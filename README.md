@@ -30,7 +30,64 @@ Use the starter script yaakstarter in the bin folder, to start the game.
 Edit the game/src files to change the game logic.
 
 # Add a new DSL module
- TODO
+
+  We first try to add a macro like module shoot.
+  Therefore you have to create a folder Shoot in BeyondC/modules and add these two files:
+
+
+BeyondC/modules/Shoot/ShootLanguage.fw:
+```
+@p maximum_input_line_length = infinity
+
+@O@<ShootGrammer.con@>==@{
+
+    Subtask: ShootSubtask.
+    
+    ShootSubtask: 'shoot'.
+
+@}
+```
+
+BeyondC/modules/Shoot/ShootUnparser.fw:
+```
+@p maximum_input_line_length = infinity
+
+
+@O@<ShootLanguage.lido@>==@{
+
+    RULE: ShootSubtask::= 'shoot' COMPUTE
+        ShootSubtask.IdemPtg = PTGShootPrinter();
+    END;
+@}
+
+
+@O@<ShootLanguage.ptg@>==@{
+
+ShootPrinter:
+    "    printf(\"Shoot them\");"
+@}
+```
+
+The first file describes the grammar in bnf.
+Every statement in an event is derived from Subtask.
+
+In the second file we describe how the unparser handles our DSL snippet. A unparser normally take the parsed AST and print it in a text representation.
+Our unparser should take the C and DSL AST and transform it to C code only.
+
+Therefore every node in the parsed AST have a attribute IdemPtg
+which have a text representation of the node.
+
+We just have to change this text representation. Without this change IdemPtg would contain the text "shoot".
+
+Therefor we have `ShootSubtask.IdemPtg = PTGShootPrinter();`
+The function PTGShootPrinter() is build in the ShootLanguage.ptg section.
+It's just a text generator description.
+Every section like ShootPrinter builds a text generator with the same name as the section and the prefix PTG.
+
+Finally we have to add the two files into the compiler construction by adding the line
+`BeyondC/modules/Shoot/ShootLanguage.fw:` to BeyondC/language.specs and `modules/Shoot/ShootUnparser.fw` to BeyondC/unparser.specs.
+
+Now run BeyondC/build compiler.sh and bin/recompile and test the new language item.
 
 # Issues
 
