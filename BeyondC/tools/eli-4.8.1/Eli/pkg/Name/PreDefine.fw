@@ -1,0 +1,62 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: PreDefine.fw,v 3.7 1999/10/15 08:47:34 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module uses the C module PreDefMod to provide functions for 
+predefining source identifiers (PreDefineSym) and for
+establishing bindings for predefined source identifiers (PreDefineSym).
+Instatiation of this module also sets the identifier encoding
+to be used for identifier entries made by those functions.
+
+This module is used in cooperation with the module PreDefId.
+The C module PreDefMod can also be used independent of this module.
+
+The function |NAME|PreDefine adds an identifer to
+the identifier module and binds it to a key in an environment.
+The function |NAME|PreDefineSym only adds an identifer to
+the identifier module without binding it to a key.
+
+The generic instance parameter |NAME| indicates the environment.
+The identifier code is given by the generic referto parameter |IDENT|.
+
+~O~<|NAME|PreDefine.specs~>~{
+$/Name/envmod.specs
+$/Name/PreDefMod.specs
+$/Scan/idn.specs
+~}
+
+~O~<|NAME|IdentTerm.h~>~{
+extern int _|NAME|IdentTerm;
+~}
+
+~O~<|NAME|IdentTerm.c~>~{
+#include "termcode.h"
+#include "|NAME|IdentTerm.h"
+int _|NAME|IdentTerm = |IDENT|;
+~}
+
+~O~<|NAME|PreDefine.head~>~{
+#include "PreDefMod.h"
+~}

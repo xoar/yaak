@@ -1,0 +1,112 @@
+@p maximum_input_line_length = infinity
+@!
+@! (C) Copyright 1997 University of Paderborn.
+@! 
+@! This file is part of the Eli Module Library.
+@! 
+@! The Eli Module Library is free software; you can redistribute it and/or
+@! modify it under the terms of the GNU Library General Public License as
+@! published by the Free Software Foundation; either version 2 of the
+@! License, or (at your option) any later version.
+@! 
+@! The Eli Module Library is distributed in the hope that it will be
+@! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@! Library General Public License for more details.
+@! 
+@! You should have received a copy of the GNU Library General Public
+@! License along with the Eli Module Library; see the file COPYING.LIB.
+@! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@! Suite 330, Boston, MA 02111-1307, USA. 
+@!
+
+@A@<Module to Sort an Array@>
+
+This module must be instantiated for each stack element type to be sorted.
+It implements a single routine with the following signature:
+
+@O@<Sort|TYPE|.h@>==@{
+#ifndef SORT|TYPE|_H
+#define SORT|TYPE|_H
+
+#include <stdlib.h>
+#include "eliproto.h"
+#include "|TYPE|FunctionTypes.h"
+
+/* include header file defining |TYPE| if |HDR| is set: */
+#define EMPTY|HDR|HDR
+#ifndef EMPTYHDR
+#include "|HDR|.h"
+#endif
+#undef EMPTY|HDR|HDR
+
+extern void Sort|TYPE| ELI_ARG((|TYPE| *arr, size_t n, |TYPE|CmpFctType cmp));
+/* Function that sorts the elements of an array into ascending order
+ *   On entry-
+ *     arr points to the array to be sorted
+ *     n=number of array elements
+ *     |TYPE|CmpFctType is a comparison function for the stack elements
+ *   On exit-
+ *     The elements of stk are in ascending order according to |TYPE|CmpFctType
+ ***/
+
+#endif
+@}
+
+Heapsort (Aho, Hopcroft and Ullmann, "The Design and Analysis of Computer
+Algorithms", pp 87-92) is used to do the soring in place:
+
+@O@<Sort|TYPE|.c@>==@{
+#include "Sort|TYPE|.h"
+
+static |TYPE| *data;
+static |TYPE|CmpFctType compare;
+
+static void
+#ifdef PROTO_OK
+Heapify(size_t i, size_t j)
+#else
+Heapify(i, j) size_t i, j;
+#endif
+{ size_t k = 2 * i;
+
+  if (k > j) return;			/* i is a leaf of the tree */
+
+  if (k+1 <= j)				/* i has two children */
+    if (compare(data[k], data[k+1]) < 0) k++;
+
+  if (compare(data[i], data[k]) < 0) {	/* A child is larger than the parent */
+    |TYPE| swap = data[i]; data[i] = data[k]; data[k] = swap;
+    Heapify(k, j);
+  }
+}
+
+void
+#ifdef PROTO_OK
+Sort|TYPE|(|TYPE| *arr, size_t n, |TYPE|CmpFctType cmp)
+#else
+Sort|TYPE|(arr, n, cmp) |TYPE| *arr; size_t n; |TYPE|CmpFctType cmp;
+#endif
+{ size_t i;
+
+  data = arr - 1;			/* Switch to 1-origin indexing */
+  compare = cmp;
+
+  for (i = n / 2; i > 0; i--) Heapify(i, n);
+
+  for (i = n; i > 1; i--) {
+    |TYPE| swap = data[1]; data[1] = data[i]; data[i] = swap;
+    Heapify(1, i-1);
+  }
+}
+@}
+
+@O@<Sort|TYPE|.specs@>@{
+#define EMPTY|HDR|HDR
+#ifdef EMPTYHDR
+$/Adt/FunctionTypes.gnrc +instance=|TYPE| :inst
+#else
+$/Adt/FunctionTypes.gnrc +instance=|TYPE| +referto=|HDR| :inst
+#endif
+#undef EMPTY|HDR|HDR
+@}

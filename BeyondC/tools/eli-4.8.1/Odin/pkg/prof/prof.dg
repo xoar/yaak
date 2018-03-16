@@ -1,0 +1,16 @@
+# Output Object Types
+
+:profile 'execution profile'? => :FILE;
+
+
+# Parameter Types
+
++prof_data 'trace file'? => :LIST;
+
++prof_flags 'prof flags'? => :cat;
+
+
+# Tools
+
+EXEC (profile.sh) (:exe) (+prof_data :ls) (+prof_flags) NEEDS (+prof_data)
+   => (:profile);

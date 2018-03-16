@@ -1,0 +1,93 @@
+#	Copyright (c) 1991 Geoffrey M. Clemm
+#	geoff@boulder.colorado.edu
+
+INCLUDE "inc/GMC.h"
+
+SCANNER
+  EOF		= TOK_EOF
+  ERR		= TOK_ERR
+  'EOF'		= TOK_EOF_
+  'ERR'		= TOK_ERR_
+  'INCLUDE'	= TOK_INCLUDE
+  'SCANNER'	= TOK_SCANNER
+  'NODES'	= TOK_NODES
+  'RULES'	= TOK_RULES
+  "Name"	= TOK_Name		=> "NAME"
+  "AString"	= TOK_AString		=> "DSTRNG"
+  "QString"	= TOK_QString		=> "KSTRNG"
+  '='		= TOK_Equals
+  '=>'		= TOK_DoubleArrow
+  '->'		= TOK_SingleArrow
+  '+'		= TOK_Plus
+  '*'		= TOK_Star
+  '//'		= TOK_DoubleSlash
+  ';'		= TOK_SemiColon
+  '?'		= TOK_Question
+  '('		= TOK_LeftParen
+  ')'		= TOK_RightParen
+
+NODES
+   "PROGRM" "NOD_Include" "SCANNR" "EOFLDF" "ERRLDF" "NONLDF" "LEAFDF"
+   "NODES" "RULES" "RULE" "ALTLST" "ALTRNT"
+   "SEQ" "LIST" "PLUS" "STAR" "QUESTION" "OPTNAL" "OUTNOD"
+   "NAME" "DSTRNG" "KSTRNG"
+
+RULES
+
+TreeGrammar
+   -> Includes Scanner Nodes Rules		=> "PROGRM";
+
+Includes
+   -> ('INCLUDE' IncludeFile+)?			=> "NOD_Include";
+
+IncludeFile
+   -> "AString"
+   -> "QString";
+
+Scanner
+   -> ('SCANNER' LexicalDefinition+) ?		=> "SCANNR";
+
+LexicalDefinition
+   -> 'EOF' '=' "Name"				=> "EOFLDF"
+   -> 'ERR' '=' "Name"				=> "ERRLDF"
+   -> "AString" '=' "Name"			=> "NONLDF"
+   -> "QString" '=' "Name" '=>' "QString"	=> "LEAFDF";
+
+Nodes
+   -> ('NODES' "QString"+) ?			=> "NODES";
+
+Rules
+   -> ('RULES' Rule+) ?				=> "RULES";
+
+Rule
+   -> "Name" AlternateList ';'			=> "RULE";
+
+AlternateList
+   -> Alternate+				=> "ALTLST";
+
+Alternate
+   -> '->' Expression TreeSpec ?		=> "ALTRNT";
+
+Expression
+   -> Term*					=> "SEQ"?;
+
+Term
+   -> Element '//' Element			=> "LIST"
+   -> Element '+'				=> "PLUS"
+   -> Element '*'				=> "STAR"
+   -> Element '?'				=> "QUESTION"
+   -> Element;
+
+Element
+   -> '(' Expression ')'
+   -> "Name"
+   -> "QString"
+   -> "AString";
+
+TreeSpec
+   -> '=>' NodeName
+   -> '=>' NodeName '?'				=> "OPTNAL"
+   -> '=>' '(' NodeName ')'			=> "OUTNOD";
+
+NodeName
+   -> "QString";

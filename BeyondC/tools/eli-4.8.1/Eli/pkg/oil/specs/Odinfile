@@ -1,0 +1,29 @@
+%current == %Oil.specs +debug +monitor
+%data    == input
+
+%d !== %current :gdb
+%g !== %current :gencode :viewlist
+%s !== %current :showMe  :viewlist
+%h !== %current :exe :help
+%p  == %current :parsable
+%c  == %current :consyntax
+%a  == %current :abstree
+%g !== %current :gencode :viewlist
+%r !== . +cmd=(%current :exe) (%data) :run
+%m !== %current +arg=(%data) :mon
+
+%Oil.specs == <<
+  Language.fw
+  Build.fw
+  Code.fw
+
+%Oil.tex.vtd == <<
+  %base.tex  == wrapper.tex
+  %title.tex == title.tex
+  %lang.tex  == Language.fw :fwTex
+  %build.tex == Build.fw :fwTex
+  %code.tex  == Code.fw :fwTex
+
+oil.exe == %Oil.specs :exe
+
+Oil.pdf == %Oil.tex.vtd :pdf

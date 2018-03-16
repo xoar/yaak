@@ -1,0 +1,37 @@
+%current == %Idem.specs+monitor+debug+cc=gcc
+%data == input
+
+%h  ! == %current:exe:help
+%d  ! == %current:gdb
+%g  ! == %current:gencode:viewlist
+%m  ! == %current+arg='-p' Idem (%data):mon
+%r  ! == .+cmd=(%current:exe) -p Idem (%data):run
+%t  ! == .+cmd=(%current:exe) -t (%data):run
+%c    == %current:consyntax
+%a    == %current:abstree
+%p    == %current:parsable
+
+%Idem.specs == <<
+  Analysis.fw
+  Idem.fw
+
+%Tree.specs == <<
+  Analysis.fw
+  Tree.fw
+
+%Xml.specs == <<
+  Analysis.fw
+  Xml.fw
+
+%Cpp.specs == <<
+  Analysis.fw
+  Cpp.fw
+
+%Java.specs == <<
+  Analysis.fw
+  Java.fw
+
+%daVinci.specs == <<
+  Analysis.fw
+  daVinci.fw
+

@@ -1,0 +1,23 @@
+begin
+  type record int i, tt t end ts;
+  type record int i, ts t end tt;
+
+  type (real, fct -> void) fct;
+  type (real, (int -> gct) -> void) gct;
+
+  type (kct, hct -> int) lct;
+  type (real -> lct) hct;
+
+  type (real -> hct) kct;
+
+  type p1! p1;
+  type p2! p3;
+  type p3! p2;
+
+  type ap[5] ap;
+
+  type record int i, rp! p end rp;
+
+  var int i;
+  i = 1;
+end

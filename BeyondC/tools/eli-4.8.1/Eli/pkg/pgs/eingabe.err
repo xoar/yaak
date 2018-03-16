@@ -1,0 +1,167 @@
+# $Id: eingabe.err,v 1.4 1994/02/25 23:31:29 kadhim Exp $
+/A modification may not separate list elements/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Coding has to be in the range of 0 to/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Element before '+' or '\*' is missing/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Identifier too long; Maximum =/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Illegal character with this ordinal number/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Illegal element/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Illegal semantic action/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Illegal semantic action or illegal modification/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Keyword expected; GRAMMAR inserted/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Left-hand side of a rule must be a nonterminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/List separators and unsafe restart points  must be disjoint/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Meta symbol expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Meta symbol not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Name of grammar expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/No sequence of terminals can be derived from this rule/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Number too large; Maximum =/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Only one symbol may be defined as end of input indicator/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Repetition of meta symbols not allowed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Repetition of semantic actions or modifications not allowed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Right-hand side of start symbol may not be empty/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Semantic brackets and unsafe restart points must be disjoint/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Start symbol may appear on left-hand side only once/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Start symbol may not appear on right-hand side/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Symbol must not exceed line/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Symbol too long; Maximum =/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Terminal already encoded/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Terminal expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Terminal symbol expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/This code is already used/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/This is an illegal end-of-input indicator/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/This modification contains no terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/This nonterminal is not reachable/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Transformed EBNF rule too long; Maximum =/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./

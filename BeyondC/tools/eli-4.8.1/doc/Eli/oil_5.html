@@ -1,0 +1,419 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from oil.tnf on 5 December 2013 -->
+
+<TITLE>Oil Reference Manual - Relating an OIL specification to library function calls</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Oil Reference Manual</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC34" HREF="oil_toc.html#SEC34">Relating an OIL specification to library function calls</A></H1>
+<P>
+To explain the relationship between the specification and the abstract
+data type we will examine different extractions from some possible
+specifications and review the behavior of some of the related functions in
+the abstract data type.
+<A NAME="IDX112"></A>
+<P>
+<A NAME="IDX113"></A>
+<H2><A NAME="SEC35" HREF="oil_toc.html#SEC35">Using Names</A></H2>
+<P>
+Each entity defined in an OIL specification is represented by a definition
+table key.
+The OIL value is accessible as a property of that definition table key.
+For example, suppose that <CODE>iAdd</CODE> was defined by an <CODE>OPER</CODE>
+statement in OIL.
+This would result in a known key
+(see  <A HREF="deftbl_3.html#SEC15">How to specify the initial state of Definition Table</A>)
+<CODE>iAdd</CODE>.
+<CODE>iAdd</CODE> would also have an <CODE>OilOp</CODE> property whose value was the
+actual OIL operator (of type <CODE>tOilOp</CODE>).
+Thus the actual OIL operator corresponding to <CODE>iAdd</CODE> could be obtained
+by the function call <CODE>GetOilOp(iAdd,OilInvalidOp)</CODE>
+(see  <A HREF="deftbl_1.html#SEC4">Behavior of the basic query operations of Definition Table</A>).
+<P>
+In order to avoid the overhead of querying a property for constant
+information, OIL also defines an identifier as the actual OIL operator.
+This identifier is constructed by prefixing the OIL identifier with
+<CODE>OilOp</CODE>.
+Thus the identifier <CODE>OilOpiAdd</CODE> denotes the value that would be
+obtained from the function call <CODE>GetOilOp(iAdd,OilInvalidOp)</CODE>.
+<P>
+Similar conventions are used for OIL types and OIL classes:
+The OIL identifier denotes a known key, and the actual OIL entity (of type
+<CODE>tOilType</CODE> or <CODE>tOilClass</CODE> respectively) is denoted by prefixing
+either <CODE>OilType</CODE> or <CODE>OilClass</CODE> to that identifier.
+A known key denoting an OIL type also has an <CODE>OilType</CODE> property,
+and a known key denoting an OIL class has an <CODE>OilClass</CODE> property.
+<P>
+<H2><A NAME="SEC36" HREF="oil_toc.html#SEC36">A simple example</A></H2>
+<P>
+Let us consider the following OIL specification:
+<P>
+<PRE>
+iAdd ( int_t, int_t ): int_t;     /* the usual '+' operators for Pascal */
+rAdd ( real_t, real_t ): real_t;
+sUnion ( set_t, set_t ): set;
+
+Plus: iAdd, rAdd, sUnion;  /* will be identified together */
+
+COERCION Float( int_t ): real_t;    /* usual Pascal coercion from int to real */
+<A NAME="IDX114"></A>
+</PRE>
+ 
+ 
+ 
+<H3><A NAME="SEC37" HREF="oil_toc.html#SEC37">Definitions from the specification</A></H3>
+ 
+All of the identifiers in this specification will denote values to the
+library functions.  The functions in the library will be applied to values
+constructed from these identifiers and will return values represented by
+these identifiers.
+ 
+<A NAME="IDX115"></A>
+<H3><A NAME="SEC38" HREF="oil_toc.html#SEC38">Operator Identification</A></H3>
+ 
+The most basic operation is that of operator identification so we will
+start there.  When semantically analyzing a binary expression formed with a
+plus sign (+), the compiler would use the function <CODE>OilIdOp2</CODE> applied to
+the value denoted by <EM>Plus</EM> (which indicates the syntactic operator) and
+the types of the operands to the plus sign.
+ 
+The invocation <CODE>OilIdOp2( Plus, int_t, real_t )</CODE> would return the operator
+<EM>rAdd</EM> because <EM>int_t</EM> was coercible to <EM>real_t</EM>.  Similarly :
+<P>
+<PRE>
+<CODE>OilIdOp2( Plus, set_t, set_t )</CODE> would return <CODE>sUnion</CODE>
+
+<CODE>OilIdOp2( Plus, int_t, int_t )</CODE> would return <CODE>iAdd</CODE>
+
+<CODE>OilIdOp2( Plus, real_t, real_t )</CODE> would return <CODE>rAdd</CODE>
+
+</PRE>
+ 
+Any combination of operand types like <EM>real_t</EM> and <EM>set_t</EM>
+would return a value denoting an erroneous operator.
+Example: <CODE>OilIsValidOp( OilIdOp2( Plus, real_t, set_t ) )</CODE>
+would return an integer value of 0.
+ 
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+<H3><A NAME="SEC39" HREF="oil_toc.html#SEC39">Operator Signatures</A></H3>
+Once we have identified an operator will need to know its type signature
+so that we may return the type of the subexpression computed by the
+operator and so we may determine the types required by the operator from
+its respective operands.  The function <CODE>OilGetArg</CODE> gives us that facility.
+ 
+The expression <CODE>OilGetArg( iAdd, 0 )</CODE> would return <EM>int_t</EM>
+as the type of the result of the operator <EM>iAdd</EM>.  
+Likewise <CODE>OilGetArg( sUnion, 1 )</CODE> would
+return <EM>set_t</EM> as the required type of the first operand to the `sUnion'
+operator.
+<A NAME="IDX118"></A>
+ 
+<A NAME="IDX119"></A>
+<A NAME="IDX120"></A>
+<H3><A NAME="SEC40" HREF="oil_toc.html#SEC40">Coercion sequence</A></H3>
+ 
+Once we have the type returned by an operator and know the type required
+of this sub-expression (from the parent context) we may need to apply a
+sequence of coercions on the result of the operator to satisfy the requirements
+of the parent context.  The function <CODE>OilCoerce</CODE> supplies the necessary
+function.
+<A NAME="IDX121"></A>
+ 
+In the case of our example we might require a <EM>real_t</EM> result from an
+<EM>iAdd</EM> operator (which returns <EM>int_t</EM>.)
+The expression <CODE>OilCoerce( int_t, real_t )</CODE>
+would return a coercion sequence which represented the coercion of
+an <EM>int_t</EM> type 
+value to a <EM>real_t</EM> type value.  This coercion sequence (call it
+<EM>cs</EM>) would then be analyzed with the functions: OilEmptyCS, OilHeadCS
+and OilTailCS.  The expression <CODE>OilHeadCS( cs )</CODE> would
+evaluate to <EM>Float</EM> and
+<CODE>OilEmptyCS( OilTailCS( cs ) )</CODE> would evaluate to true.  These expressions
+describe the fact that only the coercion operator <EM>Float</EM> was necessary to
+transform <EM>int_t</EM> to <EM>real_t</EM>.
+ 
+If no coercions were necessary then <CODE>OilEmptyCS( cs )</CODE> would have yielded
+the value true.  Likewise to detect an impossible coercion, the function
+<CODE>OilIsValidCS</CODE> would be used.
+<A NAME="IDX122"></A>
+The expression <CODE>OilIsValidCS( OilCoerce( real_t, set_t ) )</CODE>
+would yield the value false to indicate that such a coercion
+was not possible.
+ 
+<H2><A NAME="SEC41" HREF="oil_toc.html#SEC41">A more complex example</A></H2>
+ 
+Not all operator identification schemes can be implemented with the
+simple bottom-up type evaluation shown in the previous section.  Sometimes
+the desired result type will affect which operator denotation is 
+identified with a given operator indication.  OIL supplies this capability
+with the <STRONG>set of types</STRONG> operations.
+<A NAME="IDX124"></A>
+<A NAME="IDX125"></A>
+<A NAME="IDX123"></A>
+<P>
+Below is an example OIL specification which is designed
+to use <STRONG>set of types.</STRONG>
+The specification shows that there are two multiplication
+operators(<CODE>sMulS sMulD</CODE>) on type <CODE>single</CODE>.
+One multiplication operator returns a double length result
+(<CODE>double</CODE>) the other returns a single length
+ result(<CODE>single</CODE>.)  These declarations have a natural correspondence
+with many machine architectures.  The operator indication <CODE>Mul</CODE> is defined
+to identify either <CODE>sMulS</CODE> or <CODE>sMulD</CODE>.
+<A NAME="IDX127"></A>
+<A NAME="IDX126"></A>
+<P>
+<PRE>
+sMulS ( single, single ): single;
+sMulD ( single, single ): double; 
+dMulD ( double, double ): double;
+
+COERCION iCvtStoD ( single ): double;
+
+Mul: dMulD, sMulD, sMulS
+
+</PRE>
+ 
+<A NAME="IDX128"></A>
+<H3><A NAME="SEC42" HREF="oil_toc.html#SEC42">Using type sets</A></H3>
+<P>
+To use <EM>type set</EM> functions we must begin with constructing the
+<EM>possible result type set</EM> of a terminal.  For this we use the function
+<CODE>OilTypeToSet</CODE>.  Like so:
+<P>
+<PRE>
+<CODE>OilTypeToSet( single ) </CODE>yields <CODE> [ single, double ]</CODE>
+
+<CODE>OilTypeToSet( double ) </CODE>yields <CODE> [ double ]</CODE>
+</PRE>
+<P>
+For the rest of this example we will use the identifiers <CODE>ss</CODE> and
+<CODE>ds</CODE> to represent the type sets for single and double,
+respectively.
+<P>
+To analyze an entire expression with <EM>type sets</EM> we must 
+also be able to determine the set of types associated with
+an operator indication and its set of operands.  For this we use the 
+<CODE>OilIdResultTS*</CODE> functions.  Like so:
+<P>
+<PRE>
+<CODE>OilIdResultTS2( Mul, ss, ss) </CODE>yields <CODE> [ single, double ]</CODE>
+
+<CODE>OilIdResultTS2( Mul, ds, ss) </CODE>yields <CODE> [ double ]</CODE>
+
+<CODE>OilIdResultTS2( Mul, ds, ds) </CODE>yields <CODE> [ double ]</CODE>
+</PRE>
+<P>
+When we get to the root of an expression (like in an assignment) we would
+then use a desired type determined from the context of the root of the
+expression (like the destination type of the assignment)
+to determine which operator we wanted to
+select.  For this we use the <CODE>OilIdOpTS*</CODE> functions.  Like so:
+<P>
+<PRE>
+<CODE>OilIdOpTS2( single, Mul, ss, ss) </CODE>yields <CODE> sMulS</CODE>
+
+<CODE>OilIdOpTS2( double, Mul, ss, ss) </CODE>yields <CODE> sMulD</CODE>
+
+<CODE>OilIdOpTS2( double, Mul, ds, ss) </CODE>yields <CODE> dMulD</CODE>
+</PRE>
+<P>
+By using <EM>type sets</EM>, the operator indication <EM>Mul</EM> with
+<EM>single</EM> operands can identify <EM>sMulD</EM>,
+thus directly producing a double result;
+whereas with the simple scheme used previously (see  <A HREF="oil_5.html#SEC36">A simple example</A>.)
+an additional coercion would be needed to return a double result.
+<P>
+<H2><A NAME="SEC43" HREF="oil_toc.html#SEC43">Using Classes</A></H2>
+<P>
+There are three steps to using classes: (1)specifying them with OIL,
+(2)instantiating them using the <CODE>OilClassInst*</CODE> functions and
+(3)identifying the enriched indication mappings with enriched coercion
+graph. 
+<P>
+The following OILspecification allows us to define any number of
+<CODE>Set</CODE>s during compilation.  And we specify the overloading of the
+`+'(<CODE>loPlus</CODE>) operator to allow set union.
+<PRE>
+CLASS Set( element ) BEGIN
+  COERCION coElemToSet(element):Set;
+  OPER soUnion(Set,Set):Set;
+END;
+
+OPER soIadd(tInt,tInt):tInt;
+OPER soRadd(tReal,tReal):tReal;
+
+INDICATION loPlus: soIadd, soRadd, soUnion;
+</PRE>
+We can then construct a simple binary expression compiler which uses a
+constant set for one of its possible operand types.
+<PRE>
+NONTERM Expr: op:tOilOp, st:tOilType;
+
+RULE Dyadic: Expr::= Term Ind Term
+STATIC
+  Expr.st:= OilClassInst1( Set, Set_name, tInt );
+  Expr.op:= OilIdOp2( Ind.op, Term[1].type, Term[2].type )
+END;
+
+NONTERM Term: type:tOilType;
+
+RULE Set: Term::= 's'
+STATIC Term.type:= INCLUDING Expr.st END;
+
+RULE Integer: Term::= 'i'
+STATIC Term.type:= tInt END;
+
+RULE Real: Term::= 'r'
+STATIC Term.type:= tReal END;
+
+NONTERM Ind: op:tOilOp;
+
+RULE Plus: Ind::= '+'
+STATIC Ind.op:= loPlus END;
+</PRE>
+We use the following request to construct the compiler:
+<PRE>
+test3.specs :exe&#62;test3.exe
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

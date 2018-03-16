@@ -1,0 +1,37 @@
+# $Id: Makefile.in,v 1.2 2002/07/31 23:45:42 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+# Copyright (c) 1994, 1995 Anthony M. Sloane
+
+CC	= @CC@
+
+DIR	= pkg/idem
+SRC	= idem.dg
+AUX	= Makefile Makefile.in version idem.tnf
+CMD	= idem.sh skeleton.sh PtgSpec.sh tree.sh treeProc.sh
+EXE	= Idem.exe Tree.exe XML.exe CPP.exe Java.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= specs
+
+@toolmk_h@
+
+Idem.exe:	specs/Idem.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+Tree.exe:	specs/Tree.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+XML.exe:	specs/XML.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+CPP.exe:	specs/CPP.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+Java.exe:	specs/Java.exe
+	@rm -f $@
+	@LINK@ $? $@

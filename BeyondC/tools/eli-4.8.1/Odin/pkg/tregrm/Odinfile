@@ -1,0 +1,23 @@
+%install! == <<
+   %exe > $THORPKGS/tregrm/tregrm.exe
+
+%boot! == <<
+   tregrm-yacc.c +cmd='sed "/extern char/d"' :stdout >tregrm-yacc.c.dflt
+
+%odin-install! == <<
+   %exe > $ODINPKG/tregrm.exe
+
+%exe == %tregrm.c.sm +ignore=\\.hh\$ :exe
+
+%debug! == %tregrm.c.sm +debug +ignore=\\.hh\$ +gnu :dbx
+
+%tregrm.c.sm == <<
+   tg-main.c; tg-anal.c; tg-att.c; tg-dummy.c; tg-gen_grm.c
+   tg-gen_lex.c; tg-gen_nod.c; tg-nod_grm.c; tg-yylex.c; tregrm-yacc.c
+   ../odin/if-err.c +define=NO_IPC
+   ../odin/if-file.c; ../odin/if-io.c; ../odin/if-nod.c; ../odin/if-symbol.c
+
+   == () +cmd='if [ "$ODINBOOT" = "" ] ; then echo "\
+tregrm-yacc.c == tregrm.ygi :c +default=(tregrm-yacc.c.dflt) :boot \
+   "; fi' :stdout
+

@@ -1,0 +1,8 @@
+# $Id: pdl.err,v 1.7 1995/03/30 22:12:23 kadhim Exp $
+/NOTE/d
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (deftbl)Syntax./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (deftbl)top./

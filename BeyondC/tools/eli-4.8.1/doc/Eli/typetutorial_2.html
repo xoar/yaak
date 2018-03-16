@@ -1,0 +1,297 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Type Checking in Expressions</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC4" HREF="typetutorial_toc.html#SEC4">Type Checking in Expressions</A></H1>
+<P>
+Expressions consist of typed names and literals and of operators
+that are applied to operands of certain types and yield a result
+of a certain type. Determining the types of expressions and 
+checking the related type rules of the language is a significant
+subtask of type analysis. The type rules of languages are usually
+formulated in terms of concepts like "type of program constructs 
+and entities", "signature of operators", "operator overloading", 
+"type conversion". They have common and well-understood meaning
+for type analysis in general. Of course, the type rules established 
+for a particular language instantiate these concepts in a specific
+way, e.g. define a specific set of operators with their signature
+and state which conversions may be applied to resolve overloading.
+<P>
+Eli's type analysis module <CODE>Expression</CODE> provides reusable 
+roles and computations to formulate the language specific 
+instantiation of the concepts mentioned above. The type analysis
+for expressions is generated from such a specification.
+<P>
+<I>Expression module</I>[20]==
+<PRE>
+$/Type/Expression.gnrc:inst
+</PRE>
+<PRE>
+This macro is invoked in definition 26.
+</PRE>
+<P>
+This module carries out type analysis on expression trees, 
+which are subtrees made up of connected expression nodes. 
+An expression node is a node representing a program construct
+that yields a value of a certain type.
+The module provides the role <CODE>ExpressionSymbol</CODE> to be inherited by
+symbols that are expression symbols in that sense:
+<P>
+<I>Expression symbols</I>[21]==
+<PRE>
+SYMBOL Expression INHERITS ExpressionSymbol END;
+SYMBOL Variable INHERITS ExpressionSymbol END;
+</PRE>
+<PRE>
+This macro is invoked in definition 27.
+</PRE>
+<P>
+The type of each expression node is characterized by two attributes: 
+<CODE>ExpressionSymbol.Type</CODE> describes the type of the values this
+expression may yield. <CODE>ExpressionSymbol.Required</CODE> may be used to
+specify that the upper context requires the expression to yield 
+a value of a particular type. As <CODE>ExpressionSymbol.Required</CODE> is
+used to compute <CODE>ExpressionSymbol.Type</CODE>, it may not depend
+on the <CODE>Type</CODE> attribute.
+<P>
+Expression symbols may occur in different contexts with respect to
+the structure of the expression trees: root contexts, leaf contexts, and
+inner contexts. The module provides different computational roles
+for those contexts. In leaf contexts the type of the leaf expression
+must be stated using the computational role <CODE>PrimaryContext</CODE>.
+Note that in the third role below the expression node is a leaf
+with respect to the expression tree, although the context has one
+subtree, that is not an expression node:
+<P>
+<I>Leaf nodes</I>[22]==
+<PRE>
+RULE: Expression ::= IntNumber COMPUTE
+  PrimaryContext (Expression, intType);
+END;
+
+RULE: Expression ::= 'true' COMPUTE
+  PrimaryContext (Expression, boolType);
+END;
+
+RULE: Expression ::= 'false' COMPUTE
+  PrimaryContext (Expression, boolType);
+END;
+
+RULE: Variable ::= UseIdent COMPUTE
+  PrimaryContext (Variable, UseIdent.Type);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 27.
+</PRE>
+<P>
+The computational role <CODE>TransferContext</CODE> is used for contexts
+that have an expression node on the left-hand side and one on the
+right-hand side, and both have the same type properties:
+<P>
+<I>Transfer nodes</I>[23]==
+<PRE>
+RULE: Expression ::= Variable COMPUTE
+  TransferContext (Expression, Variable);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 27.
+</PRE>
+<P>
+The node representing an assignment statement has two children.
+Both are considered as roots of expression trees.
+For the <CODE>Variable</CODE> the assignment context does not impose
+any restriction on its type; hence, nothing is specified for
+that node:
+<P>
+<I>Assignment</I>[24]==
+<PRE>
+RULE: Statement ::= Variable '=' Expression ';' COMPUTE
+  RootContext (Variable.Type, , Expression);
+  Indication (assignOpr);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 27.
+</PRE>
+<P>
+<CODE>explain the purpose of assignOpr??</CODE>
+<P>
+The <CODE>Expression</CODE> on the right-hand side of the assignment
+is required to yield a value of the type of the <CODE>Variable</CODE>.
+<P>
+An expression in the role of a statement is another example for
+a root context. On execution the value of the expression   will
+just be discarded. Hence, there is no requirement on its type
+to be stated or checked:
+<I>Expression statement</I>[25]==
+<PRE>
+RULE: Statement ::=  Expression ';' END;
+</PRE>
+<PRE>
+This macro is invoked in definition 27.
+</PRE>
+<P>
+<B>Expression.specs</B>[26]==
+<PRE>
+<I>Expression module</I>[20]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Expression.lido</B>[27]==
+<PRE>
+<I>Expression symbols</I>[21]
+<I>Leaf nodes</I>[22]
+<I>Transfer nodes</I>[23]
+<I>Assignment</I>[24]
+<I>Expression statement</I>[25]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

@@ -1,0 +1,13 @@
+# $Id: gla.err,v 1.9 2008/08/13 12:34:17 pfahler Exp $
+/No such canned description/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lex)Available Descriptions./
+	p
+	d
+}
+/not in the grammar/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lex)Input./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+

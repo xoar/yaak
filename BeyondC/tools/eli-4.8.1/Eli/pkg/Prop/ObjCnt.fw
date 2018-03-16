@@ -1,0 +1,74 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: ObjCnt.fw,v 3.6 1999/08/13 13:39:21 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+~O~<|NAME|ObjCnt.pdl~>~{
+|NAME|ObjNo:	int;
+~}
+
+~O~<|NAME|ObjCnt.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RangeObjCnt END;
+
+CLASS SYMBOL |NAME|ObjCnt:
+		|NAME|IncrementCnt:	int	SYNT,
+		|NAME|tmpCnt:	int	SYNT,
+		|NAME|ObjNo:	int	SYNT,
+		|KEY|Key:		DefTableKey;
+
+CLASS SYMBOL |NAME|RangeObjCnt:
+		|NAME|InitObjCnt:	int	SYNT,
+		|NAME|TotalObjNo:	int	SYNT;
+
+CHAIN c|NAME|ObjCnt:	int;
+
+CLASS SYMBOL |NAME|RangeObjCnt	COMPUTE
+  SYNT.|NAME|InitObjCnt = 0;
+  CHAINSTART HEAD.c|NAME|ObjCnt = SYNT.|NAME|InitObjCnt;
+
+  SYNT.|NAME|TotalObjNo = TAIL.c|NAME|ObjCnt;
+END;
+
+CLASS SYMBOL |NAME|ObjCnt	COMPUTE
+  /* -1 = SUB(0,1) represents not yet counted */
+
+  SYNT.|NAME|tmpCnt = Get|NAME|ObjNo (THIS.|KEY|Key, SUB (0, 1))
+	<- THIS.c|NAME|ObjCnt;
+
+  SYNT.|NAME|ObjNo =
+	IF (EQ (SUB (0, 1), SYNT.|NAME|tmpCnt),
+        /* count a new object: */
+	ORDER (	Reset|NAME|ObjNo (THIS.|KEY|Key, THIS.c|NAME|ObjCnt),
+		THIS.c|NAME|ObjCnt),
+	SYNT.|NAME|tmpCnt);
+
+  SYNT.|NAME|IncrementCnt = 1;
+
+  THIS.c|NAME|ObjCnt = 
+	IF (EQ (SUB (0, 1), SYNT.|NAME|tmpCnt),
+        /* increment the counter chain: */
+	ADD (SYNT.|NAME|IncrementCnt, THIS.c|NAME|ObjCnt),
+	THIS.c|NAME|ObjCnt) <- SYNT.|NAME|ObjNo;
+END;
+~}

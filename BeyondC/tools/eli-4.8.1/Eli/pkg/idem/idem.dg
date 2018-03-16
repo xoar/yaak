@@ -1,0 +1,58 @@
+# $Id: idem.dg,v 2.16 2003/06/30 04:11:42 waite Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Output object types
+
+:idem 'Definition of a textual unparser'? => <:fw>;
+
+:tree 'Definition of a structural unparser'? => <:fw>;
+:treeStruc 'Definition of a tree structure'? => :LIST;
+
++prefix 'Prefix to use for unparser attributes'? => :first;
++patterns 'PTG override patterns'? => :ls;
+
++lang 'Language to be used for unparsed tree'? => :first;
+
+# Tools
+
+EXEC (PtgSpec.sh) (:FILE) (+patterns)
+  => (:PtgSpec);
+:PtgSpec 'Names of files possibly specifying override patterns' => :FILE;
+
+COLLECT (:level_2_specs +incl=(:etaIncl) :mapAbsTree)
+        (:allspecs                                     :ptg.cmpd)
+        (:PtgSpec :list                                :ptg.cmpd)
+        (:PtgSpec :list :extract=:fw    :map=:allspecs :ptg.cmpd)
+        (:PtgSpec :list :extract=:specs :map=:allspecs :ptg.cmpd)
+  => (:idem.cmpd);
+:idem.cmpd 'Canonical tree and PTG templates' => :LIST;
+
+EXEC (idem.sh) (Idem.exe) (:idem.cmpd :union :cpp) (+prefix)
+  => (:idem);
+
+EXEC (treeProc.sh) (.) (+lang)
+  => (:treeProc);
+:treeProc 'View descriptor for tree unparser generator' => :FILE;
+
+EXEC (tree.sh) (:treeProc :view :first) (:idem.cmpd :union :cpp) (+prefix)
+  => (:tree) (:treeDef);
+:treeDef 'Files defining a tree structure' => :DERIVED-DIRECTORY;
+
+COLLECT (:treeDef :list)
+  => (:treeStruc);

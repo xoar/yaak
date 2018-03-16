@@ -1,0 +1,62 @@
+@p maximum_input_line_length = infinity
+
+@O@<CmdLineIncl.clp@>@{
+IncludeDirs "-I" joinedto strings
+   "Directories to search for included files";
+@}
+
+@O@<CmdLineIncl.head@>@{
+#include "CmdLineIncl.h"
+@}
+
+@O@<CmdLineIncl.h@>@{
+#ifndef CMDLINEINCL_H
+#define CMDLINEINCL_H
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern char *FindFile(char *name);
+#else
+extern char *FindFile();
+#endif
+
+#endif
+@}
+
+@O@<CmdLineIncl.c@>@{  
+#include <sys/stat.h>
+#include <string.h>
+#include "csm.h"
+#include "obstack.h"
+#include "clp.h"
+#include "CmdLineIncl.h"
+
+char *
+#if defined(__cplusplus) || defined(__STDC__)
+FindFile(char *name)
+#else
+FindFile(name) char *name;
+#endif
+{ int result;
+  DefTableKeyList dirs;
+  struct stat file_info;
+
+  if (name[0] == '/') return name;
+
+  CsmStrPtr = obstack_copy0(Csm_obstk, name, strlen(name));
+  dirs = IncludeDirs;
+  while ((result = stat(CsmStrPtr, &file_info)) && dirs) {
+    char *dir = StringTable(GetClpValue(HeadDefTableKeyList(dirs), 0));
+
+    obstack_free(Csm_obstk, CsmStrPtr);
+    obstack_grow(Csm_obstk, dir, strlen(dir));
+    if (dir[strlen(dir)-1] != '/') obstack_1grow(Csm_obstk, '/');
+    CsmStrPtr = obstack_copy0(Csm_obstk, name, strlen(name));
+    dirs = TailDefTableKeyList(dirs);
+  }
+
+  if (result == 0) return CsmStrPtr;
+
+  obstack_free(Csm_obstk, CsmStrPtr);
+  return name;
+}
+@}

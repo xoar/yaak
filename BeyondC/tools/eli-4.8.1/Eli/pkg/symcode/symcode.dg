@@ -1,0 +1,40 @@
+# $Id: symcode.dg,v 2.5 2002/05/08 15:01:06 waite Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.symbols => :symbols;
+:symbols 'Grammar symbols' => :FILE;
+:symbols.cmpd 'Set of symbols specification fragments' => :LIST;
+COLLECT  (:symbols)
+  => (:one.symbols.cmpd);
+:one.symbols.cmpd 'Singleton symbols specification' => :symbols.cmpd;
+COLLECT  (:LIST :extract=:symbols)
+  => (:ext.symbols.cmpd);
+:ext.symbols.cmpd 'Extracted symbols specification fragments' => :symbols.cmpd;
+EXEC (codeOut.sh) (:symbols.cmpd :names) (:codeGen :name)
+  => (:codeOut);
+:codeOut 'Code generation planner' => :FILE;
+EXEC (codeGen.sh) (:symbols.cmpd :cpp)
+  => (:codeGen);
+:codeGen 'Output from generation of codes' => :DERIVED-DIRECTORY;
+EXEC ($ODINCACHE/PKGS/skeleton/no_loc.sh) (+hookvalue) (:codeGen) symErr
+  => (:symErr);
+:symErr 'Identity map for errors in standard form' => :line_err;
+
+COLLECT (:level_3_specs +incl=(:etaIncl) :codeOut :list)
+  => (:eli*level_4_specs_in);

@@ -1,0 +1,6 @@
+begin
+  type void tvoid;
+  type tvoid[5] t5;
+  var t5 a5;
+  a5[0] = 1;
+end

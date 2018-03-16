@@ -1,0 +1,218 @@
+@=~
+@! $Id: Stack.fw,v 3.6 2002/02/20 15:17:49 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+This module implements a stack named |NAME|Stack,
+whose elements are of type |KEY|.
+Values of this type can be pushed onto the stack and popped off of it in
+the usual way, and in addition each element of the stack can be indexed
+directly and its value obtained.
+All of the operations exported by this module are implemented as macros,
+using the facilities of the obstack module
+(@pxref{obstack, , Memory Object Management, lib, Library Reference
+Manual}).
+
+~A~<Synopsis~>
+
+@example
+#include "|NAME|Stack.h"
+
+int |NAME|StackEmpty
+size_t |NAME|StackSize
+void |NAME|StackPush(|KEY| v)
+|KEY| |NAME|StackPop
+|KEY| |NAME|StackTop
+
+|KEY| |NAME|StackArray(int i)
+|KEY| |NAME|StackElement(int i)
+
+void ForEach|NAME|StackElementUp(|KEY| *i)
+void ForEach|NAME|StackElementDown(|KEY| *i)
+@end example
+
+~B~<|NAME|StackEmpty~>
+
+Yields the value 1 if the stack has no elements, 0 otherwise.
+
+This operation must appear in an expression context.
+
+~B~<|NAME|StackSize~>
+
+Yields the number of elements in the stack.
+
+This operation must appear in an expression context.
+
+~B~<|NAME|StackPush(v)~>
+
+The parameter @code{v} must be an expression that yields a value of type
+|KEY|.
+That value becomes the new top element of the stack.
+The previous top element becomes the new second element, and so on.
+
+This operation must appear in a statement context.
+
+~B~<|NAME|StackPop~>
+
+Remove the top element of the stack.
+The previous second element becomes the new top element, and so on.
+
+This operation must appear in an expression context, and yields the value
+(of type
+|KEY|)
+removed.
+
+~B~<|NAME|StackTop~>
+
+Obtain the contents (of type
+|KEY|)
+of the top element of the stack without changing the state of the stack.
+
+This operation must appear in an expression context.
+
+~B~<|NAME|StackElement(i)~>
+
+Obtain the contents (of type
+|KEY|)
+of a specific element of the stack without changing the state of the stack.
+
+The argument gives the distance of the desired
+element from the top of the stack (0 for the newest element, 1 for the
+next newest, and so on).
+There is no check on the validity of the value of @code{i}.
+
+This operation must appear in an expression context.
+
+~B~<|NAME|StackArray(i)~>
+
+Obtain the contents (of type
+|KEY|)
+of a specific element of the stack without changing the state of the stack.
+For the purpose of this operation, the stack is considered to be an array.
+Element 0 is the oldest value on the stack, element 1 is the next oldest,
+and so on.
+There is no check on the validity of the value of @code{i}.
+
+This operation must appear in an expression context.
+
+~B~<ForEach|NAME|StackElementUp(i)~>
+
+Cycle through the elements of the stack, from the oldest to the most
+recent.
+The parameter @code{i} must be declared as an lvalue of type
+|KEY|* and will point, in turn, to each element of the stack.
+
+This operation must appear in a context where @code{for (i=...; i<...;i++)}
+is allowed.
+
+~B~<ForEach|NAME|StackElementDown(i)~>
+
+Cycle through the elements of the stack, from the most recent to the
+oldest.
+The parameter @code{i} must be declared as an lvalue of type
+|KEY|* and will point, in turn, to each element of the stack.
+
+This operation must appear in a context where @code{for (i=...; i>=...;i--)}
+is allowed.
+
+~A~<Module Implementation~>
+
+When this generic module is instantiated, it creates four files.
+
+~B
+
+This header file defines all of the exported operations of the module.
+It must be included in any C file that refers to those operations.
+
+~O~<|NAME|Stack.h~>~{
+#ifndef |NAME|STACK_H
+#define |NAME|STACK_H
+#include "obstack.h"
+
+extern Obstack |NAME|Stack;
+
+#define |NAME|StackEmpty \
+  (obstack_next_free(&|NAME|Stack) == obstack_base(&|NAME|Stack))
+
+#define |NAME|StackSize \
+  ((|KEY| *)obstack_next_free(&|NAME|Stack)-(|KEY| *)obstack_base(&|NAME|Stack))
+
+#define |NAME|StackTop \
+  (((|KEY| *)obstack_next_free(&|NAME|Stack))[-1])
+
+#define |NAME|StackPush(v) {\
+  |KEY| |NAME|StackTemp; |NAME|StackTemp = v; \
+  obstack_grow(&|NAME|Stack, &|NAME|StackTemp, sizeof(|KEY|)); \
+}
+
+#define |NAME|StackPop \
+  (*((|KEY| *)(obstack_next_free(&|NAME|Stack) -= sizeof(|KEY|))))
+
+#define ForEach|NAME|StackElementUp(i) \
+  for ((i) = (|KEY| *)obstack_base(&|NAME|Stack); \
+       (i) < (|KEY| *)obstack_next_free(&|NAME|Stack); \
+       (i)++)
+
+#define ForEach|NAME|StackElementDown(i) \
+  for ((i) = ((|KEY| *)obstack_next_free(&|NAME|Stack)) - 1; \
+       (i) >= (|KEY| *)obstack_base(&|NAME|Stack); \
+       (i)--)
+
+#define |NAME|StackArray(i) \
+  (((|KEY| *)obstack_base(&|NAME|Stack))[i])
+
+#define |NAME|StackElement(i) \
+  (((|KEY| *)obstack_next_free(&|NAME|Stack))[-1-(i)])
+#endif
+~}
+
+~B
+
+This file allocates the space for the stack.
+It will be added to the set of components of the generated program
+automatically.
+
+~O~<|NAME|Stack.c~>~{
+#include "obstack.h"
+
+Obstack |NAME|Stack;
+~}
+
+~B
+
+This file initializes the stack module.
+It will be added to the set of module initializations automatically.
+
+~O~<|NAME|Stack.init~>~{
+  obstack_init(&|NAME|Stack);
+~}
+
+~B
+
+This file makes the interface of the stack module available to LIDO
+computations and to the main program.
+
+~O~<|NAME|Stack.head~>~{
+#include "|NAME|Stack.h"
+~}

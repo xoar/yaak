@@ -1,0 +1,28 @@
+This is Info file testwin, produced by Makeinfo-1.43 from the input
+file testwin.tnf.
+
+
+File: testwin,  Node: Top,  Up: (dir)
+
+   This info document is used to make sure that your windowed info
+browser is working properly.  You should see a menu below.  Please
+click on the menu item.  Doing so should bring up another node.
+
+* Menu:
+
+* Test::        Follow this menu item
+
+
+File: testwin,  Node: Test,  Up: Top
+
+   If you've reached this node, your info browser is working properly. 
+Click on the `Quit' button at the top of the window to exit the
+browser.
+
+
+
+Tag Table:
+Node: Top88
+Node: Test376
+
+End Tag Table

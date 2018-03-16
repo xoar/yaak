@@ -1,0 +1,82 @@
+INCLUDE "inc/GMC.h"
+
+SCANNER
+  EOF		= TOK_EOF
+  ERR		= TOK_ERR
+  "Ident"	= TOK_ident	=> "NOD_ident"
+  'server'	= TOK_server
+  'client'	= TOK_client
+  'request'	= TOK_request
+  'split-request'
+		= TOK_splitrequest
+  'notice'	= TOK_notice
+  'in'		= TOK_in
+  'out'		= TOK_out
+  'inout'	= TOK_inout
+  'str'		= TOK_str
+  'int'		= TOK_int
+  '*'		= TOK_star
+  ','		= TOK_comma
+  '('		= TOK_lparen
+  ')'		= TOK_rparen
+  '{'		= TOK_lbrkt
+  '}'		= TOK_rbrkt
+
+NODES
+   "NOD_ident" "NOD_stubs" "NOD_server" "NOD_client"
+   "NOD_request" "NOD_splitrequest" "NOD_notice"
+   "NOD_args" "NOD_argdcls" "NOD_argdcl"
+   "NOD_in" "NOD_out" "NOD_inout" "NOD_int" "NOD_str"
+   "NOD_pointer" "NOD_proc_call"
+
+RULES
+   Stubs
+	-> Stub*				=> "NOD_stubs";
+
+   Stub
+        -> 'server' Message			=> "NOD_server"
+        -> 'client' Message			=> "NOD_client";
+
+   Message
+	-> 'request' ProcDcl			=> "NOD_request"
+	-> 'split-request' ProcDcl		=> "NOD_splitrequest"
+	-> 'notice' ProcDcl			=> "NOD_notice";
+
+   ProcDcl
+	-> ProcName Args ArgDcls '{' ProcCall '}';
+
+   Args
+	-> '(' Arg // ',' ')'			=> "NOD_args"
+	-> '(' ')'				=> "NOD_args";
+
+   ArgDcls
+	-> ArgDcl*				=> "NOD_argdcls";
+
+   ArgDcl
+	-> ArgKind ArgDef ArgType Arg		=> "NOD_argdcl";
+
+   ArgKind
+	-> 'in'					=> "NOD_in"
+	-> 'out'				=> "NOD_out"
+	-> 'inout'				=> "NOD_inout";
+
+   ArgDef
+	-> 'int'				=> "NOD_int"
+	-> 'str'				=> "NOD_str";
+
+   ArgType
+	-> Type '*'				=> "NOD_pointer"
+	-> Type;
+
+   ProcCall
+	-> ProcName Args			=> "NOD_proc_call";
+
+   ProcName
+	-> "Ident";
+
+   Arg
+	-> "Ident";
+
+   Type
+	-> "Ident";
+

@@ -1,0 +1,968 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~p maximum_output_line_length = infinity
+
+~! $Id: BlockPrint.fw,v 1.7 1998/08/14 09:35:49 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+~t title titlefont centre "Module BlockPrint"
+
+This module supplies a set of functions to support Block-Printing in
+PTG specifications. In contrary to the ~{PrettyPrint~}-Module, it does
+not break lines at the end but tries to set all the characters between
+the open-block and the close-block marks in one line. If it does not
+fit, all suggested line breaks in the block are converted into real newlines. It
+uses the module ~{PtgOutput~} to support a means of dynamic selection
+of PTG Output routines.
+
+To use the module, simply include it's name ~{BlockPrint.fw~} into
+a ~{.specs~} file. Through this, some C-functions are included
+into your specification. These functions will be described in the 
+following thereby explaining the technique for block printing.
+After this, the implementation of the block-printing module will be
+presented.
+
+~A~<Interface~>
+
+The main objective for block printing is to assure that the
+destination output has a certain maximal line length. To obtain such a
+result, the output processor should be able to insert line breaks where
+necessary at certain insertion points. These insertion points can be
+marked with the following function. It can be used inside a PTG
+pattern specification.
+
+~$~<Interface Definition~>+=~{
+void BP_BreakLine ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+Since line breaks occur very often inside an output file, some time and
+specification effort can be reduced by defining a shortcut character
+to yield a line break. A good choice for such a
+Line-break-Shortcut-Character is the tab-character. If specified, every
+tabulation character inside a PTG pattern will yield a Line break
+instead. The default shortcut character for line breaks is the
+Null-character which disables the function. 
+
+~$~<Interface Definition~>+=~{
+void BP_SetSoftBreakShortcut ELI_ARG((char sbc));
+~}
+
+At certain points in the output file, a line break should be inserted,
+independent of the resulting line-length. In such a case, a ~{BP_NewLine~}
+can be inserted. The hard break can also be specified by inserting a
+newline-character into the PTG pattern. It's effect is, that a
+linefeed will be inserted to the output file. Please note that with
+the presence of a fixed linefeed, the current blocking scope does not
+fit into one line and all the remaining line breaks of the block will
+also be converted to newlines.
+
+~$~<Interface Definition~>+=~{
+void BP_NewLine ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+To specify block printing, the scope of the output-block needs to
+be specified. Two sets of functions are supplied for blocking: The
+first pair also increases the indentation amount, the second does not
+change the indentation amount. An additional function can be used to
+specify the amount of an indentation step. If a negative value is
+supplied here, a single tab-character will be used for indentation.
+
+~$~<Interface Definition~>+=~{
+void BP_SetIndentationWidth ELI_ARG((int newindent));
+void BP_BeginBlockI ELI_ARG((PTG_OUTPUT_FILE f));
+void BP_EndBlockI ELI_ARG((PTG_OUTPUT_FILE f));
+void BP_BeginBlock ELI_ARG((PTG_OUTPUT_FILE f));
+void BP_EndBlock ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+Indentation and line breaks work together: If all characters between
+the beginning and the end of an indentation region have room in the
+current line, the embedded line breaks will be discarded and the 
+region will be printed on one line.
+
+If the indentation-region is longer than one line, every line break
+between the corresponding ~{BP_BeginBlock~} and ~{BP_EndBlock~}-command is
+converted into a newline.
+
+In different environments, ASCII-files have different conventions for
+line endings. For example, UNIX-Environments normally only use a
+newline character. On MS-DOS Systems or in Mime-conform messages, a
+carriage return and a newline is used. With the following function, a
+string-constant can be set that will be used as end-of-line token. By
+default, it is set to a single newline character.
+
+~$~<Interface Definition~>+=~{
+void BP_SetEndline ELI_ARG((char *new_eol));
+~}
+
+To process block-printing, the output of a PTG Pattern needs to be
+postprocessed. In order to do this, the module ~{PTGOutput~} is
+used. This module supplies some output functions that should be used
+to enable the block-printing features. They substitute the
+default-definitions supplied by PTG.
+
+~$~<Interface Definition~>+=~{
+PTGNode BP_OutFPtr ELI_ARG((FILE *fptr, PTGNode root));
+PTGNode BP_OutFile ELI_ARG((const char *filename, PTGNode root));
+PTGNode BP_Out ELI_ARG((PTGNode root));
+~}
+
+~A~<Implementation~>
+
+The block-printing module is a postprocessor for PTG-Output. As this,
+it uses the module ~{PTGOutput~} that coordinates different postprocessors and
+allows dynamic selection of the "right" postprocessor.
+
+~O~<BlockPrint.specs~>~{
+$/Output/PtgOutput.fw
+~}
+
+To perform it's block-printing task, the module needs to buffer the beginning
+of the last line of output. With this, upon closing a block it 
+can be decided if suggested line breaks need to be converted to real linefeeds.
+
+The buffer is defined by two static variables: The first variable
+stores the characters of the printed line, the second records
+beginning and ending indentation regions and a count of suggested
+line breaks. 
+
+Please note, that the buffers must be longer than the the line width by
+one char.
+
+~$~<Variables~>+=~{
+static char *buffer = 0;
+static struct _flagstruct {
+	short start;
+	short end;
+	short startl;
+	short endl;
+	short lbreak;
+} *flags = 0;
+~}
+
+Now, the internal character printing function can be defined. It
+inserts a single character into the output buffer and on overflow,
+calls a buffer printing function. If the buffer is exceeded, it will
+print the remains of the line directly into the output file.  
+
+As additional status information, it needs the current line-width, and
+the current offset in the printed line. The initializations of these
+variables are default values only. They can be set with functions defined
+in a later section. Additionally, we need a flag variable that is set to
+one if the beginning of the current line is already printed.
+
+~$~<Variables~>+=~{~-
+static int width = 80;
+static int offset = 0;
+static int bol_printed = 0;
+~}
+
+~$~<Forward Decls~>+=~{~-
+static void AcceptChar ELI_ARG((char c));
+~}
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void AcceptChar(char c)
+#else
+static void AcceptChar(c) char c;
+#endif 
+{   
+    if (offset >= width && !bol_printed) /* Will exeed buffer now. */
+	PrintBuffer();                   /* Print beginning of line */
+    
+    if (offset < width)                  /* Inside of buffer. */
+    {   /* Store only. */
+	buffer[offset++] = c;            
+	return;
+    }
+    else
+    {   /* Print directly if overflow */
+	putc(c, outputfile);             
+        offset++;
+    }
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void PrintBuffer ELI_ARG((void));~}
+
+The main work is performed by the ~{PrintBuffer~}-function that prints
+a beginning of the line and inserts line breaks where necessary. Together
+with other functions it maintains a stack of indent-regions.
+For each region in the stack is remembered, if a linefeed occurred inside 
+the region and if the region used indentation.
+
+~$~<Variables~>+=~{
+typedef struct {
+   char toolong;	/* == 1: iff linefeed occured inside region */
+} Region;
+
+#define BP_NESTED_REGIONS 80
+
+static Region region[BP_NESTED_REGIONS];
+static int region_top = 0;	  /* Top of Stack for current column pos. */
+static int level_top = 0;
+static int startline_region = 0;  /* Top of Stack for beginning of buffer */
+static int startline_level = 0;
+~}
+
+At exit of the ~{PrintBuffer~}-routine, one of two postconditions should
+hold: If the current line contained no line break,
+the function should print the beginning of the line, but no
+linefeed. The other functions can then append characters directly to
+the output stream until the next line break is encountered. This
+line break should be used to print a newline and resume normal
+behaviour.
+
+If the current line contained at least one line break, the first part of the
+buffer should be printed thereby converting suggested line breaks into linefeeds.
+The function will terminate by printing a linefeed and reorganizing the linebuffer
+so that it can hold more characters.
+
+First of all, the printing engine has to check if the beginning of the current line
+had already been printed. If so, the line is already too long and has no
+room in the buffer. In this situation, ~{PrintBuffer~} needs to do nothing.
+
+~$~<PrintBuffer~>+=~{~-
+   if (bol_printed)
+      return;
+~}
+
+After that, the function needs to determine, which part of the buffer can be
+printed. It searches the rightmost breakpoint in the outermost region of the
+printing buffer. 
+
+~$~<PrintBuffer Variables~>+=~{~-
+   register int col;
+   int lastcol = -1, level = startline_region, lastlevel = BP_NESTED_REGIONS+1;
+~}
+~$~<PrintBuffer~>+=~{~-
+   for (col = 1; col <= offset; col++)
+   {
+      level += flags[col].start + flags[col].startl;
+      level -= flags[col].end + flags[col].endl;
+      if (flags[col].lbreak)
+      {
+         if (lastlevel >= level)
+         {
+            lastcol = col;
+            lastlevel = level;
+         }
+      }
+   }
+~}
+
+Every time, we convert a suggested line break into a real linefeed, some region,
+and so every enclosing region has become too large. We must remember that in
+the region stack because it affects later line breaks.
+
+~$~<PrintBuffer Variables~>+=~{~-
+   int reg;
+~}
+
+~$~<PrintBuffer~>+=~{~-
+   if (lastcol == -1)
+      lastlevel = region_top;
+   for (reg = lastlevel; !region[reg].toolong && reg >= 0; reg--)
+      region[reg].toolong = 1;
+~}
+
+If no line breaks could be found, the beginning of the line must be printed. 
+A variable remembers, that the beginning has been printed, so that it will not
+be done again.
+
+~$~<PrintBuffer~>+=~{~-
+   if (lastcol == -1)
+   {
+      if (offset >= width)
+      {
+         buffer[offset] = '\0';
+         fputs(buffer, outputfile);
+         bol_printed = 1;
+      }
+   }
+   else
+   {
+~<PrintBuffer1~>
+   }
+~}
+
+Otherwise, proper indentation can be performed now, because every
+line break that remains in the buffer was a line break in a region that
+had been flagged as too long. The function steps through the buffer
+and converts line breaks into newlines. It uses a function to print 
+a newline and the according indentation space.
+
+~$~<PrintBuffer Variables~>+=~{~-
+   int softbreak = 0;
+~}
+
+~$~<PrintBuffer1~>+=~{~-
+      for (col = 0; col <= lastcol; col++)
+      {
+         startline_region += flags[col].start + flags[col].startl;
+	 startline_level += flags[col].startl;
+         startline_region -= flags[col].end + flags[col].endl;
+         startline_level -= flags[col].endl;
+         if (flags[col].lbreak)
+         {   /* Linebreak */
+	    int anz = flags[col].lbreak;
+            while (anz--)
+               PrintNewLine(startline_level);  
+         }
+
+         if (col == lastcol)
+            break;
+         putc(buffer[col], outputfile);
+      }
+~}
+
+The rest of the line, from ~{lastcol~} upto ~{offset~} needs to be printed
+in the next line. So move the characters to the beginning of the buffer.
+
+~$~<PrintBuffer1~>+=~{~-
+      if (lastcol < offset)
+      {
+         offset = (offset - lastcol);   /* #remaining characters */
+         MEMMOVE(buffer, buffer+lastcol, sizeof(char)*offset);
+	 MEMMOVE(flags, flags+lastcol, sizeof(struct _flagstruct)*(offset+1));
+	 memset(flags+offset+1, 0, (width+1-offset)*sizeof(struct _flagstruct));
+
+	 /* Column 0 already processed */
+         flags[0].start = 0;
+         flags[0].startl = 0;
+         flags[0].end = 0;
+         flags[0].endl = 0;
+         flags[0].lbreak = 0;
+      }
+      else
+      {
+	 offset = 0;
+	 memset(flags, 0, (width+1) * sizeof(struct _flagstruct));
+      }
+      bol_printed = 0;
+~}
+
+This concludes the ~{PrintBuffer~}-function.
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void PrintBuffer(void)
+#else
+static void PrintBuffer()
+#endif
+{ 
+~<PrintBuffer Variables~>
+
+~<PrintBuffer~>
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void PrintNewLine ELI_ARG((int reg));~}
+
+The ~{PrintNewLine~}-function prints a newline and does indentation.
+It uses a global variable that specifies the indentation amount for 
+each region. If it is negative, TAB-characters should be used for
+indentation. Another global variable contains the end-of-line sequence that
+should be used.
+
+~$~<Variables~>+=~{~-
+static int indent = 2;
+static char *eol = "\n";
+~}
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void PrintNewLine(int level)
+#else
+static void PrintNewLine(level) int level;
+#endif
+{
+   static char *spaces = "                                                                                ";
+   fputs(eol, outputfile);
+
+   if (indent > 0)
+   {
+      int required = level * indent;
+      while (required > 0)
+      {
+	 char *s = spaces;
+	 if (required < 80)
+	    s += (80-required);
+
+	 fputs(s, outputfile);
+	 required -= 80;
+      }
+   }
+   else
+   {
+      int col;
+      for (col = 0; col < level; col++)
+         putc('\t', outputfile);
+   }
+}
+~}
+
+The next function adjusts the buffer for a line break or a
+newline. Fixed newlines differ from suggested line breaks: If a fixed
+newline is encountered, all current regions are marked as too long
+thus assuring that line breaks will not be flushed away.
+
+~$~<Forward Decls~>+=~{
+static void AcceptBreak ELI_ARG((int soft));~}
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void AcceptBreak(int soft)
+#else
+static void AcceptBreak(soft) int soft;
+#endif
+{
+   if (!soft)
+   {  /* Mark all current regions as too long */
+      int reg;
+      for (reg = region_top; reg >= 0 && !region[reg].toolong; reg--)
+         region[reg].toolong = 1;
+   }
+
+   if (!bol_printed && offset < width)
+   {  /* Has room in current buffer. */
+      flags[offset].lbreak += 1;
+   }
+   else 
+   {  /* Print some piece of the buffer */
+      PrintBuffer();
+
+      if (bol_printed)
+      {  /* Current line too long */
+	 /* We found a line break. Resume normal printing */
+         PrintNewLine(region_top);
+	 startline_region = region_top;
+         startline_level = level_top;
+	 offset = 0;
+	 memset(flags, 0, (width+1) * sizeof(struct _flagstruct));
+         bol_printed = 0;
+      }
+      else
+      {  /* Postcondition of PrintBuffer: 
+          * We have room in buffer now */
+	 flags[offset].lbreak += 1;
+      }
+   }
+}
+~}
+
+Next, we need some supporting functions to mark an indentation-region.
+The opening function simply pushes another region-frame on the stack.
+As parameter it gets a flag, that is 1, if Indentation is desired and
+0, if no indentation should be used. It adjusts the right margin properly
+and calls the ~{PrintBuffer~} function if the decreased margin fills
+the buffer.
+
+~$~<Forward Decls~>+=~{
+static void AcceptOpenRegion ELI_ARG((int do_indent));~}
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void AcceptOpenRegion(int do_indent)
+#else
+static void AcceptOpenRegion(do_indent) int do_indent;
+#endif
+{
+   int abs_indentation = do_indent ? (indent < 0 ? 8 : indent) : 0;
+
+   if (region_top + 1 >=  BP_NESTED_REGIONS)
+      return;   /* Too many nested regions */
+
+   if (abs_indentation > width)
+      return;   /* Total indentation amount greater than linewidth */
+
+   if (offset >= width)
+      PrintBuffer();
+
+   region_top++;
+   level_top += do_indent;
+   region[region_top].toolong = 0;
+
+   if (do_indent)
+      flags[offset].startl += 1;
+   else
+      flags[offset].start += 1;
+
+   width -= abs_indentation;
+   if (offset > width)
+      PrintBuffer();
+}
+~}
+
+The closing function looks, if the start of the region is on the
+same line. If so, it removes all intermediate line breaks from the
+buffer thus preventing them from being converted into newlines. 
+After that, it restores the effective line-width back to
+the previous setting.
+
+~$~<Forward Decls~>+=~{
+static void AcceptCloseRegion ELI_ARG((int do_indent));~}
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void AcceptCloseRegion(int do_indent)
+#else
+static void AcceptCloseRegion(do_indent) int do_indent;
+#endif
+{
+   int abs_indentation;
+
+   if (region_top == 0)
+      return;
+
+   abs_indentation = do_indent ? (indent < 0 ? 8 : indent) : 0;
+
+   if (offset <= width)
+   {
+      if (do_indent)
+         flags[offset].endl += 1;
+      else
+         flags[offset].end += 1;
+   }
+
+   if (offset > 0 && offset <= width && !region[region_top].toolong)
+   {   
+      register int col;	
+      int top = 0;
+      int found = 0;
+	
+      for (col = offset; col >= 0; col--)
+      {   
+         top += flags[col].end + flags[col].endl;
+         
+	 if (flags[col].start || flags[col].startl)
+	 {
+	    top -= flags[col].start || flags[col].startl;
+	    if (top <= 0)
+            {
+               found = 1;
+	       break;
+            }
+	 }
+      }
+
+      if (found)
+      {  /* Region is completely on this line. Delete all intermediate 
+          * line breaks */
+         while (col <= offset)
+	    flags[col++].lbreak = 0;
+      }
+   }
+    
+   if (offset > width)
+      offset += abs_indentation;     
+   region_top--;    
+   level_top -= do_indent;
+   width += abs_indentation;
+}
+~}
+
+The last internal function is an initialization-function, that should be
+called at the beginning of the output for a new file. It sets the 
+line-length from a user adjustable value for two reasons: First, the
+line-length should match the length of the buffer. Second, the linewidth
+is manipulated while opening and closing regions and should be reset
+to it's original value, just in case a closing-region-command has been 
+omitted.
+
+~$~<Variables~>+=~{
+static int linewidth = 80;
+~}
+
+~$~<Forward Decls~>+=~{
+static void Init ELI_ARG((void));~}
+
+~$~<Functions~>+=~{
+static void Init()
+{ 
+   width = linewidth;
+   if (buffer)
+      free(buffer);
+   buffer = (char *)malloc((width+1) * sizeof(char));
+   if (flags)
+      free(flags);    
+   flags = (struct _flagstruct *)malloc((width+1) * sizeof(struct _flagstruct));
+   if (!buffer || !flags)
+   {
+      fprintf (stderr, "*** No more memory!\n");
+      exit(1);
+   }
+ 
+   memset(flags, '\0', sizeof(struct _flagstruct) * (width+1));
+
+   offset = 0;
+   bol_printed = 0;
+
+   region[0].toolong = 0;
+   region_top = 0;
+   startline_region = 0;
+   startline_level = 0;
+   level_top = 0;
+}
+~}
+
+~A~<PTG Interface~>
+
+Up to this point, only general-purpose block-printing functions have
+been defined. In this section, the interface to PTG will be
+defined. It falls into two different categories. One set of functions
+redirect PTG output into the block-printing functions. The second set
+of functions supplies additional Function-Call-Insertion routines,
+that influence the block-printing behaviour.
+
+The first pair of functions insert a newline and a line break. They perform a
+consistency-check to assure that they have been called from within a call
+to our new Output function that will be defined later.
+
+~$~<PTG Interface~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_NewLine(PTG_OUTPUT_FILE f)
+#else
+void BP_NewLine(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	PTG_OUTPUT_STRING(f, "\n");
+    else
+#endif
+	AcceptBreak(0);
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_BreakLine(PTG_OUTPUT_FILE f)
+#else
+void BP_BreakLine(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	PTG_OUTPUT_STRING(f, "\n");
+    else
+#endif
+	AcceptBreak(1);
+}
+~}
+
+The next functions mark the beginning and end of a block. They are
+supplied in two variants which do or do not do indentation. 
+
+The two pairs of functions are very similar. They only differ in the argument
+passed to the ~{AcceptOpenRegion~} function and of course in their
+name.
+
+~$~<PTG Indenting Functions~>~(~2~)~M~{
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_BeginBlock~1(PTG_OUTPUT_FILE f)
+#else
+void BP_BeginBlock~1(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	return;
+#endif
+    AcceptOpenRegion(~2);
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_EndBlock~1(PTG_OUTPUT_FILE f)
+#else
+void BP_EndBlock~1(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	return;
+#endif
+    AcceptCloseRegion(~2);
+}
+~}
+
+This macro is instantiated to yield the two indenting functions.
+
+~$~<PTG Interface~>+=~{
+~<PTG Indenting Functions~>~(~,0~)
+~<PTG Indenting Functions~>~(I~,1~)
+~}
+
+Next, we need to supply a function to print strings. We will also supply
+a function that prints a character to speed up the processing. The routines
+should convert a newline-character into a fixed newline. Optionally, 
+a shortcut-character can be supplied that is transformed into a softbreak.
+
+~$~<Variables~>+=~{
+static char SoftBreakShortcut = '\0';
+~}
+
+The two functions have a similar body that will be defined in a macro
+here.
+
+~$~<PTG Character Printing~>~(~1~)~M~{
+if (~1 == SoftBreakShortcut)
+    AcceptBreak(1);
+else if (~1 == '\n')
+    AcceptBreak(0);
+else
+    AcceptChar(~1);
+~}
+
+Since a null-character cannot be printed, the default-setting of 0 
+disables the shortcut for soft line breaks. The above macro is used to
+generate the two output-routines, one for strings and and one for characters.
+
+~$~<Forward Decls~>+=~{
+static void BP_PrintString ELI_ARG((PTG_OUTPUT_FILE f, const char *s));~}
+
+~$~<PTG Interface~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void BP_PrintString(PTG_OUTPUT_FILE f, const char *s)
+#else
+static void BP_PrintString(f, s) PTG_OUTPUT_FILE f; char *s;
+#endif
+{ 
+  if (s) 
+  {
+    while (*s)
+    {
+       ~<PTG Character Printing~>~(*s~)
+       s++;
+    }
+  }
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void BP_PrintChar ELI_ARG((PTG_OUTPUT_FILE f, char c));~}
+
+~$~<PTG Interface~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void BP_PrintChar(PTG_OUTPUT_FILE f, char c)
+#else
+static void BP_PrintChar(f, c) PTG_OUTPUT_FILE f; char c;
+#endif
+{
+   ~<PTG Character Printing~>~(c~)
+}
+~}
+
+The remaining functions in this section perform the actual printing. The
+main routine expects a ~{PTGNode~} and a file-argument. It constructs the
+~{PTG_OUTPUT_FILE~}-object and calls the printing routine from PTG.
+Hereby, the routine uses the optional structure component ~{destinfo~} from
+the ~{PTG_PUTPUT_FILE~}-structure to store a magic value that is used by
+the other functions to determine, if the Output-procedures supplied by this
+module have been called for output.
+
+~$~<Variables~>+=~{
+static char *unique = "";
+static FILE *outputfile = 0;
+~}
+
+The main output-processing-function follows:
+
+~$~<PTG Interface~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode BP_OutFPtr(FILE *f, PTGNode root)
+#else
+PTGNode BP_OutFPtr(f, root) FILE *f; PTGNode root;
+#endif
+{
+    PtgFilePtr ptgfile = NewPtgFile(unique, BP_PrintString);
+    outputfile = f;
+    ptgfile->PrintChar = BP_PrintChar;
+    
+    Init();
+    
+    PTGProcess(ptgfile, root);
+
+    if (!region[0].toolong)
+    {   /* All kept in one line */
+        buffer[offset] = '\0';
+        fputs(buffer, outputfile);
+    	PrintNewLine(0);
+    }
+    else
+    {
+    	AcceptBreak(1);
+	/* We have a line break at the end. So, a repeating calls to
+         * PrintBuffer should eventually yield an empty buffer! */
+ 
+        while (offset > 0)
+        {
+	    PrintBuffer();
+  	    if (bol_printed) 
+	    {
+	        PrintNewLine(0);
+	        break;
+            }
+        }
+    }
+    FreePtgFile(ptgfile);
+    
+    return root;
+}
+~}
+
+This function is used to supply two other commonly used output functions:
+
+~$~<PTG Interface~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode BP_Out (PTGNode r)
+#else
+PTGNode BP_Out (r)
+        PTGNode r;
+#endif
+{
+	return BP_OutFPtr(stdout, r);
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode BP_OutFile (const char *filename, PTGNode root)
+#else
+PTGNode BP_OutFile (filename, root)
+        char * filename; PTGNode root;
+#endif
+{
+	FILE *f = fopen(filename, "w");
+        if (!f)
+        {
+                fprintf(stderr, "DEADLY: BP_OutFile: output file '%s' can't be opened.\n",
+			filename);
+                exit(1);
+        }
+        BP_OutFPtr(f, root);
+        fclose(f);
+        return root;
+}
+~}
+
+~A~<Parameter Setting Routines~>
+
+This section will supply all the little routines to assign values to the
+different global variables that influence block printing processing.
+
+~$~<Parameters~>==~{
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_SetLineWidth(int newwidth)
+#else
+void BP_SetLineWidth(newwidth) int newwidth;
+#endif
+{
+    linewidth = newwidth;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_SetIndentationWidth(int newindent)
+#else
+void BP_SetIndentationWidth(newindent) int newindent;
+#endif
+{
+    indent = newindent;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_SetEndline(char *new_eol)
+#else
+void BP_SetEndline(new_eol) char *new_eol;
+#endif
+{
+    eol = new_eol;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void BP_SetSoftBreakShortcut(char sbc)
+#else
+void BP_SetSoftBreakShortcut(sbc) char sbc;
+#endif
+{
+    SoftBreakShortcut = sbc;
+}
+~}
+
+~A~<Collecting the Output file~>
+
+As a matter of fact, there are Compilers that do not support the ANSI ~{memmove~}
+function that can copy memory that possibly overlaps. For this reason, we implement
+a substitute here. This is not a generally usable substitute: It takes advantage of
+the fact that ~{src~} is always less than ~{dest~} in invocations of this module.
+
+~$~<Substitute memmove~>~{
+#if !defined(__STDC__) && !defined(__cplusplus)
+static void MEMMOVE(dest, src, len)
+char *dest, *src;
+int len;
+{
+   while (len--) *(dest++) = *(src++);
+}
+#else
+#define MEMMOVE(dest,src,len) memmove(dest,src,len)
+#endif
+~}
+
+~O~<BlockPrint.h~>~{
+#ifndef _BLOCK_PRINT_H
+#define _BLOCK_PRINT_H
+
+#include "ptg_gen.h"
+
+~<Interface Definition~>
+
+#endif
+~}
+
+~O~<BlockPrint.c~>~{
+#include <stdlib.h>
+#include <string.h>
+#include "BlockPrint.h"
+
+~<Substitute memmove~> 
+
+~<Variables~>
+
+~<Parameters~>
+
+~<Forward Decls~>
+
+~<Functions~>
+
+~<PTG Interface~>
+~}
+
+~O~<BlockPrint.HEAD.phi~>~{
+#include "BlockPrint.h"
+~}
+
+
+
+    
+    
+    
+
+

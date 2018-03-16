@@ -1,0 +1,11 @@
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = 1 * 3.4;
+  b = true + 1;
+  r = 3.4 + b;
+  j = i * c;
+  i = b * true;
+  i = 3 * j + r;
+end

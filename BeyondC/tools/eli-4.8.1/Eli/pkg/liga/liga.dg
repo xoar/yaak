@@ -1,0 +1,149 @@
+# $Id: liga.dg,v 2.19 2002/04/29 12:49:14 peter Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+# Liga's inputs:
+*.lido => :lido;
+:lido 'Attribute grammar written in LIDO'? => :FILE;
+
+*.ctl => :ctl;
+:ctl 'Control options for LIGA processing'? => :FILE;
+
+EXEC (ligaEta.sh) (:lido) (+incl)
+  => (:lidoEta) (:lidoEta_tab);
+    :lidoEta 'Lido specification that includes lido.eta.h' => :FILE;
+    :lidoEta_tab 'Line offset information' => :cpp_tab;
+
+EXEC ($ODINCACHE/PKGS/cpp/cppErr.sh) (+hookvalue) (:lidoEta_tab) lidoEtaErr (:lidoEta)
+  => (:lidoEtaErr);
+     :lidoEtaErr 'Error reports referred to component files' => :line_err;
+
+
+:lido.cmpd 'Set of lido specification fragments' => :LIST;
+COLLECT  (:lido:lidoEta) => (:one.lido.cmpd);
+    :one.lido.cmpd 'Singleton lido specification' => :allspecs :lido.cmpd;
+COLLECT  (:LIST :extract=:lido :map=:lidoEta) => (:lido.cmpd);
+
+:ctl.cmpd 'Set of ctl specification fragments' => :LIST;
+COLLECT  (:ctl) => (:one.ctl.cmpd);
+    :one.ctl.cmpd 'Singleton ctl specification' => :ctl.cmpd;
+COLLECT  (:LIST :extract=:ctl) => (:ctl.cmpd);
+
+COLLECT  (:one.lido.cmpd :extract=:ctl) => (:empty.ctl.lido.cmpd);
+    :empty.ctl.lido.cmpd 'Empty ctl specification derived from lido' => :ctl.cmpd;
+
+
+# Execution of Liga:
+EXEC (ligaOut.sh) (.) (:lido.cmpd :names) (:ligaBe :name) (:MeBottomUp :name)
+  => (:ligaOut);
+    :ligaOut 'LIGA input exists then request products of LIGA' => :FILE;
+
+EXEC (ligaFe.sh) (.) (:lido.cmpd :cpp)
+  => (:ligaFe);
+    :ligaFe 'LIGA frontend: LIDO analysis' => :FILE;
+
+EXEC (ligaOption.sh) (.) (:ctl.cmpd :cpp) (+ExpI) (+OptimI) (+OrdI)
+  => (:exp_option) (:ord_option) (:optUoption) (:back_option);
+    :exp_option 'options for LIGA expand and LIGA replincl' => :FILE;
+    :ord_option 'options for LIGA order' => :FILE;
+    :optUoption 'options for LIGA optim before expand' => :FILE;
+    :back_option 'options for LIGA backend' => :FILE;
+
+EXEC (ligaMe.sh) (.) (:ligaFe) (:exp_option) (:ord_option) (:optUoption) 
+                     (:lido.cmpd :cpp) (:lido.cmpd :cpp_tab) (+RunGorto)
+  => (:MeIdl) (:MeInfo) (:MeBottomUp);
+    :MeIdl 'IDL interface between Middle and Backend' => :FILE;
+    :MeInfo 'Protocol file of LIGAs Middle pass'? => :FILE;
+    :MeBottomUp 'Rules with BottomUp constraints' => :FILE;
+
+EXEC (ligaBe.sh) (.) (:MeIdl) (:back_option) (:lido.cmpd :cpp) (+monitor)
+  NEEDS (Frames/liga.dapto)
+  => (:ligaBe);
+    :ligaBe 'Generation of the attribute evaluator' => :DERIVED-DIRECTORY;
+
+COLLECT  (:level_4_specs +incl=(:etaIncl) :ligaBe :list) => (:ligaResults);
+    :ligaResults 'Contains all C files generated from LIGA'? => :LIST;
+
++RunGorto 'Stops Liga after Expand for running Gorto'? => :first;
+
+EXEC (gorto.sh) (.) (:level_4_specs +incl=(:etaIncl) :lido.cmpd :cpp) 
+                    (:level_4_specs +incl=(:etaIncl) +RunGorto :MeIdl) 
+                    (:level_4_specs +incl=(:etaIncl) :ord_option)
+  => (:gorto);
+    :gorto 'Graphical dependence analysis possibly with output of arrange options'? => :EXECUTABLE;
+
+
+EXEC (ligaProd.sh) (.) (:lido.cmpd :cpp)
+  => (:ligaProd);
+    :ligaProd 'Abstract rules extracted in LIDO notation' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:ligaProd) ligaProdErr
+  => (:ligaProdErr);
+:ligaProdErr 'Identity map for errors in standard form' => :line_err;
+
+EXEC (showFe.sh) (.) (:lido.cmpd :cpp) 
+                     (:lido.cmpd :cpp_tab)
+  => (:showFeDir);
+    :showFeDir 'Directory with generated Information about .lido specs after initial analysis'? => :DERIVED-DIRECTORY;
+
+COLLECT  (:level_4_specs +incl=(:etaIncl) :showFeDir :list) => (:showFe);
+    :showFe 'Gives information about .lido specs after the initial analysis'? => :LIST;
+
+EXEC (feInfo.sh) (.) (:lido.cmpd :cpp) 
+  => (:feInfoDir);
+    :feInfoDir 'Directory with information about .lido specs after initial analysis'? => :DERIVED-DIRECTORY;
+
+COLLECT  (:level_4_specs +incl=(:etaIncl) :feInfoDir :list) => (:feInfo);
+    :feInfo 'Gives information about .lido specs after the initial analysis'? => :LIST;
+
+EXEC (showMe.sh) (.) (:lido.cmpd :cpp) 
+                     (:lido.cmpd :cpp_tab) 
+                     (:ligaFe) (:exp_option) 
+                     (:ord_option) (:optUoption)
+  => (:showMeDir);
+    :showMeDir 'Directory with generated Information about .lido specs after the Middle pass'? => :DERIVED-DIRECTORY;
+
+COLLECT  (:level_4_specs +incl=(:etaIncl) :showMeDir :list) => (:showMe);
+    :showMe 'Gives information about .lido specs after the Middle pass'? => :LIST;
+
++ExpI 'Sets LIGA option: EXPAND: INFO;'? => :first;
+
++OptimI 'Sets LIGA option: OPTIM: INFO;'? => :first;
+
++OrdI 'Sets LIGA options: ORDER: GRAPH DIRECT_RULE VISIT_SEQUENCE;'? => :first;
+
+CONCATENATE  (:level_4_specs +incl=(:etaIncl) +ExpI :MeInfo)&  => (:ExpInfo);
+    :ExpInfo 'Information of LIGA containing details about LIDO shorthand expansion'? => :FILE;
+
+CONCATENATE  (:level_4_specs +incl=(:etaIncl) +OrdI :MeInfo)&  => (:OrdInfo);
+    :OrdInfo 'Information of LIGA about the analysis of the LIDO input'? => :FILE;
+
+CONCATENATE  (:level_4_specs +incl=(:etaIncl) +OptimI :MeInfo)&  => (:OptimInfo);
+    :OptimInfo 'Information of LIGA containing details about attribute optimization'? => :FILE;
+
+#EXEC (BottomUp.sh) (:level_4_specs +incl=(:etaIncl) :MeBottomUp)
+#                   (:abstree)
+#  => (:BottomUp);
+#    :BottomUp 'List of rules that have BOTTOMUP constraints' => :FILE;
+
+EXEC (ligaErr.sh) (.) (+hookvalue) (:lido.cmpd :cpp) (:ligaBe)
+  => (:ligaErr);
+    :ligaErr 'Map line errors in LIGA output' => :line_err;
+
+COLLECT (:level_4_specs +incl=(:etaIncl) :ligaOut :list)
+  => (:eli*level_5_specs_in);

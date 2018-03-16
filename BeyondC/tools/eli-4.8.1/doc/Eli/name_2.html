@@ -1,0 +1,781 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from name.tnf on 5 December 2013 -->
+
+<TITLE>Name analysis according to scope rules - Basic Scope Rules</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Name analysis according to scope rules</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC2" HREF="name_toc.html#SEC2">Basic Scope Rules</A></H1>
+<P>
+The consistent renaming task associates to each identifier occurrence a 
+key that uniquely identifies the object named by the identifier.
+The following modules solve the basic problems of that task.
+<P>
+<DL COMPACT>
+<DT><CODE>AlgScope</CODE>
+<DD>Algol-like scope rules
+<DT><CODE>CScope</CODE>
+<DD>C-like scope rules 
+<DT><CODE>BuScope</CODE>
+<DD>C-like scope rules analyzed while processing input  
+</DL>
+<P>
+Each of the three modules implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type <CODE>DefTableKey</CODE>.
+<A NAME="IDX21"></A>
+<A NAME="IDX22"></A>
+<P>
+The <CODE>AlgScope</CODE> module applies Algol-like scope rules.
+They are characterized by the following description:
+<P>
+A binding is valid within the whole smallest range containing
+the definition, except in inner ranges where a binding for the
+same identifier holds.
+That means a definition of an <CODE>a</CODE> in an inner range
+hides definitions of <CODE>a</CODE> in outer ranges.
+An identifier may be used before its definition.
+<P>
+Usually, the scope rules of a real language are further elaborated.
+We call them Algol-like, if the above description is their
+underlying principle. For example
+Pascal's scope rules are Algol-like. They
+additionally require that an identifier is not used before its 
+definition. That restriction can be checked using an instance of the
+<CODE>SetFirst</CODE> module 
+(see  <A HREF="prop_3.html#SEC3">Set a Property at the First Object Occurrence of Association of properties to definition</A>).
+<A NAME="IDX23"></A>
+<A NAME="IDX24"></A>
+<P>
+The <CODE>CScope</CODE> module applies C-like scope rules.
+They are characterized by the following description:
+<P>
+A binding is valid from the definition up to the end of the smallest
+range containing the definition, except in inner ranges
+from a definition of the same identifier to the end of that range.
+That means definitions of <CODE>a</CODE> in outer range are hidden
+by a definition of an <CODE>a</CODE> in an inner range from the
+point of the definition up to the end of the range.
+It implies that an identifier is not used before its definition.
+<P>
+Usually, the scope rules of a real language are further elaborated.
+We call them C-like, if the above description is their
+underlying principle. For example the scope rules of the language C
+are defined for variable names C-like. But for labels names of jumps they
+are defined Algol-like.
+<A NAME="IDX25"></A>
+<A NAME="IDX26"></A>
+<P>
+The <CODE>BuScope</CODE> module applies C-like scope rules. Its computations
+can be executed while the input is read (i.e. while the tree is
+constructed bottom-up).
+An application may need this technique
+if results of the name analysis task
+influence further reading of input, or results are to be
+presented to the user while typing the input.
+<P>
+Both Algol-like and C-like scope rules are described by six basic
+concepts. The modules provide <CODE>.lido</CODE> specifications with
+symbol computations for each concept:
+<A NAME="IDX27"></A>
+<P>
+<CODE>IdDefScope</CODE> is a symbol representing a defining identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+<A NAME="IDX28"></A>
+<P>
+<CODE>IdUseEnv</CODE> is a symbol representing an applied identifier occurrence
+that is bound in the enclosing environment.
+<A NAME="IDX29"></A>
+<P>
+<CODE>IdUseScope</CODE> is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+<A NAME="IDX30"></A>
+<P>
+<CODE>ChkIdUse</CODE> is a role that may be inherited by an applied identifier
+occurrence.
+If no definition is bound to that identifier, then the attribute
+<CODE>ChkIdUse.SymErr</CODE> has the value 1 and a message is issued by
+the computation:
+<P>
+<PRE>
+SYNT.SymMsg=
+  IF(THIS.SymErr,
+    message (ERROR, CatStrInd ("Identifier is not defined: ", THIS.Sym),
+    0, COORDREF));
+</PRE>
+<A NAME="IDX31"></A>
+<P>
+<CODE>RootScope</CODE> is the root symbol containing all identifier occurrences
+and all <CODE>RangeScope</CODE>. 
+It is automatically inherited by the root of the grammar.
+<A NAME="IDX32"></A>
+<P>
+<CODE>RangeScope</CODE> is a symbol representing a range for the binding
+of defining identifier occurrences <CODE>IdDefScope</CODE>.
+It may be nested in <CODE>RootScope</CODE> or other ranges.
+<P>
+These computational roles are associated to symbols of the user's
+grammar to solve the basic consistent renaming task.
+Make sure that your tree grammar is constructed according to the advices
+given in  <A HREF="name_1.html#SEC1">Tree Grammar Preconditions</A>.
+More details about symbol computations and attributes provided
+by the three modules are given in the description of each module.
+<A NAME="IDX33"></A>
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<P>
+Complete executable specifications of our running example for each of the
+three scope rule variants
+are available in
+<PRE>
+   $/Name/Examples/AlgLike.fw
+   $/Name/Examples/CLike.fw
+   $/Name/Examples/BuCLike.fw
+</PRE>
+<P>
+In our running example the roles are used as follows:
+<P>
+<PRE>
+   SYMBOL Program      INHERITS RootScope END;
+   SYMBOL Block        INHERITS RangeScope END;
+   SYMBOL DefIdent     INHERITS IdDefScope END;
+   SYMBOL UseIdent     INHERITS IdUseEnv END;
+   SYMBOL TypeUseIdent INHERITS IdUseEnv END;
+</PRE>
+Depending on which of the three modules is instantiated Algol-like
+or C-like name analysis is performed for this example.
+<A NAME="IDX36"></A>
+<P>
+The main result of the task is the computation of the attributes
+<CODE>IdDefScope.Key</CODE>, <CODE>IdUseEnv.Key</CODE>, i.e. <CODE>DefIdent.Key</CODE>,
+<CODE>UseIdent.Key</CODE>, and <CODE>TypeUseIdent.Key</CODE> in our example.
+They identify the object each identifier is bound to.
+It may be used in further computations to associate properties to it.
+<A NAME="IDX37"></A>
+<P>
+If no binding is found for an applied identifier occurrence the 
+<CODE>Key</CODE> attribute has the value <CODE>NoKey</CODE>.
+If that is a violation of language rules an error message
+can be issued using the role <CODE>ChkIdUse</CODE>:
+<P>
+<PRE>
+   SYMBOL UseIdent INHERITS ChkIdUse END;
+</PRE>
+<A NAME="IDX38"></A>
+<A NAME="IDX39"></A>
+<A NAME="IDX40"></A>
+<A NAME="IDX41"></A>
+<P>
+Along with each <CODE>Key</CODE> attribute there is an attribute <CODE>Bind</CODE>
+of type <CODE>Binding</CODE>, e.g. <CODE>UseIdent.Bind</CODE>. Its value 
+characterizes a binding of an identifier <CODE>idn</CODE> in the
+innermost scope of an environment <CODE>env</CODE> to a key <CODE>k</CODE>.
+The three values <CODE>idn</CODE>, <CODE>env</CODE>, and <CODE>k</CODE> can be obtained
+from a <CODE>Binding</CODE> using functions defined in  <A HREF="name_8.html#SEC20">Environment Module</A>.
+If no binding is found for an applied identifier occurrence the
+<CODE>Bind</CODE> attribute has the value <CODE>NoBinding</CODE>.
+<A NAME="IDX42"></A>
+<P>
+Although both  Algol-like and C-like scope rules are defined for
+nested ranges, the modules may be used for languages that do not
+have nested ranges, i.e. there is only one single flat range
+in which definitions are valid. In such a case <CODE>RootScope</CODE>
+is used for that range, and <CODE>RangeScope</CODE> is not used.
+<A NAME="IDX43"></A>
+<P>
+Another variant of these scope rules arises if a language does not
+distinguish between defining and applied identifier occurrences:
+identifiers are defined implicitly by their occurrences.
+In that case <CODE>IdDefScope</CODE> is used for that kind of occurrences,
+and <CODE>IdUseEnv</CODE> is not used.
+Of course, this concept does not make sense in languages that
+have ranges: One could not refer to an outer identifier definition
+from within an inner range.
+<P>
+We extend our running example to show implicit definitions
+within a flat range. We add a new kind of variables, say
+control variables to the language. They are implicitly
+defined by their use in special statements or operands,
+given by the following concrete productions:
+<P>
+<PRE>
+   Statement:      'set' Ident 'to' Expression ';'.
+   Operand:        'use' Ident.
+</PRE>
+<A NAME="IDX44"></A>
+<P>
+These control variable identifiers are bound in a new name space
+separate from that of the other entities. Hence, we use a
+second instance of one of the modules. That instance is identified
+by the generic <CODE>instance</CODE> parameter <CODE>CtrlVar</CODE>:
+<PRE>
+   $/Name/AlgScope.gnrc +instance=CtrlVar :inst
+</PRE>
+<P>
+There is only one kind of occurrences for these variables,
+<CODE>CtrlVarUse</CODE>, which has the role <CODE>CtrlVarIdDefScope</CODE>.
+The <CODE>Program</CODE> symbol has the role <CODE>CtrlVarRootScope</CODE>:
+<P>
+<PRE>
+   RULE:  Statement  ::= 'set' CtrlVarUse 'to' Expression ';' END;
+   RULE:  Expression ::= 'use' CtrlVarUse END;
+   SYMBOL CtrlVarUse INHERITS CtrlVarIdDefScope, IdentOcc END;
+   SYMBOL Program    INHERITS CtrlVarRootScope END;
+</PRE>
+<P>
+<A NAME="IDX46"></A>
+<A NAME="IDX45"></A>
+<H2><A NAME="SEC3" HREF="name_toc.html#SEC3">Algol-like Basic Scope Rules</A></H2>
+<P>
+This module implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type <CODE>DefTableKey</CODE>
+according to Algol-like scope rules:
+<P>
+A binding is valid within the whole smallest range containing
+the definition, except in inner ranges where a binding for the
+same identifier holds.
+<P>
+Make sure that you have considered the advices given in
+ <A HREF="name_2.html#SEC2">Basic Scope Rules</A>.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/AlgScope.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<A NAME="IDX47"></A>
+<P>
+Both generic parameters can be omitted in most of the usual applications.
+The <CODE>instance</CODE> parameter is used to distinguish several instances
+of this module. The scope rules of a language may require that
+identifiers are bound in different name spaces that do not affect
+each other. Then for each name space an instance of this or
+of the other basic scope modules is used.
+The <CODE>referto</CODE> parameter modifies the names of <CODE>Key</CODE> attributes
+and of <CODE>Bind</CODE> attributes.
+It is only used if there is an identifier occurrence in the language that
+is bound in more than one name space. These bindings are then described
+by one pair of <CODE>Key</CODE> and <CODE>Bind</CODE> attribute each.
+<P>
+The module provides computational roles for the symbols
+<CODE>NAMERootScope</CODE>, <CODE>NAMERangeScope</CODE>, <CODE>NAMEAnyScope</CODE>,
+<CODE>NAMEIdDefScope</CODE>, <CODE>NAMEIdUseEnv</CODE>, <CODE>NAMEIdUseScope</CODE>,
+and <CODE>NAMEChkIdUse</CODE>
+to be used in <CODE>.lido</CODE> specifications.
+The computations of the module use functions of the library's
+environment module.
+<A NAME="IDX48"></A>
+<P>
+<CODE>NAMEIdDefScope</CODE> is a symbol representing a
+defining identifier occurrence.
+<A NAME="IDX49"></A>
+<P>
+<CODE>NAMEIdUseEnv</CODE> is a symbol representing an applied identifier occurrence.
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<P>
+<CODE>NAMEIdUseScope</CODE> is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+The outer environment of this range is not considered.
+<A NAME="IDX52"></A>
+<P>
+<CODE>NAMEChkIdUse</CODE> is a role that may be inherited by an applied identifier
+occurrence. It issues an error message <CODE>identifier is not defined:</CODE>
+if no definition is bound to that identifier.
+<A NAME="IDX53"></A>
+<P>
+<CODE>NAMERootScope</CODE> is the root symbol containing all identifier occurrences
+and all <CODE>NAMERangeScope</CODE>. 
+It is automatically inherited by the root of the grammar.
+<A NAME="IDX54"></A>
+<P>
+<CODE>NAMERangeScope</CODE> is a symbol representing a range for the binding
+of defining identifier occurrences <CODE>NAMEIdDefScope</CODE>.
+It may be nested in <CODE>NAMERootScope</CODE> or in other ranges.
+<A NAME="IDX55"></A>
+<P>
+<CODE>NAMEAnyScope</CODE> comprises the roles of <CODE>NAMERootScope</CODE> and 
+<CODE>NAMERangeScope</CODE>. It may be used in constructs like
+<PRE>
+   INCLUDING NAMEAnyScope.NAMEGotKeys
+</PRE>
+<A NAME="IDX56"></A>
+<A NAME="IDX57"></A>
+<A NAME="IDX58"></A>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<P>
+The main results of using this module are the bindings of
+identifier occurrences represented by the attributes
+<CODE>NAMEIdDefScope.KEYKey</CODE> and <CODE>NAMEIdUseEnv.KEYKey</CODE>.
+Along with each <CODE>Key</CODE> attribute there is an attribute <CODE>KEYBind</CODE>
+of type <CODE>Binding</CODE>, e.g. <CODE>UseIdent.Bind</CODE>. Its value 
+characterizes a binding of an identifier <CODE>idn</CODE> in the
+innermost scope of an environment <CODE>env</CODE> to a key <CODE>k</CODE>.
+The three values <CODE>idn</CODE>, <CODE>env</CODE>, and <CODE>k</CODE> can be obtained
+from a <CODE>Binding</CODE> using functions defined in  <A HREF="name_8.html#SEC20">Environment Module</A>.
+If no binding is found for an applied identifier occurrence the
+<CODE>Bind</CODE> attribute has the value <CODE>NoBinding</CODE>.
+<P>
+Usually both <CODE>NAMEIdDefScope</CODE> and <CODE>NAMEIdUseEnv</CODE> are used.
+In specific cases of language rules any combination of
+<CODE>NAMEIdDefScope</CODE>, <CODE>NAMEIdUseEnv</CODE>, <CODE>NAMEIdUseScope</CODE> may be used.
+<A NAME="IDX61"></A>
+<P>
+The attributes <CODE>NAMEIdDefScope.Sym</CODE>, <CODE>NAMEIdUseEnv.Sym</CODE>, 
+<CODE>NAMEIdUseScope.Sym</CODE> must represent the identifier encoding.
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+<A NAME="IDX64"></A>
+<P>
+<CODE>NAMERootScope.NAMEEnv</CODE>
+is a root environment where all environments
+of this name space are embedded in.
+It has the value of a global variable <CODE>NAMERootEnv</CODE> that is assigned
+in the initialization phase of the processor.
+It allows to introduce predefinitions by initialization code,
+which then must include the file <CODE>NAMEAlgScope.h</CODE>.
+(see  <A HREF="name_3.html#SEC6">Predefined Identifiers</A>)
+<P>
+<CODE>NAMERangeScope.NAMEEnv</CODE>
+is an inherited attribute for the environment of bindings of this range.
+<A NAME="IDX65"></A>
+<P>
+<CODE>NAMEAnyScope.NAMEGotKeys</CODE>
+indicates that all keys defined in this and in all enclosing
+ranges are defined in <CODE>NAMEAnyScope.NAMEEnv</CODE>.
+<CODE>NAMEAnyScope.NAMEGotKeys</CODE> is a precondition for finding
+a binding using <CODE>IdUseEnv</CODE>.
+<A NAME="IDX66"></A>
+<P>
+<CODE>NAMEAnyScope.NAMEGotLocKeys</CODE>
+indicates that all keys are defined in this range
+are in 
+<BR> <CODE>NAMEAnyScope.NAMEEnv</CODE>.
+<P>
+<A NAME="IDX68"></A>
+<A NAME="IDX67"></A>
+<H2><A NAME="SEC4" HREF="name_toc.html#SEC4">C-like Basic Scope Rules</A></H2>
+<P>
+This module implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type <CODE>DefTableKey</CODE>
+according to C-like scope rules:
+<P>
+A binding is valid from the definition up to the end of the smallest
+range containing the definition, except in inner ranges
+from a definition of the same identifier to the end of that range.
+<P>
+Note: The scope rules of the programming language C are defined C-like
+in most but not in all respects: For example the scopes of names of 
+variables and functions are defined C-like, but those of
+jump labels are defined Algol-like.
+<P>
+Make sure that you have considered the advices given in
+ <A HREF="name_2.html#SEC2">Basic Scope Rules</A>.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/CScope.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<A NAME="IDX69"></A>
+<P>
+Both generic parameters can be omitted in most of the usual applications.
+The <CODE>instance</CODE> parameter is used to distinguish several instances
+of this module. The scope rules of a language may require that
+identifiers are bound in different name spaces that do not affect
+each other. Then for each name space an instance of this or
+of the other basic scope modules is used.
+The <CODE>referto</CODE> parameter modifies the names of <CODE>Key</CODE> attributes.
+It is only used if there is an identifier occurrence in the language that
+is bound in more than one name space. These bindings are then described
+by one <CODE>Key</CODE> attribute each.
+<P>
+The module provides computational roles for the symbols
+<CODE>NAMERootScope</CODE>, <CODE>NAMERangeScope</CODE>, <CODE>NAMEAnyScope</CODE>,
+<CODE>NAMEIdDefScope</CODE>, <CODE>NAMEIdUseEnv</CODE>, <CODE>NAMEIdUseScope</CODE>,
+<CODE>NAMEChkIdUse</CODE>, <CODE>NAMEIdDefUse</CODE>, <CODE>NAMEDeclaratorWithId</CODE>, 
+and <CODE>NAMEIdInDeclarator</CODE>
+to be used in <CODE>.lido</CODE> specifications.
+The computations of the module use functions of the library's
+environment module.
+<A NAME="IDX70"></A>
+<P>
+<CODE>NAMEIdDefScope</CODE> is a symbol representing a
+defining identifier occurrence.
+<A NAME="IDX71"></A>
+<P>
+<CODE>NAMEIdUseEnv</CODE> is a symbol representing an applied identifier occurrence.
+<A NAME="IDX72"></A>
+<P>
+<CODE>NAMEChkIdUse</CODE> is a role that may be inherited by an applied identifier
+occurrence. It issues an error message <CODE>identifier is not defined:</CODE>
+if no definition is bound to that identifier.
+<A NAME="IDX73"></A>
+<A NAME="IDX74"></A>
+<P>
+<CODE>NAMEIdUseScope</CODE> is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+The outer environment of this range is not considered.
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+<P>
+<CODE>NAMEIdDefUse</CODE> represents a defining identifier occurrence 
+like <CODE>NAMEIdDefScope</CODE> if 
+<BR> <CODE>INH.NAMEDefCond</CODE> is non-zero, 
+otherwise an applied occurrence like <CODE>NAMEIdUseEnv</CODE>.
+<CODE>NAMEDefCond</CODE> is to be computed by an upper computation.
+There is a default computation provided that sets
+<CODE>INH.NAMEDefCond</CODE> to 1 iff the identifier is not yet bound
+in the current environment.
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+<P>
+The pair of roles <CODE>NAMEDeclaratorWithId</CODE> and <CODE>NAMEIdInDeclarator</CODE>
+are used to model the scope concept of declarators as defined in the
+programming language C: A defining occurrence of an identifier may be
+part of <EM>Declarator</EM>, that is a larger construct which determines
+the type of the defined identifier, for example the definition of the array
+<CODE>a</CODE> in
+<PRE>
+   int a[a+1];
+</PRE>
+Here <CODE>a[a+1]</CODE> is the <CODE>Declarator</CODE> and the first <CODE>a</CODE>
+is its defining occurrence.
+The scope rules of C state that the scope of the defined identifier
+begins immediately after the end of the declarator, rather than
+at the position of the defining occurrence. Hence, the <CODE>a</CODE>
+within the brackets is <EM>not</EM> bound to the defined array.
+This rule is only relevant if declarators may contain applied
+identifier occurrences.
+To achieve this effect, the role <CODE>NAMEDeclaratorWithId</CODE> is
+to be inherited by a symbol which is the root of the declarator
+construct, and the role <CODE>NAMEIdInDeclarator</CODE> is inherited
+by the symbol that characterizes defining identifier occurrences
+within declarators. Make sure that the grammar guarantees a 1:1
+relation the nodes of these symbol roles in any declarator tree.
+The attribute <CODE>NAMEIdInDeclarator.Sym</CODE> has to be provided
+as usual. The symbol roles compute the <CODE>Sym</CODE> attribute
+for <CODE>NAMEDeclaratorWithId</CODE> and the <CODE>KEYKey</CODE> attribute 
+for both symbols.
+<A NAME="IDX79"></A>
+<P>
+<CODE>NAMERootScope</CODE> is the root symbol containing all identifier occurrences
+and all <CODE>NAMERangeScope</CODE>. 
+It is automatically inherited by the root of the grammar.
+<A NAME="IDX80"></A>
+<P>
+<CODE>NAMERangeScope</CODE> is a symbol representing a range for the binding
+of defining identifier occurrences <CODE>NAMEIdDefScope</CODE>.
+It may be nested in <CODE>NAMERootScope</CODE> or other ranges.
+<A NAME="IDX81"></A>
+<P>
+<CODE>NAMEAnyScope</CODE> comprises the roles of <CODE>NAMERootScope</CODE> and 
+<CODE>NAMERangeScope</CODE>. It may be used in constructs like
+<PRE>
+   INCLUDING NAMEAnyScope.NAMEEnv
+</PRE>
+<A NAME="IDX82"></A>
+<P>
+The main results of using this module are the bindings of
+identifier occurrences represented by the attributes
+<CODE>NAMEIdDefScope.KEYKey</CODE> and <CODE>NAMEIdUseEnv.KEYKey</CODE>.
+<A NAME="IDX83"></A>
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+<A NAME="IDX86"></A>
+<P>
+Along with each <CODE>Key</CODE> attribute there is an attribute <CODE>Bind</CODE>
+of type <CODE>Binding</CODE>, e.g. <CODE>UseIdent.Bind</CODE>. Its value 
+characterizes a binding of an identifier <CODE>idn</CODE> in the
+innermost scope of an environment <CODE>env</CODE> to a key <CODE>k</CODE>.
+The three values <CODE>idn</CODE>, <CODE>env</CODE>, and <CODE>k</CODE> can be obtained
+from a <CODE>Binding</CODE> using macros defined in  <A HREF="name_8.html#SEC20">Environment Module</A>.
+If no binding is found for an applied identifier occurrence the
+<CODE>Bind</CODE> attribute has the value <CODE>NoBinding</CODE>.
+<P>
+Usually both <CODE>NAMEIdDefScope</CODE> and <CODE>NAMEIdUseEnv</CODE> are used.
+In specific cases of language rules any combination of
+<CODE>NAMEIdDefScope</CODE>, <CODE>NAMEIdUseEnv</CODE>, <CODE>NAMEIdUseScope</CODE>,
+<CODE>NAMEIdDefUse</CODE> may be used.
+<A NAME="IDX87"></A>
+<P>
+The attributes <CODE>NAMEIdDefScope.Sym</CODE>, <CODE>NAMEIdUseEnv.Sym</CODE>, 
+<CODE>NAMEIdUseScope.Sym</CODE>, 
+<BR> <CODE>NAMEIdDefUse.Sym</CODE> must 
+represent the identifier encoding.
+<A NAME="IDX88"></A>
+<A NAME="IDX89"></A>
+<A NAME="IDX90"></A>
+<P>
+<CODE>NAMERootScope.NAMEEnv</CODE>
+is a root environment where all environments
+of this name space are embedded in.
+<P>
+It has the value of a global variable <CODE>NAMERootEnv</CODE> that is assigned
+in the initialization phase of the processor.
+It allows to introduce predefinitions by initialization code,
+which then must include the file <CODE>NAMECScope.h</CODE>.
+(see  <A HREF="name_3.html#SEC6">Predefined Identifiers</A>)
+<P>
+<CODE>NAMERangeScope.NAMEEnv</CODE>
+is an inherited attribute for the environment of bindings of this range.
+<A NAME="IDX91"></A>
+<P>
+<CODE>NAMEAnyScope.NAMEGotKeys</CODE>
+indicates that all identifier occurrences from the begin of the
+<CODE>NAMERootScope</CODE> up to the end of this range are bound to keys
+in <CODE>NAMEAnyScope.NAMEEnv</CODE>.
+<P>
+<A NAME="IDX93"></A>
+<A NAME="IDX94"></A>
+<A NAME="IDX95"></A>
+<A NAME="IDX92"></A>
+<H2><A NAME="SEC5" HREF="name_toc.html#SEC5">C-like Basic Scope Rules Computed Bottom-Up</A></H2>
+<P>
+This module implements consistent renaming of identifiers.
+The computations of this module are specified such that they are
+executed while the input program is read.
+Identifier occurrences are bound to object keys of type <CODE>DefTableKey</CODE>
+according to C-like scope rules.
+<P>
+Make sure that you have considered the advices given in
+ <A HREF="name_2.html#SEC2">Basic Scope Rules</A>.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/BuScope.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<P>
+The functionality provided by this modules is almost the same as
+that of the <CODE>CScope</CODE> module (see  <A HREF="name_2.html#SEC4">C-like Basic Scope Rules</A>).
+Only the differences are described here.
+<P>
+During the bottom-up computation phase values can not be propagated
+using inherited (<CODE>INH</CODE>) attributes; and computations that
+affect a whole subtree, like creation of the scope for a range,
+have to be associated to a symbol node that precedes that subtree.
+For that purpose this module  provides
+additional computational roles that cooperate with the usual basic
+name analysis roles.
+<P>
+Usually it is necessary to introduce additional symbols
+into the concrete grammar preceding range subtrees.
+They derive to nothing, and are used to carry the specific
+bottom-up computations.
+<P>
+In our running example we would replace the productions
+<PRE>
+   Source:         Block.
+   Statement:      Block.
+</PRE>
+by the productions
+<PRE>
+   Source:         BuBlock Block.
+   Statement:      BuBlock Block.
+</PRE>
+and add
+<PRE>
+   SYMBOL BuBlock INHERITS CreateNewScope, OpenNewScope END;
+</PRE>
+to the LIDO specification.
+All other module roles can be used as described for C-like scope
+rules.
+<P>
+Usually each symbol representing a <CODE>NAMERangeScope</CODE> has to be
+preceded by a symbol that inherits both roles
+<CODE>NAMECreateNewScope</CODE> and <CODE>NAMEOpenNewScope</CODE>.
+<P>
+If scopes are used as properties of objects it may be necessary
+to inherit the roles
+<CODE>NAMECreateNewScope</CODE>, <CODE>NAMERecentNewScope</CODE>, and <CODE>NAMEOpenNewScope</CODE>
+to different symbols which precede a symbol representing a <CODE>NAMERangeScope</CODE>.
+(see  <A HREF="name_5.html#SEC14">Scope Properties C-like Bottom-Up</A>, see  <A HREF="name_6.html#SEC18">C-like Inheritance Bottom-Up</A>)
+<A NAME="IDX96"></A>
+<P>
+<CODE>NAMECreateNewScope</CODE>
+creates a new scope that is embedded in the scope of the smallest
+enclosing range. That scope can be obtained from the
+attribute <CODE>SYNT.NAMENewScope</CODE>, or be accessed by a subsequent
+role <CODE>NAMERecentNewScope</CODE> (see below).
+<A NAME="IDX97"></A>
+<P>
+<CODE>NAMEOpenNewScope</CODE>
+makes the scope obtained from <CODE>SYNT.NAMENewScope</CODE> become the
+current scope. The attribute <CODE>SYNT.NAMEOpenPrecond</CODE> can be used
+to specify a precondition for this operation.
+If <CODE>NAMEOpenNewScope</CODE> is inherited by a symbol representing an identifier
+occurrence
+<CODE>SYNT.NAMEOpenPrecond = THIS.KEYKey</CODE>
+ensures that the identifier is bound before the new scope is
+opened.
+<A NAME="IDX98"></A>
+<P>
+<CODE>NAMERecentNewScope</CODE>
+accesses the most recently created new scope and provides it
+by the attribute <CODE>SYNT.NAMENewScope</CODE>.
+This role is used together with <CODE>NAMEOpenNewScope</CODE> if
+<BR> <CODE>NAMECreateNewScope</CODE> is inherited by a preceding symbol.
+<P>
+We demonstrate the use of these roles for our running example.
+The grammar introduced in See  <A HREF="modlib_1.html#SEC1">Running Example of Introduction of specification modules</A>, has to be modified
+in order to allow bottom-up computation. A new symbol <CODE>BuBlock</CODE>
+is introduced. It derives to nothing and precedes the symbol
+<CODE>Block</CODE> on right-hand sides of productions:
+<P>
+<PRE>
+  Source:         BuBlock Block.
+  Statement:      BuBlock Block.
+</PRE>
+<P>
+The roles <CODE>CreateNewScope</CODE> and <CODE>OpenNewScope</CODE>
+introduce the scope for the subsequent <CODE>Block</CODE>:
+<P>
+<PRE>
+  SYMBOL Program  INHERITS RootScope END;
+  SYMBOL Block    INHERITS RangeScope END;
+  SYMBOL BuBlock  INHERITS CreateNewScope, OpenNewScope END;
+</PRE>
+<P>
+The other roles for basic scope rules are used as described in
+See  <A HREF="name_2.html#SEC4">C-like Basic Scope Rules</A>.
+<P>
+<A NAME="IDX100"></A>
+<A NAME="IDX101"></A>
+<A NAME="IDX99"></A>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

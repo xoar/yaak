@@ -1,0 +1,63 @@
+# Source Types
+
+*.cxx => :cxx;
+
+*.C => :cxx;
+
+*.cc => :cxx;
+
+*.c\+\+ => :cxx;
+
+
+# Input Object Types
+
+:cxx 'C++ source code'? => :o_src;
+
+
+# Output Object Types
+
+:lookup_cxx_srcs 'Reference to a file naming files needed by C++'
+  => :lookup_c_srcs;
+
+:cxx_srcs 'Names of files needed for a C++ compilation' => :c_srcs;
+
+:cxx.o 'C++ object module' => :o;
+
+
+# Parameter Types
+
++cxx 'name of the C++ compiler'? => :first;
+
++cxx_flags 'flags for C++ compilation'? => :cat;
+
++incls 'List of files actually included' => :ls;
+
++debug 'Flag to request debugging information in object files'? => :first;
+
++define 'List of symbols to be defined by the C preprocessor'? => :cat;
+
+
+# Environment Variables
+
+$ODIN_CXX_HOME 'directory containing the C++ compiler' = '';
+
+$ODIN_CXX 'name of the C++ compiler' = 'g++';
+
+$ODIN_CXX_FLAGS 'C++ flags' = '';
+
+$ODIN_CXX_DEBUGF 'debug flag for C++ compiler' = '-g';
+
+$ODIN_CXX_I 'directory containing default C++ include files' = '';
+
+
+# Tools
+
+EXEC (cxx.o.sh) (:cxx_srcs) (:cxx_srcs :list :dir_of :vir_dir)
+  (errfilter.sed)
+  (+debug) (+define) (+monitor) (+cxx) (+cxx_flags)
+  NEEDS (:c_srcs :list)
+  => (:cxx.o);
+
+COLLECT (:cxx +incls=(:incl.all) :lookup=:cxx_srcs) => (:lookup_cxx_srcs);
+
+EXEC (cxx_srcs.sh) (:cxx) (+incls) => (:cxx_srcs);

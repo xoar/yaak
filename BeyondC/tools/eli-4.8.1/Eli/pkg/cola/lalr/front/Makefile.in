@@ -1,0 +1,63 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:44:40 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/lalr/front
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/lalr/front
+SRC	=
+COP	=	colaAbsprs.c Makefile.in
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=	
+EXE	=	../../colaAbsprs.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=	lalr
+
+IDL   = ../../idl
+LIB   = ../../lib
+LALR  = lalr
+FMT   = ../../trafos/fmt
+
+LIBS = 	$(LALR)/lalr.a $(FMT)/fmt.a $(LIB)/lib.a $(IDL)/IDL.a
+IHDRS = -I$(IDL) -I$(LIB) -I$(LALR) -I$(FMT)
+
+# Available Debug-Options: see file alldeb
+#
+# ALLDEB = -DDEBUG_ABS -DDEBUG_GRC -DDEBUG_PRSLIB -DDEBUG_LR0 -DDEBUG_LALR \
+#	   -DDEBUG_FIR -DDEBUG_LIB -DDEBUG_BIT -DSTATISTIK -DDEBUG_FREEPOS
+
+CFLAGS = $(ALLDEB) $(IHDRS)
+
+@toolmk_h@
+
+$(EXE): colaAbsprs.o $(LIBS)
+	rm -f $(EXE)
+	$(CC) colaAbsprs.o $(LIBS) $(CFLAGS) -o $(EXE)
+
+colaAbsprs.o: $(IDL)/comar.h  $(IDL)/prsiface.h $(FMT)/format.h \
+	   $(LIB)/cmrlib.h $(LIB)/cmrio.h $(LALR)/privatlib.h \
+	   $(LALR)/grammarcomp.h $(LALR)/first1.h \
+	   $(LALR)/parserlib.h $(LALR)/absparser.h
+

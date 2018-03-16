@@ -1,0 +1,10 @@
+{
+#if defined(__cplusplus) || defined(__STDC__)
+extern int glalex(int *v);
+#else
+extern int glalex();
+#endif
+
+int i,j;
+j = glalex(&i);
+}

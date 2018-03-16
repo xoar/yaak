@@ -1,0 +1,3551 @@
+From geoff@bellcore.com Wed Jul 13 22:42:37 1994
+Subject: Re: Dependencies
+X-Lines: 92
+Status: RO
+Content-Length: 3472
+Lines: 92
+
+> Date: Wed, 13 Jul 94 14:29:41 +0200
+> From: gross@thor.cci.de (Arno Gross)
+>
+> If I have the following Odinfile:
+>
+> dia.a == %dia.SM +inc_sp='/products/ixmotis/MOTIF12/include'  
+>		    +inc_sp='/home/gross/wx/include/x' +define=SUN_CC :a
+>
+>  %dia.SM == << 
+>     App.C; Frame.C; MyMain.C; SubFrame.C 
+>
+>   How can I prevent from generating the dependencies caused by 
+>     +inc_sp='/products/ixmotis/MOTIF12/include' ?
+
+There is a +ignore parameter (e.g. +ignore='/products/ixmotis')
+that tells the dependency generation tool to ignore all files whose
+pathname starts with "/products/ixmotis"), e.g.
+
+   dia.a == %dia.SM +inc_sp='/products/ixmotis/MOTIF12/include'  
+		    +inc_sp='/home/gross/wx/include/x' +define=SUN_CC
+		    +ignore='/products/ixmotis' :a
+
+
+Just for interests sake, why do you want to ignore dependencies
+on files in that directory ?
+
+Now for a general comment.  Odin parameters can take no value, e.g.
+   +debug
+or a string as a value, e.g.
+   +define=SUN_CC
+or a filename as a value (indicated by surrounding it with parentheses), e.g.
+   +inc_sp=(/home/gross/wx/include)
+
+Second general comment.  Single quotes (apostrophes) have a meaning similar
+to that in shells such as "sh" and "csh", i.e. it causes special characters
+to be escaped.  So if you want to include the special character '/' in a
+string, you need to escape the '/', either with
+  '/a/b/c'
+or with
+  \/a\/b\/c
+
+(This is all in the reference manual, but if you blinked, you may have missed
+it :-).
+
+>   Can you specify includes pathes relative
+>      +inc_sp='../../include'
+
+Yes, but then you have to tell Odin that the value of the +inc_sp parameter
+is a filename by enclosing it in parentheses rather than quotes, e.g.
+
+      +inc_sp=(../../include)
+
+When you say +inc_sp='../../include', you are passing a string as the value
+of the +inc_sp parameter.  When you say +inc_sp=(../../include) you are
+passing a filename as the value of the +inc_sp parameter.  Strings are passed
+to the tool unchanged.  Filenames are passed to the tool after expanding
+relative filenames to be absolute.
+
+The reason why this matters stems from the fact that Odin executes tools
+in a temporary working directory allocated for it by Odin, _not_ in the
+source directory containing the input object(s).  This is fine if your
+filenames are absolute, but if you pass a relative filename as a string, e.g.
+
+   +inc_sp='../../include'
+
+and your tool tries to interpret this as a filename, the ../.. will
+be relative to the temporary working directory, which is guaranteed to
+_not_ be what you had in mind.
+
+But don't worry if this explanation doesn't make much sense to you.
+All you have to know is:
+
+****************
+Whenever a parameter value is a filename (or an odin expression),
+put parentheses around it.
+****************
+
+>   or can I use an environment variable in the following way?
+>
+>      +inc_sp='$DIR/../include'
+
+In target expressions, the only environment variables you can use are
+those declared in one of your tool packages.  The reason for this is
+that in large (and often, small) projects, builds too often fail because
+some bizarre environment variable was not set properly.
+
+If you declare an environment variable (such as DIR) in one of your
+tool packages, then the value of DIR will be the value in your environment
+at the time when you last created or reset your cache.  This ensures
+that declared environment variables will always have a consistent value
+in a given cache.
+
+
+From geoff@bellcore.com Thu Jul 14 17:36:34 1994
+Subject: Re: Odin questions
+X-Lines: 36
+Status: RO
+Content-Length: 1337
+Lines: 36
+
+>   From: tony@reef.cs.jcu.edu.au
+>   Date: Thu, 14 Jul 94 15:10:26 +1000
+>
+>   I want to take a :tex.list as input to a tool and generate another
+>   :tex.list as output.  The output list should hold files that are the
+>   result of running each input file through sed (the details don't
+>   matter).  I've tried a few possibilities but can't get the whole thing
+>   going.  I can generate a directory object that contains the new files
+>   but I'm not sure how to get it back into a list.  Or am I doing it the
+>   wrong way?
+
+You cannot generate "another tex.list" in the same package, but you
+can declare a new type, say :another-tex.list, and make it be a sub-type
+of :tex.list, e.g.
+
+  :another-tex.list 'another tex.list' => :tex.list;
+
+Then, don't try to write a tool that sed's the whole list of file,
+but just write one that sed's a single file.
+
+  :sed-it 'sed the file' => :FILE;
+
+  EXEC (sed.sh) (:FILE) => (:sed-it);
+
+And then just use the COLLECT tool to form the new list.
+
+  COLLECT (:tex.list :apply=:sed-it) => (:another-tex.list);
+
+Alternatively, if you really are just running sed, you don't need
+to define the :sed-it tool, but rather
+you could use the :pipe.stdout derivation from the std. tool packages,
+and say:
+
+  COLLECT (:tex.list +cmd=sed +arg='s/foo/bar/' :apply=:pipe.stdout)
+     => (:another-tex.list);
+
+
+From geoff@bellcore.com Fri Jul 15 11:50:50 1994
+Subject: Re: Odin questions
+X-Lines: 40
+Status: RO
+Content-Length: 1544
+Lines: 40
+
+>   From: tony@reef.cs.jcu.edu.au
+>   Date: Fri, 15 Jul 94 12:01:00 +1000
+>
+>   ....  However, what I would really like to do is to be
+>   able to treat the output of x.c as a set of files and compile them
+>   into one program without needing to know their names or how many there
+>   are.  It seemed to work when I added this .dg fragment:
+>
+>   :output 'list of files generated as output' => <:sm.list>;
+>   This solution seems like it shouldn't break anything else.  Am I
+>   right?
+
+Yes, that is a good way of handling this, and it shouldn't break
+anything else.
+
+>   This seems to apply sed to all the right things but when I try to use
+>   the result I have problems because the names of the files are
+>   different.  Is there any way to keep the names the same?
+
+I can think of a couple of ways to control the names of derived files:
+
+1 - Use targets, e.g. if you want "header.sty +prm :doit" to be named
+"xheader.sty", create a target in the Odinfile of the form:
+
+   xheader.sty == header.sty +prm :doit
+
+Then your .tex source can just refer to xheader.sty, and Odin will make sure
+xheader.sty is up to date before your .tex file is processed.
+
+2 - Have your tool take in the list of input files, and the list of desired
+input file names, and symbolically link the former to the latter in your
+tool script.  E.g.:
+
+EXEC (mytool.sh) (:sm.list:labels) (:sm.list +stuff :doit) => (:result)
+
+Then in mytool.sh, symbolically link the files of :sm.list+stuff:doit
+to the names in :sm.list:labels.
+
+Can anyone think of another alternative ?
+
+
+From geoff@bellcore.com Tue Jul 19 16:26:28 1994
+Subject: Re: the odin environment (resend)
+X-Lines: 56
+Status: RO
+Content-Length: 3054
+Lines: 56
+
+   From: Gregory_Zelesnik@C.GP.CS.CMU.EDU
+   Date: Mon, 18 Jul 94 11:12:58 -0400
+
+   Our research involves building systems (in many cases, distributed systems
+   across a heterogeneous environment) from architectural specifications of
+   such systems.  The compiler I am generating builds Odinfiles that, in turn,
+   build the systems.  My compiler needs to fire off (in background) builds
+   on different platforms (with versions of Unix such as SunOS and Mach 3.0),
+   but in the same file space (here at CMU we have a global file_name space that
+   every machine can see).
+
+   Is it possible to install a specific odin executable for a specific platform
+   that points to a global cache that all executables (regardless of machine)
+   can manipulate?
+
+I am currently working on the notion of a global cache, called a "value cache"
+that can be shared by several independent caches (potentially with different
+tool libraries).  This is the defining feature for "Odin-2.0".  I don't know
+when this will be available ... hopefully in '95 though (:-).
+
+   One example scenario is as follows:
+
+   I am building a system that consists of 2 processes, on that runs on System A,
+   a Mach 3.0 machine, and one that runs on System B, a SunOS machine.
+
+   I run my compiler on System B.
+
+   I would like for my compiler to execute a "system" call to initiate an odin
+   build of the System B process locally.  I would also like for my compiler
+   to execute a "rsh" call to initiate an odin build remotely on System A.  The
+   source files for both processes exist in the same build directory, so 2
+   different odin executables would have to read the same Odinfile and operate
+   in the same cache (of course I would specify the same cache for both builds).
+
+Why do you want to use the same cache for both builds?  The sharing between
+builds for different architectures is probably limited, so using separate
+caches seems reasonable for this scenario.  Alternatively, you could have
+both builds controlled by the SunOS odin server, and extend the appropriate
+packages to understand a +arch parameter.  Then you could add +arch=mach3.0
+to the appropriate build requests and
+have the packages know what to do in this case (e.g. farm the build
+out to the mach3.0 machine).
+
+   Finally, I have been thinking about bringing down the latest version of odin,
+   but I've never installed odin when I've had an existing installation.  Does
+   the odin install procedure recognize that I have an existing installation, and
+   build accordingly, or does it build from scratch every time?
+
+It deletes the old Odin sources, but leaves the installed versions of old
+library packages (including the odin package with the odin.exe executable)
+in place and accessible.  Any existing cache is not affected by the upgrade
+until you explicitly reset that cache with "odin -R".  In addition, you can
+globally revert back to older versions of Odin by modifying the LIBVERSION
+file in the root directory of the Odin default package library, commonly
+/usr/local/lib/Odin/LIBVERSION.
+
+
+From geoff@bellcore.com Sat Jul 23 00:48:53 1994
+Subject: Re: mig pkg
+X-Lines: 164
+Status: RO
+Content-Length: 4914
+Lines: 164
+
+>   From: Gregory_Zelesnik@C.GP.CS.CMU.EDU
+>   Date: Fri, 22 Jul 94 17:58:53 -0400
+>
+>   I'm trying to generate a derivation graph and a shell script for 
+>   invoking the mach interface generator (mig - the mach ipc glue code generator)
+>   on the specification file (of type *.defs).
+>
+>   The problem is that the mig tool generates *2* C sources, not one, plus a
+>   header file.  I guessed that in this case I had to generate a list of C sources
+>   (object type :c.list) as an output parameter to the EXEC command.
+
+Not quite.  A list contains _references_ to files (and other lists).
+If your tool genenerates 3 files, then it should have 3 outputs, e.g.
+
+   EXEC (whatever) (whatever) => (:h) (:user.c) (:server.c)
+
+Note: if you didn't know how many outputs your tool produces ahead of time
+(not the case here), you could generate a derived directory (see the
+definition of :output in the run package).
+
+>   client == %client.sm +lib=(/afs/cs/project/mach/mach3/latest/release/i386_mach/lib/libnetname.a) +lib=(/afs/cs/project/mach/mach3/latest/release/i386_mach/lib/libmach.a) : exe
+>
+>   %client.sm == <<
+>       client.c
+>       server.defs
+>       client_support.c
+>
+>   -------
+
+Replace "server.defs" above with "server.defs :user.c; server.defs :server.c".
+
+Also, if you want to avoid repeating that long pathname, you could use the
+following Odinfile:
+
+--------
+(| Odinfile :cpp |)
+
+#define LIBDIR /afs/cs/project/mach/mach3/latest/release/i386_mach/lib
+
+client == %client.sm +lib=(LIBDIR/libnetname.a) +lib=(LIBDIR/libmach.a) : exe
+
+%client.sm == <<
+   client.c; server.defs:user.c; server.defs:server.c; client_support.c
+
+--------
+
+>
+>   it gives me the following message:
+>
+>   -------
+>
+>   ** Summary of warning and error messages for /afs/cs/project/vit/unicon/tests_v1/test_mach3.0/client
+>   --- </afs/cs/project/vit/unicon/tests_v1/test_mach3.0/Odinfile :odin*bindings_ptr%client.sm :cc*sm.list :recurse=:sm.list :o> generated errors ---
+>   Cannot derive to <o> from <defs>
+>    from type <defs> at line 2 :
+>      /afs/cs/project/vit/unicon/tests_v1/test_mach3.0/server.defs.
+>
+>   -------
+>
+>   I thought that odin was able to apply the :o derivation to a list of C sources
+>   of type :c.list, but I guess I'm mistaken.  Any hints?  (Below are the mig.dg
+>   and mig.sh files that I've produced.
+
+The .defs file is not a list.  The fact that it can be derived to a list,
+namely :c.list, does not make it a list.
+
+>   ------ mig.dg
+>
+>   # Source Types
+>
+>   *.defs => :defs;
+>
+>
+>   # Input Object Types
+>
+>   :defs 'MIG input'? => :FILE;
+>
+>
+>   # Output Object Types
+>
+>   :c.list 'User and Server C source code'? => :LIST;
+
+Replace :c.list with
+
+   :server.c 'Server C source code'? => :c;
+   :user.c 'User C source code'? => :c;
+
+>
+>   :h 'header file'? => :FILE;
+>
+>   # Parameter Types
+>
+>   +mach_rt 'Real-Time Mach environment' => :VOID;
+>   +mach    'Mach environment' => :VOID;
+>
+>   # Environment Variables
+>
+>   $MACH_RT_PATH 'directory tree containing rt mach' = '/afs/cs.cmu.edu/project/art-6/latest/mk83d/release/i386_mach';
+>   $MACH_PATH    'directory tree containing mach'    = '/afs/cs.cmu.edu/project/mach/mach3/latest/release/i386_mach';
+>
+>   # Tools
+>
+>   EXEC (mig.sh) (:defs) (+mach_rt) (+mach)
+>      => (:c.list) (:h);
+
+Make this be:
+
+       => (:user.c) (:server.c) (:h);
+
+>   ----- mig.sh
+>
+>   #!/bin/sh
+>
+>   ODIN_defs=$1;shift; ODIN_mach_rt=$1;shift; ODIN_mach=$1;shift;
+>
+>   export PATH
+>   export LPATH
+>   export CPATH
+>
+>   # I need to monkey around with the paths like this because "mig" is simply
+>   # a shell script that invokes a binary executable called "migcom" that is
+>   # hardcoded in the shell script to exist on the LPATH varable, the path to
+>   # which is found by doing a `wh -Lq migcom`.  migcom also reads input from
+>   # the .defs file that can only be found in the CPATH.
+>
+>   if [ "$ODIN_mach_rt" = "" ] ; then
+>      PATH=$MACH_RT_PATH/bin:$PATH
+>      LPATH=$MACH_RT_PATH/lib:$LPATH
+>      CPATH=$MACH_RT_PATH/include:$CPATH
+>   else
+>      PATH=$MACH_PATH/bin:$PATH
+>      LPATH=$MACH_PATH/lib:$LPATH
+>      CPATH=$MACH_PATH/include:$CPATH; fi
+>
+>   name = `basename $ODIN_defs .defs`
+>
+>   mig $ODIN_defs 2>WARNINGS
+>   if [ $? != 0 ] ; then
+>      mv WARNINGS ERRORS
+>      echo 'mig failed' >>ERRORS
+>
+>   rm -f c.list
+
+No need for this "rm" ... Odin always gives your tool a clean working dir.
+
+>   if [ -f $name.h ] ; then mv $name.h h; fi
+>   if [ -f $nameUser.c ] ; then 
+>      echo "'$nameUser.c c'">c.list
+>      if [ -f $nameServer.c ] ; then
+>	 echo "'$nameServer.c c'">>c.list; fi
+>   elif [ -f $nameServer.c ] ; then 
+>      echo "'$nameServer.c'">c.list; fi
+
+Replace the above 6 lines with
+
+   if [ -f ${name}User.c ] ; then mv ${name}User.c user.c; fi
+   if [ -f ${name}Server.c ] ; then mv ${name}Server.c server.c; fi
+
+I'm assuming that you meant "${name}User.c" instead of "$nameUser.c" ?
+
+>
+>   exit 0
+>
+
+
+From geoff@bellcore.com Thu Jul 28 08:38:36 1994
+Subject: Re: Software Build Tools
+X-Lines: 74
+Status: RO
+Content-Length: 4056
+Lines: 74
+
+   From: "R. Barara"  <rajan@cs.keele.ac.uk>
+   Date: Thu, 28 Jul 1994 11:21:16 +0100 (BST)
+
+   I don't know how are you storing the objects i.e. the derivation graph ? Are
+   you storing it in a hierarchical or a relational database or flat files with
+   some indexes on them or as a tree ?
+
+The meta-data (which amoung other things allows you to find the right
+derived object) is stored in a single binary file.  A general rule of
+thumb is that this file adds 10% to the disk space required to store
+your derived objects.  Since this file contains all the dependency information
+usually stored as text in a Makefile, the net increase is disk space
+from a Make based system is less than 10%.
+
+   Depending on the storage strategy used
+   there must be some overheadsof retrieval etc. ??
+
+Yes, the dependency information must be read from the binary file,
+but it is then cached in memory, so that the second time you refer
+to a file, there is no noticeable retrieval overhead (there is an
+Odin server for each cache, that can live beyond the lifetime of a
+single build on that cache).
+
+   I think I got a bit confused there... In fact the Objects know how to derive
+   themselves so checkpoints or derivation history is not needed. But on a second
+   thought, for variations like different OS, different GUI, profile options etc.
+   how would one specify to build in Odin. For example if one wants to build a
+   software for Sun OS 4.3 and X11 v 1.1 as well as for Sun OS 5.1 and Motif (some
+   version) using different compilers or even same compilers. How will one specify
+   these things ? Does Odin provide a facility for variations like this ?
+
+Yes, using the same parameter mechanism used to indicate what the include
+search paths are, or whether to set debug or optimize the compile.
+For example,
+
+mysystem.sm +os=SunOS-4.3 +gui=X11.1.1 +compiler=sun :exe
+mysystem.sm +os=SunOS-5.1 +gui=Motif +compiler=gnu :exe
+
+   Another question : make has a drawback that if .c.o: some rule and .lex.c:some
+   rule , is given and we want to build some .o from .lex then unless the .c file
+   is present .o can't be created i.e. make is not smart enough to see that .c can
+   be generated from .lex and then use the other rule to create .o ... Instead it
+   will need a rule .lex.o:
+
+Odin handles this properly (e.g. does not require a .lex.o rule).
+Some of the SuperMake's such as GnuMake and NMake do to.
+
+One of the nice properties of Odin is that you can declare a type to
+be a supertype of several other types, and then any rule using the
+supertype is inherited by all of its subtypes.
+
+   Does Odin store the Object files for different variations of the same software as different files or in different directories or stores them with the same name
+   and keeps overwriting them ??
+
+It stores them as different files in the derived file cache, so different
+variations can coexist.  It then maps any user request into the right file
+(re-using an existing derived file if it matches the request).
+
+   I agree that the makefile is a source code but during the design phase some de
+   isions are made for the module creation and the interfaces are defined and
+   finally the design knows how the executable could be generated , so if we use a
+   PE(programming environment) which remembers these design decisions, it could
+   convert them to rules. Ofcourse we must tell how the compiler and linker
+   commands etc. are to be used for a particular language each time a new language
+   is introduced !! It could mean avoiding to write the makefiles because these
+   types of decisions could be picked from design phase !!
+
+Yes, but the question arises as to what is the language to be used during the
+design phase to specify this information.  You need to be able to refer
+to a document to make sure that the environment has correctly captured your
+design decisions (or for someone else to find out what those design
+decisions were)  I predict that the Odinfile's and the Odin tool packages
+are about as clear and concise a language for this as you will find.
+
+
+From geoff@bellcore.com Fri Aug  5 01:09:39 1994
+Subject: Re: +define
+X-Lines: 47
+Status: RO
+Content-Length: 1869
+Lines: 47
+
+   From: Gregory_Zelesnik@C.GP.CS.CMU.EDU
+   Date: Thu, 04 Aug 94 12:25:43 -0400
+
+   ... a quick question about the cc.dg.  I'm trying to use the +define
+   option, but I don't know the syntax.
+
+   With the cc compiler, you can do a -Dname, and a -Dname=def.  With 
+   the -Dname option, the preprocessor simply translates the name into a 1.
+   With the other, it tranlsates "name" into "def".
+
+   It appears in the cc.dg that +define=name will yeild -Dname.  What is
+   the syntax for -Dname=def ?
+
+The syntax for the define parameter is the same as the syntax for -D on the
+cc command line, except that you have to escape the `=' since it is an odin
+special character, e.g.
+
+foo.sm +define='name=def'
+
+or
+
+foo.sm +define = name\=def
+
+(the spaces on either side of the first `=' can be omitted, as can spaces
+around any odin operator).
+
+   and can I tell by looking at the dg what the syntax for an +option
+   will be?
+
+If the derivation graph writer is careful, he puts an indication in the
+description for a given parameter what the values look like.  E.g.
+
++define 'a CPP macro definition such as \'name\' or \'name=val\'' => ...;
+
+(Unfortunately, I have not done so, thus leading to the confusion ...
+sorry about that).  In case you are faced with a negligent .dg writer
+such as myself, you need to look into a script that uses the parameter
+(e.g. cc.sh in this case), and see how it is used.  You will note that
+the contents of +define is just stuck in the command line preceded by
+a -D, thus indicating what reasonable values for +define are.
+
+If one is a _really_ diligent package writer, you could provide a
+man page for each package, containing descriptions of the source types,
+the parameter types, and the output types defined by the package
+(the one line description in the derivation graph is a help, but
+a longer description would sometimes be useful).
+
+
+From geoff@bellcore.com Tue Aug  9 20:10:30 1994
+Subject: Re: FYI
+X-Lines: 37
+Status: RO
+Content-Length: 1396
+Lines: 37
+
+   From: Gregory_Zelesnik@C.GP.CS.CMU.EDU
+   Date: Tue, 09 Aug 94 17:49:35 -0400
+
+   If I want to use the gcc compiler, I need to put the +gnu option on 
+   both the compiles (in the system model) and the link (before the :exe) 
+   correct?
+
+It is sufficient to just put the +gnu before the :exe ... the +gnu will
+be inherited by all the elements of the system model, so the explicit
++gnu's in the system model are correct, but redundant.
+
+An example of when you might want to put a +gnu in the system model is if
+you want the compiles (or some of the compiles) to be done with the gnu
+compiler, but you want the linking to be done with the standard linker
+(i.e. not the gnu linker).
+
+   Also, if I have my own .dg file generating .c source from some specification
+   language, does the +gnu option in this case go after the derivation that
+   produces the C code?  ... as in the following:
+
+   %server.sm == <<
+	   server.c +gnu
+	   server.defs :server.c +gnu  <----- here?
+	   server_support.c +gnu
+
+This would be the right place to put the +gnu parameter, but
+as above, the server.defs:server.c will inherit the +gnu from the one
+specified before the :exe, so you don't need it in the system model.
+In particular, this lets you use the same system model for building a
+gnu version and a non gnu version, e.g.
+
+# the gnu version
+%server.sm +gnu :exe    
+
+# the non-gnu version
+%server.sm :exe
+
+
+From geoff@bellcore.com Wed Aug 10 22:31:57 1994
+Subject: Re: Odin questions
+X-Lines: 97
+Status: RO
+Content-Length: 3318
+Lines: 97
+
+>   From: Tony Sloane <tony@cs.jcu.edu.au>
+>
+>   I have some rules that look like:
+>
+>   eliicont.malloc.out == %eliicont.rr +arg=(../test/textedit.icn) \
+>     +malloc :atomout
+>   eliicont.gprof.out == %eliicont.rr +arg=(../test/textedit.icn) \
+>     +gprof :atomout
+>   eliicont.3rd.out == %eliicont.rr +arg=(../test/textedit.icn) +3rd \
+>     +3rdopt='memory_errors yes' +3rdopt='all leaks at_exit' \
+>     +3rdopt='heap_history yes' :atomout
+>   eliicont.mem.out == %eliicont.rr +arg=(../test/textedit.icn) \
+>     +inst=(mem.inst.c) +anal=(mem.anal.c) :atomout
+>
+>   %eliicont.rr == %eliicont.sm +optimize=3 :rr
+>
+>   It's a pain to have to type all that duplicated stuff.  Can I
+>   abbreviate it somehow?
+
+A couple of possibilities.
+
+First, virtual files can be defined with trailing parameters.
+So you could have said:
+
+---------------------------------
+eliicont.malloc.out == %eliicont.rr +malloc :atomout
+eliicont.gprof.out == %eliicont.rr +gprof :atomout
+eliicont.3rd.out == %eliicont.rr +3rd \
+  +3rdopt='memory_errors yes' +3rdopt='all leaks at_exit' \
+  +3rdopt='heap_history yes' :atomout
+eliicont.mem.out == %eliicont.rr \
+  +inst=(mem.inst.c) +anal=(mem.anal.c) :atomout
+
+%eliicont.rr == %eliicont.sm +optimize=3 :rr +arg=(../test/textedit.icn)
+---------------------------------
+
+Alternatively, you could use cpp.
+
+---------------------------------
+/* (| Odinfile :cpp |) */
+/* the preceding line causes Odin to run this file through :cpp */
+
+#define ELRR %eliicont.sm +optimize=3 :rr +arg=(../test/textedit.icn)
+
+eliicont.malloc.out == ELRR +malloc :atomout
+eliicont.gprof.out == ELRR +gprof :atomout
+eliicont.3rd.out == ELRR +3rd +3rdopt='memory_errors yes' \
+  +3rdopt='all leaks at_exit' +3rdopt='heap_history yes' :atomout
+eliicont.mem.out == ELRR +inst=(mem.inst.c) +anal=(mem.anal.c) :atomout
+---------------------------------
+
+>   Also, is there a way to write a target in an Odinfile that just causes
+>   other targets to be built?  Basically equivalent to a "make all".
+
+Again, a couple of ways.
+
+First, you could define %all as an executable target, e.g.
+
+---------------------------------
+%all ! ==  <<
+  eliicont.malloc.out; eliicont.gprof.out
+  eliicont.3rd.out; eliicont.mem.out
+  ! echo "all targets built"
+
+...
+---------------------------------
+
+The ! following %all declares it to be an executable command script,
+so when you request:
+  odin %all
+Odin would execute the four specified commands (which would build your
+four targets) and then execute the "echo" host command .
+
+Alternatively, you could just define a list containing your targets:
+
+---------------------------------
+%all2 == %all2.sm :list
+
+%all2.sm == <<
+  eliicont.malloc.out; eliicont.gprof.out; eliicont.3rd.out; eliicont.mem.out
+
+...
+---------------------------------
+
+The critical distinction here is that %all2.sm is just a regular virtual file
+(not an "executable" target like %all was).
+Then the request "odin %all2" would again do what you wanted.
+
+The advantage of the first approach is that you can put arbitrary Odin
+commands in the command file, not just names of objects.
+
+The advantage of the %all2 approach, is that since %all2 is a list
+(as opposed to %all which was a command script), you can request a derivation
+like:
+   %all2 :err
+which will give you all the errors associated with the targets.
+
+
+From geoff@bellcore.com Thu Aug 11 23:26:16 1994
+Subject: Re: C compiler bug
+X-Lines: 90
+Status: RO
+Content-Length: 4038
+Lines: 90
+
+>   From: Gregory_Zelesnik@C.GP.CS.CMU.EDU
+>   Date: Thu, 11 Aug 94 17:12:20 -0400
+>
+>   I've run into a rather nasty C compiler bug which will not build a version of
+>   my executable that does not core dump, unless I set the environment variable
+>   LPATH to contain the directory which contains the libraries I am looking for.
+>   What's strange is, nowhere else in my LPATH is there a directory that contains
+>   the libraries I'm looking for, so the order of the search paths is
+>   unimportant.  If I leave the directory of importance out, the compiler will
+>   not link the binaries.  If I put it in, it links them fine.  However, if I
+>   leave it out, and attempt to do one of the following...
+>	   a) fully qualify the library and passing it as an argument to the 
+>	      compiler
+>	   b) use the -L option to pass it a library search path specification of
+>	      the directory of importance
+>   the compiler produces an executable that core dumps.  To make matters worse,
+>   this bug seems to be present in the gcc *and* cc compilers on my machine.
+
+Never run into anything like this myself.  Anyone else ?
+
+>   Regardless, because of the philosophy of odin regarding the dependence of a
+>   build on environment variables, I fear that there is no odin workaround for
+>   this bug.  Is there?
+>   Is there a way of passing odin an environment variable to set for a specific
+>   compile?
+
+I can think of a couple of approaches.
+
+If you are willing to have LPATH set to this value for _all_ your compiles,
+then it is relatively simple.  Just add the declaration:
+
+   $LPATH 'library search path' = 'some-search path';
+
+to the derivation graph of one of your packages (people often have an "env"
+package whose purpose is to contain the misc. environment variables they
+find they need for their builds).  The value of $LPATH will either be the
+value of $LPATH in your environment when you create or reset the cache,
+else it will be some-search-path (i.e. the default you specified for it
+in the derivation graph entry).
+
+Note that the value of $LPATH is *not* its current value whenever
+you invoke odin, but is the value when you created or last reset your cache.
+This allows other people to reproduce builds using your cache
+without worrying about whether they have the right set of magic environment
+variable values.
+
+An alternative approach is necessary if you need to have $LPATH set
+to different values for different compiles.  Then you need to extend
+the "cc" package so that understands a +env parameter (look at the "run"
+package for an example of a tool that takes a +env parameter).
+
+To override the "cc" package, you could either create your own "cc" package,
+or you could just override the definition of the EXEC that produces a :o.
+Assuming you want to do the latter, you would just create a new package
+called something like "mycc", and add a new definition for EXEC that takes
+a new +env parameter.
+
+For example, mycc/mycc.dg could be:
+--------------------------------------------------
++env 'shell environment variable definition (e.g. var=value)'? => :FILE;
+
+EXEC (cc.sh) (:c) (:c :dir)@ (+cc_home) (+gnu) (+atac)
+ (+debug) (+prof) (+optimize) (+define) (+inc_sp)@ (+cc_flags) (+env)
+ NEEDS (:all_c_inc)&
+   => (:o) (:o_src) (:data.atac);
+--------------------------------------------------
+
+Then put a copy of cc/cc.sh into mycc/cc.sh, and modify mycc/cc.sh to be:
+
+-------------------------------------------------
+...
+ODIN_flags=$1;shift; ODIN_env=$1;shift;
+...
+( eval $ODIN_env $compiler -c $flags $ODIN_c ) 2>WARNINGS \
+ || { mv WARNINGS ERRORS; echo "$compiler failed" >>ERRORS; }
+...
+------------------------------------------------
+
+This definition of how to produce a :o will then override the default
+definition, and you can then annotate your system model with the appropriate
++env parameters.  For example:
+
+-----------------------------------------------
+...
+normal.c
+weird.c +env='LPATH=/lib1:/libweird'
+weirder.c +env='LPATH=/lib1:/libweirder'
+...
+-----------------------------------------------
+
+
+From geoff@bellcore.com Mon Aug 15 17:18:10 1994
+Subject: beware of the `cat`
+X-Lines: 31
+Status: RO
+Content-Length: 892
+Lines: 31
+
+Several folks (including myself) have run into the following situation
+in which an error in a command script makes it appear that Odin is "hanging".
+
+If you have some list parameter, e.g.
+  +files
+which in an EXEC command script you assign to the shell variable $ODIN_files
+using the standard
+  ODIN_files=$1; shift;
+and you insert the filenames into the command line with the standard syntax:
+
+... `cat $ODIN_files` ...
+
+this will hang when +files is not specified, because in this case,
+$ODIN_files is just the empty string, thus leaving the command
+
+... `cat ` ...
+
+which tries to read from standard input.
+
+There are a variety of workarounds for this, but one easy one is just
+to change
+
+... `cat $ODIN_files` ...
+
+to be
+
+... `cat /dev/null $ODIN_files` ...
+
+On a separate subject, I will be on vacation the week of Aug 21,
+so any mail I get after Aug 21 won't be answered until Aug 28.
+
+
+From geoff@bellcore.com Wed Sep 14 00:41:10 1994
+Subject: Re: questions
+X-Lines: 35
+Status: RO
+Content-Length: 1610
+Lines: 35
+
+   Date: Tue, 13 Sep 1994 15:36:09 +0800
+   From: harry@rentec.com (Harry Felder)
+
+   1. some debuggers, eg sun sol2 dbx, like to have the .o and .c
+   files around when debugging an executable. any existing
+   magic trick to suck out all the .o and .a files for an
+   executable to make dbx happier?
+
+In the default "cc" tool package, files are compiled with absolute pathnames.
+In SunOS4.x, this causes full pathnames to be stored in the .o and a.out
+files, which means dbx can find the files that it needs, without having to
+play games with where the .o and .c files are located.
+
+Let me know if this doesn't work for solaris dbx, since it should also easy to
+extend the "dbx" package so that it sucks the appropriate files into reasonable
+places, such that dbx becomes happy.
+
+   2. any tricks to go from existing make files to odin files?
+
+It's pretty easy to go from odin files to make files, but the structure of
+make files (to the extent that they have a structure :-) varies so much from
+user to user that it is hard to generalize too much.
+
+For simple make files, just convert the contents of your FILES or SOURCES
+macro into a system model, and you are pretty much done (see the "getting
+started" section in the reference manual for details).
+
+   3. any other documentaion or information (a tutorial??) on Odin 
+   other than the ps file and mbox on bellcore.com?
+
+I wish there were.  Any volunteers ?  The best I've got at the moment
+for a tutorial is the "getting started" section in the reference manual.
+For real examples of Odinfile's, see the
+Odin/pkg/{odin,dg,tregrm,ipcgen}/Odinfile files.
+
+
+From geoff@bellcore.com Wed Sep 14 21:33:33 1994
+Subject: Re: Strange problem with Odin
+X-Lines: 44
+Status: RO
+Content-Length: 1511
+Lines: 44
+
+>   From: "Mike Lindelsee" <ml@agouron.com>
+>   Date: Wed, 14 Sep 1994 16:27:34 -0700
+>
+>   ... I'm running on
+>   a SGI using IRIX 5.2.  When I try the second example in the document - the
+>   hello program that uses two files I get a runtime link problem (oh, and by the
+>   way, I'm using C++ source for both files).  The error is a follows:
+>
+>    1382:stuff: rld: Error: unresolvable symbol in stuff: endl__FR7ostream
+>    1382:stuff: rld: Error: unresolvable symbol in stuff: cout
+>    1382:stuff: rld: Fatal Error: this executable has unresolvable symbols
+>
+>   but when I do the compilation by hand, i.e.,
+>
+>	   CC -c *.c
+>	   CC -o hello *.o
+>
+>   there is no problem.
+
+It looks like you are getting C linkage instead of C++ linkage.
+Odin decides what tools to run based on the extension of your file,
+so for example, with:
+
+   test.c :o
+
+it knows to run the C compiler (.c indicates a C file), while with:
+
+   test.C :o
+
+it knows to run the C++ compiler (.C indicates a C++ file).  The system
+model in the example, "test.sm" specifies C linkage (.sm indicates a
+system that needs C linkage).  What you want is "test.SM", since
+the .SM indicates C++ linkage.
+
+>   Is there some way that I can see the actual commands
+>   that Odin is issuing?
+
+Yes, if you set LogLevel=5 (either as an Odin command, or by saying
+  ODINLOGLEVEL=5;export ODINLOGLEVEL
+in your shell environment).  You'll also see some other stuff, but
+the commands being executed will be preceded by the comment:
+
+   ** Executing : ...
+
+
+From geoff@bellcore.com Fri Sep 16 16:41:34 1994
+Subject: Re: YAOQ (Yet another odin question)
+X-Lines: 28
+Status: RO
+Content-Length: 844
+Lines: 28
+
+>   From: "Mike Lindelsee" <ml@agouron.com>
+>   Date: Fri, 16 Sep 1994 11:54:40 -0700
+>
+>   ... I need the
+>   file to compile three source files into an executable.  The files are
+>	   Main.C (C++)
+>	   lexer.l (flex)
+>	   parser.y (bison)
+>   The parser.y generates the files parser.tab.[ch], lexer.l generates
+>    lex.yy.c.
+>   I can give it the include path and the libraries, but am having a problem
+>   setting up the odin-expressions to get the executable compiled.
+
+The Odinfile:
+-------------------
+prog == prog.SM :exe
+
+prog.SM == <<
+  Main.C; lexer.l; parser.y
+
+parser.tab.h == parser.y :h
+-------------------
+Then if you say "odin prog", you'll get your executable.
+
+You will also have to modify Odin/pkg/yacc/yacc.sh so that it invokes
+"bison" instead of yacc, and Odin/pkg/lex/lex.sh so that it invokes
+"flex" instead of "lex".
+
+
+From geoff@bellcore.com Sat Sep 17 00:21:11 1994
+Subject: Re: YAOQ (Yet another odin question)
+X-Lines: 44
+Status: RO
+Content-Length: 1726
+Lines: 44
+
+>   From: "Mike Lindelsee" <ml@agouron.com>
+>   Date: Fri, 16 Sep 1994 14:12:42 -0700
+>
+>   The generated file, lex.yy.c, is including
+>   C++ headers and so needs to be compiled with the C++ compiler.
+>   I'm not sure how to force this though.
+>   By copying lex.yy.c to lex.yy.C somewhere, maybe?
+
+If you have a .y file that produces C++ code instead of C code, then you need
+to give it a new extension (commonly .Y), and then extend the yacc tool package
+so that it knows how to transform a .Y file into a .C file.
+
+For example, extend ./Odin/pkg/yacc/yacc.dg to specify:
+----------------------
+*.Y => :Y;
+
+:Y 'YACC input that generates C++ code'? => :FILE;
+
+EXEC (YACC.sh) (:Y) (+yaccid) (+conflict_ok)
+   => (:C) (:h) (:yacc.log);
+----------------------
+and then YACC.sh is identical to yacc.sh, except that it generates a C file
+instead of a c file.
+
+>	   3) CC creates the directory, ./ptrepository, where it stores the
+>	      template instantiation information.  Odin is complaining about
+>	      being unable to remove this directory (I probably need to put an
+>	      'rm -r' somewhere in one of the packages).
+
+Yes, you can just extend the CC.sh script to "rm -r" the ./ptrepository
+directory before it exits.
+
+Alternatively, you can add the parameter
+  +cxx_flags = '-ptrpathname some_directory'
+(and "+ld_flags = '-ptrpathname some_directory' if ld needs it as well)
+to your requests, e.g.:
+
+prog == prog.SM +cxx_flags = '-ptrpathname some_directory' :exe
+
+We don't actually use C++ templates in our systems (they are just too
+_sloooow_ to compile), so I don't have any personal experience with this.
+I'll try to find out from some Odin users that haven't given up on
+templates (yet :-) what they prefer to do.
+
+
+From geoff@bellcore.com Wed Dec 21 21:20:27 1994
+Subject: Re: Odin: Using +define with preprocessor
+X-Lines: 31
+Status: RO
+Content-Length: 1221
+Lines: 31
+
+Since Odin concatenates adjacent words (like sh),
+if you don't mind putting the quotes in your #define, you could say:
+
+#define ODIN_HOST_FILE  '/home/jon/dgj/hosts'
+...
+prog == prog.c.sm +define=_REENTRANT 'HOST_FILE='ODIN_HOST_FILE :exe
+script == script.in +define='INSERT_HOST_FILE_HERE='ODIN_HOST_FILE :cpp
+
+   From: Jonathan Giddy <J.Giddy@cit.gu.edu.au>
+
+   I've set up a series of Odinfiles to build my system.  I make use of
+   the capability to preprocess the Odinfiles using the line
+   /* (| Odinfile :cpp |) */
+   In particular, I use this to #include a configuration file consisting
+   mainly of #define's.  However I hit a problem when I need to use #define
+   values in +define expressions.
+
+   For example, if I have
+
+   #define ODIN_HOST_FILE  /home/jon/dgj/hosts
+
+   prog == prog.c.sm +define _REENTRANT 'HOST_FILE=ODIN_HOST_FILE' :exe
+   script == script.in +define 'INSERT_HOST_FILE_HERE=ODIN_HOST_FILE' :cpp
+
+   then ODIN_HOST_FILE does not get replaced because it is in single quotes.
+   Replacing 'HOST_FILE=ODIN_HOST_FILE' with HOST_FILE\=ODIN_HOST_FILE
+   does not work either.
+
+   Is there a way to get this to work correctly?  Or is there a better way
+   of doing this type of thing in Odin? 
+
+
+From geoff@bellcore.com Tue Dec 27 19:37:40 1994
+Subject: Re: [Q] How to tell Odin to checkout iff source file is not present?
+X-Lines: 28
+Status: RO
+Content-Length: 1119
+Lines: 28
+
+Not a silly question at all.  
+
+The basic idea is that you define a new source type, say .vp.sm (standing
+for "view path system model"), and define a tool
+
+ EXEC (do-viewpath.sh) (:vp.sm) NEEDS (:vp.x)& => (:sm) (:vp.x);
+
+where :sm is the system model containing the checked out files (when
+they exist) and the version controlled file otherwise, and
+where :vp.x is the "view path cross-product" containing all possible
+members of the system model.
+
+See the :libraries object type in the "code" tool package library for an
+example of something like this.  If you have any trouble with this (this
+is actually one of the most complicated tool descriptions), let me know,
+and I can work one up for you as an example.
+
+   Date: Tue, 27 Dec 94 15:24:37 CST
+   From: ken@netstor.com (Ken Olstad)
+
+   I imagine that this might be a silly question, but I'm an Odin beginner
+   and I'm stumped.
+
+   Given a system consisting of several version-controlled (let's say RCS)
+   source files, I'd like to set things up so that Odin builds from the RCS
+   file foo.c,v if and only if foo.c is not present.  Can anyone tell me
+   how?
+
+
+From geoff@bellcore.com Fri Dec 30 13:19:15 1994
+Subject: Re: variables in odin
+X-Lines: 61
+Status: RO
+Content-Length: 2463
+Lines: 61
+
+   Date: Fri, 30 Dec 1994 12:11:51 -0500
+   From: sekar@freud.bellcore.com (R C Sekar)
+
+   It seems that I cannot define/use variables in my odin file.
+
+You are correct that you cannot define variables in your odin file.
+The main reason for this is that Odin can be using a target in an
+Odinfile concurrently via paths through several Odinfile's, and there
+would be no way to decide which of a set of conflicting definitions
+should be used.
+
+   Even environment variables are not permitted in most places.
+
+You can use environment variables, but you have to "declare" the 
+environment variables you will be using, so that Odin can ensure that
+all your Odinfile's receive consistent values.  You declare an env. var.
+in a tool package, and then you add that package to your ODINPATH
+(I can show you some examples).  Note that the value of a declared
+environment variable is its value when you last reset your cache.
+This ensures that multiple concurrent Odin requests are handled
+consistently.  (Make "handles" this problem by just letting multiple
+concurrent makes stomp on each other.)
+
+   It also seems that I cannot do much of shell-stuff inside odin.
+
+You can do xxx-stuff in your Odinfile's, where "xxx" is your favorite
+processor (sh, m4, cpp, ...), by adding an initial line of the form:
+
+stuff (| Odinfile +cmd=xxx :pipe.stdout |) more-stuff
+
+to your Odinfile, where "stuff" and "more-stuff" are arbitrary strings.
+This tells odin to run this Odinfile through the
+specified command before giving it to Odin.
+
+In particular, most of the BSC Odinfile's are run through cpp before
+they are given to Odin.
+
+   To give you an example of what I want to do,
+   I will use an abstract shell-like syntax.
+
+   RMBase = a b c
+   SCBase = d e f
+   RMHfiles = {$RMBase}.h // means a.h b.h c.h
+   RMCfiles = {$RMBase}.C
+   SCHfiles = {$SCBase}.h
+   SCCfiles = {$SCBase}.C
+
+   SC.sm  = $RMCfiles $SCCfiles
+   SCTAGS.sm = $SCHfiles $SCCfiles $RMHfiles 
+	   // I use this for making my emacs "tags" file
+   SCRMTAGS.sm = $SCHfiles $SCCfiles $RMHfiles $RMCfiles
+
+My guess is that you don't really need to do this kind of
+thing to achieve what you want.  In Makefile's you do have
+to explicitly massage all kinds of lists, but Odin does most
+of this for you.
+Normally you just need to put a given file into a single system
+model, so there is no need to do cross-products of filename bases
+with filename extensions.  If you send me your Makefile, I can go over
+it with you.
+
+
+From geoff@bellcore.com Fri Dec 30 15:04:04 1994
+Subject: Re: variables in odin
+X-Lines: 115
+Status: RO
+Content-Length: 5715
+Lines: 115
+
+   Date: Fri, 30 Dec 1994 13:38:21 -0500
+   From: sekar@freud.bellcore.com (R C Sekar)
+
+   > The main reason for this is that Odin can be using a target in an
+   > Odinfile concurrently via paths through several Odinfile's, and there
+   > would be no way to decide which of a set of conflicting definitions
+   > should be used.
+
+   Can't you flag an error when Odin detects a conflict?
+
+I could, but explaining the error would require that the user understand
+all the intermediate Odinfile's involved (which they currently do not have
+to understand), and worse, might require modification to Odinfile's that
+they do not own.  I try to avoid providing features that have these kinds
+of negative consequences, unless the feature cannot be handled by existing
+functionality.
+
+   In any case, it does
+   seem restrictive not to allow any list/string processing operations inside
+   Odin.
+
+You should need far less string-processing in Odin than in Make, because
+Odin understands "lists" and performs operations on them.  For example,
+if you want all the .o's from a system model, you just say "my.sm :list :o",
+so there is no need to DO string processing on the system model.
+So if you tell me what kind of list processing you need, I can probably
+give you a simple Odin expression that does it without shell-style
+string manipulation.  After you've seen a couple, it probably will be
+clearer.
+
+   ... the restriction of having to reset the cache
+   every time the variable is redefined, seems rather inconvenient. Am I missing
+   something?
+
+The reason for this restriction is that several people can share a
+common cache, and it would be unfortunate if all of them had to have
+identical environments for them to share the derived files from that
+cache.  There is a tradeoff here, between convenience and re-use, but
+since in practice, the shell variables used in Odinfile's tend to change
+infrequently, re-use at the moment is taking precedence.
+
+   Why cant Odin reset caches itself whenever one of the tool 
+   packages changes? Isnt this the correct behavior?
+
+Resetting the cache involves clearing out all your derived files.
+In general, a change to a tool package can have a cascading effect
+and change the results of an arbitrarily large number of derived files.
+For large systems, you want to do this only when _you_ want the
+functionality provided by some tool package change.
+
+   > You can do xxx-stuff in your Odinfile's, where "xxx" is your favorite
+   > processor (sh, m4, cpp, ...), by adding an initial line of the form:
+   > 
+   > stuff (| Odinfile +cmd=xxx :pipe.stdout |) more-stuff
+
+   While this makes it possible in theory to use any processor on the
+   Odinfile, I am not sure if it is easy to do this. This is because
+   the whole Odinfile is run through a filter, so if there are different
+   parts that need to be processed by different processors, I need to somehow
+   "protect" some parts of the Odinfile from each processor. One instance
+   of this arises in using cpp itself, where (| ... |) is protected by
+   /* */
+
+I've never had someone want to run different parts of an Odinfile
+through different preprocessors before...  You actually can do this
+through the use of text valued targets, but are you sure you want to (:-) ?
+(If you do, just let me know, and I can send you some examples).
+
+   > My guess is that you don't really need to do this kind of
+   > thing to achieve what you want. 
+
+   I am not sure if my example was clear enough. My point was that I wanted to 
+   define the base file names exactly once, and use them to make file names with 
+   extensions.
+
+Normally, the source files have a single extension, and it is all the
+derived files that have the same base but different extensions.
+Since you only put source files in system models, there should be no
+need to have the bases composed with different extensions.
+The example earlier in this message is an example of how you can get
+various lists of derived files, by applying list operations to the
+system model (i.e. "my.sm:list:o").
+Then my.sm is the only list you need to explicitly define ... all the
+rest can be named by derivations from my.sm.
+
+   > In Makefile's you do have
+   > to explicitly massage all kinds of lists, but Odin does most
+   > of this for you.
+
+   While this is certainly good, it would still be useful to give the user the
+   ability to manipulate lists as they please. The additional power comes in
+   handy when the user wants to do a little more (or a bit differently from)
+   what the tool inventor intended.
+
+Odin can do a much better job manipulating lists correctly and efficiently
+through derivation, than can a text processor.
+Note though that you can use text processors to manipulate Odin lists
+(Odin lets you invoke whatever text processors you want), but that I don't
+give you a built-in syntax for doing a particular flavor of text processing,
+since that is what Odin's list derivation processing is for.
+
+   Especially in the above example, the tool
+   cannot possibly anticipate the kind of file name derivations that the user
+   may need.
+
+I think you will find that you can do a lot more with the standard tool
+packages than you might think.  For example, there is a "pipe" derivation
+that lets you effectively define a "persistent pipe" expression (i.e.
+an expression where the anonymous intermediate results are cached and
+reused by Odin).  If you find there is something you cannot do, let
+me know and I will happily extend the standard tool packages.  If you
+feel adventurous, you can define your own packages, and submit them
+for inclusion in the standard set.  Writing a tool package is about as
+hard as writing a generic Makefile rule for one of the super-Makes.
+
+
+From geoff@bellcore.com Fri Jan  6 22:50:39 1995
+Subject: Re: using g++ in Odin ?
+X-Lines: 22
+Status: RO
+Content-Length: 795
+Lines: 22
+
+   From manon@faline.bellcore.com Wed Jan  4 10:37:56 1995
+   Subject: using g++ in Odin ? 
+
+   Some developers have difficulty to understand HP compiler's error messages.
+   So one idea is to use Odin to run g++ instead of HP's C++ to compile it first
+   and use g++'s  descriptive error message to fix the compilation bug before 
+   using HP C++ to produce the standard executables.
+
+   Is it the right way to do it? If it is, any easy way to do it in Odin?
+
+   If not, any better suggestion?
+
+If you want to use gnu tools, specify +gnu in your request, e.g.
+
+test.C.sm +gnu :exe
+
+If you want to use just g++ for C++ compiles, but not the other gnu tools
+(e.g. you still want to use cc rather than gcc for your C compiles),
+specify +cxx='g++' in your request, e.g.
+
+test.C.sm +cxx='g++' :exe
+
+
+From geoff@bellcore.com Fri Jan  6 23:50:50 1995
+Subject: source viewpaths now provided by the default "vc" package
+X-Lines: 19
+Status: RO
+Content-Length: 890
+Lines: 19
+
+I merged the "sccs" and "rcs" packages into a single "vc" package.
+The vc package also contains a generic ",vw" source type, which is
+the way of specifying a view, where the viewpath for this view
+is specified by +view_sp parameters.
+
+Currently, the view path is defined to be:
+   for each directory in the view path (where "." is always the
+   first entry on the view path, and succeeding entries are specified
+   by the +view_sp parameters):
+      look for a file with the specified name (e.g. foo.c)
+      else look for an RCS file with that name (i.e. foo.c,v)
+      else look for an SCCS file with that name (i.e. s.foo.c).
+
+For those of you that use viewpaths, should I look for
+RCS/foo.c,v and SCCS/s.foo.c instead of (or in addition to)
+foo.c,v and s.foo.c ?  Or should I just let local installations
+modify the vw.sh script in the vc package to produce the
+appropriate sequence ?
+
+
+From geoff@bellcore.com Tue Jan 10 11:27:00 1995
+Subject: odin log messages
+X-Lines: 12
+Status: RO
+Content-Length: 606
+Lines: 12
+
+Odin displays the log messages from a build step in a batch when the build
+step completes.  This is done to prevent log messages from different build
+steps that are running concurrently from being inter-mixed.
+
+This does have the unfortunate side effect of not giving you feedback on how
+long each step is taking (actually, it makes it look like the _previous_ step
+is taking the time of the current step).  If you're interested in this
+timing information, set your LogLevel to 4.  This will give you a
+  **Generating-xxx
+message when a build step starts, and the standard log messages when
+it completes.
+
+
+From geoff@bellcore.com Fri Jan 20 11:56:56 1995
+Subject: the Odin copy-left and tool packages
+X-Lines: 14
+Status: RO
+Content-Length: 595
+Lines: 14
+
+The issue has not come up, but in case anyone was wondering,
+the Odin copy-left only applies to the Odin interpreter and
+the Odin derivation graph compiler (odin.exe and dg.exe),
+not to tool packages.
+
+Although most tool packages are just collections of shell scripts,
+there are applications (such as the Eli system) in which the
+tool packages contain executables that far outweigh the Odin system
+in both size and complexity.
+
+The copyright status of the tool packages and executables that they
+contain is completely up to the discretion of the author and is
+unaffected by the Odin copy-left.
+
+
+From geoff@bellcore.com Thu Mar  2 00:19:39 1995
+Subject: Re: ODIN and RCS
+X-Lines: 98
+Status: RO
+Content-Length: 4246
+Lines: 98
+
+   From: florijn@cs.ruu.nl (Gert Florijn)
+
+   I'm very interested
+   in getting the new version of the vc package to experiment
+   further. I tried to implement it myself, but the link between
+   ODIN and the external tools is still a bit murky to me...
+
+The vc package is the most subtle of all the packages.
+You might want to check over a simpler package first,
+such as the yacc package.
+
+   Something else came up when looking at Odin and playing
+   around with it. When using the help on possible derivations
+   on a particular object I noticed some strange things. On
+   one hand there's a large number of derivations that don't seem
+   directly applicable, e.g. when I do
+	   hello.c :?
+   I get things like the nroff-output, etc. which don't appear
+   to be useful for c source files. Is this caused by the subtyping
+   mechanism, e.g. because these derivations are applicable to
+   objects of type :FILE or something like that?
+
+Yes.  In particular, in the roff package:
+
+EXEC (eqn.sh) eqn (:FILE) => (:eqn);
+
+This says any file can be run through the eqn process, which
+can then be run through tbl and nroff.
+This is done because the Unix world has not been able to pick
+a "standard" extension for roff input files.
+
+   Wouldn't it from
+   this respect be useful to put these derivations on a sub-type
+   (nroff input). Would it then also be useful to introduce a
+   coercion operator which can convert one object type into another
+   under the users control?
+
+Yes, this is something on the odin "wish list".
+
+One can easily define a "renaming" tool using a derived directory.
+This tool would be invoked as:
+
+my.file +rename=my.file.new-ext :rename/my.file.new-ext
+
+The two problems with this approach are that requests are rather ugly
+(including the need to repeat the string "my.file.new-ext"), and
+that each rename generates a new directory and a copy of the file
+being renamed.
+
+What one really wants is to be able to define the renamed object
+as being a reference to the original object, but
+it turns out that this is rather messy to implement,
+so I've been waiting for a pressing need for such a feature.
+
+   In other cases (e.g. the :stdout derivation) the derivation seems
+   to come from down the derivation graph, e.g. since we can derive
+   a :o and from that derive a :exe and from that a :stdout, we can
+   derive :stdout from :exe. Is this true, or is there some other
+   strategy happening?
+
+Yes, the help messages are the transitive closure of derivations.
+
+   On the other hand, more direct derivatives like :o are missing
+   (for a c sourec object). Similarly, operations like :co on ,v
+   objects don't appear (at least not in the regular help-list; if
+   I change the help-level they do appear). Why is this? When do
+   operations appear or not.
+
+The "help-level" of a particular type is specified by whether
+you have placed a "?" following the help-string in the type definition.
+If it does appear, then that type is listed at any HelpLevel value.
+If the "?" does not appear in the type definition, then the type is
+listed in help messages only if the HelpLevel is greater than 1.
+
+   The final point is Latex. Using the current package a latex file
+   is always latexed twice, bibtexed and latexed again, even if there
+   are no references and even if I don't use bibtex. Now my question
+   is: how can I skip the bibtex phase,
+
+I haven't looked into that.  I will put it on my to-do list
+(it should be possible).
+
+   and how can I prevent superfluous Latex runs.
+
+To prevent the extra Latex runs, you would need to short-circuit
+the fixed point processing earlier.  One way to do so would be to grep
+for the "labels have changed" message from the latex run.
+If no such message is present, replace the newly modified .aux file
+with a copy of the input .aux file (the reason Odin often does an extra
+Latex run is that Latex often changes the .aux file even when the
+"labels have changed" is not generated).  But if you generate an
+.aux file that is a copy of the input .aux file, when
+Odin looks at the new .aux file, it will see it has not changed,
+and will mark the Latex run as valid.
+
+The advantage of the current approach is that it doesn't depend on
+Latex generated a "redo" message in any particular format.
+
+
+From geoff@bellcore.com Wed Mar  1 19:25:42 1995
+Subject: Re: what is this message?
+X-Lines: 33
+Status: RO
+Content-Length: 930
+Lines: 33
+
+By default, Odin prints out error messages as it sees them, and then
+again in a summary at the end.  By default it only prints out the 
+single summary line about warnings (because many tools like the C++
+compiler generate _lots_ of largely useless warnings).
+
+You can explicitly ask to see the warnings with a request like:
+
+-> %SA.os :warn >
+
+or:
+
+odin '%SA.os :warn >'
+
+How warnings and error messages are treated is based on the WarnLevel and
+ErrLevel variables (set to 2 and 4 by default).  So if you want warnings
+handled like errors are by default, just set WarnLevel to 4, e.g.
+
+ODINWARNLEVEL=4; export ODINWARNLEVEL
+
+Note: you can modify your warnlevel and errlevel without reseting your cache.
+
+
+   Date: Wed, 1 Mar 1995 18:55:38 -0500
+   From: fjlin@koyukuk.bellcore.com (Fuchun J Lin)
+
+   Hi, Geoff
+
+       What is "--- Warning status set for < %SA.os> ---"?  However,
+   I didn't see any warning messages.
+
+   --Joe
+
+
+
+From geoff@bellcore.com Mon Mar  6 19:51:47 1995
+Subject: Re: problem with executable object
+X-Lines: 41
+Status: RO
+Content-Length: 1775
+Lines: 41
+
+Odin has two ways of "executing" a file:
+- if Unix execute permission is set, Odin just "exec()"s the file.
+- if Unix execute permission is not set, the file is assumed to contain Odin
+  commands, and is read as standard input by the Odin command interpreter.
+
+In this case, the tool that generated gdb must have neglected to
+do a "chmod +x gdb".   So when you executed the file, it was given
+to the Odin interpreter which reported syntax errors.
+
+In general, if you see:
+
+<> some command
+
+this means that "some command" is being executed by Odin, not by the
+host system shell.
+
+   From: Basim Kadhim <kadhim@riker.cs.colorado.edu>
+
+   We have the executable object, gdb, which is supposed to run the gdb
+   debugger.  When I try to derive to :gdb in Odin, I get a syntax error
+   in the generated shell script as follows:
+
+   -> maptool.specs +debug :gdb 
+   maptool.specs +debug :gdb 
+   ** maptool.specs +debug :execute*gdb
+   <> maptool.specs +debug :gdb !
+   <> #!/bin/sh
+   <> gdb -d /home/riker/kadhim/.ODIN/riker/FILES/a/f/maptool.specs.139222.vir_dir -d /home/riker/kadhim/.ODIN/riker/FILES/a/g/maptool.specs.140726.vir_dir /home/riker/kadhim/.ODIN/riker/FILES/a/g/maptool.specs.140934.exe 
+   "/home/riker/kadhim/.ODIN/riker/FILES/a/g/maptool.specs.125810.gdb", line 3: syntax error at < -d /home/riker/kadhim/.ODIN/riker/FILES/a/f/maptool.specs.139222.vir_dir -d /home/riker/kadhim/.ODIN/riker/FILES/a/g/maptool.specs.140726.vir_dir /home/riker/kadhim/.ODIN/riker/FILES/a/g/maptool.specs.140934.exe >.
+
+   The strange thing is that if I redirect the script to a file:
+
+   -> maptool.specs +debug :gdb > maptool.gdb
+
+   and then run the script:
+
+   -> !sh maptool.gdb
+
+   everything works just fine.  Is there something unusual about how Odin
+   runs the scripts?
+
+
+From geoff@bellcore.com Wed Mar  8 13:12:43 1995
+Subject: :redo_errs is your friend
+X-Lines: 17
+Status: RO
+Content-Length: 495
+Lines: 17
+
+Let's say that you ask for :
+
+  odin my-target
+
+and you get some error messages indicating some transitory NFS or memory
+shortage errors.  Since Odin doesn't know that these errors are transitory,
+it will cache them, and next time you ask for "odin my-target" it will just
+report those errors again.
+
+To get odin to redo the steps with errors, just say:
+
+  odin my-target:redo_errs
+
+i.e. tack the string ":redo_errs" to the end of your target.
+
+This is a _LOT_ faster than "odin -r my-target"!
+
+
+From geoff@bellcore.com Tue Mar 28 23:08:57 1995
+Subject: Re: an abbreviation mechanism for Odinfiles?
+X-Lines: 90
+Status: RO
+Content-Length: 2814
+Lines: 90
+
+> Date: Mon, 27 Mar 1995 23:11:03 -0500
+> From: Rob DeLine <Robert_DeLine@GS115.SP.CS.CMU.EDU>
+> 
+> In my Odinfiles, I often find huge, cumbersome rules like this:
+> 
+> unistk == %unicon.c.sm +gnu +debug \
+> 	+lib=(/afs/cs/project/vit/stk/lib/stk/2.1.6/STk/blt-1.7-for-STk/libblt.a) \
+> 	+lib=(/afs/cs/project/vit/stk/lib/stk/2.1.6/STk/Src/libstk.a) \
+> 	+lib=(/afs/cs/project/vit/stk/lib/stk/2.1.6/STk/Mp/libgmp.a) \
+> 	+lib=(/afs/cs/project/vit/stk/lib/stk/2.1.6/STk/Tk/libtk.a) \
+> 	+lib=(/afs/cs/project/vit/stk/lib/stk/2.1.6/STk/Tcl/libtcl.a) \
+> 	+lib=(/usr/local/lib/libX11.a) \
+> 	+lib=(/usr/lib/libnsl.a) \
+> 	+lib=(/lib/libm.a) \
+> 	:exe
+> 
+> I'd like some way not to have to repeat the string 
+> "/afs/cs/project/vit/stk/lib/stk/2.1.6/STk" five times.  Environment 
+> variables would be one way, but they aren't acceptable since they 
+> are implicit and dynamically bound with respect to the Odinfile.  
+> Is there something like a Makefile variable available in Odin?
+
+The main abstraction mechanism in Odinfile is "virtual targets".
+For example, an equivalent Odinfile to your example would be:
+
+-------------------
+
+unistk == %unicon.c.sm +gnu +debug \
+	+lib=(%STk/blt-1.7-for-STk/libblt.a) \
+	+lib=(%STk/Src/libstk.a) \
+	+lib=(%STk/Mp/libgmp.a) \
+	+lib=(%STk/Tk/libtk.a) \
+	+lib=(%STk/Tcl/libtcl.a) \
+	+lib=(/usr/local/lib/libX11.a) \
+	+lib=(/usr/lib/libnsl.a) \
+	+lib=(/lib/libm.a) \
+ 	:exe
+
+%STk == /afs/cs/project/vit/stk/lib/stk/2.1.6/STk
+
+-------------------
+
+Another abstraction you might want to use is to bundle all your +lib's
+together so that they could be used elsewhere (such as for a +purify'd target).
+
+-------------------
+
+unistk == %unicon.c.sm +gnu +debug +(%STk-libs) :exe
+
+unistk-pure == %unicon.c.sm +gnu +debug +purify +(%STk-libs) :exe
+
+%STk-libs == <<
+	+lib=(%STk/blt-1.7-for-STk/libblt.a)
+	+lib=(%STk/Src/libstk.a)
+	+lib=(%STk/Mp/libgmp.a)
+	+lib=(%STk/Tk/libtk.a)
+	+lib=(%STk/Tcl/libtcl.a)
+	+lib=(/usr/local/lib/libX11.a)
+	+lib=(/usr/lib/libnsl.a)
+	+lib=(/lib/libm.a)
+
+%STk == /afs/cs/project/vit/stk/lib/stk/2.1.6/STk
+
+-------------------
+
+You can use environment variables that you have declared in a tool
+package, so for example, if you declared STK_DIR in a tool package,
+and you set
+   STK_DIR=/afs/cs/project/vit/stk/lib/stk/2.1.6/STk; export STK_DIR
+in your environment before you created (or reset) your cache, you
+could then have your Odinfile be:
+
+-------------------
+
+unistk == %unicon.c.sm +gnu +debug +(%STk-libs) :exe
+
+unistk-pure == %unicon.c.sm +gnu +debug +purify +(%STk-libs) :exe
+
+%STk-libs == <<
+	+lib=($STK_DIR/blt-1.7-for-STk/libblt.a)
+	+lib=($STK_DIR/Src/libstk.a)
+	+lib=($STK_DIR/Mp/libgmp.a)
+	+lib=($STK_DIR/Tk/libtk.a)
+	+lib=($STK_DIR/Tcl/libtcl.a)
+	+lib=(/usr/local/lib/libX11.a)
+	+lib=(/usr/lib/libnsl.a)
+	+lib=(/lib/libm.a)
+
+-------------------
+
+
+From geoff@bellcore.com Mon Jun 26 14:44:17 1995
+Subject: Re: odin and multiple directories
+X-Lines: 66
+Status: RO
+Content-Length: 2737
+Lines: 66
+
+   Date: Tue, 20 Jun 1995 12:46:58 -0700
+   From: Mike Harless <harless@sdd.hp.com>
+
+   How do you specify multiple search directories within an Odinfile?
+
+I assume you mean "view-path" style search directories.  This functionality
+is provided by the "vc" (version-control) package.  The directories to be
+searched are specified with the "+view_sp" parameter defined in the "vc"
+package.  For example, if your master directory is /usr/master, then add
+",vw" to the names of your system model, and you can make requests like:
+
+prog.c.sm,v +view_sp=(/usr/master) :exe
+
+   I assume that it deals with the :view derivation, but nothing is clicking 
+   on how I specify/derive it.
+
+The :view derivation is the primitive which allows you to specify
+search path functionality in your packages.  The cc and cxx packages
+use :view to provide include search paths.  The code package uses :view
+to provide library search paths.  The vc package uses :view to provide
+view paths.
+
+In particular, ":view.names" is the derivation the vc package
+provides for computing the actual pathnames of view relative names
+specified in "foo,vw" files.
+
+   What we have is source code under directories in a master area, and then
+   source code that is in local directores that mirrors the master area and
+   is used for making local builds for testing new code.  If a file is found 
+   in the local directory, it should be used instead of a file with the same 
+   name in the master area.  If nothing is found in the local area, I need to 
+   look in the master area for the file.
+
+Yes, this should be handled by the vc package.  Currently, the priority is:
+  file
+  RCS/file,v
+  file,v
+  SCCS/s.file
+  s.file
+  master/file
+  master/RCS/file,v
+  master/file,v
+  master/SCCS/s.file
+  master/s.file
+  ...
+
+This priority list is specified in the Odin/pkg/vc/vw.sh script ... modify
+it as appropriate.
+
+   Also, I got the impression that this won't be supported until 2.0, but is
+   it possible to have a cache for the above master area that the users could
+   use in addition to their own local one? 
+
+You are correct -- this won't be supported until 2.0 (and I currently have
+no estimate of when 2.0 will be ready).  The hard part here is implementing
+it so that builds with both high and low percentages of cache hits are
+performed efficiently.  I want to avoid the ClearMake situation where people
+with lots of derived files have to turn off the "wink-in" functionality
+because it slows down their builds too much.
+
+   Thanks for any help or pointers on where to look.  Would you rather I 
+   post questions like this to the list rather than to you?
+
+Either is fine.  Questions sent directly to me are copied to the list,
+if the answers are of general interest.
+
+
+From geoff@bellcore.com Sun Jul  2 09:02:07 1995
+Subject: Re: about ODIN
+X-Lines: 21
+Status: RO
+Content-Length: 479
+Lines: 21
+
+>   From: Hidetaka Koie <sgphk1@ipcs.shizuoka.ac.jp>
+>
+>   I want to compile only several sources with optimize option.
+>
+>	g++ -c file01.cc
+>	g++ -c file02.cc
+>	....
+>	g++ -c file09.cc
+>	g++ -c -O3 file10.cc
+>	g++ file01.o ... file10.o -o files
+>
+>   Please tell me what to descript Odinfile?
+
+Create a C++ system model with +optimize=3 on the appropriate files, e.g.:
+
+prog.cc.sm == <<
+   file01.cc; file02.cc; file09.cc
+   file10.cc +optimize=3
+
+prog == prog.cc.sm +gnu :exe
+
+
+From geoff@bellcore.com Fri Sep  8 08:39:27 1995
+Subject: Re: odin vs. multiple platform builds
+X-Lines: 42
+Status: RO
+Content-Length: 1667
+Lines: 42
+
+>   Date: Thu, 7 Sep 1995 11:29:46 -0400
+>   From: Mark Buda <hermit@clark.net>
+>
+>   Hi. I'm a new odin user, and I can't figure out how to do something in a
+>   nice way. Suppose I have a program X whose source lives in directory foo. I
+>   want to compile X for SunOS and Solaris. I want the SunOS binaries to
+>   reside in foo/sparc-sunos4 and the Solaris binaries to reside in
+>   foo/sparc-solaris2. The only way I can see to do this is to have an
+>   Odinfile in each of the subdirectories that says how to build "X" for the
+>   corresponding platform. This is bad, because in the real-life situation
+>   there are several such directories, and I also want to be able to specify
+>   the list of platforms in a single location.
+
+In foo/Odinfile, add the targets:
+
+%install! == <<
+   %foo.c.sm +whatever1 +whatever2 :exe >sparc-sunos4/foo
+   %foo.c.sm +whatever3 +whatever4 :exe >sparc-solaris2/foo
+
+Then "odin %install" will install the binaries into their respective
+directories.  You can also add a few virtual targets to give you some
+more flexibility:
+
+%install! == <<
+   %install-sparc-sunos4; %install-sparc-solaris2
+
+%install-sparc-sunos4! == <<
+   %foo.c.sm +(%sparc-sunos4-prms) :exe >sparc-sunos4/foo
+
+%install-sparc-solaris! == <<
+   %foo.c.sm +(%sparc-soloaris2-prms) :exe >sparc-solaris2/foo
+
+%sparc-sunos4-prms == <<
+  +whatever1 +whatever2 +...
+
+%sparc-solaris2-prms == <<
+   +whatever3 +whatever4 +...
+
+Just for interests sake, why is it bad to have a separate Odinfile
+in each of the installation directories?  This lets a user know
+how these binaries are made, without them having to guess that the
+definitions come from the parent directory.
+
+From geoff@bellcore.com Tue Sep 12 16:31:06 1995
+Date: Tue, 12 Sep 1995 16:07:00 -0400
+Subject: Re: Is there a FAQ? Or more examples?
+X-Lines: 67
+Status: RO
+Content-Length: 2933
+Lines: 67
+
+>   From: "George A. Lippert" <glippert@zucchini.cts.com>
+>
+>   I'm impressed with the tool (version 1.15.10) so far (just started using it)
+>   but the manual leaves much unstated and is way too thin on examples.  Is there
+>   a FAQ for odin?
+
+I've edited the "odin.mbox" and have renamed it "FAQ".  (It is, after all,
+the frequently asked questions :-).
+
+>   Some of the questions I have are:
+>
+>   1)How do you tell odin that *all* the .c files in the current directory go
+>     into the executable?  Something like "hello == *.c :exe" doesn't work.
+
+This functionality does not exist, but you can add it in a straightforward
+fashion.  In particular, just define your own kind of system model (perhaps
+give it the extension ".esm" for "extended system model").  Then write a tool
+script that converts a ".esm" file into a ".sm" file, and you're all set.
+
+>   2)How do you tell odin that the list value for +lib= comes from a command?
+
+You would have to modify the command so that it produces the library
+descriptions in Odin format (e.g. "+lib=foo +lib=bar").  If your command
+is "getlib input" that runs in "/usr/foodir", then your lib parameter
+would be:
+
+... +(/usr/foodir +cmd=getlib input :stdout) ...
+
+>   3)What goes on when I add +sys5, for example?  There is much missing from the
+>     manual on points like this.
+
+To find out what "goes on" when you add +sys5, you would have to look at
+the tools scripts that use the +sys5 parameter.  The tools that are affected
+by +sys5 can be found by grepping for "+sys5" in the .dg files in the PKGS
+directory in your cache.
+
+One could imagine a document that describes this for a particular combination
+of packages.  Any volunteers for producing such a document for the current
+set of default packages?
+
+>   4)How does one turn off the -w66 flag that odin uses with FORTRAN?  Our
+>     compiler thinks this is a bad flag.
+
+The f77 package is a place holder for a real fortran package (as far as I
+know, no one has actually used the f77 package for any real projects).
+If anyone has a real fortran package, just mail it to me, and I'll add it
+to the default packages distributed with Odin.
+
+Minimally, I'll modify the f77 package to remove the -w66 flag.
+
+>   5)Odin does not seem to look for include files in FORTRAN source. Neither the
+>     "#include" preprocessor form nor the "INCLUDE" FORTRAN statement form.  This
+>     is a killer deficiency for us if this is really the case.
+
+You would need to write an include scanner (analagous to the c_inc.sh in
+the cc package), and add this to the fortran package.
+
+>   6)On Linux (the only platform I've tried odin on so far) I have to define
+>     ODIN_LOCALIPC in my environment to get odin to run.  Well, the manual said
+>     that that might be the case although I certainly do have TCP/IP. Hmmm?
+
+Odin runs fine for me on Linux without ODIN_LOCALIPC set.  Perhaps you could
+mail a log of how it fails for you?
+
+Cheers,
+
+Geoff
+
+From geoff@bellcore.com Tue Nov  7 23:16:23 1995
+Received: from thumper.bellcore.com (thumper.bellcore.com [128.96.41.1]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id XAA19471; Tue, 7 Nov 1995 23:15:53 -0500
+Received: from mailee.bellcore.com (mailee.bellcore.com [192.4.13.24]) by thumper.bellcore.com (8.6.9/8.6.10) with ESMTP id XAA25905; Tue, 7 Nov 1995 23:15:28 -0500
+Received: from wodehouse.bellcore.com (wodehouse.bellcore.com [192.4.7.31]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id WAA19329 for <odin-local@mailee.bellcore.com>; Tue, 7 Nov 1995 22:54:03 -0500
+Received: (from geoff@localhost) by wodehouse.bellcore.com (8.6.9/8.6.9) id WAA00652; Tue, 7 Nov 1995 22:53:32 -0500
+Date: Tue, 7 Nov 1995 22:53:32 -0500
+Message-Id: <199511080353.WAA00652@wodehouse.bellcore.com>
+From: Geoffrey M Clemm <geoff@bellcore.com>
+To: uwe@uni-paderborn.de
+CC: elibugs@cs.colorado.edu, odin@wodehouse.bellcore.com
+In-reply-to: <199511061257.NAA10230@rubin.uni-paderborn.de> (message from Uwe
+	Kastens on Mon, 6 Nov 1995 13:57:17 +0100 (MET))
+Subject: Re: odin -R
+X-Lines: 58
+Status: RO
+Content-Length: 2531
+Lines: 58
+
+>   From: Uwe Kastens <uwe@uni-paderborn.de>
+>
+>   I was mislead by the explamation of the odin -R option.
+>   The manual says:
+>
+>	-R   Reset the packages.  This resets the cache and installs
+>	     the most recent version of each tool package.
+>
+>   I assumed that 
+>	   odin -c CACHE -R 
+>   where CACHE is an existing cache reinstalls it with the same set of
+>   packages it was installed before (their "most recent versions" - whatever
+>   that means).
+
+If you wanted to keep the same set of packages, why are you resetting the
+tool packages?  (I'm sure you had something in mind -- I just don't see
+what it is.)
+
+Did you just want to reset the database (which is what "odin -r" is for)?
+
+As for "most recent version", each package can have several versions,
+each of which appears as a subdirectory of the package (this is described
+in the Odin reference manual).  The name of the "current" version of this
+package is stored in a file named PKGVER in the package directory.
+This allows you to create a new version of a package, without disturbing
+people currently using an old version of the package.  They will only see
+the new version after they do an "odin -R".
+
+>   The present effect of -R can be easily achieved by 
+>	   rm -rf CACHE; odin -c CACHE
+>   without any surprise.
+
+Yes, but this little sequence is performed so frequently that:
+
+a) I wanted to give Odin users an easy way to invoke it
+b) I didn't want a common Odin operation to require the user to type in
+   a "rm -rf" command (the penalty for mistyping is too high).
+   The "odin -R" command does some sanity checks on the cache name
+   so that an error like "odin -R ~" is detected and aborted.
+
+>   Furthermore I'd appreciate if a cache keeps the information how it
+>   was created, in order to simplify its recreation, and to simplify
+>   creation of another cache that has the same set of packages.
+
+That is exactly the information that is currently kept in the cache
+(namely, the set of symbolic links in the "CACHE/PKGS" directory).
+
+>   I'm using several different caches for different purposes
+>   (Eli application, liga maintainance, modlib maintainance).
+>   Hence, the ODINPATH variable is NOT suitable for me to remember how a
+>   cache has been created.
+
+I highly recommend that in this situation you give names to your
+different eli variants (e-app, e-liga, e-modlib), and then have shell
+scripts by these names that set $ODINPATH appropriately before invoking odin.
+This will allow you to take advantage of odin package versioning.
+
+- Geoff
+
+From geoff@bellcore.com Wed Nov  8 13:32:09 1995
+Date: Wed, 8 Nov 1995 12:45:45 -0500
+Subject: Re: Odin-Feature
+X-Lines: 19
+Status: RO
+Content-Length: 497
+Lines: 19
+
+   From: Christoph Eilinghoff <che@uni-paderborn.de>
+
+   ... I want to derive:	
+	   x.ppm +filter="y.flt": f.ppm
+
+   This doesn't work. ...
+   I have to find a way to construct the absolute filename for filter,
+
+A parameter value can either be a string (indicated by the quote (") marks)
+or a file.  If it is a file, then it should be placed in parentheses
+so that Odin knows to build absolute pathnames for it.  So if you say:
+
+  x.ppm +filter=(y.flt) :f.ppm
+
+you should be fine.
+
+Cheers,
+
+Geoff
+
+From geoff@bellcore.com Sun Nov 26 23:20:42 1995
+Received: from flash.bellcore.com (flash.bellcore.com [192.4.13.90]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id XAA22858; Sun, 26 Nov 1995 23:20:12 -0500
+Received: from mailee.bellcore.com (mailee.bellcore.com [192.4.13.24]) by flash.bellcore.com (8.6.9/8.6.9) with ESMTP id XAA27101; Sun, 26 Nov 1995 23:19:25 -0500
+Received: from wodehouse.bellcore.com (wodehouse.bellcore.com [192.4.7.31]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id XAA22800 for <odin-local@mailee.bellcore.com>; Sun, 26 Nov 1995 23:02:13 -0500
+Received: (from geoff@localhost) by wodehouse.bellcore.com (8.6.9/8.6.9) id XAA20655; Sun, 26 Nov 1995 23:01:20 -0500
+Date: Sun, 26 Nov 1995 23:01:20 -0500
+Message-Id: <199511270401.XAA20655@wodehouse.bellcore.com>
+From: Geoffrey M Clemm <geoff@bellcore.com>
+To: drepper@ipd.info.uni-karlsruhe.de
+CC: odin@wodehouse.bellcore.com
+In-reply-to: <199511261814.TAA09716@myware.rz.uni-karlsruhe.de> (message from
+	Ulrich Drepper on Sun, 26 Nov 1995 19:13:58 +0100)
+Subject: "File type produced by multiple tools" error
+X-Lines: 64
+Status: RO
+Content-Length: 2247
+Lines: 64
+
+   From: Ulrich Drepper <drepper@myware.rz.uni-karlsruhe.de>
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   drepper@myware ~/ttt/od> odin -R
+   Cache at /home/drepper/.ODIN/myware has been reset.
+   Clearing packages for /home/drepper/.ODIN/myware.
+   Installing package /home/drepper/dipl/.ODIN/sa.
+   Installing package /usr/local/lib/Odin/odin/1.15.11.
+   Installing package /usr/local/lib/Odin/vc/1.11.19.
+   ...
+   Installing package /usr/local/lib/Odin/run/1.13.4.
+   File type :sa produced by multiple tools in package sa.
+   Error compiling packages in /home/drepper/.ODIN/myware.
+
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   I use Odin 1.15.11 and the additional sa file is:
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   *.sap => :sap ;
+   *.sam => :sam ;
+   *.sa  => :sa ;
+
+   :class 'sa class'? => :FILE ;
+   :sa 'sa source'? => :FILE ;
+   :sap 'sa source with CPP'? => :FILE ;
+   :sam 'sa source with M4'? => :FILE ;
+
+   EXEC (sa.sh) (:OBJECT :name) => (:class) ;
+
+   EXEC (sap.sh) (:sap) => (:sa) ;
+
+   EXEC (sam.sh) (:sam) => (:sa) ;
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Within a given package, only one tool can produce a given file type,
+which means that the declarations:
+
+EXEC (sap.sh) (:sap) => (:sa) ;
+EXEC (sam.sh) (:sam) => (:sa) ;
+
+cannot appear in the same package.  One thing you could do is declare
+two new file types that are subtypes of :sa, e.g.
+
+:sap_out 'output of running cpp' => :sa;
+:sam_out 'output of running m4' => :sa;
+
+and then declare your tools as:
+
+EXEC (sap.sh) (:sap) => (:sap_out) ;
+EXEC (sam.sh) (:sam) => (:sam_out) ;
+
+This will achieve the effect you intended without violating the 
+constraint that only one tool can produce a given type within a
+given package.
+
+Note: if your sap.sh just invokes cpp, and your sam.sh just invokes m4,
+then you could solve this a bit more elegantly by using "generic types".
+In particular, there already is a generic *,c source type declared in
+the cpp package to be a file that needs to be run through cpp, so if
+you create a file with the extension ".sa,c" (e.g. "foo.sa,c") it will
+behave like your .sap file.
+
+Cheers,
+
+Geoff
+
+From geoff@bellcore.com Wed Dec  6 10:09:07 1995
+Date: Wed, 6 Dec 1995 09:33:42 -0500
+From: Geoffrey M Clemm <geoff@bellcore.com>
+To: peterc@linux.tctech.com.au
+CC: odin@wodehouse.bellcore.com
+In-reply-to: <199512052332.AA21060@linux.tctech.com.au> (message from Peter
+	Chon on Wed, 6 Dec 1995 10:32:22 +1100)
+Subject: Re: beginner's questions
+X-Lines: 75
+Status: RO
+Content-Length: 3513
+Lines: 75
+
+>   From: Peter Chon <peterc@linux.tctech.com.au>
+>
+>   I have just begun to use Odin, and I'm having some mental blockages.
+>   First, where are the files ERRORS and WARNINGS kept? 
+
+They must be put in the current directory where your EXEC tool is
+execl()'ed.  If your tool cd's to another directory before it has
+written all the ERRORS or WARNINGS it might generate, you need to
+save the current directory (usually with a `pwd` call) in a shell
+variable, so you can write the files in the right place.
+
+>   Next, I'm having some problems with remote builds. Here is an example:
+>
+>   gorgon: scan_for_includes open.c
+>   siren: scan_for_includes preceive.c
+>   Remote build server on siren died.  Will try to restart.
+>   ** Aborted /home/peterc/work/rap/src/sys/sys/printq.c +inc_sp=(/home/peterc/work/rap/src/sys/h) +home=(/home/peterc/work/rap/src/sys/sys) :cc*c_inc.view_desc
+>
+>   When I do "odin %all", the build process seems to continue. Is there
+>   something I have to watch in setting up for remote builds? I have two
+>   sparcstation 2 and one sparcstation 1, all running solaris 2.4. I have
+>   set the env for 6 maxbuilds and LOCAL:LOCAL:siren:siren:gorgon:gorgon.
+
+This means that the remote build server process on siren died for some
+reason.  When this happens, Odin will restart the build server, but it
+will abort the build request of any client that was actively using that
+build server (since the results of those builds are unknown).  I haven't
+run into this problem before (except when network problems prevented
+communication with remote machines, in which case aborting is the best
+you can do).
+
+>   I've read somewhere that I cannot generate the same file
+>   type with two tools in the same package, so for assembler files that
+>   ends with .s, I've modified cc.dg to have the line:
+>
+>   *.s => :c;
+>
+>   I would have preferred to have done something like "*.s => :s;", then
+>   EXEC (asm.sh) ........ => (:o);, but this seems illegal.
+
+Yes, it is illegal.  Usually this is a signal that you are adding the
+definition in the wrong package.  In particular, rather than modifying
+the cc package,  you should create a new "asm" package  (after all,
+assembler code is not c code).  Then you can use your preferred way
+to define the asm tool.  Remember to set $ODINPATH to be "/.../asm"
+where "/../asm" is the directory for your asm package.
+
+Another reason for not modifying a package that you do not maintain is
+that it means every time you get a new version of that package, you have
+to merge back in your changes.  Odin's package system was designed to
+avoid this problem by allowing you to use your own packages to extend
+or override existing packages, without modifying existing packages.
+It really is very easy to set up your own package(s), even just for
+playing around.
+
+>   However, I
+>   am not sure if that additional line in cc.dg is causing problems, as
+>   I now get these errors:
+>
+>   ** Summary of error messages for /home/peterc/work/rap/src/sys/sys%all
+>   --- </home/peterc/work/rap/src/sys/sys/ctxsw.s +define=BSDURG +debug +inc_sp=(/home/peterc/work/rap/src/sys/h) :cc*o> does not exist ---
+
+If you look at the end of the cc.sh script, you will see the lines:
+
+input=`basename $ODIN_c .c`
+if [ -f $input.o ] ; then mv $input.o o; fi
+
+Since your input file is a ".s" file, $input will be set to be "asm.s",
+and since there is no named "asm.s.o", the "mv" is not executed, and there
+is no :o file produced (as indicated by the Odin error message).
+
+Cheers,
+
+Geoff
+
+
+From geoff@bellcore.com Thu Dec  7 22:24:11 1995
+Received: from flash.bellcore.com (flash.bellcore.com [192.4.13.90]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id WAA05902; Thu, 7 Dec 1995 22:23:44 -0500
+Received: from mailee.bellcore.com (mailee.bellcore.com [192.4.13.24]) by flash.bellcore.com (8.6.9/8.6.9) with ESMTP id WAA26999; Thu, 7 Dec 1995 22:22:44 -0500
+Received: from xlendi.bellcore.com (xlendi.bellcore.com [192.4.6.88]) by mailee.bellcore.com (8.6.9/8.6.4) with ESMTP id WAA05785 for <odin-local@mailee.bellcore.com>; Thu, 7 Dec 1995 22:08:30 -0500
+Received: (from geoff@localhost) by xlendi.bellcore.com (8.6.9/8.6.9) id WAA06381; Thu, 7 Dec 1995 22:07:09 -0500
+Date: Thu, 7 Dec 1995 22:07:09 -0500
+Message-Id: <199512080307.WAA06381@xlendi.bellcore.com>
+From: Geoffrey M Clemm <geoff@bellcore.com>
+To: peterc@linux.tctech.com.au
+CC: odin@xlendi.bellcore.com
+In-reply-to: <199512070510.AA31128@linux.tctech.com.au> (message from Peter
+	Chon on Thu, 7 Dec 1995 16:10:53 +1100)
+Subject: Re: more beginners questions
+X-Lines: 66
+Status: RO
+Content-Length: 2218
+Lines: 66
+
+>   From: Peter Chon <peterc@linux.tctech.com.au>
+>
+>   how do I indicate dependancies in an Odinfile?
+>   For example, in a makefile, you can have:
+>
+>   libc.a:	start.o version.h`
+>	   stuff...
+>
+>   In an Odinfile, how do I say that libc.a depends on start.o and
+>   version.h?
+
+You would just say in your Odinfile:
+
+libc.a == start.c :a
+
+Odin will infer that it needs to compile start.c (which makes it depend on
+start.o), and before doing so, will scan start.c for includes, determining
+the dependency on version.h
+
+>   Next, some source files are automatically generated. Is it necessary
+>   to write a package and a tool to do this, or can this be done within
+>   the Odinfile? For example, I wish to do something like the following
+>   makefile example:
+>
+>   inter.s: gen-inter.s
+>	   gasp -o inter.s gen-inter.s
+>
+>   where gasp is a GNU assembler preprocessor.
+
+You can just say:
+
+inter.s == () +cmd=gasp -o inter.s (gen-inter.s) :output/inter.s
+
+The :output derivation (declared in the standard "run" package) takes
+a file (which will be the standard input to the tool) and a +cmd parameter
+which is the command you want it to run, and produces a derived directory,
+:output, which contains all the files created by that run.  The "()" is
+the standard Odin "empty" file.
+
+All arguments to the +cmd parameter that are filenames should be placed
+in parentheses (as gen-inter.s is).
+
+There is also a :stdout derivation which is the standard output of a
+tool run.  Assuming "gasp" can run as a filter (i.e. reading from standard
+input and writing to standard output), you could also just say:
+
+inter.s == gen-inter.s +cmd=gasp :stdout
+
+
+>   Finally, do I need to create a package and tools to add object files
+>   to existing libraries, or merge a number of libraries into one large
+>   one?
+
+There currently is no good way in Odin to add object files to existing
+libraries as a derivation step.  Probably this feature could be added,
+but most current archive programs run so fast when creating a new archive,
+that it hasn't gotten much priority.
+
+Merging a number of libraries into one large library is not one of the
+derivations in the derivation graph.  Is there a standard way to do this?
+
+Cheers,
+
+Geoff
+
+
+
+From owner-odin@mroe.cs.colorado.edu Thu May  9 00:04 EDT 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA17884; Thu, 9 May 1996 00:04:38 -0400
+Received: from mroe.cs.colorado.edu by gw.atria.com id <AAA24292@gw.atria.com> Thu, 9 May 1996 00:04:39 -0400    
+Received: (from daemon@localhost) by mroe.cs.colorado.edu (8.7.5/8.7.3) id VAA22989 for odin-list; Wed, 8 May 1996 21:12:33 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.5/8.7.3) with SMTP id VAA22986 for <odin@cs.colorado.edu>; Wed, 8 May 1996 21:12:31 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <XAA22683@gw.atria.com> Wed, 8 May 1996 23:11:50 -0400    
+Received: by tantalum (5.x/920526.BPD)
+	id AA17781; Wed, 8 May 1996 23:11:48 -0400
+Date: Wed, 8 May 1996 23:11:48 -0400
+Message-Id: <9605090311.AA17781@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: H.Jansen@math.tudelft.nl
+Cc: odin@cs.Colorado.EDU
+Subject: building multiple targets
+Content-Type: text
+X-Lines: 42
+Status: RO
+Content-Length: 1144
+Lines: 42
+
+   From: Henk Jansen <hjansen@math.tudelft.nl>
+
+    I've got problems with the following multiple definitions in the Odinfile:
+
+    %target  == %target1  %target2
+    %target1 == ...
+    %target2 == ...
+
+    It seems that parser has problems with the first line. Probably my
+    specification is wrong. How can I issue multiple targets from one target?
+
+The right hand side of a target definition must be an Odin expression.
+"%target1 %target2" is not an Odin expression (which is why the parser
+complained).
+
+There are two basic ways of forming a composite targets: lists and command
+scripts.
+
+List Method:
+---------------------------
+%target.list == %target.sm :list
+
+%target.sm == <<
+   %target1; %target2
+---------------------------
+
+Command Method:
+---------------------------
+%target.cmd! == <<
+   %target1; %target2
+---------------------------
+
+%target.list, will build %target1 and %target2 in parallel.
+Also, the request %target.list:err will generate an error
+report for both targets.
+
+On the other hand, %target.cmd will invoke %target1 and %target2
+sequentially, and will only execute %target2 if %target1 succeeds.
+
+Cheers,
+
+Geoff
+
+From owner-odin@mroe.cs.colorado.edu Thu May 30 00:59 EDT 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA10881; Thu, 30 May 1996 00:59:30 -0400
+Received: from mroe.cs.colorado.edu by gw.atria.com id <AAA01960@gw.atria.com> Thu, 30 May 1996 00:59:30 -0400    
+Received: (from daemon@localhost) by mroe.cs.colorado.edu (8.7.5/8.7.3) id WAA00990 for odin-list; Wed, 29 May 1996 22:57:36 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.5/8.7.3) with SMTP id WAA00987 for <odin@cs.colorado.edu>; Wed, 29 May 1996 22:57:35 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <AAA01943@gw.atria.com> Thu, 30 May 1996 00:56:54 -0400    
+Received: by tantalum (5.x/920526.BPD)
+	id AA10878; Thu, 30 May 1996 00:56:52 -0400
+Date: Thu, 30 May 1996 00:56:52 -0400
+Message-Id: <9605300456.AA10878@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: mjung@uni-paderborn.de
+Cc: eli@interhdl.com, odin@cs.Colorado.EDU
+In-Reply-To: <199605101237.OAA17245@bernstein.uni-paderborn.de> (message from
+	Matthias Jung on Fri, 10 May 1996 14:37:34 +0200 (MET DST))
+Subject: Re: Cannot build Eli
+Content-Type: text
+X-Lines: 62
+Status: RO
+Content-Length: 2056
+Lines: 62
+
+   From: Matthias Jung <mjung@uni-paderborn.de>
+
+   > Thanks for the answer. I would like to know more. For example, is
+   > there a way to declare inside the Odinfile what is the C compiler that
+   > I want to use (in the same way that one can declare it in a
+   > Makefile?).
+
+You cannot set the value globally for an entire Odinfile (this would not
+combine well with Odin's scoping conventions), but you can set it for
+all appropriate targets with parameters of the form "+cc=my_cc".
+
+   > Also, ODIN_CC and its corresponding variable inside the
+   > Odinfile are not the only variables I am sure. Is there a
+   > documentation which describes all such variables?
+
+The declared Odin environment variables and their current values
+are stored in the $ODINCACHE/ENV object.  You can print this to stdout
+with the command:
+
+odin '$ODINCACHE/ENV>'
+
+   Normally, it should work like in the following example:
+
+   %setenv ! == <<EOF
+      ODIN_CXX = !g++
+   EOF
+
+   But, for some reason, it keeps saying to me:
+
+   mjung@bernstein</tmp:504> odin -r
+   Cache at /tmp/CACHE.mjung/bernstein has been reset.
+   Odin Version 1.16
+   -> %setenv
+   <>  %setenv !
+   <>    ODIN_CXX =! g++
+   Cannot change value of package variable: ODIN_CXX.
+
+   I think, that is not the expected behaviour. (Geoff??)
+
+This is the expected (documented) behavior.
+You cannot change the value of a declared package environment variable,
+except when you reset the cache (with odin -R).
+
+   A list of all the used 'package variables' can be found by scanning all
+   the .dg-files and searching for lines like:
+
+   $ODIN_CC_HOME 'directory containing the C compiler' = '';
+
+That gives you the default values and comments.  To get the current values
+in your cache, use the technique described above.
+
+   (Geoff: Is there some way of retrieving the explanation string, or
+   better, a list of all variables in Odin?)
+
+There currently is no easier way to retrieve the explanation strings
+(although I have a high priority enhancement request to provide a command
+to do this).
+
+Cheers,
+
+Geoff
+
+
+From geoff@atria.com Mon Oct 14 23:49 EDT 1996
+Subject: Re: How to define '-I'-flags to Eli-Called 'cc'? (fwd)
+Date: Mon, 14 Oct 1996 21:49:09 -0600 (MDT)
+X-Lines: 67
+Status: RO
+Content-Length: 2318
+Lines: 67
+
+The short answer is that you probably want to use +inc_sp,
+not +cc_flags.
+
+For a more detailed answer to your actual questions:
+
+1) Why is there a space between -I and the name?
+
+This is just formatting.  They are two separate values to the +cc_flags
+parameter.  Whether a space, another character, or nothing, is actually
+inserted into the cc command is up to the shell script implementing the
+c.o command.  For example, you can have your script handle -I specially,
+and not append a space to it.
+
+2) What happened to the name?
+
++cc_flags is defined as:
+
+   +cc_flags 'flags for cc'? => :cat;
+
+This means that the value is the contents of the file (a directory in
+your case) which is not what you want.
+
+Note that +inc_sp is defined as:
+
+  +inc_sp 'name of a directory in an include search path'? => :ls;
+
+which is what you want.
+
+- Geoff
+
+
+   > From mjung@uni-paderborn.de Mon Oct 14 05:57:55 1996
+   > 
+   > I wrote a specification that should refer to a library.
+   > Here, the header-files with prototypes for the library-objects can be found
+   > in some directory.
+   > 
+   > Since i want to be able to take the whole thing and to compile it in a different
+   > place, i decided to use a relative pathname to refer to the directory with the
+   > header-files introducing the library objects and functions.
+   > 
+   > To refer to the library, i wanted to use the '+cc_flags='-derivation option.
+   > If i want to refer to a relative directory, i need to put the directory-name 
+   > into parantheses.
+   > 
+   > e.g. in the Odinfile:
+   > 
+   > 	+cc_flags=-I(../../../til/interfac)
+   > 
+   > But: While generating, Odin inserts a space between the '-I' and the dirname:
+   > 
+   > ** Generating /homes/hurricane/pbcomp/frontend/pascal-/CACHE/jade/PKGS/eli/driver.c +cc_flags=-I (/homes/compinet/mjung/Pbcomp/til/interfac) +incl=(/homes/compinet/mjung/Pbcomp/frontend/pascal-/specs/sparc.specs +fold :eli*level_8_specs +fold :eli*includes) :cc*c.o
+   > 
+   > It seems that this makes the pathname disappear. The effectively called commandline
+   > (i got it with a modified c.o.sh-script)
+   > 
+   > ** Calling cc -c -I -DODIN_IGNORE driver.c
+   > 
+   > What happened?
+   > Is there a save way to specify an inclusion directory without having all the
+   > headerfiles copied in the generated sources?
+   > 
+
+
+
+
+
+
+From owner-odin@mroe.cs.colorado.edu Mon Oct 14 23:49 EDT 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Date: Mon, 14 Oct 1996 23:49:09 -0400
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: H.Jansen@math.tudelft.nl
+Cc: odin@cs.colorado.edu
+In-Reply-To: <01I9YY8FYMXU000N7F@TUDRNV.TUDelft.NL> (message from Henk Jansen
+	on Fri, 27 Sep 1996 10:22:46 +0200 (METDST))
+Subject: Re: How to use odin.el
+Content-Type: text
+X-Lines: 44
+Status: RO
+Content-Length: 1899
+Lines: 44
+
+   From: Henk Jansen <hjansen@nw.twi.tudelft.nl>
+
+    I'm not quite sure how to use odin.el within an Emacs environment.
+    I usually have one Emacs window running a shell with odin processes.
+    At the same time I have several other Emacs windows making sequential
+    updates to odin input files (mainly funnelweb documents). Is odin.el
+    to be activated in the shell window or in the updating windows?
+
+You just say "M-x odin" and this sets up an odin shell buffer you
+can use, and initializes the "M-x compile" string.  You can use this
+odin shell buffer, or any other odin sessions you may have around.
+
+More importantly, it sets up a write-file-hook, which sends messages
+to Odin letting it know every time you modify a file.  This lets Odin
+assume it will be notified about file changes, which is much more efficient
+than stat'ing the file system between every request to see if any files
+have changed.
+
+    Further, I believe that odin is difficult to learn: whilst it attempts
+    to do similar things like make in a better way, the syntax is completely
+    different.
+
+Yes, unfortunately there was no way I could significantly
+improve on Make without significantly modifying its syntax.
+
+    Odin is a complex tool, much of its cache operation is hidden from
+    the user which makes it difficult sytem to learn by trial and error.
+
+This is primarily a problem for tool package writers.  Users can just
+assume that it's all done by magic (:-).
+
+    Probably, a more extensive and structured documentation would improve this situation.
+
+Undoubtedly.  You might want to take a look at the eli system documentation
+which uses odin to orchestrate a large number of compiler writing tools.
+(eli-request@cs.colorado.edu gets you on the mailing list).
+
+Of course, anyone who would like to contribute documentation of this kind
+to the Odin distribution is encouraged to do so!
+
+Cheers,
+
+Geof
+
+
+From owner-odin@mroe.cs.colorado.edu Thu Nov 14 00:04 EST 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA01428; Thu, 14 Nov 1996 00:04:11 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <AAA08300@gw.atria.com> Thu, 14 Nov 1996 00:04:09 -0500    
+Received: (from daemon@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id WAA05794 for odin-list; Wed, 13 Nov 1996 22:03:46 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id WAA05791 for <odin@cs.colorado.edu>; Wed, 13 Nov 1996 22:03:44 -0700 (MST)
+Received: from tantalum by gw.atria.com id <AAA08282@gw.atria.com> Thu, 14 Nov 1996 00:03:14 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA01425; Thu, 14 Nov 1996 00:03:13 -0500
+Date: Thu, 14 Nov 1996 00:03:13 -0500
+Message-Id: <9611140503.AA01425@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: kelvinc@sdd.hp.com
+Cc: odin@cs.colorado.edu
+In-Reply-To: <199507201835.AA134445335@hpsdlg08.sdd.hp.com>
+	(kelvinc@sdd.hp.com)
+Subject: Re: Another question
+Content-Type: text
+X-Lines: 59
+Status: RO
+Content-Length: 1873
+Lines: 59
+
+Some of you may note the following request is well over a year old.
+I may be slow to respond, but eventually, I try to get to everything (:-).
+
+At any rate, in the recent Odin-1.19.2, the scenario described by Kelvin
+below all works except that "objects.c.sm,vw" must be located in the
+same directory as the Odinfile containing:
+   works == objects.c.sm,vw +(%paths) :exe
+since the view path is used to lookup the contents of objects.c.sm,vw
+but not objects.c.sm,vw itself.
+
+(It did not work in earlier Odin releases).
+
+Cheers,
+
+Geoff
+
+   Date: Thu, 20 Jul 1995 11:35:35 -0700
+   From: Kelvin Chong (Seed) <kelvinc@sdd.hp.com>
+   Content-Length: 372
+   X-Lines: 22
+
+   I have a question concerning view paths.  I'm using system model files
+   (*.c.sm,vw) and I'm trying to nest other files inside of it.
+
+   objects.c.sm,vw contains:
+	   file1.c
+	   file2.c
+	   other_objects.c.sm,vw
+
+   and other_objects.c.sm,vw contains:
+	   file3.c
+	   file4.c
+	   yet_another.c.sm,vw
+
+   and yet_another.c.sm,vw contains:
+	   file5.c
+	   file6.c
+
+   Now, let's say each group of files are located in their own directory
+   (ie file1.c & file2.c are in ./g1, file3.c & file4.c are in ./g2, etc.)
+   Also, the system model files can be in different directories (ie
+   objects.c.sm,vw may be in ./g1, other_objects.c.sm,vw are in
+   ./files2).  I want to be able to do something like this:
+
+   %paths == <<
+	   +view_sp=(./g1) +view_sp=(./g2) +view_sp=(./files2)
+
+   works == objects.c.sm,vw +(%paths) :exe
+
+   and have Odin find files in those three directories.  It finds the
+   .sm,vw files alright, but it won't find the files inside of them.
+   If I moved those .c.sm,vw files into the directories of the files they
+   contain, it'll work.  How do I handle nested files like this?  Is
+   there some elegant way I don't know of other than modifying the vc.dg?
+
+   Thanks,
+   Kelvin
+
+
+
+From owner-odin@mroe.cs.colorado.edu Thu Nov 14 00:33 EST 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA01488; Thu, 14 Nov 1996 00:33:54 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <AAA08861@gw.atria.com> Thu, 14 Nov 1996 00:33:53 -0500    
+Received: (from daemon@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id WAA06468 for odin-list; Wed, 13 Nov 1996 22:33:34 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id WAA06464 for <odin@cs.colorado.edu>; Wed, 13 Nov 1996 22:33:31 -0700 (MST)
+Received: from tantalum by gw.atria.com id <AAA08841@gw.atria.com> Thu, 14 Nov 1996 00:33:01 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA01484; Thu, 14 Nov 1996 00:33:00 -0500
+Date: Thu, 14 Nov 1996 00:33:00 -0500
+Message-Id: <9611140533.AA01484@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: MFD@bup-nbg.de
+Cc: odin@cs.colorado.edu
+In-Reply-To: <49D5A71F8@nwserver0> (mfd@bup-nbg.de)
+Subject: Re: Is it possible to build from RCS include-files?
+Content-Type: text
+X-Lines: 87
+Status: RO
+Content-Length: 2230
+Lines: 87
+
+
+   From: "Matthias Duerrbeck" <mfd@bup-nbg.de>
+   Date: Wed, 31 Jan 1996 12:43:27 CET-1
+
+Yes, another message almost a year old, but I was delaying until Odin
+handled this situation properly (which as of version 1.16.2, it does :-).
+
+   I would like to build directly from RCS source files and RCS include files. 
+   My solution:
+
+   %all ! == << END
+     helloinc.h
+     helloinc
+   END
+
+I'm not sure why you'd want to group helloinc.h and helloinc,
+or why you'd want to make it a command target (with the `!').
+
+   helloinc.h == ../archiv/RCS/helloinc1.h,v +rev=1.1 : co
+
+   helloinc == %helloinc.c.sm +inc_sp=(.) :exe
+
+   %helloinc.c.sm == << EOF
+      %ARCHIV/helloinc.c,v +rev=1.1;
+      %ARCHIV/print.c,v +rev=1.1;
+   EOF
+
+   %ARCHIV == ../archiv/RCS
+
+   Is there another way to do this job?
+
+Yes.
+
+   Can the Odin system perform the checkout of the include-file?
+
+Yes.
+
+   Can the +rev parameter be inherited?
+
+Yes.  (but only as of version 1.16.2)
+
+   Is it possible to use a viewpath?
+
+Yes.  In particular, you could have something like:
+
+--------------------------------------------
+hello == %hello.c.sm,vw +rev=1.1 +inc_sp=(%incdir) +view_sp=(%ARCHIV) :exe
+
+%incdir == %helloinc.sm,vw +rev=1.1 +view_sp=(%ARCHIV) :vw.dir
+
+%hello.c.sm,vw == << END
+   helloinc.c
+   print.c
+END
+
+%helloinc.sm,vw == << END
+   helloinc.h
+   helloinc_other.h
+END
+
+%ARCHIV == ../archiv
+--------------------------------------------
+
+Odin would then search for helloinc.c in
+  helloinc.c
+  RCS/helloinc.c,v
+  helloinc.c,v
+  ../archiv/helloinc.c
+  ../archiv/RCS/helloinc.c,v
+  ../archiv/helloinc.c,v
+
+and similarly for the other files specified in the ,vw files.
+If the file was found in a ,v file, it would automatically check
+out the appropriate version (as indicated by the inherited +rev
+parameter).
+
+Something important to note here is that the check-out would take
+place into a derived file in the Odin cache, not into the source
+directory containing the ,v file (or any other source directory).
+This means that you can _concurrently_ be building several different
+versions of your system from the rcs archive, without allocating
+separate work spaces for the builds, much less worrying about doing
+the checkouts yourself.
+
+Cheers,
+
+Geoff
+
+From owner-odin@mroe.cs.colorado.edu Thu Nov 14 01:21 EST 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA01901; Thu, 14 Nov 1996 01:21:07 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <BAA09545@gw.atria.com> Thu, 14 Nov 1996 01:21:05 -0500    
+Received: (from daemon@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id XAA07356 for odin-list; Wed, 13 Nov 1996 23:11:36 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id XAA07353 for <odin@cs.colorado.edu>; Wed, 13 Nov 1996 23:11:35 -0700 (MST)
+Received: from tantalum by gw.atria.com id <BAA09412@gw.atria.com> Thu, 14 Nov 1996 01:11:04 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA01891; Thu, 14 Nov 1996 01:11:03 -0500
+Date: Thu, 14 Nov 1996 01:11:03 -0500
+Message-Id: <9611140611.AA01891@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: MFD@bup-nbg.de
+Cc: odin@cs.colorado.edu
+In-Reply-To: <40FF44E11@nwserver0> (mfd@bup-nbg.de)
+Subject: Re: Build from RCS include-files and other problems
+Content-Type: text
+X-Lines: 56
+Status: RO
+Content-Length: 1092
+Lines: 56
+
+   From: "Matthias Duerrbeck" <mfd@bup-nbg.de>
+   Date: 	Mon, 8 Jul 1996 12:07:27 CET-1
+
+   You uncovered a bug by verifying the build from RCS include-
+   files. Is this bug already fixed?
+
+Finally, yes.
+
+   Now I use version 1.16.1 and I have other problems:
+
+   Odinfile:
+
+   %ARCHIV == ../archiv/RCS
+
+   hello1 == ../archiv/RCS/hello.c,v +rev=1.1 : exe
+
+   hello2 == %ARCHIV/hello.c,v +rev=1.1 : exe
+
+   hello3 == %hello3.c.sm +rev=1.1 : exe
+   %hello3 == << END
+     ../archiv/RCS/hello.c,v
+   END
+
+   hello4 == %hello.c.sm,vw +view_sp=(../archiv/RCS) : exe
+   %hello.c.sm,vw == << END
+      hello.c
+   END
+
+
+   Problems:
+
+   hello1: o.k. rev 1.1 generated
+
+   hello2: rev 1.3 (newest) generated, "rev"-parameter not taken 
+   into account 
+
+This works properly in 1.16.2.
+
+   hello3: rev 1.3 (newest) generated, "rev"-parameter not 
+   inherited 
+
+This works properly in 1.16.2.
+
+Note: You have a typo in the line
+   %hello3 == << END
+which should be
+   %hello3.c.sm == << END
+
+   hello4: error message: <hello.c> not found in view-path
+
+This works properly in 1.16.2.
+
+Cheers,
+
+Geoff
+
+
+From owner-odin@mroe.cs.colorado.edu Fri Nov 29 22:31 EST 1996
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA24945; Fri, 29 Nov 1996 22:31:13 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <WAA07688@gw.atria.com> Fri, 29 Nov 1996 22:31:14 -0500    
+Received: (from mjrdomo@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id UAA27441 for odin-list; Fri, 29 Nov 1996 20:29:12 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id UAA27436 for <odin@cs.colorado.edu>; Fri, 29 Nov 1996 20:29:08 -0700 (MST)
+Received: from tantalum by gw.atria.com id <WAA07598@gw.atria.com> Fri, 29 Nov 1996 22:28:36 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA24933; Fri, 29 Nov 1996 22:28:34 -0500
+Date: Fri, 29 Nov 1996 22:28:34 -0500
+Message-Id: <9611300328.AA24933@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: beatty@netcom.com
+Cc: odin@cs.colorado.edu
+In-Reply-To: <9611290411.AA11066@beatty.slip.netcom.com> (message from Derek
+	Lee Beatty on Thu, 28 Nov 96 22:11:25 -0600)
+Subject: Re: odin on platform with fascist linker?
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 43
+Status: RO
+Content-Length: 1421
+Lines: 43
+
+   From: Derek Lee Beatty <beatty@beatty.slip.netcom.com>
+
+   [General comment: nice system; I'm glad I ran across a reference to  
+   it in one of Mary Shaw's papers.]
+
+Thanks!
+
+   Interesting problem running Odin 1.15.1 on my NeXT machine at home:  
+   apparently "ranlib" drops a timestamp into ".a" files, and "ld"  
+   insists on this timestamp matching the ".a" file's modification time.
+
+   Do you forsee any problems with adding "-p" switches to the "cp"  
+   commands in "copy.csh" in the "odin" package?  It fixed my problem.
+
+That's a good solution.  I've run into Unix's that did not support the -p
+switch though.
+
+Other solutions:
+
+- modify copy.sh so that it checks to see if it is copying into a .a file,
+in which case it does the ranlib after the copy.
+
+- use virtual targets, i.e.
+
+%libccc.a == %ccc.SM +gnu +debug :a
+
+ccc_a.t == ccc_a.t.C +gnu +debug  +lib=(%libccc.a) :exe
+
+and then since virtual targets like %libcc.a are used directly out of
+the cache, there is no copying that would disrupt the date stamp.
+
+   PS: There were a few "uninteresting" problems (typical C code porting  
+   issues) on this platform; diffs available on your request.
+
+Yes, I'm interested in any fixes that help Odin compile cleanly
+on any Unix platform.  Please send the diffs.
+
+I've copied this response to the odin mailing list at odin@cs.colorado.edu,
+since these questions may be of general interest.
+
+Cheers,
+
+Geoff
+
+From owner-odin@mroe.cs.colorado.edu Tue Jan  7 00:40 EST 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA19394; Tue, 7 Jan 1997 00:40:11 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <AAA06776@gw.atria.com> Tue, 7 Jan 1997 00:40:08 -0500    
+Received: (from mjrdomo@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id WAA27547 for odin-list; Mon, 6 Jan 1997 22:38:34 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id WAA27502 for <odin@cs.colorado.edu>; Mon, 6 Jan 1997 22:38:14 -0700 (MST)
+Received: from tantalum by gw.atria.com id <AAA06632@gw.atria.com> Tue, 7 Jan 1997 00:37:31 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA19391; Tue, 7 Jan 1997 00:37:30 -0500
+Date: Tue, 7 Jan 1997 00:37:30 -0500
+Message-Id: <9701070537.AA19391@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: beatty@ibmoto.com
+Cc: markj@ibmoto.com, odin@cs.colorado.edu
+In-Reply-To: <199701061531.JAA23883@ripcity.ibmoto.com> (message from Derek
+	Beatty on Mon, 06 Jan 97 09:31:26 -0600)
+Subject: library dependencies
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 42
+Status: RO
+Content-Length: 1683
+Lines: 42
+
+   From: Derek Beatty <beatty@ibmoto.com>
+
+   ... I have 
+   several different pieces ("packages") of code; each has its own directory and 
+   Odinfile.  Previously, each Odinfile had commands of the form:
+
+   %install ! == <<
+       %exported_headers :list > ../../../include
+       %exported_libs :list > ../../../lib
+
+   Thus Odin did not track dependencies between packages.  (My reasoning was that 
+   I might want to work on package "A", a client of package "B", while "B" was in 
+   an inconsistent state.)
+
+   Last week I changed all that, adding an Odinfile to ../../../include that 
+   describes where each header comes from.
+
+With Odin, I try to adhere to the "have your cake and eat it too"
+philosophy (:-).
+
+In particular, you can have two directories, one with an Odinfile
+containing definitions for the libraries (your second approach),
+and a second one with an Odinfile that just has a %install target
+with commands that copy the libraries from the first directory
+(your first approach).
+
+Then you put both directories (in the specified order) on your
+library search path.  Odin will first try to build the libraries
+that it needs in the first directory.  For any library that
+fails to build, it will then look in the second directory.
+
+And here's the cute part:  even though Odin goes ahead and builds
+your executable (and lets you run it, etc), it knows that you really
+care about those errors from the first directory, so it will give
+you the error messages from the first libraries as part of the
+error report for your executable, even though it went ahead and
+used the fallback libraries in the second directory to actually
+build the executable.
+
+Cheers,
+
+Geoff
+
+From owner-odin@mroe.cs.colorado.edu Thu Jan  9 14:27 EST 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA25353; Thu, 9 Jan 1997 14:27:50 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <OAA19740@gw.atria.com> Thu, 9 Jan 1997 14:27:48 -0500    
+Received: (from mjrdomo@localhost) by mroe.cs.colorado.edu (8.7.6/8.7.3) id MAA24791 for odin-list; Thu, 9 Jan 1997 12:26:30 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.7.6/8.7.3) with SMTP id MAA24747 for <odin@cs.colorado.edu>; Thu, 9 Jan 1997 12:26:07 -0700 (MST)
+Received: from tantalum by gw.atria.com id <OAA19407@gw.atria.com> Thu, 9 Jan 1997 14:25:34 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA25347; Thu, 9 Jan 1997 14:25:28 -0500
+Date: Thu, 9 Jan 1997 14:25:28 -0500
+Message-Id: <9701091925.AA25347@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: waite@scotty.cs.colorado.edu
+Cc: odin@cs.colorado.edu
+In-Reply-To: <199701091626.JAA24601@scotty.cs.colorado.edu> (message from
+	William Waite on Thu, 9 Jan 1997 09:26:06 -0700 (MST))
+Subject: Re: library dependencies
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 41
+Status: RO
+Content-Length: 1447
+Lines: 41
+
+I just noticed that the odin.tex reference manual section relevant
+to this topic not been updated.  I've modified the section that defines
+:view to be as follows:
+
+The {\ex :view} derivation produces a list from a text file.
+The format of the text file is sequences of odin-expressions
+naming file objects, where each sequence is terminated by
+an odin-expression naming a string object.
+An example of such an input file would be:
+\begin{verbatim}
+# the search sequence for test.h
+   test.h
+   test.h,v :co
+   RCS/test.h,v :co
+   = 'test.h'
+# the search sequence for sys.h
+   sys.h
+   SCCS/s.sys.h :co
+   = 'sys.h'
+\end{verbatim}
+The {\ex :view} list contains the first file from each sequence
+whose status is greater than {\ex ERROR}.
+If none of the files in a particular sequence have the appropriate
+status, the status of the {\ex :view} object is set to {\ex ERROR},
+unless the sequence is terminated by the empty string odin-expression:
+\begin{verbatim}
+   = ''
+\end{verbatim}
+in which case that sequence is just ignored.
+The {\ex :view} derivation depends only on the file selected
+from a given sequence and on the files preceding the
+selected file in the given sequence.
+This means that error messages from these preceding files
+are included in {\ex :error} reports for the {\ex :view} object,
+but any derived files following a selected files
+from a given sequence are ignored when the {\ex :view}
+object is made up-to-date.
+
+Cheers,
+
+Geoff
+
+From owner-odin@mroe.cs.colorado.edu Wed Feb 26 23:56 EST 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA00698; Wed, 26 Feb 1997 23:56:10 -0500
+Received: from mroe.cs.colorado.edu by gw.atria.com id <XAA17787@gw.atria.com> Wed, 26 Feb 1997 23:56:11 -0500    
+Received: (from mjrdomo@localhost) by mroe.cs.colorado.edu (8.8.5/8.7.3) id VAA26343 for odin-list; Wed, 26 Feb 1997 21:55:32 -0700 (MST)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2]) by mroe.cs.colorado.edu (8.8.5/8.7.3) with SMTP id VAA26314 for <odin@cs.colorado.edu>; Wed, 26 Feb 1997 21:55:18 -0700 (MST)
+Received: from tantalum by gw.atria.com id <XAA17760@gw.atria.com> Wed, 26 Feb 1997 23:54:47 -0500    
+Received: by tantalum (5.x/920526.BPD)
+	id AA00689; Wed, 26 Feb 1997 23:54:45 -0500
+Date: Wed, 26 Feb 1997 23:54:45 -0500
+Message-Id: <9702270454.AA00689@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: yates@highway1.com
+Cc: odin@cs.colorado.edu
+In-Reply-To: <3315086E.5DAA@highway1.com> (yates@highway1.com)
+Subject: Re: Testing the water
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 34
+Status: RO
+Content-Length: 1008
+Lines: 34
+
+   From: yates@highway1.com (john yates)
+
+   I am an erstwhile user of DSEE and ClearCase.
+
+Two good choices (:-).
+
+   I am starting
+   up an embedded system project.  We will be developing on
+   Windows NT boxes, though in time the code will have to be
+   ported to the embedded environment.
+
+   I would very much like to have access to distributed builds.
+   From what I have read of Odin it sounds promising. Is anyone
+   actually using it? Is there an NT port?
+
+Unfortunately there currently is not an NT port.
+A user from Germany began a port, but stopped because of
+the lack of symlinks (it would be feasible to make Odin
+not use symlinks, but it would require some work).
+
+Unfortunately, I seem to have mislaid the message about
+the status of this port.
+
+I did recently hear that symlinks did appear in the latest
+version of NT, but I haven't had a chance to confirm this
+rumor.  I would happily merge an NT port into the standard
+distribution if someone would like to pursue this.
+
+Cheers,
+
+Geoff
+
+
+
+
+From owner-odin@mroe.cs.colorado.edu Tue May 13 22:43 EDT 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Date: Tue, 13 May 1997 22:41:52 -0400
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: odin@cs.colorado.edu
+In-Reply-To: <9705132301.AA39543@kreuzjoch.pc-plus.de>
+	(Stephen.Riehm@PC-Plus.DE)
+Subject: Re: Example Odinfiles? (looking for an introduction)
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 60
+Status: RO
+Content-Length: 2608
+Lines: 60
+
+   From: Stephen.Riehm@PC-Plus.DE (Stephen Riehm)
+
+   I've just read the Odin System Reference Manual, and while it doesn't
+   quite fit the method I was thinking about, it definitely warrants a
+   closer look.
+
+I noticed the address "PC-Plus" ... Odin has not (yet) been ported
+to Windows, so you would need to be running Linux or some other Unix
+variant unless you wanted to do some porting yourself.
+
+   The features which I am looking for are:
+	   multiple source trees (ie: the source files could be in my
+	       private directory, or in a central shared directory)
+
+That is handled by the "vc" package, which lets you define a +view_sp
+(view search path) parameter, indicating in which directories to search
+for source files.
+
+	   how does Odin handle things like automatic regression testing?
+	       Do you have to set up a rule for each test?
+
+No, the output of each test is a separate object, but the regression
+run would just be a list containing the test output objects.
+In cases where you have the same program being applied to several
+different input data files, you can use the :map second-order derivation
+to apply the program to a list of the input data files.
+
+               Is it possible
+	       to specify a list of things which need to be done in a
+	       certain order? (I know about the shell commands which can
+	       be set off with !<< - but in the example on page 11, how
+	       would you specify when the backup should be triggered?)
+
+The !<< notation is handy for defining a little executable script,
+but probably isn't the way you want to handle regression runs,
+since invoking the executable doesn't capture the output status
+or results from the test run.  What you probably want is something
+like:
+
+data1 +prog=(test_prog) :stdout +other=(expected_data1_out) :diff
+
+i.e. compare the output of the test run against the expected output.
+
+   I guess I'm also interested in the complexity of Odinfiles for Large
+   systems. We're using gmake at the moment, but everyone agrees that
+   gmake just can't cut it, and it's just getting too complex. Can some
+   one show me an example of a complex system defined by relatively
+   simple odinfiles?
+
+You'd probably have to indicate what is the source of the complexity
+you are encountering?  Files depending on derived files in other
+directories?  Source transformation tools with complex dependencies?
+Multiple version control systems?  Building system variants concurrently?
+Odinfile's are usually much simpler than the corresponding makefiles
+if you really care about the dependencies being tracked correctly.
+
+Cheers,
+
+Geoff
+
+
+From owner-odin@mroe.cs.colorado.edu Wed Jul  9 23:45 EDT 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA10228; Wed, 9 Jul 1997 23:45:46 -0400
+Received: from mroe.cs.colorado.edu by gw.atria.com id <XAA24656@gw.atria.com> Wed, 9 Jul 1997 23:45:47 -0400    
+Received: (from mjrdomo@localhost)
+	by mroe.cs.colorado.edu (8.8.6/8.8.6) id VAA11409
+	for odin-list; Wed, 9 Jul 1997 21:44:36 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2])
+	by mroe.cs.colorado.edu (8.8.6/8.8.6) with SMTP id VAA11403
+	for <odin@cs.colorado.edu>; Wed, 9 Jul 1997 21:44:30 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <XAA24490@gw.atria.com> Wed, 9 Jul 1997 23:43:59 -0400    
+Received: by tantalum (5.x/920526.BPD)
+	id AA10222; Wed, 9 Jul 1997 23:43:57 -0400
+Date: Wed, 9 Jul 1997 23:43:57 -0400
+Message-Id: <9707100343.AA10222@tantalum>
+From: "Geoffrey M. Clemm" <geoff@tantalum.atria.com>
+To: odin@cs.colorado.edu
+In-Reply-To: <199707092152.QAA59395@jet.ibmoto.com> (message from Sheetal
+	Kakkad on Wed, 09 Jul 97 16:52:29 -0600)
+Subject: Re: Another Odin question (re. max builds limit?)
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 36
+Status: RO
+Content-Length: 1508
+Lines: 36
+
+   From: Sheetal Kakkad <svkakkad@ibmoto.com>
+
+   I have a question regarding the maximum number of builds that can be 
+   started in parallel. Specifically, is there an inherent limit imposed by 
+   Odin on this number?
+
+None that I am aware of.
+
+   We tried an Odinfile with maxbuilds set to about 40 
+   (and approrpriate number of hosts in the buildhosts variable), but found 
+   that Odin spawned only about 26 processes (remote builds), ignoring the 
+   maxbuilds value. I do not think we hit the OS's max process limit because 
+   there was no error message (as I would expect to see from "fork" when the 
+   process limit is reached).
+
+I'm guessing that the builds were finishing fast enough that it never
+needed to get to the 27'th host.  Odin doesn't fire off processes until
+it reaches maxbuilds.  It fires off a process, checks to see if any
+are done, and if so handles that result, and then fires off the next
+process, etc.  This allows you to put the "preferred" hosts on the
+beginning of your buildhost list, and be able to count on the fact
+that Odin will keep the preferred hosts busy before firing up a build
+on some host later in the buildhost list.
+
+One way to test this is to modify the build script so that it hangs,
+to guarantee that none of the builds will complete, thus guaranteeing
+that Odin will end up using all the buildhost entries (you of course
+also have to ensure that there are 40 things that can be done in
+parallel, but I'm sure you're aware of that).
+
+Cheers,
+
+Geoff
+
+
+
+
+From owner-odin@mroe.cs.colorado.edu Tue Aug 19 14:10 EDT 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA02152; Tue, 19 Aug 1997 14:10:02 -0400
+Received: from rational2.rational.com by gw.atria.com id <OAA25154@gw.atria.com> Tue, 19 Aug 1997 14:10:00 -0400 (EDT)
+Received: from igor.rational.com (igor [89.64.2.102])
+	by rational2.rational.com (8.8.6/8.8.6) with SMTP id LAA04551
+	for <gclemm@atria.com>; Tue, 19 Aug 1997 11:09:58 -0700 (PDT)
+Received: from rational.rational.com (rational.rational.com [89.30.4.42]) by igor.rational.com (8.6.9/igor-1.0-wwong) with ESMTP id LAA06800 for <gclemm@igor.rational.com>; Tue, 19 Aug 1997 11:09:52 -0700
+Received: from mroe.cs.colorado.edu (mroe.cs.colorado.edu [128.138.243.151])
+	by rational.rational.com (8.8.6/8.8.6) with ESMTP id LAA06114
+	for <gclemm@rational.com>; Tue, 19 Aug 1997 11:09:51 -0700 (PDT)
+Received: (from mjrdomo@localhost)
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) id LAA21575
+	for odin-list; Tue, 19 Aug 1997 11:36:12 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2])
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) with ESMTP id LAA21569;
+	Tue, 19 Aug 1997 11:36:06 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <NAA20544@gw.atria.com> Tue, 19 Aug 1997 13:35:34 -0400 (EDT)
+Received: by tantalum (5.x/920526.BPD)
+	id AA02085; Tue, 19 Aug 1997 13:35:32 -0400
+Date: Tue, 19 Aug 1997 13:35:32 -0400
+Message-Id: <9708191735.AA02085@tantalum>
+From: "Geoffrey M. Clemm" <gclemm@tantalum.atria.com>
+To: tony@cs.jcu.edu.au
+Cc: elibugs@cs.colorado.edu, odin@cs.colorado.edu
+In-Reply-To: <33F93E0C.246@cs.jcu.edu.au> (message from Tony Sloane on Tue, 19
+	Aug 1997 16:32:44 +1000)
+Subject: Re: :? and Odinfiles
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 56
+Status: RO
+Content-Length: 1653
+Lines: 56
+
+
+For efficiency, the help requests (:?, +?, etc.) are all constrained
+to produce their output without actually running any tools, so all
+they can use is the help request itself and information from the
+derivation graph.
+
+So Odin can't do much with "%brspecs:?" other than letting you
+know about the derivations that apply to all objects.
+
+You can let Odin know that this is a specs file by calling it
+"%br.specs" instead of "%brspecs", because then Odin can infer
+that it will be a ".specs" file, and give you more appropriate help.
+
+In case you're wondering why processing the Odinfile is considered
+running a tool, consider the case where your Odinfile just consists
+of the line:
+
+   == proto.of :do_something_really_hairy
+
+Odin would have to run the "do_something_really_hairy" tool before
+it could discover what your target is bound to (if anything).
+
+Cheers,
+Geoff
+
+
+   From: Tony Sloane <tony@cs.jcu.edu.au>
+
+   One thing that has been bugging me a bit lately that you might be able
+   to comment on.  If you have something like
+
+	   %brspecs == branch.specs
+
+   in an Odinfile, the command
+
+	   %brspecs :?
+
+   doesn't produce what I'd expect (a list of the products that can be
+   derived from branch.specs).  It produces what appears to be a generic
+   list (things that can be derived from anything?).
+
+   Why should the above command be any different from the following?
+
+	   branch.specs :?
+
+   which does produce what I expect.
+
+   There may be an implementation-based reason but it's not intuitive for
+   users.  Since one can do something like
+
+	   %brspecs :exe
+
+   users expect to see exe listed in response to "%brspecs :?".
+
+   Tony
+
+
+From owner-odin@mroe.cs.colorado.edu Wed Aug 20 09:35 EDT 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA03255; Wed, 20 Aug 1997 09:35:21 -0400
+Received: from rational2.rational.com by gw.atria.com id <JAA27314@gw.atria.com> Wed, 20 Aug 1997 09:35:20 -0400 (EDT)
+Received: from igor.rational.com (igor [89.64.2.102])
+	by rational2.rational.com (8.8.6/8.8.6) with SMTP id GAA10069
+	for <gclemm@atria.com>; Wed, 20 Aug 1997 06:35:19 -0700 (PDT)
+Received: from rational.rational.com (rational.rational.com [89.30.4.42]) by igor.rational.com (8.6.9/igor-1.0-wwong) with ESMTP id GAA14865 for <gclemm@igor.rational.com>; Wed, 20 Aug 1997 06:35:12 -0700
+Received: from mroe.cs.colorado.edu (mroe.cs.Colorado.EDU [128.138.243.151])
+	by rational.rational.com (8.8.6/8.8.6) with ESMTP id GAA26118
+	for <gclemm@rational.com>; Wed, 20 Aug 1997 06:35:11 -0700 (PDT)
+Received: (from mjrdomo@localhost)
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) id HAA18720
+	for odin-list; Wed, 20 Aug 1997 07:13:21 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2])
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) with ESMTP id HAA18714;
+	Wed, 20 Aug 1997 07:13:15 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <JAA24575@gw.atria.com> Wed, 20 Aug 1997 09:12:28 -0400 (EDT)
+Received: by tantalum (5.x/920526.BPD)
+	id AA03125; Wed, 20 Aug 1997 09:12:26 -0400
+Date: Wed, 20 Aug 1997 09:12:26 -0400
+Message-Id: <9708201312.AA03125@tantalum>
+From: "Geoffrey M. Clemm" <gclemm@tantalum.atria.com>
+To: tony@cs.jcu.edu.au
+Cc: elibugs@cs.colorado.edu, odin@cs.colorado.edu
+In-Reply-To: <33FA29E6.4606@cs.jcu.edu.au> (message from Tony Sloane on Wed,
+	20 Aug 1997 09:19:02 +1000)
+Subject: Re: :? and Odinfiles
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 26
+Status: RO
+Content-Length: 1017
+Lines: 26
+
+   From: Tony Sloane <tony@cs.jcu.edu.au>
+
+   > For efficiency, the help requests (:?, +?, etc.) are all constrained
+   > to produce their output without actually running any tools ...
+
+   I'd suggest that this isn't very useful behaviour.  If 'blah :fred' 
+   is a legal derivation, users expect 'blah :?' to list fred.  Appealing
+   to efficiency arguments doesn't cut it with most users :-)
+
+You'd be surprised how many users find efficiency arguments appealing (:-).
+
+But let's try another one:
+
+If you use the input object (rather than the input object name) to determine
+the results of :?, what do you do if the input object cannot be produced
+because of errors?  Do you say "can't give you help, because there are
+errors" (pretty annoying), or produce different help messages depending 
+on whether there are errors or not (pretty confusing)?
+
+Note that the implementation of this change is trivial (probably a couple
+of lines of code), so the only issue here is what is the right thing to do.
+
+Cheers,
+
+Geoff
+
+
+From owner-odin@mroe.cs.colorado.edu Fri Oct 17 12:43 EDT 1997
+Return-Path: <owner-odin@mroe.cs.colorado.edu>
+Received: from gw.atria.com by tantalum (5.x/920526.BPD)
+	id AA01960; Fri, 17 Oct 1997 12:43:01 -0400
+Received: from rational2.rational.com by gw.atria.com id <MAA22872@gw.atria.com> Fri, 17 Oct 1997 12:43:01 -0400    
+Received: from igor.rational.com (igor [89.64.2.102])
+	by rational2.rational.com (8.8.6/8.8.6) with SMTP id JAA16931
+	for <gclemm@atria.com>; Fri, 17 Oct 1997 09:42:57 -0700 (PDT)
+Received: from rational.com (rational.rational.com [89.30.4.42]) by igor.rational.com (8.6.9/igor-1.0-wwong) with ESMTP id JAA22792 for <gclemm@igor.rational.com>; Fri, 17 Oct 1997 09:42:43 -0700
+Received: from mroe.cs.colorado.edu (mroe.cs.colorado.edu [128.138.243.151])
+	by rational.com (8.8.6/8.8.6) with ESMTP id JAA03772
+	for <gclemm@rational.com>; Fri, 17 Oct 1997 09:40:15 -0700 (PDT)
+Received: (from mjrdomo@localhost)
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) id KAA25190
+	for odin-list; Fri, 17 Oct 1997 10:15:05 -0600 (MDT)
+Received: from gw.atria.com (gw.atria.com [192.88.237.2])
+	by mroe.cs.colorado.edu (8.8.7/8.8.7) with SMTP id KAA25138
+	for <odin@cs.colorado.edu>; Fri, 17 Oct 1997 10:12:42 -0600 (MDT)
+Received: from tantalum by gw.atria.com id <MAA19736@gw.atria.com> Fri, 17 Oct 1997 12:11:10 -0400    
+Received: by tantalum (5.x/920526.BPD)
+	id AA01916; Fri, 17 Oct 1997 12:11:09 -0400
+Date: Fri, 17 Oct 1997 12:11:09 -0400
+Message-Id: <9710171611.AA01916@tantalum>
+From: "Geoffrey M. Clemm" <gclemm@tantalum.atria.com>
+To: che@uni-paderborn.de
+Cc: odin@cs.colorado.edu
+In-Reply-To: <199710171349.PAA03569@gitarre.uni-paderborn.de>
+	(che@uni-paderborn.de)
+Subject: Re: REFERENCE-Objects in Odin
+Sender: owner-odin@mroe.cs.colorado.edu
+Precedence: bulk
+Content-Type: text
+X-Lines: 71
+Status: RO
+Content-Length: 2138
+Lines: 71
+
+
+   From: che@uni-paderborn.de
+
+   My (part of) the derivation graph (test.dg) looks like this:
+
+   +machine 'machine param'?=> :cat;
+
+   :the_machine_ref 'selected machine'? => :REFERENCE;
+   :gcel_machine 'selected machine'? => :FILE;
+   :gcpp_machine 'selected machine'? => :FILE;
+   :use_the_machine_ref 'selected machine'? => :FILE;
+
+   EXEC (gcpp_machine.sh) (:FILE)
+	   => (:gcpp_machine);
+
+   EXEC (gcel_machine.sh) (:FILE)
+	   => (:gcel_machine);
+
+   EXEC (the_machine_ref.sh) (:gcpp_machine)@ (:gcel_machine)@ (+machine) 
+	   => (:the_machine_ref);
+
+   EXEC (use_the_machine_ref.sh) (:the_machine_ref)
+	   => (:use_the_machine_ref);
+
+   Using this Odin says:
+
+   Type must be atomic : test*the_machine_ref
+
+Ooops.  I never do say in the reference manual how to create
+reference objects.  Your only clue would have been to browse
+through the .dg files in the distribution, and notice that
+reference types can be created by the READ-LIST tool (Odin will
+give you an error if the input file to the READ-LIST tool has
+more than one line in it).
+
+So in your case, you would need to declare:
+
+:the_machine_name 'name of selected machine' => :FILE;
+:the_machine_ref 'reference to selected machine'? => :REFERENCE;
+
+EXEC (the_machine_ref.sh) (:gcpp_machine)@ (:gcel_machine)@ (+machine) 
+	=> (:the_machine_ref_name);
+
+READ_LIST (:the_machine_name) => (:the_machine_ref);
+
+The explanation here is that a user tool can only create a file.
+You need to use an internal tool (such as READ_LIST) to create
+a list or a reference.  I'll add a READ_REFERENCE tool to avoid
+this confusion.
+
+   The other problem I have, is how the file the_machine_ref.sh
+   should look like. You said, I just have to give back one of
+   the (:..._machine)-objects. 
+   But how will I do that.
+   Have I to make a copy , e.g.
+	   cp $gcpp_machine the_machine_ref.
+
+   In this case, I don't know, hoe Odin  will recognize
+   the relation between the input and output-object.
+
+No, you would say:
+
+ echo $gcpp_machine the_machine_name.
+
+As you correctly point out, if you just did the copy, it would have
+the contents, but not the pointer it needs.
+
+Cheers,
+
+Geoff
+
+

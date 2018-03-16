@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>Missing Lido Computations</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Missing Lido Computations</h1>
+<hr>
+
+<b>From the reference manual:</b>
+<p>
+
+<dl>
+<dd>There must be exactly one attribute computation for each
+synthesized attribute of the left-hand side nonterminal and for
+each inherited attribute of each right-hand side nonterminal.
+</dl>
+
+<p>
+<b>Typical Error Situations</b>
+
+<ul>
+<li> Forgetting to specify an attribute computation
+<li> Misspelling the attribute name in an attribute computations
+<li> Misspelling the attribute name in an attribute use
+</ul>
+
+<b>Example:</b>
+
+<p>
+<pre>
+   ATTR	i : int;
+   ...
+
+   RULE r2 : X ::= '(' X '.' X ')'
+   COMPUTE somethingelse();
+   END;
+
+   RULE r3 : X ::= 'x'
+   COMPUTE  something();
+            X.i = 1;
+   END;
+</pre>
+
+<p>
+==> <tt>ERROR: computation of X[1].i is missing in RULE r2</tt>
+
+<p>Lido's <a href="showfe.html">showFe</a> protocol lists all attribibute/symbol
+associations.
+
+
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

@@ -1,0 +1,94 @@
+/*	Copyright (c) 1991 Geoffrey M. Clemm */
+/*	geoff@boulder.colorado.edu */
+
+#include "scan.h"
+
+NODES
+   "CMANDS" "NULLCD" "DISPLY" "COPYTR" "EDIT"   "COPYTL" "EXECUT"
+   "UTILTY" "VARVAL" "VARSET" "HELP"   "EPHELP" "SFHELP" "PFHELP"
+
+   "DRVFIL" "EMPFIL" "ARTFIL" "ABSFIL"
+   "PRMOPR" "APLOPR" "DRVOPR" "HODOPR" "ELMOPR" "DIROPR" "SEGOPR"
+   "OPRTNS" "PRMVLS" "PVLFIL" "STRING" "HOSTWD" "WORD"   "OBJTID"
+
+RULES
+
+Command
+   -> SingleCommand // ';'		=> "CMANDS"?;
+
+SingleCommand
+   -> ()				=> "NULLCD"
+   -> Query
+   -> Execute
+   -> Copy
+   -> Variable;
+
+Query
+   -> OdinExpr;
+
+Execute
+   -> OdinExpr EPString			=> "EXECUT"
+   -> EPString				=> "EXECUT"
+   -> OdinExpr '!'			=> "EXECUT"
+   -> '!'				=> "EXECUT"
+   -> OdinExpr '!' ':' Word		=> "UTILTY"
+   -> '!' ':' Word			=> "UTILTY";
+
+Copy
+   -> OdinExpr '>' OdinExpr		=> "COPYTR"
+   -> OdinExpr '<' OdinExpr		=> "COPYTL"
+   -> OdinExpr '>'			=> "DISPLY"
+   -> OdinExpr '<'			=> "EDIT";
+
+Variable
+   -> Word '='				=> "VARVAL"
+   -> Word '=' OdinExpr			=> "VARSET"
+   -> Word '=' EPString			=> "VARSET";
+
+OdinExpr
+   -> OdinExpr1				=> "DRVFIL";
+   
+OdinExpr1
+   -> Root
+   -> OdinExpr1 Operation
+   -> '(' OdinExpr1 ')';
+
+Root
+   -> '(' ')'				=> "EMPFIL"
+   -> Word
+   -> "ObjectID"
+   -> '/'				=> "ARTFIL"
+   -> '/' Word				=> "ABSFIL"
+   -> ':' FileType			=> "DRVOPR"
+   -> '?' "Word"			=> "PFHELP"
+   -> "Word" '?'			=> "SFHELP"
+   -> '%' Word				=> "SEGOPR"
+   -> '=' Word				=> "STRING";
+
+Operation
+   -> '+' PrmType PrmVals?		=> "PRMOPR"
+   -> '+' '(' OdinExpr ')'		=> "APLOPR"
+   -> ':' FileType			=> "DRVOPR"
+   -> ':' FileType '=' ':' FileType	=> "HODOPR"
+   -> '/' Word				=> "ELMOPR"
+   -> '/'				=> "DIROPR"
+   -> '%' Word				=> "SEGOPR";
+
+PrmVals
+   ->  '=' PrmVal+			=> "PRMVLS";
+
+PrmVal
+   -> Word
+   -> '(' OdinExpr ')'			=> "PVLFIL";
+
+FileType -> Word;
+
+PrmType -> Word;
+
+Word
+   -> '?'				=> "HELP"
+   -> "Word";
+
+EPString
+   -> '!' '?'				=> "EPHELP"
+   -> "EPString";

@@ -1,0 +1,9 @@
+# $Id: Odinfile,v 1.4 1996/03/31 14:46:19 waite Exp $
+
+%program == struct.specs +fold :exe
+%source == struct.specs +fold :source
+
+%results == input +cmd=(%program) :stdout
+%warnings == %results :warning
+%diffcmd == . +cmd=diff (%results) (result) :run
+%test ! == %diffcmd

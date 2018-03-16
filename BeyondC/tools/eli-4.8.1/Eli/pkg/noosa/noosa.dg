@@ -1,0 +1,54 @@
+# $Id: noosa.dg,v 2.13 2013/08/31 01:43:41 profw Exp $
+# Copyright (c) 1994, The Regents of the University of Colorado
+# Copyright (c) 1995-1999, Anthony M. Sloane
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.db => :db;
+:db 'Monitoring database' => :FILE;
+
+CONCATENATE  (:libDb :list)
+  => (:monDb);
+
+:monDb 'Event database for execution monitoring' => :FILE;
+
++arg 'Command line arguments'? => :LIST;
+
+*.tcl => :tcl;
+:tcl 'Tcl code fragment for monitoring support'? => :FILE;
+
+COLLECT (:level_9_specs :extract=:tcl) (:genlib :extract=:tcl)
+  => (:all_tcl);
+:all_tcl 'All Tcl code fragments arising from specs and library' => :LIST;
+
+EXEC (mon.sh) (.) (:allspecs +monitor :exe) (:allspecs +monitor :monDb)
+     (:all_tcl :cat) (+arg :ls) (+monitor)
+  NEEDS (+arg) (noosa.exe) (noosa.tcl)
+  => (:mon);
+
+:mon 'Domain-specific execution monitoring run'? => :EXECUTABLE;
+
+EXEC (mongdb.sh) (.) (:allspecs +monitor :sources :dir_of :vir_dir)
+    (:allspecs +monitor :includes :dir_of :vir_dir)
+    (:allspecs +monitor :exe) (:allspecs +monitor :monDb) 
+    (:all_tcl :cat) (+core) (+arg :ls) (+monitor)
+  NEEDS (:allspecs +monitor :sources) (:allspecs +monitor :includes)
+  => (:mongdb);
+
+:mongdb 'Monitoring in conjunction with the GNU symbolic debugger'?
+  => :EXECUTABLE;
+

@@ -1,0 +1,187 @@
+# $Id: Makefile.in,v 1.8 2010/01/09 17:04:44 profw Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado
+
+# We can build four different versions: tty, sunview, xview and Tcl/Tk.
+
+CC	= @CC@
+
+# Override the defaults for some things here.
+
+# CP = cp
+# DEFAULT_EDITOR = vi
+# DEFAULT_PRINTER = postscript
+# DEFAULT_WINRUNNER = xterm -e or shelltool
+# ISHELL = /bin/sh
+# LPR = lpr -P
+# MAIL = mail
+# MAINTAINER = eli-project-users@lists.sourceforge.net
+# MV = mv
+# PRINTEXTENSION = .ps
+# SCRIPT = script
+# SCRIPTOUTPUT = scriptout
+# SED = sed
+# SHELL = /bin/sh
+# TOUCH = touch
+
+# Override things like this:
+
+# OVERRIDES = -DMAINTAINER=\"${MAINTAINER}\"
+
+# Might want to override ISHELL for makeinfo too.
+
+# MIDEFS = -DSHELL="\"${ISHELL}\""
+
+# ---------------------------------------------------------------------------
+# Shouldn't need to customize anything below here.
+
+STRBUILD  = strbuild.h $(ADTLIB)/obstack.h
+LIBRHDRS  = example.h file.h info.h list.h node.h option.h system.h util.h
+
+BROWSRCS  = example.c file.c info.c list.c node.c option.c system.c \
+	    strbuild.c util.c
+BROWHDRS  = $(LIBRHDRS) $(STRBUILD) driver.h
+BROWOBJS  = example.o file.o info.o list.o node.o option.o system.o \
+	    strbuild.o util.o obstack.o
+
+INFOSRCS  = infoReader.c help.c page.c signals.c menunote.c typeout.c complete.c
+INFOHDRS  = menunote.h typeout.h
+INFOOBJS  = infoReader.o help.o page.o signals.o menunote.o typeout.o complete.o
+
+SUNVSRCS  = infotool.c panel_sw.c text_sw.c complain_sw.c option_sw.c \
+            print_sw.c
+SUNVHDRS  = panel_sw.h text_sw.h complain_sw.h option_sw.h print_sw.h \
+	    infotool.icon
+SUNVOBJS  = infotool.o panel_sw.o text_sw.o complain_sw.o option_sw.o \
+	    print_sw.o
+
+XVIEWOBJS = infotool_x.o panel_sw_x.o text_sw_x.o complain_sw_x.o \
+	    option_sw_x.o print_sw_x.o
+
+TCLSRCS	  = tclinfo.c
+
+AUXHDRS   = $(LIBRHDRS) $(INFOHDRS) $(SUNVHDRS) \
+            menunote.h strbuild.h driver.h
+
+SRCS 	  = $(BROWSRCS) $(INFOSRCS) $(SUNVSRCS) $(TCLSRCS) \
+            $(AUXHDRS)
+
+DIR	  = pkg/info/texinfo
+SRC	  = info.tcl
+AUX	  = CheckXref.specs $(SRCS) Makefile Makefile.in \
+	    makeinfo.c getopt.c getopt1.c getopt.h texindex.c \
+	    help.h page.h signals.h complete.h
+CMD	  = 
+EXE	  = infoReader.exe @tclinfo@ @xinfotool@ makeinfo.exe texindex.exe
+
+@toolmk_h@
+@Adtmk_h@
+
+CFLAGS          = -DMAINTAINER=\"@PACKAGE_BUGREPORT@\" @CFLAGS_CURSES@ \
+		  -I../../eli
+XCFLAGS		= $(CFLAGS) @X_CFLAGS@ -DXVIEW
+TCFLAGS		= $(CFLAGS) @CFLAGS_TCL@ @X_CFLAGS@
+
+LIBS		= @LIB_CURSES@
+XVIEWLIBS	= @X_LIBS@ -lxview -lolgx -lX11 @X_PRE_LIBS@ @X_EXTRA_LIBS@ 
+TCLLIBS		= @LIBS_TCL@
+
+info.exe:	info.sh
+	rm -f $@
+	@LINK@ info.sh $@
+	chmod 775 $@
+
+# infoReader
+
+infoReader.exe:	info.a $(INFOOBJS)
+	$(CC) $(LDFLAGS) -o $@ $(INFOOBJS) info.a $(LIBS)
+
+infoReader.o:	$(INFOHDRS) menunote.h
+
+# xinfotool	
+
+xinfotool:	info.a $(XVIEWOBJS)
+	$(CC) $(LDFLAGS) -o xinfotool $(XVIEWOBJS) info.a $(XVIEWLIBS)
+
+$(XVIEWOBJS):	info.h $(SUNVHDRS)
+
+.SUFFIXES:	_x.o .o .c
+
+.c_x.o:
+	$(CC) $(XCFLAGS) -c $< -o $*_x.o
+
+# tclinfo
+
+tclinfo.exe:	info.a tclinfo.o
+	$(CC) $(LDFLAGS) -o $@ tclinfo.o info.a $(TCLLIBS)
+
+tclinfo.o:	tclinfo.c $(LIBRHDRS)
+	$(CC) $(TCFLAGS) -c tclinfo.c
+
+# The standard library.
+
+info.a:		$(BROWOBJS)
+	ar rcu $@ $(BROWOBJS)
+	@RANLIB@ $@
+
+# Auxiliary programs.
+
+makeinfo.exe:	makeinfo.c getopt.c getopt1.c getopt.h
+	$(CC) $(CFLAGS) $(MIDEFS) -o $@ makeinfo.c getopt.c getopt1.c
+
+texindex.exe:	texindex.c
+	$(CC) $(CFLAGS) -o $@ texindex.c
+
+# Development tools.
+
+kbdlint:	$(INFOSRCS) $(INFOHDRS) $(BROWSRCS) $(BROWHDRS)
+	lint $(INFOSRCS) $(BROWSRCS)
+
+sunlint:	$(SUNVSRCS) $(BROWSRCS) $(BROWHDRS)
+	lint $(SUNVSRCS) $(BROWSRCS)
+
+TAGS:		$(SRCS)
+	etags $(SRCS)
+
+.SUFFIXES:	.exe
+.c.exe:
+	$(CC) $(CFLAGS) -o $@ $*.c
+
+complete.o:	complete.c info.h $(STRBUILD) typeout.h system.h complete.h
+	$(CC) $(CFLAGS) $(ADTINCL) -c complete.c
+
+infoReader.o:	infoReader.c info.h $(STRBUILD) file.h node.h option.h \
+		help.h page.h signals.h complete.h
+	$(CC) $(CFLAGS) $(ADTINCL) -c infoReader.c
+
+strbuild.o:	strbuild.c $(STRBUILD)
+	$(CC) $(CFLAGS) $(ADTINCL) -c strbuild.c
+
+complain_sw.o:	info.h file.h
+example.o:	info.h file.h node.h option.h list.h
+file.o:		info.h file.h option.h system.h
+getopt1.o:	getopt.h
+help.o:		info.h typeout.h
+info.o:		info.h node.h system.h
+infotool.o:	info.h panel_sw.h text_sw.h complain_sw.h option_sw.h \
+		infotool.icon option.h
+list.o:		info.h system.h util.h
+makeinfo.o:	getopt.h
+menunote.o:	info.h node.h list.h
+node.o:		info.h file.h node.h system.h util.h
+option.o:	info.h option.h system.h
+option_sw.o:	info.h option.h system.h
+page.o:		info.h node.h
+panel_sw.o:	info.h complain_sw.h option_sw.h print_sw.h
+print_sw.o:	info.h file.h node.h option.h
+signals.o:	info.h
+system.o:	info.h file.h driver.h system.h
+termio.o:	info.h
+text_sw.o:	info.h panel_sw.h
+typeout.o:	info.h typeout.h
+util.o:		info.h option.h util.h
+
+
+
+
+
+

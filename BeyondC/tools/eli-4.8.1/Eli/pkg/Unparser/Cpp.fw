@@ -1,0 +1,532 @@
+@A@<Create a C++ Structural Unparser@>
+
+The FunnelWeb file defining a C++ structural unparser begins with a brief
+description of how to output unparsed values, and specifies
+the types of the attributes holding those values.
+It then defines
+the tree to be unparsed,
+the class symbol computations,
+and which tree symbols inherit which class symbol computations.
+PTG templates follow these definitions.
+Finally, the file defines the @{IGNORE@} macro and instantiates the
+necessary library modules.
+
+@$@<Complete FunnelWeb file@>==@{
+@=~
+Frame:
+  "@p maximum_input_line_length = infinity\n\n"
+  "The following symbol computation can be used to display the entire input:"
+  "\n\nSYMBOL ROOTCLASS COMPUTE\n"
+  "  BP_Out(THIS." $1 string "Ptg);\n"
+  "END;\n\n"
+  "Applying this output function to the " $1 string
+    "Ptg attribute of any nonterminal\n"
+  "symbol in the tree will cause the subtree rooted in that node to be"
+    " displayed.\n\n"
+  "@O@<" $1 string "copy.lido@>@{\n"
+  "ATTR " $1 string "Ptg, " $1 string "OrigPtg: PTGNode;\n\n"
+  $2 "\n"	/* Tree grammar */
+  $3		/* Class computations */
+  $4		/* Inheritances */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg@>@{\n"
+  $5		/* PTG templates */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg.phi@>@{\n"
+  "#define IGNORE(f,n)\n"
+  "@}\n\n"
+  "@O@<" $1 string "copy.specs@>@{\n"
+  "$/Output/PtgCommon.fw\n"
+  "$/Output/BlockPrint.fw\n"
+  "@}\n"
+~=@
+@}
+
+The FunnelWeb file defining the generated unparser is written as file
+@{tree@} in the current working directory: 
+
+@$@<Output the complete FunnelWeb file@>==@{
+SYMBOL xRoot COMPUTE
+  PTGOutFile(
+    "tree",
+    PTGFrame(
+      THIS.Prefix,
+      THIS.TreeGram,
+      TAIL.ClassComp,
+      TAIL.Inherit,
+      TAIL.PtgTemplates));
+END;
+@}
+
+@B@<PTG templates for non-literal terminal symbols@>
+
+The same PTG template is generated for each non-literal terminal symbol:
+
+@$@<Format for a non-literal terminal symbol@>==@{
+Term: $ string "_" $ ":\n \"\\\"\" [PtgOutId $ int] \"\\\"\"\n"
+@}
+
+This template assumes that the internal representation of a
+non-literal terminal symbol is a string table index.
+The user must override it for any non-literal terminal symbol with a
+different internal representation.
+
+@$@<Create PTG templates@>+=@{
+SYMBOL xSymbol COMPUTE
+  THIS.PtgTemplates =
+    IF(AND(THIS.IsTerminal,AND(THIS.IsFirstOcc,GetNoPtgGiven(THIS.Key,1))),
+      PTGSeq(THIS.PtgTemplates,PTGTerm(INCLUDING xRoot.Prefix,THIS.Ptg)),
+      THIS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<PTG templates for plain productions@>
+
+The body of the template for a plain production is a C++ @{new@} operation
+that dynamically allocates an object of the appropriate production class.
+The arguments of the constructor function are defined by the symbols on the
+right-hand side of the plain production.
+In order to increase the readability of the output, the line may be broken
+after each argument:
+
+@$@<Formats for productions@>+=@{
+PlainProd:
+  $1 string "_" $2 string ":\n"
+  "  \"new " $2 string "(\" [BP_BeginBlockI] [BP_BreakLine] "
+    $3 " [BP_BreakLine] [BP_EndBlockI] \")\"\n"
+
+SepSeq:
+  $ { " \",\" [BP_BreakLine] " } $
+@}
+
+Each argument of the constructor function is the value of the @{Insert@}
+attribute of the corresponding element on the right-hand side
+of the plain production:
+
+@$@<Create PTG templates@>+=@{
+ATTR Insert: PTGNode;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  xProduction.PtgTemplates=
+    IF(GetNoPtgGiven(xRule.Key,1),
+      PTGSeq(
+        xRHS.PtgTemplates,
+        PTGPlainProd(
+          INCLUDING xRoot.Prefix,
+          StringTable(xRule.Sym),
+          xRHS CONSTITUENTS Element.Insert
+            WITH (PTGNode, PTGSepSeq, IDENTICAL, PTGNull))),
+      xRHS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+All literals on the right-hand side are ignored, but the representation of
+any other symbol is simply copied into the constructor's argument list:
+
+@$@<Create PTG templates@>+=@{
+RULE: Element ::= xLiteral
+COMPUTE
+  Element.Insert = PTGNULL;
+END;
+
+RULE: Element ::= xSymbol
+COMPUTE
+  Element.Insert = Element.Mark;
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  Element.Insert = Element.Mark;
+END;
+@}
+
+@B@<PTG templates for LISTOF productions@>
+
+There are three templates for each @{LISTOF@} production, and none of their
+bodies depend on the right-hand side of that production:
+
+@$@<Formats for productions@>+=@{
+ListProd:
+  $1 string "_"  $2 string ":\n  \"new " $2 string
+    "(\" [BP_BeginBlockI] [BP_BreakLine] "
+    "$ [BP_BreakLine] [BP_EndBlockI] \")\"\n"
+
+ListProd2:
+  $1 string "_2" $2 string ":\n  { \"Comb" $1 string
+    "(\" } $ { \",\" [BP_BreakLine] } $ { \")\" }\n" 
+
+ListProd1:
+  $1 string "_1" $2 string ":\n  \"new list<" $1 string " *>"
+    "(\" [BP_BeginBlockI] [BP_BreakLine] \"1,\" [BP_BreakLine] "
+    "$ [BP_BreakLine] [BP_EndBlockI] \")\"\n"
+
+Triple: $ $ $
+@}
+
+Each one of the PTG templates can be overridden individually:
+
+@$@<Create PTG templates@>+=@{
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.PtgTemplates=
+    PTGSeq(
+      Syms.PtgTemplates,
+      PTGTriple(
+        IF(GetNoPtgGiven(xRule.Key,1),
+          PTGListProd(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg2Given(xRule.Key,1),
+          PTGListProd2(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg1Given(xRule.Key,1),
+          PTGListProd1(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL)))
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@A@<Create a C++ Tree Module@>
+
+The C++ tree module consists of a header file and, if there are any
+@{LISTOF@} productions, a code file.
+Both files are written to the @{treeDef@} sub-directory of the current
+directory:
+
+@$@<Compute the common start of the module file names@>==@{
+SYMBOL xRoot:
+  HasListof:      int,		/* 1 if there are LISTOF productions */
+  ModuleBasename: CharPtr;	/* Basename of the module files */
+
+SYMBOL xRoot COMPUTE
+  SYNT.HasListof=
+    CONSTITUENTS xProduction.IsListof WITH (int, OR, IDENTICAL, ZERO);
+  SYNT.ModuleBasename=CatStrStr("treeDef/", THIS.Prefix);
+END;
+
+SYMBOL xProduction:
+  IsListof:       int;		/* 1 if this is a LISTOF production */
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  xProduction.IsListof=0;
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.IsListof=1;
+END;
+@}
+
+@B@<Module interface@>
+
+The module interface is defined by a C++ header file defining the tree
+structure and an abstract visitor class for that tree.
+The tree structure definition consists of
+a base class declaration,
+a set of abstract symbol class declarations,
+and a set of production class declarations.
+In order to satisfy the declaration-before-use rules of C++, forward
+declarations for the production classes must come first, followed by the
+declaration of the abstract visitor class.
+Then come the base class declaration, the symbol class declarations, and
+the production class declarations (in that order).
+
+If the tree grammar contains any @{LISTOF@} productions, then a combine
+function declaration immediately follows the base class declaration.
+
+@$@<Structure of the document type definition@>==@{
+Header:
+  "#ifndef " $1 string "_H\n"
+  "#define " $1 string "_H\n\n"
+  "#include <string>\n"
+  "#include <list>\n\n"
+  $2	/* Production class forward declarations */
+  "\nclass " $1 string "Visitor {\n"
+  "  public:\n"
+  $3	/* Production class visitor methods */
+  "};\n\n"
+  "class " $1 string " {\n"
+  "  public:\n"
+  "    " $1 string "() { }\n"
+  "    virtual ~" $1 string "() { }\n"
+  "    virtual void Accept(" $1 string "Visitor *) { }\n"
+  "};\n\n"
+  $4	/* Possible combine function declaration */
+  $5	/* Symbol class definitions */
+  $6	/* Production class definitions */
+  "\n#endif\n"
+
+Forward:
+  "class " $1 string ";\n"
+
+Visit:
+  "    virtual void Visit" $1 string "(" $1 string "*) = 0;\n"
+
+DeclareCombine:
+  "list<" $1 string " *> *"
+    "Comb" $1 string "(list<" $1 string " *>*, list<" $1 string " *>*);\n\n"
+@}
+
+The module interface is contained in a type-@{h@} file written to the
+module sub-directory of the current working directory.
+Each rule contributes
+a forward declaration of its class,
+a declaration of a corresponding visitor method,
+and a complete declaration of its class.
+Each symbol contributes a declaration of its abstract class.
+The combine function is declared if and only if there are @{LISTOF@}
+productions:
+
+@$@<Output the complete header file@>==@{
+ATTR Fwd, Visit, Class: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  PTGOutFile(
+    CatStrStr(THIS.ModuleBasename,".h"),
+    PTGHeader(
+      THIS.Prefix,
+      CONSTITUENTS xRule.Fwd WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull),
+      CONSTITUENTS xRule.Visit WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull),
+      IF(THIS.HasListof,PTGDeclareCombine(THIS.Prefix),PTGNULL),
+      CONSTITUENTS xSymbol.Class WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull),
+      CONSTITUENTS xProduction.Class WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull)));
+END;
+
+SYMBOL xRule COMPUTE
+  SYNT.Fwd=PTGForward(StringTable(THIS.Sym));
+  SYNT.Visit=PTGVisit(StringTable(THIS.Sym));
+END;
+@}
+
+@B@<Symbol classes@>
+
+Each non-terminal symbol class inherits from the base class.
+It has no variables or methods of its own.
+
+@$@<Format of a symbol class definition@>==@{
+SymbolClass:
+  "class " $1 ": public " $2 string " {\n"
+  "  public:\n"
+  "    " $1 "() { }\n"
+  "    virtual ~" $1 "() { }\n"
+  "};\n\n"
+@}
+
+@$@<Construct the symbol class definitions@>==@{
+SYMBOL xSymbol COMPUTE
+  SYNT.Class=
+    IF(AND(THIS.IsFirstOcc,NOT(THIS.IsTerminal)),
+      PTGSymbolClass(THIS.Ptg,INCLUDING xRoot.Prefix),
+      PTGNULL);
+END;
+@}
+
+@B@<Production classes@>
+
+Each production class inherits from the class corresponding to the symbol
+on the left-hand side.
+It may have children, in which case the constructor will have arguments and
+assign the values of those arguments to the corresponding children.
+Each child will be declared as a private variable and an public access
+method for that child will be declared.
+
+Every production class implements an @{Access@} method invoking the visitor
+method corresponding to the production.
+
+@$@<Format of a production class definition@>+=@{
+ProductionClass:
+  "class " $1 string ": public " $2 " {\n"
+  "  public:\n"
+  "    " $1 string "(" $3 ")\n"
+  "      { " $4 "}\n"
+  "    virtual ~" $1 string "() { }\n"
+  "    virtual void Accept(" $7 string "Visitor *v)"
+         " { v->Visit" $1 string "(this); }\n"
+  $5	/* Access functions */
+  $6	/* Fields */
+  "};\n\n"
+
+Pointer:
+  $ "*"
+
+Argument:
+  $1 " a" $2 int
+
+Assign:
+  "c" $1 int " = a" $1 int "; "
+
+Computed:
+  "c" $2 int " = (" $1 ")0; "
+
+Access:
+  "    " $1 " GetChild" $2 int "() { return c" $2 int "; }\n"
+
+Set:
+  "    void SetChild" $2 int "(" $1 " a) { c" $2 int " = a; }\n"
+
+Declare:
+  "    " $1 " c" $2 int ";\n"
+
+Vars:
+  "  private:\n"
+  $
+@}
+
+@$@<Construct the element definitions@>+=@{
+CHAIN cnt: int;
+ATTR Argument, Assign, Access, Declare: PTGNode;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  .Declare=
+    xRHS CONSTITUENTS Element.Declare
+      WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull);
+  CHAINSTART xRHS.cnt=1;
+  xProduction.Class=
+    PTGProductionClass(
+      StringTable(xRule.Sym),
+      xSymbol.Ptg,
+      xRHS CONSTITUENTS Element.Argument
+        WITH(PTGNode, PTGCommaSeq, IDENTICAL, PTGNull),
+      xRHS CONSTITUENTS Element.Assign
+        WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull),
+      xRHS CONSTITUENTS Element.Access
+        WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull),
+      IF(EQ(.Declare,PTGNULL),PTGNULL,PTGVars(.Declare)),
+      INCLUDING xRoot.Prefix);
+END;
+
+SYMBOL Element COMPUTE
+  THIS.cnt=ADD(THIS.cnt,1);
+END;
+
+RULE: Element ::= xLiteral
+COMPUTE
+  Element.Argument = PTGNULL;
+  Element.Assign = PTGNULL;
+  Element.Access = PTGNULL;
+  Element.Declare = PTGNULL;
+END;
+
+SYMBOL xSymbol: Type: PTGNode;
+
+SYMBOL xSymbol COMPUTE
+  SYNT.Type=IF(THIS.IsTerminal,PTGAsIs("string"),PTGPointer(THIS.Ptg));
+END;
+
+RULE: Element ::= xSymbol
+COMPUTE
+  Element.Argument = PTGArgument(xSymbol.Type,Element.cnt);
+  Element.Assign = PTGAssign(Element.cnt);
+  Element.Access = PTGAccess(xSymbol.Type,Element.cnt);
+  Element.Declare = PTGDeclare(xSymbol.Type,Element.cnt);
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  Element.Argument = PTGNULL;
+  Element.Assign = PTGComputed(xSymbol.Type,Element.cnt);
+  Element.Access=
+    PTGSeq(
+      PTGSet(xSymbol.Type,Element.cnt),
+      PTGAccess(xSymbol.Type,Element.cnt));
+  Element.Declare = PTGDeclare(xSymbol.Type,Element.cnt);
+END;
+@}
+
+@$@<Format of a production class definition@>+=@{
+ListofProdClass:
+  "class " $1 string ": public " $2 " {\n"
+  "  public:\n"
+  "    " $1 string "(list<" $3 string " *> *a)\n"
+  "      { c = a; }\n"
+  "    virtual ~" $1 string "() { }\n"
+  "    virtual void Accept(" $3 string "Visitor *v)"
+         " { v->Visit" $1 string "(this); }\n"
+  "    list<" $3 string " *> *GetList() { return c; }\n"
+  "  private:\n"
+  "    list<" $3 string " *> *c;\n"
+  "};\n\n"
+@}
+
+@$@<Construct the element definitions@>+=@{
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.Class=
+    PTGListofProdClass(
+      StringTable(xRule.Sym),
+      xSymbol.Ptg,
+      INCLUDING xRoot.Prefix);
+END;
+@}
+
+@B@<Module code@>
+
+When a tree grammar contains @{LISTOF@} productions, the unparser must
+build the list children of those productions by combining individual
+objects.
+Any list can be built up by converting each element to a single-element
+list, and then combining pairs of lists.
+Each list is only used as an operand of a @/single@/ combine operation.
+
+The C++ Standard Template Library provides a @{splice@} function that
+copies one list into another at a given position.
+This function can be used to combine pairs of lists:
+
+@$@<Function for combining lists@>==@{
+Combine:
+  "#include \"" $1 string ".h\"\n\n"
+  "list<" $1 string " *> *\n"
+  "Comb" $1 string "(list<" $1 string " *> *x, list<" $1 string " *> *y)\n"
+  "{ x->splice(x->end(), *y, y->begin(), y->end()); y->~list(); return x; }\n"
+@}
+
+Here @{splice@} is used to copy the second list of the pair to the end of
+the first list of the pair.
+The modified first list then becomes the result of the combine operation.
+
+Because each list is only used as an operand to the combine function once,
+the second operand will never be used again and can therefore be destroyed.
+
+The module code is contained in a type-@{cc@} file written to the
+module sub-directory of the current working directory.
+It is produced if and only if there are @{LISTOF@}
+productions:
+
+@$@<Output the complete program file@>==@{
+ATTR Fwd, Visit, Class: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  IF(THIS.HasListof,
+    PTGOutFile(
+      CatStrStr(THIS.ModuleBasename,".cc"),
+      PTGCombine(THIS.Prefix)));
+END;
+@}
+
+@A@<Files Defining a C++ Unparser and Module@>
+
+@O@<Cpp.ptg@>@{
+@<Complete FunnelWeb file@>
+@<Format for a non-literal terminal symbol@>
+@<Formats for productions@>
+@<Structure of the document type definition@>
+@<Format of a symbol class definition@>
+@<Format of a production class definition@>
+@<Function for combining lists@>
+
+AltSeq: $ { " | " } $
+@}
+
+@O@<Cpp.lido@>@{
+@<Output the complete FunnelWeb file@>
+@<Create PTG templates@>
+@<Output the complete header file@>
+@<Compute the common start of the module file names@>
+@<Construct the symbol class definitions@>
+@<Construct the element definitions@>
+@<Output the complete program file@>
+@}

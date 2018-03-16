@@ -1,0 +1,142 @@
+# $Id: fw.dg,v 2.20 2010/03/03 19:56:07 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+# Copyright 1995-1998, Anthony M. Sloane
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Source files
+
+*.fw => :fw;
+
+# Objects
+
+:fw 'FunnelWeb specification'? => :FILE;
+:fw.cmpd 'Set of fw specification fragments' => :LIST;
+:one.fw.cmpd 'Singleton set' => :fw.cmpd :level_0_specs;
+:fw_srcs 'Source text needed for FunnelWeb processing' => :LIST;
+
+:fwGen 'Objects generated from a FunnelWeb specification' => :DERIVED-DIRECTORY;
+:fwGenList 'List of objects generated from a FunnelWeb specification' => :LIST;
+:fwSpec 'Massaged specs files from a FunnelWeb file' => :DERIVED-DIRECTORY;
+:fwSpecList 'List of massaged specs files from a FunnelWeb file' => :LIST;
+:fwMap 'Mapping from output objects to FunnelWeb specification' => :FILE;
+:fwNop 'Files that are not to be placed into the pipe' => :FILE;
+:fwAll 'All files from one FunnelWeb specification' => :LIST;
+:fwSel 'Text representation of product file names' => :FILE;
+:fwProd 'All product files from one FunnelWeb specification' => :LIST;
+:fwErr 'Map line errors in FunnelWeb output' => :line_err;
+
+:fwOut 'Results of FunnelWeb processing' => :FILE;
+
+:fwTex 'TeX representation of a FunnelWeb specification'? => <:tex>;
+:fwTexinfo 'Texinfo representation of a FunnelWeb specification'? => <:tnf>;
+:fwHtml 'HTML representation of a FunnelWeb specification'? => :FILE;
+:fwRep 'Derivation implied by the typesetter directive' => :FILE;
+
+:fwincl.dir 'Directly included FunnelWeb file names' => :FILE;
+:fwincl.all 'Transitive fwincl dependence' => :LIST;
+
+:expandtabs 'Text file with tabs replaced by sequences of spaces' => :FILE;
+:tabsexpanded 'Odinfile defining files with expanded tabs' => :FILE;
+
+:fw_pdf 'Derive PDF from FunnelWeb' => :REFERENCE :pdf;
+:fw_ps 'Derive PostScript from FunnelWeb' => :REFERENCE :ps;
+
+# Parameters
+
++chapter 'Section @A should be a chapter'? => :ls;
+
+# Tools
+
+COLLECT (:fw)
+  => (:one.fw.cmpd);
+
+COLLECT (:LIST :extract=:fw)
+  => (:fw.cmpd);
+
+EXEC (fwOut.sh)
+     (:fw.cmpd :names)
+     (:fw.cmpd :fwProd :name)
+  => (:fwOut);
+
+UNION (:fw :fwincl.all)
+  => (:fw_srcs);
+
+COLLECT (:FILE) (:fwincl.dir :list :map=:fwincl.all)
+  => (:fwincl.all);
+
+EXEC (fwincl.dir.sh) (:FILE :dir)@ (.) (:FILE) (+incl) (+ignore)
+  NEEDS (fw_incl.exe)
+  => (:fwincl.dir);
+
+EXEC (fwSel.sh) (:fw.cmpd :map=:fwNop :cat) (:fwAll :pasted)
+  NEEDS ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:fwSel);
+
+READ-LIST (:fwSel) => (:fwProd);
+
+COLLECT (:fwSpec :expandlist)
+  => (:fwSpecList);
+
+COLLECT (:fwGen :direlms :delete=:specs)
+  => (:fwGenList);
+
+COLLECT (:fw.cmpd :map=:fwSpecList) (:fw.cmpd :map=:fwGenList)
+  => (:fwAll);
+
+EXEC (fwTangle.sh) (fw.exe)
+     (:fw :label)
+     (:fw_srcs :ls)
+     (:fw_srcs :labels)
+     (:fw_srcs :tabsexpanded :vir_dir)
+  NEEDS (:fw_srcs :map=:expandtabs) ($ODINCACHE/PKGS/skeleton/sed.exe)
+        ($ODINCACHE/PKGS/skeleton/err_map.exe)
+  => (:fwGen) (:fwMap) (:fwNop);
+
+EXEC (fwSpec.sh) (fwSpec.sed)
+     (:fwGen :list :extract=:specs :labels)
+     (:fwGen :list :pasted)
+     (:fwGen)
+  NEEDS (:fwGen :list :extract=:specs) ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:fwSpec);
+
+EXEC (fwWeave.sh) (fw.exe)
+     (:fw :label)
+     (:fw_srcs :ls)
+     (:fw_srcs :labels)
+     (:fw_srcs :tabsexpanded :vir_dir)
+     (+chapter)
+  NEEDS (:fw_srcs :map=:expandtabs) ($ODINCACHE/PKGS/skeleton/sed.exe)
+        ($ODINCACHE/PKGS/skeleton/err_map.exe)
+  => (:fwTex) (:fwTexinfo) (:fwHtml) (:fwRep);
+
+EXEC (fwErr.sh) (.) (+hookvalue) (:fwMap) (:fwGen :list :ls) (:fwGen :list :labels)
+  NEEDS (fw_errors.exe) ($ODINCACHE/PKGS/skeleton/sed.exe)
+        ($ODINCACHE/PKGS/skeleton/err_map.exe)
+  => (:fwErr);
+
+EXEC (expandtabs.sh) (.) (:FILE)
+  NEEDS ($ODINCACHE/PKGS/skeleton/eliexpand.exe)
+  => (:expandtabs);
+
+EXEC (tabsexpanded.sh) (:LIST :labels) (:LIST :ls)
+  NEEDS ($ODINCACHE/PKGS/skeleton/paste.exe)
+  => (:tabsexpanded);
+
+COLLECT (:fw +apply=(:fwRep) :apply :pdf) => (:fw_pdf);
+
+COLLECT (:fw +apply=(:fwRep) :apply :ps) => (:fw_ps);

@@ -1,0 +1,45 @@
+<html>
+<head>
+<title>ExpInfo Example </title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>ExpInfo output (INCLUDING)</h1>
+<hr>
+
+<pre>
+INCLUDING construct:
+   INCLUDING (file.LabelGotKeys, 
+              root.LabelGotKeys, 
+              function_definition.LabelGotKeys)
+
+Occurrence 1:
+   file .../LabelAlgScope.lido [30:9]
+   RULE rule_060: external_declaration ::= 
+                  BeginExtDecl function_definition 
+
+Occurrence 2:
+   file .../LabelAlgScope.lido [60:13]
+   RULE rule_45: LabelUse ::= identifier 
+
+Transport attributes:
+   external_declaration._incl2
+   translation_unit._incl2
+   LabelUse._incl2
+   jump_statement._incl2
+   statement._incl2
+   ...
+
+Computations in transport context:
+   RULE rule_035: statement ::= 
+                     labeled_statement 
+      labeled_statement<2>._incl2 = 
+             statement<1>._incl2;
+...
+</pre>
+<font size=-2>[this listing is slightly abbreviated and reformatted]</font>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

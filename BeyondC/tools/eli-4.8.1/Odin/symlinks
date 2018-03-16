@@ -1,0 +1,137 @@
+#!/bin/sh
+
+# This shell script ensures that necessary symbolic links in the Odin-directory
+# exist. If they do not, the script will create them. It will also try to call
+# autoconf to create the configure-scripts. This will only be done if autoconf
+# exists in the path and the version is new enough for Eli.
+
+echo Symlinking Files
+
+if test ! -f  ./pkg/dg/inc/config.hh -a \
+        ! -L  ./pkg/dg/inc/config.hh; then
+ln -s  ../../odin/inc/config.hh ./pkg/dg/inc/config.hh
+fi
+
+if test ! -f  ./pkg/dg/inc/DG_Version.h; then
+ln -s  ../../odin/inc/DG_Version.h ./pkg/dg/inc/DG_Version.h
+fi
+
+if test ! -f  ./pkg/dg/inc/DPType_.h; then
+ln -s  ../../odin/inc/DPType_.h ./pkg/dg/inc/DPType_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/DrvPth.h; then
+ln -s  ../../odin/inc/DrvPth.h ./pkg/dg/inc/DrvPth.h
+fi
+
+if test ! -f  ./pkg/dg/inc/FKind_.h; then
+ln -s  ../../odin/inc/FKind_.h ./pkg/dg/inc/FKind_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/FTClass_.h; then
+ln -s  ../../odin/inc/FTClass_.h ./pkg/dg/inc/FTClass_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/GMC.h; then
+ln -s  ../../odin/inc/GMC.h ./pkg/dg/inc/GMC.h
+fi
+
+if test ! -f  ./pkg/dg/inc/IOTyp.h; then
+ln -s  ../../odin/inc/IOTyp.h ./pkg/dg/inc/IOTyp.h
+fi
+
+if test ! -f  ./pkg/dg/inc/ISKind_.h; then
+ln -s  ../../odin/inc/ISKind_.h ./pkg/dg/inc/ISKind_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/InpKind_.h; then
+ln -s  ../../odin/inc/InpKind_.h ./pkg/dg/inc/InpKind_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/Lvl.h; then
+ln -s  ../../odin/inc/Lvl.h ./pkg/dg/inc/Lvl.h
+fi
+
+if test ! -f  ./pkg/dg/inc/Macro.h; then
+ln -s  ../../odin/inc/Macro.h ./pkg/dg/inc/Macro.h
+fi
+
+if test ! -f  ./pkg/dg/inc/PType_.h; then
+ln -s  ../../odin/inc/PType_.h ./pkg/dg/inc/PType_.h
+fi
+
+if test ! -f  ./pkg/dg/inc/Pos.h; then
+ln -s  ../../odin/inc/Pos.h ./pkg/dg/inc/Pos.h
+fi
+
+if test ! -f  ./pkg/dg/inc/Str.h; then
+ln -s  ../../odin/inc/Str.h ./pkg/dg/inc/Str.h
+fi
+
+if test ! -f  ./pkg/dg/inc/System.hh; then
+ln -s  ../../odin/inc/System.hh ./pkg/dg/inc/System.hh
+fi
+
+if test ! -f  ./pkg/dg/inc/TClass_.h; then
+ln -s  ../../odin/inc/TClass_.h ./pkg/dg/inc/TClass_.h
+fi
+
+if test ! -f  ./pkg/dg/if-ft.c; then
+ln -s  ../odin/if-ft.c ./pkg/dg/if-ft.c
+fi
+
+if test ! -f  ./pkg/dg/if-lvl.c; then
+ln -s  ../odin/if-lvl.c ./pkg/dg/if-lvl.c
+fi
+
+if test ! -f  ./pkg/dg/if-drvpth.c; then
+ln -s  ../odin/if-drvpth.c ./pkg/dg/if-drvpth.c
+fi
+
+if test ! -f  ./pkg/odin/ipcgen/inc/config.hh -a \
+        ! -L  ./pkg/odin/ipcgen/inc/config.hh; then
+ln -s  ../../odin/inc/config.hh ./pkg/odin/ipcgen/inc/config.hh
+fi
+
+if test ! -f  ./pkg/odin/ipcgen/inc/GMC.h; then
+ln -s  ../../../odin/inc/GMC.h ./pkg/odin/ipcgen/inc/GMC.h
+fi
+
+if test ! -f  ./pkg/odin/ipcgen/inc/Str.h; then
+ln -s  ../../../odin/inc/Str.h ./pkg/odin/ipcgen/inc/Str.h
+fi
+
+if test ! -f  ./pkg/odin/ipcgen/inc/System.hh; then
+ln -s  ../../../odin/inc/System.hh ./pkg/odin/ipcgen/inc/System.hh
+fi
+
+if test ! -d  ./pkg/odin/boot/inc; then
+ln -s  ../inc ./pkg/odin/boot/inc
+fi
+
+if test ! -f  ./pkg/tregrm/inc/config.hh -a \
+        ! -L  ./pkg/tregrm/inc/config.hh; then
+ln -s  ../../odin/inc/config.hh ./pkg/tregrm/inc/config.hh
+fi
+
+if test ! -f  ./pkg/tregrm/inc/GMC.h; then
+ln -s  ../../odin/inc/GMC.h ./pkg/tregrm/inc/GMC.h
+fi
+
+if test ! -f  ./pkg/tregrm/inc/Str.h; then
+ln -s  ../../odin/inc/Str.h ./pkg/tregrm/inc/Str.h
+fi
+
+if test ! -f  ./pkg/tregrm/inc/System.hh; then
+ln -s  ../../odin/inc/System.hh ./pkg/tregrm/inc/System.hh
+fi
+
+for p in `echo $PATH | sed 's/:/ /g'`
+do
+  if test -x $p/autoconf
+  then
+    echo Calling Autoconf 
+    autoconf
+    break
+  fi
+done

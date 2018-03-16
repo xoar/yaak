@@ -1,0 +1,68 @@
+# Source Types
+
+*,eqn => :eqn_in;
+
+*.tbl => :tbl_in;
+
+*.roff => :roff;
+
+
+# Input Object Types
+
+:eqn_in 'eqn input'? => :FILE;
+
+:tbl_in 'tbl input' => :FILE;
+
+:roff 'nroff/troff input'? => :FILE;
+
+
+# Intermediate Object Types
+
+:so_inc_spec 'names of Nroff-style included files' => :FILE;
+
+:so_inc 'list of Nroff-style included files' => :LIST;
+
+:all_so_inc 'list of Nroff-style transitively included files' => :LIST;
+
+
+# Output Object Types
+
+:eqn 'output from eqn'? => :tbl_in;
+
+:gnc.eqn 'output from eqn'? => :GENERIC;
+
+:tbl 'output from tbl'? => :roff;
+
+:nroff 'output from nroff'? => :FILE;
+
+
+# Parameter Types
+
++home 'home directory for relative pathnames' => :first;
+
++mp 'macro package'? => :first;
+
+
+# Tools
+
+EXEC (so_inc.sh) (:FILE) (+home)@
+   => (:so_inc_spec);
+
+READ-LIST (:so_inc_spec)
+   => (:so_inc);
+
+COLLECT (:so_inc :map=:all_so_inc) (:so_inc)
+   => (:all_so_inc);
+
+EXEC (eqn.sh) eqn (:FILE)
+   => (:eqn);
+
+EXEC (eqn.sh) gnc.eqn (:eqn_in)
+   => (:gnc.eqn);
+
+EXEC (tbl.sh) (:tbl_in)
+   => (:tbl);
+
+EXEC (nroff.sh) (:roff) (:roff :dir)@ (+mp)
+ NEEDS (:roff +home=(:roff :dir) :lookup=:all_so_inc)
+   => (:nroff);

@@ -1,0 +1,766 @@
+@A@<Input Structure@>
+
+The input text for an unparser generator has two components, a canonical tree
+description and a set of PTG templates specified by the user.
+Unfortunately, these two components have slightly different lexical
+properties:
+PTG type specifiers like @{integer@} are identifiers in a canonical tree
+description.
+We have chosen to handle this difference by defining a non-literal terminal
+symbol @{PtgType@}, and allowing LIDO symbol and rule names to be either
+identifiers or @{PtgType@}s.
+
+@$@<Overall input text structure@>==@{@-
+xRoot: xGrammar PTGSpec .
+@}
+
+It is sometimes necessary to generate more than one unparser for a given
+tree.
+In order to distinguish the attributes and computations involved, we need
+to use distinct prefixes for the generated file name and many of the
+identifiers it contains.
+A command line parameter provides the necessary information.
+
+@O@<Analysis.clp@>@{
+Prefix "-p" string "prefix to be used for generated attribute";
+InputFile input "input file name";
+@}
+
+@B@<Canonical Tree Descriptions@>
+
+The canonical description of a tree is a LIDO file containing one instance
+of each rule.
+Every rule has a name, but no associated computations:
+
+@$@<Constructs of interest@>+=@{
+RULE: xGrammar LISTOF xProduction END;
+
+RULE: xProduction ::= 'RULE' xRule ':' xSymbol '::='    xRHS 'END' ';' END; 
+RULE: xProduction ::= 'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';' END;
+
+RULE: xRHS LISTOF Element END;
+RULE: Syms LISTOF xSymbol END;
+
+RULE: Element ::=     xSymbol END;
+RULE: Element ::= '$' xSymbol END;
+RULE: Element ::= xLiteral    END;
+@}
+
+Input to the unparser generator comes from LIGA, which has stripped out all
+of the computations and ensured that all rules are named.
+Symbols and rule names are both identifiers (or @{PtgType@}s),
+distinguished by the contexts in which they appear.
+The elements on the right-hand side of a @{LISTOF@} production are symbols
+separated by vertical bars:
+
+@$@<Additional concrete rules for LIDO text@>==@{
+xRule:    xIdentifier / PtgType .
+xSymbol:  xIdentifier / PtgType .
+
+Syms:     [ xSymbol // '|' ] .
+@}
+
+There are only two kinds of non-literal basic symbol in the canonical tree
+description (@{PtgType@} is considered a non-literal basic symbol in the
+set of PTG templates):
+
+@$@<LIDO basic symbols@>==@{
+xIdentifier:	C_IDENTIFIER	[mkidn]
+xLiteral:	PASCAL_STRING	[mkidn]
+@}
+
+@B@<PTG Templates@>
+
+@$@<Constructs of interest@>+=@{
+RULE: PatternSpec  ::=    PatternName ':' Items     END;
+RULE: PatternName  ::=    xIdentifier               END;
+RULE: Items        LISTOF Item                      END;
+RULE: Item         ::=    CString                   END;
+RULE: Item         ::=    '$'                       END;
+RULE: Item         ::=    '$' Number                END;
+RULE: Item         ::=    '$'        PtgType        END;
+RULE: Item         ::=    '$' Number PtgType        END;
+RULE: Item         ::=    '[' xIdentifier Items ']' END;
+RULE: Item         ::=    '{' Items '}'             END;
+@}
+
+The input actually contains a sequence of @{PatternSpec@}s, and whether
+@{Items@} can be empty or not varies with the context.
+
+@$@<Concrete rules for PTG Templates@>==@{
+PTGSpec: PatternSpec* .
+PatternSpec: PatternName ':' Items .
+Items: Item* .
+Item:
+  '$' [ Number ] [ PtgType ] /
+  '[' xIdentifier Items ']' /
+  '{' Insert '}' .
+Insert: Item+ .
+@}
+
+@O@<Analysis.map@>==@{
+MAPSYM
+Items ::= Insert .
+@}
+
+Three new kinds of non-literal terminal symbol appear in PTG templates
+(@{xIdentifier@} is a non-literal terminal symbol in a tree definition):
+
+@$@<PTG basic symbols@>==@{
+CString:	C_STRING_LIT
+Number:		PASCAL_INTEGER
+PtgType:	$int|string|pointer|long|short|char|float|double [mkidn]
+@}
+
+If @{PtgType@} is not distinguished from @{xIdentifier@}, the grammar is
+not LALR(1).
+
+@A@<Semantic Analysis@>
+
+@B@<Name analysis@>
+
+Symbols and rules share a single name space, and there is no nesting within
+a LIDO specification.
+Each identifier is visible in the entire specification.
+
+@$@<Instantiate the necessary modules@>+=@{
+$/Name/AlgScope.gnrc :inst
+@}
+
+The input file contains LIDO rules and possibly PTG templates.
+Some of those PTG templates may be intended to take the places of templates
+that would normally be created by the unparser generator.
+Each such template's name consists of a prefix and the name of the rule
+whose output it describes.
+Thus a PTG template name may be a use of a LIDO rule name.
+
+@$@<Name analysis roles@>==@{
+SYMBOL xSymbol	   INHERITS IdDefScope, LidoIdent   END;
+SYMBOL xRule	   INHERITS IdDefScope, LidoIdent   END;
+SYMBOL PatternName INHERITS IdUseEnv,   PtgRuleName END;
+
+SYMBOL LidoIdent   COMPUTE SYNT.Sym = TERM;             END;
+SYMBOL PtgRuleName COMPUTE SYNT.Sym = MakePtgSym(TERM); END;
+@}
+
+@{MakePtgSym@} removes the prefix, returning the remainder of the PTG
+template name as an identifier.
+A binding for this identifier is then sought.
+
+@$@<int MakePtgSym(int sym)@>==@{
+/* Obtain a possible LIDO rule name from a PTG template name
+ *   On entry-
+ *     sym=string table index of the template name
+ *   If the template name format is appropriate then on exit-
+ *     MakePtgSym=string table index of a possible LIDO rule name
+ *   Else on exit-
+ *     MakePtgSym=NoStrIndex
+ ***/
+{ char *str;
+  CONST char *prefix = StringTable(GetClpValue(Prefix, NoStrIndex));
+  int len = strlen(prefix);
+  int t = xIdentifier, s;
+
+  str = StringTable(sym);
+  if (strncmp(str, prefix, len) == 0 && str[len] == '_') {
+    str += len + 1;
+    if (str[0] == '2' || str[0] == '1') str++;
+    mkidn(str, strlen(str), &t, &s);
+    return s;
+  } else
+    return NoStrIndex;
+}
+@}
+
+@B@<Establishing properties@>
+
+The following properties must be established for symbols:
+
+@$@<Symbol properties@>==@{
+Defined:	int;	/* The symbol has been defined */
+IsListofLhs:	int;	/* The symbol is defined by a LISTOF rule */
+ComputedRoot:	int;	/* The symbol is the root of a computed tree */
+@}
+
+@$@<Symbol property computations@>==@{
+SYMBOL xRoot COMPUTE
+  SYNT.GotProperties=
+    CONSTITUENTS (xSymbol.GotProperties,PtgRuleName.GotProperties);
+END;
+
+SYMBOL xSymbol COMPUTE
+  INH.GotProperties = 0;
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  xSymbol.GotProperties = ResetDefined(xSymbol.Key, 1);
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xSymbol.GotProperties =
+    ORDER(
+      ResetDefined(xSymbol.Key, 1),
+      ResetIsListofLhs(xSymbol.Key, 1));
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  xSymbol.GotProperties = ResetComputedRoot(xSymbol.Key, 1);
+END;
+@}
+
+The following properties must be established for rules:
+
+@$@<Rule properties@>==@{
+NoPtgGiven:	int;	/* The rule was not given an explicit template */
+NoPtg2Given:	int;	/* The rule was not given a CombFct template */
+NoPtg1Given:	int;	/* The rule was not given a SingleFct template */
+@}
+
+@$@<Rule property computation@>==@{
+SYMBOL PtgRuleName COMPUTE
+  SYNT.GotProperties = FixPtgGiven(TERM,THIS.Key);
+END;
+@}
+
+@{FixPtgGiven@} sets the rule properties.
+Each of these properties is queried with a default value of @{1@};
+@{FixPtgGiven@} sets the value to @{0@} explicitly if the @{PtgRuleName@}
+is of the form @{Prefix_r@}, @{Prefix_1r@}, or @{Prefix_2r@}
+for any LIDO rule name @{r@}.
+
+@$@<void FixPtgGiven(int sym, DefTableKey key)@>==@{
+/* Check whether the template corresponds to a LIDO name
+ *   On entry-
+ *     sym is string table index of the PTG template name
+ *     key is the key bound to the supposed LIDO name
+ *   On exit-
+ *     The appropriate property of the LIDO name has been set
+ ***/
+{ CONST char *str;
+  CONST char *prefix = StringTable(GetClpValue(Prefix, NoStrIndex));
+  int len = strlen(prefix);
+
+  str = StringTable(sym);
+  if (strncmp(str, prefix, len) == 0 && str[len] == '_') {
+    switch (str[len + 1]) {
+    case '1': ResetNoPtg1Given(key, 0); break;
+    case '2': ResetNoPtg2Given(key, 0); break;
+    default:  ResetNoPtgGiven(key, 0);
+    }
+  }
+}
+@}
+
+Note that @{key@} will be @{NoKey@} unless the PTG template name is a valid
+prefix followed by a valid LIDO name.
+This is guaranteed by @{MakePtgSym@} and the name analysis.
+Moreover, @{str[1]@} is always a valid address because the template name
+must be at least one character long.
+
+@B@<Attributes common to all unparsers@>
+
+The following attributes are common to all onparsers:
+
+@$@<Common attributes@>==@{
+SYMBOL xRoot:
+  Prefix: CharPtr;	/* Prefix for attribute and file names */
+
+SYMBOL xSymbol:
+  IsTerminal: int,	/* 1 if the symbol is a terminal */
+  Ptg: PTGNode,		/* Name of the symbol */
+  AttrPtg: PTGNode;	/* Name of the unparser-generated attribute */
+
+SYMBOL Element:
+  Mark: PTGNode;	/* Indexed insertion point text */
+@}
+
+We allow multiple instantiations of an unparser to exist by allowing a
+different prefix to be used for the generated attributes.
+
+@$@<Compute common attributes@>+=@{
+SYMBOL xRoot COMPUTE
+  SYNT.Prefix=StringTable(GetClpValue(Prefix,NoStrIndex));
+END;
+@}
+
+A symbol is terminal if it is not the left-hand side of any rule,
+and does not appear as a computed root.
+
+@$@<Compute common attributes@>+=@{
+SYMBOL xSymbol COMPUTE
+  SYNT.IsTerminal=
+    AND(NOT(GetDefined(THIS.Key,0)),NOT(GetComputedRoot(THIS.Key,0)))
+    <- INCLUDING xRoot.GotProperties;
+  SYNT.Ptg=PTGId(TERM);
+  SYNT.AttrPtg=PTGAttr(THIS.Ptg,INCLUDING xRoot.Prefix);
+END;
+@}
+
+@{PTGAttr@} is generated from the following template;
+@{PTGId@} is a library function accepting a string table index:
+
+@$@<Name of the unparser-generated attribute of a symbol@>==@{
+Attr: $ "." $ string "Ptg"
+@}
+
+@$@<Instantiate the necessary modules@>+=@{
+$/Output/PtgCommon.fw
+@}
+
+A PTG template is generated for each plain production.
+Each non-terminal and non-literal terminal symbol appearing on the
+right-hand side of that plain production corresponds to an indexed
+insertion point in the corresponding template.
+The indices depend on the positions of the arguments in a @{RuleFct@}.
+
+@$@<Compute common attributes@>+=@{
+CHAIN NontermCnt, TermCnt: int;	/* Index for the insertion point */
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  CHAINSTART xRHS.NontermCnt = 1;
+  CHAINSTART xRHS.TermCnt    = xRHS.NontermCnt;
+END;
+
+SYMBOL Element COMPUTE SYNT.Mark=PTGNULL; END;
+
+RULE: Element ::= xSymbol
+COMPUTE
+  Element.Mark=
+    IF(xSymbol.IsTerminal,
+      PTGMarker(Element.TermCnt),
+      PTGMarker(Element.NontermCnt));
+  Element.NontermCnt=
+    IF(xSymbol.IsTerminal,Element.NontermCnt,ADD(Element.NontermCnt,1));
+  Element.TermCnt=
+    IF(xSymbol.IsTerminal,ADD(Element.TermCnt,1),Element.TermCnt);
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  Element.Mark=PTGMarker(Element.NontermCnt);
+  Element.NontermCnt=ADD(Element.NontermCnt,1);
+END;
+@}
+
+@{PTGMarker@} is generated from the following template:
+
+@$@<Name of a specific indexed insertion point@>==@{
+Marker: "$" $ int
+@}
+
+@A@<Code Generation@>
+
+An unparser specification has two main parts: LIDO computations that
+collect unparser attribute values from the children of a node, and PTG
+computations that combine those values to establish the unparser attribute
+value for the current node.
+The LIDO computations are identical for all unparsers, and are specified in
+this section; the PTG computations are unparser-specific, and are defined
+in each individual unparser document.
+
+All of the LIDO computations are expressed as class symbol computations.
+These computations are then inherited by the tree symbols.
+
+@$@<int FwOut(int sym, int warn)@>==@{
+/* Protect the FunnelWeb warning character in a string
+ *   On entry-
+ *     sym indexes a string to be output
+ *     warn is the warning character to be protected
+ *   On exit-
+ *     FwOut indexes an equivalent string with each FunnelWeb warning
+ *       character protected
+ ***/
+{ CONST char *str = StringTable(sym);
+  CONST char *first = strchr(str, warn);
+
+  if (first) {
+    int code = 0;
+
+    do {
+      while (str <= first) obstack_1grow(Csm_obstk, *str++);
+      obstack_1grow(Csm_obstk, warn);
+      first = strchr(first + 1, warn);
+    } while (first);
+    while (*str) obstack_1grow(Csm_obstk, *str++);
+    obstack_1grow(Csm_obstk, '\0');
+    CsmStrPtr = (char *)obstack_finish(Csm_obstk);
+    mkidn(CsmStrPtr, strlen(CsmStrPtr), &code, &sym);
+  }
+  return sym;
+}
+@}
+
+A global variable, @{Warn@}, is provided with the initial value @{@@@}.
+This variable can be used as the value of the @{warn@} parameter, and its
+value can be changed if the warning character for the file is changed.
+
+@B@<Canonical tree grammar@>
+
+@O@<Idemcopy.lido@>@{
+ATTR TreeGram: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  SYNT.TreeGram=
+    CONSTITUENTS xProduction.TreeGram
+      WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull);
+END;
+
+RULE: xProduction ::= 'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE 
+  xProduction.TreeGram=
+    PTGPlain(
+      StringTable(xRule.Sym),
+      StringTable(xSymbol.Sym),
+      CONSTITUENTS Element.TreeGram 
+      WITH (PTGNode, PTGSpaceSeq, IDENTICAL, PTGNull));
+END; 
+
+RULE: xProduction ::= 'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE 
+  xProduction.TreeGram=
+    PTGListof(
+      StringTable(xRule.Sym),
+      StringTable(xSymbol.Sym),
+      Syms CONSTITUENTS xSymbol.Ptg
+        WITH (PTGNode, PTGAltSeq, IDENTICAL, PTGNull));
+END;
+
+RULE: Element ::= xSymbol
+COMPUTE 
+  Element.TreeGram=xSymbol.Ptg;
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE 
+  Element.TreeGram=PTGComputedRoot(StringTable(xSymbol.Sym));
+END;
+
+RULE: Element ::= xLiteral
+COMPUTE 
+  Element.TreeGram=PTGId(FwOut(xLiteral,Warn));
+END;
+@}
+
+@O@<Idemcopy.ptg@>@{
+Plain:
+  "RULE " $1 string ": " $2 string " ::= "    $3 " END;\n"
+
+SpaceSeq:
+  $ { " " } $
+
+Listof:
+  "RULE " $1 string ": " $2 string " LISTOF " $3 " END;\n"
+
+AltSeq:
+  $ { " | " } $
+
+ComputedRoot:
+  "$ " $1 string
+@}
+
+@B@<Class symbol computations@>
+
+There is one computation that handles all symbols defined by plain
+productions, and one computation for each symbol defined by a @{LISOF@}
+production.
+These computations are defined as follows:
+
+@$@<Generated class symbol computations@>==@{
+PlainRules:
+  "CLASS SYMBOL " $1 string "Reproduce COMPUTE\n"
+  "  SYNT." $1 string "OrigPtg=\n"
+  "    RuleFct(\"PTG" $1 string "_\", RHS." $1 string "Ptg, TermFct(\"PTG"
+$1 string "_\"));\n"
+  "  SYNT." $1 string "Ptg=THIS." $1 string "OrigPtg;\n"
+  "END;\n\n"
+
+  "CLASS SYMBOL " $1 string "NoReproduce COMPUTE\n"
+  "  SYNT." $1 string "Ptg = PTGNULL;\n"
+  "END;\n\n"
+
+ListofRule: 
+  "CLASS SYMBOL " $1 string "Reproduce_" $3 " COMPUTE\n"
+  "  SYNT." $1 string "OrigPtg=\n"
+  "    PTG" $1 string "_" $2 "(\n"
+  "      CONSTITUENTS (" $4 ")\n"
+  "      SHIELD (" $5 ")\n"
+  "      WITH (PTGNode, PTG" $1 string "_2" $2
+    ", PTG" $1 string "_1" $2
+    ", PTGNull));\n"
+  "  SYNT." $1 string "Ptg=THIS." $1 string "OrigPtg;\n"
+  "END;\n\n"
+@}
+
+@$@<Produce class symbol computations@>==@{
+CHAIN ClassComp: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  CHAINSTART HEAD.ClassComp=PTGPlainRules(THIS.Prefix);
+END;
+
+RULE: xProduction ::= 'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.ClassComp=
+    PTGSeq(
+      xProduction.ClassComp,
+      PTGListofRule(
+        INCLUDING xRoot.Prefix,
+        PTGAsIs(StringTable(xRule.Sym)),
+        xSymbol.Ptg,
+        Syms CONSTITUENTS xSymbol.AttrPtg
+          WITH(PTGNode, PTGCommaSeq, IDENTICAL, PTGNull),
+        Syms CONSTITUENTS xSymbol.Ptg
+          WITH(PTGNode, PTGCommaSeq, IDENTICAL, PTGNull)));
+END;
+@}
+
+@B@<Symbol inheritances@>
+
+All non-terminal symbols appearing on the left-hand sides of plain
+productions inherit the @{Reproduce@} class computation.
+Each non-terminal appearing on the left-hand side of a @{LISTOF@}
+production inherits the class computation specific to that @{LISTOF@}
+production.
+
+Symbols appearing as roots of computed subtrees need not appear on the
+left-hand side of any production.
+In that case, there is no way for the unparser generator to determine a
+computation for the symbol, and it inherits @{NoReproduce@}.
+
+@$@<Generated symbol inheritances@>==@{
+NontComp:
+  "SYMBOL " $1 " INHERITS " $2 string "Reproduce END;\n"
+
+ListComp:
+  "SYMBOL " $1 " INHERITS " $2 string "Reproduce_" $1 " END;\n"
+
+NontNoComp:
+  "SYMBOL " $1 " INHERITS " $2 string "NoReproduce END;\n"
+@}
+
+@$@<Produce symbol inheritances@>==@{
+CHAIN Inherit: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  CHAINSTART HEAD.Inherit=PTGNULL <- THIS.GotProperties;
+END;
+
+SYMBOL xSymbol INHERITS FirstOcc COMPUTE
+  THIS.Inherit =
+    IF(THIS.IsFirstOcc,
+      IF(GetIsListofLhs(THIS.Key,0),
+        PTGSeq(THIS.Inherit,PTGListComp(THIS.Ptg,INCLUDING xRoot.Prefix)),
+      IF(GetDefined(THIS.Key,0),
+        PTGSeq(THIS.Inherit,PTGNontComp(THIS.Ptg,INCLUDING xRoot.Prefix)),
+      IF(GetComputedRoot(THIS.Key,0),
+        PTGSeq(THIS.Inherit,PTGNontNoComp(THIS.Ptg,INCLUDING xRoot.Prefix)),
+        THIS.Inherit))),
+      THIS.Inherit);
+END;
+@}
+
+We use the @{FirstOcc@} module to ensure that these computations are only
+done once for each symbol.
+
+@$@<Instantiate the necessary modules@>+=@{
+$/Prop/FirstOcc.gnrc:inst
+@}
+
+@B@<PTG templates@>
+
+The generated FunnelWeb file contains at least one PTG template for every
+non-literal terminal symbol and every production in the tree grammar being
+unparsed (a @{LISTOF@} production has three templates).
+These templates are collected by using a chain:
+
+@$@<Collect PTG templates@>==@{
+CHAIN PtgTemplates: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  CHAINSTART HEAD.PtgTemplates = PTGNULL;
+END;
+@}
+
+If a template is overridden, the overriding template must be copied
+unchanged into the generated FunnelWeb file:
+
+@$@<Add an overriding template to the output@>==@{
+ATTR IdemPtg: PTGNode;
+
+SYMBOL PatternName COMPUTE
+  THIS.PtgTemplates =
+    IF(NE(THIS.Key,NoKey),
+      PTGSeq(THIS.PtgTemplates,INCLUDING PatternSpec.IdemPtg),
+      THIS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+
+RULE: PatternSpec ::= PatternName ':' Items
+COMPUTE
+  PatternSpec.IdemPtg=PTGAxiom(PatternName.IdemPtg,Items.IdemPtg);
+END;
+
+RULE: PatternName ::= xIdentifier 
+COMPUTE
+  PatternName.IdemPtg=PTGId(xIdentifier);
+END;
+
+RULE: Item ::= CString
+COMPUTE
+  Item.IdemPtg=PTGId(FwOut(CString,Warn));
+END;
+
+RULE: Item ::= '$'
+COMPUTE
+  Item.IdemPtg=PTGAsIs("$");
+END;
+
+RULE: Item ::= '$' Number
+COMPUTE
+  Item.IdemPtg=PTGIndex(Number);
+END;
+
+RULE: Item ::= '$' PtgType
+COMPUTE
+  Item.IdemPtg=PTGCType(StringTable(PtgType));
+END;
+
+RULE: Item ::= '$' Number PtgType
+COMPUTE
+  Item.IdemPtg=PTGIndTyp(Number,StringTable(PtgType));
+END;
+
+RULE: Item ::= '[' xIdentifier Items ']'
+COMPUTE
+  Item.IdemPtg=PTGCall(StringTable(xIdentifier),Items.IdemPtg);
+END;
+
+RULE: Item ::= '{' Items '}'
+COMPUTE
+  Item.IdemPtg=PTGOption(Items.IdemPtg);
+END;
+
+RULE: Items LISTOF Item
+COMPUTE
+  Items.IdemPtg=
+    CONSTITUENTS Item.IdemPtg SHIELD Item
+      WITH (PTGNode, PTGSpSeq, IDENTICAL, PTGNull);
+END;
+@}
+
+@$@<Create PTG template components in standard form@>==@{
+Axiom:  $ ":\n  " $ "\n"
+Index:  "$" $ int
+CType:  "$ " $ string
+IndTyp: "$" $ int " " $ string
+Call:   "[" $ string { " " } $ "]"
+Option: "{ " $ " }"
+SpSeq:  $ { " " } $
+@}
+
+@A@<Output files@>
+
+@O@<Analysis.head@>==@{
+#include "Analysis.h"
+@}
+
+@O@<Analysis.h@>==@{
+#ifndef ANALYSIS_H
+#define ANALYSIS_H
+
+#include "eliproto.h"
+#include "deftbl.h"
+
+extern int  Warn;	/* Standard FunnelWeb warning character */
+
+extern void p_mkstr     ELI_ARG((char *, int, int *, int *));
+extern int  MakePtgSym  ELI_ARG((int));
+extern void FixPtgGiven ELI_ARG((int, DefTableKey));
+extern int  FwOut       ELI_ARG((int, int));
+
+#endif
+@}
+
+@O@<Analysis.pdl@>==@{
+@<Symbol properties@>
+@<Rule properties@>
+@}
+
+@O@<Analysis.c@>==@{
+#include <string.h>
+#include "obstack.h"
+#include "csm.h"
+#include "idn.h"
+#include "clp.h"
+#include "pdl_gen.h"
+#include "termcode.h"
+#include "Analysis.h"
+
+int Warn = '@@';	/* Standard FunnelWeb warning character */
+
+int
+#ifdef PROTO_OK
+MakePtgSym(int sym)
+#else
+MakePtgSym(sym) int sym;
+#endif
+@<int MakePtgSym(int sym)@>
+
+void
+#ifdef PROTO_OK 
+FixPtgGiven(int sym, DefTableKey key)
+#else
+FixPtgGiven(sym, key) int sym; DefTableKey key;
+#endif
+@<void FixPtgGiven(int sym, DefTableKey key)@>
+
+int
+#ifdef PROTO_OK 
+FwOut(int sym, int warn)
+#else
+FwOut(sym, warn) int sym, warn;
+#endif
+@<int FwOut(int sym, int warn)@>
+@}
+
+@O@<Analysis.gla@>==@{
+@<PTG basic symbols@>
+@<LIDO basic symbols@>
+	AWK_COMMENT
+	C_COMMENT
+@}
+
+@O@<Analysis.con@>==@{
+@<Overall input text structure@>
+@<Additional concrete rules for LIDO text@>
+@<Concrete rules for PTG Templates@>
+@}
+
+@O@<Analysis.lido@>==@{
+@<Constructs of interest@>
+@<Common attributes@>
+@<Name analysis roles@>
+@<Symbol property computations@>
+@<Rule property computation@>
+@<Compute common attributes@>
+@<Produce class symbol computations@>
+@<Produce symbol inheritances@>
+@<Collect PTG templates@>
+@<Add an overriding template to the output@>
+@}
+
+@O@<Analysis.ptg@>==@{
+@<Name of the unparser-generated attribute of a symbol@>
+@<Name of a specific indexed insertion point@>
+@<Generated class symbol computations@>
+@<Generated symbol inheritances@>
+@<Create PTG template components in standard form@>
+@}
+
+@O@<Analysis.specs@>==@{
+@<Instantiate the necessary modules@>
+@}

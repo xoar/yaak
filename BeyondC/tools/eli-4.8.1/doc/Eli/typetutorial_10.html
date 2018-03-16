@@ -1,0 +1,425 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Pointer Types</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_9.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_11.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC14" HREF="typetutorial_toc.html#SEC14">Pointer Types</A></H1>
+<P>
+In this chapter we introduce pointer types to our language.
+The notation <CODE>t !</CODE> denotes a type for
+values that point to values of type <CODE>t</CODE>.
+<P>
+A new <CODE>Variable</CODE> notation is introduced:
+In <CODE>v !</CODE> the dereferencing operator <CODE>!</CODE> is applied to 
+the variable <CODE>v</CODE>, which must have a pointer type. The result
+of the operation is the value that <CODE>v</CODE> points to. 
+<P>
+A pointer value of type <CODE>t !</CODE> is created by execution of a 
+generator <CODE>new t</CODE>, where <CODE>t</CODE> is a type denotation.
+<P>
+Here is an example program that uses these pointer constructs
+in different contexts:
+<P>
+<B>PointerExamp</B>[114]==
+<PRE>
+begin
+  var   int k;
+  var   int! pi, int! pj;
+  var   record int i, bool b, real! r end! rv;
+  type  record int x, t! next end t;
+  var   t l;
+  pi = new int;
+  pi! = 1;
+  pi = pj;
+  pi! = pj!;
+  rv!.b = true;
+  rv!.r! = 3.2;
+  l.next!.x = 1;
+  l.next = nil;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+The following productions are added to the grammar:
+<P>
+<I>Abstract pointer syntax</I>[115]==
+<PRE>
+RULE: TypeDenoter ::= PointerType END;
+RULE: PointerType ::= TypeDenoter '!' END;
+
+RULE: Variable    ::= Variable '!' END;
+RULE: Expression  ::= 'nil' END;
+RULE: Expression  ::= Generator END;
+RULE: Generator   ::= 'new' TypeDenoter END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+There are two constructs which introduce a pointer type.
+The first one is a denoter for a pointer type. Two monadic 
+operators are created for each pointer type: 
+One is applied to a pointer and yields the value pointed to, 
+the other yields the reference of an entity instead of its 
+value. The dereferencing operators of all pointer types are
+overloaded on the indication <CODE>DerefOpr</CODE>, correspondingly
+all operators that prevent dereferencing are overloaded 
+on the indication <CODE>RefOpr</CODE>.
+We also introduce an artificial type for the <CODE>nil</CODE> symbol:
+<I>Pointer operators</I>[116]==
+<PRE>
+DerefOpr;
+RefOpr;
+NilOpr;
+nilType -&#62; IsType = {1};
+</PRE>
+<PRE>
+This macro is invoked in definition 124.
+</PRE>
+<P>
+Creating these pairs of operators for a pointer type establishes 
+the condition <CODE>PointerType.GotOper</CODE>, which is a precondition 
+for operator identification. Furthermore, we state that the type 
+of the <CODE>nil</CODE> symbol is coercible to each pointer type.
+<P>
+<I>Pointer type denotation</I>[117]==
+<PRE>
+RULE: TypeDenoter ::= PointerType COMPUTE
+  TypeDenoter.Type = PointerType.Type;
+END;
+
+SYMBOL PointerType INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  PointerType.GotOper +=
+    ORDER 
+      (Coercible (NilOpr, nilType, PointerType.Type),
+       MonadicOperator
+         (DerefOpr, NewKey(), PointerType.Type, TypeDenoter.Type),
+       MonadicOperator
+         (RefOpr, NewKey(), TypeDenoter.Type, PointerType.Type));
+END;
+
+RULE: Expression  ::= 'nil' COMPUTE
+  PrimaryContext (Expression, nilType);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+A generator also introduces a pointer type. The
+<CODE>TypeDenoter</CODE> states which is the type pointed to.
+Generators may occur as operand in expressions:
+<P>
+<I>Generator</I>[118]==
+<PRE>
+SYMBOL Generator INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  Generator.GotOper +=
+    ORDER (
+    MonadicOperator
+       (DerefOpr, NewKey(), Generator.Type, TypeDenoter.Type),
+    MonadicOperator
+       (RefOpr, NewKey(), TypeDenoter.Type, Generator.Type));
+END;
+
+RULE: Expression ::= Generator COMPUTE
+  PrimaryContext (Expression, Generator.Type);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+Types <CODE>t !</CODE>, <CODE>s !</CODE> and the types created by <CODE>new t</CODE> and 
+<CODE>new s</CODE> are all considered to be equivalent in our language, if the 
+types <CODE>s</CODE> and <CODE>t</CODE> are equivalent, with respect to renaming 
+and to equivalence rules for the particular type categories.
+<P>
+We use the facilities of the <CODE>StructEquiv</CODE> module to specify
+such structural type equivalence for pointer types.
+In particular two conditions are specified for types <CODE>a</CODE> and
+<CODE>b</CODE> to be equivalent: Both have to be of the kind <CODE>PointerClass</CODE>,
+and their sequences of component types have to be elementwise equivalent, 
+in this case the single type pointed to:
+<B>EqualPtrTypes.lido</B>[119]==
+<PRE>
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  PointerType.GotType =
+    AddTypeToBlock
+      (PointerType.Type, PointerClass,
+       VResetComponentTypes 
+         (PointerType.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+  &#60;- .moreTypeProperies;
+END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  Generator.GotType =
+    AddTypeToBlock
+      (Generator.Type, PointerClass,
+       VResetComponentTypes 
+         (Generator.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+  &#60;- .moreTypeProperies;
+END;
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+The <CODE>PointerClass</CODE> is a unique key used to distinguish
+this kind of types from other kinds, e.g. array types:
+<P>
+<I>Pointer type equality</I>[120]==
+<PRE>
+PointerClass;
+</PRE>
+<PRE>
+This macro is invoked in definition 124.
+</PRE>
+<P>
+Pointer types are to be treated especially when types are checked for
+equivalence: On the one hand, a type is allowed to be 
+recursively defined if the recursion goes through a pointer 
+component, for example in <CODE>type record int i, rec! p end rec;</CODE>.
+That is why we associate the property <CODE>AllowRecurType</CODE>
+to the pointer type, together with the properties defining the
+output for types. 
+<P>
+<I>Pointer types allow recursion</I>[121]==
+<PRE>
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  .moreTypeProperies =
+    ORDER
+      (ResetTypeName (PointerType.Type, "pointer..."),
+       ResetTypeLine (PointerType.Type, LINE),
+       ResetAllowRecurType (PointerType.Type, 1));
+END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  .moreTypeProperies =
+    ORDER
+      (ResetTypeName (Generator.Type, "pointer..."),
+       ResetTypeLine (Generator.Type, LINE),
+       ResetAllowRecurType (Generator.Type, 1));
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+On the other hand, we have to check that pointer types are not
+defined directly recursively, or indirectly recursively s.t.
+only pointer types are involved:
+<PRE>
+  type p1! p1;
+  type p2! p3;
+  type p3! p2;
+</PRE>
+In the example above all three type are pairwise equivalent.
+<P>
+<I>Recursion check for pointer types</I>[122]==
+<PRE>
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  IF (EQ (FinalType (PointerType.Type), FinalType (TypeDenoter.Type)),
+    message (ERROR, "Recursively defined pointer type", 
+             0, COORDREF))
+    &#60;- INCLUDING Program.TypeIsSet;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+For the dereferencing operation applied to a <CODE>Variable</CODE> we 
+specify that in the following context a suitable operator that
+overloads the <CODE>DerefOpr</CODE> indication is applicable:
+<P>
+<I>Pointer variable</I>[123]==
+<PRE>
+RULE: Variable ::= Variable '!' COMPUTE
+  MonadicContext (Variable[1], , Variable[2]);
+  Indication (DerefOpr);
+
+  IF(BadOperator,
+    message(ERROR,"Dereferencing not allowed", 0, COORDREF));
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 125.
+</PRE>
+<P>
+<B>Pointer.pdl</B>[124]==
+<PRE>
+<I>Pointer type equality</I>[120]
+<I>Pointer operators</I>[116]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Pointer.lido</B>[125]==
+<PRE>
+<I>Abstract pointer syntax</I>[115]
+<I>Pointer type denotation</I>[117]
+<I>Generator</I>[118]
+<I>Pointer types allow recursion</I>[121]
+<I>Recursion check for pointer types</I>[122]
+<I>Pointer variable</I>[123]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Pointer.con</B>[126]==
+<PRE>
+<I>Concrete pointer syntax</I>[143]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_9.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_11.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

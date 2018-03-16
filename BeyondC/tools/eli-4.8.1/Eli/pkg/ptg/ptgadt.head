@@ -1,0 +1,4 @@
+/* $Id: ptgadt.head,v 1.1 1991/09/19 11:31:10 mjung Exp $ */
+/* Interface for the PTG-generated module */
+
+#include "ptg_gen.h"

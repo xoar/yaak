@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# This shell script ensures that necessary symbolic links in the Odin-directory
+# exist. If they do not, the script will create them. It will also try to call
+# autoconf to create the configure-scripts. This will only be done if autoconf
+# exists in the path and the version is new enough for Eli.
+
+(cd Odin; ./symlinks)
+
+for p in `echo $PATH | sed 's/:/ /g'`
+do
+  if test -x $p/autoconf
+  then
+    echo Calling Autoconf 
+    autoconf
+    (cd ./Eli; autoconf --include=..)
+    (cd ./Eli/pkg/cpp/gnu_cpp; autoconf)
+    (cd ./Eli/pkg/eli/ofiles; autoconf)
+    (cd ./Eli/pkg/skeleton/gnu_sed; autoconf)
+    break
+  fi
+done

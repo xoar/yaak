@@ -1,0 +1,17 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:46:32 waite Exp $
+# Copyright (c) 1991, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/kwd
+SRC	= kwd.dg kwd.c match.c match.h
+AUX	= Makefile Makefile.in version
+CMD	= kwd.sh kw.exe.sh kwd_gen.sh kwd_out.sh
+EXE	= kwfilter.exe
+AUXDIR	= derivedSrcs
+
+@toolmk_h@
+
+kwfilter.exe:	derivedSrcs/kwfilter.exe
+	@rm -f $@
+	@LINK@ $? $@

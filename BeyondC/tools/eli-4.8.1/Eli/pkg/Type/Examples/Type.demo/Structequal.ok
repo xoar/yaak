@@ -1,0 +1,11 @@
+begin
+  type	record int i, t! p, t! q end t;
+  type	record int i, s! p, s! q end s;
+  type	record int i, u! p, u! q end v;
+  type	record int i, v! p, record int i, v! p, v! q end! q end u;
+  var	t tv, s sv, u uv, v vv;
+  uv = vv;
+  tv = sv;
+  sv = vv;
+  tv.p = uv.p;
+end

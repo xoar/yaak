@@ -1,0 +1,59 @@
+/* $Id: humans.specs,v 2.19 2013/04/07 00:23:42 profw Exp $
+ * Copyright (c) 1990, The Regents of the University of Colorado
+ * Documents for which paper copies are important
+ */
+ 
+        /* Top-level menu */
+dir.tnf
+
+	/* Tutorial material */
+EliRefCard.tnf		/* Eli's Quick Reference Card */
+faq.tnf                 /* Answers to Frequently Asked Questions */
+novice.tnf		/* Guide for New Eli Users */
+nametutorial.tnf	/* Tutorial on Name Analysis */
+typetutorial.tnf	/* Tutorial on Type Analysis */
+
+	/* Reference material */
+../../clp/clp.tnf		/* Command Line Processor Reference Manual */ 
+../../pdl/deftbl.tnf		/* PDL Reference Manual */
+../../gla/lex.tnf		/* Lexical Analysis Manual */
+info.tnf			/* Hypertext Browser Reference Manual */
+lib.tnf				/* Library Reference Manual */
+../../fw/fw.tnf			/* FunnelWeb User's Manual */
+../../liga/Info/lidoref.tnf	/* LIDO Reference Manual */
+../../liga/Info/comptrees.tnf	/* Computation in Trees */
+../../liga/Info/show.tnf	/* Debugging Information for LIDO */
+../../liga/Info/lcl.tnf		/* LIGA Control Language Reference Manual */
+../../liga/Info/gorto.tnf	/* Graphical Order Tool Reference Manual */
+adt.tnf                         /* Specification Module Libraries */
+input.tnf
+modlib.tnf
+lib.tnf
+name.tnf
+oldmod.tnf
+output.tnf
+problems.tnf
+prop.tnf
+type.tnf
+../../cola/Info/cola.tnf	/* COLA Options Refernce Manual */
+../../parser/syntax.tnf		/* Syntactic Analysis Manual */
+../../noosa/mon.tnf		/* Execution Monitoring Manual */
+../../oil/oil.tnf		/* OIL Reference Manual */
+pp.tnf				/* Products and Parameters Reference Manual */
+../../ptg/ptg.tnf		/* Program Text Generator Manual */
+../../idem/idem.tnf		/* Abstract Syntax Tree Unparsing */
+../../tp/tp.tnf			/* Tree Parsing */
+ui.tnf				/* User Interface Reference Manual */
+
+	/* Administration material */
+sysadmin.tnf			/* System Administration Guide */
+news.tnf                        /* Release notes */
+news4.8.tnf
+news4.7.tnf
+news4.6.tnf
+news4.5.tnf
+news4.4.tnf
+news4.3.tnf
+news4.2.tnf
+news4.1.tnf
+news4.0.tnf

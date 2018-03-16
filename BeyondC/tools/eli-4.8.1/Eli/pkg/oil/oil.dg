@@ -1,0 +1,45 @@
+# $Id: oil.dg,v 2.9 2010/03/18 19:30:45 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.oil => :oil;
+:oil 'OIL specification'? => :FILE;
+:oil.cmpd 'Set of oil specification fragments' => :LIST;
+
+COLLECT  (:oil)
+  => (:one.oil.cmpd);
+:one.oil.cmpd 'Singleton oil specification' => :oil.cmpd;
+
+COLLECT  (:LIST :extract=:oil)
+  => (:ext.oil.cmpd);
+:ext.oil.cmpd 'Extracted oil specification fragments' => :oil.cmpd;
+
+EXEC (oil_gen.sh) (oil.exe) (:oil.cmpd :cpp) (oil.err)
+  => (:oil_gen);
+:oil_gen 'Objects generated from OIL specifications' => :DERIVED-DIRECTORY;
+
+EXEC (oil_out.sh) (:oil.cmpd :names) (:oil_gen :name) (oil.specs)
+  => (:oil_out);
+:oil_out 'Results of OIL processing' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:oil_gen) oil_genErr
+  => (:oil_genErr);
+:oil_genErr 'Identity map for errors in standard form' => :line_err;
+
+COLLECT (:allspecs +incl=(:etaIncl) :oil_out :list)
+  => (:eli*level_1_specs_in);

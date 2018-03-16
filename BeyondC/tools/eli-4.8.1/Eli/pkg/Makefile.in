@@ -1,0 +1,22 @@
+# $Id: Makefile.in,v 1.6 2010/03/17 22:40:28 profw Exp $
+# Copyright (c) 1992, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg
+SRC	=
+AUX	= Makefile Makefile.in
+CMD	=
+EXE	=
+GEN	=
+GENINS	=
+SRCDIR	= Adt Input Name Output Prop Scan Tech Type Unparser \
+	  adtinit burg cc cola cpp cxx dbx delit \
+	  eli gla idl kwd lib liga lint \
+	  maptool noosa odi oldodin pdl pgs phi ptg \
+	  run skeleton symcode version \
+	  fw info parser clp dapto oil idem tp
+AUXDIR	=
+PREDIR  = info liga
+
+@toolmk_h@

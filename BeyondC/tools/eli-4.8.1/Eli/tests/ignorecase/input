@@ -1,0 +1,24 @@
+{TEST 6.1.1-1, CLASS=CONFORMANCE}
+
+{ The Pascal Standard states that matching upper and lower
+  case letters are equivalent in identifiers and word-symbols
+  (i.e. reserved words) if they are permitted.  This test does
+  not apply to processors with only one letter-case, but otherwise
+  the processor passes only if PASS is printed, and fails if the
+  program is unacceptable. }
+{V3.0: Test reclassified from 6.1.3-2 to current position due
+  to change in DP7185 wording.  Comment redrafted to be more
+  understandable. }
+
+program t6p1p1d1(output);
+var
+   conform  : integer;
+
+Begin
+   BEGIN
+      Conform:=1;
+      CONFORM:=2;
+      If conform = 2 then
+         writeln(' PASS...6.1.1-1')
+   enD
+end.

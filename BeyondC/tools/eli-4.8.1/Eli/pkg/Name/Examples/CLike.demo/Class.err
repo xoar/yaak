@@ -1,0 +1,23 @@
+begin
+  class w : w begin val ww = 1; ww; end;
+  class x : z begin val px = 1; pz; end;
+  class y : x begin val py = 1; px; end;
+  class z : y begin val pz = 1; py; end;
+  class m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+	end;
+  class n
+	begin	val a = 1; 
+		val c = 3;
+		c;
+	end;
+  class r : m : n
+	begin	val c = 4;
+		a;
+	end;
+  r::a;
+  z::px;
+  w::ww;
+end

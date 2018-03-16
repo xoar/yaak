@@ -1,0 +1,17 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:48:01 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+# Copyright (c) 1994, 1995 Anthony M. Sloane
+
+CC	= @CC@
+
+DIR	= pkg/oldodin
+SRC	= oldodin.dg
+AUX	= Makefile Makefile.in version
+CMD	= dir.sh ls.sh
+EXE	=
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@

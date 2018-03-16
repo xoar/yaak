@@ -1,0 +1,14 @@
+# $Id: Makefile.in,v 1.3 2010/05/10 17:51:39 profw Exp $
+# Copyright 2007, The Regents of the University of Colorado
+
+DIR	= pkg/cxx
+SRC	= cxx.dg errfilter.sed
+AUX	= cxx.o.sh.in Makefile Makefile.in version
+CMD	= cxx.o.sh cxx_srcs.sh
+EXE	=
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@

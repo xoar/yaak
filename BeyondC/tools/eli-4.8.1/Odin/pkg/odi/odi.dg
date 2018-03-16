@@ -1,0 +1,46 @@
+# Source Types
+
+*odi.SM => :odi.cxx.sm;
+
+
+# Intermediate Object Types
+
+:odi.cxx.sm 'system model for an ODI C++ program'? => :FILE;
+
+:odi.cxx.sm.list 'list of files in a C++ system model' => :sm.list;
+
+:schema.C 'ObjectStore schema source module' => <:cxx>;
+
+:com_schema_standin 'compiled ObjectStore schema' => :FILE;
+
+
+# Parameter Types
+
++schema_src 'ObjectStore schema source file'? => :LIST;
+
++schema_dir 'ObjectStore schema directory'? => :first;
+
+
+# Environment Variables
+
+$OS_ROOTDIR 'ObjectStore root directory' = '/net/xlendi/usr2/ostore-r3.0';
+
+
+# Tools
+
+READ-LIST (:odi.cxx.sm)
+   => (:odi.cxx.sm.list);
+
+EXEC (com_schema.sh) (+schema_src :ls) (+schema_src :map=:dir :ls)
+ (+schema_dir)@ (+inc_sp) (:com_schema_standin)@
+ NEEDS (+schema_src) (+schema_src :map=:all_cxx_inc)
+  => (:com_schema_standin);
+
+EXEC (app_schema.sh) (+schema_dir)@
+ (:odi.cxx.sm.list :recurse=:sm.list :map=:o :ls) (:library_flags)
+ NEEDS (:odi.cxx.sm.list :recurse=:sm.list :map=:o) (:libraries)
+ (:com_schema_standin)
+  => (:schema.C);
+
+COLLECT (:odi.cxx.sm.list) (:schema.C)
+   => (:cxx.sm.list);

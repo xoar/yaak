@@ -1,0 +1,474 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+@comment ############################################################
+@node Example, Predefined, Techniques, Top, Run
+@comment  node-name,  next,  previous,  up
+@chapter A Complete Example
+@comment ############################################################
+
+@findex A Complete Example
+@findex example
+@findex LIDO
+In this chapter we demonstrate the use of PTG for translating a
+simple assignment language into C code.
+This example shows PTG techniques in the context of a complete
+translator specification. It especially demonstrates how
+PTG patterns are applied in LIDO specifications.
+
+When this manual is read online, the browser's @code{Run} 
+command can be used to obtain a copy of the complete specification 
+for further experiments.
+You will get a Funnelweb file @code{PtgEx.fw}
+containing the content of this chapter (@pxref{top,,,fw, FunnelWeb}). 
+It can be used for example to derive the specified processor by
+
+@example
+PtgEx.fw :exe >.
+@end example
+
+@noindent
+or to derive the set of files described below:
+
+@example
+PtgEx.fw :fwGen >.
+@end example
+
+@menu
+* Structure::    Source Language Structure
+* Frame::        Program Frame
+* Expressions::  Expressions
+* CHAIN::        Using LIDO CHAINs
+* CONSTITUENTS:: Using LIDO CONSTITUENTS
+@end menu
+
+@ifinfo
+@egfiles ptg
+@end egfiles
+
+@run
+echo "Obtaining specifications and sample input"
+cp $ODINCACHE/PKGS/ptg/sample/PtgEx.fw PtgEx.fw
+echo 'Copy complete, see file PtgEx.fw, hit return to continue'
+read answer
+@end run
+@end ifinfo
+
+@comment ############################################################
+@node Structure, Frame, , Example
+@comment  node-name,  next,  previous,  up
+@section Source Language Structure
+@comment ############################################################
+
+@findex Source Language Structure
+@findex example language
+Programs of this example language are sequences of assignments,
+input statements, and output statements, like
+
+~O~<simple~>~{
+   input a;
+   output a;
+   x := a + 1;
+   y := x - 5;
+   output x;
+   output y + x;
+~}
+@noindent
+The values of variables and expressions are integral numbers.
+There are only the binary operators @code{+} and @code{-}.
+The above program is to be translated into the following C program:
+
+~O~<simple.out~>~{
+   #include <stdio.h>
+
+   int a = 0, x = 0, y = 0;
+
+   int main (void) {
+
+   scanf ("%d", &(a));
+   printf ("%d\n",a);
+   x = a+1;
+   y = x-5;
+   printf ("%d\n",x);
+   printf ("%d\n",y+x);
+
+   exit (0);
+   }
+~}
+
+The structure of the source programs is specified by the following
+concrete grammar:
+
+~O~<Program.con~>~{
+   Program:     Statement*.
+
+   Statement:   Variable ':=' Expression ';'.
+   Statement:   'input' Variable ';'.
+   Statement:   'output' Expression ';'.
+
+   Expression:  Expression Operator Operand / Operand.
+
+   Operator:    '+' / '-'.
+
+   Operand:     Variable.
+   Operand:     IntLit.
+   Variable:    Ident.
+~}
+
+In the tree grammar @code{Expression}s and @code{Operand}s are
+represented both by @code{Expression} nodes, as specified by
+the type @code{.sym} rule:
+
+~O~<Expr.sym~>~{
+   Expression ::= Operand .
+~}
+
+Identifier tokens, number literals, and comments are denoted as
+in Pascal, as stated by the following type @code{.gla} specification:
+
+~O~<Mini.gla~>~{
+   Ident:   PASCAL_IDENTIFIER
+   IntLit:  PASCAL_INTEGER
+            PASCAL_COMMENT
+~}
+
+@comment ############################################################
+@node Frame, Expressions, Structure, Example
+@comment  node-name,  next,  previous,  up
+@section Program Frame
+@comment ############################################################
+
+@findex Program Frame
+@findex output function
+In this section the overall structure of the target programs is
+specified, the name of the output file is determined, and
+its contents is produced by a PTG output function.
+We first specify a pattern for target program frame:
+
+~O~<Frame.ptg~>~{
+   Frame:
+      "#include <stdio.h>\n\n"
+
+      $1 /* declarations */
+
+      "\nint main (void) {\n\n"
+
+      $2 /* statements */
+
+      "\nexit (0);\n}\n"
+~}
+@noindent
+It has two insertion points, one for variable declarations
+and one for the statement sequence.
+The text to be inserted is obtained from the attributes
+@code{Program.DeclPtg} and @code{Program.StmtPtg} of type @code{PTGNode}
+It is shown below how they are computed.
+Here they are used as arguments of the @code{Frame} pattern application:
+
+@findex file name
+@findex SRCFILE
+~O~<TransProg.lido~>~{
+   ATTR DeclPtg, StmtPtg: PTGNode;
+
+   SYMBOL Program COMPUTE
+     PTGOutFile (CatStrStr(SRCFILE, ".c"),
+                 PTGFrame (THIS.DeclPtg, THIS.StmtPtg));
+   END;
+~}
+
+The above call of the output function @code{PTGOutFile} (see
+@pxref{Output}) writes to a file which name is derived from the file
+name of the source program by appending @code{".c"}. The concatenation
+function is imported from the specification module library. See
+@ref{Strings, , String Concatenation, problems, Specification Module
+Library: Common Problems}, for further details on the @code{Strings} module.
+
+~O~<TransProg.specs~>~{
+$/Tech/Strings.specs
+~}
+
+The macro @code{SRCFILE} is obtained from the source program module, 
+see @ref{source, , Text Input, lib, Library Reference Manual}.
+That module is included automatically into every Eli specification. So, only
+it's interface has to be made known by the attribute evaluator:
+
+~O~<TransProg.head~>~{
+#include "source.h"
+~}
+
+@comment ############################################################
+@node Expressions, CHAIN, Frame, Example
+@comment  node-name,  next,  previous,  up
+@section Expressions
+@comment ############################################################
+
+@findex LIDO
+@findex Expressions
+In this section we specify the translation of expressions.
+Target expressions are composed by applications of patterns
+that construct the text in a bottom-up way, i.e. from the
+leaves up to the complete expression.
+
+In our simple example this translation is one-to-one as
+specified by the three patterns:
+
+~O~<TransExpr.ptg~>~{
+   BinOperation: $ $ $
+   Number:       $ int
+   String:       $ string
+~}
+@noindent
+The @code{BinOperation} pattern composes a left operand,
+an operator, and a right operand. 
+The @code{Number} pattern just converts an integral number into
+text.
+The @code{String} pattern reproduces its argument.
+It is used here for output of operators and of identifiers.
+
+These patterns are applied in computations of @code{Expression}
+contexts. Attributes @code{Ptg} of type @code{PTGNode} are used
+for the intermediate results:
+
+~O~<TransExpr.lido~>~{
+   ATTR Ptg: PTGNode;
+
+   RULE: Expression ::= Expression Operator Expression COMPUTE
+      Expression[1].Ptg = 
+         PTGBinOperation (
+	    Expression[2].Ptg, Operator.Ptg, Expression[3].Ptg);
+   END;
+
+   RULE: Operator ::= '+' COMPUTE
+      Operator.Ptg = PTGString ("+");
+   END;
+
+   RULE: Operator ::= '-' COMPUTE
+      Operator.Ptg = PTGString ("-");
+   END;
+
+   RULE: Expression ::= Variable COMPUTE
+      Expression.Ptg = Variable.Ptg;
+   END;
+
+   RULE: Expression ::= IntLit COMPUTE
+      Expression.Ptg = PTGNumber (IntLit);
+   END;
+
+   RULE: Variable ::= Ident COMPUTE
+      Variable.Ptg = PTGString (StringTable (Ident)); 
+   END;
+
+   ATTR Sym: int;
+~}
+@noindent
+The last two computations use values obtained from named terminal
+symbols: @code{IntLit}
+supplies an integer value to the @code{Number} pattern,
+the token code of @code{Ident} is used
+to access the identifier string from the @code{StringTable}.
+The @code{String} pattern then reproduces the identifier.
+@findex StringTable
+
+@comment ############################################################
+@node CHAIN, CONSTITUENTS, Expressions, Example
+@comment  node-name,  next,  previous,  up
+@section Using LIDO CHAINs
+@comment ############################################################
+
+@findex Using LIDO CHAINs
+@findex LIDO
+@findex CHAIN
+@findex statements
+@findex sequences
+In this sections the translation of statement sequences is shown.
+The LIDO @code{CHAIN} construct is used to compose a sequence
+of translated statements in left-to-right order.
+
+Assignments, input statements, and output statements are translated
+by the following patterns:
+
+~O~<TransStmt.ptg~>~{
+   AssignStmt:	$1 /* lhs */ " = " $2 /* rhs */ ";\n"
+   InputStmt:	"scanf (\"%d\", &(" $1 /* variable */ "));\n"
+   OutPutStmt:	"printf (\"%d\\n\","  $1 /* expression */ ");\n"
+
+   Seq:         $  $
+~}
+@noindent
+The last pattern is used to combine two text components
+(statement sequences in this case) into one (see @xref{Sequences}).
+
+A @code{CHAIN} named @code{StmtChn} is defined to compose
+@code{PTGNode}s in left-to-right order through the tree.
+The @code{CHAIN} starts in the root context with an empty text.
+The result is obtained at the end of the @code{CHAIN} by
+@code{TAIL.StmtChn}:
+
+~O~<TransStChn.lido~>~{
+   CHAIN StmtChn: PTGNode;
+
+   SYMBOL Program COMPUTE
+      CHAINSTART HEAD.StmtChn = PTGNULL;
+      SYNT.StmtPtg = TAIL.StmtChn;
+   END;
+~}
+
+In each of the three statement contexts the translation
+is produced by application of the corresponding pattern
+and appended to the end of the @code{CHAIN} using the @code{Seq}
+pattern:
+
+~O~<TransStmt.lido~>~{
+   RULE: Statement ::= Variable ':=' Expression ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGAssignStmt (Variable.Ptg, Expression.Ptg));
+   END;
+
+   RULE: Statement ::= 'input' Variable ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGInputStmt (Variable.Ptg));
+   END;
+
+   RULE: Statement ::= 'output' Expression ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGOutPutStmt (Expression.Ptg));
+   END;
+~}
+
+@comment ############################################################
+@node CONSTITUENTS, , CHAIN, Example
+@comment  node-name,  next,  previous,  up
+@section Using LIDO CONSTITUENTS
+@comment ############################################################
+
+@findex Using LIDO CONSTITUENTS
+@findex CONSTITUENTS
+@findex LIDO
+@findex declarations
+@findex sequences
+In this section the construction of a declarator sequence is
+described using the LIDO @code{CONSTITUENTS} construct.
+It is also shown how a list with separators is produced,
+and how text is generated only once for each identifier
+that occurs in the program.
+
+The source language does not have declarations; variables
+are introduced by just using them. 
+Hence, we have to generate declarations in the target program,
+one for each variable that occurs in the source.
+
+A variable may occur several times, but its declaration
+must be generated only once.
+For that purpose each variable is identified by a key
+which is associated to every occurrence of the variable.
+
+This task is an instance of a name analysis task. We
+can use the @code{AlgScope} module of the module library
+to solve it:
+
+~O~<ScopeLib.specs~>~{
+   $/Name/AlgScope.gnrc:inst
+~}
+
+The computational role @code{IdDefScope} 
+provided by that module is associated to the grammar
+symbol @code{Variable}:
+
+~O~<Scope.lido~>~{
+   SYMBOL Variable INHERITS IdDefScope COMPUTE 
+      SYNT.Sym = TERM;
+   END;
+~}
+
+The computations of that module yield an attribute @code{Variable.Key}.
+It has the same value for each occurrence of a variable identifier.
+
+We now associate a property @code{IsDeclared} to variables by a type
+@code{.pdl} specification:
+
+~O~<Decl.pdl~>~{
+   IsDeclared: int;
+~}
+@noindent
+It describes a state of that variable with respect to the
+translation process: A declaration is only produced if
+@code{IsDeclared} is not yet set, and then @code{IsDeclared} is set.
+The attribute @code{Variable.DeclPtg} takes the result, 
+either the generated target declaration or @code{PTGNULL}.
+
+~O~<VarDecl.lido~>~{
+   RULE: Variable ::= Ident COMPUTE
+      Variable.DeclPtg =
+         IF (GetIsDeclared (Variable.Key, 0),
+             PTGNULL,
+             ORDER (ResetIsDeclared (Variable.Key, 1),
+                    PTGDeclVariable (StringTable (Ident))));
+   END;
+~}
+@noindent
+The pattern @code{DeclVariable} is used here to reproduce
+the variable name from the @code{StringTable} and to add
+the initialization to it:
+A single variable declarator is specified by the pattern
+
+~O~<Decl.ptg~>~{
+   DeclVariable:  $ string " = 0"
+   Declaration:   "int " $ ";\n"
+~}
+@noindent
+The second pattern constitutes a complete declaration where
+the declarator list is inserted.
+
+@findex WITH functions
+The declarator list is collected in the @code{Program} context
+using a @code{CONSTITUENTS} construct. 
+It combines the @code{PTGNode}
+values of all @code{Variable.DeclPtg} attributes of the tree:
+
+~O~<ProgDecl.lido~>~{
+   SYMBOL Program COMPUTE
+      SYNT.DeclPtg = 
+         PTGDeclaration (
+            CONSTITUENTS Variable.DeclPtg
+            WITH (PTGNode, PTGCommaSeq, IDENTICAL, PTGNull));
+   END;
+~}
+
+The @code{WITH} clause of the @code{CONSTITUENTS} construct
+specifies the type of the combined values, @code{PTGNode},
+and three functions which are applied to obtain the resulting
+value:
+@code{PTGNull} is the nullary predefined function producing no text.
+@code{IDENTICAL} is a unary function predefined in LIDO; it is applied to each
+@code{Variable.DeclPtg} attributes reproducing its value.
+@code{PTGCommaSeq} is a pattern function that combines two
+PTG texts, and separates them by a comma  if none of them is empty.
+That pattern is specified using PTG's optional clause
+(see @xref{Sequences}):
+@findex separator
+
+~O~<Comma.ptg~>~{
+   CommaSeq:  $ {", "} $
+~}
+
+
+

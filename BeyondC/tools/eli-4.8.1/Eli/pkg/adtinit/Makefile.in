@@ -1,0 +1,22 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:43:46 waite Exp $
+# Copyright 1993, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/adtinit
+SRC	= adtinit.dg
+AUX	= Makefile.in Makefile version
+CMD	= csmidnOut.sh csmidnProd.sh
+GEN	=
+EXE	= adtinit.exe transl.exe
+AUXDIR	= src
+
+@toolmk_h@
+
+adtinit.exe:	src/adtinit.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+transl.exe:	src/transl.exe
+	@rm -f $@
+	@LINK@ $? $@

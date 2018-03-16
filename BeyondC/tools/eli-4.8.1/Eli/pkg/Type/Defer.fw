@@ -1,0 +1,202 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+The generic parameter +referto=|KEY| is used on instantiation.
+
+This module implements the technique of deferred property
+association:
+Many languages have constructs that define an identifier to denote
+the same object as another, different identifier does.
+Properties accessed or set via the one key should yield the same
+results or effects as if the other key was used.
+Typical examples for such constructs are type definitions
+or constant definitions.
+@findex Deferred Property Association
+@findex Module Defer
+@findex Defer
+
+The roles of this module relate keys to each other which represent
+the same object. That relation has to be acyclic. The properties
+are associated to the keys at the ends of those relation chains.
+A function is provided that walks down the chain when accessing
+a property from any of the related keys.
+
+This technique also decouples the computations which establish
+the equivalence between key from those which associate properties
+to keys. It avoids cyclic dependencies between computations
+in cases where properties of objects may be defined recursively,
+e.g. recursively defined types.
+
+The property @code{Defer} implements the relation between keys described
+here. It should not be set otherwise than by using the 
+@code{SetDeferId} role of this module.
+@findex property Defer
+
+Setting a property to a key that may be an end of a @code{Defer}
+chain should occur in the context of the @code{SetDeferProp}
+role.
+
+If properties are accessed for a key @code{k} that may be
+on a @code{Defer} chain, the result of the call
+@code{TransDefer (k)} has to be used instead of the
+the key @code{k} itself, e.g. @code{GetKind (TransDefer (k), NoKind)}.
+@findex TransDefer
+
+The property _RecDefer is used internally by this module to
+ensure that no cyclic Defer relation is established.
+
+~O~<Defer.pdl~>~{
+Defer: DefTableKey [Trans];
+_RecDefer: int;
+~}
+
+This module uses the @code{PropLib} module
+(@xref{PropLib}) to obtain the @code{TransDefer} function.
+@findex Module PropLib
+@findex PropLib
+
+~O~<Defer.specs~>~{
+$/Prop/PropLib.fw
+~}
+
+The module provides the following computational roles:
+
+@code{SetDeferId} 
+is a role for a defining occurrence of an identifier. 
+It establishes the @code{Defer} relation from
+@code{SetDeferId.|KEY|Key} to point to 
+@code{SetDeferId.DeferredKey}.
+A lower or upper computation for @code{THIS.DeferredKey} has to be
+provided.
+An attempt to complete a @code{Defer} cycle is not executed.
+@findex SetDeferId
+@findex DeferredKey
+@findex attribute DeferredKey
+
+@code{ChkSetDeferId} is a role that may be inherited
+to any identifier occurrence.
+It checks whether an attempt was made to complete
+a @code{Defer} cycle involving this key.
+The role should be inherited together with @code{SetDeferId},
+if @code{Defer} cycles are not otherwise excluded.
+@findex ChkSetDeferId
+
+@code{SetDeferProp}
+is a role that characterizes a context where properties may be
+set to a key at the end of a @code{Defer} chain.
+Computations that associate the properties have to
+establish the postcondition represented by the @code{VOID}
+attribute @code{SYNT.GotDeferProp}.
+The role provides a default computation for
+@code{SYNT.GotDeferProp} that states the empty postcondition.
+@findex SetDeferProp
+@findex GotDeferProp
+@findex attribute GotDeferProp
+
+~O~<Defer.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS RootDefer END;
+
+CLASS SYMBOL RootDefer COMPUTE
+  SYNT.GotDefer = 
+    CONSTITUENTS (SetDeferId.GotDefer, SetDeferProp.GotDeferProp)
+    SHIELD RootDefer;
+END;
+
+CLASS SYMBOL SetDeferId:
+	|KEY|Key:         DefTableKey, /* required */
+	|KEY|DeferredKey: DefTableKey; /* required */
+
+CLASS SYMBOL SetDeferId COMPUTE
+  SYNT.GotDefer =
+      _ChkSetDeferred (THIS.|KEY|Key, THIS.|KEY|DeferredKey);
+END;
+
+CLASS SYMBOL ChkSetDeferId:
+	Sym:		int,		/* required */
+	|KEY|Key:	DefTableKey;	/* required */
+
+CLASS SYMBOL ChkSetDeferId COMPUTE
+  IF (Get_RecDefer (THIS.|KEY|Key, 0),
+  message (ERROR,
+           CatStrInd ("cyclic definition: ", THIS.Sym),
+           0, COORDREF))
+  <- INCLUDING RootDefer.GotDefer;
+END;
+
+CLASS SYMBOL SetDeferProp:
+	GotDeferProp:	VOID		SYNT;	/* default */
+
+CLASS SYMBOL SetDeferProp COMPUTE
+  SYNT.GotDeferProp = "yes";
+END;
+~}
+
+~O~<Defer.head~>~{
+#include "Defer.h"
+~}
+
+~O~<Defer.h~>~{
+#include "deftbl.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern void _ChkSetDeferred (DefTableKey t1, DefTableKey t2);
+#else
+extern void _ChkSetDeferred ();
+#endif
+/* On exit
+ *    if t1 is t2 or the Defer relation applied to t2
+ *    directly or indirectly leads to t1, the _RecDefer property
+ *    is set for t1, t2, and all keys reached from t2 via Defer;
+ *    otherwise the Defer property of t1 is set to t2.
+ */
+~}
+
+~O~<Defer.c~>~{
+#include "Defer.h"
+#include "pdl_gen.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+void _ChkSetDeferred (DefTableKey t1, DefTableKey t2)
+#else
+void _ChkSetDeferred (t1, t2) DefTableKey t1, t2;
+#endif
+{ int acyclic = 1; DefTableKey t = t2;
+  if (t1 == NoKey) return;
+  while (t != NoKey)
+    if (t1 == t)
+      { acyclic = 0; break; }
+    else
+      t = GetDefer (t, NoKey);
+  if (acyclic)
+    ResetDefer (t1, t2);
+  else
+    { Reset_RecDefer (t1, 1);
+      t = t2;
+      while (t != NoKey)
+      { Reset_RecDefer (t, 1);
+        t = GetDefer (t, NoKey);
+      }
+    }
+}
+~}

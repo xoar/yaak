@@ -1,0 +1,135 @@
+#	Copyright (c) 1991 Geoffrey M. Clemm
+#	geoff@boulder.colorado.edu
+
+INCLUDE "inc/GMC.h"
+
+SCANNER
+
+  EOF			= TOK_EOF
+  ERR			= TOK_ERR
+  'BANNER'		= TOK_BANNER
+  'NEEDS'		= TOK_NEEDS
+
+  "Word"		= TOK_Word	=> "NOD_Word"
+  ':'			= TOK_Colon
+  '+'			= TOK_Plus
+  '='			= TOK_Equals
+  '('			= TOK_LeftParen
+  ')'			= TOK_RightParen
+  '%'			= TOK_Percent
+  '/'			= TOK_Slash
+  ';'			= TOK_Semicolon
+  '?'			= TOK_Question
+  '<'			= TOK_LeftAngle
+  '>'			= TOK_RightAngle
+  '&'			= TOK_Ampersand
+  '@'			= TOK_At
+  '*'			= TOK_Asterisk
+  '$'			= TOK_Dollar
+
+NODES
+   "NOD_DrvGrf" "NOD_Banner"
+   "NOD_SrcDcl" "NOD_PrmDcl" "NOD_ObjDcl" "NOD_ToolDcl" "NOD_VarDcl"
+   "NOD_Prefix" "NOD_Suffix" "NOD_Hidden" "NOD_BaseSupertype"
+   "NOD_Args" "NOD_Needs" "NOD_NameInput" "NOD_ErrOKInput" "NOD_Results"
+   "NOD_ForeignResult"
+   "NOD_OdinExpr" "NOD_DrvInput" "NOD_PrmInput"
+   "NOD_EmptyFile" "NOD_AbsRoot" "NOD_AbsFile"
+   "NOD_PrmOpr" "NOD_AplOpr" "NOD_PrmVals" "NOD_DrvOpr"
+   "NOD_SecOrdDrvOpr" "NOD_Oprs"
+   "NOD_VirSelOpr" "NOD_SelOpr" "NOD_DirOpr" "NOD_VarWord" "NOD_Word"
+
+RULES
+
+DerivationGraph
+   -> DGEntry // ';'				=> "NOD_DrvGrf";
+
+DGEntry
+   -> ()
+   -> 'BANNER' "Word"				=> "NOD_Banner"
+   -> SourceType '=' '>' ObjectType		=> "NOD_SrcDcl"
+   -> ObjectType Desc '=' '>' SuperType+	=> "NOD_ObjDcl"
+   -> ParameterType Desc '=' '>' ObjectType	=> "NOD_PrmDcl"
+   -> '$' "Word" Desc '=' ParameterValue	=> "NOD_VarDcl"
+   -> "Word" Args Needs '=' '>' Results		=> "NOD_ToolDcl";
+
+SourceType
+   -> "Word" '*'				=> "NOD_Prefix"
+   -> '*' "Word"?				=> "NOD_Suffix";
+
+ParameterType
+   -> '+' "Word";
+
+ObjectType
+   -> ':' "Word";
+
+ForeignObjectType
+   -> ':' "Word" '*' "Word";
+
+Desc
+   -> "Word" '?'
+   -> "Word"					=> "NOD_Hidden";
+
+SuperType
+   -> '<' ObjectType '>'			=> "NOD_BaseSupertype"
+   -> ObjectType;
+
+Args
+   -> Arg+					=> "NOD_Args";
+
+Needs
+   -> 'NEEDS' Arg+				=> "NOD_Needs"
+   -> ( )					=> "NOD_Needs";
+
+Results
+   -> Result+					=> "NOD_Results"
+   -> ForeignResult				=> "NOD_Results";
+
+Result
+   -> '(' ObjectType ')';
+
+ForeignResult
+   -> '(' ForeignObjectType ')'			=> "NOD_ForeignResult";
+
+Arg
+   -> VarWord
+   -> FileArg
+   -> FileArg '@'				=> "NOD_NameInput"
+   -> FileArg '&'				=> "NOD_ErrOKInput";
+
+FileArg
+   -> '(' OdinExpr1 ')'				=> "NOD_OdinExpr";
+
+OdinExpr1
+   -> Root
+   -> OdinExpr1 Operation
+   -> '(' OdinExpr1 ')';
+
+Root
+   -> '(' ')'					=> "NOD_EmptyFile"
+   -> VarWord
+   -> ObjectType				=> "NOD_DrvInput"
+   -> ParameterType				=> "NOD_PrmInput"
+   -> '/'					=> "NOD_AbsRoot"
+   -> '/' VarWord				=> "NOD_AbsFile"
+   -> '%' VarWord				=> "NOD_VirSelOpr";
+
+Operation
+   -> ParameterType ParameterValues?		=> "NOD_PrmOpr"
+   -> ParameterType FileArg			=> "NOD_AplOpr"
+   -> ObjectType				=> "NOD_DrvOpr"
+   -> ObjectType '=' ObjectType			=> "NOD_SecOrdDrvOpr"
+   -> '/' VarWord				=> "NOD_SelOpr"
+   -> '/'					=> "NOD_DirOpr"
+   -> '%' VarWord				=> "NOD_VirSelOpr";
+
+ParameterValues
+   -> '=' ParameterValue+			=> "NOD_PrmVals";
+
+ParameterValue
+   -> VarWord
+   -> FileArg;
+
+VarWord
+   -> "Word"
+   -> '$' "Word"				=> "NOD_VarWord";

@@ -1,0 +1,45 @@
+# $Id: Makefile.in,v 1.7 2009/08/03 19:16:19 profw Exp $
+# 
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+# 
+
+CC      =       @CC@
+
+DIR	=	pkg/Type/Examples
+SRC	=	TypeTutorial.fw Type.savedmessages Odinfile Type.demo
+COP	=	Makefile.in 
+AUX	=	$(COP) Makefile
+COM	=	
+CMD	=	$(COM)
+RCS	=
+EXE	=	
+GEN	=	
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+CLEAN	= 	$(EXE) $(GENINS) \
+		TypeTutorial.fw.exe Type.messages Type.diff Type.warn
+
+Type:
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '%Type.test'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done

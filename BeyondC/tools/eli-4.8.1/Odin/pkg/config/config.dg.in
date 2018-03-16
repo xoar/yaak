@@ -1,0 +1,17 @@
+$ODIN_VERSION_STR 'odin-build release number' = '@PACKAGE_VERSION@';
+
+$ODIN_CC 'name of the C compiler' = '@CC@';
+
+$ODIN_CC_FLAGS 'C compiler flags' = '@CFLAGS@';
+
+$ODIN_CPP 'name of the C preprocessor' = '@CPP@';
+
+$ODIN_CPP_FLAGS 'C preprocessor flags' = '@CPPFLAGS@';
+
+$ODIN_CXX 'name of the C++ compiler' = '@CXX@';
+
+$ODIN_CXX_FLAGS 'CC flags' = '@CXXFLAGS@';
+
+$ODIN_YACC 'name of the yacc compiler' = '@YACC@';
+
+$ODIN_RANLIB 'archive symbol table program' = '@RANLIB@';

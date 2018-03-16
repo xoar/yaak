@@ -1,0 +1,16 @@
+begin
+  var	int i,
+	bool b,
+	real r;
+
+  fun g (int z) void
+  begin r = z; return 1; end;
+
+  i = 1;
+  i = r;
+  i = b;
+
+  g (i);
+  g (r);
+  g (b);
+end

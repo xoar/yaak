@@ -1,0 +1,60 @@
+# $Id: configure.in,v 1.4 2013/10/31 15:41:18 pfahler Exp $
+
+AC_INIT([ofiles],[1.1])
+AC_CONFIG_SRCDIR(rdsymb.c)
+AC_CONFIG_HEADER(ofile.h)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_CHECK_HEADERS(fcntl.h unistd.h malloc.h a.out.h elf.h sys/elf.h mach-o/loader.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+
+dnl Checks for known binary formats.
+
+AC_MSG_CHECKING(for object file format)
+ofilefmt=unknown
+cat > conftest.$ac_ext <<EOF
+#include "confdefs.h"
+int main(){return 0;}
+EOF
+if { (eval echo \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }
+then 
+  ofilemsg=`file conftest.$ac_objext`
+  ofilename=`expr "$ofilemsg" : '.*\(ELF\)'`
+  if test "$ofilename" = 'ELF'
+  then AC_DEFINE(ELF_BINARIES,
+    1,[Define if using ELF binaries]) ofilefmt=ELF
+  fi
+  ofilename=`expr "$ofilemsg" : '.*\(COFF\)'`
+  if test "$ofilename" = 'COFF'
+  then AC_DEFINE(COFF_BINARIES,
+    1,[Define if using COFF binaries]) ofilefmt=COFF
+  fi
+  ofilename=`expr "$ofilemsg" : '.*\(Mach-O\)'`
+  if test "$ofilename" = 'Mach-O'
+  then AC_DEFINE(MACH_O_BINARIES,
+    1,[Define if using Mach binaries]) ofilefmt=Mach-O
+  fi
+  ofilename=`expr "$ofilemsg" : '.*\(data\)'`
+  if test "$ofilename" = 'data'
+  then
+  osmsg=`uname -o`
+  osname=`expr "$osmsg" : '.*\(Cygwin\)'`
+     if test "$osname" = 'Cygwin'
+     then AC_DEFINE(COFF_BINARIES,
+      1,[Define if using COFF binaries]) ofilefmt=COFF
+     fi
+  fi
+fi
+rm -rf conftest*
+AC_MSG_RESULT($ofilefmt)
+
+AC_OUTPUT(Makefile)

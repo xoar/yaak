@@ -1,0 +1,60 @@
+/* $Id: csm.dapto,v 3.6 1999/02/10 09:22:39 mjung Exp $ */
+/* (C) Copyright 1997 University of Paderborn */
+
+/* This file is part of the Eli Module Library.
+
+The Eli Module Library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Library General Public License as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+
+The Eli Module Library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with the Eli Module Library; see the file COPYING.LIB.
+If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+Suite 330, Boston, MA 02111-1307, USA.  */
+
+aspect string;
+
+<stdlib.h>
+<string.h>
+"csm.h"
+
+event string_stored* "Storage of a new string in the string table"
+    (int index "Index of new string", str string "New string");
+
+operation get_string "Look up a string given its index"
+    (int index "Index of the string to be looked up") : str
+{ 
+    if ((index < 0) || (index >= numstr)) {
+	DAPTO_RESULT_STR ("*** Illegal string table index ***");
+    } else {
+	char *s = StringTable (index);
+	if (s == (char *) 0) {
+	    DAPTO_RESULT_STR ("*** No string at this index ***");
+        } else {
+	    DAPTO_RESULT_STR (s);
+        }
+    }
+}
+
+operation get_all_strings "Look up all of the index-string pairs"
+    () : str
+{
+    int i;
+    char *s;
+
+    for (i = 0; i < numstr; i++) {
+        s = StringTable (i);
+        if (s == (char *) 0)
+            continue;
+	DAPTO_RESULT_INT (i);
+	DAPTO_RESULT_STR (s);
+    }
+}
+
+end;

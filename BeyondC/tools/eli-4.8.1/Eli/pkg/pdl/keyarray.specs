@@ -1,0 +1,6 @@
+/* $Id: keyarray.specs,v 1.1 1993/01/05 05:14:08 waite Exp $ */
+/* Module to manage arrays of definition table keys */
+
+keyarray.c
+keyarray.h
+keyarray.head

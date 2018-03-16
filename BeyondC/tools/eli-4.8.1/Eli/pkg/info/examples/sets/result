@@ -1,0 +1,34 @@
+int number_of_sets = 3;
+
+char *name_of_set[] = {
+"colors",
+"bugs",
+"verbs"};
+
+int size_of_set[] = {
+3,
+5,
+4};
+
+char *set_of_colors[] = {
+"red",
+"blue",
+"green"};
+
+char *set_of_bugs[] = {
+"ant",
+"spider",
+"fly",
+"moth",
+"bee"};
+
+char *set_of_verbs[] = {
+"crawl",
+"walk",
+"run",
+"fly"};
+
+char **values_of_set[] = {
+set_of_colors,
+set_of_bugs,
+set_of_verbs};

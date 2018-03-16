@@ -1,0 +1,58 @@
+@! $Id: code.fw,v 1.12 2005/10/01 17:56:51 profw Exp $
+@O@<code.ptg@>@{
+Table:
+  "int number_of_sets = " $/*integer*/ ";\n\n"
+  "char *name_of_set[] = {\n"
+  $/*list of set names*/ "};\n\n"
+  "int size_of_set[] = {\n"
+  $/*list of set sizes*/ "};\n\n"
+  $/*list of sets*/
+  "char **values_of_set[] = {\n"
+  $/*list of set representations*/ "};\n"
+
+Set:
+  "char *set_of_" $/*set name*/ "[] = {\n"
+  $/*list of set elements*/ "};\n\n"
+
+List:
+  $ ",\n" $
+
+Quoted:
+  "\"" $ "\""
+
+Name:
+  "set_of_" $
+@}
+
+@O@<code.lido@>@{
+ATTR Ptg: PTGNode;
+SYMBOL Entity INHERITS IdPtg END;
+
+SYMBOL text COMPUTE
+  IF(NoErrors,
+    PTGOut(
+      PTGTable(
+        PTGNumb(CONSTITUENTS set_name.Sym WITH (int, ADD, ARGTOONE, ZERO)),
+        CONSTITUENTS set_name.Ptg WITH (PTGNode, PTGList, PTGQuoted, PTGNull),
+        CONSTITUENTS set_body.Size WITH (PTGNode, PTGList, PTGNumb, PTGNull),
+        CONSTITUENTS set_def.Ptg WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull),
+        CONSTITUENTS set_name.Ptg WITH (PTGNode, PTGList, PTGName, PTGNull))));
+END;
+
+ATTR Size: int;
+SYMBOL set_body COMPUTE
+  SYNT.Size=CONSTITUENTS set_element.Sym WITH (int, ADD, ARGTOONE, ZERO);
+END;
+
+SYMBOL set_def COMPUTE
+  SYNT.Ptg=
+    PTGSet(
+      CONSTITUENT set_name.Ptg,
+      CONSTITUENTS set_element.Ptg WITH (PTGNode, PTGList, PTGQuoted, PTGNull));
+END;
+@}
+
+@O@<code.HEAD.phi@>@{
+#include "err.h"
+#define NoErrors (ErrorCount[ERROR]==0)
+@}

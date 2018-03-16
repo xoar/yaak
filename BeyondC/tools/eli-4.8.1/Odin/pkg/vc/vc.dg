@@ -1,0 +1,90 @@
+# Source Types
+
+*,v  => :,v;
+
+s.*  => :sccs;
+
+*,vw => :,vw;
+
+
+# Input Object Types
+
+:,v 'RCS version control file'? => :FILE;
+
+:sccs 'SCCS version control file'? => :FILE;
+
+:,vw 'a view-path system model'? => :FILE;
+
+
+# Intermediate Object Types
+
+:view.source.spec 'specification of all possible source files in the view'
+   => :FILE;
+
+:view.names 'names of files in the view' => :GENERIC;
+
+:vw.of 'odinfile containing the view versions' => :FILE;
+
+
+# Output Object Types
+
+:sccs.co 'version from a version control file' => :co;
+
+:co 'version from a version control file' => :GENERIC :try.co;
+
+:FILE 'a file' => <:try.co>;
+:try.co 'co if possible' => :FILE;
+
+:vw.dir 'a directory containing the view versions'
+   => :REFERENCE;
+
+:sccs.log 'log file'? => :log;
+
+:log 'log file'? => :FILE;
+
+
+# Parameter Types
+
++date 'revision date'? => :first;
+
++rev 'revision number'? => :first;
+
++state 'revision state'? => :first;
+
++who 'revision author'? => :first;
+
++view_sp 'name of a directory in an view search path'? => :ls;
+
+
+# Environment Variables
+
+$ODIN_VC_RCS 'look for RCS files in viewpath' = 'yes';
+
+$ODIN_VC_SCCS 'look for SCCS files in viewpath' = 'yes';
+
+
+# Tools
+
+EXEC (rcs.log.sh) (:,v) (+date) (+rev) (+state) (+who)
+   => (:log);
+
+EXEC (rcs_co.sh) (:,v) (+date) (+rev) (+state) (+who)
+   => (:co);
+
+EXEC (sccs_co.sh) (:sccs) (+date) (+rev)
+   => (:sccs.co);
+
+EXEC (sccs.log.sh) (:sccs) (+date) (+rev)
+   => (:sccs.log);
+
+EXEC (vw.sh) (:,vw :source_names) (+view_sp)
+   => (:view.source.spec);
+
+EXEC (merge.sh) (:view.source.spec :view :names) (:,vw :operation_names)
+   => (:view.names);
+
+EXEC (vw.of.sh) (:,vw :source_names) (:view.names :list :map=:try.co :ls)
+   => (:vw.of);
+
+COLLECT (:vw.of :vir_dir)
+   => (:vw.dir);

@@ -1,0 +1,182 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+~! $Id: OutStr.fw,v 3.3 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@unnumbered Module OutStr
+
+Copyright, 1994, AG-Kastens, University Of Paderborn
+
+@noindent
+This module supplies different C functions that can be used to print
+Strings in PTG functions.
+
+@noindent
+The following functions are supplied:
+@table @code
+@item C_outstr(FILE *file, char *string)
+This function prints the given string as C String literal. The
+string is surrounded by double quotes. Special characters are
+printed as octals.
+
+@item C_outchar(FILE *file, char *string)
+This function prints the given string as C character literal, 
+surrounded by single quotes. Non-Ascii-Characters are processed
+as octal values.
+
+@comment @item C_outchr(FILE *file, int chr)
+@comment Does the same as @code{C_outchar} but takes an @code{int} as argument,
+@comment which is easier to use in Liga, Gla and Ptg.
+
+@item P_outstr(FILE *file, char *string) 
+This function prints the given string as Pascal String literal.  The
+given string must not contain non-ascii-characters with an ASCII-value
+greater than 127 (decimal). The string is surrounded by single quotes
+denoting a Pascal string.
+
+@item outstr(FILE *file, char *string)
+This function is supplied for completeness. It simply calls @code{fputs}
+with it's string value. 
+@end table
+
+@subsubheading Implementation
+
+~O~<OutStr.head~>~{
+#include "OutStr.h"
+~}
+
+~O~<OutStr.h~>~{
+#ifndef OUTSTR_H
+#define OUTSTR_H
+
+#include <stdio.h>
+
+#if defined(__STDC__) || defined(__cplusplus)
+extern	void	C_outstr(FILE *fs, char *s);
+extern	void	C_outchar(FILE *fs, char *s);
+extern	void	P_outstr(FILE *fs, char *s);
+extern	void	outstr(FILE *fs, char *s);
+#else
+extern	void	C_outstr();
+extern	void	C_outchar();
+extern	void	P_outstr();
+extern	void	outstr();
+#endif
+
+#endif
+~}
+
+~O~<OutStr.c~>~{
+#include "OutStr.h"
+
+#define	SQ	'\''
+
+#if defined(__STDC__) || defined(__cplusplus)
+void C_outstr(FILE *fs, char *s)
+#else
+void C_outstr(fs, s) FILE *fs; char *s;
+#endif
+{
+	char c;
+
+	(void)fputc('\"', fs);
+
+	while (c = *s++ & 0377) {
+		if (c >= '\177') (void)fprintf(fs, "\\%3o", c);
+		else if (c == '\\') (void)fputs("\\\\", fs);
+		else if (c == '"') (void)fputs("\\\"", fs);
+		else if (c >= ' ') (void)fputc(c, fs);
+		else switch (c) {
+		case '\n': (void)fputs("\\n", fs); break;
+		case '\t': (void)fputs("\\t", fs); break;
+		case '\b': (void)fputs("\\b", fs); break;
+		case '\r': (void)fputs("\\r", fs); break;
+		case '\f': (void)fputs("\\f", fs); break;
+		default: (void)fprintf(fs, "\\%3o", c); }
+	}
+
+	(void)fputc('\"', fs);
+	return;
+}
+
+
+#if defined(__STDC__) || defined(__cplusplus)
+void C_outchar (FILE *fs, char *s)
+#else
+void C_outchar(fs, s) FILE *fs; char *s;
+#endif
+{
+        char c;
+
+        (void)fputc(SQ, fs);
+
+	if (c = *s & 0377) {
+		if (c >= '\177') (void)fprintf(fs, "\\%3o", c);
+		else if (c == '\\') (void)fputs("\\\\", fs);
+		else if (c == '"') (void)fputs("\\\"", fs);
+		else if (c >= ' ') (void)fputc(c, fs);
+		else switch (c) {
+		case '\n': (void)fputs("\\n", fs); break;
+		case '\t': (void)fputs("\\t", fs); break;
+		case '\b': (void)fputs("\\b", fs); break;
+		case '\r': (void)fputs("\\r", fs); break;
+		case '\f': (void)fputs("\\f", fs); break;
+		default: (void)fprintf(fs, "\\%3o", c); }
+	}
+
+	(void)fputc(SQ, fs);
+	return;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void P_outstr(FILE *fs, char *s)
+#else
+void P_outstr(fs, s) FILE *fs; char *s;
+#endif
+{
+	char c;
+
+	(void)fputc(SQ, fs);
+
+	while (c = *s++ & 0177) {
+		if (c == '\'') (void)fputs("''", fs);
+		else (void)fputc(c, fs);
+	}
+
+	(void)fputc(SQ, fs);
+	return;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void outstr(FILE *fs, char *s)
+#else
+void outstr(fs, s) FILE *fs; char *s;
+#endif
+{
+        fputs(s, fs);
+        return;
+}
+~}
+@bye
+

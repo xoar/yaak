@@ -1,0 +1,109 @@
+# $Id: parser.dg,v 2.14 2010/03/27 19:33:52 profw Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.con => :con;
+:con 'Concrete syntax'? => :FILE;
+:con.cmpd 'Set of con specification fragments' => :LIST;
+
+COLLECT  (:con)
+  => (:one.con.cmpd);
+:one.con.cmpd 'Singleton con specification' => :allspecs :con.cmpd;
+
+COLLECT  (:LIST :extract=:con)
+  => (:con.cmpd);
+
+COLLECT (:pgsOut :list)
+  => (:parserGen);
+:parserGen 'Name of the selected parser generation step' => :LIST;
+
+EXEC (parserOut.sh) (:level_6_specs :extract=:mapPgram :names)
+                    (:level_6_specs :parserGen :names) (+parser) (+monitor)
+		    (parser.reqmod) (mon_cprods.c) (dfltparse.reqmod)
+  => (:parserOut);
+:parserOut 'Results of parser generation' => :FILE;
+
+COLLECT (:pgsData :list)
+  => (:parserInfo);
+:parserInfo 'Name of the selected parser information step' => :LIST;
+
+EXEC (infoOut.sh) (:level_6_specs :extract=:mapPgram :names)
+                  (:level_6_specs :parserInfo :names) (+parser)
+		  (noneInfo)
+  => (:infoOut);
+:infoOut 'Name of the parser generation information product' => :FILE;
+
+READ-LIST (:infoOut)
+  => (:parsable);
+:parsable 'Information about parser generation'? => :REFERENCE :FILE;
+
+CONCATENATE  (:level_2_specs +incl=(:etaIncl) :mapBnf)
+  => (:bnf);
+:bnf 'EBNF -> BNF'? => :FILE;
++parser 'Selects the parser generator'? => :first;
+
+*.perr => :perr;
+:perr 'Parser error recovery information'? => :FILE;
+:perr.cmpd 'Set of perr specification fragments' => :LIST;
+
+COLLECT  (:perr)
+  => (:one.perr.cmpd);
+:one.perr.cmpd 'Singleton perr specification' => :perr.cmpd;
+
+COLLECT  (:LIST :extract=:perr)
+  => (:ext.perr.cmpd);
+:ext.perr.cmpd 'Extracted perr specification fragments' => :perr.cmpd;
+
+EXEC (perrGen.sh) (%perrExe) (:perr.cmpd :cpp) (perr.err)
+     ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:perrGen);
+:perrGen 'File generated from perr specifications' => :FILE;
+
+EXEC (perrOut.sh) (:perr.cmpd :names) (:perrGen :name)
+  => (:perrOut);
+:perrOut 'Results of perr processing' => :FILE;
+
+*.coding => :coding;
+:coding 'Symbol encodings' => :FILE;
+:coding.cmpd 'Set of coding specification fragments' => :LIST;
+
+COLLECT  (:coding)
+  => (:one.coding.cmpd);
+:one.coding.cmpd 'Singleton coding specification' => :coding.cmpd;
+
+COLLECT  (:LIST :extract=:coding)
+  => (:ext.coding.cmpd);
+:ext.coding.cmpd 'Extracted coding specification fragments' => :coding.cmpd;
+
+EXEC (pgram.sh) (:coding.cmpd :cpp) (:perrOut :list :cat)
+                (:level_6_specs :extract=:mapPgram :ls)
+                (:level_6_specs :extract=:mapBuPgram :ls)
+		($ODINCACHE/PKGS/skeleton/sed.exe)
+  NEEDS (:level_6_specs :extract=:mapPgram)
+        (:level_6_specs :extract=:mapBuPgram)
+  => (:Pgram) (:BuPgram);
+:Pgram 'Complete parsing grammar without bottomup constraints' => :FILE;
+:BuPgram 'Complete parsing grammar with bottomup constraints' => :FILE;
+
+EXEC (UserPgram.sh) (:level_6_specs +incl=(:etaIncl) :Pgram)
+                    (:level_6_specs +incl=(:etaIncl) :BuPgram)
+  => (:pgram);
+:pgram 'Complete parsing grammar'? => :FILE;
+
+COLLECT (:parserOut :list)
+  => (:eli*level_7_specs_in);

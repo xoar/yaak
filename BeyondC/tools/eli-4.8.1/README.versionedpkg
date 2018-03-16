@@ -1,0 +1,27 @@
+Odin's "versioned package" concept allows someone to install a new version
+of the system, but continue to use the previous version for some projects.
+To implement this concept, each package contains a file named "version".
+It is a text file consisting of a single line that is a sequence of three
+integers separated by dots.
+
+If a change is made to a package that will cause it to behave differently,
+the "version" file for that package must be updated.  It is NOT necessary
+to update the file for bug fixes to files other than the package's
+derivation graph.  The version must ALWAYS be changed if the package's
+derivation graph (file whose name ends in ".dg") is modified.
+
+When the system is installed, the actual contents of each package
+is stored in a subdirectory whose name is the content of "version".
+For example, if "foo/version" contains "1.2.3", then the contents of
+package "foo" will be stored in directory ".../lib/Eli/foo/1.2.3".
+Existing caches will not use this new directory until the user restarts
+Eli with the -R parameter.  They will continue to use the old derivation
+graph and the old (compatible) scripts and programs.  When a user wants to
+move to the new DG and scripts, they restart Eli using the -R parameter.
+
+The standard interpretations of the components of the version number are:
+
+  First component increment:	Change affecting other packages
+  Second component increment:	Local functionality change
+  Third component increment:	Defect repair or compatibility
+

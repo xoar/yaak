@@ -1,0 +1,5 @@
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  pi = pj;
+end

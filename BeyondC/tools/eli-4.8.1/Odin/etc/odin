@@ -1,0 +1,152 @@
+#!/bin/sh
+
+dfltlib=${ODINPKGS-/usr/local/lib/Odin}
+prog=odin
+USAGE="usage: $prog [-c cache] [-k] [-r] [-R] [-s] command ..."
+
+cmd=; keep_going=; meta_cache=; preset=; quick=; reset=;
+ODIN_SERVER=1; ODIN_SERVER_SHUTDOWN=;
+export ODINCACHE ODIN_SERVER ODIN_SERVER_SHUTDOWN
+
+while [ $# -gt 0 ] ; do
+   case $1 in
+      # use specified cache rather than the default cache
+      -c)
+	 if [ $# -lt 2 ] ; then echo $USAGE; exit 1; fi
+         meta_cache=$2; shift;shift;;
+      # keep going after build errors detected
+      -k)
+	 ODIN_KEEPGOING=1; export ODIN_KEEPGOING; shift;;
+      # do not run the derivation graph compiler
+      -q)
+	 quick=1; shift;;
+      # reset the cache (clear all derived objects)
+      -r)
+	 reset=1; shift;;
+      # reset the cache and the packages (update to latest versions)
+      -R)
+	 preset=1; reset=1; shift;;
+      # have Odin client be its own server if there is not a server
+      -s)
+	 ODIN_SERVER=; shift;;
+      -*)
+	 echo $USAGE; exit 1;;
+      *)
+         break;; esac; done
+
+while [ $# -gt 0 ] ; do
+   case $1 in
+      -*)
+	 echo $USAGE; exit 1;; 
+      *)
+         cmd="$cmd;$1"; shift;; esac; done
+
+if [ "$ODINCACHE" != "" -a "$meta_cache" = "" ] ; then
+   if [ "$reset" != "" ] ; then
+      echo "Cannot reset active cache."
+      exit 1; fi
+   ODINVERIFYLEVEL=0; export ODINVERIFYLEVEL
+   ODINLOGLEVEL=0; export ODINLOGLEVEL
+   ODINERRLEVEL=0; export ODINERRLEVEL
+   ODINWARNLEVEL=0; export ODINWARNLEVEL
+   exec $ODINCACHE/PKGS/odin/odin.exe "$cmd"; fi
+
+if [ "$meta_cache" = "" ] ; then
+   meta_cache=${ODIN-$HOME/.ODIN}; fi
+odinview=${ODINVIEW-`uname -n`}
+if [ "$odinview" = "" ] ; then
+   odinview=local; fi
+cache=$meta_cache/$odinview
+
+if [ ! -d $cache ] ; then
+   case $meta_cache in /*);; *)
+      echo "Cache location must be an absolute pathname: $meta_cache"
+      exit 1;; esac
+   if [ ! -d $meta_cache ] ; then
+      mkdir $meta_cache || exit; fi
+   mkdir $cache || exit
+   echo $cache > $cache/PATH
+   mkdir $cache/PKGS || exit
+   touch $cache/LOG || exit
+   preset=1; reset=''
+   echo "New cache created at $cache."; fi
+
+ODINCACHE=`cat $cache/PATH` ||
+ { echo "Invalid cache at $cache - do \"rm -rf $cache\""; exit 1; }
+cache=$ODINCACHE
+
+if [ "$reset" != "" ] ; then
+   if [ -r $cache/SOCKET ] ; then
+      ODIN_SERVER_SHUTDOWN=1
+      $ODINCACHE/PKGS/odin/odin.exe
+      ODIN_SERVER_SHUTDOWN=; fi
+   if [ -s $cache/ERR ] ; then
+      cat $cache/ERR >>$cache/LOG; rm $cache/ERR; fi
+   if [ -d $cache/JOBS ] ; then mv $cache/JOBS $cache/JOBS.$$; fi
+   if [ -d $cache/FILES ] ; then mv $cache/FILES $cache/FILES.$$; fi
+   (rm -rf $cache/JOBS.* $cache/FILES.* &)
+   rm -f $cache/INFO $cache/SOCKET $cache/core
+   echo "Cache at $cache has been reset."; fi
+
+if [ "$preset" != "" ] ; then
+   echo "Clearing packages for $cache."
+   rm -f $cache/DG $cache/ENV $cache/ENV2 $cache/DG.log $cache/PKGS/*
+   if [ ! -f $cache/EMPTY ] ; then
+      touch $cache/EMPTY; chmod a-wx $cache/EMPTY; fi
+   pkgpath=$dfltlib
+   if [ "$quick" = "" ] ; then
+      if [ -f $dfltlib/ODINPATH ] ; then
+	 pkgpath="`cat $dfltlib/ODINPATH`:$pkgpath"; fi
+      if [ "$ODINPATH" != "" ] ; then
+	 pkgpath="$ODINPATH:$pkgpath"; fi; fi
+   for opelm in `echo $pkgpath | sed 's/:/ /g'`; do
+      case $opelm in /*);; *)
+	 echo "$ODINPATH element must be an absolute pathname: $opelm"
+	 exit 1;; esac;
+      pkgver=PKGVER
+      #select
+         if [ -f $opelm/PKGLST ] ; then
+            pkgdir=$opelm
+	    pkglist=`cat $opelm/PKGLST`
+	    if [ -f $opelm/LIBVER ] ; then
+	       pkgver=`cat $opelm/LIBVER`; fi
+         else
+            pkgdir=`dirname $opelm`
+            pkglist=`basename $opelm`; fi
+      for pkg in $pkglist; do
+	 version=$pkgdir/$pkg
+	 #select
+	    if [ -f $version/$pkgver ] ; then
+	       version=$version/`cat $version/$pkgver`
+	    elif [ -f $version/PKGVER ] ; then
+	       version=$version/`cat $version/PKGVER`; fi
+	 #select
+	    if [ ! -f $version/$pkg.dg ] ; then
+	       echo "Skipping bad package $version."
+	    elif [ ! -r $cache/PKGS/$pkg ] ; then
+	       ln -s $version $cache/PKGS/$pkg
+	       echo "$pkg" >>$cache/PKGS/PKGLST
+	       echo "Installing package $version".; fi; done; done
+
+   if [ "$quick" = "" ] ; then
+      dg_exe=$cache/PKGS/dg/dg.exe
+      if [ ! -f $dg_exe ] ; then
+	 echo "$dg_exe not found - cannot compile packages in $cache."
+	 exit 1; fi
+      if [ "$pkgpath" = "$dfltlib" ] ; then skip=1; else skip=0; fi
+      (cd $cache; $dg_exe PKGS/PKGLST PKGS $skip >DG.log) || {
+	 echo "Error compiling packages in $cache."
+	 exit 1; }
+      rm -f $cache/DG.c
+      echo "$cache packages compiled."; fi; fi
+
+if [ -s $cache/ERR ] && egrep -sv arning $cache/ERR; then
+   cat $cache/ERR
+   echo "Cache is inconsistent and must be reset.  Use: $prog -r"
+   exit 1; fi
+
+if [ -f $cache/core ] ; then
+   echo "Cache is inconsistent and must be reset.  Use: $prog -r"
+   exit 1; fi
+
+exec $ODINCACHE/PKGS/odin/odin.exe "$cmd"

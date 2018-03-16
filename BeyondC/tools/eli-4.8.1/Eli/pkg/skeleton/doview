@@ -1,0 +1,48 @@
+#! /bin/sh
+# $Id: doview,v 2.2 1996/04/04 17:38:33 waite Exp $
+# Copyright 1996, The Regents of the University of Colorado
+
+cd ODIN_compound
+
+echo
+echo Your default shell is being executed in a generated directory.
+echo To terminate this execution, exit your shell normally.
+echo Any material that you add to this directory may be deleted
+echo after you exit.
+echo
+
+$SHELL
+
+list=' '
+while test "$list" != ''
+do
+  cd ODIN_compound
+  list=''
+  echo
+  for f in `ls`
+  do
+    if test -d $f
+    then
+      if test "$list" = ''
+      then
+        list=' '
+        echo
+        echo You have created the following subdirectories in the cache:
+        echo
+      fi
+      echo "ODIN_compound/$f"
+    fi
+  done
+  if test "$list" != ''
+  then
+    echo
+    echo You should remove them before terminating this session.
+    echo If you are willing to accept future cache problems by
+    echo leaving them alone, type \"exit 5\" after the prompt.
+    echo
+    $SHELL
+    if test $? -eq 5
+    then echo; exit 0
+    fi
+  fi
+done

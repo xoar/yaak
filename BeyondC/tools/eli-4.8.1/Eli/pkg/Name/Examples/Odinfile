@@ -1,0 +1,244 @@
+# $Id: Odinfile,v 1.6 1997/08/29 12:29:43 mjung Exp peter $
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+#
+
+%filter_errors == <<EOF
+s,/[^ ]*Examples,Examples,g
+EOF
+
+AlgLike.fw.exe == AlgLike.fw:exe
+AlgLike.warn == AlgLike.fw:warning
+%AlgLike ! == <<EOF
+	AlgLike.fw.exe
+	AlgLike.warn
+EOF
+
+%trenn == <<EOF
+==============
+EOF
+
+%AlgLikeOk == <<EOF
+%AlgLike.TEST == . +cmd=cat (%trenn) \
+	(AlgLike.demo/TEST:label) \
+	(AlgLike.demo/TEST) \
+	(AlgLike.demo/TEST +cmd=(AlgLike.fw.exe) :stdout :warn) \
+	(AlgLike.demo/TEST +cmd=(AlgLike.fw.exe) :stdout) :stdout
+EOF
+
+%AlgLikeErr == <<EOF
+%AlgLike.TEST == . +cmd=cat (%trenn) \
+	(AlgLike.demo/TEST:label) \
+	(AlgLike.demo/TEST) \
+	((AlgLike.demo/TEST +cmd=(AlgLike.fw.exe) :stdout :warn) +cmd=sed -f (%filter_errors) :stdout) :stdout
+EOF
+
+== %AlgLikeOk +cmd=sed -e 's/TEST/Core.ok/g' :stdout
+== %AlgLikeErr +cmd=sed -e 's/TEST/Core.err/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/Module.ok/g' :stdout
+== %AlgLikeErr +cmd=sed -e 's/TEST/Module.err/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/Predef.ok/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/With.ok/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/Class.ok/g' :stdout
+== %AlgLikeErr +cmd=sed -e 's/TEST/Class.err/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/ClassVar.ok/g' :stdout
+== %AlgLikeOk +cmd=sed -e 's/TEST/Flat.ok/g' :stdout
+
+AlgLike.messages == . +cmd=cat \
+	(%AlgLike.Core.ok) \
+	(%AlgLike.Core.err) \
+	(%AlgLike.Module.ok) \
+	(%AlgLike.Module.err) \
+	(%AlgLike.Predef.ok) \
+	(%AlgLike.With.ok) \
+	(%AlgLike.Class.ok) \
+	(%AlgLike.Class.err) \
+	(%AlgLike.ClassVar.ok) \
+	(%AlgLike.Flat.ok) \
+		:stdout
+
+%AlgLike.test ! == <<EOF
+	AlgLike.messages
+	!diff AlgLike.messages AlgLike.savedmessages > AlgLike.diff || true
+	AlgLike.diff >
+EOF
+
+%AlgLike.testsok ! == <<EOF
+	AlgLike.messages > AlgLike.savedmessages
+EOF
+
+CLike.fw.exe == CLike.fw:exe
+CLike.warn == CLike.fw:warning
+%CLike ! == <<EOF
+	CLike.fw.exe
+	CLike.warn
+EOF
+
+%CLikeOk == <<EOF
+%CLike.TEST == . +cmd=cat (%trenn) \
+	(CLike.demo/TEST:label) \
+	(CLike.demo/TEST) \
+	(CLike.demo/TEST +cmd=(CLike.fw.exe) :stdout :warn) \
+	(CLike.demo/TEST +cmd=(CLike.fw.exe) :stdout) :stdout
+EOF
+
+%CLikeErr == <<EOF
+%CLike.TEST == . +cmd=cat (%trenn) \
+	(CLike.demo/TEST:label) \
+	(CLike.demo/TEST) \
+	((CLike.demo/TEST +cmd=(CLike.fw.exe) :stdout :warn) +cmd=sed -f (%filter_errors) :stdout) :stdout
+EOF
+
+== %CLikeOk +cmd=sed -e 's/TEST/Core.ok/g' :stdout
+== %CLikeErr +cmd=sed -e 's/TEST/Core.err/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/Module.ok/g' :stdout
+== %CLikeErr +cmd=sed -e 's/TEST/Module.err/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/Predef.ok/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/With.ok/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/Class.ok/g' :stdout
+== %CLikeErr +cmd=sed -e 's/TEST/Class.err/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/ClassVar.ok/g' :stdout
+== %CLikeOk +cmd=sed -e 's/TEST/Flat.ok/g' :stdout
+
+CLike.messages == . +cmd=cat \
+	(%CLike.Core.ok) \
+	(%CLike.Core.err) \
+	(%CLike.Module.ok) \
+	(%CLike.Module.err) \
+	(%CLike.Predef.ok) \
+	(%CLike.With.ok) \
+	(%CLike.Class.ok) \
+	(%CLike.Class.err) \
+	(%CLike.ClassVar.ok) \
+	(%CLike.Flat.ok) \
+		:stdout
+
+
+%CLike.test ! == <<EOF
+	CLike.messages
+	!diff CLike.messages CLike.savedmessages > CLike.diff || true
+	CLike.diff >
+EOF
+
+%CLike.testsok ! == <<EOF
+	CLike.messages > CLike.savedmessages
+EOF
+
+BuCLike.fw.exe == BuCLike.fw:exe
+BuCLike.warn == BuCLike.fw:warning
+%BuCLike ! == <<EOF
+	BuCLike.fw.exe
+	BuCLike.warn
+EOF
+
+%BuCLikeOk == <<EOF
+%BuCLike.TEST == . +cmd=cat (%trenn) \
+	(BuCLike.demo/TEST:label) \
+	(BuCLike.demo/TEST) \
+	(BuCLike.demo/TEST +cmd=(BuCLike.fw.exe) :stdout :warn) \
+	(BuCLike.demo/TEST +cmd=(BuCLike.fw.exe) :stdout) :stdout
+EOF
+
+%BuCLikeErr == <<EOF
+%BuCLike.TEST == . +cmd=cat (%trenn) \
+	(BuCLike.demo/TEST:label) \
+	(BuCLike.demo/TEST) \
+	((BuCLike.demo/TEST +cmd=(BuCLike.fw.exe) :stdout :warn) +cmd=sed -f (%filter_errors) :stdout) :stdout
+EOF
+
+== %BuCLikeOk +cmd=sed -e 's/TEST/Core.ok/g' :stdout
+== %BuCLikeErr +cmd=sed -e 's/TEST/Core.err/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/Module.ok/g' :stdout
+== %BuCLikeErr +cmd=sed -e 's/TEST/Module.err/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/Predef.ok/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/With.ok/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/Class.ok/g' :stdout
+== %BuCLikeErr +cmd=sed -e 's/TEST/Class.err/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/ClassVar.ok/g' :stdout
+== %BuCLikeOk +cmd=sed -e 's/TEST/Flat.ok/g' :stdout
+
+BuCLike.messages == . +cmd=cat \
+	(%BuCLike.Core.ok) \
+	(%BuCLike.Core.err) \
+	(%BuCLike.Module.ok) \
+	(%BuCLike.Module.err) \
+	(%BuCLike.Predef.ok) \
+	(%BuCLike.With.ok) \
+	(%BuCLike.Class.ok) \
+	(%BuCLike.Class.err) \
+	(%BuCLike.ClassVar.ok) \
+	(%BuCLike.Flat.ok) \
+		:stdout
+
+%BuCLike.test ! == <<EOF
+	BuCLike.messages
+   	!diff BuCLike.messages BuCLike.savedmessages > BuCLike.diff || true
+	BuCLike.diff >    
+EOF
+
+
+%BuCLike.testsok ! == <<EOF
+	BuCLike.messages > BuCLike.savedmessages
+EOF
+
+%all ! == <<EOF
+	%AlgLike
+	%CLike
+	%BuCLike
+EOF
+	
+%test ! == <<EOF
+	%AlgLike.test
+	%CLike.test
+	%BuCLike.test
+	! if test -s AlgLike.diff || test -s CLike.diff || test -s BuCLike.diff; then echo "*** diffs encountered."; exit 1; else echo "All tests passed without diffs."; fi
+EOF
+
+%helpmsg == <<EOF
+Virtual targets, defined in the Odinfile manage processor generation and
+testing. The following targets can be used:
+
+AlgLike.fw.exe		Generates the Name-Examples that use
+			the Algol Scoperule Modules
+CLike.fw.exe		Generates the Name-Examples that use
+			the C Scoperule Modules
+BuCLike.fw.exe		Generates the Name-Examples that use
+			the C Scoperule Modules designed for
+			use in Bottomup Computations.
+
+%all			Derives all of the three processors.
+
+%AlgLike.test		Tests the AlgLike.fw.exe-Processor 
+			after bringing it up to date.
+%CLike.test		Tests the CLike.fw.exe-Processor 
+			after bringing it up to date.
+%BuCLike.fw.test	Tests the BuCLike.fw.exe-Processor
+			after bringing it up to date.
+
+%test			Tests all of the above processors.
+
+Additionally, the targets %AlgLike.testsok, %CLike.testsok
+and %BuCLike.testsok can be used to bring the compared test
+output, used in the ...test-targets for verification, up
+to date.
+EOF
+
+%help ! == <<EOF
+	%helpmsg>
+EOF

@@ -1,0 +1,49 @@
+# $Id: Makefile.in,v 1.2 2008/03/25 12:28:28 peter Exp $
+# Makefile for pkg/liga/Info
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+CC	=	@CC@
+
+DIR	=	pkg/liga/Info
+PS	=	struktur.eps verfolgung.eps hierarchy.eps rule.eps symbol.eps \
+		symbol-rule.eps hide.eps visitseq.eps lidow.eps message.eps 	
+SRC	=	middle.err ligaBe.err option.err ligaProd.err
+COP	=       Makefile.in lcl.tnf lidoref.tnf gorto.tnf \
+		show.tnf comptrees.tnf help.tnf frontfix.err frontgen.err
+AUX	=	$(COP) Makefile psfig.tex $(PS)
+COM	=
+CMD	=	$(COM)
+RCS	=
+EXE	=
+GEN	=	
+GENINS	=	front.err
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+front.err:	frontfix.err frontgen.err
+	cat frontgen.err frontfix.err > front.err
+	
+predist:        docs
+        
+docs:
+	cp -f *.gif $(ELIDOC)/gifs
+	chmod +w $(ELIDOC)/gifs/*.gif
+

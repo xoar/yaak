@@ -1,0 +1,112 @@
+
+/* encoding of tree node types and symbols */
+
+#ifndef NODECODE_H
+#define NODECODE_H
+
+extern int LHSMAP[];
+
+#define IsSymb(_n,_c) (LHSMAP[(_n)->_prod] == (_c))
+
+#define SYMBLST_Source 0
+#define SYMBLST_ConAlt 1
+#define SYMBLST_AbsElements 2
+#define SYMBLST_AbsAlts 3
+#define SYMBLST_MapMembers 4
+#define SYMBLST_MapAlt 5
+#define SYMBLST_MapReorderAlt 6
+#define SYMBMapDelim 7
+#define SYMBMapReorder 8
+#define SYMBMapProd 9
+#define SYMBMapAbs 10
+#define SYMBAbsSignature 11
+#define SYMBRuleIdUse 12
+#define SYMBMapLHS 13
+#define SYMBMaptoId 14
+#define SYMBAbsRuleId 15
+#define SYMBMapText 16
+#define SYMBMapPosition 17
+#define SYMBMapReorderAlt 18
+#define SYMBMapElement 19
+#define SYMBMapAlt 20
+#define SYMBMapMember 21
+#define SYMBMapMembers 22
+#define SYMBAbsAlt 23
+#define SYMBAbsAlts 24
+#define SYMBAbsElements 25
+#define SYMBBottomUpRule 26
+#define SYMBMapChains 27
+#define SYMBMapRule 28
+#define SYMBMapSymbol 29
+#define SYMBAbsElement 30
+#define SYMBConElement 31
+#define SYMBAbsLHS 32
+#define SYMBConAlt 33
+#define SYMBConLHS 34
+#define SYMBAbsProd 35
+#define SYMBConProd 36
+#define SYMBSource 37
+#define RULELST_0rule_35 0
+#define RULELST_ConProdrule_35 1
+#define RULELST_AbsProdrule_35 2
+#define RULELST_MapSymbolrule_35 3
+#define RULELST_MapRulerule_35 4
+#define RULELST_MapChainsrule_35 5
+#define RULELST_BottomUpRulerule_35 6
+#define RULErule_19 7
+#define RULErule_39 8
+#define RULErule_38 9
+#define RULErule_34 10
+#define RULErule_25 11
+#define RULErule_24 12
+#define RULErule_23 13
+#define RULErule_22 14
+#define RULErule_21 15
+#define RULErule_20 16
+#define RULELST_0rule_34 17
+#define RULELST_ConElementrule_34 18
+#define RULErule_18 19
+#define RULErule_17 20
+#define RULErule_15 21
+#define RULErule_28 22
+#define RULErule_12 23
+#define RULErule_9 24
+#define RULErule_37 25
+#define RULErule_36 26
+#define RULErule_33 27
+#define RULErule_31 28
+#define RULErule_29 29
+#define RULErule_26 30
+#define RULErule_16 31
+#define RULErule_13 32
+#define RULErule_4 33
+#define RULErule_2 34
+#define RULELST_0rule_29 35
+#define RULELST_MapPositionrule_29 36
+#define RULELST_MapTextrule_29 37
+#define RULELST_0rule_31 38
+#define RULELST_MapMemberrule_31 39
+#define RULELST_0rule_33 40
+#define RULELST_AbsElementrule_33 41
+#define RULErule_000 42
+#define RULErule_001 43
+#define RULErule_002 44
+#define RULErule_003 45
+#define RULErule_35 46
+#define RULErule_32 47
+#define RULErule_30 48
+#define RULErule_27 49
+#define RULErule_14 50
+#define RULErule_11 51
+#define RULErule_10 52
+#define RULErule_8 53
+#define RULErule_7 54
+#define RULErule_6 55
+#define RULErule_5 56
+#define RULErule_3 57
+#define RULErule_1 58
+#define RULELST_0rule_30 59
+#define RULELST_MapElementrule_30 60
+#define RULELST_0rule_32 61
+#define RULELST_AbsAltrule_32 62
+#endif

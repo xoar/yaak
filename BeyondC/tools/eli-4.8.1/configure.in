@@ -1,0 +1,44 @@
+# $Id: configure.in,v 1.31 2013/12/05 21:51:50 profw Exp $
+
+dnl Automagically configure the Eli-System to the os this script is running on.
+dnl 
+dnl (c) Copyright by Matthias Jung, University of Paderborn, 1996.
+
+AC_PREREQ(2.53)
+
+AC_INIT(Eli,[4.8.1],[eli-project-users@lists.sourceforge.net])
+AC_CONFIG_SRCDIR(testcurses)
+
+AC_ARG_WITH(XView,
+  [AS_HELP_STRING([--with-XView=path],[use XView in path/include, path/lib])])
+AC_ARG_WITH(tcltk,
+  [AS_HELP_STRING([--with-tcltk=path],[use Tcl/Tk in path/include and path/lib])])
+AC_ARG_WITH(Xaw,
+  [AS_HELP_STRING([--with-Xaw=path],[use Athena Widgets in path/include path/lib])])
+AC_ARG_WITH(curses,
+  [AS_HELP_STRING([--with-curses=path],[use curses/ncurses in path/include and path/lib])])
+
+AC_PREFIX_DEFAULT($HOME)
+
+AC_CONFIG_SUBDIRS(Odin Eli Eli/pkg/eli/ofiles Eli/pkg/cpp/gnu_cpp Eli/pkg/skeleton/gnu_sed)
+
+AC_OUTPUT(Makefile Eli/pkg/version/version Eli/pkg/version/version.dg)
+
+cat <<EOF
+
+Now run 'make' followed by 'make install'. 'make' will:
+o  Build and check the Info-System that comes with Eli.
+o  Build Eli and Odin.
+
+'make install' will:
+o  install both systems to "$prefix"
+
+If you want installation in a different directory DIR, please
+re-configure the system to use DIR as the installation prefix:
+
+   make distclean
+   ./configure --prefix=DIR
+   make
+   make install
+
+EOF

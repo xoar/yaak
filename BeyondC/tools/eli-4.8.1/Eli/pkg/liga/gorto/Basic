@@ -1,0 +1,119 @@
+/*======================================================================*
+ *									*
+ *	FILE:		app-defaults/Basic				*
+ *									*
+ *	CONTENTS:	Basic part of application defaults for Gorto	*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+
+
+!			GLOBAL DEFINITIONS
+
+Gorto*Command.ShapeStyle:		Oval
+Gorto*Toggle.ShapeStyle:		Oval
+
+Gorto.title:				Graphical Order Tool
+Gorto*Label.borderWidth:		0
+Gorto*SimpleMenu*menuLabel.vertSpace:	50
+Gorto*SimpleMenu.borderWidth:		2
+Gorto*SimpleMenu*HorizontalMargins:	16
+
+Gorto*Text*autoFill:			on
+Gorto*Text*wrap:			none
+Gorto*Text*Scroll:			WhenNeeded
+
+
+!			PRODUCTION PART OF MAIN WINDOW
+
+Gorto*prodListView.allowVert:		True
+Gorto*prodList.defaultColumns:		5
+
+
+!			SYMBOL PART OF MAIN WINDOW
+
+Gorto*symbolListView.allowVert:		True
+Gorto*symbolList.defaultColumns:	5
+
+
+!			HIDE / UNHIDE
+
+Gorto*hide*ShowGrip:			False
+Gorto*hide*name*scrollVertical:		never
+Gorto*hide*name*scrollHorizontal:	never
+
+Gorto*unhide*ShowGrip:			False
+Gorto*unhide*name*scrollVertical:	never
+Gorto*unhide*name*scrollHorizontal:	never
+
+
+!			RULES
+
+Gorto.rule.AllowShellResize:		True
+Gorto.rule*ruleView.showGrip:		False
+Gorto.rule*ruleView.allowResize:	True
+
+Gorto.rule*ruleView.allowVert:		True
+Gorto.rule*ruleView.allowHoriz:		True
+
+Gorto.rule*ruleGraph.translations:	 	\
+	Ctrl<Btn1Down>:		select(FOLLOW-AND-CLOSE,REMOVE) \n\
+	Shift<Btn1Down>:	select(FOLLOW) \n\
+	<Btn1Down>:		select(FOLLOW-MARKED) \n\
+	<Btn2Down>:		menu-popup(symbolMenu) \n\
+	Shift<Btn3Down>:	menu-popup(visitSeqMenu) \n\
+	Ctrl<Btn3Down>:		menu-popup(mainMenu) \n\
+	<Btn3Down>:		menu-popup(ruleMenu) \n\
+	<Key>h:			select(HIDE) \n\
+	<Key>q:			close-window()
+
+
+!			SYMBOLS
+
+Gorto.symbol*symbolView.allowVert:	True
+Gorto.symbol*symbolView.allowHoriz:	True
+
+Gorto.symbol*symbolGraph.translations: 		\
+	Ctrl<Btn1Down>:		select(FOLLOW-AND-CLOSE,REMOVE) \n\
+	Shift<Btn1Down>:	select(FOLLOW) \n\
+	<Btn1Down>:		select(FOLLOW-MARKED) \n\
+	Ctrl<Btn2Down>:		select(SPLIT-PARTITION) \n\
+	Shift<Btn2Down>:	select(APPEND-PARTITION) \n\
+	<Btn2Down>:		select(MOVE) \n\
+	Ctrl<Btn3Down>:		menu-popup(mainMenu) \n\
+	<Btn3Down>:		menu-popup(symbolMenu) \n\
+	<Key>h:			select(HIDE) \n\
+	<Key>u:			select(UNHIDE) \n\
+	<Key>q:			close-window()
+
+
+!			SYMBOL POPUP FOR RULE SELECTION
+
+Gorto.symbolRules*ShapeStyle:		Rectangle
+Gorto.symbolRules*ShowGrip:		False
+Gorto.symbolRules*rules.defaultColumns:	1
+
+
+!			VISIT_SEQUENCES
+
+Gorto.visitSeq*visitSeqView.allowVert:	True
+Gorto.visitSeq*visitSeqView.allowHoriz:	True
+
+Gorto.visitSeq*visitSeqGraph.translations: 	\
+	<Btn1Down>:		select() \n\
+	<Btn2Down>:		select(MOVE) \n\
+	Shift<Btn3Down>:	menu-popup(ruleMenu) \n\
+	Ctrl<Btn3Down>:		menu-popup(mainMenu) \n\
+	<Btn3Down>:		menu-popup(visitSeqMenu) \n\
+	<Key>q:			close-window()
+
+
+!			LIDO SOURCE
+
+Gorto.lido.geometry:			500x300
+Gorto*lidoText.translations:		#override \
+	<Btn3Down>:		menu-popup(mainMenu) \n\
+	Ctrl<Key>q:		close-window()
+
+

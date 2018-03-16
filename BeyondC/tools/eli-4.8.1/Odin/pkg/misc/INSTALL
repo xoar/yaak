@@ -1,0 +1,65 @@
+#! /bin/sh
+# $Id: INSTALL,v 1.2 2009/07/16 02:04:15 profw Exp $
+# Install one or more packages
+
+cd $1
+
+if test -f $2/LIBVER
+then
+  num=`cat $2/LIBVER | sed 's/PKGVER.//'`
+  libver=PKGVER.`expr $num + 1`
+else
+  libver=PKGVER.1
+fi
+echo $libver > $2/LIBVER
+
+if test -f PKGLST
+then
+  pkgs=`cat PKGLST`
+  if test -f $2/PKGLST
+  then
+    sort -u PKGLST $2/PKGLST > $2/PKgLST
+    mv $2/PKgLST $2/PKGLST
+  else cp PKGLST $2
+  fi
+else
+  pkgs=`ls *.dg`
+  pkgs=`basename $pkgs .dg`
+  echo $pkgs > $2/PKGLST
+fi
+chmod +w $2/PKGLST
+
+for pkg in $pkgs
+do
+  if test ! -d $2/$pkg; then mkdir $2/$pkg || exit 1; fi
+  if test -f version
+  then ver=`cat version`
+  else ver=`cat $pkg/version`
+  fi
+  echo $ver > $2/$pkg/$libver
+  echo $ver > $2/$pkg/PKGVER
+  destpkg=$2/$pkg/$ver
+  if test ! -d $destpkg; then mkdir $destpkg || exit 1; fi
+  if test -f PKGLST
+  then
+    for d in `(cd $pkg; find . -type d -print | sed -e /CVS/d)`
+    do
+      if test ! -d $destpkg/$d
+      then umask 002; mkdir $destpkg/$d
+      fi
+    done
+    for f in `(cd $pkg; find . -type f -print | sed -e /CVS/d -e /version/d)`
+    do cmp -s $pkg/$f $destpkg/$f || cp $pkg/$f $destpkg/$f
+    done
+  else
+    for d in `find . -type d -print | sed -e /CVS/d`
+    do
+      if test ! -d $destpkg/$d
+      then umask 002; mkdir $destpkg/$d
+      fi
+    done
+    for f in `find . -type f -print | sed -e /CVS/d -e /version/d`
+    do cmp -s $f $destpkg/$f || cp $f $destpkg/$f
+    done
+  fi
+done

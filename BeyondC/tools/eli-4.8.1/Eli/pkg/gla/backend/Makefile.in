@@ -1,0 +1,45 @@
+# $Id: Makefile.in,v 1.2 2002/05/08 15:00:55 waite Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/gla/backend
+SRC	=
+AUX	= dj.h gla_be.c bvectors.c gencode.c part.c djset.c misc.c print.c
+CMD	=
+EXE	= gla_be.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+@Adtmk_h@
+@Inputmk_h@
+
+OBJS    = gla_be.o bvectors.o gencode.o part.o djset.o misc.o print.o obstack.o
+
+gla_be.exe:	$(OBJS)
+	$(CC) -o $@ $(CFLAGS) $(OBJS)
+
+bvectors.o:	bvectors.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c bvectors.c
+
+djset.o:	djset.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c djset.c
+
+gencode.o:	gencode.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c gencode.c
+
+gla_be.o:	gla_be.c dj.h $(ADTLIB)/obstack.h
+	$(CC) $(CFLAGS) $(INPINCL) $(ADTINCL) -c gla_be.c
+
+misc.o:		misc.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c misc.c
+
+part.o:		part.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c part.c
+
+print.o:	print.c dj.h
+	$(CC) $(CFLAGS) $(INPINCL) -c print.c
+

@@ -1,0 +1,12 @@
+/* $Id: gla.reqmod,v 1.7 2010/02/26 17:50:57 profw Exp $ */
+/* Files required to support the generated lexical analyzer */
+
+gla.h
+scanops.h
+tabsize.c
+tabsize.h
+glahead.c
+$/Scan/ScanProc.h
+$/Scan/auxNUL.c
+$/Scan/auxEOF.c
+$/Scan/dflteot.c

@@ -1,0 +1,7 @@
+/* $Id: struct.specs,v 1.1 1991/09/02 20:20:31 waite Exp $ */
+/* Specifications for Pascal scanning and parsing */
+
+pascal.gla	/* Denotations and comments */
+pident.gla	/* Identifiers and keywords */
+pident.gla :kwd	/* Exclude keywords from the finite-state machine */
+pascal.con	/* Concrete syntax */

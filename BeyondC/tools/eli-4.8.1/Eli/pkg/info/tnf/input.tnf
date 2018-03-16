@@ -1,0 +1,313 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename input
+@setchapternewpage odd
+@settitle Tasks related to input processing
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: input.tnf,v 3.7 1999/11/19 14:48:46 mjung Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Tasks related to input processing}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 3.7 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@ifinfo
+@comment  node-name,  next,  previous,  up
+@chapheading Specification Module Library
+@chapheading Input Processing
+@end ifinfo
+@findex Input Processing
+@findex Library @code{Input}
+@findex bottom-up
+@findex input file insertion
+
+This library contains modules that support insertion of files
+into the currently processed input file. The name of the file
+to be inserted is computed from information of the current
+input file. Such computations have to be executed immediately
+while the input is being read (bottom-up in terms of tree construction).
+This library also contains a module that supports command line arguments
+of the generated processor which specify directories where
+files to be included are searched.
+
+@menu
+* Include::     Insert a File into the Input Stream
+* CurrTok::     Accessing the Current Token
+* CmdLineIncl:: Command Line Arguments for Included Files
+* Index::       Index
+@end menu
+@iftex
+@ifclear html
+@table @code
+@item Include
+Insert a File into the Input Stream
+@item CurrTok
+Accessing the Current Token
+@item CmdLineIncl
+Command Line Arguments for Included Files
+@end table
+@end ifclear
+@end iftex
+
+@findex Module @code{CoordMap}
+@findex Module @code{GlaCorr}
+@code{Include} is the central module to solve the file inclusion
+task. It is based on the modules @code{CoordMap} and @code{GlaCorr}
+which are automatically instatiated when @code{Include} is used.
+(@code{CoordMap} and @code{GlaCorr} are not intended to be used
+directly in specifications.)
+The module @code{CmdLineIncl} can be used additionally to enable the
+command line feature.
+
+The module @code{CurrTok} provides access to the current token,
+which has just been accepted by the scanner. It may supply the
+file name to the function provided
+by the @code{Include} module, if that function is issued in 
+computations specified in the concrete grammar rather then 
+in @code{.lido} computations.
+
+@comment =====================================
+@node Include, CurrTok, , top
+@findex Module @code{Include}
+@findex input file inclusion
+@findex bottom-up
+@chapter Insert a File into the Input Stream
+
+This module supports generating processors that include the contents
+of a file into the currently read input stream. The effect is the same
+as that known from the preprocessor @code{cpp}. There file inclusion
+is initiated by a @code{cpp} command like @code{#include "myfile"},
+here it is initiated by a computation of the language processor.
+It usually takes the file name from the text of a token found
+in the input stream.
+
+Such facilities are used, for example, 
+in some systems for functional or logical languages, where commands like 
+@example
+   use ["myfile"]
+@end example
+@noindent 
+cause the inclusion of the given file at the place of the use 
+command.
+
+The file is included at the current position of the input stream
+when that computation is executed. That computation can either
+be specified within the concrete grammar to be initiated by the
+parser. Or it can be specified in a @code{.lido} specification.
+In the latter case the computation has to be executed while input is
+being read (and the tree is constructed bottom-up) to achieve the
+desired effect.
+
+This module is instantiated without generic parameters by
+@example
+   $/Input/Include.gnrc:inst
+@end example
+@noindent 
+
+The module provides the following function:
+
+@findex NewInput
+@findex function @code{NewInput}
+@table @code
+@item int NewInput (char *name)
+It switches input reading to the file named @code{name}.
+When its end is encountered input reading is switched back to 
+the next not yet processed token in the file that was the current 
+when @code{NewInput} was called.
+The call of @code{NewInput} yields 1 if the file could be opened;
+otherwise it yields 0.
+@end table
+
+This facility is demonstrated by inserting a construct into our 
+running example that allows to comprise sets of declarations
+on separate files and include them in the program text.
+Such declaration files may be used to specify common interfaces.
+
+The file inclusion construct is introduced by the concrete productions
+@example
+   Declaration:   FileInclusion ';'.
+   FileInclusion: 'include' FileName.
+@end example
+@noindent
+
+We add a scanner specification for the terminal symbol @code{FileName}:
+@example
+   FileName: C_STRING_LIT       [c_mkstr]
+@end example
+@noindent
+Hence, an input program may contain file inclusion commands
+like @code{include "myfile";} wherever a @code{Declaration} is
+allowed.
+
+@findex NewInput
+@findex CatStrInd
+@findex BOTTOMUP
+The following @code{.lido} specification attaches the call of
+@code{NewInput} to the @code{FileInclusion} context:
+@example
+   ATTR InpFileEx: int;
+   RULE: FileInclusion ::= 'include' FileName COMPUTE
+         .InpFileEx = NewInput (StringTable (FileName)) BOTTOMUP;
+
+         IF (NOT (.InpFileEx),
+         message (ERROR, CatStrInd ("can not open file ", FileName),
+                  0, COORDREF));
+   END;
+@end example
+@noindent 
+The file name is specified to be the text of the @code{FileName}
+token. The computation has to executed while the input is read and the tree
+is built bottom-up. Hence it is specified @code{BOTTOMUP}.
+
+Note: The above computation is executed when the @code{FileInclusion}
+tree node is built. Then the last token read from the current input
+stream is the terminating @code{;} of the @code{Declaration}, due to the
+lookahead of the parser. Hence, the contents of the included file
+is being processed as if it stood immediately following that
+@code{;} of the @code{Declaration}.
+Due to this reason it was essential to use two productions in the
+concrete grammar as stated above. A single production like
+@example
+   Declaration:  'include' FileName ';'.
+@end example
+@noindent
+instead would delay insertion until the token following that @code{;}
+has been read.
+
+@comment =====================================
+@node CurrTok, CmdLineIncl, Include, top
+@findex Module @code{CurrTok}
+@findex function @code{GetCurrTok}
+@chapter Accessing the Current Token
+
+This module provides a function @code{GetCurrTok} that can be used to
+access the string of the current token read from input.
+The function is used for example to access the name of a file to
+be included if the switching computation is issued by the parser
+as specified in the concrete grammar.
+
+This module is instantiated without generic parameters by
+@example
+   $/Input/CurrTok.gnrc:inst
+@end example
+
+The signature of the function is
+@table @code
+@item char *GetCurrTok (void)
+It accesses the string of the current token, stores it in memory,
+and yields a pointer to the stored string as result.
+@end table
+
+In our running example we could achieve the same effect of file
+inclusion as described in (@pxref{Include}), by specifying a computation
+in the concrete grammar rather than in a @code{.lido} specification:
+
+@example
+   Declaration: 'include' 
+                &'ChkFileOpnd(NewInput(GetCurrTok()), GetCurrTok());' 
+                FileName ';'.
+@end example
+@noindent
+@findex NewInput
+The token of @code{FileName} that immediatly follows the computation
+is accessed. The call of @code{ChkFileOpnd} is assumed to check
+for success of the @code{NewInput} call.
+
+
+@comment =====================================
+@node CmdLineIncl, , CurrTok, top
+@findex Module @code{CmdLineIncl}
+@findex command line arguments
+@findex input file inclusion
+@findex directories
+@chapter Command Line Arguments for Included Files
+
+Using this module introduces processing of a command line option
+into the generated processor: If the processor is called
+@example
+    processor.exe -Idirname filename
+@end example
+then files to be included are searched in the current directory and
+in @code{dirname}.
+This module provides specifications for the Eli's CLP tool
+to achieve the effect.
+
+This module is instantiated without generic parameters by
+@example
+   $/Input/CmdLineIncl.gnrc:inst
+@end example
+
+@findex function @code{NewInput}
+@findex function @code{FindFile}
+@findex FindFile
+The module provides a function that can be used together with
+calls of the @code{NewInput} function:
+
+@table @code
+@item char * FindFile (char *name)
+It searches the file named @code{name} in the current directory
+and in the directories given by @code{-I} command line arguments.
+@end table
+
+In order to use this facility the @code{FindFile} function has to be applied
+to the argument of the function @code{NewInput}.
+Hence, the examples of the two previous sections had to be rewritten
+as
+@example
+   ATTR InpFileEx: int;
+   RULE: FileInclusion ::= 'include' FileName COMPUTE
+     .InpFileEx = NewInput (FindFile (StringTable (FileName))) BOTTOMUP;
+
+     IF (NOT (.InpFileEx),
+     message (ERROR, CatStrInd ("can not open file ", FileName),
+              0, COORDREF));
+   END;
+@end example
+@noindent
+for the case of the @code{.lido} specification of input switching
+as shown in (@pxref{Include}), or
+@example
+   Declaration: 'include' &'NewInput(FindFile (GetCurrTok()));' FileName ';'.
+@end example
+@noindent
+for the case of the concrete grammar specification of input switching
+as shown in (@pxref{CurrTok}).
+
+@node Index, , , top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

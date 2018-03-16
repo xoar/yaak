@@ -1,0 +1,11 @@
+begin
+  var	tt rv;
+  type	t tt;
+  type	record int i, bool b, real r end t;
+  var	int j, bool c, real s;
+  var	t rt;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+  rt = rv;
+end

@@ -1,0 +1,11 @@
+/* $Id: input,v 1.1 1995/08/02 23:55:56 waite Exp $ */
+/* Validation of C non-literal token scanner */
+
+/* First try the "normal" forms of the tokens, then look at tricky ones.
+   This comment goes over more than one line. */
+
+1234
+identifier another_identifier x a1234
+"This is a string" "This ends with a newline\n"
+'c' '\n'
+1234.5678

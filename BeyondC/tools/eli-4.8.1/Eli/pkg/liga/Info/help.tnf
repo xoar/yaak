@@ -1,0 +1,163 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+
+@setfilename help
+@settitle HELP - Collection of helpful hints for various error messages
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: help.tnf,v 4.1 1997/08/29 07:46:59 peter Exp $
+
+@titlepage
+@sp 2
+@center @titlefont{HELP - Collection of helpful hints}
+@center @titlefont{for various error messages}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-4790 Paderborn
+@center F.R.G
+@sp 8
+@center $Revision: 4.1 $
+@end titlepage
+ 
+@iftex 
+@finalout
+It makes absolutely no sense to print this manual. In case of errors
+in your specifications, please use the derivation
+@example
+... : warn : help
+@end example
+This will bring you to an hypertext help system where you can get
+helpful advise for the errors, Eli detected in your specification.
+@end iftex
+@ifinfo
+@node top, , , (dir)
+@comment  node-name,  next,  previous,  up
+With this menu, you can decend to all the hints given in this documentation.
+@menu
+  Node                    Contents
+  ----------------------------------------------------------------------------
+* 1: open CHAIN.          Message: 'open CHAIN: unreachable chain symbol'.
+* 2: no CONSTITUENTS.     Message: 'no CONSTITUENTS symbol in subtree'.
+* 3: open INCLUDING.      Message: 'open INCLUDING: no source found'.
+* 4: limits.              What to do if a limit is reached.
+* 5: system.              Errors that indicate ELI System failure.
+@end menu
+
+@c ---------------------------------------------------------------------------
+
+@node open CHAIN, no CONSTITUENTS, , top
+@comment  node-name,  next,  previous,  up
+
+The message
+
+@example
+   ERROR: open CHAIN: unreachable chain symbol
+@end example
+
+indicates that a CHAIN c mentioned in a computation (pointed to by the
+message) is associated to a context p which may be derived such that
+a node for p does NOT lie in a subtree having CHAINSTART at the subtree
+root.
+
+@noindent *Note Syntax of CHAIN-Construct: (lidoshort)CHAIN.
+
+@noindent *Note More Information: (lido)Chaining.
+
+@c ---------------------------------------------------------------------------
+
+@node no CONSTITUENTS, open INCLUDING, open CHAIN, top
+@comment  node-name,  next,  previous,  up
+
+Assuming an attribution like: 
+
+@example
+RULE p: X ::= ... COMPUTE
+   ... CONSTITUENTS StructType.Code ...
+END;
+@end example
+
+The WARNING 'no CONSTITUENTS symbol in subtree' at the CONSTITUENTS
+means that there is no StructType node below. Such situations often
+occur when you INHERIT the computation with the constituents to several
+context where some of them have the StructType below and other don't.
+
+But writing such a CONSTITUENTS directly in a RULE computation is not
+reasonable, but well defined.
+
+@noindent *Note Syntax of CONSTITUENTS-Construct: (lidoshort)CONSTITUENTS.
+
+@noindent *Note More Information: (lido)Remote Access to Subtree Components.
+
+@c ---------------------------------------------------------------------------
+
+@node open INCLUDING, limits, no CONSTITUENTS, top
+@comment  node-name,  next,  previous,  up
+
+Assume that you have a rule
+
+@example
+RULE p: X ::= ... COMPUTE
+ ... INCLUDING StructTagDef.Tag ...
+END;
+@end example
+
+Then 'open INCLUDING' means: It is possible to have a tree according to the
+tree grammar specified by the LIDO rules, such that an X node doesn't
+have a StructTagDef above. Hence 'INCLUDING StructTagDef.Tag' would be
+undefined in such a case. That is an ERROR.
+
+In such cases you can use two arguments with the INCLUDING-Statement. The
+second one will be used if the first doesn't exist. 
+
+@noindent *Note Syntax of INCLUDING-Construct: (lidoshort)INCLUDING.
+
+@noindent *Note More Information: (lido)Remote Access to an Including Symbol.
+
+@c ---------------------------------------------------------------------------
+@node limits, system, open INCLUDING, top
+@comment  node-name,  next,  previous,  up
+
+This message indicates that a limit has been reached. It's possible that
+the behaviour can be changed by increasing a constant in one of the
+ELI Modules.
+
+Please describe your problem and send the description to 
+
+@example
+   elibugs@@cs.colorado.edu
+@end example
+
+@c ---------------------------------------------------------------------------
+@node system, , limits, top
+@comment  node-name,  next,  previous,  up
+   
+This message is an indication for a serious failure in ELI. 
+
+To get a fix for your problem, please describe what you have done and
+send that description to 
+
+@example
+   elibugs@@cs.colorado.edu
+@end example
+@end ifinfo
+@bye

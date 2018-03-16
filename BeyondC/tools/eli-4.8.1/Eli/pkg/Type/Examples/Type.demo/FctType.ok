@@ -1,0 +1,36 @@
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  type (int, real -> real) fct;
+
+  var	fct vf;
+
+  fun f (int x, real y) real
+  begin r = x * y; end;
+
+  type (real, fct -> void) gct;
+
+  fun g (real z, fct ff) void
+  begin r = z; ff (1, z); end;
+  
+  var	gct vg;
+
+  type (int -> int) itoi;
+  type (int -> (int -> int)) itoitoi;
+  fun next (int i) int begin i = i + 1; end;
+  fun cadd (int i) itoi begin i = i + 1; end;  
+  var itoi vnext;
+  var itoitoi vcadd;
+
+  vnext = next;
+  vcadd = cadd;
+  vnext (1);
+  vcadd (1);
+  vcadd (1) (2);
+
+  vf = f;
+  s = vf (i+1, 3.4);
+  vg = g;
+  vg (vf (j, s), vf);
+end

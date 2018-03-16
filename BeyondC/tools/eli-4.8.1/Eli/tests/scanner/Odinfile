@@ -1,0 +1,10 @@
+# $Id: Odinfile,v 1.4 1996/03/31 14:46:21 waite Exp $
+# Scanner only
+
+%program == c.gla :exe
+
+%results == input +cmd=(%program) :stdout
+%warnings == %results :warning
+%diffcmd == . +cmd=diff (%results) (result) :run
+%test ! == %diffcmd
+%source == c.gla +monitor :source

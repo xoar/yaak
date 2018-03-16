@@ -1,0 +1,81 @@
+<html>
+<head> <title>'Partitioned' Attribute Dependence Cycles</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>'Partitioned' Attribute Dependence Cycles</h1>
+<hr>
+<P>
+
+<b>Typical Error Situations</b>
+
+<P>
+Partitioned cycles are caused by additional constraints
+that the OAG scheduling algorithm has to introduce
+during partition computation.
+
+<p>
+<pre>
+   RULE : root ::= nt nt
+   COMPUTE nt[1].a = 'a';
+           nt[1].c = nt[2].d;
+           nt[2].a = nt[1].b;
+           nt[2].c = 'c';
+   END;
+
+   RULE : nt ::= 'a'
+   COMPUTE nt.b = nt.a;
+           nt.d = nt.c;
+   END;
+</pre>
+
+<p>
+results in
+
+<p>
+<pre>
+    ERROR: did not find evaluation order; 
+           see OrdInfo, add dependencies, or use gorto
+    ERROR: evaluation order for nt.a not found
+    ERROR: evaluation order for nt.c not found
+    ERROR: evaluation order for nt.b not found
+    ERROR: evaluation order for nt.d not found
+</pre>
+
+<!--NewPage-->
+<p>
+<p align="center">&nbsp;<img src="gifs/graph2.gif"></p>
+
+Partitioning problems often occur in conjunction with  
+independent Lido chains which run through the same subtree.
+
+The solution is to artificially enforce a scheduling order
+by adding attribute dependences.
+
+<p>
+Write a <tt>.ctl</tt> file containing the line
+
+<p>
+<pre>
+   ORDER: ARRANGE FOR SYMB nt EVAL a BEFORE c;
+</pre>
+
+<p>
+and add this specification to your .specs list.
+
+<p>
+<b>Or </b>add a source level dependence 
+
+<p>
+<pre>
+   RULE : nt ::= 'a'
+   COMPUTE nt.b = nt.a;
+           nt.d = nt.c <- nt.a;
+   END;
+</pre>
+
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

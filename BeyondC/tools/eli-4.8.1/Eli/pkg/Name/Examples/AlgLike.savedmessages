@@ -1,0 +1,391 @@
+==============
+Core.ok
+begin
+  val a = 1, b = 2;
+  val c = 1, d = c;
+  val e =
+	begin val a = c, b = f;
+	      a; b; e;
+	end;
+  val f = 2;
+  begin val a = 5;
+        a; d;
+  end;
+  a; c; f;
+  join j begin val r = 1; s; a; end
+	 begin val s = 2; r; c; end
+  joined;
+  j;
+end
+a in line 2 bound in line 2 of scope in line 1
+b in line 2 bound in line 2 of scope in line 1
+c in line 3 bound in line 3 of scope in line 1
+d in line 3 bound in line 3 of scope in line 1
+c in line 3 bound in line 3 of scope in line 1
+e in line 4 bound in line 4 of scope in line 1
+a in line 5 bound in line 5 of scope in line 5
+c in line 5 bound in line 3 of scope in line 1
+b in line 5 bound in line 5 of scope in line 5
+f in line 5 bound in line 8 of scope in line 1
+a in line 6 bound in line 5 of scope in line 5
+b in line 6 bound in line 5 of scope in line 5
+e in line 6 bound in line 4 of scope in line 1
+f in line 8 bound in line 8 of scope in line 1
+a in line 9 bound in line 9 of scope in line 9
+a in line 10 bound in line 9 of scope in line 9
+d in line 10 bound in line 3 of scope in line 1
+a in line 12 bound in line 2 of scope in line 1
+c in line 12 bound in line 3 of scope in line 1
+f in line 12 bound in line 8 of scope in line 1
+j in line 13 bound in line 13 of scope in line 1
+r in line 13 bound in line 13 of scope in line 14
+s in line 13 bound in line 14 of scope in line 14
+a in line 13 bound in line 2 of scope in line 1
+s in line 14 bound in line 14 of scope in line 14
+r in line 14 bound in line 13 of scope in line 14
+c in line 14 bound in line 3 of scope in line 1
+j in line 16 bound in line 13 of scope in line 1
+==============
+Core.err
+begin
+   val a = 1, b = 2;
+   val c = x;
+   val b = 3;
+   begin
+	val a = 3, d = 4, a = 5;
+	a;
+   end;
+   d;
+   join b
+           begin val e = 6; f; end
+	   begin val e = 7; x; end
+   joined;
+end
+
+
+
+
+
+** Summary of warning and error messages for Examples/AlgLike.demo/Core.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout
+--- <Examples/AlgLike.demo/Core.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 2:15 ERROR: identifier is multiply defined: b
+"stdin", line 3:12 ERROR: Identifier is not defined: x
+"stdin", line 4:8 ERROR: identifier is multiply defined: b
+"stdin", line 6:13 ERROR: identifier is multiply defined: a
+"stdin", line 6:27 ERROR: identifier is multiply defined: a
+"stdin", line 9:4 ERROR: Identifier is not defined: d
+"stdin", line 10:9 ERROR: identifier is multiply defined: b
+"stdin", line 11:22 ERROR: identifier is multiply defined: e
+"stdin", line 11:29 ERROR: Identifier is not defined: f
+"stdin", line 12:22 ERROR: identifier is multiply defined: e
+"stdin", line 12:29 ERROR: Identifier is not defined: x
+Examples/AlgLike.fw.exe failed.
+==============
+Module.ok
+begin
+  val x = 0;
+  module m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+		n::a;
+	end;
+  module n
+	begin	val a = 1; 
+		val c = 3;
+		module p
+			begin	val a = 4;
+				a; c;
+				n::a;
+				m::a;
+			end;
+		c;
+		p::a;
+		m::b;
+	end;
+  x;
+  m::b;
+  n::p;
+end
+x in line 2 bound in line 2 of scope in line 1
+m in line 3 bound in line 3 of scope in line 1
+a in line 4 bound in line 4 of scope in line 3
+b in line 5 bound in line 5 of scope in line 3
+a in line 6 bound in line 4 of scope in line 3
+n in line 7 bound in line 9 of scope in line 1
+a in line 7 bound in line 10 of scope in line 9
+n in line 9 bound in line 9 of scope in line 1
+a in line 10 bound in line 10 of scope in line 9
+c in line 11 bound in line 11 of scope in line 9
+p in line 12 bound in line 12 of scope in line 9
+a in line 13 bound in line 13 of scope in line 12
+a in line 14 bound in line 13 of scope in line 12
+c in line 14 bound in line 11 of scope in line 9
+n in line 15 bound in line 9 of scope in line 1
+a in line 15 bound in line 10 of scope in line 9
+m in line 16 bound in line 3 of scope in line 1
+a in line 16 bound in line 4 of scope in line 3
+c in line 18 bound in line 11 of scope in line 9
+p in line 19 bound in line 12 of scope in line 9
+a in line 19 bound in line 13 of scope in line 12
+m in line 20 bound in line 3 of scope in line 1
+b in line 20 bound in line 5 of scope in line 3
+x in line 22 bound in line 2 of scope in line 1
+m in line 23 bound in line 3 of scope in line 1
+b in line 23 bound in line 5 of scope in line 3
+n in line 24 bound in line 9 of scope in line 1
+p in line 24 bound in line 12 of scope in line 9
+==============
+Module.err
+begin
+  val x = 0;
+  module m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+		n::a;
+	end;
+  m::x;
+  x::m;
+  r::q;
+end
+** Summary of warning and error messages for Examples/AlgLike.demo/Module.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout
+--- <Examples/AlgLike.demo/Module.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 10:3 ERROR: module or class identifier required: x
+"stdin", line 7:17 ERROR: Identifier is not defined: n
+"stdin", line 9:6 ERROR: identifier is not defined: x
+"stdin", line 11:3 ERROR: Identifier is not defined: r
+Examples/AlgLike.fw.exe failed.
+==============
+Predef.ok
+begin
+  var int a, bool b;
+  begin var real a, real int;
+	a; int;
+  end;
+  true;
+end
+int in line 2 bound in line 0 of scope in line 0
+a in line 2 bound in line 2 of scope in line 1
+bool in line 2 bound in line 0 of scope in line 0
+b in line 2 bound in line 2 of scope in line 1
+real in line 3 bound in line 0 of scope in line 0
+a in line 3 bound in line 3 of scope in line 3
+real in line 3 bound in line 0 of scope in line 0
+int in line 3 bound in line 3 of scope in line 3
+a in line 4 bound in line 3 of scope in line 3
+int in line 4 bound in line 3 of scope in line 3
+true in line 6 bound in line 0 of scope in line 0
+==============
+With.ok
+begin
+  val x = 0;
+  module m
+	begin	val a = 1;
+		val b = 2;
+		with n do a;
+	end;
+  module n
+	begin	val a = 1; 
+		val c = 3;
+		with m do a;
+	end;
+  with m do with n do
+	begin a; b; c;
+	end;
+end
+x in line 2 bound in line 2 of scope in line 1
+m in line 3 bound in line 3 of scope in line 1
+a in line 4 bound in line 4 of scope in line 3
+b in line 5 bound in line 5 of scope in line 3
+n in line 6 bound in line 8 of scope in line 1
+a in line 6 bound in line 9 of scope in line 8
+n in line 8 bound in line 8 of scope in line 1
+a in line 9 bound in line 9 of scope in line 8
+c in line 10 bound in line 10 of scope in line 8
+m in line 11 bound in line 3 of scope in line 1
+a in line 11 bound in line 4 of scope in line 3
+m in line 13 bound in line 3 of scope in line 1
+n in line 13 bound in line 8 of scope in line 1
+a in line 14 bound in line 9 of scope in line 8
+b in line 14 bound in line 5 of scope in line 3
+c in line 14 bound in line 10 of scope in line 8
+==============
+Class.ok
+begin
+  val x = 0;
+  class m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+		n::a;
+	end;
+  class n
+	begin	val a = 1; 
+		val c = 3;
+		class p
+			begin	val a = 4;
+				a; c;
+				n::a;
+				m::a;
+			end;
+		c;
+		p::a;
+		m::b;
+	end;
+  class r : m : n
+	begin	val c = 4;
+		c; b; x;
+	end;
+  r::c; r::b;
+  x;
+  m::b;
+  n::p;
+end
+x in line 2 bound in line 2 of scope in line 1
+m in line 3 bound in line 3 of scope in line 1
+a in line 4 bound in line 4 of scope in line 3
+b in line 5 bound in line 5 of scope in line 3
+a in line 6 bound in line 4 of scope in line 3
+n in line 7 bound in line 9 of scope in line 1
+a in line 7 bound in line 10 of scope in line 9
+n in line 9 bound in line 9 of scope in line 1
+a in line 10 bound in line 10 of scope in line 9
+c in line 11 bound in line 11 of scope in line 9
+p in line 12 bound in line 12 of scope in line 9
+a in line 13 bound in line 13 of scope in line 12
+a in line 14 bound in line 13 of scope in line 12
+c in line 14 bound in line 11 of scope in line 9
+n in line 15 bound in line 9 of scope in line 1
+a in line 15 bound in line 10 of scope in line 9
+m in line 16 bound in line 3 of scope in line 1
+a in line 16 bound in line 4 of scope in line 3
+c in line 18 bound in line 11 of scope in line 9
+p in line 19 bound in line 12 of scope in line 9
+a in line 19 bound in line 13 of scope in line 12
+m in line 20 bound in line 3 of scope in line 1
+b in line 20 bound in line 5 of scope in line 3
+r in line 22 bound in line 22 of scope in line 1
+m in line 22 bound in line 3 of scope in line 1
+n in line 22 bound in line 9 of scope in line 1
+c in line 23 bound in line 23 of scope in line 22
+c in line 24 bound in line 23 of scope in line 22
+b in line 24 bound in line 5 of scope in line 3
+x in line 24 bound in line 2 of scope in line 1
+r in line 26 bound in line 22 of scope in line 1
+c in line 26 bound in line 23 of scope in line 22
+r in line 26 bound in line 22 of scope in line 1
+b in line 26 bound in line 5 of scope in line 3
+x in line 27 bound in line 2 of scope in line 1
+m in line 28 bound in line 3 of scope in line 1
+b in line 28 bound in line 5 of scope in line 3
+n in line 29 bound in line 9 of scope in line 1
+p in line 29 bound in line 12 of scope in line 9
+==============
+Class.err
+begin
+  class w : w begin val ww = 1; ww; end;
+  class x : z begin val px = 1; pz; end;
+  class y : x begin val py = 1; px; end;
+  class z : y begin val pz = 1; py; end;
+  class m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+	end;
+  class n
+	begin	val a = 1; 
+		val c = 3;
+		c;
+	end;
+  class r : m : n
+	begin	val c = 4;
+		a;
+	end;
+  r::a;
+  z::px;
+  w::ww;
+end
+** Summary of warning and error messages for Examples/AlgLike.demo/Class.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout
+--- <Examples/AlgLike.demo/Class.err +cmd=(Examples/AlgLike.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 2:13 ERROR: Wrong scope inherited
+"stdin", line 5:13 ERROR: Wrong scope inherited
+"stdin", line 5:33 ERROR: Identifier is not defined: py
+"stdin", line 18:17 ERROR: Several definitions are inherited for: a
+"stdin", line 20:6 ERROR: Several definitions are inherited for: a
+"stdin", line 21:6 ERROR: identifier is not defined: px
+Examples/AlgLike.fw.exe failed.
+==============
+ClassVar.ok
+begin
+  class p
+	begin	var real d;
+		d;
+	end;
+  class m : p
+	begin	var int a;
+		var p c;
+		d; c.d;
+		p::d;
+	end;
+  var m x;
+  class n
+	begin	var bool b;
+		var m c;
+		c.a;
+		x.a;
+	end;
+  var n y;
+  y.b;
+end
+p in line 2 bound in line 2 of scope in line 1
+real in line 3 bound in line 0 of scope in line 0
+d in line 3 bound in line 3 of scope in line 2
+d in line 4 bound in line 3 of scope in line 2
+m in line 6 bound in line 6 of scope in line 1
+p in line 6 bound in line 2 of scope in line 1
+int in line 7 bound in line 0 of scope in line 0
+a in line 7 bound in line 7 of scope in line 6
+p in line 8 bound in line 2 of scope in line 1
+c in line 8 bound in line 8 of scope in line 6
+d in line 9 bound in line 3 of scope in line 2
+c in line 9 bound in line 8 of scope in line 6
+d in line 9 bound in line 3 of scope in line 2
+p in line 10 bound in line 2 of scope in line 1
+d in line 10 bound in line 3 of scope in line 2
+m in line 12 bound in line 6 of scope in line 1
+x in line 12 bound in line 12 of scope in line 1
+n in line 13 bound in line 13 of scope in line 1
+bool in line 14 bound in line 0 of scope in line 0
+b in line 14 bound in line 14 of scope in line 13
+m in line 15 bound in line 6 of scope in line 1
+c in line 15 bound in line 15 of scope in line 13
+c in line 16 bound in line 15 of scope in line 13
+a in line 16 bound in line 7 of scope in line 6
+x in line 17 bound in line 12 of scope in line 1
+a in line 17 bound in line 7 of scope in line 6
+n in line 19 bound in line 13 of scope in line 1
+y in line 19 bound in line 19 of scope in line 1
+y in line 20 bound in line 19 of scope in line 1
+b in line 20 bound in line 14 of scope in line 13
+==============
+Flat.ok
+begin
+  val a = 1, b = 2;
+  set a to a;
+  begin val a = 3;
+	set b to use a;
+	a; b;
+  end;
+  use b;
+end
+a in line 2 bound in line 2 of scope in line 1
+b in line 2 bound in line 2 of scope in line 1
+a in line 3 bound in line 3 of scope in line 1
+a in line 3 bound in line 2 of scope in line 1
+a in line 4 bound in line 4 of scope in line 4
+b in line 5 bound in line 5 of scope in line 1
+a in line 5 bound in line 3 of scope in line 1
+a in line 6 bound in line 4 of scope in line 4
+b in line 6 bound in line 2 of scope in line 1
+b in line 8 bound in line 5 of scope in line 1

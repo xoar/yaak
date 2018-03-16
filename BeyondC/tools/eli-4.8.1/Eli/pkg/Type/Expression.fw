@@ -1,0 +1,1089 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: Expression.fw,v 1.13 2013/04/07 04:47:30 profw Exp $
+~! Copyright 2006 The Regents of the University of Colorado.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@setchapternewpage odd
+@settitle Type Analysis for Expressions
+@headings double
+
+@ifnotinfo
+~t title titlefont centre "Type Analysis for Expressions"
+~t title smalltitlefont centre "Module Implementation"
+~t vskip 15 mm
+@end ifnotinfo
+
+An @dfn{expression node} is an abstract syntax tree node
+representing a program construct that yields a value, and
+an @dfn{expression subtree} is a subtree of the abstract syntax tree
+made up of expression nodes.
+Type analysis computations for expression subtrees are carried out by OIL,
+Eli's operator identification library
+(@pxref{library,,OIL's support library,oil,OIL Reference Manual}).
+
+Type relationships in an expression subtree are modeled by @dfn{operators}
+associated with the expression nodes in that tree.
+Each operator delivers a particular result type and demands particular
+types as operands, as specified by its @dfn{signature}.
+Many languages also define @dfn{coercible}, a partial ordering relation
+on the set of types such that an expression node defines an acceptable
+operand for an operator if the type delivered by that node is coercible to
+the type demanded by the operator.
+
+An @dfn{indication} names a set of operators.
+Tree computations outside of OIL determine an indication for any expression
+node at which the type relationships are characterized by an operator.
+The type analysis computation provided by OIL then selects an operator
+from the set named by that indication.
+
+All of the information needed by OIL to carry out the type analysis
+computations for expression subtrees of a particular abstract syntax tree
+must be made available in the OIL database before any of those computations
+begin.
+The initial contents of the OIL database consists of language-defined
+information specified using the ~{PreDefOp~} module
+(@pxref{Top,,,PreDefOp,Pre-defined Operator Specification}).
+Information introduced by program constructs like type, procedure, and
+method denotations must be defined by tree computations.
+These tree computations invoke OIL operations to add information to the
+database.
+
+Each node of an expression subtree represents one of a few kinds of
+construct.
+The type analysis computations for a particular node are determined by the
+kind of construct, the @dfn{context}, represented by that node.
+These computations invoke OIL operations that query the database to
+determine the possible relationships among the types and operators
+appearing in the context.
+
+The ~{Expression~} module provides an wrapper for OIL consisting of
+computational roles to be inherited by tree symbols and context-dependent
+computations to be used in rules.
+It is instantiated by:
+
+@example
+$/Type/Expression.gnrc                 :inst
+$/Type/Expression.gnrc +referto=Result :inst
+@end example
+@iftex
+@noindent
+@xref{Completing,,Completing the OIL Database}, for ~{Expression~} module
+components that compute program-defined database information.
+@xref{Expression,,Expression Contexts}, for components that describe
+type analysis within expression subtrees.
+
+The components of the module are separated by function in this document
+to make the description easier to understand.
+They must be collected into specification files for implementation:
+
+~O~<Expression.specs~>~{
+$/oil/oil.specs
+$/Adt/PtrList.gnrc+instance=DefTableKey+referto=deftbl :inst
+$/Adt/PtrList.gnrc+instance=tOilTypeSet+referto=oiladt2:inst
+~}
+
+~O~<Expression.lido~>==~{
+~<Computational roles~>
+~}
+
+~O~<Expression.pdl~>==~{
+~<Properties and access functions~>
+~}
+@end iftex
+
+If the module is instantiated with the ~{+referto=Result~} parameter, then
+operator identification is carried out strictly bottom-up.
+Otherwise, operators are selected based on both the possible types of the
+operands and the required result type.
+This variation is controlled by two parameters, ~{|ARG|~} and ~{|SET~}.
+
+~{|ARG|~} is replaced by ~{result~} if ~{+referto=Result~}.
+This means that the algorithm will take any type required by the context
+into account when selecting an operator from the set represented by an
+indication.
+Otherwise, ~{|ARG|~} is replaced by ~{OilInvalidType~} and any required
+type will be ignored (except in contexts requiring type conversion,
+@pxref{Optional,,Optional operators}).
+
+~{|SET|~} is replaced by ~{Known~} if ~{+referto=Result~}.
+This means that the possible type set will always contain only the result
+type of the identified operator.
+Otherwise, ~{|SET|~} is replaced by ~{Possible~} and a possible type set
+will be computed based on the possible operators and the possible type sets
+of the operands.
+
+~O~<Expression.lido.eta~>==~{
+#define OilOp1Id(result,rator,rand)\
+  OilIdOpTS1(|ARG|,rator,rand)
+#define OilOp2Id(result,rator,left,right)\
+  OilIdOpTS2(|ARG|,rator,left,right)
+#define OilOpnId(rator,list,result)\
+  OilIdOpTSn(rator,list,|ARG|)
+
+#define KnownTS1(result,rator,rand)\
+  result._oilset=OilTypeToSet(result._oiltyp)
+#define KnownTS2(result,rator,left,right)\
+  result._oilset=OilTypeToSet(result._oiltyp)
+#define KnownTSn(result,rator,list)\
+  result._oilset=OilTypeToSet(result._oiltyp)
+
+#define PossibleTS1(result,rator,rand)\
+  result._oilset=\
+    OilIdResultTS1(rator._oilind,rand._oilset)
+#define PossibleTS2(result,rator,left,right)\
+  result._oilset=\
+    OilIdResultTS2(rator._oilind,left._oilset,right._oilset)
+#define PossibleTSn(result,rator,list)\
+  result._oilset=\
+    OilIdResultSet(rator._oilind,list._setsig)
+
+~<Context-dependent computations~>
+~}
+
+~A~<Completing the OIL Database~>
+
+This section presents ~{Expression~} module components that
+add information derived from program constructs to the OIL database.
+All of the tree computations resulting from the specifications in this
+section must be completed before any expression analysis can take place.
+Because the computations only have side effects on the OIL database, an
+explicit dependence is required.
+This is achieved by requiring the symbol on the left-hand side of a
+rule containing computations that affect the database to play the
+~{OperatorDefs~} role.
+The user must establish ~{OperatorDefs.GotOper~} as the
+post-condition indicating that @emph{all} of the database alterations
+defined by that rule have been carried out.
+~{OperatorDefs~} provides a default symbol computation establishing
+~{OperatorDefs.GotOper~} for contexts in which no database alterations take
+place.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL OperatorDefs:
+  GotOper:		VOID		SYNT;	/* default */
+
+CLASS SYMBOL OperatorDefs COMPUTE
+  SYNT.GotOper = "yes";
+END;
+
+CLASS SYMBOL RootType COMPUTE
+  SYNT.GotOper = "yes";
+  SYNT.GotAllOpers = CONSTITUENTS OperatorDefs.GotOper <- THIS.GotOper;
+END;
+~}
+
+@noindent
+~{RootType.GotAllOpers~} indicates that all operator-defining tree
+computations have been completed,
+and is therefore the pre-condition for expression analysis.
+
+~B~<Signatures~>
+
+Signatures of operators introduced by language constructs such as procedures,
+methods, and multi-dimensional arrays are usually specified by rules with
+one grammar symbol representing a list of operand types and another
+representing the result type.
+The grammar symbol representing the list of operand types plays the
+~{OpndTypeListRoot~} role; the grammar symbol representing an element
+of such a list plays the ~{OpndTypeListElem~} role:
+
+~$~<Computational roles~>+=~{
+CHAIN _cDefTableKeyList: DefTableKeyList;
+
+CLASS SYMBOL OpndTypeListRoot:
+  OpndTypeList:	DefTableKeyList	SYNT;	/* provided */
+
+CLASS SYMBOL OpndTypeListRoot COMPUTE
+  CHAINSTART HEAD._cDefTableKeyList = NULLDefTableKeyList;
+  SYNT.OpndTypeList = TAIL._cDefTableKeyList;
+END;
+
+CLASS SYMBOL RootType COMPUTE
+  CHAINSTART HEAD._cDefTableKeyList = NULLDefTableKeyList;
+  TAIL._cDefTableKeyList;
+END;
+
+CLASS SYMBOL OpndTypeListElem:
+  Type:			DefTableKey;	/* required */
+
+CLASS SYMBOL OpndTypeListElem COMPUTE
+  THIS._cDefTableKeyList=
+    ConsDefTableKeyList(THIS.Type,THIS._cDefTableKeyList);
+END;
+~}
+
+A user computation in the lower context must set ~{OpndTypeListElem.Type~}
+to the type of the corresponding parameter.
+This value is a definition table key, which may represent either a type or
+a type identifier.
+
+~{OpndTypeListRoot.OpndTypeList~} is the list of
+~{OpndTypeListElem.Type~} values, in reverse order.
+
+Signatures of operators introduced by language constructs such as
+one-dimensional arrays are usually specified by rules with an individual
+grammar symbol representing each operand type and another representing the
+result type.
+The tree computations defining the operators in those cases actually
+construct lists of the individual operand types, in reverse order, so that
+signature processing is uniform for all cases.
+
+~B~<Operators~>
+
+Let @samp{ind}, @samp{opr}, @samp{rand}, @samp{rand1}, @samp{rand2}, and
+@samp{rslt} be definition table keys and @samp{rands} be a
+~{DefTableKeyList~} value.
+
+@ftable @code
+@item MonadicOperator(@samp{ind},@samp{opr},@samp{rand},@samp{rslt})
+Adds operator @code{@samp{opr}(@samp{rand}):@samp{rslt}}
+to the set named by indication @samp{ind}.
+
+@item DyadicOperator(@samp{ind},@samp{opr},@samp{rand1},@samp{rand2},@samp{rslt})
+Adds operator @code{@samp{opr}(@samp{rand1},@samp{rand2}):@samp{rslt}}
+to the set named by indication @samp{ind}.
+
+@item ListOperator(@samp{ind},@samp{opr},@samp{rands},@samp{rslt})
+Adds operator @code{@samp{opr}(t1,...,tn):@samp{rslt}}
+to the set named by indication @samp{ind}.
+Here @code{t1,...,tn} are the values obtained from @samp{rands}.
+@end ftable
+
+~$~<Context-dependent computations~>+=~{
+#define MonadicOperator(ind,op,parm,res)\
+  _OverloadOilOp(\
+    ind,\
+    OilNewOp(op,_MakeOilArgSig(res,SingleDefTableKeyList(parm)),1)\
+    <- INCLUDING RootType.GotAllTypes)
+
+#define DyadicOperator(ind,op,parm1,parm2,res)\
+  _OverloadOilOp(\
+    ind,\
+    OilNewOp(\
+      op,\
+      _MakeOilArgSig(\
+        res,\
+	ConsDefTableKeyList(parm2,SingleDefTableKeyList(parm1))),\
+      1)\
+    <- INCLUDING RootType.GotAllTypes)
+
+#define ListOperator(ind,op,rands,res)\
+  _OverloadOilOp(\
+    ind,\
+    OilNewOp(op,_MakeOilArgSig(res,rands),1)\
+    <- INCLUDING RootType.GotAllTypes)
+~}
+
+The actual value of @samp{opr} is often irrelevant in these computations,
+because the designer does not ask which operator was selected from the
+given indication.
+The @code{Expression} module provides the known key @code{NoOprName} for
+use in these situations.
+
+~$~<Properties and access functions~>+=~{
+NoOprName;
+~}
+
+Often, a new type introduces several new operators and all of them overload
+known indications.
+In that case, an OIL class definition can be used to specify all of the
+operators.
+They are all entered into the database with a single instantiation:
+
+~$~<Context-dependent computations~>+=~{
+#define InstClass0(c,typ)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      NullDefTableKeyList())\
+  <- INCLUDING RootType.GotAllTypes)
+
+#define InstClass1(c,typ,arg)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      SingleDefTableKeyList(arg))\
+  <- INCLUDING RootType.GotAllTypes)
+
+#define InstClass2(c,typ,arg1,arg2)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      ConsDefTableKeyList(arg2,SingleDefTableKeyList(arg1)))\
+  <- INCLUDING RootType.GotAllTypes)
+
+#define InstClass3(c,typ,arg1,arg2,arg3)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      ConsDefTableKeyList(arg3,\
+        ConsDefTableKeyList(arg2,SingleDefTableKeyList(arg1))))\
+  <- INCLUDING RootType.GotAllTypes)
+~}
+
+The instantiation macros are also useful outside of a LIDO specification,
+but there they cannot depend on informaton in the tree:
+
+~$~<OIL class instantiation macros for C code~>==~{~-
+#define InstClass0(c,typ)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      NullDefTableKeyList()))
+
+#define InstClass1(c,typ,arg)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      SingleDefTableKeyList(arg)))
+
+#define InstClass2(c,typ,arg1,arg2)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      ConsDefTableKeyList(arg2,SingleDefTableKeyList(arg1))))
+
+#define InstClass3(c,typ,arg1,arg2,arg3)\
+  OilDefClassOps(\
+    GetOilClass(c,OilInvalidClass),\
+    _MakeOilArgSig(\
+      FinalType(typ),\
+      ConsDefTableKeyList(arg3,\
+        ConsDefTableKeyList(arg2,SingleDefTableKeyList(arg1)))))
+~}
+
+~B~<Coercibility~>
+
+Let @samp{from} and @samp{to} be definition table keys.
+@ftable @code
+@item Coercible(@samp{op},@samp{from},@samp{to})
+Specifies that type @samp{from} is coercible to type @samp{to}.
+The conversion operator is @samp{op}.
+
+@item IsCoercible(@samp{from},@samp{to})
+Yields true if type @samp{from} is coercible to type @samp{to}.
+@end ftable
+
+~$~<Context-dependent computations~>+=~{
+#define Coercible(op,from,to)\
+  OilAddCoercion(\
+    OilNewOp(\
+      op,\
+      _MakeOilArgSig(to,SingleDefTableKeyList(from)),\
+      1)\
+  <- INCLUDING RootType.GotAllTypes)
+
+#define IsCoercible(from,to)\
+  OilIsCoercibleTo(\
+    GetOilType(FinalType(from),OilInvalidType),\
+    GetOilType(FinalType(to),OilInvalidType)\
+  <- INCLUDING RootType.GotAllTypes)
+~}
+
+~B~<Database operations~>
+
+The process of establishing definition table keys for indications lies
+outside of this module.
+Thus there is no guarantee that a key used as an indication for the first
+time has a corresponding value in the OIL database.
+The following access function provides the necessary guarantee:
+
+~$~<Properties and access functions~>+=~{
+OilOp:      tOilOp [_Overload];
+
+void _Overload(DefTableKey key, tOilOp op)
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = OilNewOp(key, OilEmptyArgSig, 1);
+  if (op == OilInvalidOp) return;
+  OilAddIdentification(VALUE, op);
+}
+~}
+
+An operator's signature in the OIL database is constructed from an empty
+signature by adding the OIL types in reverse order.
+Types are represented by definition table keys in the compiler as a whole,
+and each definition table key representing a type is given a
+~{tOilType~}-valued property named ~{OilType~}.
+Thus ~{FinalType~} must first be used to obtain the unique key for each
+type, and then the ~{OilType~} property of that key can be added to the
+signature:
+
+~$~<tOilArgSig _MakeOilArgSig(DefTableKey res, DefTableKeyList tpl)~>==~{
+{ tOilArgSig sig = OilEmptyArgSig;
+
+  while (tpl != NULLDefTableKeyList) {
+    sig =
+      OilAddArgSig(
+        OilGetOilType(FinalType(HeadDefTableKeyList(tpl))),
+        sig);
+    tpl = TailDefTableKeyList(tpl);
+  }
+  sig = OilAddArgSig(OilGetOilType(FinalType(res)), sig);
+
+  return sig;
+}
+~}
+
+The ~{OilType~} property of a language-defined type is set during
+initialization.
+Definition table keys introduced by tree computations to represent types do
+not necessarily have that property.
+The following access function guarantees that every key interpreted as a
+type has the ~{OilType~} property:
+
+~$~<Properties and access functions~>+=~{
+OilType: tOilType [OilGet];
+
+tOilType OilGet(DefTableKey key)
+{ if (key == NoKey) return OilInvalidType;
+  if (!ACCESS) VALUE = OilNewType(key);
+  return VALUE;
+}
+~}
+
+~A~<Expression Contexts~>
+
+This section presents the ~{Expression~} module components that use
+information in the OIL database to carry out type analysis computations
+in expression subtrees.
+Every expression node is defined by an abstract syntax rule whose left-hand
+side symbol plays the ~{ExpressionSymbol~} role.
+Many of the rules for contexts in which the type relationships are
+characterized by an operator have a right-hand side symbol playing the
+~{OperatorSymbol~} role.
+
+Operator identification computations are specific to particular contexts in
+which the grammar symbols playing the ~{ExpressionSymbol~} and
+~{OperatorSymbol~} roles appear.
+The contexts can be characterized as those without operators,
+those in which the need for an operator depends on context, and
+those in which an operator is always needed.
+The ~{Expression~} module provides rule computations for each of these
+situations.
+
+~B~<ExpressionSymbol~>
+
+~{ExpressionSymbol.Type~} is set by module computations to the
+definition table key representing the result type of the expression.
+~{ExpressionSymbol.Required~} may be set by a user computatation in the
+upper context to a definition table key representing the type of value that
+the expression is required to produce.
+By default, an expression is not required to produce a specific type of
+value.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL ExpressionSymbol: 
+  Required:	DefTableKey	INH,	/* default */
+  _reqtyp:	tOilType	INH,	/* provided */
+  _oilset:	tOilTypeSet	SYNT,	/* provided */
+  _oiltyp:	tOilType	SYNT,	/* provided */
+  Type:		DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL ExpressionSymbol INHERITS ExpError COMPUTE
+  INH.Required = NoKey;
+  INH._reqtyp  =
+    OilGetOilType(FinalType(THIS.Required))
+      <- INCLUDING RootType.GotAllOpers;
+  SYNT._oiltyp = OilInvalidType;
+  SYNT._oilset = OilEmptyTypeSet;
+  SYNT.Type    = OilTypeName(THIS._oiltyp);
+END;
+~}
+
+Both ~{_reqtyp~} and ~{_oiltyp~} are used as rule attributes in
+some contexts, as is a temporary called ~{_oiltop~}
+Thus their types must also be made available globally.
+
+~$~<Computational roles~>+=~{
+ATTR _reqtyp:	tOilType;
+ATTR _oiltyp:	tOilType;
+ATTR _oiltop:	tOilOp;
+~}
+
+If an expression is required by its parent to produce values of a given
+type, but values of that type cannot be produced, then the error
+~{Incorrect type for this context~} will be reported at the left end of
+the expression.
+That behavior can be changed for all expressions by symbol computations
+overriding the computation of ~{ExpError.ExpErr~} and/or ~{ExpError.ExpMsg~}.
+It can be changed for individual expression contexts by rule computations
+overriding the computation of @samp{lhs}~{.ExpErr~} and/or
+@samp{lhs}~{.ExpMsg~}, where @samp{lhs} is the left-hand side symbol of
+the rule defining the context.
+All of the computations to be overridden occur in the lower context.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL ExpError INHERITS ChkExp END;
+
+CLASS SYMBOL ChkExp:
+  ExpErr:	int	SYNT,	/* provided */
+  ExpMsg:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL ChkExp COMPUTE
+  SYNT.ExpErr=NOT(OilIsValidCS(OilCoerce(THIS._oiltyp,THIS._reqtyp)));
+  SYNT.ExpMsg=
+    IF(THIS.ExpErr,
+      message(ERROR,"Incorrect type for this context",0,COORDREF));
+END;
+~}
+
+~B~<OperatorSymbol~>
+
+~{OperatorSymbol.Oper~} is set by module computations to the
+definition table key representing the operator of the expression.
+~{OperatorSymbol.Indic~} may be set by user computation in the lower
+context to a definition table key representing the indication whose
+operator set is valid at this point.
+By default, no operators are valid.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL OperatorSymbol: 
+  Indic:	DefTableKey	SYNT,	/* default */
+  _oilind:	tOilOp		SYNT,	/* default */
+  _oilop:	tOilOp		INH,	/* default */
+  Oper:		DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL OperatorSymbol INHERITS OprError COMPUTE
+  SYNT.Indic=NoKey;
+  SYNT._oilind=GetOilOp(THIS.Indic,OilInvalidOp);
+  INH._oilop=OilInvalidOp;
+  SYNT.Oper=OilOpName(THIS._oilop);
+END;
+~}
+
+Both ~{_oilind~} and ~{_oilop~} are used as rule attributes in
+contexts where the operator does not appear as a grammar symbol.
+Thus their types must also be made available globally.
+
+~$~<Computational roles~>+=~{
+ATTR _oilind:	tOilOp;
+ATTR _oilop:	tOilOp;
+~}
+
+If no operator named by ~{OperatorSymbol._oilind~} is compatible with
+the context, then the error
+~{Incorrect operand type(s) for this operator~}
+will be reported at the ~{OperatorSymbol~}.
+That behavior can be changed for all expressions by symbol computations
+overriding the computation of ~{OprError.OprErr~} and/or ~{OprError.OprMsg~}.
+It can be changed for individual operator contexts by rule computations
+overriding the computation of @samp{op}~{.OprErr~} and/or @samp{op}~{.OprMsg~},
+where @samp{op} is the grammar symbol playing the ~{OperatorSymbol~} role.
+All of the computations to be overridden occur in the lower context.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL OprError INHERITS ChkOpr END;
+
+CLASS SYMBOL ChkOpr:
+  OprErr:	int	SYNT,	/* provided */
+  OprMsg:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL ChkOpr COMPUTE
+  SYNT.OprErr=
+    AND(OilIsValidOp(THIS._oilind),NOT(OilIsValidOp(THIS._oilop)));
+  SYNT.OprMsg=
+    IF(THIS.OprErr,
+      message(
+        ERROR,
+	"Incorrect operand type(s) for this operator",
+	0,
+	COORDREF));
+END;
+~}
+
+~B~<Contexts with no operator~>
+
+Let @samp{type} be a definition table key and @samp{e1}, @samp{e2}, and
+@samp{e3} be grammar symbols that play the ~{ExpressionSymbol~} role.
+The left-hand side symbol of the rule is @samp{e1}.
+
+@ftable @code
+@item PrimaryContext(@samp{e1},@samp{type})
+Rule computations for a leaf of an expression subtree.
+Examples are constants and variable references.
+The @samp{type} argument must be the definition table key of the operand
+type.
+
+@item TransferContext(@samp{e1},@samp{e2})
+Rule computations for a node in which the result and one
+operand are identical with respect to type.
+Examples are some chain rules that rename expressions.
+
+@item BalanceContext(@samp{e1},@samp{e2},@samp{e3})
+Rule computations for a node in which the result is a type
+@samp{t} to which each of the operands can be coerced.
+Moreover, there is no other type @samp{t'} coercible to @samp{t}
+to which each of the operands can be coerced. 
+An example is a conditional expression.
+@end ftable
+
+~$~<Context-dependent computations~>+=~{
+#define PrimaryContext(e1,type)\
+  ._oiltyp=OilGetOilType(FinalType(type))<-INCLUDING RootType.GotAllOpers;\
+  e1._oiltyp=._oiltyp;\
+  e1._oilset=OilTypeToSet(._oiltyp)
+
+#define TransferContext(e1,e2)\
+  e1._oiltyp=e2._oiltyp;\
+  e1._oilset=e2._oilset;\
+  e1.ExpMsg="no";\
+  e2._reqtyp=e1._reqtyp
+
+#define BalanceContext(e1,e2,e3)\
+  ._oiltyp=OilBalance(e2._oilset,e3._oilset);\
+  e1._oilset=OilTypeToSet(._oiltyp);\
+  e1._oiltyp=._oiltyp;\
+  e1.ExpMsg="no";\
+  e2._reqtyp=e1._reqtyp;\
+  e3._reqtyp=e1._reqtyp
+~}
+
+When the number of subexpressions to be balanced is larger than two (for
+example in a multi-way selection or the operands of an operator like
+~{max~}), we can establish tree nodes playing the ~{BalanceListRoot~}
+and ~{BalanceListElem~} roles.
+Both inherit from ~{ExpressionSymbol~}, and neither requires
+computations beyond the ones used in any expression context.
+A node playing the ~{BalanceListRoot~} should have nodes playing the
+~{BalanceListElem~} role as its immediate ~{ExpressionSymbol~}
+descendants.
+
+~$~<Computational roles~>+=~{
+CHAIN _BalListSet: tOilTypeSet;
+
+CLASS SYMBOL BalanceListRoot INHERITS ExpressionSymbol COMPUTE
+  CHAINSTART HEAD._BalListSet = OilEmptyTypeSet;
+  SYNT._oilset = TAIL._BalListSet;
+END;
+
+CLASS SYMBOL RootType COMPUTE
+  CHAINSTART HEAD._BalListSet = OilEmptyTypeSet;
+END;
+
+CLASS SYMBOL BalanceListElem:
+  _BalType:	tOilType	SYNT;	/* provided */
+
+CLASS SYMBOL BalanceListElem INHERITS ExpressionSymbol, ChkBal COMPUTE
+  THIS._BalType = OilBalance(THIS._BalListSet,THIS._oilset);
+  THIS._BalListSet =
+    IF(EQ(THIS._BalListSet,OilEmptyTypeSet),
+      THIS._oilset,
+      IF(EQ(THIS._BalType,OilInvalidType),
+        THIS._BalListSet,
+        OilTypeToSet(THIS._BalType)));
+  INH._reqtyp = INCLUDING BalanceListRoot._reqtyp;
+END;
+~}
+
+If a ~{BalanceListElem~} node represents a type that cannot be balanced
+with the list elements to its left, and no other expression errors are
+reported at that node, then the error ~{Type inconsistent with list to the
+left~} is reported at the left end of the node's expression.
+That behavior can be changed for all balanced list elements by symbol
+computations overriding the computation of ~{BalanceListElem.BalErr~}
+and/or ~{BalanceListElem.BalMsg~}.
+It can be changed for individual balanced list elements by rule
+computations overriding the computation of @samp{lhs}~{.BalErr~} and/or
+@samp{lhs}~{.BalMsg~}, where @samp{lhs} is the left-hand side symbol
+of the rule defining the context.
+All of the computations to be overridden occur in the lower context.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL ChkBal:
+  BalErr:	int	SYNT,	/* provided */
+  BalMsg:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL ChkBal COMPUTE
+  SYNT.BalErr=
+    AND(NE(THIS._BalListSet,OilEmptyTypeSet),
+        EQ(THIS._BalType,OilInvalidType));
+  SYNT.BalMsg=
+    IF(AND(THIS.BalErr,NOT(THIS.ExpErr)),
+      message(ERROR,"Type inconsistent with list to the left",0,COORDREF));
+END;
+~}
+
+~B~<Optional operators~>
+
+Some expression contexts demand a result of a certain type, and allow one
+of a set of conversion operators to be used if the operand type is not
+coercible to the desired result type.
+At the root of an expression tree, the desired type must be specified
+explicity by user computation; in other contexts it is supplied by the
+parent expression.
+
+Let @samp{rslt} and @samp{rand} be grammar symbols playing the
+~{ExpressionSymbol~} role, @samp{rator} be a grammar symbol playing the
+~{OperatorSymbol~} role, and @samp{type} be a definition table key
+representing a type.
+
+The operator is selected from the set of operators defined by
+the indication @samp{rator}.
+If none of those operators can accept a value to which the result
+of @samp{rand} can be coerced and deliver a value coercible to the required
+result type, then the operator is invalid.
+Note, however, that this does ~/not~/ imply an error.
+The node is type-correct if the operand type is coercible to the desired
+result type.
+
+If the operator is invalid and the operand type is not coercible to the
+desired result type, the error will be reported at the child as an invalid
+type for the context.
+
+@ftable @code
+@item RootContext(@samp{type},@samp{rator},@samp{rand})
+Rule computations for contexts in which there is no result expression, but
+the operand expression must yield a specific type.
+The @samp{type} argument must be the definition table key of that type.
+
+@item CastContext(@samp{rslt},@samp{rator},@samp{rand},@samp{type})
+Rule computations for contexts in which the type is explicit.
+The @samp{type} argument must be the definition table key of the desired
+result type.
+
+@item ConversionContext(@samp{rslt},@samp{rator},@samp{rand})
+Rule computations for contexts in which the type is determined by the
+result.
+@end ftable
+@noindent
+
+~$~<Context-dependent computations~>+=~{
+#define RootContext(type,rator,e2)\
+  ._reqtyp=OilGetOilType(FinalType(type))<-INCLUDING RootType.GotAllOpers;\
+  rator._oilop=\
+    IF(OilSetIncludes(e2._oilset,._reqtyp),\
+      OilInvalidOp,\
+      OilIdOpTS1(._reqtyp,rator._oilind,e2._oilset));\
+  e2._reqtyp=\
+    IF(EQ(rator._oilop,OilInvalidOp),\
+      ._reqtyp,\
+      OilGetArgType(rator._oilop,1))
+
+#define CastContext(e1,rator,e2,type)\
+  PrimaryContext(e1,type);\
+  RootContext(type,rator,e2)
+
+#define ConversionContext(e1,rator,e2)\
+  e1._oilset=\
+    OilUnionTypeSets(\
+      OilIdResultTS1(rator._oilind,e2._oilset),\
+      e2._oilset)\
+    <- INCLUDING RootType.GotAllOpers;\
+  rator._oilop=\
+    IF(OilSetIncludes(e2._oilset,e1._reqtyp),\
+      OilInvalidOp,\
+      OilIdOpTS1(e1._reqtyp,rator._oilind,e2._oilset));\
+  e1._oiltyp=\
+    IF(EQ(rator._oilop,OilInvalidOp),\
+      e1._reqtyp,\
+      OilGetArgType(rator._oilop,0));\
+  e2._reqtyp=\
+    IF(EQ(rator._oilop,OilInvalidOp),\
+      e1._reqtyp,\
+      OilGetArgType(rator._oilop,1))
+~}
+
+~B~<Operand lists~>
+
+Expressions such as procedure calls, method calls, and multi-dimensional
+array references are usually specified by rules with one grammar symbol
+representing the list of operands.
+That symbol plays the ~{OpndExprListRoot~} role; the grammar symbol
+representing an element of such a list plays the ~{OpndExprListElem~} role:
+
+~$~<Computational roles~>+=~{
+CHAIN _csetlst: tOilTypeSetList;
+CHAIN _cargsig: tOilArgSig;
+
+CLASS SYMBOL OpndExprListRoot:
+  _setsig:	tOilSetSig	SYNT,	/* provided */
+  _atOilArgSig:	tOilArgSig	INH,	/* provided */
+  _aIsValid:	int		INH;	/* default  */
+
+CLASS SYMBOL OpndExprListRoot INHERITS LstError COMPUTE
+  CHAINSTART HEAD._csetlst=NULLtOilTypeSetList;
+  SYNT._setsig=_MakeOilSetSig(TAIL._csetlst);
+  CHAINSTART HEAD._cargsig=THIS._atOilArgSig;
+  INH._atOilArgSig=OilEmptyArgSig<-THIS._setsig;
+  INH._aIsValid=1;
+END;
+
+CLASS SYMBOL RootType COMPUTE
+  CHAINSTART HEAD._csetlst=NULLtOilTypeSetList;
+  TAIL._csetlst;
+  CHAINSTART HEAD._cargsig=OilEmptyArgSig;
+  TAIL._cargsig;
+END;
+~}
+
+If the number of operands in the list is less than the number of arguments
+required, then the error ~{Too few arguments~} will be reported at the left
+end of the operand list.
+That behavior can be changed for all operand lists by symbol computations
+overriding the computation of ~{LstError.LstErr~} and/or ~{LstError.LstMsg~}.
+It can be changed for individual operand lists by rule computations
+overriding the computation of @samp{root}~{.LstErr~} and/or
+@samp{root}~{.LstMsg~}, where @samp{root} is the grammar symbol playing the
+~{OpndExprListRoot~} role.
+All of the computations to be overridden occur in the lower context.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL LstError INHERITS ChkArgList END;
+
+CLASS SYMBOL ChkArgList:
+  LstErr:	int		SYNT,	/* provided */
+  LstMsg:	VOID		SYNT,	/* provided */
+  LstTyp:	DefTableKey	SYNT,	/* provided */
+  LstNxt:	int		SYNT;	/* provided */
+
+CLASS SYMBOL ChkArgList COMPUTE
+  SYNT.LstTyp=OilTypeName(OilArgType(TAIL._cargsig));
+  SYNT.LstNxt=NE(OilNextArg(THIS._cargsig),OilEmptyArgSig);
+  SYNT.LstErr=
+    AND(
+      THIS._aIsValid,
+      AND(
+        NE(THIS.LstTyp,VarArgType),
+        NE(THIS.LstTyp,NoKey)));
+  SYNT.LstMsg=
+    IF(THIS.LstErr,message(ERROR,"Too few arguments",0,COORDREF));
+END;
+~}
+
+~{OpndExprListElem~} inherits ~{ExpressionSymbol~}, and overrides
+that role's computation of ~{INH._reqtyp~}, extracting the current
+required type from the ~{_cargsig~} chain.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL OpndExprListElem:
+  _argtype:	tOilType	SYNT;	/* provided */
+
+CLASS SYMBOL OpndExprListElem INHERITS ExpressionSymbol,
+				       ArgError COMPUTE
+  SYNT._argtype=OilArgType(THIS._cargsig);
+  THIS._cargsig=
+    IF(EQ(THIS._argtype,OilTypeVarArgType),
+      THIS._cargsig,
+      OilNextArg(THIS._cargsig));
+  THIS._csetlst=ConstOilTypeSetList(THIS._oilset,THIS._csetlst);
+  INH.Required=OilTypeName(THIS._argtype);
+  INH._reqtyp=
+    IF(EQ(THIS._argtype,OilTypeVarArgType),OilInvalidType,THIS._argtype);
+END;
+~}
+
+~O~<Expression.oil~>==~{
+SET _Internal = [VarArgType];
+~}
+
+If the number of operands in the list is more than the number of arguments
+required, then the error ~{Too many arguments~} will be reported at each
+excess argument.
+That behavior can be changed for all operand lists by symbol computations
+overriding the computation of ~{ArgError.ArgErr~} and/or ~{ArgError.ArgMsg~}.
+It can be changed for individual operand lists by rule computations
+overriding the computation of @samp{arg}~{.ArgErr~} and/or
+@samp{arg}~{.ArgMsg~}, where @samp{arg} is the symbol playing the
+~{OpndExprListElem~} role.
+All of the computations to be overridden occur in the lower context.
+
+~$~<Computational roles~>+=~{
+CLASS SYMBOL ArgError INHERITS ChkArg END;
+
+CLASS SYMBOL ChkArg:
+  ArgErr:	int	SYNT,	/* provided */
+  ArgMsg:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL ChkArg COMPUTE
+  SYNT.ArgErr=AND(INCLUDING OpndExprListRoot._aIsValid,
+               EQ(THIS._argtype,OilInvalidType));
+  SYNT.ArgMsg=
+    IF(THIS.ArgErr,message(ERROR,"Too many arguments",0,COORDREF));
+END;
+~}
+
+An operator's operand set signature is constructed from an empty signature
+by adding the possible type sets of the operands in reverse order.
+
+~$~<tOilSetSig _MakeOilSetSig(tOilTypeSetList tpl)~>==~{
+{ tOilTypeSetList result = OilNewSetSig();
+
+  while (tpl != NULLtOilTypeSetList) {
+    result = OilAddSetSig(HeadtOilTypeSetList(tpl), result);
+    tpl = TailtOilTypeSetList(tpl);
+  }
+
+  return result;
+}
+~}
+
+~B~<Required operators~>
+
+Let @samp{e1}, @samp{e2}, and @samp{e3} all be grammar symbols playing the
+~{ExpressionSymbol~} role,
+@samp{rator} be a grammar symbol that plays the ~{OperatorSymbol~} role, and
+@samp{args} be a grammar symbol that plays the ~{OpndExprListRoot~} role.
+The left-hand side symbol of the rule is @samp{e1}.
+
+@ftable @code
+@item MonadicContext(@samp{e1},@samp{rator},@samp{e2})
+Rule computations for an operator with one operand.
+An example is negation.
+
+@item DyadicContext(@samp{e1},@samp{rator},@samp{e2}@samp{e3})
+Rule computations for an operator with two operands.
+An example is subtraction.
+
+@item ListContext(@samp{e1},@samp{rator},@samp{args})
+Rule computations for an operator with an operand list.
+An example is a procedure call.
+@end ftable
+
+~$~<Context-dependent computations~>+=~{
+#define MonadicContext(e1,rator,e2)\
+  |SET|TS1(e1,rator,e2)\
+    <- INCLUDING RootType.GotAllOpers;\
+  rator._oilop=\
+    OilNoOverload(\
+      rator._oilind,\
+      OilOp1Id(e1._reqtyp,rator._oilind,e2._oilset))\
+    <- INCLUDING RootType.GotAllOpers;\
+  e1._oiltyp=OilGetArgType(rator._oilop,0);\
+  e2._reqtyp=OilGetArgType(rator._oilop,1)
+
+#define DyadicContext(e1,rator,e2,e3)\
+  |SET|TS2(e1,rator,e2,e3)\
+    <- INCLUDING RootType.GotAllOpers;\
+  rator._oilop=\
+    OilNoOverload(\
+      rator._oilind,\
+      OilOp2Id(e1._reqtyp,rator._oilind,\
+        e2._oilset,e3._oilset))\
+    <- INCLUDING RootType.GotAllOpers;\
+  e1._oiltyp=OilGetArgType(rator._oilop,0);\
+  e2._reqtyp=OilGetArgType(rator._oilop,1);\
+  e3._reqtyp=OilGetArgType(rator._oilop,2)
+
+#define ListContext(e1,rator,args)\
+  |SET|TSn(e1,rator,args)\
+    <- INCLUDING RootType.GotAllOpers;\
+  rator._oilop=\
+    OilNoOverload(\
+      rator._oilind,\
+      OilOpnId(rator._oilind,args._setsig,e1._reqtyp))\
+    <- INCLUDING RootType.GotAllOpers;\
+  args._aIsValid=NE(rator._oilop,OilInvalidOp);\
+  args._atOilArgSig=OilArgTypesOf(rator._oilop);\
+  e1._oiltyp=OilGetArgType(rator._oilop,0)
+~}
+
+A particular expression node may fit one of the patterns described
+in the previous sections, but not include a symbol playing the
+~{OperatorSymbol~} role.
+In that case, the @samp{rator} argument would be omitted and the effect
+of the ~{OperatorSymbol~} role provided by three additional
+context-dependent computations:
+
+~$~<Context-dependent computations~>+=~{
+#define Indication(rator)\
+  ._oilind=GetOilOp(rator,OilInvalidOp)\
+  <- INCLUDING RootType.GotAllOpers
+
+#define BadIndication NOT(OilIsValidOp(._oilind))
+
+#define BadOperator NOT(OilIsValidOp(._oilop))
+
+#define OperName OilOpName(._oilop)
+~}
+
+~A~<Operational Specifications~>
+
+This module uses C routines to process argument lists and parameter lists.
+The bodies of those routines are described at the points where they are
+applied.
+This section defines the infrastructure needed to compile those bodies and
+make them available to link with the generated compiler.
+
+~O~<Expression.HEAD.phi~>~{
+#include "Expression.h"
+~}
+
+~O~<Expression.h~>~{
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
+
+#include "eliproto.h"
+#include "err.h"
+#include "oiladt2.h"
+#include "DefTableKeyList.h"
+#include "tOilTypeSetList.h"
+#include "Typing.h"
+
+extern tOilArgSig
+     _MakeOilArgSig ELI_ARG((DefTableKey, DefTableKeyList));
+extern tOilSetSig _MakeOilSetSig ELI_ARG((tOilTypeSetList));
+extern int IsCoercible ELI_ARG((DefTableKey from, DefTableKey to));
+
+~<OIL class instantiation macros for C code~>
+
+#endif
+~}
+
+~O~<Expression.c~>~{
+#include "pdl_gen.h"
+#include "Expression.h"
+
+tOilArgSig
+#if PROTO_OK
+_MakeOilArgSig(DefTableKey res, DefTableKeyList tpl)
+#else
+_MakeOilArgSig(res) DefTableKey res; DefTableKeyList tpl;
+#endif
+~<tOilArgSig _MakeOilArgSig(DefTableKey res, DefTableKeyList tpl)~>
+
+tOilSetSig
+#if PROTO_OK
+_MakeOilSetSig(tOilTypeSetList tpl)
+#else
+_MakeOilSetSig(tpl) tOilTypeSetList tpl;
+#endif
+~<tOilSetSig _MakeOilSetSig(tOilTypeSetList tpl)~>
+
+int
+#if PROTO_OK
+IsCoercible(DefTableKey from, DefTableKey to)
+#else
+IsCoercible(from,to) DefTableKey from, to;
+#endif
+{ return
+    OilIsCoercibleTo(
+      GetOilType(FinalType(from),OilInvalidType),
+      GetOilType(FinalType(to),OilInvalidType));
+}
+~}

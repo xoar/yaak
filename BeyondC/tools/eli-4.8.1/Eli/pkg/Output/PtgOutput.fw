@@ -1,0 +1,352 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~p maximum_output_line_length = infinity
+
+~! $Id: PtgOutput.fw,v 1.5 2009/01/09 11:22:23 peter Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+~t title titlefont centre "Module PtgOutput"
+
+This module supplies a posibility to choose dynamically the destination
+of the PTG-Output. An example Output routine that supplies the default
+FilePointer based output is also included.
+~A~<Implementation~>
+
+~B~<Data structures~>
+
+First of all, we have to define the file-structure, that will be used
+as the ~{file~}-parameter of PTG. It is written as a C Specification and
+contains pointers to the actual printing functions. The last component 
+of the structure contains a pointer to the actual file. The different 
+print-functions know the type of this component.
+
+~$~<Ptg File Structure~>~{
+typedef struct PtgFile_s *PtgFilePtr;
+
+typedef void (*PrintStringFct) ELI_ARG((PtgFilePtr, const char *));
+typedef void (*PrintIntFct) ELI_ARG((PtgFilePtr, int));
+typedef void (*PrintLongFct) ELI_ARG((PtgFilePtr, long));
+typedef void (*PrintShortFct) ELI_ARG((PtgFilePtr, short));
+typedef void (*PrintCharFct) ELI_ARG((PtgFilePtr, char));
+typedef void (*PrintFloatFct) ELI_ARG((PtgFilePtr, float));
+typedef void (*PrintDoubleFct) ELI_ARG((PtgFilePtr, double));
+
+typedef struct PtgFile_s {
+	PrintStringFct PrintString;
+	PrintIntFct PrintInt;
+	PrintLongFct PrintLong;
+	PrintShortFct PrintShort;
+	PrintCharFct PrintChar;
+	PrintFloatFct PrintFloat;
+	PrintDoubleFct PrintDouble;
+
+	void *destinfo;
+} PtgFile;
+~}
+
+The ~{ELI_ARG~} Prototyping macro is defined to be the following:
+~$~<Prototyping Macro~>~{
+#ifdef ELI_ARG
+#undef ELI_ARG
+#endif
+#if defined(__STDC__) || defined(__cplusplus)
+#define ELI_ARG(p) p
+#else
+#define ELI_ARG(p) ()
+#endif
+~}
+
+~B~<Functions~>
+ 
+This structure is used to supply override definitions of the PTG Output
+macros.
+
+~$~<Ptg Output Macros~>~{
+#define PTG_OUTPUT_FILE PtgFilePtr
+#define PTG_OUTPUT_STRING(file,param) (file->PrintString(file,param))
+#define PTG_OUTPUT_INT(file,param) (file->PrintInt(file,param))
+#define PTG_OUTPUT_LONG(file,param) (file->PrintLong(file,param))
+#define PTG_OUTPUT_SHORT(file,param) (file->PrintShort(file,param))
+#define PTG_OUTPUT_CHAR(file,param) (file->PrintChar(file,param))
+#define PTG_OUTPUT_FLOAT(file,param) (file->PrintFloat(file,param))
+#define PTG_OUTPUT_DOUBLE(file,param) (file->PrintDouble(file,param))
+~}
+
+The user of such a definition should not have to provide all the different
+output-routines himself. So, we supply default-implementations for all
+but the String-Output-Routine. We cannot use the default-implementation in
+the generated ~{ptg_gen.c~} file, because that definition is only guaranteed to
+exist, if the PTG output macros are not overridden.
+
+~$~<Default Printing Routine Definition~>~{
+extern void _PTGPrintint ELI_ARG((PtgFilePtr file, int param));
+extern void _PTGPrintlong ELI_ARG((PtgFilePtr file, long param));
+extern void _PTGPrintshort ELI_ARG((PtgFilePtr file, short param));
+extern void _PTGPrintchar ELI_ARG((PtgFilePtr file, char param));
+extern void _PTGPrintfloat ELI_ARG((PtgFilePtr file, float param));
+extern void _PTGPrintdouble ELI_ARG((PtgFilePtr file, double param));
+~}
+
+Here are the implementations. The functions all work in the same manner: 
+they use a static string-buffer and the function sprintf to convert their
+argument to a string. Then, the string output function is called.
+Hence, a template can be used to generate all six functions. The template
+has two parameters: The name of the printed type and the format string for
+the sprintf-routine. The format-string contains the quotation marks and the
+comma. So it can include an optional type-cast, if necessary.
+
+~$~<Default Printing Routine Template~>~(~2~)~M~{
+#if defined(__STDC__) || defined(__cplusplus)
+void _PTGPrint~1(PtgFilePtr file, ~1 param)
+#else
+void _PTGPrint~1(file, param)
+	PtgFilePtr file;
+	~1 param;
+#endif
+{
+	sprintf(buffer, ~2 param);
+	file->PrintString(file, buffer);
+}
+~}
+
+This template is used to generate all six output functions.
+
+~$~<Default Printing Routine Implementation~>~{
+static char buffer[40];
+
+~<Default Printing Routine Template~>~(int~,"%d",~)
+~<Default Printing Routine Template~>~(long~,"%ld",~)
+~<Default Printing Routine Template~>~(short~,"%d",(int)~)
+~<Default Printing Routine Template~>~(char~,"%c",~)
+~<Default Printing Routine Template~>~(float~,"%g",(double)~)
+~<Default Printing Routine Template~>~(double~,"%g",~)
+~}
+
+~B~<Memory Management~>
+
+Now we can define a function that allocates and frees ~{PtgFilePtr~}. The user
+has to supply the output information and the String Printing Routine.
+The rest is filled with default-functions.
+
+First, we define the function interface, then it's implementation:
+~$~<Alloc Interface~>~{
+extern PtgFilePtr NewPtgFile ELI_ARG((void *destination, PrintStringFct printstring));
+extern void FreePtgFile ELI_ARG((PtgFilePtr file));
+~}
+
+~$~<Alloc Implementation~>~{
+#if defined(__STDC__) || defined(__cplusplus)
+PtgFilePtr NewPtgFile(void *destination, PrintStringFct printstring)
+#else
+PtgFilePtr NewPtgFile(destination, printstring)
+	void *destination;
+	PrintStringFct printstring;
+#endif
+{
+	PtgFilePtr n = (PtgFilePtr)malloc(sizeof(PtgFile));
+	if (!n)
+	{
+		fputs("DEADLY: Out of Memory.\n", stderr);
+		exit(1);
+	}
+	n->PrintString = printstring;
+	n->PrintInt = _PTGPrintint;
+	n->PrintShort = _PTGPrintshort;
+	n->PrintLong = _PTGPrintlong;
+	n->PrintChar = _PTGPrintchar;
+	n->PrintFloat = _PTGPrintfloat;
+	n->PrintDouble = _PTGPrintdouble;
+	n->destinfo = destination;
+	return n;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void FreePtgFile(PtgFilePtr file)
+#else
+void FreePtgFile(file)
+	PtgFilePtr file;
+#endif
+{
+	free(file);
+}
+~}
+
+~B~<Assembly of Output Files~>
+
+This section assembles all the different code-pieces into the different output files.
+
+~O~<PtgOutput.h~>~{
+#ifndef _PTGOUTPUT_H
+#define _PTGOUTPUT_H
+
+~<Prototyping Macro~>
+~<Ptg File Structure~>
+~<Alloc Interface~>
+
+#endif
+~}
+
+~O~<PtgOutput.c~>~{
+#include "PtgOutput.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+~<Default Printing Routine Definition~>
+~<Default Printing Routine Implementation~>
+~<Alloc Implementation~>
+~}
+
+~O~<PtgOutput.ptg.phi~>~{
+#include "PtgOutput.h"
+~<Ptg Output Macros~>
+~}
+
+~A~<Example~>
+
+As an example, the functions will be introduced, that supply the
+default PTG output functions using file pointers. PTG removed the
+definition because of the new definition in the ~{.phi~}-file.
+
+~B~<Typed output functions~>
+
+~$~<File Pointer Output Definition~>~{
+extern PTGNode PTGOut ELI_ARG((PTGNode root));
+extern PTGNode PTGOutFile ELI_ARG((const char *name, PTGNode root));
+extern PTGNode PTGOutFPtr ELI_ARG((FILE *fptr, PTGNode root));
+~}
+
+Now follows the implementation of theese functions. To do this,
+we need first to write the output functions. Theese are implemented
+by storing the filepointer in the additional ~{destinfo~}-field 
+of the ~{PtgFile~}-structure.
+
+Since the implementation of the seven output functions looks like
+the same for every function, we will define a template first and
+use it for function definition.
+
+~$~<File Pointer Output Template~>~(~3~)~M~{
+#if defined(__STDC__) || defined(__cplusplus)
+void PtgFPtrPrint~1(PtgFilePtr file, ~2 param)
+#else
+void PtgFPtrPrint~1(file, param)
+	PtgFilePtr file;
+	~2 param;
+#endif
+{
+	~3
+}
+~}
+
+The template takes two parameters: the first is the typename of
+the generated Print-routine, the second contains the output statement.
+It's application yields the seven needed output routines.
+
+~$~<File Pointer Output Functions~>~{
+~<File Pointer Output Template~>~(String~,const char *~,fputs(param, (FILE *)(file->destinfo));~)
+~<File Pointer Output Template~>~(Int~,int~,fprintf((FILE *)(file->destinfo), "%d", param);~)
+~<File Pointer Output Template~>~(Short~,short~,fprintf((FILE *)(file->destinfo), "%d", (int)param);~)
+~<File Pointer Output Template~>~(Long~,long~,fprintf((FILE *)(file->destinfo), "%ld", param);~)
+~<File Pointer Output Template~>~(Char~,char~,putc(param, (FILE *)(file->destinfo));~)
+~<File Pointer Output Template~>~(Float~,float~,fprintf((FILE *)(file->destinfo), "%g", (double)param);~)
+~<File Pointer Output Template~>~(Double~,double~,fprintf((FILE *)(file->destinfo), "%g", param);~)
+~}
+
+~B~<Output Processing Functions~>
+
+Now, we can implement the output functions:
+
+~$~<File Pointer Output FPtr~>~{
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode PTGOutFPtr(FILE *fptr, PTGNode root)
+#else
+PTGNode PTGOutFPtr(fptr, root)
+	FILE *fptr;
+	PTGNode root;
+#endif
+{
+	PtgFilePtr ptgfile = NewPtgFile(fptr, PtgFPtrPrintString);
+	ptgfile->PrintInt = PtgFPtrPrintInt;
+	ptgfile->PrintLong = PtgFPtrPrintLong;
+	ptgfile->PrintShort = PtgFPtrPrintShort;
+	ptgfile->PrintChar = PtgFPtrPrintChar;
+	ptgfile->PrintFloat = PtgFPtrPrintFloat;
+	ptgfile->PrintDouble = PtgFPtrPrintDouble;
+
+	PTGProcess(ptgfile, root);
+	FreePtgFile(ptgfile);
+	return root;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode PTGOut (PTGNode r)
+#else
+PTGNode PTGOut (r)
+        PTGNode r;
+#endif
+{
+	return PTGOutFPtr(stdout, r);
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+PTGNode PTGOutFile (const char *filename, PTGNode root)
+#else
+PTGNode PTGOutFile (filename, root)
+        char * filename; PTGNode root;
+#endif
+{
+	FILE *f = fopen(filename, "w");
+        if (!f)
+        {
+                fprintf(stderr, "DEADLY: PTGOutFile: output file '%s' can't be opened.\n",
+			filename);
+                exit(1);
+        }
+	PTGOutFPtr(f, root);
+        fclose(f);
+        return root;
+}
+~}
+
+~B~<Assembly of Output Files~>
+
+~O~<PtgOutFPtr.h~>~{
+#ifndef _PTGOUTFPTR_H
+#define _PTGOUTFPTR_H
+
+/* We use the type PTGNode in prototypes. */
+#include "ptg_gen.h"
+
+~<File Pointer Output Definition~>
+
+#endif
+~}
+
+~O~<PtgOutFPtr.c~>~{
+#include "PtgOutFPtr.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+~<File Pointer Output Functions~>
+
+~<File Pointer Output FPtr~>
+~}
+

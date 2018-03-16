@@ -1,0 +1,876 @@
+==============
+Array.err
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  var	record int i, bool b, real[3] r end [2] rv;
+  var	real[6][7] m;
+  pi[1] = true;
+  pi[false] = 1;
+  k[1] = 1;
+  pi = pj;
+  rv.b = true;
+  rv[1].r = 3.2;
+  m[1] = 1.0;
+end
+** Summary of warning and error messages for Examples/Type.demo/Array.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Array.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 6:11 ERROR: Incorrect type for this context
+"stdin", line 7:6 ERROR: Incorrect type for this context
+"stdin", line 8:3 ERROR: Not an array
+"stdin", line 10:3 ERROR: selection applied to non record type
+"stdin", line 11:13 ERROR: Incorrect type for this context
+"stdin", line 12:10 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+ArrayType.err
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  var	record int i, bool b, real[3] r end [2] rv;
+  type	bool[4] bt;
+  var	bt vbt, bt wbt;
+  var	real[6][7] m;
+  pi[1] = true;
+  pi[false] = 1;
+  k[1] = 1;
+  pi = pj;
+  vbt[1] = wbt;
+  rv.b = true;
+  rv[1].r = 3.2;
+  m[1] = 1.0;
+end
+** Summary of warning and error messages for Examples/Type.demo/ArrayType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/ArrayType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 8:11 ERROR: Incorrect type for this context
+"stdin", line 9:6 ERROR: Incorrect type for this context
+"stdin", line 10:3 ERROR: Not an array
+"stdin", line 12:12 ERROR: Incorrect type for this context
+"stdin", line 13:3 ERROR: selection applied to non record type
+"stdin", line 14:13 ERROR: Incorrect type for this context
+"stdin", line 15:10 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+AssigCoerce.err
+begin
+  var	int i,
+	bool b,
+	real r;
+
+  fun g (int z) void
+  begin r = z; return 1; end;
+
+  i = 1;
+  i = r;
+  i = b;
+
+  g (i);
+  g (r);
+  g (b);
+end
+** Summary of warning and error messages for Examples/Type.demo/AssigCoerce.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/AssigCoerce.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 7:23 ERROR: Incorrect type for this context
+"stdin", line 11:7 ERROR: Incorrect type for this context
+"stdin", line 15:6 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+FctType.err
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  type (int, real -> real) fct;
+
+  var	fct vf;
+
+  fun f (int x, real y) real
+  begin r = x * y; end;
+
+  type (real, fct -> void) gct;
+
+  fun g (real z, gct ff) void
+  begin r = z; ff (z); end; (*err*)
+
+  var	gct vg;
+
+  vf = f;
+  
+  s = vf (i+1, 3.4);
+  vg = g; (*err*)
+  vg (vf (j, j), vg); (*errc=18*)
+end
+** Summary of warning and error messages for Examples/Type.demo/FctType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/FctType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 15:20 ERROR: Too few arguments
+"stdin", line 22:8 ERROR: Incorrect type for this context
+"stdin", line 23:18 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+Function.err
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+
+  fun f (int x, real y) real
+  begin r = x * y; return c; return; end;
+
+  fun g (real z) void
+  begin r = z; return 1; end;
+
+  f ();
+  f (1);
+  f (1, 1.0, 1.3);
+  f (1, b);
+  f (i, g (s));
+  return r;
+end
+** Summary of warning and error messages for Examples/Type.demo/Function.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Function.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 7:27 ERROR: Incorrect type for this context
+"stdin", line 7:30 ERROR: return value required
+"stdin", line 10:23 ERROR: Incorrect type for this context
+"stdin", line 12:6 ERROR: Too few arguments
+"stdin", line 13:6 ERROR: Too few arguments
+"stdin", line 14:14 ERROR: Too many arguments
+"stdin", line 15:9 ERROR: Incorrect type for this context
+"stdin", line 16:9 ERROR: Incorrect type for this context
+"stdin", line 17:10 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+Opr.err
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = 1 * 3.4;
+  b = true + 1;
+  r = 3.4 + b;
+  j = i * c;
+  i = b * true;
+  i = 3 * j + r;
+end
+** Summary of warning and error messages for Examples/Type.demo/Opr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Opr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 6:12 ERROR: Incorrect operand type(s) for this operator
+"stdin", line 7:11 ERROR: Incorrect operand type(s) for this operator
+"stdin", line 8:9 ERROR: Incorrect operand type(s) for this operator
+"stdin", line 9:7 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+Pointer.err
+begin
+  var	int k, int! kk;
+  var	t! pi, s! pj;
+  type	record int x, t! next end t;
+  var   t rv;
+  pi = new t;
+  pi = new int;
+  pi = pj;
+  pi! = pj!;
+  pi!.x = true;
+  pi!.next!.next!.x = pi!;
+  kk = new int;
+  kk! = pi!; 
+  pi!.next!.next!.x = rv!;
+end
+** Summary of warning and error messages for Examples/Type.demo/Pointer.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Pointer.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 3:16 ERROR: identifier is not defined: s
+"stdin", line 7:8 ERROR: Incorrect type for this context
+"stdin", line 8:8 ERROR: Incorrect type for this context
+"stdin", line 10:11 ERROR: Incorrect type for this context
+"stdin", line 11:23 ERROR: Incorrect type for this context
+"stdin", line 13:9 ERROR: Incorrect type for this context
+"stdin", line 14:23 ERROR: Dereferencing not allowed
+Examples/TypeTutorial.fw.exe failed.
+==============
+RecFct.err
+begin
+  type (real, fct -> void) fct;
+  type (real, (int -> gct) -> void) gct;
+  type (real -> hct) kct;
+  type (kct, hct -> int) lct;
+  type (real -> lct) hct;
+  var fct fff;
+  var kct kkk;
+
+  fff (1.3, fff);
+  kkk (1.4) (1.5);
+end
+** Summary of warning and error messages for Examples/Type.demo/RecFct.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/RecFct.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 2:28 ERROR: Recursively defined type: fct
+"stdin", line 3:37 ERROR: Recursively defined type: gct
+"stdin", line 4:22 ERROR: Recursively defined type: kct
+"stdin", line 5:26 ERROR: Recursively defined type: lct
+"stdin", line 6:22 ERROR: Recursively defined type: hct
+Examples/TypeTutorial.fw.exe failed.
+==============
+Record.err
+begin
+  var	record int i, bool b, real r end rv;
+  var	int j, bool c, real s;
+  j = rv.b;
+  c = rv.r;
+  s = rv.i;
+  j = s.i;
+end
+** Summary of warning and error messages for Examples/Type.demo/Record.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Record.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 4:7 ERROR: Incorrect type for this context
+"stdin", line 5:7 ERROR: Incorrect type for this context
+"stdin", line 7:7 ERROR: selection applied to non record type
+Examples/TypeTutorial.fw.exe failed.
+==============
+RecPtr.err
+begin
+(* The definitions of p2 and p3 are erroneous
+   because p2 and p3 are equivalent. But, messages are
+   not given. p2 and p3 are considered to be different.
+   If the definitions of rp is removed, the messages
+   for p2 and p3 are given.
+*)
+  type p2! p3;
+  type p3! p2;
+(* *)  type record int i, rp! p end rp;
+  var p2 v2;
+  var p3 v3;
+  v2 = v3;
+end
+** Summary of warning and error messages for Examples/Type.demo/RecPtr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/RecPtr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 8:8 ERROR: Recursively defined pointer type
+"stdin", line 9:8 ERROR: Recursively defined pointer type
+Examples/TypeTutorial.fw.exe failed.
+==============
+RecType.err
+begin
+
+  type uuu uuu;
+
+  type vvv www;
+  type www qqq;
+  type qqq vvv;
+
+  var uuu vuu;
+  var www vww;
+
+  vuu = vww;
+
+end
+
+
+
+
+
+** Summary of warning and error messages for Examples/Type.demo/RecType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/RecType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 3:8 ERROR: Must be a type identifier: uuu
+"stdin", line 5:8 ERROR: Must be a type identifier: vvv
+"stdin", line 6:8 ERROR: Must be a type identifier: www
+"stdin", line 7:8 ERROR: Must be a type identifier: qqq
+"stdin", line 9:7 ERROR: Must be a type identifier: uuu
+"stdin", line 10:7 ERROR: Must be a type identifier: www
+"stdin", line 3:12 ERROR: cyclic definition: uuu
+"stdin", line 3:12 ERROR: Must define a type: uuu
+"stdin", line 5:12 ERROR: cyclic definition: www
+"stdin", line 5:12 ERROR: Must define a type: www
+"stdin", line 6:12 ERROR: cyclic definition: qqq
+"stdin", line 6:12 ERROR: Must define a type: qqq
+"stdin", line 6:12 DEADLY: Too many ERRORs
+Examples/TypeTutorial.fw.exe failed.
+==============
+RecurType.err
+begin
+  type record int i, tt t end ts;
+  type record int i, ts t end tt;
+
+  type (real, fct -> void) fct;
+  type (real, (int -> gct) -> void) gct;
+
+  type (kct, hct -> int) lct;
+  type (real -> lct) hct;
+
+  type (real -> hct) kct;
+
+  type p1! p1;
+  type p2! p3;
+  type p3! p2;
+
+  type ap[5] ap;
+
+  type record int i, rp! p end rp;
+
+  var int i;
+  i = 1;
+end
+** Summary of warning and error messages for Examples/Type.demo/RecurType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/RecurType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 13:8 ERROR: Recursively defined pointer type
+"stdin", line 14:8 ERROR: Recursively defined pointer type
+"stdin", line 15:8 ERROR: Recursively defined pointer type
+"stdin", line 2:31 ERROR: Recursively defined type: ts
+"stdin", line 3:31 ERROR: Recursively defined type: tt
+"stdin", line 5:28 ERROR: Recursively defined type: fct
+"stdin", line 6:37 ERROR: Recursively defined type: gct
+"stdin", line 8:26 ERROR: Recursively defined type: lct
+"stdin", line 9:22 ERROR: Recursively defined type: hct
+"stdin", line 11:22 ERROR: Recursively defined type: kct
+"stdin", line 17:14 ERROR: Recursively defined type: ap
+Examples/TypeTutorial.fw.exe failed.
+==============
+Simple.err
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = true;
+  b = 3.4;
+  r = 1;
+  j = c;
+  c = r;
+  s = i;
+end
+** Summary of warning and error messages for Examples/Type.demo/Simple.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Simple.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 5:7 ERROR: Incorrect type for this context
+"stdin", line 6:7 ERROR: Incorrect type for this context
+"stdin", line 8:7 ERROR: Incorrect type for this context
+"stdin", line 9:7 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+Structequal.err
+begin
+  type	record int i, t! p, t! q end t;
+  type	record int i, s! p, s! q end s;
+  type	record int i, u! p, u! q end v;
+  type	record int i, v! p, record int i, v! p, v! q end! q end u;
+  var	t tv, s sv, u uv, v vv;
+  var int[5] a,  int[5] b, int [6] c, bool[5] d;
+  uv = vv;
+  tv = sv;
+  sv = vv;
+  tv.p = uv.p;
+  a = b;
+  b = c;
+  b = d;
+end
+** Summary of warning and error messages for Examples/Type.demo/Structequal.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Structequal.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 13:7 ERROR: Incorrect type for this context
+"stdin", line 14:7 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+TypeDef.err
+begin
+  var	tt rv;
+  type	t tt;
+  type	record int i, bool b, real r end t;
+  var	int j, bool c, real s;
+  var	t rt;
+  var	record int i, bool b, real r end rr;
+  var	xt x;
+  type	yt y;
+  var	rv z;
+  type	z w;
+
+  j = rv.k;
+  rr.b = 1;
+  s = tt.r;
+  rt = rr;
+end
+** Summary of warning and error messages for Examples/Type.demo/TypeDef.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/TypeDef.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 8:9 ERROR: identifier is not defined: xt
+"stdin", line 9:9 ERROR: identifier is not defined: yt
+"stdin", line 10:9 ERROR: Must be a type identifier: rv
+"stdin", line 11:9 ERROR: Must be a type identifier: z
+"stdin", line 9:12 ERROR: Must define a type: y
+"stdin", line 11:11 ERROR: Must define a type: w
+"stdin", line 13:10 ERROR: identifier is not defined: k
+"stdin", line 14:10 ERROR: Incorrect type for this context
+"stdin", line 15:7 ERROR: Must denote a typed object: tt
+"stdin", line 15:7 ERROR: selection applied to non record type
+Examples/TypeTutorial.fw.exe failed.
+==============
+Union.err
+begin
+  var   union int, bool end rv;
+  var   int j, bool c, real r;
+  rv = 42; rv = true;
+  j = <int> rv;
+  case rv of
+    int t: j = t;
+    bool t: c = t;
+    real t: r = t;
+  end
+  case 3.4 of
+  int t: j = t;
+  end
+  j = rv;
+end
+** Summary of warning and error messages for Examples/Type.demo/Union.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/Union.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 9:5 ERROR: Must be a subtype of the case expression
+"stdin", line 11:3 ERROR: Case expression must have a union type
+"stdin", line 14:7 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+UnionType.err
+begin
+  type union int, bool end ibU;
+  var  ibU vibU;
+  type union bool, int end biU;
+  var  biU vbiU;
+  var  union int, bool end vib;
+
+  type union int[5], bool[5] end iAbAU;
+  var  iAbAU viAbAU;
+  var  int[5] viA;
+  var  int[5] wiA;
+  var  int[10] xiA;
+ 
+  var   int j;
+
+  viA = wiA;
+  viA = xiA;
+
+  vibU = vbiU;
+
+  viAbAU = <int> viAbAU;
+  case viAbAU of
+    int[10] t: j = t[1];
+  end
+end
+** Summary of warning and error messages for Examples/Type.demo/UnionType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/UnionType.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 17:9 ERROR: Incorrect type for this context
+"stdin", line 19:10 ERROR: Incorrect type for this context
+"stdin", line 21:18 ERROR: Incorrect type for this context
+"stdin", line 21:12 ERROR: Incorrect type for this context
+"stdin", line 23:5 ERROR: Must be a subtype of the case expression
+Examples/TypeTutorial.fw.exe failed.
+==============
+VoidArr.err
+begin
+  type void tvoid;
+  type tvoid[5] t5;
+  var t5 a5;
+  a5[0] = 1;
+end
+** Summary of warning and error messages for Examples/Type.demo/VoidArr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout
+--- <Examples/Type.demo/VoidArr.err +cmd=(Examples/TypeTutorial.fw.exe) :run*stdout*composite> generated errors ---
+"stdin", line 3:8 ERROR: Wrong element type
+"stdin", line 5:11 ERROR: Incorrect type for this context
+Examples/TypeTutorial.fw.exe failed.
+==============
+Apply.ok
+begin
+  fun mul (int x, real y) real
+  begin return x * y; end;
+
+  fun add (int x, real y) real
+  begin return x + y; end;
+
+  type (int, real -> real) fct;
+
+  fun apply2 (real z, fct ff) real
+  begin return ff (2, z); end;
+
+  var real r;
+
+  r = apply2 (3.1, add);
+  r = apply2 (3.1, mul);
+end
+line 3 Type int defined in line 0
+line 3 Type real defined in line 0
+line 6 Type int defined in line 0
+line 6 Type real defined in line 0
+line 11 Type function... defined in line 2
+line 11 Type real defined in line 0
+line 15 Type real defined in line 0
+line 15 Type function... defined in line 10
+line 15 Type function... defined in line 2
+line 16 Type real defined in line 0
+line 16 Type function... defined in line 10
+line 16 Type function... defined in line 2
+==============
+Array.ok
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  var	record int i, bool b, real[3] r end [2] rv;
+  var	real[6][7] m;
+  pi[1] = k;
+  rv[2].b = true;
+  rv[1].r[k] = 3.2;
+  m[1][k] = 1.0;
+end
+line 6 Type array... defined in line 3
+line 6 Type int defined in line 0
+line 7 Type array... defined in line 4
+line 7 Type bool defined in line 0
+line 8 Type array... defined in line 4
+line 8 Type array... defined in line 4
+line 8 Type int defined in line 0
+line 9 Type array... defined in line 5
+line 9 Type int defined in line 0
+==============
+ArrayType.ok
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  var	record int i, bool b, real[3] r end [2] rv;
+  type	bool[4] bt;
+  var	bt vbt, bt wbt;
+  var	real[6][7] m;
+  pi[1] = k;
+  vbt = wbt;
+  rv[2].b = true;
+  rv[1].r[k] = 3.2;
+  m[1][k] = 1.0;
+end
+line 8 Type array... defined in line 3
+line 8 Type int defined in line 0
+line 9 Type array... defined in line 5
+line 9 Type array... defined in line 5
+line 10 Type array... defined in line 4
+line 10 Type bool defined in line 0
+line 11 Type array... defined in line 4
+line 11 Type array... defined in line 4
+line 11 Type int defined in line 0
+line 12 Type array... defined in line 7
+line 12 Type int defined in line 0
+==============
+DiffCompNames.ok
+begin
+  var   record int i, bool b, real r end va;
+  var   record int i, bool b, real r end vc;
+  var   record int j, bool k, real l end vd;
+  va = vc;
+  va = vd;
+end
+line 5 Type record... defined in line 4
+line 5 Type record... defined in line 4
+line 6 Type record... defined in line 4
+line 6 Type record... defined in line 4
+==============
+FctType.ok
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  type (int, real -> real) fct;
+
+  var	fct vf;
+
+  fun f (int x, real y) real
+  begin r = x * y; end;
+
+  type (real, fct -> void) gct;
+
+  fun g (real z, fct ff) void
+  begin r = z; ff (1, z); end;
+  
+  var	gct vg;
+
+  type (int -> int) itoi;
+  type (int -> (int -> int)) itoitoi;
+  fun next (int i) int begin i = i + 1; end;
+  fun cadd (int i) itoi begin i = i + 1; end;  
+  var itoi vnext;
+  var itoitoi vcadd;
+
+  vnext = next;
+  vcadd = cadd;
+  vnext (1);
+  vcadd (1);
+  vcadd (1) (2);
+
+  vf = f;
+  s = vf (i+1, 3.4);
+  vg = g;
+  vg (vf (j, s), vf);
+end
+line 10 Type real defined in line 0
+line 10 Type int defined in line 0
+line 10 Type real defined in line 0
+line 15 Type real defined in line 0
+line 15 Type real defined in line 0
+line 15 Type function... defined in line 5
+line 15 Type real defined in line 0
+line 21 Type int defined in line 0
+line 21 Type int defined in line 0
+line 22 Type int defined in line 0
+line 22 Type int defined in line 0
+line 26 Type function... defined in line 19
+line 26 Type function... defined in line 19
+line 27 Type function... defined in line 22
+line 27 Type function... defined in line 22
+line 28 Type function... defined in line 19
+line 29 Type function... defined in line 22
+line 30 Type function... defined in line 22
+line 32 Type function... defined in line 5
+line 32 Type function... defined in line 5
+line 33 Type real defined in line 0
+line 33 Type function... defined in line 5
+line 33 Type int defined in line 0
+line 34 Type function... defined in line 14
+line 34 Type function... defined in line 14
+line 35 Type function... defined in line 14
+line 35 Type function... defined in line 5
+line 35 Type int defined in line 0
+line 35 Type real defined in line 0
+line 35 Type function... defined in line 5
+==============
+Function.ok
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+
+  fun f (int x, real y) real
+  begin r = x * y; return r;end;
+
+  fun g (real z) void
+  begin r = z; return; end;
+  
+  s = f (i+1, 3.4);
+  g (f (j, s));
+  return;
+end
+line 7 Type real defined in line 0
+line 7 Type int defined in line 0
+line 7 Type real defined in line 0
+line 7 Type real defined in line 0
+line 10 Type real defined in line 0
+line 10 Type real defined in line 0
+line 12 Type real defined in line 0
+line 12 Type function... defined in line 6
+line 12 Type int defined in line 0
+line 13 Type function... defined in line 9
+line 13 Type function... defined in line 6
+line 13 Type int defined in line 0
+line 13 Type real defined in line 0
+==============
+Opr.ok
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = 1 * 3;
+  b = true + false;
+  r = 3.4 + i;
+  j = i * 2;
+  c = b * true;
+  s = 3 * r + 1;
+end
+line 5 Type int defined in line 0
+line 6 Type bool defined in line 0
+line 7 Type real defined in line 0
+line 7 Type int defined in line 0
+line 8 Type int defined in line 0
+line 8 Type int defined in line 0
+line 9 Type bool defined in line 0
+line 9 Type bool defined in line 0
+line 10 Type real defined in line 0
+line 10 Type real defined in line 0
+==============
+Pointer.ok
+begin
+  var	int k;
+  var	int! pi, int! pj;
+  var	record int i, bool b, real! r end! rv;
+  type	record int x, t! next end t;
+  var	t l;
+  pi = new int;
+  pi! = 1;
+  pi = pj;
+  pi! = pj!;
+  rv!.b = true;
+  rv!.r! = 3.2;
+  l.next!.x = 1;
+  pi;
+  l.next = new t;
+  l.next = nil;
+end
+line 7 Type pointer... defined in line 3
+line 8 Type pointer... defined in line 3
+line 9 Type pointer... defined in line 3
+line 9 Type pointer... defined in line 3
+line 10 Type pointer... defined in line 3
+line 10 Type pointer... defined in line 3
+line 11 Type pointer... defined in line 4
+line 11 Type bool defined in line 0
+line 12 Type pointer... defined in line 4
+line 12 Type pointer... defined in line 4
+line 13 Type record... defined in line 5
+line 13 Type pointer... defined in line 15
+line 13 Type int defined in line 0
+line 14 Type pointer... defined in line 3
+line 15 Type record... defined in line 5
+line 15 Type pointer... defined in line 15
+line 16 Type record... defined in line 5
+line 16 Type pointer... defined in line 15
+==============
+Record.ok
+begin
+  var	record int i, bool b, real r end rv;
+  var	int j, bool c, real s;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+end
+line 4 Type int defined in line 0
+line 4 Type record... defined in line 2
+line 4 Type int defined in line 0
+line 5 Type bool defined in line 0
+line 5 Type record... defined in line 2
+line 5 Type bool defined in line 0
+line 6 Type real defined in line 0
+line 6 Type record... defined in line 2
+line 6 Type real defined in line 0
+==============
+Simple.ok
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = 1;
+  b = true;
+  r = 3.4;
+  j = i;
+  c = b;
+  s = r;
+  42;
+end
+line 5 Type int defined in line 0
+line 6 Type bool defined in line 0
+line 7 Type real defined in line 0
+line 8 Type int defined in line 0
+line 8 Type int defined in line 0
+line 9 Type bool defined in line 0
+line 9 Type bool defined in line 0
+line 10 Type real defined in line 0
+line 10 Type real defined in line 0
+==============
+StrEqArr.ok
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  pi = pj;
+end
+line 4 Type array... defined in line 3
+line 4 Type array... defined in line 3
+==============
+Structequal.ok
+begin
+  type	record int i, t! p, t! q end t;
+  type	record int i, s! p, s! q end s;
+  type	record int i, u! p, u! q end v;
+  type	record int i, v! p, record int i, v! p, v! q end! q end u;
+  var	t tv, s sv, u uv, v vv;
+  uv = vv;
+  tv = sv;
+  sv = vv;
+  tv.p = uv.p;
+end
+line 7 Type record... defined in line 5
+line 7 Type record... defined in line 5
+line 8 Type record... defined in line 5
+line 8 Type record... defined in line 5
+line 9 Type record... defined in line 5
+line 9 Type record... defined in line 5
+line 10 Type record... defined in line 5
+line 10 Type pointer... defined in line 5
+line 10 Type record... defined in line 5
+line 10 Type pointer... defined in line 5
+==============
+TypeDef.ok
+begin
+  var	tt rv;
+  type	t tt;
+  type	record int i, bool b, real r end t;
+  var	int j, bool c, real s;
+  var	t rt;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+  rt = rv;
+end
+line 7 Type int defined in line 0
+line 7 Type record... defined in line 4
+line 7 Type int defined in line 0
+line 8 Type bool defined in line 0
+line 8 Type record... defined in line 4
+line 8 Type bool defined in line 0
+line 9 Type real defined in line 0
+line 9 Type record... defined in line 4
+line 9 Type real defined in line 0
+line 10 Type record... defined in line 4
+line 10 Type record... defined in line 4
+==============
+Union.ok
+begin
+  var   union int, bool end rv;
+  var   int j, bool c;
+  rv = 42; rv = true;
+  j = <int> rv;
+  case rv of
+    int t: j = t;
+    bool t: c = t;
+  end
+end
+line 4 Type union... defined in line 2
+line 4 Type union... defined in line 2
+line 5 Type int defined in line 0
+line 5 Type union... defined in line 2
+line 6 Type union... defined in line 2
+line 7 Type int defined in line 0
+line 7 Type int defined in line 0
+line 8 Type bool defined in line 0
+line 8 Type bool defined in line 0
+==============
+UnionType.ok
+begin
+  type union int, bool end ibU;
+  var  ibU vibU;
+  type union bool, int end biU;
+  var  biU vbiU;
+  var  union int, bool end vib;
+
+  type union int[5], bool[5] end iAbAU;
+  var  iAbAU viAbAU;
+  var  int[5] viA;
+
+  var   int j;
+
+  vib = vibU;
+  viA = <int[5]> viAbAU;
+  case viAbAU of
+    int[5] t: j = t[1];
+  end
+end
+line 14 Type union... defined in line 2
+line 14 Type union... defined in line 2
+line 15 Type array... defined in line 17
+line 15 Type union... defined in line 8
+line 16 Type union... defined in line 8
+line 17 Type int defined in line 0
+line 17 Type array... defined in line 17
+==============
+Voiden.ok
+begin
+  var	int k;
+  var	int[5] pi;
+  var	record int i, bool b end rv;
+  
+  k;
+  pi;
+  rv;
+end
+line 6 Type int defined in line 0
+line 7 Type array... defined in line 3
+line 8 Type record... defined in line 4

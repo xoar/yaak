@@ -1,0 +1,8 @@
+begin
+  var	record int i, bool b, real r end rv;
+  var	int j, bool c, real s;
+  j = rv.b;
+  c = rv.r;
+  s = rv.i;
+  j = s.i;
+end

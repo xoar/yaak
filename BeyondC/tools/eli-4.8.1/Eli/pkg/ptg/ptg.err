@@ -1,0 +1,100 @@
+# Copyright (C) 1997 University of Paderborn
+# 
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+
+/predefined identifier is redefined/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Predefined./
+	p
+	d
+}
+/identifier is multiply defined/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Patterns./
+	p
+	d
+}
+/optional clause without choice/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Optional./
+	p
+	d
+}
+/function called inconsistently/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Calls./
+	p
+	d
+}
+/inconsistent type of insertion point/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Typed./
+	p
+	d
+}
+/use indices not greater than 20/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Indexed./
+	p
+	d
+}
+/index 0 is not allowed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Indexed./
+	p
+	d
+}
+/pointer type is not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Typed./
+	p
+	d
+}
+/do not mix indexed and non-indexed insertions/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Indexed./
+	p
+	d
+}
+
+
+
+/illegal newline in string literal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Syntax./
+	p
+	d
+}
+/In CaseTbl, char .*(.*) is not a token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Parse stack overflow/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (ptg)Syntax./
+	p
+	d
+}
+/Parsing resumed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Too many ERRORs + FATALs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+

@@ -1,0 +1,134 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: DynSpace.fw,v 3.5 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+~O~<DynSpace.specs~>~{
+$/Adt/obstack.specs
+~}
+
+~O~<DynSpace.head~>~{
+#include "DynSpace.h"
+~}
+
+~O~<DynSpace.h~>~{
+#ifndef DYNSPACE_H
+#define DYNSPACE_H
+
+#if defined(__cplusplus) || defined(__STDC__)
+
+/* 
+ * Returns: Get a new Environment for the allocation of dynamic Space. 
+ */
+extern void* InitDynSpace (void);
+
+/* 
+ * on Entry:
+ *   space points to an Environment that was allocated by InitDynSpace().
+ *   size  is the amount of Bytes that have to be allocated dynamically.
+ * Returns: A pointer to a dynamically allocated memory portion of size Bytes.
+ */
+extern void* DynAlloc (void *space, int size);
+
+/*
+ * on Entry:
+ *   space points to an Environment allocated by InitDynSpace(). There have
+ *      been calls to DynAlloc() to allocate dynamic memory in space.
+ * on Exit:
+ *   all the memory portions returned by DynAlloc() are freed. space now
+ *   points to an empty Environment that may be used for DynAlloc() again.
+ *   ! None of the pointers previously returned by DynAlloc with space as
+ *   ! first parameter may be used afterwards. 
+ */
+extern void DynClear (void *space);
+  
+#else
+
+extern void* InitDynSpace ();
+extern void* DynAlloc ();
+extern void DynClear ();
+
+#endif
+#endif
+~}
+
+~O~<DynSpace.c~>~{
+#include <stdio.h>
+#include <stdlib.h>
+#include "obstack.h"
+#include "DynSpace.h"
+
+typedef struct {
+  Obstack space;
+  void *baseptr;
+} Dyn, *DynP;
+
+#if defined(__STDC__) || defined(__cplusplus)
+void *DynAlloc (void *space, int size)
+#else
+void* DynAlloc (space, size)
+	void*	space;
+	int	size;
+#endif
+{
+    DynP spc;
+
+    spc = (DynP) space;
+    return ((void*)obstack_alloc(&(spc->space), size));
+}/* DynAlloc */
+
+#if defined(__STDC__) || defined(__cplusplus)
+void DynClear(void *space)
+#else
+void DynClear (space)
+     void *space;
+#endif
+{
+    DynP spc;
+
+    spc = (DynP) space;
+    obstack_free(&(spc->space), spc->baseptr);
+    spc->baseptr = obstack_alloc(&(spc->space), 0);
+} /* DynClear */
+
+#if defined(__STDC__) || defined(__cplusplus)
+void *InitDynSpace(void)
+#else
+void* InitDynSpace ()
+#endif
+{
+    DynP New;
+
+    New = (DynP) malloc (sizeof(Dyn));
+    if (!New) {
+	fprintf (stderr, "no space for DynSpace\n");
+	exit (1);
+    }
+
+    obstack_init(&(New->space));
+    New->baseptr = obstack_alloc(&(New->space), 0);
+
+    return ((void*)New);
+}/* InitDynSpace */
+~}
+

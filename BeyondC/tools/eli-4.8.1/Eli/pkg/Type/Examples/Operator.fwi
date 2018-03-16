@@ -1,0 +1,125 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Operator Overloading~>
+
+We here extend our language by binary and unary operators in
+order to demonstrate type analysis for expressions with
+overloaded operators.
+
+Operators are overloaded in our language,
+i.e. an operator symbol like @code{+}
+may denote one of several operations, e.g. integer addition or
+logical disjunktion (or).
+The distinction is made using the types of the operands. 
+Hence, we associate to an operator symbol like @code{+} an
+indication like @code{AddOp}, which represents a set of
+operators, like @code{iAdd, bOr}.
+
+Each of the following rules associates an indication name
+to the attribute @code{BinOpr.Indic}. (The indication names
+are introduced below.)
+
+~$~<Operator Indications~>==~{
+RULE: BinOpr ::= '+' COMPUTE BinOpr.Indic = AddOp; END;
+RULE: BinOpr ::= '-' COMPUTE BinOpr.Indic = SubOp; END;
+RULE: BinOpr ::= '*' COMPUTE BinOpr.Indic = MulOp; END;
+RULE: BinOpr ::= '/' COMPUTE BinOpr.Indic = DivOp; END;
+
+RULE: UnOpr ::= '+' COMPUTE UnOpr.Indic = PlusOp; END;
+RULE: UnOpr ::= '-' COMPUTE UnOpr.Indic = NegOp; END;
+RULE: UnOpr ::= '!' COMPUTE UnOpr.Indic = NotOp; END;
+~}
+
+For each of the operator indications at least one meaning is specified
+by one of the following operation descriptions.
+The first component of an operation description relates it
+to an indication representing the operator symbol, 
+the second component is a unique name for the operation.
+
+The third component describes the signature of the
+operation expressed in terms of keys for predefined types.
+
+All names are automatically introduced as names
+for definition table keys. They may be used explicitly in 
+specifications to distinguish operations, or to associate
+properties to them.
+
+For each language defined operator its signature is specified;
+operators that have the same signature can be comprised
+in one definition:
+~$~<Oil Operation Signatures~>==~{
+OPER
+  iAdd, iSub, iMul, iDiv (intType,intType):intType;
+  iPlus, iNeg            (intType):intType;
+  bOr, bAnd              (boolType,boolType):boolType;
+  bNot                   (boolType):boolType;
+~}
+
+Next, we associate a set of operators to every indication.
+Here, for example the @code{AddOp} is overloaded with three
+operations: @code{iAdd} and @code{bOr}, and @code{MulOp} is 
+overloaded with @code{iMul} and @code{bAnd}. All other
+indications have singleton sets:
+~$~<Oil indications~>==~{
+INDICATION
+  AddOp:  iAdd, bOr;
+  SubOp:  iSub;
+  MulOp:  iMul, bAnd;
+  DivOp:  iDiv;
+  PlusOp: iPlus;
+  NegOp:  iNeg;
+  NotOp:  bNot;
+~}
+
+The operation signatures as given above require
+operands to have exactly those types. E.g. @code{a + 1}
+is illegal if @code{a} was of type @code{boolType}.
+
+Type analysis for binary and unary expressions needs to compute
+the @code{Type} attribute of the whole expression (the result type
+of the operation) and the required types of operands (the corresponding
+type of the signature of the identified target operator).
+The latter may differ from the type of the operand in case that coercion is
+applied. 
+We obtain these computations from the @code{Expression} module.
+
+~$~<Operator contexts~>==~{
+SYMBOL BinOpr INHERITS OperatorSymbol END;
+
+RULE: Expression ::= Expression BinOpr Expression COMPUTE
+  DyadicContext (Expression[1], BinOpr, Expression[2], Expression[3]);
+END;
+
+SYMBOL UnOpr INHERITS OperatorSymbol END;
+RULE: Expression ::= UnOpr Expression COMPUTE
+  MonadicContext (Expression[1], UnOpr, Expression[2]);
+END;
+~}
+
+The key of the identified operation could be obtained by
+@code{BinOpr.Oper} or @code{UnOpr.Oper}, if necessary e.g.
+for translation.
+
+~O~<Operator.con~>~{
+~<Expression syntax~>
+~}
+
+~O~<Operator.sym~>~{
+~<Operators~>
+~}
+
+~O~<Indications.lido~>~{
+~<Operator Indications~>
+~}
+
+~O~<Operator.oil~>~{
+~<Oil Operation Signatures~>
+~<Oil indications~>
+~}
+
+~O~<Operator.lido~>~{
+~<Operator contexts~>
+~}
+

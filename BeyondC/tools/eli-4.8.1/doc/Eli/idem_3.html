@@ -1,0 +1,410 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from idem.tnf on 5 December 2013 -->
+
+<TITLE>Abstract Syntax Tree Unparsing - Changing Structure or Representation</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Abstract Syntax Tree Unparsing</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC10" HREF="idem_toc.html#SEC10">Changing Structure or Representation</A></H1>
+<A NAME="IDX82"></A>
+<A NAME="IDX83"></A>
+<P>
+The computation of <CODE>IdemPtg</CODE> in a given context can be decomposed into
+two tasks: collecting the <CODE>IdemPtg</CODE> attribute values from the
+children, and combining those values into a representation of the
+current context.
+Methods for attribute value collection depend on the tree grammar,
+and are embodied in LIDO computations.
+Methods for combining values, on the other hand, depend on the desired
+form of the unparsed text.
+They are embodied in PTG patterns.
+<P>
+There are two ways to override the output defined by the <CODE>IdemPtg</CODE>
+attribute at a given node:
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+<P>
+<OL>
+<LI>
+Override the PTG pattern associated with that node
+<LI>
+Override the computation of the <CODE>IdemPtg</CODE> attribute in the
+associated rule
+</OL>
+<P>
+The first method should be used when the change is simply one of format
+(adding constant strings, changing the order of the components, or omitting
+components).
+When it is necessary to add significant content to the unparsed
+representation of a node, then the second method should be used.
+Any arbitrary computation yielding an object of type <CODE>PTGNode</CODE> can be
+carried out, using any information at the processor's disposal.
+(Such a solution usually <EM>also</EM> requires overriding of the pattern.)
+<P>
+<H2><A NAME="SEC11" HREF="idem_toc.html#SEC11">Overriding PTG patterns</A></H2>
+<P>
+The generated unparser specification contains a PTG pattern for
+each non-literal terminal symbol
+and
+each LIDO rule
+in the definition of the tree grammar.
+Each pattern name is the name of the construct
+(non-literal terminal or rule),
+preceded by a prefix followed by an underscore.
+The default prefix is <CODE>Idem</CODE>.
+<A NAME="IDX86"></A>
+<A NAME="IDX87"></A>
+<P>
+All of the non-literal terminal symbols are represented by patterns of the
+following form (<SAMP>`name'</SAMP> is the non-literal terminal symbol):
+<A NAME="IDX88"></A>
+<P>
+<PRE>
+Idem_<SAMP>`name'</SAMP>: [PtgOutId $ int]
+</PRE>
+<P>
+This pattern is a single function call insertion
+(see  <A HREF="ptg_2.html#SEC5">Function Call Insertion of PTG: Pattern-based Text Generator</A>).
+<CODE>PtgOutId</CODE> is a function exported by the PtgCommon module
+(see  <A HREF="output_2.html#SEC2">Commonly used Output patterns for PTG of Tasks related to generating output</A>).
+Its argument is assumed to be a
+<A NAME="IDX89"></A>
+string table index
+(see  <A HREF="lib_1.html#SEC6">Character String Storage of Library Reference Manual</A>)
+and it outputs the indexed string.
+<P>
+This default pattern for a non-literal terminal symbol assumes that
+the value of that symbol is, in fact, a string table index.
+If the internal representation of the symbol was created by either the
+token processor
+<A NAME="IDX90"></A>
+<CODE>mkidn</CODE>
+(see  <A HREF="lex_1.html#SEC11">Available Processors of Lexical Analysis</A>)
+or the token processor <CODE>mkstr</CODE>, this will be the case.
+<P>
+In the expression language specification, <CODE>mkidn</CODE> is used to
+establish the internal representation of an <CODE>Identifier</CODE>, and
+<CODE>mkstr</CODE> is used to establish the internal representation of an
+<CODE>Integer</CODE>.
+Suppose, however, that the internal representation of an <CODE>Integer</CODE>
+was created by the token processor
+<A NAME="IDX91"></A>
+<CODE>mkint</CODE>.
+In that case, the user would have to provide the following PTG pattern
+to override the normal pattern generation.
+<A NAME="IDX92"></A>
+<P>
+<PRE>
+Idem_Integer: $ int
+</PRE>
+<P>
+It is vital to ensure that the PTG pattern associated with a non-literal
+terminal symbol is
+<A NAME="IDX94"></A>
+<A NAME="IDX93"></A>
+compatible with the token processor creating the
+internal representation of that symbol.
+<P>
+The only differences between the infix and postfix representations of an
+expression tree are in the literal terminal symbols reconstructed by the
+textual unparser (parentheses appear in an infix representation but not in
+a postfix representation) and in the order in which values are combined
+(operators between operands in an infix representation but following them
+in a postfix representation).
+Thus we can override the PTG patterns generated from the expression
+language definition to produce a postfix unparser:
+<A NAME="IDX95"></A>
+<P>
+<PRE>
+Idem_PlusExp: $1 $2  "+" [Separator]
+Idem_StarExp: $1 $2  "*" [Separator]
+Idem_Parens:  $1
+Idem_CallExp: $1 $2 [Separator]
+</PRE>
+<P>
+Earlier
+(see  <A HREF="idem_1.html#SEC1">Using an Unparser</A>),
+we used a LIDO computation to ensure that a textual unparser generated from
+the expression language definition separated the arguments of a call with
+commas.
+<A NAME="IDX97"></A>
+<A NAME="IDX96"></A>
+The same effect can be achieved by simply overriding the PTG pattern that
+defines the "combine" function of the computation inherited by
+<CODE>Arguments</CODE>:
+<P>
+<PRE>
+Idem_2ArgList: $ { "," [Separator] } $
+</PRE>
+<P>
+As usual, an invocation of <CODE>Separator</CODE> follows the terminal symbol
+<KBD>,</KBD>.
+<A NAME="IDX98"></A>
+<A NAME="IDX99"></A>
+<P>
+In some situations, it is necessary to omit one or more children of a node.
+This cannot be done simply by omitting indexed insertion points from the
+appropriate PTG pattern, because PTG determines the number of arguments to
+the generated function from the set of insertion points.
+An invocation of the generated function, with one argument per child,
+already appears in the computation for the node.
+Thus any change in the number of insertion points would result in a
+mismatch between the number of parameters to the function and the number of
+arguments to the call.
+<P>
+A child can be omitted from the unparsed tree by "wrapping" the
+corresponding indexed insertion point in the PTG pattern
+(<SAMP>`i'</SAMP> is the integer index):
+<A NAME="IDX100"></A>
+<A NAME="IDX101"></A>
+<P>
+<PRE>
+[ IGNORE  $<SAMP>`i'</SAMP>  ]
+</PRE>
+<P>
+<CODE>IGNORE</CODE> is a macro defined in the generated FunnelWeb file.
+It does nothing, so the effect is that the indexed sub-tree does not
+appear in the unparsed output.
+<P>
+<H2><A NAME="SEC12" HREF="idem_toc.html#SEC12">Changing <CODE>IdemPtg</CODE> computations</A></H2>
+<P>
+The unparser generator implements the computation of the
+<A NAME="IDX102"></A>
+<CODE>IdemPtg</CODE> attribute as a
+<A NAME="IDX104"></A>
+<A NAME="IDX103"></A>
+class symbol computation.
+This class symbol computation can be overridden either by a
+<A NAME="IDX106"></A>
+<A NAME="IDX105"></A>
+tree symbol computation
+or by a
+<A NAME="IDX108"></A>
+<A NAME="IDX107"></A>
+rule computation
+(see  <A HREF="lidoref_8.html#SEC15">Inheritance of Computations of LIDO - Reference Manual</A>).
+<P>
+When overriding the default
+<A NAME="IDX110"></A>
+<A NAME="IDX109"></A>
+computation for an <CODE>IdemPtg</CODE> value, it is
+often convenient to be able to write the new computation in terms of
+the overridden value.
+Thus the unparser generator actually produces two class symbol
+computations:
+<A NAME="IDX112"></A>
+<A NAME="IDX111"></A>
+The <CODE>IdemOrigPtg</CODE> attribute of the class symbol is first computed
+by applying the appropriate PTG function to the <CODE>IdemPtg</CODE> attributes
+of the children.
+Then the <CODE>IdemPtg</CODE> attribute of the class symbol is assigned the value
+of the <CODE>IdemOrigPtg</CODE> attribute of the class symbol.
+<P>
+To see how <CODE>IdemPtg</CODE> and <CODE>IdemOrigPtg</CODE> could be used when an
+unparser's behavior must be changed, suppose that the
+<A NAME="IDX114"></A>
+<A NAME="IDX113"></A>
+<CODE>Parens</CODE> rule
+were omitted from the definition of the expression language.
+In that case, the unparser has no information about parentheses present in
+the original input text.
+Thus a pretty-printer would fail to output parentheses that were necessary
+to override the normal operator precedence and association in certain
+expressions, changing the meaning of those expressions.
+<P>
+Here is a simple
+<A NAME="IDX116"></A>
+<A NAME="IDX115"></A>
+tree symbol computation to ensure that the unparsed form
+has the same meaning as the original tree.
+It overrides the class symbol computation for <CODE>IdemPtg</CODE> that was
+produced by the unparser generator by a tree symbol computation:
+<P>
+<PRE>
+SYMBOL Expression COMPUTE
+  SYNT.IdemPtg=PTGParen(THIS.IdemOrigPtg);
+END;
+</PRE>
+<P>
+<CODE>PTGParen</CODE> is defined by the pattern:
+<P>
+<PRE>
+Paren: "(" $ ")"
+</PRE>
+<P>
+This specification puts parentheses around <EM>every</EM> expression, which
+certainly preserves the meaning but may make the result hard to read.
+A more readable representation could be created by parenthesizing
+only those expressions containing operators:
+<P>
+<PRE>
+RULE: Expression ::= Expression Operator Expression
+COMPUTE
+  Expression[1].IdemPtg=PTGParen(Expression[1].IdemOrigPtg);
+END;
+
+RULE: Expression ::= Operator Expression
+COMPUTE
+  Expression[1].IdemPtg=PTGParen(Expression[1].IdemOrigPtg);
+END;
+</PRE>
+<P>
+This illustrates the use of
+<A NAME="IDX118"></A>
+<A NAME="IDX117"></A>
+rule computations to override the generated class symbol computation.
+<A NAME="IDX119"></A>
+<A NAME="IDX120"></A>
+<P>
+A comma-separated argument list can be produced by overriding the
+computation of <CODE>IdemOrigPtg</CODE> (or <CODE>IdemPtg</CODE>,
+see  <A HREF="idem_1.html#SEC1">Using an Unparser</A>):
+<P>
+<PRE>
+RULE: Arguments LISTOF Expression
+COMPUTE
+  Arguments.IdemOrigPtg=
+    CONSTITUENTS Expression.IdemPtg SHIELD Expression
+      WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+END;
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

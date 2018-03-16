@@ -1,0 +1,62 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+~O~<|NAME|TypeDep.lido~>~{
+~<|NAME|ExportRange~>
+~<|NAME|Collected Scopes~>
+~<|NAME|Override TypeIsSet~>
+~}
+
+~$~<|NAME|ExportRange~>==~{
+CLASS SYMBOL |NAME|ExportRange COMPUTE
+  SYNT.|NAME|ExportTypesAreSet =
+      CONSTITUENTS TypedDefId.TypeIsSet SHIELD |NAME|AnyScope;
+
+  SYNT.|NAME|ExportTypesAreSetNest = 
+    CONSTITUENTS |NAME|ExportRange.|NAME|ExportTypesAreSetNest
+      SHIELD |NAME|AnyScope
+    <- SYNT.|NAME|ExportTypesAreSet;
+END;
+~}
+
+~$~<|NAME|Collected Scopes~>==~{
+CLASS SYMBOL |NAME|RootScope, |NAME|RangeScope:
+        |NAME|GotVisibleTypes: VOID,
+	|NAME|GotTypeExportNests:	VOID;	/* local */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|GotVisibleTypes =
+      CONSTITUENTS TypedDefId.TypeIsSet SHIELD |NAME|AnyScope;
+
+  SYNT.|NAME|GotTypeExportNests =
+    CONSTITUENTS |NAME|ExportRange.|NAME|ExportTypesAreSetNest
+      SHIELD |NAME|AnyScope;
+END;
+
+CLASS SYMBOL |NAME|RangeScope COMPUTE
+  SYNT.|NAME|GotVisibleTypes =
+      CONSTITUENTS TypedDefId.TypeIsSet SHIELD |NAME|AnyScope
+      <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleTypes;
+
+  SYNT.|NAME|GotTypeExportNests =
+    CONSTITUENTS |NAME|ExportRange.|NAME|ExportTypesAreSetNest
+      SHIELD |NAME|AnyScope
+    <- INCLUDING |NAME|AnyScope.|NAME|GotTypeExportNests;
+END;
+~}
+
+
+~$~<|NAME|Override TypeIsSet~>==~{
+CLASS SYMBOL |NAME|VisibleTypedUseId INHERITS TypedUseId COMPUTE
+  SYNT.TypeIsSet = INCLUDING |NAME|AnyScope.|NAME|GotVisibleTypes;
+END;
+
+CLASS SYMBOL |NAME|DeepSelectTypedUseId INHERITS TypedUseId COMPUTE
+  SYNT.TypeIsSet = INCLUDING |NAME|AnyScope.|NAME|GotTypeExportNests;
+END;
+
+CLASS SYMBOL |NAME|AllTypedUseId INHERITS TypedUseId COMPUTE
+  SYNT.TypeIsSet = INCLUDING RootType.TypeIsSet;
+END;
+~}

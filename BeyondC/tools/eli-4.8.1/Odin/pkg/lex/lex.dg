@@ -1,0 +1,26 @@
+# Source Types
+
+*.l => :l;
+
+
+# Input Object Types
+
+:l 'scanner grammar'? => :FILE;
+
+
+# Output Object Types
+
+:c 'C source code'? => :FILE;
+
+
+# Parameter Types
+
++yaccid 'entry point for lexical analyzer'? => :first;
+
+
+# Tools
+
+EXEC (lex.sh) (:l) (+yaccid)
+   => (:c);
+
+

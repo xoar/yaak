@@ -1,0 +1,180 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Array Types~>
+
+We now add array types to our language. We specify that two
+array types are structural equivalent if their element types
+are equivalent, and if the types have the same number of elements.
+Hence, type equivalence is not only determined by the component types.
+
+Here is an example program that uses arrays, records, and
+type definitions in combination:
+
+~O~<ArrayExamp~>~{
+begin
+  var   int k;
+  var   int[5] pi, int[5] pj;
+  var   record int i, bool b, real[3] r end [2] rv;
+  type  bool[4] bt;
+  var   bt vbt, bt wbt;
+  var   real[6][7] m;
+  pi[1] = k;
+  vbt = wbt;
+  rv[2].b = true;
+  rv[1].r[k] = 3.2;
+  m[1][k] = 1.0;
+end
+~}
+
+We extend the grammar by notations for
+array type denoters and by indexed variables:
+
+~$~< Abstract array syntax~>==~{
+RULE: TypeDenoter ::= ArrayType END;
+RULE: ArrayType   ::= TypeDenoter '[' ArraySize ']' END;
+RULE: ArraySize   ::= IntNumber END;
+
+RULE: Variable    ::= Variable '[' Expression ']' END;
+~}
+
+In this language an array type is described by two properties:
+the element type and the number of elements:
+~$~<Array type properties~>==~{
+ElemType:	DefTableKey;
+ElemNo:		int;
+~}
+
+In the context of a type denotation for an @code{ArrayType}
+the two properties of the type are set together with the
+@code{TypeName} to indicate the array type in the output.
+The attribute @code{GotTypeProp} specifies that these properties
+are set.
+
+~$~<Array type denoter~>==~{
+SYMBOL ArrayType INHERITS TypeDenotation END;
+
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  .GotTypeProp =
+     ORDER
+       (ResetElemType (ArrayType.Type, TypeDenoter.Type),
+        ResetElemNo   (ArrayType.Type, ArraySize.Size),
+        ResetTypeName (ArrayType.Type, "array..."),
+        ResetTypeLine (ArrayType.Type, LINE));
+END;
+
+TERM IntNumber: int;
+
+SYMBOL ArraySize: Size: int;
+
+RULE: ArraySize ::= IntNumber COMPUTE
+  ArraySize.Size = IntNumber;
+END;
+
+RULE: TypeDenoter ::= ArrayType COMPUTE
+  TypeDenoter.Type = ArrayType.Type;
+END;
+~}
+
+Finally it is stated that array elements of type
+void are not allowed. We can not simply compare @code{voidType}
+and the type key, because @code{TypeDenoter.Type} not necessarily 
+contains the final element type; it may be related to it.
+The final type key is obtained by the function @code{FinalType}
+in a state that is characterized by @code{INCLUDING Program.TypeIsSet}.
+~$~<Array check element type ~>==~{
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  IF (EQ (FinalType (TypeDenoter.Type), voidType),
+      message (ERROR, "Wrong element type", 0, COORDREF))
+  <- INCLUDING Program.TypeIsSet;
+END;
+~}
+
+
+Two array types are equivalent if and only if their element types are
+equivalent and if they have the same number of elements.
+
+In order to state the equivalence with respect to array sizes,
+we establish a bijective mapping between any array size that occurs
+in the program and a definition table key. 
+That number mapping is computed by
+turning an array size into an identifier and then binding that
+identifier in a scope that serves just this purpose.
+
+~$~<Size mapping~>==~{
+$/Tech/MakeName.gnrc:inst
+$/Name/CScope.gnrc+instance=SizeMap :inst
+~}
+
+~$~<Array size mapping~>==~{
+SYMBOL ArraySize INHERITS SizeMapIdDefScope END;
+
+RULE: ArraySize ::= IntNumber COMPUTE
+  ArraySize.Sym = IdnNumb (0, IntNumber);
+END;
+~}
+
+The @code{ArraySize.Key} serves as the initial set of potential
+equivalent array types; it is used as the second argument of the
+RULE computation @code{AddTypeToBlock}. 
+The type of the element may contribute to type equivalence of
+array types. Hence, the third argument of @code{AddTypeToBlock}
+is a singleton list, which is also set as the @code{ComponentTypes}
+property of the array type:
+
+~$~<Array type equivalence~>==~{
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  ArrayType.GotType =
+    AddTypeToBlock 
+     (ArrayType.Type, ArraySize.Key, 
+      VResetComponentTypes 
+        (ArrayType.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+    <- .GotTypeProp;
+END;
+~}
+
+Type analysis in the context of an indexed variable is 
+specified as a join of three expression subtrees: @code{Variable[1]},
+the left-hand side of the rule is a leaf of an expression tree. 
+@code{PrimaryContext} is used to state  that its type is the
+@code{ElemType} property of @code{Variable[2]}.
+
+@code{Variable[2]}, which yields the array, is considered
+to be the root of an expression subtree. No requirements
+are specified. It has to be
+checked explicitly that its type is an array type.
+
+The subcript expression is a separate expression subtree.
+It has to be of type int, as specified by its @code{Required} 
+attribute.
+
+~$~<Indexing~>==~{
+RULE: Variable ::= Variable '[' Expression ']' COMPUTE
+  PrimaryContext
+    (Variable[1],
+     GetElemType (Variable[2].Type, NoKey));
+
+  IF (EQ (GetElemType (Variable[2].Type, NoKey), NoKey),
+    message (ERROR, "Not an array", 0, COORDREF));
+
+  Expression.Required = intType;
+END;
+~}
+
+~O~<Array.specs~>~{
+~<Size mapping~>
+~}
+
+~O~<Array.pdl~>~{
+~<Array type properties~>
+~}
+
+~O~<Array.lido~>~{
+~< Abstract array syntax~>
+~<Array type denoter~>
+~<Array check element type ~>
+~<Array size mapping~>
+~<Array type equivalence~>
+~<Indexing~>
+~}

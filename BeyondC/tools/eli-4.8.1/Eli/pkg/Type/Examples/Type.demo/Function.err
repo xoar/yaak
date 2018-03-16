@@ -1,0 +1,18 @@
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+
+  fun f (int x, real y) real
+  begin r = x * y; return c; return; end;
+
+  fun g (real z) void
+  begin r = z; return 1; end;
+
+  f ();
+  f (1);
+  f (1, 1.0, 1.3);
+  f (1, b);
+  f (i, g (s));
+  return r;
+end

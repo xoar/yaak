@@ -1,0 +1,80 @@
+@O@<perr.gla@>==@{
+Identifier:	C_IDENTIFIER
+Literal:	PASCAL_STRING	[mkidn]
+		$% (auxEOL)
+		AWK_COMMENT
+@}
+
+@O@<perr.con@>==@{
+Source: SpecList .
+
+SpecList: SpecList SepaPart /
+	  SpecList BracketPart /
+	  SpecList SkipPart / .
+
+SepaPart: '$SEPA' SepaSymbols .
+
+BracketPart: '$BRACKET' BracketSymbols .
+
+SkipPart: '$SKIP' SkipSymbols .
+
+SepaSymbols: Symbols .
+BracketSymbols: Symbols .
+SkipSymbols: Symbols .
+
+Symbols: Symbols Symbol / .
+Symbol: Identifier '.' / Literal '.' .
+@}
+
+@O@<perr.lido@>==@{
+ATTR SepaOut, BracketOut, SkipOut, Out: PTGNode;
+
+SYMBOL Source
+COMPUTE
+  SYNT.SepaOut = CONSTITUENTS SepaPart.Out
+			WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull);
+  SYNT.BracketOut = CONSTITUENTS BracketPart.Out
+			WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull);
+  SYNT.SkipOut = CONSTITUENTS SkipPart.Out
+			WITH(PTGNode, PTGSeq, IDENTICAL, PTGNull);
+  PTGOutFile("perr", PTGOutput(SYNT.SepaOut, SYNT.BracketOut, SYNT.SkipOut));
+END;
+
+SYMBOL Part
+COMPUTE
+  SYNT.Out = PTGLine(CONSTITUENTS Symbol.Out
+			WITH(PTGNode, PTGSpcSeq, IDENTICAL, PTGNull));
+END;
+
+SYMBOL SepaPart INHERITS Part END;
+SYMBOL BracketPart INHERITS Part END;
+SYMBOL SkipPart INHERITS Part END;
+
+RULE: Symbol ::= Identifier '.'
+COMPUTE
+  Symbol.Out = PTGSymbol(PTGStr(StringTable(Identifier)));
+END;
+
+RULE: Symbol ::= Literal '.'
+COMPUTE
+  Symbol.Out = PTGSymbol(PTGStr(StringTable(Literal)));
+END;
+
+TERM Identifier: int;
+TERM Literal: int;
+@}
+
+@O@<perr.head@>==@{
+#include "csm.h"
+@}
+
+@O@<perr.ptg@>==@{
+Str: $ string
+Symbol: $ " ."
+SpcSeq: $ " " $
+Seq: $ $
+Line: $ "\n"
+Output: "$SEPA\n" $
+	"$BRACKET\n" $
+	"$SKIP\n" $
+@}

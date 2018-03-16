@@ -1,0 +1,227 @@
+# Output Object Types
+
+:targets_ptr 'pointer to the targets file' => :FILE :REFERENCE;
+
+:targets_inc 'directed nested target definitions' => :LIST;
+
+:all_targets_inc 'all nested target definitions' => :LIST;
+
+:targets 'target definitions from an Odinfile' => :FILE;
+
+:vtd 'Virtual target definition file'? => :FILE;
+
+:act_tgt.list 'actual targets' => :LIST;
+
+:vir_tgt.list 'virtual targets' => :LIST;
+
+:vir_dir 'a virtual directory' => :DERIVED-DIRECTORY;
+
+:atmc_prm_data 'file containing parameter data' => :FILE;
+
+:cmpd_prm_data 'file containing parameter data'=> :LIST;
+
+:copy 'copy' => :VOID;
+
+:copy_cmd 'copy command' => :LIST;
+
+:prm_values 'list of parameter values' => :LIST;
+
+:first 'first object in a list' => :REFERENCE;
+
+:expand_hooks 'expand hooks' => :FILE;
+
+:nested_hooks 'nested hooks' => :LIST;
+
+:hook_values.of 'Odinfile containing hook values' => :FILE;
+
+:err 'errors'? => :FILE;
+
+:warn 'warnings'? => :FILE;
+
+:dir 'directory of a file'? => :REFERENCE;
+
+:name 'name of a file'? => :FILE;
+
+:names 'names of the elements of a list'? => :FILE;
+
+:filename 'filename of a file'? => :FILE;
+
+:ls 'filenames of the elements of a list'? => :FILE;
+
+:cat 'concatenation of the contents of the elements of a list'? => :FILE;
+
+:union 'list union'? => :LIST;
+
+:label 'label of a file'? => :FILE;
+
+:labels 'labels of the elements of a list'? => :FILE;
+
+:id 'id of an object' => :FILE;
+
+:depend 'source dependencies'? => :LIST;
+
+:source_names 'source components of a system model' => :FILE;
+
+:operation_names 'operation components of a system model' => :FILE;
+
+:view_spec 'view specification' => :LIST;
+
+:view 'view derived from a view specification' => :LIST;
+
+:apply 'apply operations from a file' => :REFERENCE;
+
+:odin_help 'top level help for odin' => :EXECUTABLE;
+
+:prefix_help 'list of known prefixes' => :FILE;
+
+:suffix_help 'list of known suffixes' => :FILE;
+
+:drv_help 'applicable derivation types' => :FILE;
+
+:prm_help 'applicable parameter types' => :FILE;
+
+:'odin*abstract' 'the abstract object of an instance' => :FILE;
+
+
+# Parameter Types
+
++copy_dest 'where to copy' => :first;
+
++copy_dest_desc 'where to copy' => :first;
+
++hookvalue 'hook value' => :first;
+
++null 'ignored parameter type' => :first;
+
++depend 'dependency' => :LIST;
+
++prm_help 'derivation for which parameter types are applicable' => :first;
+
++apply 'operations to apply' => :first;
+
+
+# Environment Variables
+
+$ODIN_RBSCMD 'the name of the Odin remote-build-server'? = 'odin/rbs.sh';
+
+$ODIN_SHORTNAMES 'use short cache filenames'? = '';
+
+$ODIN_LOCALIPC 'use Unix domain interprocess communication'? = '';
+
+$ODIN_PASTE 'name of the multi-file line merge command'? = 'paste';
+
+$ODINCACHE 'the Odin cache directory'? = '';
+
+$DUMPCORE 'whether to dump core when anomaly detected'? = 'yes';
+
+
+# Tools
+
+TARGETSPTR (:OBJECT)
+   => (:targets_ptr);
+
+TARGETSINC (:FILE)
+   => (:targets_inc);
+
+COLLECT (:targets_inc :map=:all_targets_inc) (:targets_inc)
+   => (:all_targets_inc);
+
+TARGETS (:FILE) NEEDS (:all_targets_inc)&
+   => (:targets);
+
+ACTTARGETS (:targets_ptr)
+   => (:act_tgt.list);
+
+VIRTARGETS (:targets_ptr)
+   => (:vir_tgt.list);
+
+VIRDIR (:vir_tgt.list)@
+   => (:vir_dir);
+
+EXEC (copy.sh) (:OBJECT) (+copy_dest)&
+   => (:copy);
+
+COPYCMD (:OBJECT) (+copy_dest_desc)&
+   => (:copy_cmd);
+
+NESTEDHOOKS (:FILE)
+   => (:nested_hooks) (:hook_values.of);
+
+EXPANDHOOKS (:nested_hooks) (:FILE)
+   => (:expand_hooks);
+
+PRMVALUES (:FILE)
+   => (:prm_values);
+
+FIRST (:LIST)
+   => (:first);
+
+ERROR (:OBJECT)
+   => (:err);
+
+WARNING (:OBJECT)
+   => (:warn);
+
+DIRECTORY (:OBJECT)
+   => (:dir);
+
+NAME (:OBJECT)
+   => (:name);
+
+NAMES (:LIST)
+   => (:names);
+
+FILENAME (:FILE)
+   => (:filename);
+
+FILENAMES (:LIST)
+   => (:ls);
+
+CONCATENATE (:LIST)
+   => (:cat);
+
+UNION (:LIST)
+   => (:union);
+
+LABEL (:OBJECT)
+   => (:label);
+
+LABELS (:LIST)
+   => (:labels);
+
+ID (:OBJECT)
+   => (:id);
+
+DEPEND (:OBJECT)
+   => (:depend);
+
+SOURCES (:FILE)
+   => (:source_names);
+
+OPERATIONS (:FILE)
+   => (:operation_names);
+
+READ-VIEW-SPECIFICATION (:FILE)
+   => (:view_spec);
+
+COMPUTE-VIEW (:view_spec)
+   => (:view);
+
+APPLY (:OBJECT) (+apply)
+   => (:apply);
+
+EXEC '/bin/cp' (help.sh) odin_help
+   => (:odin_help);
+
+PREFIXHELP (:OBJECT)
+   => (:prefix_help);
+
+SUFFIXHELP (:OBJECT)
+   => (:suffix_help);
+
+DRVHELP (:OBJECT)
+   => (:drv_help);
+
+PRMHELP (:OBJECT) (+prm_help)
+   => (:prm_help);
+

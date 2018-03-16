@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>Remote Attribute Access: INCLUDING</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Remote Attribute Access: INCLUDING</h1>
+<hr>
+<P>
+
+Accesses an attribute of a symbol that
+is on the path towards the tree root.<p>
+
+<pre>
+    INCLUDING (X.a, Y.b, Z.c)
+</pre>
+
+<p>
+<b>Typical Error Situations</b>
+
+<p>
+<ul>
+<p>
+<li>usage in a tree context which is not enclosed in an X, Y or Z context
+
+<p>
+==> <tt>ERROR: in some contexts none of the INCLUDING symbols is found</tt>
+
+<p>
+<li>trying to access attributes a, b, or c of different type
+
+<p>
+==> <tt>ERROR: type conflict in INCLUDING</tt>
+
+<p>
+<li>trying to access more that one attribute of a single symbol
+
+<p>
+==> <tt>ERROR: Remote access to two attributes of one symbol</tt>
+</ul>
+
+<!--NewPage-->
+<p>
+In conjunction with symbol computations
+
+<pre>
+     INCLUDING (C.a)     /* C is a CLASS symbol */
+</pre>
+
+stands for
+
+<pre>
+     INCLUDING (X1.a, X2.a, X3.a, ...)     
+</pre>
+
+for all <tt>Xi</tt> that <tt>C</tt> is inherited to.
+
+
+<p>
+<b>Typical Error Situation</b>
+
+<ul>
+<li> Ending up with an empty INCLUDING list due to missing INHERITS clauses
+</ul>
+
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

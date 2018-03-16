@@ -1,0 +1,948 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from type.tnf on 5 December 2013 -->
+
+<TITLE>Type Analysis - Expressions</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<A NAME="IDX22"></A>
+<A NAME="IDX23"></A>
+<H1><A NAME="SEC12" HREF="type_toc.html#SEC12">Expressions</A></H1>
+<P>
+An <EM>expression node</EM> represents a program construct that
+yields a value, and an <EM>expression tree</EM> is a subtree of the
+abstract syntax tree made up entirely of expression nodes.
+Type analysis within an expression tree is uniform;
+additional specifications are needed only at the roots and leaves.
+(Note that these need not be roots and leaves in the sense of the
+abstract syntax tree.)
+A designer often chooses to represent a programming language expression
+by more than one expression tree, in order to capture special relationships
+within that expression.
+For example, each argument of a function call might be a separate
+expression tree because more type conversions are allowed in that context
+than in the context of an operator.
+<P>
+The <CODE>Expression</CODE> module provides computational roles and rule
+computations to implement the type analysis of expression trees:
+<P>
+<A NAME="IDX24"></A>
+<DL COMPACT>
+<DT><CODE>ExpressionSymbol</CODE>
+<DD>The computational role inherited by a grammar symbol that represents an
+expression node.
+<A NAME="IDX25"></A>
+<P>
+<DT><CODE>OperatorSymbol</CODE>
+<DD>The computational role inherited by a grammar symbol that represents an
+operator node.
+<A NAME="IDX26"></A>
+<P>
+<A NAME="IDX27"></A>
+<DT><CODE>OpndExprListRoot</CODE>
+<DD><DT><CODE>BalanceListRoot</CODE>
+<DD>Computational roles inherited by grammar symbols that represent
+operand lists.
+<A NAME="IDX28"></A>
+<P>
+<A NAME="IDX29"></A>
+<DT><CODE>OpndExprListElem</CODE>
+<DD><DT><CODE>BalanceListElem</CODE>
+<DD>Computational roles inherited by grammar symbols that represent
+operand list elements.
+Every <CODE>OpndExprListElem</CODE> must be a descendant of <CODE>OpndExprListRoot</CODE>
+in the tree; every <CODE>BalanceListElem</CODE> must be a descendant of
+<CODE>BalanceListRoot</CODE>.
+<A NAME="IDX30"></A>
+<A NAME="IDX31"></A>
+<A NAME="IDX32"></A>
+<A NAME="IDX33"></A>
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<A NAME="IDX36"></A>
+<A NAME="IDX37"></A>
+<A NAME="IDX38"></A>
+<P>
+<DT><CODE>PrimaryContext</CODE>
+<DD><DT><CODE>TransferContext</CODE>
+<DD><DT><CODE>BalanceContext</CODE>
+<DD><DT><CODE>MonadicContext</CODE>
+<DD><DT><CODE>DyadicContext</CODE>
+<DD><DT><CODE>ListContext</CODE>
+<DD><DT><CODE>ConversionContext</CODE>
+<DD><DT><CODE>CastContext</CODE>
+<DD><DT><CODE>RootContext</CODE>
+<DD>Rule computations implementing common expression contexts.
+<A NAME="IDX39"></A>
+<A NAME="IDX40"></A>
+<P>
+<DT><CODE>Indication</CODE>
+<DD><DT><CODE>OperName</CODE>
+<DD>Rule computations for expression contexts where operations are performed,
+but which have no grammar symbol representing the possible operations.
+</DL>
+<P>
+The expression module is usually instantiated by:
+<P>
+<PRE>
+$/Type/Expression.gnrc :inst
+</PRE>
+For a discussion of alternatives,
+see  <A HREF="type_4.html#SEC14">Selecting an operator at an expression node</A>.
+<P>
+<H2><A NAME="SEC13" HREF="type_toc.html#SEC13">Type analysis of expression trees</A></H2>
+<A NAME="IDX41"></A>
+<P>
+The symbol on the left-hand side of a rule defining an expression node
+characterizes the expression's result.
+It inherits the <CODE>ExpressionSymbol</CODE> role.
+Two attributes of <CODE>ExpressionSymbol</CODE> describe its type:
+<P>
+<DL COMPACT>
+<A NAME="IDX42"></A>
+<DT><CODE>Required</CODE>
+<DD>An inherited attribute whose <CODE>DefTableKey</CODE> value represents
+the type required by the surrounding context.
+(A value of <CODE>NoKey</CODE> indicates that no specific type is required.)
+<CODE>Required</CODE> may be set by a user computation at the root of an
+expression subtree; computations are supplied by the <CODE>Expression</CODE>
+module for all other expression nodes.
+<P>
+<A NAME="IDX43"></A>
+<DT><CODE>Type</CODE>
+<DD>An attribute whose <CODE>DefTableKey</CODE> value is set by computations supplied
+by the <CODE>Expression</CODE> module to represent the type of the result
+delivered by the expression subtree rooted in this node.
+(A value of <CODE>NoKey</CODE> indicates that the type delivered by the node is
+unknown.)
+<CODE>Type</CODE> may depend on <CODE>Required</CODE> as well as on the possible types of
+the node's children; it must never be set by user computation.
+</DL>
+<P>
+An expression node is type-correct if the type specified by its <CODE>Type</CODE>
+attribute is acceptable as the type specified by its <CODE>Required</CODE>
+attribute.
+Any type is acceptable as an undefined required type,
+and an undefined type is acceptable as any required type.
+<P>
+In order to support incremental development, <CODE>ExpressionSymbol</CODE>
+defines default computations setting the values of both <CODE>Required</CODE>
+and <CODE>Type</CODE> to <CODE>NoKey</CODE>;
+those computations are overridden by the rule computations
+described in this chapter.
+The default computations allow one to declare that a symbol inherits
+<CODE>ExpressionSymbol</CODE> without producing specification errors for every
+context containing that symbol.
+This advantage is offset by the fact that if one forgets to provide rule
+computations for some contexts, the generated compiler will silently ignore
+certain errors in the input program.
+<P>
+Rules defining expression nodes in an abstract syntax tree
+for a typical programming language describe constants, variables, and
+computations:
+<P>
+<A NAME="IDX44"></A>
+<PRE>
+SYMBOL Expr INHERITS ExpressionSymbol   END;
+
+RULE: Expr   ::= Number                 END;
+RULE: Expr   ::= ExpIdUse               END;
+RULE: Expr   ::= Expr Operator Expr     END;
+RULE: Expr   ::= Expr '[' Subscript ']' END;
+</PRE>
+<P>
+The first two rules describe leaves of expression subtrees.
+Any node described by the first rule is a leaf of the abstract syntax tree
+as well as a leaf of some expression subtree.
+Nodes described by the second rule are not leaves of the abstract syntax
+tree because each has an <CODE>ExpIdUse</CODE> node as a child.
+<P>
+A leaf of an expression subtree delivers a value whose type
+must be determined from the context of that leaf according to the
+definition of the language.
+For example, the <CODE>Expr</CODE> node in the first rule might deliver
+the language-defined integer type;
+in the second rule, the delivered type is the value of <CODE>ExpIdUse.Type</CODE>.
+<P>
+The type analyzer models most interior expression nodes by operators
+applied to operands:
+<OL>
+<LI>
+An indication is derived from the context.
+<P>
+<LI>
+One operator is selected from the set associated with that indication.
+<P>
+<LI>
+The <CODE>Type</CODE> attribute of the node is set to the result type of the
+selected operator.
+<P>
+<LI>
+The <CODE>Required</CODE> attributes of one or more children are set to the
+operand types of the selected operator.
+</OL>
+<P>
+For example, in the following rule, the indication is provided by the
+<CODE>Operator</CODE> child:
+<P>
+<PRE>
+RULE: Expr   ::= Expr Operator Expr     END;
+</PRE>
+Usually, a set of several operators (such as {<CODE>iAddOp</CODE>,
+<CODE>fAddOp</CODE>}) is associated with that indication.
+An operator is then selected from that set as discussed in the next section.
+<P>
+In the fourth rule, we might assume that each array type definition
+adds a dyadic access operator to an indication fixed by the rule
+(see  <A HREF="type_5.html#SEC23">Operator, function, and method definitions</A>):
+<P>
+<PRE>
+RULE: Expr   ::= Expr '[' Subscript ']' END;
+</PRE>
+The left operand of that operator is the array type, the right operand is
+the index type, and the result is the element type.
+<P>
+The operator/operand model provides support for expression node semantics
+that are ubiquitous in programming languages.
+Several other models, useful in special circumstances, are supported and
+will be introduced in later sections of this chapter.
+It is clear, however, that there will be situations in which the semantics
+of an expression context do not fit any of the supported models.
+Our advice is to consider such a context as a place where several disjoint
+expression subtrees meet:
+The expression symbol on the left-hand side of the rule defining the
+context is a leaf of an expression tree above the context, and each
+expression symbol on the right-hand side is the root of an expression tree
+below the context.
+<P>
+<H2><A NAME="SEC14" HREF="type_toc.html#SEC14">Selecting an operator at an expression node</A></H2>
+<P>
+If an indication is associated with a singleton operator set, that operator
+is selected regardless of operand or result types.
+<P>
+There are two standard algorithms for selecting an operator if the
+indication's set has more than one element.
+The simplest ignores the type required by the context.
+For each operator in the set, it checks whether each operand is
+acceptable as the type required by that operator.
+If more than one operator in the set satisfies this condition, the
+algorithm chooses the one requiring the fewest coercions.
+If no operator can be identified, then the unknown operator is chosen.
+<P>
+To select this algorithm, instantiate the <CODE>Expression</CODE> module without
+the <CODE>+referto</CODE> parameter:
+<A NAME="IDX46"></A>
+<A NAME="IDX45"></A>
+<P>
+<PRE>
+$/Type/Expression.gnrc :inst
+</PRE>
+<P>
+Ada is a language in which the selection of an operator depends on the
+type required by the context as well as the types delivered by the
+operands.
+In that case, a two-pass algorithm is required.
+<P>
+Starting with the leaves of an expression tree and working towards the root
+of that tree, the algorithm determines a <EM>possible type set</EM> for each
+expression node.
+Every type in the possible type set at a node is either a leaf type or
+is a type associated with an operator whose result is that type, and whose
+operands are elements of the possible type sets of the node's children.
+The algorithm associates a <EM>cost</EM> with each type in a possible type
+set.
+<P>
+OIL allows one to specify an arbitrary integer cost for each operator and
+coercion independently.
+If this specification is omitted, a cost of 1 is assigned to the operator
+or coercion.
+For the remainder of this section, we assume that all cost specifications
+have been omitted and therefore all costs are 1.
+<P>
+Consider a very simple expression node, the integer constant 3.
+One element of the possible type set for this node is the language-defined
+integer type, which has cost 0 because no operations are needed to create a
+value of that type.
+If a coercion has been defined with the language-defined integer type as
+its operand and the language-defined floating-point type as its result,
+then another element of the possible type set of this node is the
+language-defined floating-point type.
+It has cost 1, the total number of operators required to produce it.
+Similarly, if there is a coercion from floating-point to double,
+double will be an element of the possible type set of the node and
+it will have cost 2.
+<P>
+When the algorithm computes the possible type set of an interior expression
+node, it considers the operators in that node's indication set.
+For each operator, it checks whether the type required by that
+operator for a given argument is in the possible type set of the
+corresponding operand.
+Each operator meeting that condition is a possible operator at the node.
+The cost of using an operator is one more than the sum of the costs
+associated with its argument types in the possible type sets of its
+operands.
+Finally, the possible type set of the node is the set of all types <CODE>T</CODE>
+such that the result type of a possible operator is acceptable as <CODE>T</CODE>.
+<P>
+Often a particular element of the possible type set of an interior node
+can be obtained in more than one way.
+For example, consider a node representing the sum of two integers.
+Assuming that the integer type is acceptable as the floating-point type,
+the possible type set of each child contains both integer and
+floating-point types.
+Thus both integer addition and floating-point addition are possible
+selections at this node.
+There are then two ways to obtain a floating-point result:
+<P>
+<OL>
+<LI>
+Use an integer addition and convert the result to floating-point.
+<P>
+<LI>
+Convert each operand to floating-point and use a floating-point addition.
+</OL>
+<P>
+The cost of using an integer addition in this context is 1 because the cost
+of the integer elements of the possible type sets are both 0.
+Converting the result to floating-point costs one coercion, for a total
+cost of 2.
+The cost of using a floating-point addition, on the other hand, is 3
+because the cost of the floating-point elements of the possible type sets
+are both 1.
+<P>
+The cost of obtaining a value of type <CODE>T</CODE> using a particular operator
+is the sum of the cost of using that operator and the number of
+coercion operators required to convert a value of the result type to
+a value of type <CODE>T</CODE>.
+When more than one possible operator selection leads to a value of a given
+type, the algorithm only retains the one with the lowest cost.
+<P>
+If the <CODE>Required</CODE> attribute of the expression tree root is the
+unknown type, then the algorithm chooses the lowest-cost element of the
+root's possible type set as the result type of the expression.
+Otherwise, the <CODE>Required</CODE> attribute of the root is taken as the
+result type regardless of whether it appears in the root's possible type set.
+<P>
+The second pass starts with the root of the tree and works towards the
+leaves.
+At each node, the value of the <CODE>Required</CODE> attribute specifies an
+element of the possible type set and hence an operator.
+Given an operator, the values of the node's <CODE>Type</CODE> attribute and the
+<CODE>Required</CODE> attributes of any operands are fixed.
+<P>
+If the possible type set of an expression node does not contain an element
+equal to the value of that node's <CODE>Required</CODE> attribute, then the
+unknown operator is selected; the node's <CODE>Type</CODE> attribute and the
+<CODE>Required</CODE> attributes of any operands are set to the unknown type.
+<P>
+To select the two-pass algorithm, instantiate the <CODE>Expression</CODE> module
+with the <CODE>+referto=Result</CODE> parameter:
+<A NAME="IDX48"></A>
+<A NAME="IDX47"></A>
+<P>
+<PRE>
+$/Type/Expression.gnrc +referto=Result :inst
+</PRE>
+<P>
+<H2><A NAME="SEC15" HREF="type_toc.html#SEC15">Expression contexts without operators</A></H2>
+<P>
+Let <SAMP>`e1'</SAMP> be a grammar symbol  playing the <CODE>ExpressionSymbol</CODE> role,
+and <SAMP>`type'</SAMP> be an expression yielding the definition table key of a
+type.
+A <EM>primary context</EM> is one in which the parent <SAMP>`e1'</SAMP> delivers a
+value of a known type.
+<A NAME="IDX49"></A>
+<CODE>PrimaryContext(<SAMP>`e1'</SAMP>,<SAMP>`type'</SAMP>)</CODE> provides the rule
+computations to set <SAMP>`e1'</SAMP><CODE>.Type</CODE> to the type <SAMP>`type'</SAMP>.
+(Recall that the value of the <CODE>Type</CODE> attribute of an expression node
+must never be set directly by a user computation.)
+<P>
+The constant and variable expressions in C are examples of primary
+contexts:
+<P>
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<PRE>
+SYMBOL Expr INHERITS ExpressionSymbol END;
+
+RULE: Expr ::= Number COMPUTE
+  PrimaryContext(Expr,intType);
+END;
+
+SYMBOL ExpIdUse INHERITS TypedUseId END;
+
+RULE: Expr ::= ExpIdUse COMPUTE
+  PrimaryContext(Expr,ExpIdUse.Type);
+END;
+</PRE>
+The type of an integer constant is the language-defined integer type
+(see  <A HREF="type_2.html#SEC3">Language-defined types</A>), and the type of a variable is the
+type with which it was declared
+(see  <A HREF="type_3.html#SEC10">Accessing the type of an entity</A>).
+<P>
+Let <SAMP>`e1'</SAMP> and <SAMP>`e2'</SAMP> be grammar symbols playing the
+<CODE>ExpressionSymbol</CODE> role.
+A <EM>transfer context</EM> is one in which the parent <SAMP>`e1'</SAMP> and
+one of its children <SAMP>`e2'</SAMP> are identical with respect to type.
+<A NAME="IDX52"></A>
+<CODE>TransferContext(<SAMP>`e1'</SAMP>,<SAMP>`e2'</SAMP>)</CODE> provides the rule
+computations to set <SAMP>`e1'</SAMP><CODE>.Type</CODE> and <SAMP>`e2'</SAMP><CODE>.Required</CODE>.
+<P>
+The comma expression in C is an example of a transfer context:
+<P>
+<PRE>
+RULE: Expr ::= Expr ',' Expr COMPUTE
+  TransferContext(Expr[1],Expr[3]);
+END;
+</PRE>
+<P>
+Notice that the left operand of the comma, <CODE>Expr[2]</CODE>, is the root of an
+expression subtree distinct from the one containing the <CODE>TransferContext</CODE>.
+The value of this expression will be discarded, so its type is arbitrary.
+Thus there is no need to override the default computation
+<CODE>Expr[2].Required=NoKey</CODE>.
+<P>
+Let <SAMP>`e1'</SAMP>, <SAMP>`e2'</SAMP>, and <SAMP>`e3'</SAMP> be grammar symbols playing the
+<CODE>ExpressionSymbol</CODE> role.
+A <EM>balance context</EM> is one in which the parent <SAMP>`e1'</SAMP> must deliver
+either the result delivered by child <SAMP>`e2'</SAMP> or the result delivered by
+child <SAMP>`e3'</SAMP>.
+This means that values delivered by both children must be acceptable as
+a common type, and the parent must deliver a value of that common type.
+<A NAME="IDX53"></A>
+<CODE>BalanceContext(<SAMP>`e1'</SAMP>,<SAMP>`e2'</SAMP>,<SAMP>`e3'</SAMP>)</CODE> provides the rule
+computations to set <SAMP>`e1'</SAMP><CODE>.Type</CODE>, <SAMP>`e2'</SAMP><CODE>.Required</CODE>,
+and <SAMP>`e3'</SAMP><CODE>.Required</CODE> such that the following relations hold:
+<P>
+<UL>
+<LI>
+<SAMP>`e2'</SAMP><CODE>.Type</CODE> <CODE>acceptableAs</CODE> <SAMP>`e1'</SAMP><CODE>.Type</CODE>
+<LI>
+<SAMP>`e3'</SAMP><CODE>.Type</CODE> <CODE>acceptableAs</CODE> <SAMP>`e1'</SAMP><CODE>.Type</CODE>
+<P>
+<LI>
+There is no type <SAMP>`t'</SAMP> other than <SAMP>`e1'</SAMP><CODE>.Type</CODE> such that
+<UL>
+<LI>
+<SAMP>`e2'</SAMP><CODE>.Type</CODE> <CODE>acceptableAs</CODE> <SAMP>`t'</SAMP>
+<LI>
+<SAMP>`e3'</SAMP><CODE>.Type</CODE> <CODE>acceptableAs</CODE> <SAMP>`t'</SAMP>
+<LI>
+<SAMP>`t'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`e1'</SAMP><CODE>.Type</CODE>
+</UL>
+<P>
+<LI>
+<SAMP>`e2'</SAMP><CODE>.Required</CODE> equals <SAMP>`e1'</SAMP><CODE>.Type</CODE>
+<LI>
+<SAMP>`e3'</SAMP><CODE>.Required</CODE> equals <SAMP>`e1'</SAMP><CODE>.Type</CODE>
+</UL>
+<P>
+The conditional expression of C is an example of a balance context:
+<P>
+<PRE>
+RULE: Expr ::= Expr '?' Expr ':' Expr COMPUTE
+  BalanceContext(Expr[1],Expr[3],Expr[4]);
+  Expr[2].Required=scalarType;
+END;
+</PRE>
+<P>
+The condition, <CODE>Expr[2]</CODE>, is the root of an expression subtree
+distinct from that containing the <CODE>BalanceContext</CODE>.
+The definition of C requires that <CODE>Expr[2]</CODE> return a value of scalar
+type, independent of the types of the other expression nodes.
+(Pointers and numbers are values of scalar type in C.)
+Thus the default computation <CODE>Expr[2].Required=NoKey</CODE> must be overridden
+in this context.
+<P>
+Some languages generalize the conditional expression to a case expression.
+For example, consider an ALGOL 68 computation of the days in a month:
+<P>
+<PRE>
+begin int days, month, year;
+days := case month in
+  31,
+  (year mod 4 and year mod 100 &#60;&#62; 0 or year mod 400 = 0 | 28 | 29),
+  31,30,31,30,31,31,30,31,30,31 esac
+end
+</PRE>
+<P>
+The number of cases is not fixed, and the balancing process therefore
+involves an arbitrary list.
+This is the purpose of the <CODE>BalanceListRoot</CODE> and
+<CODE>BalanceListElem</CODE> roles.
+Both inherit from <CODE>ExpressionSymbol</CODE>, and neither requires
+computations beyond the ones used in any expression context.
+The balancing computation described above is carried out pairwise on the
+list elements:
+<P>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+<PRE>
+SYMBOL CaseExps INHERITS BalanceListRoot END;
+SYMBOL CaseExp  INHERITS BalanceListElem END;
+
+RULE: Expr ::= 'case' Expr 'in' CaseExps 'esac' COMPUTE 
+  TransferContext(Expr[1],CaseExps);
+END;
+
+RULE: CaseExps LISTOF CaseExp END;
+
+RULE: CaseExp ::= Expr COMPUTE
+  TransferContext(CaseExp,Expr);
+END;
+</PRE>
+<P>
+Notice that these rule computations simply interface with the
+<CODE>BalanceListRoot</CODE> and <CODE>BalanceListElem</CODE> roles; all significant
+computations are done by module code generated from those roles.
+<P>
+<H2><A NAME="SEC16" HREF="type_toc.html#SEC16">Operators with explicit operands</A></H2>
+<A NAME="IDX57"></A>
+<P>
+Tree symbols in the abstract syntax that correspond to operator symbols in
+a source program usually inherit the <CODE>OperatorSymbol</CODE> role.
+Two attributes of <CODE>OperatorSymbol</CODE> describe the operator selection
+in the current context:
+<P>
+<DL COMPACT>
+<A NAME="IDX58"></A>
+<DT><CODE>Indic</CODE>
+<DD>A synthesized attribute whose <CODE>DefTableKey</CODE> value represents the
+indication derived from the context.
+(A value of <CODE>NoKey</CODE> indicates that no such indication can be derived.)
+<CODE>Indic</CODE> must be set by a user computation.
+<P>
+<A NAME="IDX59"></A>
+<DT><CODE>Oper</CODE>
+<DD>An attribute whose <CODE>DefTableKey</CODE> value is set by <CODE>Expression</CODE>
+module computations to represent the operator selected from the set
+identified by the associated indication.
+(A value of <CODE>NoKey</CODE> indicates that no operator could be selected.)
+<CODE>Oper</CODE> may depend on <CODE>Required</CODE> as well as on the possible types of
+the node's children and the operator indication;
+it must never be set by user computation.
+</DL>
+<P>
+In order to support incremental development, <CODE>OperatorSymbol</CODE>
+defines a default computation setting the values of both <CODE>Indic</CODE> and
+<CODE>Oper</CODE> to <CODE>NoKey</CODE>.
+The default computation of <CODE>Indic</CODE> is overridden by a user
+computation, and that of <CODE>Oper</CODE> by the rule computations
+described in this section.
+The default computations allow one to declare that a symbol inherits
+<CODE>OperatorSymbol</CODE> without producing specification errors for
+every context containing that symbol.
+This advantage is offset by the fact that if one forgets to provide
+appropriate overriding computations, the generated
+compiler will silently ignore certain errors in the input program.
+<P>
+Let <SAMP>`e1'</SAMP>, <SAMP>`e2'</SAMP>, and <SAMP>`e3'</SAMP> all play the <CODE>ExpressionSymbol</CODE>
+role, and <SAMP>`rator'</SAMP> play the <CODE>OperatorSymbol</CODE> role.
+A <EM>monadic (dyadic) context</EM> is one in which the parent <SAMP>`e1'</SAMP>
+delivers the result of applying <SAMP>`rator'</SAMP> to the operand(s).
+The following provide rule computations to set <SAMP>`rator'</SAMP><CODE>.Oper</CODE>,
+<SAMP>`e1'</SAMP><CODE>.Type</CODE>, and <SAMP>`e2'</SAMP><CODE>.Required</CODE>
+(plus <SAMP>`e3'</SAMP><CODE>.Required</CODE> if present):
+<P>
+<UL>
+<A NAME="IDX60"></A>
+<LI>
+<CODE>MonadicContext(<SAMP>`e1'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`e2'</SAMP>)</CODE>
+<P>
+<A NAME="IDX61"></A>
+<LI>
+<CODE>DyadicContext(<SAMP>`e1'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`e2'</SAMP>,<SAMP>`e3'</SAMP>)</CODE>
+</UL>
+<P>
+Contexts with arbitrary numbers of operands are discussed in the next
+section.
+<P>
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+<PRE>
+SYMBOL Operator INHERITS OperatorSymbol END;
+
+RULE: Expr ::= Expr Operator Expr COMPUTE
+  DyadicContext(Expr[1],Operator,Expr[2],Expr[3]);
+END;
+
+RULE: Operator ::= '+' COMPUTE
+  Operator.Indic=PlusInd;
+END;
+</PRE>
+<P>
+The array access rule also fits the <CODE>DyadicContext</CODE> pattern,
+but has no symbol playing the <CODE>OperatorSymbol</CODE> role.
+In such cases, the <SAMP>`rator'</SAMP> argument is omitted and the indication
+supplied by an additional context-dependent rule computation.
+<P>
+Let <SAMP>`ind'</SAMP> be a definition table key representing an indication.
+<CODE>Indication(<SAMP>`ind'</SAMP>)</CODE> provides the rule computations to set the
+node's indication to <SAMP>`ind'</SAMP>.
+<P>
+If the indication <CODE>indexInd</CODE>'s operator set includes
+one access operator for every array type
+(see  <A HREF="type_5.html#SEC23">Operator, function, and method definitions</A>),
+then the following computation implements the type relationship in an array
+access:
+<P>
+<A NAME="IDX64"></A>
+<A NAME="IDX65"></A>
+<PRE>
+SYMBOL Subscript INHERITS ExpressionSymbol END;
+
+RULE: Expr ::= Expr '[' Subscript ']' COMPUTE
+  DyadicContext(Expr[1],,Expr[2],Subscript);
+  Indication(indexInd);
+END;
+</PRE>
+Note that <CODE>Expr[2]</CODE> can be <EM>any</EM> expression yielding
+an array value; it need not be a simple array name.
+<P>
+In some cases it is useful to know the name of the operator selected from
+the indication set.
+The <CODE>OperatorSymbol.Oper</CODE> attribute normally supplies this
+information, but when there is no symbol playing that role the value can be
+accessed via a context-dependent rule computation:
+<P>
+<DL COMPACT>
+<A NAME="IDX66"></A>
+<DT><CODE>OperName</CODE>
+<DD>Yields the operator selected from the context's indication set.
+If no operator can be selected, the result is the unknown operator.
+</DL>
+<P>
+<H2><A NAME="SEC17" HREF="type_toc.html#SEC17">Operators with operand lists</A></H2>
+<P>
+Function calls and multidimensional array references are common examples
+of expression contexts whose operators have operand lists
+rather than explicit operands.
+One symbol on the right-hand side of the rule defining such a context
+characterizes the entire list of operands.
+It inherits the <CODE>OpndExprListRoot</CODE> role.
+<P>
+The symbol defining an operand in the list inherits the
+<CODE>OpndExprListElem</CODE> role.
+<CODE>OpndExprListElem</CODE> inherits the <CODE>ExpressionSymbol</CODE> role, and
+overrides <CODE>ExpressionSymbol</CODE>'s default computation of the
+<CODE>Required</CODE> attribute in all upper contexts.
+<P>
+Let <SAMP>`e'</SAMP> be a grammar symbol playing the <CODE>ExpressionSymbol</CODE> role,
+<SAMP>`rator'</SAMP> be a grammar symbol playing the <CODE>OperatorSymbol</CODE> role,
+and <SAMP>`rands'</SAMP> be a grammar symbol playing the <CODE>OpndExprListRoot</CODE>
+role.
+A <EM>list</EM> context is one in which the parent <SAMP>`e'</SAMP> delivers the
+result of applying <SAMP>`rator'</SAMP> to the operand list <SAMP>`rands'</SAMP>.
+<A NAME="IDX67"></A>
+<CODE>ListContext(<SAMP>`e'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`rands'</SAMP>)</CODE>
+provides the rule computations to set <SAMP>`e'</SAMP><CODE>.Type</CODE>,
+<SAMP>`rator'</SAMP><CODE>.Oper</CODE>, and <CODE>OpndExprListElem.Required</CODE> for each
+<CODE>OpndExprListElem</CODE> descendant of <SAMP>`rands'</SAMP>.
+<P>
+If the language has multi-dimensional array references, they can be
+implemented using a strategy that differs from that of the previous
+section:
+<P>
+<A NAME="IDX68"></A>
+<A NAME="IDX69"></A>
+<A NAME="IDX70"></A>
+<A NAME="IDX71"></A>
+<PRE>
+SYMBOL Subscripts INHERITS OpndExprListRoot END; 
+SYMBOL Subscript  INHERITS OpndExprListElem END; 
+
+RULE: Expr ::= Expr '[' Subscripts ']' COMPUTE
+  ListContext(Expr[1],,Subscripts);
+  Indication(GetAccessor(Expr[2].Type,NoKey));
+END;
+
+RULE: Subscripts LISTOF Subscript END;
+
+RULE: Subscript ::= Expr COMPUTE
+  TransferContext(Subscript,Expr);
+END;
+</PRE>
+<P>
+This computation assumes that the indication is the value of the
+<CODE>Accessor</CODE> property of the array type
+(see  <A HREF="type_5.html#SEC19">User-Defined Types</A>).
+<P>
+Some languages have <EM>variadic</EM> operators -- operators taking a variable
+number of operands.
+The most common of these are <CODE>max</CODE> and <CODE>min</CODE>, which can take two
+or more numeric operands.
+All of the operands must ultimately be of the same type, so the situation
+is similar to that of a balanced context.
+<P>
+For type checking purposes, the variadic operator can be considered to have
+a single operand, whose type is determined by balancing the elements of the
+list
+(see  <A HREF="type_4.html#SEC15">Expression contexts without operators</A>).
+Of course this form of operand list must be distinguished syntactically
+from a normal list operand:
+<P>
+<A NAME="IDX72"></A>
+<A NAME="IDX73"></A>
+<A NAME="IDX74"></A>
+<A NAME="IDX75"></A>
+<PRE>
+SYMBOL VarRands INHERITS BalanceListRoot END;
+SYMBOL VarRand  INHERITS BalanceListElem END;
+
+RULE: Expr ::= VarOper '(' VarRands ')' COMPUTE
+  MonadicContext(Expr,VarOper,VarRands)
+END;
+
+RULE: VarRands LISTOF VarRand END;
+
+RULE: VarRand ::= Expr COMPUTE
+  TransferContext(Actual,Expr);
+END;
+</PRE>
+<P>
+<H2><A NAME="SEC18" HREF="type_toc.html#SEC18">Type conversion</A></H2>
+<P>
+The <CODE>acceptableAs</CODE> relation models implicit type conversion
+in the context of operators applied to operands.
+In other contexts, additional type conversions may be possible.
+For example, both Java and C allow a floating-point value to be assigned to
+an integer variable.
+That conversion cannot be modeled by the <CODE>acceptableAs</CODE> relation
+(see  <A HREF="type_2.html#SEC6">Language-defined coercibility</A>).
+<P>
+Additional type conversions such as those taking place on
+assignment can be modeled by specific conversion operators.
+An indication is associated with each context in which additional
+type conversions are possible, and the indication's set contains exactly
+the conversions allowable in that context.
+<P>
+Let <SAMP>`e1'</SAMP> and <SAMP>`e2'</SAMP> play the <CODE>ExpressionSymbol</CODE> role, and
+<SAMP>`rator'</SAMP> play the <CODE>OperatorSymbol</CODE> role.
+A <EM>conversion context</EM> is one in which the rules of the language allow
+the type conversions in <SAMP>`rator'</SAMP><CODE>.Indic</CODE>'s set to be
+applied to the value yielded by <SAMP>`e2'</SAMP> (in addition to any coercions)
+in order to obtain the type that must be yielded by <SAMP>`e1'</SAMP>.
+<A NAME="IDX76"></A>
+<CODE>ConversionContext(<SAMP>`e1'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`e2'</SAMP>)</CODE> provides rule
+computations to set <SAMP>`rator'</SAMP><CODE>.Oper</CODE>, <SAMP>`e1'</SAMP><CODE>.Type</CODE>, and
+<SAMP>`e2'</SAMP><CODE>.Required</CODE>.
+If no additional conversion operator is required, or
+if none can be selected from <SAMP>`rator'</SAMP><CODE>.Indic</CODE>'s set,
+then <SAMP>`rator'</SAMP><CODE>.Oper</CODE> is set to the unknown operator
+and both <SAMP>`e1'</SAMP><CODE>.Type</CODE> and
+<SAMP>`e2'</SAMP><CODE>.Required</CODE> are set to <SAMP>`e1'</SAMP><CODE>.Required</CODE>.
+<P>
+In C, an actual argument to a function call may be implicitly converted to
+the type of the corresponding formal parameter prior to the function call.
+The same set of conversions can be used in assignment contexts, so assume
+that the indication is <CODE>assignCvt</CODE>:
+<P>
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+<A NAME="IDX79"></A>
+<PRE>
+SYMBOL Actual INHERITS OpndExprListElem END;
+
+RULE: Actual ::= Expr COMPUTE
+  ConversionContext(Actual,,Expr);
+  Indication(assignCvt);
+END;
+</PRE>
+<P>
+Let <SAMP>`e1'</SAMP> and <SAMP>`e2'</SAMP> play the <CODE>ExpressionSymbol</CODE> role,
+<SAMP>`rator'</SAMP> play the <CODE>OperatorSymbol</CODE> role, and
+<SAMP>`type'</SAMP> yield a <CODE>DefTableKey</CODE> value representing a type.
+A <EM>cast context</EM> is a conversion context in which the desired type
+is inherent in the context itself, rather than being determined by <SAMP>`e1'</SAMP>.
+<A NAME="IDX80"></A>
+<CODE>CastContext(<SAMP>`e1'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`e2'</SAMP>,<SAMP>`type'</SAMP>)</CODE> provides rule
+computations to set <SAMP>`rator'</SAMP><CODE>.Oper</CODE>, <SAMP>`e1'</SAMP><CODE>.Type</CODE>, and
+<SAMP>`e2'</SAMP><CODE>.Required</CODE>.
+If no additional conversion operator is required, or
+if none can be selected from <SAMP>`rator'</SAMP><CODE>.Indic</CODE>'s set,
+then <SAMP>`rator'</SAMP><CODE>.Oper</CODE> is set to the unknown operator
+and both <SAMP>`e1'</SAMP><CODE>.Type</CODE> and
+<SAMP>`e2'</SAMP><CODE>.Required</CODE> are set to <SAMP>`type'</SAMP>.
+<P>
+The C cast expression is an example of a cast context.
+Here we assume that <CODE>castInd</CODE> is an indication whose set consists of
+all of the possible C conversions:
+<P>
+<A NAME="IDX81"></A>
+<PRE>
+RULE: Expr ::= '(' Type ')' Expr COMPUTE
+  CastContext(Expr[1],,Expr[2],Type.Type);
+  Indication(castInd);
+END;
+</PRE>
+<P>
+Let <SAMP>`e2'</SAMP> play the <CODE>ExpressionSymbol</CODE> role,
+<SAMP>`rator'</SAMP> play the <CODE>OperatorSymbol</CODE> role, and
+<SAMP>`type'</SAMP> yield a <CODE>DefTableKey</CODE> value representing a type.
+A <EM>root context</EM> is a conversion context in which the desired type
+is inherent in the context itself, which is not an expression context.
+<A NAME="IDX82"></A>
+<CODE>RootContext(<SAMP>`type'</SAMP>,<SAMP>`rator'</SAMP>,<SAMP>`e2'</SAMP>)</CODE> provides rule
+computations to set <SAMP>`rator'</SAMP><CODE>.Oper</CODE> and
+<SAMP>`e2'</SAMP><CODE>.Required</CODE>.
+If no additional conversion operator is required, or
+if none can be selected from <SAMP>`rator'</SAMP><CODE>.Indic</CODE>'s set,
+then <SAMP>`rator'</SAMP><CODE>.Oper</CODE> is set to the unknown operator
+and <SAMP>`e2'</SAMP><CODE>.Required</CODE> is set to <SAMP>`type'</SAMP>.
+<P>
+The C return statement is an example of a root context.
+It is not itself an expression, but it has an expression operand.
+That operand must yield the return type of the function,
+which is inherent in the context of the return statement,
+and can be obtained from the <CODE>Function</CODE> node.
+Here we assume that <CODE>assignInd</CODE> is an indication whose set consists of
+all of the possible C assignment conversions:
+<P>
+<A NAME="IDX83"></A>
+<PRE>
+RULE: Statement ::= 'return' Expr COMPUTE
+  RootContext(INCLUDING (Function.ResultType),,Expr[2]);
+  Indication(assignInd);
+END;
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

@@ -1,0 +1,46 @@
+# Source Types
+
+*.y => :y;
+
+
+# Input Object Types
+
+:y 'yacc input'? => :FILE;
+
+
+# Output Object Types
+
+:c 'C source code'? => :FILE;
+
+:h 'header file'? => :FILE;
+
+:yacc.log 'yacc table listing' => :log;
+
+
+# Parameter Types
+
++gnu 'use gnu tools'? => :first;
+
++sys5 'use Unix System V conventions'? => :first;
+
++yaccid 'entry point for yacc parser'? => :first;
+
++conflict_ok 'reduce/reduce and shift/reduce conflicts are OK'? => :first;
+
++yacc 'name of the yacc compiler'? => :first;
+
++yacc_flags 'flags for yacc'? => :cat;
+
+
+# Environment Variables
+
+$ODIN_SYS5 'use Unix System V conventions'? = '';
+
+$ODIN_YACC_FLAGS 'yacc flags' = '-dv';
+
+
+# Tools
+
+EXEC (yacc.sh) (:y) (+yaccid) (+conflict_ok) (+sys5) (+gnu)
+ (+yacc) (+yacc_flags)
+   => (:c) (:h) (:yacc.log);

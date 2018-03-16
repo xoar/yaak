@@ -1,0 +1,1795 @@
+\input texinfo     @c -*-texinfo-*-
+@comment Copyright, 2002, The Regents of the University of Colorado
+@comment %**start of header
+@setfilename idem
+@settitle Abstract Syntax Tree Unparsing
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Abstract Syntax Tree Unparsing}
+@sp 1
+@center $Revision: 2.17 $
+@include org.tnf
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@node Top, , (dir), (dir)
+
+@ifinfo
+$Revision: 2.17 $
+@end ifinfo
+
+@dfn{Parsing} is the process of constructing a tree from a string of
+characters; @dfn{unparsing} is the reverse: constructing a string of
+characters from a tree.
+
+A so-called ``pretty-printer'' is an example of a processor that
+incorporates an unparser:
+It reads arbitrarily-formatted text, builds a tree representing the text's
+structure, and then unparses that tree using appropriate formatting rules
+to lay out the text in a standard way.
+
+An unparser is also used to produce a textual representation
+of a tree-structured data object.
+One example of such a textual representation is the XML file used to
+transmit a data object over the Internet; another is a Java program that
+can be executed to re-build the object.
+
+Arbitrary unparsers can be specified by means of a combination
+of attribute computations and PTG
+(@pxref{Patterns,,Pattern Specifications,ptg,
+PTG: Pattern-Based Text Generator})
+patterns.
+Writing these specifications by hand is a tedious process for a large tree
+grammar.
+
+Given a specification of the LIDO rules defining a tree grammar,
+Eli can derive the specifications of certain common unparsings.
+The result is a FunnelWeb file
+(@pxref{Introduction,,Introduction,fw,FunnelWeb})
+that is used directly to produce output routines for a generated processor.
+Each of the common unparsings has certain characteristics that must be
+understood to use it effectively.
+
+Although a pre-packaged unparsing may suffice for almost all of the rules
+of a particular tree grammar,
+a user may need to make a few changes in structure or representation.
+The unparser generator provides facilities for specifying such changes,
+while retaining the bulk of the generated attribute computations and PTG
+patterns.
+
+Finally, an unparser must be derived from a specification of the tree
+grammar to be unparsed together with specifications of any changes in
+representation.
+The resulting FunnelWeb file must either be extracted or incorporated into
+the derivation of the processor using it.
+
+@menu
+* Use::			Using an Unparser
+* Unparsings::		Available Kinds of Unparser
+* Changing::		Changing Structure or Representation
+* Derivation::		Deriving an Unparser
+* Index::       	Index.
+@end menu
+
+@node Use, Unparsings, , Top
+@chapter Using an Unparser
+
+In order to make the discussion concrete, we will use a trivial expression
+language as an example.
+That language is defined by the FunnelWeb file
+@findex @file{example.fw}
+@file{example.fw}:
+
+@example
+@@O@@<example.lido@@>==@@@{
+RULE PlusExp: Expression ::=    Expression '+' Expression    END;
+RULE StarExp: Expression ::=    Expression '*' Expression    END;
+RULE Parens:  Expression ::=    '(' Expression ')'           END;
+RULE IdnExp:  Expression ::=    Identifier                   END;
+RULE IntExp:  Expression ::=    Integer                      END;
+
+RULE CallExp: Expression ::=    Identifier '(' Arguments ')' END;
+RULE ArgList: Arguments  LISTOF Expression                   END;
+@@@}
+
+@@O@@<example.gla@@>==@@@{
+Identifier: C_IDENTIFIER
+Integer:    C_INT_DENOTATION
+@@@}
+
+@@O@@<example.con@@>==@@@{
+Axiom: Expression .
+Expression: Expression '+' Term / Term .
+Term: Term '*' Factor / Factor .
+Factor: 
+  Identifier / 
+  Integer / 
+  Identifier '(' Arguments ')' /
+  '(' Expression ')' .
+Arguments: Expression // ',' .
+@@@}
+
+@@O@@<example.map@@>==@@@{
+MAPSYM
+Expression ::= Term Factor .
+@@@}
+@end example
+
+The non-literal terminal symbols @code{Integer} and @code{Identifier} are
+defined by canned descriptions.
+According to their definitions
+(@pxref{Available Descriptions,,Available Descriptions,lex,Lexical Analysis}),
+@code{C_IDENTIFIER} uses the token processor @code{mkidn} to establish the
+internal value of the terminal symbol, and @code{C_INT_DENOTATION} uses
+@code{mkstr}.
+
+The concrete grammar and mapping specification
+together provide
+@findex precedence levels
+three precedence levels of @code{Expression}
+(@code{Expression}, @code{Term} and @code{Factor}) to disambiguate the
+dyadic computation rules.
+Parentheses can be used to override the defined precedence and association,
+and their presence is reflected in the tree.
+
+Finally, the concrete grammar specifies the comma as the
+@findex argument separator
+@findex  separator, argument
+argument separator in procedure calls.
+This fact is @emph{not}, however, explicit in the tree.
+
+@findex pretty-printer
+How could a pretty-printer for this language be constructed?
+Eli is capable of generating an unparser specification from the FunnelWeb
+file given above.
+That specification is, itself, a FunnelWeb file.
+These two FunnelWeb files, plus some additional information, provide a
+complete definition of the pretty-printer.
+Suppose that the additional information will be provided by a FunnelWeb
+file @file{Add.fw}.
+Here is a type-@file{specs} file that will define the pretty-printer:
+
+@example
+example.fw
+example.fw :idem
+Add.fw
+@end example
+
+@noindent
+The first line describes the file defining the language,
+the second describes the textual unparser derived from the language
+definition
+(@pxref{Derivation,,Deriving an Unparser}),
+and the last describes the file defining the additional information.
+A processor is derived from this type-@file{specs} file in the usual way
+(@pxref{exe,,exe -- Executable Version of the Processor,pp,Products and
+Parameters Reference}).
+
+@findex additional information
+@file{Add.fw} must specify three additional pieces of information to
+complete the pretty-printer:
+
+@itemize
+@item
+The formatting strategy.
+@item
+Which node of the tree to print.
+@item
+The argument list separators.
+@end itemize
+
+Our sample language involves only expressions, so the
+@findex formatting strategy
+@findex layout
+formatting strategy
+can be specified by instantiating a library module used to format C
+programs:
+
+@findex C_Separator
+@example
+$/Output/C_Separator.fw
+@end example
+
+The generated unparser specification establishes a type-@code{PTGNode}
+value for the @code{IdemPtg} attribute of each of the tree nodes.
+Because this value was created with the help of the library module defined
+by @file{C_Separator.fw} it should be written to the standard output
+stream by applying the routine
+@findex @code{Sep_Out}
+@code{Sep_Out} to it:
+
+@example
+SYMBOL Axiom COMPUTE Sep_Out(THIS.IdemPtg); END;
+@end example
+
+Finally, we can ensure that commas separate the arguments by overriding
+the generated @code{IdemPtg} computation for the argument list.
+@findex @file{Add.fw}
+The complete FunnelWeb file @file{Add.fw} would be:
+
+@example
+@@O@@<Add.specs@@>==@@@{
+$/Output/C_Separator.fw
+@@@}
+
+@@O@@<Add.lido@@>==@@@{
+SYMBOL Axiom COMPUTE Sep_Out(THIS.IdemPtg); END;
+
+RULE: Arguments LISTOF Expression
+COMPUTE
+  Arguments.IdemPtg=
+    CONSTITUENTS Expression.IdemPtg SHIELD Expression
+      WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+END;
+@@@}
+
+@@O@@<Add.ptg@@>==@@@{
+ArgSep: $ @{ "," [Separator] @} $
+@@@}
+@end example
+
+@noindent
+@findex Separator function call
+The @code{[Separator]} function call insertion in the pattern allows the
+module defined by @file{C_Separator.fw} to provide appropriate layout
+characters between the elements of an expression to implement the desired
+formatting.
+
+@node Unparsings, Changing, Use, Top
+@chapter Available Kinds of Unparser
+
+@findex unparser, kinds
+@findex kinds of unparser
+Eli is capable of generating specifications for the following kinds of
+unparsers:
+
+@table @asis
+@item Textual
+Print a ``source text'' representation of the tree.
+This kind of unparser is most useful for processors that solve a
+``source-to-source'' translation problem, such as pretty-printing or
+language extension.
+
+@item Structural
+Print a ``structural'' representation of the tree.
+This kind of unparser is most useful for debugging applications,
+and for processors that output textual representations
+of tree-structured data objects.
+@end table
+
+@menu
+* idem::	Textual unparser
+* tree::	Structural unparser
+@end menu
+
+@node idem, tree, , Unparsings
+@section Textual unparser
+
+@findex textual unparser
+@findex unparser, textual
+A textual unparser creates source text which, when parsed, results in the
+tree that was unparsed.
+For example, the pretty-printer described above accepted a sentence in the
+expression language and built a tree.
+It then unparsed that tree to produce an equivalent sentence in the
+expression language that was formatted in a particular way.
+If the resulting sentence were parsed according to the rules of the expression
+language, the result would be the tree from which it had been created.
+
+Consider the tree representing the following sentence in the expression
+language:
+
+@example
+a((b+c)*d, e)
+@end example
+
+@noindent
+None of the terminal symbols @kbd{(} @kbd{)} @kbd{+} @kbd{*} is stored
+explicitly in the tree.
+Thus the textual unparser must
+@findex reconstruction of literal terminals
+@findex literal terminals, reconstruction
+reconstruct these terminal symbols from the
+LIDO rules defining the tree nodes.
+
+The terminal symbol @kbd{,} doesn't appear in any of the LIDO rules, and
+therefore it cannot be automatically reconstructed by the textual unparser.
+Additional information must be provided by the user to insert it into the
+unparsed text.
+This is a common consequence of using
+@findex @code{LISTOF} productions
+@findex productions, @code{LISTOF}
+@code{LISTOF} productions.
+
+Our definition of the tree grammar for the expression language contains the
+following rule:
+
+@example
+RULE Parens: Expression ::= '(' Expression ')' END;
+@end example
+
+@noindent
+The purpose of this rule is to support the unparser by retaining
+information about the presence of parentheses used to
+@findex overriding operator precedence
+@findex operator precedence, overriding
+override the normal operator precedence.
+Such parentheses result in a @code{Parens} node in the tree, and the
+unparser can then use this LIDO rule to reconstruct the parentheses.
+
+@code{Parens} is an example of a @emph{chain rule}, in which the left-hand
+non-terminal symbol appears exactly once as the only non-terminal symbol
+on the right-hand side.
+Such chain rules are often eliminated from a tree grammar, because they have no
+significance to the computations it supports.
+If a textual unparser is to be generated, however, then either a chain rule
+must be in the tree grammar or there must be additional information that
+allows the unparser to
+@findex reconstruction of literal terminals
+@findex literal terminals, reconstruction
+reconstruct its terminal symbols.
+
+One important aspect of the textual form of the program that is missing from
+the LIDO rules is how to separate the basic symbols.
+For example, consider a @code{CallExp} in the expression language:
+
+@example
+a(b, c)
+@end example
+
+@noindent
+There is no information in the LIDO rules about whether a space should precede
+and/or follow a @kbd{(} or @kbd{,}.
+Spacing is important for making the text readable, however, and cannot
+simply be ignored.
+
+@menu
+* idemsep::	Computations for plain productions
+* idemdel::	Computations for LISTOF productions
+@end menu
+
+@node idemsep, idemdel, , idem
+@subsection Computations for plain productions
+
+@findex plain productions, computations
+@findex computations for plain productions
+A generated textual unparser defines the following computation (two
+attributes are used to simplify overriding,
+@pxref{Compute,,Changing @code{IdemPtg} computations}):
+
+@findex @code{IdemPtg}
+@findex @code{IdemReproduce}
+@findex attributes
+@example
+ATTR IdemPtg, IdemOrigPtg: PTGNode;
+
+CLASS SYMBOL IdemReproduce COMPUTE
+  SYNT.IdemOrigPtg=
+    RuleFct("PTGIdem_", RHS.IdemPtg, TermFct("PTGIdem_"));
+  SYNT.IdemPtg=THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+The class symbol @code{IdemReproduce} is inherited by every
+non-terminal symbol appearing on the left-hand side of a plain production.
+For example, it is inherited by @code{Expression} and @code{Axiom} in the
+textual unparser specification generated from the expression language
+definition.
+
+This computation invokes a function specific to the LIDO rule and, if the
+rule contains any instances of non-literal terminal symbols, a function
+specific to each.
+For example, the effect of @code{Expression} inheriting
+@code{IdemReproduce} is to carry out computations at the @code{StarExp} and
+@code{CallExp} rules that are equivalent to the following rule
+computations:
+
+@example
+RULE StarExp: Expression ::= Expression '*' Expression
+COMPUTE
+  Expression[1].IdemOrigPtg=
+    PTGIdem_StarExp(Expression[2].IdemPtg,Expression[3].IdemPtg);
+  Expression[1].IdemPtg=Expression[1].IdemOrigPtg;
+END;
+
+RULE CallExp: Expression ::= Identifier '(' Arguments ')'
+COMPUTE
+  Expression[1].IdemOrigPtg=
+    PTGIdem_CallExp(Arguments.IdemPtg,PTGIdem_Identifier(Identifier));
+  Expression[1].IdemPtg=Expression[1].IdemOrigPtg;
+END;
+@end example
+
+@noindent
+(For details about @code{RuleFct} and @code{TermFct},
+@pxref{Predefined Entities,,Predefined Entities,lidoref,
+LIDO - Reference Manual}.)
+
+Here are several PTG patterns appearing in a textual unparser generated
+from the expression language definition that illustrate how the
+PTG functions are specified:
+
+@example
+Idem_StarExp: $1  "*" [Separator]  $2
+Idem_IdnExp:  $1  [Separator]
+Idem_CallExp: $2  [Separator] "(" [Separator]  $1  ")" [Separator]
+@end example
+
+@noindent
+Notice how these patterns
+@findex reconstruction of literal terminals
+@findex literal terminals, reconstruction
+reconstruct the terminal symbols @kbd{*},
+@kbd{(}, and @kbd{)}.
+
+The different orders of the indexed insertion points in the patterns
+@code{Idem_StarExp} and @code{Idem_CallExp} are due to
+the definition of the computation above.
+@code{Idem_StarExp} has two non-terminal children,
+which appear in order as the arguments of the generated rule function.
+@code{Idem_CallExp}, on the other hand,
+has a non-literal terminal as its first child and a non-terminal as its second.
+The non-literal terminal arguments of the generated rule function follow
+the non-terminal arguments.
+
+@findex Separator function call
+@code{Separator} is the function that makes the decision about how to place
+layout characters
+(@pxref{Separator,,Introduce Separators in PTG Output,output,
+Tasks related to generating output}).
+A call to @code{Separator} is inserted into every pattern after each
+terminal symbol, both literal and non-literal.
+This allows a decision to be made about layout characters between each
+pair of terminal symbols.
+
+The separator module provides the following output functions, which must be
+used instead of the corresponding PTG output functions
+(@pxref{Output,,Output Functions,ptg,PTG: Pattern-based Text Generator}):
+
+@findex @code{Sep_Out}
+@example
+PTGNode Sep_Out(PTGNode root);
+PTGNode Sep_OutFile(char *filename, PTGNode root);
+PTGNode Sep_OutFPtr(FILE *fptr, PTGNode root);
+@end example
+
+The module library contains two modules that implement different strategies
+for selecting layout characters:
+
+@table @file
+@findex @file{Sp_Separator.fw}
+@item Sp_Separator.fw
+A single space is used as a separator regardless of the context.
+
+@item C_Separator.fw
+@findex @file{C_Separator.fw}
+Reasonable separator placement rules for C program text:
+a newline is added after any of @kbd{;} @kbd{@{} @kbd{@}},
+no separator is added after any of @kbd{(} @kbd{[} @kbd{.} @kbd{++}
+@kbd{--},
+no separator is added before any of @kbd{[} @kbd{]} @kbd{,} @kbd{.} @kbd{;}
+@kbd{++} @kbd{--},
+and a single space added in all other cases.
+@end table
+
+@findex module, separator
+@findex separator module, constructing
+@findex constructing a separator module
+If none of the available modules is satisfactory,
+then you must create your own.
+The simplest approach is to modify one from the library.
+Here is a sequence of Eli requests that will
+extract @file{C_Separator.fw} as file @code{My_Separator.fw},
+make @code{My_Separator.fw} writable,
+and
+initiate an editor session on it:
+
+@example
+-> $elipkg/Output/C_Separator.fw > My_Separator.fw
+-> My_Separator.fw !chmod +w
+-> My_Separator.fw <
+@end example
+
+In order to change the decision about what (if any) separator is to be
+inserted in a given context, you need to change the function called
+@findex @code{Sep_Print}
+@code{Sep_Print}.
+@code{Sep_Print}
+(@pxref{Separator, , Introduce Separators in PTG Output,output,
+Specification Module Library: Generating Output})
+@findex @code{Sep_Print}
+has three arguments:
+a pointer to the file to which the separator is to be written,
+a pointer to the string that immediately precedes the separator,
+and a pointer to the string that immediately follows the separator.
+
+@code{Sep_Print} must decide whether a separator is appropriate between the
+two strings given by its second and third arguments,
+and if so then what that separator should be.
+If a separator is required, @code{Sep_Print} must write that separator to the
+file.
+@code{Sep_Print} must not modify the strings passed to it.
+
+@node idemdel, , idemsep, idem
+@subsection Computations for LISTOF productions
+
+@findex @code{LISTOF} productions, computations
+@findex computations for @code{LISTOF} productions
+A generated textual unparser defines the following computation for a
+@code{LISTOF} production named @samp{r} with left-hand side @samp{X} and
+elements @samp{Y | Z} (two attributes are used to simplify overriding,
+@pxref{Compute,,Changing @code{IdemPtg} computations}):
+
+@findex @code{IdemReproduce_X}
+@example
+ATTR IdemPtg, IdemOrigPtg: PTGNode;
+
+CLASS SYMBOL IdemReproduce_X COMPUTE
+  SYNT.IdemOrigPtg=
+    PTG_r(
+      CONSTITUENTS (Y.IdemPtg, Z.IdemPtg) SHIELD (Y, Z)
+      WITH (PTGNode, PTGIdem_2r, PTGIdem_1r, PTGNull));
+  SYNT.IdemPtg=THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+The class symbol @code{IdemReproduce_X} is inherited by the
+non-terminal symbol @code{X}.
+For example, in the textual unparser specification generated from the
+expression language, there is such a rule with
+@code{r} being @code{ArgList}, 
+@code{X} being @code{Arguments}, and
+@code{Y} being @code{Expression}.
+There is no @code{Z} in that case:
+
+@example
+CLASS SYMBOL IdemReproduce_Arguments COMPUTE
+  SYNT.IdemOrigPtg=
+    PTG_ArgList(
+      CONSTITUENTS (Expression.IdemPtg) SHIELD (Expression)
+      WITH (PTGNode, PTGIdem_2ArgList, PTGIdem_1ArgList, PTGNull));
+  SYNT.IdemPtg=THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+@code{Arguments} inherits @code{IdemReproduce_Arguments} in the textual
+unparser specification generated from the expression language definition.
+
+The computation for the class symbol invokes three functions
+specific to the LIDO rule.
+Here are the three PTG patterns specifying those functions for the
+@code{ArgList} rule:
+
+@example
+Idem_ArgList:  $
+Idem_2ArgList: $ $
+Idem_1ArgList: $
+@end example
+
+@noindent
+PTG patterns for other @code{LISTOF} productions will differ from these
+only in the pattern names.
+
+@node tree, , idem, Unparsings
+@section Structural unparser
+
+@findex structural unparser
+@findex unparser, structural
+A structural unparser creates a textual description of the tree in terms
+of rule names and non-literal terminal symbols.
+For example, the sentence @samp{a(b,c)} in the expression language
+could be unparsed as the XML file:
+
+@example
+<rule_000>
+  <CallExp>
+    a
+    <ArgList>
+      <IdnExp>b</IdnExp>
+      <IdnExp>c</IdnExp>
+    </ArgList>
+  </CallExp>
+</rule_000>
+@end example
+
+@noindent
+The entire sentence is output as a @code{rule_000} because the LIDO rule
+defining @code{Axiom} was generated, and was given the name @code{rule_000}
+by Eli.
+The single child of this node is a @code{CallExp} with two components,
+the non-literal terminal symbol @samp{a} and an @code{ArgList}
+made up of two @code{IdnExp} nodes.
+
+Appropriate layout, with meaningful line breaks and indentation,
+is important for a human trying to understand the output of
+a structural unparser.
+This formatting depends only on structure, however, not on the content of
+the output.
+
+Structural unparser generators producing both simple descriptions of trees and
+descriptions in several standard languages are available.
+It is also possible for a user to create an unparser generator that
+describes the tree in a language of their own choosing.
+
+@menu
+* treesep::	Computations for plain productions
+* treedel::	Computations for LISTOF productions
+* treelng::	Languages describing tree structure
+@end menu
+
+@node treesep, treedel, , tree
+@subsection Computations for plain productions
+
+@findex plain productions, computations
+@findex computations for plain productions
+A generated structural unparser defines the following computation (two
+attributes are used to simplify overriding,
+@pxref{Compute,,Changing @code{IdemPtg} computations}):
+
+@findex @code{IdemPtg}
+@findex @code{IdemReproduce}
+@findex attributes
+@example
+ATTR IdemPtg, IdemOrigPtg: PTGNode;
+
+CLASS SYMBOL IdemReproduce COMPUTE
+  SYNT.IdemOrigPtg=
+    RuleFct("PTGIdem_", RHS.IdemPtg, TermFct("PTGIdem_"));
+  SYNT.IdemPtg = THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+The class symbol @code{IdemReproduce} is inherited by every non-terminal
+symbol appearing on the left-hand side of a plain production.
+For example, it is inherited by @code{Expression} and @code{Axiom} in the
+structural unparser specification generated from the expression language
+definition.
+
+This computation invokes a function specific to the LIDO rule and, if the
+rule contains any instances of non-literal terminal symbols, a function
+specific to each.
+For example, the effect of @code{Expression} inheriting
+@code{IdemReproduce} is to carry out computations at the @code{StarExp} and
+@code{CallExp} rules that are equivalent to the following rule
+computations:
+
+@example
+RULE StarExp: Expression ::= Expression '*' Expression
+COMPUTE
+  Expression[1].IdemOrigPtg=
+    PTGIdem_StarExp(Expression[2].IdemPtg,Expression[3].IdemPtg);
+  Expression[1].IdemPtg=Expression[1].IdemOrigPtg;
+END;
+
+RULE CallExp: Expression ::= Identifier '(' Arguments ')'
+COMPUTE
+  Expression[1].IdemOrigPtg=
+    PTGIdem_CallExp(Arguments.IdemPtg,PTGIdem_Identifier(Identifier));
+  Expression[1].IdemPtg=Expression[1].IdemOrigPtg;
+END;
+@end example
+
+@noindent
+(For details about @code{RuleFct} and @code{TermFct},
+@pxref{Predefined Entities,,Predefined Entities,lidoref,
+LIDO - Reference Manual}.)
+
+Here are several PTG patterns from a structural unparser generated from
+the expression language definition that illustrate how those functions are
+specified:
+
+@findex @code{BP_BeginBlockI}
+@findex @code{BP_BreakLine}
+@findex @code{BP_EndBlockI}
+@example
+Idem_StarExp:
+  "<StarExp>" [BP_BeginBlockI]
+    [BP_BreakLine] $1 [BP_BreakLine] $2 [BP_BreakLine]
+  [BP_EndBlockI] "</StarExp>"
+Idem_IdnExp:
+  "<IdnExp>" [BP_BeginBlockI]
+    [BP_BreakLine] $1 [BP_BreakLine]
+  [BP_EndBlockI] "</IdnExp>"
+Idem_CallExp:
+  "<CallExp>" [BP_BeginBlockI]
+    [BP_BreakLine] $2 [BP_BreakLine] $1 [BP_BreakLine]
+  [BP_EndBlockI] "</CallExp>"
+@end example
+
+@noindent
+These patterns are the ones generated if the output is to be an XML file
+(@pxref{treelng,,Languages describing tree structure}).
+
+@findex order of indexed insertion points
+@findex indexed insertion points, order of
+The different orders of the indexed insertion points in the patterns
+@code{Idem_StarExp} and @code{Idem_CallExp} are due to the definition
+of the computation above.
+@code{Idem_StarExp} has two non-terminal children,
+which appear in order as the arguments of the generated rule function.
+@code{Idem_CallExp}, on the other hand,
+has a non-literal terminal as its first child and a non-terminal as its second.
+The non-literal terminal arguments of the generated rule function follow
+the non-terminal arguments.
+
+Generated structural unparsers use the
+@findex block print module
+@findex module, block print
+block print module
+(@pxref{BlockPrint,,Typesetting for Block Structured Output,output,
+Tasks related to generating output})
+to provide
+@findex layout
+layout.
+The generated PTG patterns invoke functions of this module to mark
+potential line breaks and the boundaries of logical text blocks.
+The block print module provides the following output functions, which must be
+used instead of the corresponding PTG output functions
+(@pxref{Output,,Output Functions,ptg,PTG: Pattern-based Text Generator}):
+
+@findex @code{BP_Out}
+@example
+PTGNode BP_Out(PTGNode root);
+PTGNode BP_OutFPtr(FILE *fptr, PTGNode root);
+PTGNode BP_OutFile(char *filename, PTGNode root);
+@end example
+
+Note that the textual representation of the @emph{children} of every node
+is considered to be a logical text block.
+A line break can occur before each child.
+The effect of this specification is to keep the textual representation of a
+node on a single line if that is possible.
+Otherwise, the sequence of children is written one per line, indented from
+the name of the block's rule.
+
+@node treedel, treelng, treesep, tree
+@subsection Computations for LISTOF productions
+
+@findex @code{LISTOF} productions, computations
+@findex computations for @code{LISTOF} productions
+A generated structural unparser defines the following computation for a
+@code{LISTOF} production named @samp{r} with left-hand side @samp{X} and
+elements @samp{Y | Z} (two attributes are used to simplify overriding,
+@pxref{Compute,,Changing @code{IdemPtg} computations}):
+
+@findex @code{IdemPtg}
+@findex @code{IdemReproduce_X}
+@findex attributes
+@example
+ATTR IdemPtg, IdemOrigPtg: PTGNode;
+
+CLASS SYMBOL IdemReproduce_X COMPUTE
+  SYNT.IdemOrigPtg=
+    PTG_r(
+      CONSTITUENTS (Y.IdemPtg, Z.IdemPtg) SHIELD (Y, Z)
+      WITH (PTGNode, PTGIdem_2r, PTGIdem_1r, PTGNull));
+  SYNT.IdemPtg=THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+The symbol @code{IdemReproduce_X} is inherited by the non-terminal symbol
+@code{X}.
+For example, in the structural unparser specification generated from the
+expression language, there is such a rule with
+@code{r} being @code{ArgList}, 
+@code{X} being @code{Arguments}, and
+@code{Y} being @code{Expression}.
+There is no @code{Z} in that case:
+
+@example
+CLASS SYMBOL IdemReproduce_Arguments COMPUTE
+  SYNT.IdemOrigPtg=
+    PTG_ArgList(
+      CONSTITUENTS (Expression.IdemPtg) SHIELD (Expression)
+      WITH (PTGNode, PTGIdem_2ArgList, PTGIdem_1ArgList, PTGNull));
+  SYNT.IdemPtg=THIS.IdemOrigPtg;
+END;
+@end example
+
+@noindent
+@code{Arguments} inherits @code{IdemReproduce_Arguments} in the structural
+unparser specification generated from the expression language definition.
+
+The computation for the class symbol invokes three functions
+specific to the LIDO rule.
+Here are the three PTG patterns specifying those functions for the
+@code{ArgList} rule:
+
+@example
+Idem_ArgList:
+  "<ArgList>" [BP_BeginBlockI]
+   [BP_BreakLine] $ [BP_BreakLine]
+  [BP_EndBlockI] "</ArgList>"
+Idem_2ArgList: $ @{ [BP_BreakLine] @} $
+Idem_1ArgList: $
+@end example
+
+@noindent
+PTG patterns for other @code{LISTOF} productions will differ from these
+only in the rule name.
+
+@node treelng, , treedel, tree
+@subsection Languages describing tree structure
+
+By default, a structural unparser generator uses a generic functional
+representation to describe the tree.
+Here's the default representation of the sentence @samp{a(b,c)}
+in the expression language:
+
+@example
+rule_000(CallExp(a,IdnExp(b),IdnExp(c)))
+@end example
+
+@noindent
+(Recall that the entire sentence is output as a @code{rule_000} because the
+LIDO rule defining @code{Axiom} was generated, and was given the name
+@code{rule_000} by Eli.)
+
+Four other standard representations are available:
+
+@table @code
+@findex @code{XML}
+@findex application languages, @code{XML}
+@item XML
+Generates an unparser that produces an XML representation of the tree,
+and a separate DTD file defining the possible structures.
+
+@findex @code{CPP}
+@findex application languages, @code{CPP}
+@item CPP
+Generates an unparser that produces C++ code to build the tree,
+and a separate module defining the set of C++ classes used.
+
+@findex @code{Java}
+@findex application languages, @code{Java}
+@item Java
+Generates an unparser that produces Java code to build the tree,
+and a separate package defining the set of Java classes used.
+@end table
+
+@findex application languages, other
+It is also possible to build structural unparser generators for other
+application languages by modifying existing generator specifications.
+All unparser generators have the same general organization: they analyze the
+tree grammar and produce class symbol computations and
+PTG patterns to output any tree defined by that grammar.
+Much of the analysis is common, with differences appearing only in the
+final output of the generated FunnelWeb file.
+
+@findex unparser generator, available specifications
+The unparser generator specifications available in the library are:
+
+@table @file
+@findex @file{Analysis.fw}
+@item $/Unparser/Analysis.fw
+Analysis of the input text that defines the tree grammar.
+Common attribute computations supporting a wide range of unparsers.
+
+@findex @file{Idem.fw}
+@item $/Unparser/Idem.fw
+Attribute computations specific to textual unparsers.
+
+@findex @file{Tree.fw}
+@item $/Unparser/Tree.fw
+Attribute computations specific to the generic functional representation.
+
+@findex DTD file
+@findex @file{Xml.fw}
+@item $/Unparser/Xml.fw
+Attribute computations specific to XML files and the associated DTD file.
+
+@findex @file{Cpp.fw}
+@item $/Unparser/Cpp.fw
+Attribute computations specific to C++ code and the associated module
+definition.
+
+@findex package definition
+@findex @file{Java.fw}
+@item $/Unparser/Java.fw
+Attribute computations specific to Java code and the associated package
+definition.
+@end table
+
+Suppose that you wanted to create an unparser generator that would
+produce Modula-3 code to build the tree, and a separate interface file
+defining the tree structure.
+Because Modula-3 is quite similar to Java in its structure,
+you might start by modifying @file{$/Unparser/Java.fw} from the library.
+Here is a sequence of Eli requests that will
+extract @file{Java.fw} as file @code{Modula-3.fw},
+make @code{Modula-3.fw} writable,
+and
+initiate an editor session on it:
+
+@example
+-> $elipkg/Unparser/Java.fw > Modula-3.fw
+-> Modula-3.fw !chmod +w
+-> Modula-3.fw <
+@end example
+
+After suitable modification, @file{Modula-3.fw} could be combined with the
+library specification @file{$/Unparser/Analysis.fw} to define the new
+unparser generator.
+Thus you might create a file called
+@findex @file{M3.specs}
+@file{M3.specs} with the following content:
+
+@example
+Modula-3.fw
+$/Unparser/Analysis.fw
+@end example
+
+The unparser generator could then be derived from @file{M3.specs} as usual
+(@pxref{exe,,exe -- Executable Version of the Processor,pp,Products and
+Parameters Reference}):
+
+@example
+-> M3.specs :exe
+@end example
+
+@node Changing, Derivation, Unparsings, Top
+@chapter Changing Structure or Representation
+
+@findex @code{IdemPtg}, computation
+@findex computation, @code{IdemPtg}
+The computation of @code{IdemPtg} in a given context can be decomposed into
+two tasks: collecting the @code{IdemPtg} attribute values from the
+children, and combining those values into a representation of the
+current context.
+Methods for attribute value collection depend on the tree grammar,
+and are embodied in LIDO computations.
+Methods for combining values, on the other hand, depend on the desired
+form of the unparsed text.
+They are embodied in PTG patterns.
+
+There are two ways to override the output defined by the @code{IdemPtg}
+attribute at a given node:
+
+@findex overriding PTG patterns
+@findex PTG patterns, overriding
+@enumerate
+@item
+Override the PTG pattern associated with that node
+@item
+Override the computation of the @code{IdemPtg} attribute in the
+associated rule
+@end enumerate
+
+@noindent
+The first method should be used when the change is simply one of format
+(adding constant strings, changing the order of the components, or omitting
+components).
+When it is necessary to add significant content to the unparsed
+representation of a node, then the second method should be used.
+Any arbitrary computation yielding an object of type @code{PTGNode} can be
+carried out, using any information at the processor's disposal.
+(Such a solution usually @emph{also} requires overriding of the pattern.)
+
+@menu
+* Combine::	Overriding PTG patterns
+* Compute::	Changing @code{IdemPtg} computations
+@end menu
+
+@node Combine, Compute, , Changing
+@section Overriding PTG patterns
+
+The generated unparser specification contains a PTG pattern for
+each non-literal terminal symbol
+and
+each LIDO rule
+in the definition of the tree grammar.
+Each pattern name is the name of the construct
+(non-literal terminal or rule),
+preceded by a prefix followed by an underscore.
+The default prefix is @code{Idem}.
+
+@findex non-literal terminal symbols
+@findex terminal symbol, non-literal
+All of the non-literal terminal symbols are represented by patterns of the
+following form (@samp{name} is the non-literal terminal symbol):
+
+@findex @code{PtgOutId}
+@example
+Idem_@samp{name}: [PtgOutId $ int]
+@end example
+
+@noindent
+This pattern is a single function call insertion
+(@pxref{Calls,,Function Call Insertion,ptg,PTG: Pattern-based Text
+Generator}).
+@code{PtgOutId} is a function exported by the PtgCommon module
+(@pxref{PtgCommon,,Commonly used Output patterns for PTG,output,
+Tasks related to generating output}).
+Its argument is assumed to be a
+@findex string table index
+string table index
+(@pxref{storage,,Character String Storage,lib,Library Reference Manual})
+and it outputs the indexed string.
+
+This default pattern for a non-literal terminal symbol assumes that
+the value of that symbol is, in fact, a string table index.
+If the internal representation of the symbol was created by either the
+token processor
+@findex @code{mkidn}
+@code{mkidn}
+(@pxref{Available Processors,,Available Processors,lex,Lexical Analysis})
+or the token processor @code{mkstr}, this will be the case.
+
+In the expression language specification, @code{mkidn} is used to
+establish the internal representation of an @code{Identifier}, and
+@code{mkstr} is used to establish the internal representation of an
+@code{Integer}.
+Suppose, however, that the internal representation of an @code{Integer}
+was created by the token processor
+@findex @code{mkint}
+@code{mkint}.
+In that case, the user would have to provide the following PTG pattern
+to override the normal pattern generation.
+
+@findex terminal symbol, overriding
+@example
+Idem_Integer: $ int
+@end example
+
+It is vital to ensure that the PTG pattern associated with a non-literal
+terminal symbol is
+@findex token processor compatibility
+@findex compatibility with token processor
+compatible with the token processor creating the
+internal representation of that symbol.
+
+The only differences between the infix and postfix representations of an
+expression tree are in the literal terminal symbols reconstructed by the
+textual unparser (parentheses appear in an infix representation but not in
+a postfix representation) and in the order in which values are combined
+(operators between operands in an infix representation but following them
+in a postfix representation).
+Thus we can override the PTG patterns generated from the expression
+language definition to produce a postfix unparser:
+
+@findex @code{Separator}
+@example
+Idem_PlusExp: $1 $2  "+" [Separator]
+Idem_StarExp: $1 $2  "*" [Separator]
+Idem_Parens:  $1
+Idem_CallExp: $1 $2 [Separator]
+@end example
+
+Earlier
+(@pxref{Use,,Using an Unparser}),
+we used a LIDO computation to ensure that a textual unparser generated from
+the expression language definition separated the arguments of a call with
+commas.
+@findex argument separator
+@findex separator, argument
+The same effect can be achieved by simply overriding the PTG pattern that
+defines the ``combine'' function of the computation inherited by
+@code{Arguments}:
+
+@example
+Idem_2ArgList: $ @{ "," [Separator] @} $
+@end example
+
+@noindent
+As usual, an invocation of @code{Separator} follows the terminal symbol
+@kbd{,}.
+
+@findex child, omitting in the unparsed output
+@findex omitted child
+In some situations, it is necessary to omit one or more children of a node.
+This cannot be done simply by omitting indexed insertion points from the
+appropriate PTG pattern, because PTG determines the number of arguments to
+the generated function from the set of insertion points.
+An invocation of the generated function, with one argument per child,
+already appears in the computation for the node.
+Thus any change in the number of insertion points would result in a
+mismatch between the number of parameters to the function and the number of
+arguments to the call.
+
+A child can be omitted from the unparsed tree by ``wrapping'' the
+corresponding indexed insertion point in the PTG pattern
+(@samp{i} is the integer index):
+
+@findex @code{IGNORE} macro
+@findex @kbd{$} symbol
+@example
+[ IGNORE  $@samp{i}  ]
+@end example
+
+@noindent
+@code{IGNORE} is a macro defined in the generated FunnelWeb file.
+It does nothing, so the effect is that the indexed sub-tree does not
+appear in the unparsed output.
+
+@node Compute, , Combine, Changing
+@section Changing @code{IdemPtg} computations
+
+The unparser generator implements the computation of the
+@findex @code{IdemPtg}, overriding
+@code{IdemPtg} attribute as a
+@findex class symbol computation
+@findex computation, class symbol
+class symbol computation.
+This class symbol computation can be overridden either by a
+@findex tree symbol computation
+@findex computation, tree symbol
+tree symbol computation
+or by a
+@findex rule computation
+@findex computation, rule
+rule computation
+(@pxref{Inheritance of Computations, , Inheritance of Computations,
+lidoref, LIDO - Reference Manual}).
+
+When overriding the default
+@findex @code{IdemPtg}, computation
+@findex computation, @code{IdemPtg}
+computation for an @code{IdemPtg} value, it is
+often convenient to be able to write the new computation in terms of
+the overridden value.
+Thus the unparser generator actually produces two class symbol
+computations:
+@findex @code{IdemOrigPtg} attribute
+@findex attribute, @code{IdemOrigPtg}
+The @code{IdemOrigPtg} attribute of the class symbol is first computed
+by applying the appropriate PTG function to the @code{IdemPtg} attributes
+of the children.
+Then the @code{IdemPtg} attribute of the class symbol is assigned the value
+of the @code{IdemOrigPtg} attribute of the class symbol.
+
+To see how @code{IdemPtg} and @code{IdemOrigPtg} could be used when an
+unparser's behavior must be changed, suppose that the
+@findex chain rule, omitted
+@findex omitted chain rule
+@code{Parens} rule
+were omitted from the definition of the expression language.
+In that case, the unparser has no information about parentheses present in
+the original input text.
+Thus a pretty-printer would fail to output parentheses that were necessary
+to override the normal operator precedence and association in certain
+expressions, changing the meaning of those expressions.
+
+Here is a simple
+@findex tree symbol computation
+@findex computation, tree symbol
+tree symbol computation to ensure that the unparsed form
+has the same meaning as the original tree.
+It overrides the class symbol computation for @code{IdemPtg} that was
+produced by the unparser generator by a tree symbol computation:
+
+@example
+SYMBOL Expression COMPUTE
+  SYNT.IdemPtg=PTGParen(THIS.IdemOrigPtg);
+END;
+@end example
+
+@noindent
+@code{PTGParen} is defined by the pattern:
+
+@example
+Paren: "(" $ ")"
+@end example
+
+This specification puts parentheses around @emph{every} expression, which
+certainly preserves the meaning but may make the result hard to read.
+A more readable representation could be created by parenthesizing
+only those expressions containing operators:
+
+@example
+RULE: Expression ::= Expression Operator Expression
+COMPUTE
+  Expression[1].IdemPtg=PTGParen(Expression[1].IdemOrigPtg);
+END;
+
+RULE: Expression ::= Operator Expression
+COMPUTE
+  Expression[1].IdemPtg=PTGParen(Expression[1].IdemOrigPtg);
+END;
+@end example
+
+@noindent
+This illustrates the use of
+@findex rule computation
+@findex computation, rule
+rule computations to override the generated class symbol computation.
+
+@findex argument separator
+@findex separator, argument
+A comma-separated argument list can be produced by overriding the
+computation of @code{IdemOrigPtg} (or @code{IdemPtg},
+@pxref{Use,,Using an Unparser}):
+
+@example
+RULE: Arguments LISTOF Expression
+COMPUTE
+  Arguments.IdemOrigPtg=
+    CONSTITUENTS Expression.IdemPtg SHIELD Expression
+      WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+END;
+@end example
+
+@node Derivation, Index, Changing, Top
+@chapter Deriving an Unparser
+
+Recall the example of the pretty-printer that was defined by the file
+following type-@file{specs} file
+(@pxref{Use,,Using an Unparser}):
+
+@example
+example.fw
+example.fw :idem
+Add.fw
+@end example
+
+@noindent
+The first line is the name of a file defining a processor that builds a
+tree from a sentence in the expression language.
+The second line is a request to derive a textual unparser from the
+definition of the expression language.
+Finally, the third line is the name of a file containing the computation
+that outputs the unparsed tree.
+These three lines constitute the complete definition of the pretty-printer,
+which could be derived from this type-@file{specs} file in the usual way.
+
+Here we are concerned only with the problem of
+@findex unparser derivation
+@findex derivation, unparser
+@emph{deriving} an unparser, exemplified by the second line above.
+Such a derivation always yields a FunnelWeb file that defines the desired
+unparser.
+Since the derivation occurs as a component of a type-@file{specs} file, the
+derived unparser becomes a component of the processor defined by that
+type-@file{specs} file.
+
+All of the information needed to construct the unparser must be derivable
+from its
+@findex basis
+@emph{basis} (file @file{example.fw} in this case).
+Different derivations are applied to the basis to create different kinds of
+unparsers, to control the representation language of the unparsed text, and
+to obtain a definition of the output structure.
+
+@menu
+* Basis::	Establishing a basis
+* DeriveIdem::	Deriving textual unparsers
+* DeriveTree::	Deriving structural unparsers
+* DeriveDefn::	Obtaining the structure definition
+* Multiple::	Deriving multiple unparsers
+* Partial::	Deriving unparsers from sub-grammars
+@end menu
+
+@node Basis, DeriveIdem, , Derivation
+@section Establishing a basis
+
+In the simplest case, the only information needed to derive an unparser
+is the tree grammar rules defining the set of trees to be unparsed.
+
+Since the generated unparser will be a component of some processor,
+all of the rules defining trees to be unparsed must be
+valid rules of the tree grammar for that processor.
+The easiest way to satisfy this requirement is for the basis of the
+unparser derivation to define a complete tree grammar for the processor.
+This is the situation in our example; file @file{example.fw} defines the
+complete tree grammar for the expression language and therefore for the
+pretty-printer.
+(@xref{DeriveTree,,Deriving structural unparsers}, for applications in
+which unparsers are derived from parts of the tree grammar for a processor.)
+
+Suppose that we were to create a file @file{evaluate.fw} containing
+computations that evaluate sentences in the expression language.
+A ``desk calculator'' could then be defined by a file @file{calculator.specs}
+with the content:
+
+@example
+example.fw
+evaluate.fw
+@end example
+
+@noindent
+In this case, @file{calculator.specs} still defines the complete tree
+grammar for the expression language.
+Thus the following type-@file{specs} file would define a processor that
+reads sentences in the expression language, evaluates them,
+and prints them in a standard format:
+
+@example
+calculator.specs
+calculator.specs :idem
+Add.fw
+@end example
+
+The situation is more complex when some PTG patterns must be overridden
+to obtain the desired output.
+Overriding patterns must be specified as part of the basis from which
+the unparser is derived,
+and they will be incorporated into the generated unparser definition.
+
+One way to include overriding PTG patterns in the basis of an unparser
+derivation is to make them a part of the overall processor specification.
+Thus, for example, they could be included in @file{example.fw} of the
+specifications above.
+Then either of the derivations shown (the one based on @file{example.fw} or
+the one based on @file{calculator.specs}) would produce an unparser with
+the specified patterns overridden.
+It is important to note that the tree grammar and the PTG patterns are the
+@emph{only} things defined by @file{calculator.specs}
+(or by @file{example.fw} in the earlier derivation)
+that are relevant to deriving an unparser.
+All other information is ignored.
+PTG patterns whose names do not match prefixed rule names from the tree
+grammar are also ignored.
+
+It is often a violation of modularity to combine overriding patterns with
+the overall processor specification.
+For example, consider an unparser that outputs a postfix representation
+of a sentence in the expression language
+(@pxref{Combine,,Overriding PTG patterns}).
+The overriding patterns are specific to this particular processor, and have
+nothing to do with the definition of the expression language itself.
+Including them in @file{example.fw} would pollute the language
+specification, tying it to this application.
+
+We can easily avoid this violation of modularity by adding a @code{patterns}
+parameter to @file{example.fw} to form the basis of the derivation.
+First, the overriding patterns are defined in a file named (say)
+@file{Postfix.ptg}:
+
+@example
+Idem_PlusExp: $1 $2  "+" [Separator]
+Idem_StarExp: $1 $2  "*" [Separator]
+Idem_Parens:  $1
+Idem_CallExp: $1 $2      [Separator]
+@end example
+
+@noindent
+This file is then supplied as the value of the @code{patterns} parameter
+(@pxref{parameterization expressions,,Parameterization Expressions,ui,
+Eli User Interface Reference Manual}):
+
+@findex @code{+patterns}
+@example
+example.fw +patterns=(Postfix.ptg)
+@end example
+
+@noindent
+The unparser derivation would then be:
+
+@example
+example.fw +patterns=(Postfix.ptg) :idem
+@end example
+
+@noindent
+A complete processor accepting a sentence in the expression language and
+printing its postfix equivalent in standard form would then be defined by
+the following type-@file{specs} file:
+
+@example
+example.fw
+example.fw +patterns=(Postfix.ptg) :idem
+Add.fw
+@end example
+
+A basis may include any number of file-valued @code{patterns} parameters.
+Only the PTG patterns defined by these files are relevant to the unparser
+generation; all other information is ignored.
+PTG patterns whose names do not match prefixed rule names from the tree
+grammar are also ignored.
+
+@findex @code{+prefix}
+Any unparser can be derived with a prefix other than @code{Idem} for the
+type-@code{PTGNode} attributes and PTG patterns that it creates.
+The desired prefix forms part of the basis from which the unparser is
+derived.
+This feature is useful if an application involves more than one unparser
+(@pxref{Multiple,,Deriving multiple unparsers}).
+
+The desired prefix is supplied as the value of the @code{prefix} parameter.
+For example, the basis for an expression language unparser computing the
+attributes @code{TargetPtg} and @code{TargetOrigPtg} instead of
+@code{IdemPtg} and @code{IdemOrigPtg} would be:
+
+@example
+example.fw +prefix=Target
+@end example
+
+All PTG pattern names in an unparser derived from this basis would begin
+with @code{Target_}.
+Thus, if we wished to override the generated patterns in order to produce
+postfix, the overriding pattern names in @file{Postfix.ptg} would have to
+reflect the new prefix:
+
+@example
+Target_PlusExp: $1 $2  "+" [Separator]
+Target_StarExp: $1 $2  "*" [Separator]
+Target_Parens:  $1
+Target_CallExp: $1 $2      [Separator]
+@end example
+
+@noindent
+The basis of such an unparser consists of the the specification file for
+the tree grammar, modified by the two parameters (which may be given in
+any order
+@pxref{parameterization expressions,,Parameterization Expressions,ui,
+Eli User Interface Reference Manual}):
+
+@example
+example.fw +prefix=Target +patterns=(Postfix.ptg)
+@end example
+
+In the remainder of this document, @file{Basis} will be used to denote the
+basis of an unparser derivation.
+As we have seen in this section, @file{Basis} consists of a single file
+defining a tree grammar, possibly parameterized by a set of overriding
+PTG patterns and/or a prefix to replace the default @code{Idem}.
+
+@node DeriveIdem, DeriveTree, Basis, Derivation
+@section Deriving textual unparsers
+
+@findex textual unparser, deriving
+@findex derivation, textual unparser
+A textual unparser is constructed by deriving the
+@findex @code{idem}
+@code{:idem} product:
+
+@example
+Basis :idem
+@end example
+
+The result of this derivation is a FunnelWeb file defining a textual
+unparser.
+That FunnelWeb file contains:
+
+@itemize @bullet
+@item
+Named LIDO rules for the tree grammar specified by @file{Basis}.
+
+@item
+PTG patterns either generated from the tree grammar
+(@pxref{idem,,Textual unparser})
+or supplied as part of @file{Basis}
+(@pxref{Basis,,Establishing a basis}).
+
+@item
+@code{CLASS} @code{SYMBOL} computations for @code{IdemPtg} and
+@code{IdemOrigPtg}
+(@pxref{idem,,Textual unparser}).
+Those computations invoke PTG routines generated from the patterns.
+The prefix of the attribute and routine names is either @code{Idem} or the
+string specified via a @code{prefix} parameter in @file{Basis}
+(@pxref{Basis,,Establishing a basis}).
+
+@item
+A definition of the @code{IGNORE} macro
+(@pxref{Combine,,Overriding PTG patterns}).
+
+@item
+Invocations of the @code{PtgCommon}
+(@pxref{PtgCommon,,Commonly used Output patterns for PTG,
+output,Tasks related to generating output})
+and @code{Separator}
+(@pxref{Separator,,Introduce Separators in PTG Output,
+output,Tasks related to generating output})
+library modules.
+@end itemize
+
+@noindent
+A PostScript version of the unparser definition can also be derived for
+documentation purposes:
+
+@example
+Basis :idem :fwTex :ps
+@end example
+
+@node DeriveTree, DeriveDefn, DeriveIdem, Derivation
+@section Deriving structural unparsers
+
+@findex structural unparser, deriving
+@findex derivation, structural unparser
+A structural unparser is constructed by deriving the
+@findex @code{tree}
+@code{:tree} product:
+
+@example
+Basis :tree
+@end example
+
+The result of this derivation is a FunnelWeb file defining a structural
+unparser.
+That FunnelWeb file contains:
+
+@itemize @bullet
+@item
+Named LIDO rules for the tree grammar specified by @file{Basis}.
+
+@item
+PTG patterns either generated from the tree grammar
+(@pxref{idem,,Textual unparser})
+or supplied as part of @file{Basis}
+(@pxref{Basis,,Establishing a basis}).
+
+@item
+@code{CLASS} @code{SYMBOL} computations for @code{IdemPtg} and
+@code{IdemOrigPtg}
+(@pxref{idem,,Textual unparser}).
+Those computations invoke PTG routines generated from the patterns.
+The prefix of the attribute and routine names is either @code{Idem} or the
+string specified via a @code{prefix} parameter in @file{Basis}
+(@pxref{Basis,,Establishing a basis}).
+
+@item
+A definition of the @code{IGNORE} macro
+(@pxref{Combine,,Overriding PTG patterns}).
+
+@item
+Invocations of the @code{PtgCommon}
+(@pxref{PtgCommon,,Commonly used Output patterns for PTG,
+output,Tasks related to generating output})
+and @code{BlockPrint}
+(@pxref{BlockPrint,,Typesetting for Block Structured Output,
+output,Tasks related to generating output})
+library modules.
+@end itemize
+
+@noindent
+A PostScript version of the unparser definition can also be derived for
+documentation purposes:
+
+@example
+Basis :tree :fwTex :ps
+@end example
+
+A structural unparser produces a description of the tree in some language.
+Recall that a generic functional representation is used by default.
+@findex application language, selecting
+Any other standard representation language can be specified by supplying
+an appropriate value of the
+@findex @code{+lang}
+@code{lang} parameter to the derivation.
+For example, the following derives a structural unparser producing a
+description of the tree in XML:
+
+@example
+Basis +lang=XML :tree
+@end example
+
+@noindent
+@xref{treelng,,Languages describing tree structure}, for a list of the
+standard representation languages.
+
+@findex unparser generator, specifying
+When none of the standard representation languages is appropriate, you
+can specify your own unparser generator.
+This unparser generator can be invoked by supplying its executable file to
+the derivation as the value of the @code{lang} parameter.
+
+The most common way to specify a new unparser generator is to modify an
+existing specification and then use Eli to produce an executable file from
+that modified specification.
+We have already given an example of this technique
+(@pxref{treelng,,Languages describing tree structure}).
+In that example, file
+@findex @file{M3.specs}
+@file{M3.specs} defined a generator producing an
+unparser that represents a tree by a Modula-3 program.
+The executable version of that generator could be obtained in the usual way
+by deriving the @code{exe} product from @file{M3.specs}
+(@pxref{exe,,exe -- Executable Version of the Processor,pp,Products and
+Parameters Reference}).
+Thus the following derivation would create a Modula-3 unparser
+for the trees defined by @file{Basis}:
+
+@example
+Basis +lang=(M3.specs :exe) :tree
+@end example
+
+@noindent
+Here the executable file supplied as the value of the @code{lang} parameter
+is the one derived from the specification of the Modula-3 unparser
+generator.
+
+@node DeriveDefn, Multiple, DeriveTree, Derivation
+@section Obtaining the structure definition
+
+@findex structural unparser, structure definition
+Structural unparser generators producing application-language code also
+deliver a definition of the data structure(s) described by that code.
+For example, an unparser generator producing tree descriptions in XML also
+delivers a ``document type declaration'' (DTD) file defining a grammar for
+those descriptions.
+@findex DTD file
+Here's the DTD file for the expression language:
+
+@example
+<!ENTITY % Axiom "(rule_000)">
+<!ENTITY % Expression
+  "(PlusExp | StarExp | Parens | IdnExp | IntExp | CallExp)">
+<!ENTITY % Arguments "(ArgList)">
+<!ELEMENT rule_000 (%Expression;)>
+<!ELEMENT PlusExp (%Expression;, %Expression;)>
+<!ELEMENT StarExp (%Expression;, %Expression;)>
+<!ELEMENT Parens (%Expression;)>
+<!ELEMENT IdnExp (#PCDATA)>
+<!ELEMENT IntExp (#PCDATA)>
+<!ELEMENT CallExp (#PCDATA, %Arguments;)>
+<!ELEMENT ArgList ((%Expression;)*)>
+@end example
+
+@findex derivation, structure definition
+This definition depends only on the tree grammar,
+not on any particular tree defined by that grammar.
+Thus it is built separately:
+
+@example
+Basis +lang=XML :treeStruc
+@end example
+
+The @code{treeStruc} product is a set of files.
+Both the number of files in that set and their types depend on the
+particular structural unparser being generated.
+For example, the set is empty for the generic functional representation.
+The XML unparser generator produces a single DTD file, and
+the Java unparser generator produces one type-@file{java} file for every
+class in the representation.
+
+You can list the files in the set with the following request:
+
+@example
+Basis +lang=XML :treeStruc :ls >
+@end example
+
+To obtain copies of the definition files, make a copy of the
+set itself
+(@pxref{Copy,,Extracting and Editing Objects,ui,Eli User Interface
+Reference Manual}):
+
+@example
+Basis +lang=XML :treeStruc > Structure
+@end example
+
+@noindent
+(This request copies the generated files into a sub-directory named
+@file{Structure} of the current directory;
+the destination name @file{Structure} could be replaced by any directory
+name.
+The directory must exist before the request is made.)
+
+@node Multiple, Partial, DeriveDefn, Derivation
+@section Deriving multiple unparsers
+
+@findex unparsers, combining
+@findex sub-tree, computed
+@findex computed sub-tree
+Consider a translator that builds a target program tree corresponding to
+the source program presented to it.
+Perhaps we would like to make that translator output a listing of the source
+text formatted according to standard rules and also an XML file that
+defined the target program tree.
+This can be done by including two unparsers, one textual and the other
+structural.
+
+To make the discussion concrete, let @file{Source_i.specs} define
+a processor that reads a sentence in language @samp{i} and builds a
+corresponding decorated tree.
+@file{Translator.fw} specifies computations over such a source program
+tree that build a target program tree according to the structure defined by
+file @file{Target_j.specs}.
+File @file{Translator.specs}, consisting of the following three lines,
+would then define a translator that would build a target program tree
+corresponding to a sentence in language @samp{i}:
+
+@example
+Source_i.specs
+Target_j.specs
+Translate.fw
+@end example
+
+@noindent
+If the root of the tree grammar defined in @file{Source_i.specs}
+is @code{Source}, and the root of the tree grammar defined in
+@file{Target_j.specs} is @code{Target},
+then @file{Translate.fw} might contain the following LIDO computation:
+
+@example
+RULE Axiom: Root ::= Source $ Target
+COMPUTE
+  Target.GENTREE=Source.Code;
+END;
+@end example
+
+@noindent
+This computation takes the target program tree that has been built as the
+value of attribute @code{Source.Code}, and makes it the second child of the
+root node
+(@pxref{Computed Subtrees,,Computed Subtrees,lidoref,LIDO - Reference Manual}).
+
+Given @file{Translator.specs}, one way to define a processor producing
+a listing of the source text formatted according to standard rules and also
+an XML file defining the target program tree
+would be to write the following type-@file{specs} file:
+
+@example
+Translator.specs
+Translator.specs                          :idem
+Translator.specs +prefix=Target +lang=XML :tree
+Add.fw
+@end example
+
+@noindent
+The first line of this file defines the translator itself, and the second
+line defines a textual unparser computing @code{IdemPtg} attributes.
+A structural unparser computing @code{TargetPtg} attributes that hold XML
+representations of their nodes is defined by the third line.
+Two of the additional computations defined by the last line of this file
+might be:
+
+@findex @code{Sep_Out}
+@findex @code{BP_OutFile}
+@example
+SYMBOL Source COMPUTE Sep_Out   (      THIS.IdemPtg);   END;
+SYMBOL Target COMPUTE BP_OutFile("xml",THIS.TargetPtg); END;
+@end example
+
+@noindent
+These computations will write the pretty-printed source program to the
+standard output, and the XML representation of the target program tree to
+file @file{xml}.
+
+@node Partial, , Multiple, Derivation
+@section Deriving unparsers from sub-grammars
+
+@findex tree grammar, partial
+Suppose that the tree grammars defined by @file{Source_i.specs} and
+@file{Target_j.specs} in the example of the previous section are disjoint.
+In that case, the processor defined there will compute
+unnecessary @code{IdemPtg} attributes for target tree nodes and
+unnecessary @code{TargetPtg} attributes for source tree nodes.
+These unnecessary computations can be avoided by simply changing the
+type-@file{specs} file to derive each unparser from the tree grammar
+to which it applies:
+
+@example
+Translator.specs
+Source_i.specs                          :idem
+Target_j.specs +prefix=Target +lang=XML :tree
+Add.fw
+@end example
+
+@noindent
+Note that no other changes are needed in any of the files.
+
+Each of the two tree grammars on which the unparsers are based defines a
+complete, rooted sub-tree of the complete tree.
+Moreover, because the tree grammar defined by @file{Target_j.specs}
+describes a tree created by attribution, each of its rules has been given
+an explicit name
+(@pxref{Tree Construction Functions,,Tree Construction Functions,lidoref,
+LIDO - Reference Manual}).
+
+The fact that no more than one of the tree grammars contains unnamed rules
+is crucial to the success of the complete processor derivation.
+Recall that an unparser definition contains the definition of the tree
+grammar on which it is based, and every rule in that tree grammar is named.
+If the names were not explicit in the unparser's basis, the names in the
+unparser definition will have been created as part of the unparser
+generation.
+The same name creation process is applied during every unparser generation,
+and therefore if two unparsers generated from disjoint tree grammars with
+unnamed rules are combined there will be name clashes.
+
+@node Index, , Derivation, Top
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

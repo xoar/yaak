@@ -1,0 +1,63 @@
+#!/bin/sh
+# install the Odin system
+
+. pkg/config/boot.sh
+
+sys=${1-$HOME}
+
+if [ ! "$ODINPKGS" ] ; then
+   ODINPKGS=$sys/lib/Odin; export ODINPKGS
+   if [ ! -d $sys/lib ] ; then mkdir $sys/lib || exit 1; fi
+   if [ ! -d $sys/lib/Odin ] ; then mkdir $sys/lib/Odin || exit 1; fi; fi
+echo "Installing odin packages into $ODINPKGS."
+if [ ! "$ODINBIN" ] ; then
+   ODINBIN=$sys/bin/odin
+   if [ ! -d $sys/bin ] ; then mkdir $sys/bin || exit 1; fi; fi
+echo "Installing odin command into $ODINBIN."
+if [ ! "$ODINMAN" ] ; then
+   ODINMAN=$sys/man/man1/odin.1
+   if [ ! -d $sys/man ] ; then mkdir $sys/man || exit 1; fi
+   if [ ! -d $sys/man/man1 ] ; then mkdir $sys/man/man1 || exit 1; fi; fi
+echo "Installing odin man page into $ODINMAN."
+
+if [ ! -d $ODINPKGS ] ; then mkdir $ODINPKGS || exit 1; fi
+
+(cd ./pkg/odin; make CC=$ODIN_CC CFLAGS="$ODIN_CC_FLAGS") || exit 1
+
+if [ ! -f $ODINPKGS/LIBVER ] ; then
+   echo PKGVER.0 > $ODINPKGS/LIBVER; fi
+num=`cat $ODINPKGS/LIBVER | sed 's/PKGVER.//'`
+libver=PKGVER.`expr $num + 1`
+echo $libver > $ODINPKGS/LIBVER
+
+cp pkg/PKGLST $ODINPKGS; chmod +w $ODINPKGS/PKGLST
+newpkgs=`cd ./pkg; ls | sed -e s/PKGLST// -e s/CVS// -e 's/^[.]*//'`
+for pkg in $newpkgs; do
+   if [ ! -d $ODINPKGS/$pkg ] ; then mkdir $ODINPKGS/$pkg || exit 1; fi
+   ver=`cat pkg/$pkg/version`
+   echo $ver > $ODINPKGS/$pkg/$libver
+   echo $ver > $ODINPKGS/$pkg/PKGVER
+   destpkg=$ODINPKGS/$pkg/$ver
+   if [ ! -d $destpkg ] ; then mkdir $destpkg || exit 1; fi
+   #select
+      if [ -r pkg/$pkg/Odinfile ] ; then
+	 files=`(cd ./pkg/$pkg; ls *.dg *sh *.exe)`
+      else
+	 files=`(cd ./pkg/$pkg; ls) | sed -e s/CVS// -e 's/.*\.in//'`; fi
+   for file in $files; do
+      cmp -s pkg/$pkg/$file $destpkg/$file ||
+       cp pkg/$pkg/$file $destpkg/$file; done
+   chmod +w $destpkg/*
+   echo "$pkg-$ver package created."; done
+
+ODINPATH=;export ODINPATH
+cache=`pwd`/ODINBOOT
+export ODINPKG
+for pkg in odin tregrm dg; do
+   ver=`cat pkg/$pkg/version`
+   ODINPKG=$ODINPKGS/$pkg/$ver
+   etc/odin -q -s -c $cache "pkg/$pkg%odin-install" || exit 1
+   echo "$pkg-$ver package created (phase 2)."; done
+
+sed s,/usr/local/lib/Odin,$ODINPKGS, < etc/odin > $ODINBIN; chmod +x $ODINBIN || exit 1
+sed s,/usr/local/lib/Odin,$ODINPKGS, < doc/odin.1 > $ODINMAN || exit 1

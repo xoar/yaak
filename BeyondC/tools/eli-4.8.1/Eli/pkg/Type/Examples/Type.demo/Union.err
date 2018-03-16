@@ -1,0 +1,15 @@
+begin
+  var   union int, bool end rv;
+  var   int j, bool c, real r;
+  rv = 42; rv = true;
+  j = <int> rv;
+  case rv of
+    int t: j = t;
+    bool t: c = t;
+    real t: r = t;
+  end
+  case 3.4 of
+  int t: j = t;
+  end
+  j = rv;
+end

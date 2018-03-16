@@ -1,0 +1,75 @@
+# $Id: Makefile.in,v 1.3 2002/10/01 20:37:58 waite Exp $
+# Copyright (c) 1991, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/skeleton
+SRC	= skeleton.dg line_err.awk doview
+AUX	= Makefile Makefile.in version
+CMD	= delete.sh dg_out.sh err_filter.sh err_map.sh extract.sh \
+	  paste.sh index.sh msgtext.sh no_map.sh viewlist.sh no_loc.sh
+EXE	= map_errors.exe err_tab.exe err_map.exe mk_include.exe \
+	  get_incl.exe type_sel.exe cat-n.exe fmt.exe eliexpand.exe \
+	  paste.exe vtd.exe sed.exe rel_err.exe line_err.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= gnu_sed src
+
+@toolmk_h@
+
+sed.exe:	gnu_sed/sed.exe
+	rm -f $@
+	@LINK@ $? $@
+
+map_errors.exe:	src/map_errors.exe
+	rm -f $@
+	@LINK@ $? $@
+
+err_tab.exe:	src/err_tab.exe
+	rm -f $@
+	@LINK@ $? $@
+
+err_map.exe:	src/err_map.exe
+	rm -f $@
+	@LINK@ $? $@
+
+mk_include.exe:	src/mk_include.exe
+	rm -f $@
+	@LINK@ $? $@
+
+get_incl.exe:	src/get_incl.exe
+	rm -f $@
+	@LINK@ $? $@
+
+type_sel.exe:	src/type_sel.exe
+	rm -f $@
+	@LINK@ $? $@
+
+cat-n.exe:	src/cat-n.exe
+	rm -f $@
+	@LINK@ $? $@
+
+fmt.exe:	src/fmt.exe
+	rm -f $@
+	@LINK@ $? $@
+
+eliexpand.exe:	src/eliexpand.exe
+	rm -f $@
+	@LINK@ $? $@
+
+paste.exe:	src/paste.exe
+	rm -f $@
+	@LINK@ $? $@
+
+vtd.exe:	src/vtd.exe
+	rm -f $@
+	@LINK@ $? $@
+
+rel_err.exe:	src/rel_err.exe
+	rm -f $@
+	@LINK@ $? $@
+
+line_err.exe:	src/line_err.exe
+	rm -f $@
+	@LINK@ $? $@

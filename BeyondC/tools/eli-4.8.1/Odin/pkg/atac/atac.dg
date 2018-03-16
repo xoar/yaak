@@ -1,0 +1,46 @@
+# Intermediate Object Types
+
+:data.atac 'ATAC static coverage information' => :FILE;
+
+# Output Object Types
+
+:atac.report 'ATAC report'? => :FILE;
+
+:atac 'ATAC display'? => :EXECUTABLE;
+
+
+# Parameter Types
+
++atac 'produce ATAC traces'? => :first;
+
++trace 'ATAC trace file'? => :first;
+
++atac_flags 'ATAC flags'? => :cat;
+
+
+# Environment Variables
+
+$ATACHOME 'directory containing ATAC tools' = '/usr/public';
+
+
+# Tools
+
+EXEC (atac_cc.sh) (:c) (:c :dir)@ (+inc_sp) (+cc_home)@ (+gnu)
+ (+atac) (+debug) (+prof) (+optimize) (+define) (+cc_flags)
+ NEEDS (:c +home=(:c:dir) :lookup=:all_c_inc) $ATACHOME
+   => (:o) (:data.atac);
+
+EXEC (atac_ld.sh) (:o_of :vir_dir) (:library_flags)
+ (+cc_home)@ (+gnu) (+purify) (+atac) (+debug) (+prof) (+eprof) (+ld_flags)
+ NEEDS (:o_of :vir_tgt.list) (:libraries) (:c.exe.list)@
+   => (:exe);
+
+EXEC (atac.report.sh)
+ (:code.list +atac :map=:data.atac :ls) (+trace) (+atac_flags)
+ NEEDS (:code.list +atac :map=:data.atac) $ATACHOME
+   => (:atac.report);
+
+EXEC (atac.sh)
+ (:code.list +atac :map=:data.atac :ls) (+trace) (+atac_flags)
+ NEEDS (:code.list +atac :map=:data.atac) $ATACHOME
+   => (:atac);

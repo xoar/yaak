@@ -1,0 +1,537 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from type.tnf on 5 December 2013 -->
+
+<TITLE>Type Analysis - Dependence in Type Analysis</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_7.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_9.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC34" HREF="type_toc.html#SEC34">Dependence in Type Analysis</A></H1>
+<P>
+Type analysis is a complex process, involving several different kinds
+of entity.
+Each kind of entity has properties, which are stored in the definition
+table under the entity's key.
+Those properties are set and used in a variety of contexts.
+The result is a collection of implicit dependence relations among the type
+analysis computations, and these relations depend on the language being
+analyzed.
+<P>
+The modules described in this document make the implicit relations
+explicit, using void attributes and dependent expressions in LIDO
+(see  <A HREF="lidoref_7.html#SEC12">Dependent Expressions of LIDO - Reference Manual</A>).
+Although the explicit dependences work for a wide range of typical
+programming languages, one or more of them must sometimes be overridden
+because of the rules of a particular language.
+This chapter explains the implicit dependences that must be made explicit,
+how the various modules make them explicit, and some typical circumstances
+in which the default treatment fails.
+<P>
+The void attributes that make these dependences explicit are summarized
+here; the remainder of this chapter explains them in more detail:
+<P>
+<DL COMPACT>
+<A NAME="IDX211"></A>
+<DT><CODE>TypeDenotation.GotType</CODE>
+<DD>The new type key has been created, and any properties that are not
+dependent on final types have been stored in the definition table
+as properties of that key.
+<P>
+<A NAME="IDX212"></A>
+<DT><CODE>TypeDefDefId.GotDefer</CODE>
+<DD>Information that can be used to find the final type
+has been stored in the definition table as properties of the key
+assigned to the identifier by the name analyzer.
+<P>
+<A NAME="IDX213"></A>
+<DT><CODE>RootType.GotUserTypes</CODE>
+<DD>Computations for all type denotations have reached the state represented by
+<CODE>TypeDenotation.GotType</CODE> and computations for all type identifier
+definitions have reached the state represented by
+<CODE>TypeDefDefId.GotDefer</CODE>.
+<P>
+<A NAME="IDX214"></A>
+<DT><CODE>RootType.GotAllTypes</CODE>
+<DD>All final types have been determined.
+<P>
+<A NAME="IDX215"></A>
+<DT><CODE>TypedDefId.TypeIsSet</CODE>
+<DD>Information that can be used to find the final type
+has been stored in the definition table as properties of the key
+assigned to the identifier by the name analyzer.
+<P>
+<A NAME="IDX216"></A>
+<DT><CODE>RootType.TypeIsSet</CODE>
+<DD>The state represented by <CODE>RootType.GotAllTypes</CODE> has been reached,
+and computations for all typed identifier definitions have reached
+the state represented by <CODE>TypedDefId.TypeIsSet</CODE>.
+<P>
+<A NAME="IDX217"></A>
+<DT><CODE>TypedUseId.TypeIsSet</CODE>
+<DD>All information needed to find the final type of this typed identifier
+is available.
+<P>
+<A NAME="IDX218"></A>
+<DT><CODE>OperatorDefs.GotOper</CODE>
+<DD>All operator descriptions associated with this construct have been
+entered into the operator data base.
+<P>
+<A NAME="IDX219"></A>
+<DT><CODE>RootType.GotAllOpers</CODE>
+<DD>Computations for all symbols inheriting <CODE>OperatorDefs</CODE> have reached
+the state represented by <CODE>OperatorDefs.GotOper</CODE>.
+</DL>
+<P>
+<H2><A NAME="SEC35" HREF="type_toc.html#SEC35">Dependences among types and type identifiers</A></H2>
+<P>
+Consider the following program, written in a C-like notation:
+<P>
+<PRE>
+{ Measurement Length;
+  typedef Inches Measurement;
+  typedef int Inches;
+
+  Length = 3; printf("%d\n", Length + 7);
+}
+</PRE>
+<P>
+Suppose that the language definition states that type identifiers are
+statically bound, with the scope of a declaration being the entire block.
+Thus all of the type identifier occurrences have valid bindings.
+(That would <EM>not</EM> be the case in C, because in C the scope of a
+declaration is from the end of the declaration to the end of the block.)
+<P>
+The type analysis of each of the two occurrences of <CODE>Length</CODE> in the
+last line of the program is described by the following specifications
+discussed earlier:
+<P>
+<A NAME="IDX220"></A>
+<A NAME="IDX221"></A>
+<A NAME="IDX222"></A>
+<A NAME="IDX223"></A>
+<PRE>
+SYMBOL ExpIdUse INHERITS TypedUseId, ChkTypedUseId END;
+
+RULE: Expr ::= ExpIdUse COMPUTE
+  PrimaryContext(Expr,ExpIdUse.Type);
+END;
+</PRE>
+<P>
+The value of <CODE>ExpIdUse.Type</CODE> should be <CODE>intType</CODE>, the known
+definition table key created for the language-defined integer type.
+Recall that <CODE>intType</CODE> was associated with the <CODE>int</CODE> keyword
+by the following specification:
+<P>
+<PRE>
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+</PRE>
+<P>
+The problem is to make the <CODE>intType</CODE> value of the <CODE>Type.Type</CODE>
+attribute in this context the value of the <CODE>ExpIdUse.Type</CODE> attribute
+in the context quoted above.
+<P>
+A human has no trouble seeing how this problem could be solved:
+<P>
+<OL>
+<LI>
+The type definition rule sets the <CODE>TypIdDef.Type</CODE> attribute of the
+occurrence of <CODE>Inches</CODE> in the third line of the program to
+<CODE>intType</CODE>.
+<P>
+<LI>
+The value of a property of the <CODE>Inches</CODE> entity could be set from the
+value of the <CODE>TypIdDef.Type</CODE> attribute in that context.
+<P>
+<LI>
+That property could be used to set the <CODE>TypIdUse.Type</CODE> attribute of
+the occurrence of <CODE>Inches</CODE> in the second line of the program.
+<P>
+<LI>
+The type identifier use rule sets the value of the <CODE>Type.Type</CODE>
+attribute in that context the value of the <CODE>TypIdUse.Type</CODE> attribute.
+<P>
+<LI>
+Similar reasoning results in the value of the <CODE>Type.Type</CODE> attribute
+in the variable definition context of the first line of the program
+becoming <CODE>intType</CODE>.
+<P>
+<LI>
+Finally, a property of the <CODE>Length</CODE> entity is set in the context of
+the first line of the program and used to make <CODE>intType</CODE> the value
+of the <CODE>ExpIdUse.Type</CODE> attributes in the two contexts of the last line.
+</OL>
+<P>
+Unfortunately, this solution is based on the human's ability to see the
+dependence among the type identifiers and process the lines of the program
+in an order determined by that dependence.
+One cannot, for example, blindly process the lines in the order in which
+they were written.
+<P>
+The dependence among the lines in our example is a result of our use of the
+known key <CODE>intType</CODE> as the value of a property of the type identifier
+entities.
+This strategy is actually an example of a premature evaluation:
+There is no need to know the key representing the type of
+<CODE>Length</CODE> until the <CODE>ExpIdUse.Type</CODE> attribute is evaluated.
+We can avoid the constraint on the order of rule processing by a
+"lazy evaluation" strategy in which we use properties of the type
+identifier entities to establish a means for determining the value of the
+<CODE>ExpIdUse.Type</CODE> attribute rather than establishing the value itself.
+<P>
+Recall that there are three possible <CODE>Type</CODE> contexts: a keyword, a
+type denotation, and a type identifier
+(see  <A HREF="type_5.html#SEC22">Referring to a type</A>).
+In the first two, we can set the value of the <CODE>Type.Type</CODE> attribute to
+the definition table key for the type itself.
+In the third, however, the only information that we are guaranteed to have
+is the definition table key for the type identifier.
+However, this information is sufficient to find the definition table key
+for the type <EM>once all of the type identifiers have been defined</EM>.
+Thus we can simply set the value of the <CODE>Type.Type</CODE> attribute to the
+definition table key for the type identifier itself in this context.
+<P>
+The computation provided by the <CODE>Typing</CODE> module for the
+<CODE>TypeDefDefId</CODE> context sets a property of the type identifier entity
+to the value of the <CODE>TypeDefDefId.Type</CODE> attribute
+(see  <A HREF="type_5.html#SEC21">Type identifiers</A>).
+Effectively, this computation creates a linear list of type identifier
+entities ending in a type entity.
+When all of the entities corresponding to type identifiers have this
+property set, the definition table key for a type should be the last
+element of each list.
+<P>
+In our example, the value of this property of the identifier
+<CODE>Length</CODE>'s definition table key would be the definition table key of
+the identifier <CODE>Measurement</CODE>.
+The value of its property would be the definition table key of the
+identifier <CODE>Inches</CODE>, whose property would be <CODE>intType</CODE>.
+<P>
+There is no guarantee, of course, that the last element of the list is
+actually a type.
+For example, consider the following incorrect program:
+<P>
+<PRE>
+{ Measurement Length;
+  typedef Inches Measurement;
+  int Inches;
+
+  Length = 3; printf("%d\n", Length + 7);
+}
+</PRE>
+<P>
+Here the last element of the list beginning at <CODE>Measurement</CODE> would be
+<CODE>Inches</CODE>, a variable identifier.
+The <CODE>ChkTypeDefUseId</CODE> role checks the <CODE>IsType</CODE> property of the
+key that is the last element of the list to report errors of this kind
+(see  <A HREF="type_7.html#SEC31">Verifying type identifier usage</A>).
+<P>
+The void attribute <CODE>RootType.GotUserTypes</CODE> represents the state of the
+computation at which all of the type denotations and type identifiers have
+been formed into lists.
+<P>
+<H2><A NAME="SEC36" HREF="type_toc.html#SEC36">Dependence on structural equivalence</A></H2>
+<P>
+The structural equivalence computation must be carried out after all
+<CODE>Type.Type</CODE> attributes have been set and linked as described in the
+previous section, and
+all of the possibly-equivalent types have been added to the appropriate
+blocks of the initial partition
+(see  <A HREF="type_6.html#SEC27">Computing equivalence classes</A>).
+The latter condition is represented by all of the void attributes
+<CODE>TypeDenotation.GotType</CODE> having been set.
+A user can override the computation of the void attribute
+<CODE>RootType.GotType</CODE> to signal dependence of the structural equivalence
+computation on any additional information.
+<P>
+<CODE>RootType.GotAllTypes</CODE> is the post-condition for the structural
+equivalence algorithm.
+After that computation is complete, however, some definition table keys
+that were thought to represent types have had their properties changed
+so that they represent type identifiers
+(see  <A HREF="type_6.html#SEC25">Structural Type Equivalence</A>).
+Thus scanning a list of definition table keys to find the last one
+is only meaningful after <CODE>RootType.GotAllTypes</CODE> has been established.
+The <CODE>TypeKey</CODE> attributes of <CODE>TypeDenotation</CODE>,
+<CODE>TypeDefDefId</CODE>, and <CODE>TypeDefUseId</CODE> reflect this fact.
+<P>
+Sometimes a designer uses a C routine to access type properties.
+If the keys defining the types have been obtained from <CODE>Type</CODE>
+attributes of <CODE>TypeDenotation</CODE>, <CODE>TypeDefDefId</CODE>, or
+<CODE>TypeDefUseId</CODE> (rather than from <CODE>TypeKey</CODE> attributes of those
+nodes), then
+<A NAME="IDX224"></A>
+<CODE>FinalType</CODE> can be used to obtain the key at the end of the list.
+The C program must include the header file <CODE>Typing.h</CODE>, and the code
+must enforce a dependence on <CODE>RootType.GotAllTypes</CODE>.
+If that dependence is not enforced, the results of invoking
+<CODE>FinalType</CODE> are undefined.
+<P>
+<H2><A NAME="SEC37" HREF="type_toc.html#SEC37">Dependence on the operator database</A></H2>
+<P>
+The operator identification database used for type analysis within
+expressions is initialized from the specifications of language-defined
+types, operators, and operator indications.
+Database representations for function operators and operators associated
+with user-defined types cannot be constructed until the pre-condition
+<CODE>RootType.GotAllTypes</CODE> has been established.
+Moreover, type analysis of expressions cannot be carried out until that
+information has been entered into the database.
+<P>
+Computations that define operators must establish the <CODE>GotOper</CODE>
+post-condition at their associated <CODE>OperatorDefs</CODE> nodes.
+The computation of <CODE>RootType.GotOper</CODE> can be overridden to provide
+dependence on computations not associated with an <CODE>OperatorDefs</CODE> node.
+<CODE>RootType.GotAllOpers</CODE> represents the state in which the database has
+been completely populated.
+All expression analysis computations have <CODE>RootType.GotAllOpers</CODE> as a
+pre-condition.
+<P>
+<H2><A NAME="SEC38" HREF="type_toc.html#SEC38">Dependences for typed entities</A></H2>
+<A NAME="IDX225"></A>
+<P>
+The computation provided for the <CODE>TypedDefId</CODE> context sets the
+<CODE>TypeOf</CODE> property of that identifier's key to the value of
+<CODE>TypedDefId.Type</CODE>.
+<CODE>TypedDefId.TypeIsSet</CODE> is the post-condition for that computation.
+<CODE>RootType.AllTypesAreSet</CODE> is the conjunction of all of the
+<CODE>TypedDefId.TypeIsSet</CODE> post-conditions plus
+<CODE>RootType.GotAllTypes</CODE>.
+<P>
+If other property values of the identifier's key are set by
+user computations in the lower context of <CODE>TypedDefId</CODE>
+that establish the postcondition <CODE>SYNT.GotProp</CODE>,
+then the setting of these properties is also guaranteed by the
+post-condition <CODE>TypedDefId.TypeIsSet</CODE>.
+(<CODE>SYNT.GotProp</CODE> defaults to the empty postcondition.)
+Note that if any of these user computations depend on any results from type
+analysis, a cycle will be created.
+<P>
+A computation supplied by the module sets the <CODE>TypedUseId.Type</CODE>
+attribute to the value of the <CODE>TypeOf</CODE> property of that identifier's
+definition table key.
+<CODE>TypedUseId.TypeIsSet</CODE> is a precondition for that computation.
+It must guarantee that the <CODE>TypeOf</CODE> property of the identifier
+has  actually been set.
+The module provides a default computation for <CODE>TypedUseId.TypeIsSet</CODE>
+in the lower context of the <CODE>TypedUseId</CODE> node, requiring the
+pre-condition <CODE>RootType.TypeIsSet</CODE>.
+<P>
+Some languages provide initialized variable declarations, and allow the
+user to omit either the type specification or the initializing expression
+but not both.
+If the type specification is omitted, the variable's type is the type
+returned by the initializing expression.
+Here are some examples of such declarations in Modula-3:
+<P>
+<PRE>
+VAR Both: INTEGER := 3;
+VAR NoType := Both + 7;
+VAR NoInit: INTEGER;
+</PRE>
+<P>
+The default computations for the <CODE>TypeIsSet</CODE> attributes in this
+example lead to a cycle:
+<P>
+<OL>
+<LI>
+The <CODE>TypedDefId.Type</CODE> attribute of <CODE>NoType</CODE>
+depends on <CODE>TypedUseId.Type</CODE> for <CODE>Both</CODE>.
+<P>
+<LI>
+The computation of <CODE>TypedUseId.Type</CODE> for <CODE>Both</CODE>
+has the pre-condition <CODE>TypedUseId.TypeIsSet</CODE>.
+<P>
+<LI>
+<CODE>TypedUseId.TypeIsSet</CODE> depends on <CODE>RootType.TypeIsSet</CODE> in the
+default computation.
+<P>
+<LI>
+<CODE>RootType.TypeIsSet</CODE> is the conjunction of <EM>all</EM>
+<CODE>TypedDefId.TypeIsSet</CODE> attributes.
+<P>
+<LI>
+<CODE>TypedDefId.TypeIsSet</CODE> for <CODE>NoType</CODE> is the post-condition
+for a computation involving the <CODE>TypedDefId.Type</CODE> attribute
+of <CODE>NoType</CODE>.
+</OL>
+<P>
+If the language requires that the initialized declaration of a variable
+precede any uses of that variable,
+then we can override the default dependence as follows:
+<P>
+<PRE>
+CHAIN TypeDepend: VOID;
+
+CLASS SYMBOL ROOTCLASS COMPUTE
+  CHAINSTART HEAD.TypeDepend=THIS.GotType;
+END;
+
+RULE: VrblDecl ::= 'VAR' VarIdDef ':' Type ':=' Expr COMPUTE
+  VrblDecl.Type=Type.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet &#60;- Expr.TypeDepend;
+END;
+    
+RULE: VrblDecl ::= 'VAR' VarIdDef ':' Type COMPUTE
+  VrblDecl.Type=Type.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet &#60;- Expr.TypeDepend;
+END;
+    
+RULE: VrblDecl ::= 'VAR' VarIdDef ':=' Expr COMPUTE
+  VrblDecl.Type=Expr.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet &#60;- Expr.TypeDepend;
+END;
+
+SYMBOL VarIdUse COMPUTE
+  SYNT.TypeIsSet=THIS.TypeDepend;
+  THIS.TypeDepend=SYNT.TypeIsSet;
+END;
+</PRE>
+<P>
+If there is no ordering requirement, then a fixed-point computation is
+required to determine the variable types.
+In addition, code generated from the initializing expressions must be
+arranged to ensure that a variable's value is computed before it is used.
+Finally, such out-of-order dependence makes the program hard to understand.
+We strongly recommend that declaration before use be required if variables
+are allowed to obtain their type from their initializers.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_7.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_9.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

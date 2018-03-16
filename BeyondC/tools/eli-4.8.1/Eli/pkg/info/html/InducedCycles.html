@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>'Induced' Attribute Dependence Cycles</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>'Induced' Attribute Dependence Cycles</h1>
+<hr>
+<P>
+
+<b>Typical Error Situations</b>
+
+<p>
+Indirect cycles that show up after the so-called
+induced attribute dependences have been computed.
+
+<p>
+There are abstract trees where an attribute value depends on itself:
+
+<p>
+<pre>
+   ATTR a1,a2 : int;
+   RULE  r1 :  root ::= a
+   COMPUTE a.a1 = 1;
+   END;
+   RULE r2 : a ::=  b
+   COMPUTE b.a1 = ADD(a.a1,b.a2);
+   END;
+   RULE r3 : b ::=  'a'
+   COMPUTE b.a2 = 7;
+   END;
+   RULE r4 : b ::= 'b'
+   COMPUTE b.a2 = ADD(b.a1,1);
+   END;
+</pre>
+
+<p>
+The resulting error message is
+
+<p>
+<pre>
+   ERROR: INDUCED cyclic dependencies; 
+          see OrdInfo, or use gorto
+   ERROR: evaluation order for b.a1 not found
+   ERROR: evaluation order for b.a2 not found
+</pre>
+
+<!--NewPage-->
+<p>
+<p align="center">
+&nbsp;<img src="gifs/graph1.gif" align=right>
+</p>
+
+<p>
+To locate the error write a <tt>.ctl</tt> file containing the line
+
+<p>
+<pre>
+   ORDER: GRAPH DIRECT_RULE;
+</pre>
+
+<p>
+add it to your .specs or .fw file and make a request for
+
+<pre>
+   foo.specs:OrdInfo>
+</pre>
+
+<p>
+OrdInfo yields
+
+<p>
+<pre>
+  INDUCED GRAPH FOR RULE r2 ROW 7; COL 6
+  a ::=   b
+  ATNO CLASS ATNAME DEPENDS ON
+  0    INH   a.a1   []
+  1    INH   b.a1   CYCLIC [0 1 2]
+  2    SYNT  b.a2   CYCLIC [0 1 2]
+  END RULE
+</pre>
+<font size=-2>[this listing is slightly abbreviated and reformatted]</font>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

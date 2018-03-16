@@ -1,0 +1,962 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from syntax.tnf on 5 December 2013 -->
+
+<TITLE>Syntactic Analysis - Using Foreign parsers</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Syntactic Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC29" HREF="syntax_toc.html#SEC29">Using Foreign parsers</A></H1>
+<P>
+When Eli is used to generate a parser, Maptool is able to relate the
+concrete syntax to the abstract syntax and create all of the code necessary
+to build a tree representing the input text.
+If a parser is generated by other tools, or written by hand, tree-building
+code must be created manually.
+In this section, we assume that a parser for the source language exists,
+and that Eli is being used to generate code from a LIDO specification of
+the abstract syntax and desired tree computations.
+<P>
+The interface specification of any parser designed to support tree
+computation defines a set of function invocations that will occur as
+parsing of the input text proceeds.
+If the parser has been generated, these function invocations are included
+in the grammar as semantic actions
+(see  <A HREF="syntax_4.html#SEC27">Carrying Out Actions During Parsing</A>).
+<P>
+The code generated from a LIDO specification includes a set of tree
+construction functions, one for each rule context
+(see  <A HREF="lidoref_10.html#SEC21">Tree Construction Functions of LIDO - Reference Manual</A>).
+These functions must be invoked at appropriate times with appropriate
+arguments during the course of the parse.
+In order to use an existing parser, therefore, we must implement a module
+obeying the interface specification of that parser and correctly invoking
+the tree construction functions generated from the LIDO specification.
+<P>
+It would be possible to develop the module in isolation and then integrate
+it with the foreign parser, but a better approach is to use the foreign
+parser as part of the Eli specification of the complete program.
+Development can then proceed incrementally using Eli tools like execution
+monitoring to track down errors and verify correct behavior.
+<P>
+<H2><A NAME="SEC30" HREF="syntax_toc.html#SEC30">Building tree nodes</A></H2>
+<P>
+A typical parser interface specifies a data structure to define text
+fragments, in addition to the semantic actions:
+<P>
+<PRE>
+typedef struct {  /* Basic symbol */
+  int line;       /*   Source line containing the symbol */
+  int col;        /*   Column containing the first character */
+  int type;       /*   Classification code of the symbol */
+  char *text;     /*   Symbol text */
+} Token;
+                  /* Symbol classification codes */
+#define ETXT 1    /*   End of the shource file */
+#define LPAR 2    /*   Left parenthesis */
+#define RPAR 3    /*   Right parenthesis */
+#define PLUS 4    /*   Plus */
+#define STAR 5    /*   Asterisk */
+#define INTG 6    /*   Integer */
+...
+</PRE>
+<P>
+Each tree construction function generated by Eli from a LIDO specification
+must be invoked with pointers to its children, and therefore the tree must
+be built bottom-up.
+The usual strategy is to store pointers to constructed nodes on a stack
+until their parent node is built.
+Eli provides a stack module for this purpose:
+<P>
+<PRE>
+NODEPTR *_nst;         /* Stack array: _nst[...] are the elements */
+int _nsp;              /* Stack index: _nst[_nsp] is the top element */
+void _incrnodestack(); /* Push an empty element onto the stack */
+</PRE>
+Elements of the stack are <CODE>_nst[_nsp]</CODE>, <CODE>_nst[_nsp-1]</CODE>, etc.
+The statement <CODE>_nsp-=k;</CODE> pops <CODE>k</CODE> elements off of the stack,
+and the statement <CODE>_incrnodestack();</CODE> pushes an empty element onto the
+stack.
+To make the stack visible, include the file <TT>`treestack.h'</TT>.
+<P>
+The behavior of the functions called by the parser is determined primarily
+by the needs of the abstract syntax.
+We'll consider two LIDO specifications, one for computing the value of an
+integer expression involving addition and multiplication and the other for
+carrying out overload resolution in more general expressions.
+<P>
+<H3><A NAME="SEC31" HREF="syntax_toc.html#SEC31">Tree designed for expression evaluation</A></H3>
+<P>
+Consider the following LIDO specification, which evaluates an integer
+expression involving addition and multiplication.
+It assumes each <CODE>Integer</CODE> terminal is represented by the value of the
+corresponding integer:
+<P>
+<PRE>
+ATTR val: int;
+
+RULE Top: Root ::= Expr COMPUTE
+  printf("The value is %d\n", Expr.val);
+END;
+
+RULE Add: Expr ::= Expr '+' Expr COMPUTE
+  Expr[1].val=ADD(Expr[2].val,Expr[3].val);
+END;
+
+RULE Mul: Expr ::= Expr '*' Expr COMPUTE
+  Expr[1].val=MUL(Expr[2].val,Expr[3].val);
+END;
+
+RULE Num: Expr ::= Integer COMPUTE
+  Expr.val=Integer;
+END;
+</PRE>
+Eli generates four node construction functions from this specification:
+<P>
+<PRE>
+NODEPTR MkTop(POSITION *_coord, NODEPTR _d1);
+NODEPTR MkAdd(POSITION *_coord, NODEPTR _d1, NODEPTR _d2);
+NODEPTR MkMul(POSITION *_coord, NODEPTR _d1, NODEPTR _d2);
+NODEPTR MkNum(POSITION *_coord, int _TERM1);
+</PRE>
+To make the node construction functions visible, include the file
+<TT>`treecon.h'</TT>.
+<P>
+The <CODE>_coord</CODE> parameter will be discussed in detail in the next
+section; here we will always supply <CODE>NoPosition</CODE> as the value of this
+argument
+(see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of The Eli Library</A>).
+<P>
+Our module must call <CODE>MkNum</CODE> whenever the parser recognizes an
+integer, and we must provide the internal value of that integer as
+the second argument of that call.
+The result of the call must be pushed onto the top of the stack.
+<P>
+Suppose that by looking at the code of the parser, or the grammar from
+which the parser was generated, we determine that when the parser
+recognizes an integer in the input text it calls the function
+<CODE>int_literal_constant</CODE> with the <CODE>Token</CODE> describing that integer
+as its argument.
+We might then implement <CODE>int_literal_constant</CODE> as follows:
+<P>
+<PRE>
+void int_literal_constant(Token *t)
+{ _incrnodestack();
+  _nst[_nsp]=MkNum(NoPosition,atoi(t-&#62;text));
+}
+</PRE>
+Note that this code does <EM>not</EM> check for an error in the conversion of
+the string.
+That might or might not be reasonable, depending upon how careful the
+parser was in accepting a string as a representation of an integer value.
+<P>
+Further examination of the parser might show that it calls the function
+<CODE>mult_operand</CODE> with no arguments when it has recognized an expression
+involving two operands and an asterisk operator.
+In this case, the nodes for the two operand expressions are already on the
+stack.
+They must be removed and replaced by a <CODE>Mul</CODE> node:
+<P>
+<PRE>
+void mult_operand(void)
+{ _nst[_nsp-1]=MkMul(NoPosition,_nst[_nsp-1],_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+Implementation of the action when the parser recognizes an expression
+involving two operands and a plus operator is identical except that
+<CODE>MkAdd</CODE> is invoked instead of <CODE>MkMul</CODE>.
+<P>
+If the parser invokes <CODE>level_0_expr</CODE> with no arguments when it has
+completed recognition of the input text, the implementation of that
+function might be:
+<P>
+<PRE>
+void level_0_expr(void)
+{ _nst[_nsp]=MkTop(NoPosition,_nst[_nsp]);
+}
+</PRE>
+<P>
+Suppose that the parser invokes <CODE>level_3_expr</CODE> with no arguments when
+it has recognized an expression in parentheses.
+There is no corresponding rule in the abstract syntax, because parentheses
+serve only to override operator precedence and do not affect the
+computation.
+In that case, the routine does nothing:
+<P>
+<PRE>
+void level_3_expr(void)
+{ }
+</PRE>
+<P>
+An expression language usually has precedence levels containing several
+operators.
+For example, dyadic <CODE>+</CODE> and <CODE>-</CODE> operators usually have the same
+precedence, as do dyadic <CODE>*</CODE> and <CODE>/</CODE>.
+A parser may invoke a single function when it recognizes <EM>any</EM>
+dyadic expression whose operator is at a specific precedence level.
+In that case, some indication of the operator must be passed to that
+function.
+For example, the parser might call <CODE>mult_operand</CODE> with a pointer to
+the operator token.
+The implementation of <CODE>mult_operand</CODE> must then use the token type to
+select the correct node construction function:
+<P>
+<PRE>
+void mult_operand(Token *o)
+{ if (o-&#62;type == STAR)
+    _nst[_nsp-1]=MkMul(NoPosition,_nst[_nsp-1],_nst[_nsp]);
+  else
+    _nst[_nsp-1]=MkDiv(NoPosition,_nst[_nsp-1],_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+This assumes that the parser will not invoke <CODE>mult_operand</CODE> unless the
+operator is either <CODE>*</CODE> or <CODE>/</CODE>, and therefore no error checking is
+required.
+(If the number of operators at the precedence level were larger, then a
+switch statement might be preferable to the conditional.)
+<P>
+The code for <CODE>mult_operand</CODE> also assumes that the division is
+implemented by a LIDO rule named <CODE>Div</CODE>:
+<P>
+<PRE>
+RULE Div: Expr ::= Expr '/' Expr COMPUTE
+  Expr[1].val=DIV(Expr[2].val,Expr[3].val);
+END;
+</PRE>
+<P>
+<H3><A NAME="SEC32" HREF="syntax_toc.html#SEC32">Tree designed for overload resolution</A></H3>
+<P>
+Consider the following LIDO specification, which provides a structure to
+analyze the result type of an expression involving addition, subtraction,
+multiplication, and division of integers and floating point numbers
+(see  <A HREF="typetutorial_3.html#SEC5">Operator Overloading of Tutorial on Type Analysis</A>).
+It assumes that each <CODE>Integer</CODE> and <CODE>Float</CODE> terminal
+is represented by the string definining the corresponding number:
+<P>
+<PRE>
+RULE Top: Root ::= Expr END;
+
+RULE Dya: Expr ::= Expr BinOp Expr END;
+
+RULE Pls: BinOp ::= '+' END;
+RULE Min: BinOp ::= '-' END;
+RULE Str: BinOp ::= '*' END;
+RULE Sls: BinOp ::= '/' END;
+
+RULE Ntg: Expr ::= Integer END;
+RULE Flt: Expr ::= Float   END;
+</PRE>
+Eli generates eight node construction functions from this specification.
+The first six are:
+<P>
+<PRE>
+NODEPTR MkTop(POSITION *_coord, NODEPTR _d1);
+NODEPTR MkDya(POSITION *_coord, NODEPTR _d1, NODEPTR _d2, NODEPTR _d3);
+NODEPTR MkPls(POSITION *_coord);
+NODEPTR MkMin(POSITION *_coord);
+NODEPTR MkAst(POSITION *_coord);
+NODEPTR MkSls(POSITION *_coord);
+</PRE>
+To make the node construction functions visible, include the file
+<TT>`treenode.h'</TT>.
+<P>
+In this example, we would like to represent the integer and floating-point
+constants in the tree by the strings that represent them in the source text.
+There are two possibilities:
+<P>
+<OL>
+<LI>
+If the foreign parser stores permanent copies of token strings, then
+pointers to those strings can be stored in the tree nodes.
+<P>
+<LI>
+If the foreign parser points to token strings in the input buffer, then
+our module must store them permanently for reference by the tree nodes.
+</OL>
+<P>
+In case 1, a specification must be added to the LIDO description
+of the tree:
+<P>
+<PRE>
+TERM Integer, Float: CharPtr;
+</PRE>
+<CODE>CharPtr</CODE> is the LIDO name for the C type <CODE>char *</CODE>.
+The definition of <CODE>CharPtr</CODE> is made available by including file
+<TT>`strings.h'</TT>.
+<P>
+The <CODE>TERM</CODE> specification causes the two functions <CODE>MxNtg</CODE> and
+<CODE>MkFlt</CODE> to be defined as follows:
+<P>
+<PRE>
+NODEPTR MkNtg(POSITION *_coord, CharPtr t);
+NODEPTR MkFlt(POSITION *_coord, CharPtr t);
+</PRE>
+<P>
+Suppose that, as discussed in the last subsection, the parser calls
+<CODE>int_literal_constant</CODE> when it recognizes an integer in the source
+text.
+That routine could be implemented as:
+<P>
+<PRE>
+void int_literal_constant(Token *t)
+{ _incrnodestack();
+  _nst[_nsp]=MkNtg(NoPosition,t-&#62;text);
+}
+</PRE>
+<P>
+In case 2, we can make use of Eli's <CODE>MakeName</CODE> module
+(see  <A HREF="problems_4.html#SEC4">Generating Optional Identifiers of Solutions of common problems</A>).
+It provides a function to store a string uniquely and return an
+integer-valued hash table index to that unique representation:
+<P>
+<PRE>
+int MakeName(char *c);
+</PRE>
+Because the default type of a LIDO terminal is <CODE>int</CODE>, we can omit the
+<CODE>TERM</CODE> specification and the two functions <CODE>MxNtg</CODE> and
+<CODE>MkFlt</CODE> will be defined as follows:
+<P>
+<PRE>
+NODEPTR MkNtg(POSITION *_coord, int t);
+NODEPTR MkFlt(POSITION *_coord, int t);
+</PRE>
+The implementation of <CODE>int_literal_constant</CODE> would be:
+<P>
+<PRE>
+void int_literal_constant(Token *t)
+{ _incrnodestack();
+  _nst[_nsp]=MkNum(NoPosition,MakeName(t-&#62;text));
+}
+</PRE>
+<P>
+The <CODE>MakeName</CODE> module must be instantiated
+in order to gain access to the <CODE>MakeName</CODE> function.
+This is done by adding the following line to a <TT>`.specs'</TT> file:
+<P>
+<PRE>
+$/Tech/MakeName.gnrc:inst
+</PRE>
+No <CODE>+instance</CODE> parameter should be supplied, because scanning and
+parsing are provided by the foreign code.
+Once the module has been instantiated, the definition of the <CODE>MakeName</CODE>
+function is made available to the tree construction module by including file
+<TT>`MakeName.h'</TT>.
+<P>
+Let's assume that the parser invokes a single function when it recognizes
+any dyadic expression whose operator is at a specific precedence level,
+passing the operator token to that function.
+For example, <CODE>+</CODE> and <CODE>-</CODE> might both be operators at precedence
+level 1:
+<P>
+<PRE>
+void level_1_operator(Token *o)
+{ NODEPTR op;
+  if (o-&#62;type == PLUS) op=MkPls(NoPosition);
+  else                 op=MkMin(NoPosition);
+  _nst[_nsp-1]=MkDya(NoPosition,_nst[_nsp-1],op,_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+This assumes that the parser will not invoke <CODE>level_1_operator</CODE> unless
+the operator is either <CODE>+</CODE> or <CODE>-</CODE>, and therefore no error checking
+is required.
+(If the number of operators at the precedence level were larger, then a
+switch statement might be preferable to the conditional.)
+<P>
+If, on the other hand, the parser invokes a function <CODE>add_operand</CODE>
+with no arguments when it has recognized an expression involving two operands
+and an addition operator then <CODE>add_operand</CODE> can be implemented as:
+<P>
+<PRE>
+void add_operand(void)
+{ _nst[_nsp-1]=
+    MkDya(NoPosition,_nst[_nsp-1],MkPls(NoPosition),_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+Note that the operator node implied by the <CODE>add_operand</CODE> call must be
+explicitly created in this case; it is only implicit in the parse.
+<P>
+<H3><A NAME="SEC33" HREF="syntax_toc.html#SEC33">Tree nodes for chain rules</A></H3>
+<P>
+Recall that a chain rule has the form <SAMP>`X ::= Y'</SAMP>,
+where <SAMP>`X'</SAMP> differs from <SAMP>`Y'</SAMP>
+(see  <A HREF="syntax_2.html#SEC9">Chain rule definitions</A>).
+Such a rule will always result in a tree node with a single child, and if
+the rule name is <SAMP>`Ch'</SAMP> then the constructor function will be:
+<P>
+<PRE>
+NODEPTR MkCh(POSITION *_coord, NODEPTR _d1);
+</PRE>
+<P>
+With the exception of the root node of the tree, it is never necessary to
+explicitly invoke the constructor of a chain rule node.
+This is actually a very important property of the tree construction module.
+For example, consider the following fragment of a LIDO specification:
+<P>
+<PRE>
+RULE SimpleVar: Var ::= VrblIdUse                      END;
+RULE SubscrVar: Var ::= Var '[' Exp ']'                END;
+RULE VarExp:    Exp ::= Var                            END;
+RULE ArrayExp:  Exp ::= TypeIdUse '[' Exp ']' 'of' Exp END;
+RULE Typ: TypeIdUse ::= Symbol                         END;
+RULE Var: VrblIdUse ::= Symbol                         END;
+RULE Idn:    Symbol ::= Identifier                     END;
+</PRE>
+<CODE>Identifier</CODE> is a terminal symbol, represented by a unique permanent
+string
+(see  <A HREF="syntax_6.html#SEC32">Tree designed for overload resolution</A>).
+<P>
+The problem here is that, given the input sequence <SAMP>`a['</SAMP>, a parser
+would have to look beyond the matching <SAMP>`]'</SAMP> in order to decide whether
+<SAMP>`a'</SAMP> was a <CODE>VrblIdUse</CODE> or a <CODE>TypeIdUse</CODE>.
+But because the rules <CODE>Typ</CODE> and <CODE>Var</CODE> are chain rules, their
+constructor functions don't need to be called.
+That means the parser can construct an <CODE>Idn</CODE> node for <SAMP>`a'</SAMP> and
+leave it on the stack.
+If that node is later used as the left child of a <CODE>SubscrVar</CODE> node,
+the tree construction module will insert the necessary <CODE>Var</CODE> and
+<CODE>SimpleVar</CODE> nodes.
+If, on the other hand, the <CODE>Idn</CODE> node is used as the left child of an
+<CODE>ArrayExp</CODE> node then the tree construction module will insert the
+necessary <CODE>Typ</CODE> node.
+There is no need for the parser to look ahead.
+<P>
+<H2><A NAME="SEC34" HREF="syntax_toc.html#SEC34">Adding coordinate information</A></H2>
+<P>
+LIDO computations may access the coordinates of the first character
+of the source text region represented by a node.
+Usually, these computations are used to attach error reports to appropriate
+text locations.
+Many of the modules that implement common computations use this facility
+for error reporting (for an example,
+see  <A HREF="type_7.html#SEC30">Verifying typed identifier usage of Type Analysis</A>).
+<P>
+Execution monitoring is provided by Noosa, a separate process that can
+display the abstract syntax tree and
+graphically relate it to the source text
+(see  <A HREF="mon_2.html#SEC13">Trees and Attribute Values of Execution Monitoring Reference</A>).
+Noosa requires that both the source text coordinates of the first
+character of a tree context and those of the first character
+<EM>beyond</EM> that context be supplied to its construction function.
+<P>
+Specific source text coordinates are represented by a <CODE>POSITION</CODE>
+(see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of The Eli Library</A>).
+This data type and the operations upon it are made visible by including the
+file <TT>`err.h'</TT>.
+An appropriate <CODE>POSITION</CODE> value must be created from parser data and a
+pointer to that data passed to the tree construction function.
+<P>
+<H3><A NAME="SEC35" HREF="syntax_toc.html#SEC35">Supplying coordinates for computation</A></H3>
+<P>
+LIDO provides three names that can be used in computations to obtain source
+text coordinates of a tree context
+(see  <A HREF="lidoref_12.html#SEC23">Predefined Entities of LIDO - Reference Manual</A>):
+<P>
+<DL COMPACT>
+<DT><CODE>LINE</CODE>
+<DD>the source line number of the tree context.
+<A NAME="IDX141"></A>
+<DT><CODE>COL</CODE>
+<DD>the source column number of the tree context.
+<A NAME="IDX142"></A>
+<DT><CODE>COORDREF</CODE>
+<DD>the address of the source coordinates of the tree context,
+to be used for example in calls of the message routine of
+the error module or in calls of tree construction functions.
+<A NAME="IDX143"></A>
+</DL>
+If any of these three names appear in the LIDO computation, the source text
+coordinates of the first character of each tree context must be supplied to
+its node construction function.
+That information must be extracted from the parser.
+<P>
+In order to support the use of coordinates in computation,
+the tree construction function must have access to
+the location of the first character of its tree context.
+We have assumed that each token provided by the parser specifies the line
+and column of the first character of the corresponding input string
+(see  <A HREF="syntax_6.html#SEC30">Building tree nodes</A>).
+This information can be used to build a <CODE>POSITION</CODE> value:
+<P>
+<PRE>
+POSITION curpos;
+
+void int_literal_constant(Token *t)
+{ LineOf(curpos) = t-&#62;line; ColOf(curpos) = t-&#62;col;
+  _incrnodestack();
+  _nst[_nsp]=MkNum(&#38;curpos,atoi(t-&#62;text));
+}
+</PRE>
+Notice that the address of <CODE>curpos</CODE>, rather then <CODE>curpos</CODE> itself,
+is passed to the node construction function <CODE>MkNum</CODE>.
+<P>
+Unfortunately, this information isn't sufficient.
+We must not only pass the coordinates to <CODE>MkNum</CODE>, we must also save
+them on the stack in case this node is the left child of another node.
+At that point, the coordinates of the first character of this token would
+be the coordinates of the first character of the larger tree context.
+<P>
+The Eli stack module actually provides two parallel stacks, <CODE>_nst</CODE> for
+nodes and <CODE>_pst</CODE> for positions.
+Thus the complete code for integer literal constants would be:
+<P>
+<PRE>
+void int_literal_constant(Token *t)
+{ LineOf(curpos) = t-&#62;line; ColOf(curpos) = t-&#62;col;
+  _incrnodestack();
+  _pst[_nsp]=curpos;
+  _nst[_nsp]=MkNum(&#38;curpos,atoi(t-&#62;text));
+}
+</PRE>
+The position value, not a pointer to that value, is saved on the stack.
+That frees <CODE>curpos</CODE> to be used in constructing other values.
+<P>
+When a node whose children are all on the stack is constructed, the
+coordinates are obtained from the leftmost child:
+<P>
+<PRE>
+void mult_operand(void)
+{ _nst[_nsp-1]=MkMul(&#38;_pst[_nsp-1],_nst[_nsp-1],_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+<P>
+Generally speaking, the stack location for the left operand
+becomes the stack location for the result.
+Because the coordinates of the result are the coordinates of the left
+operand, there is no need for an assignment to <CODE>_pst</CODE>.
+<P>
+<H3><A NAME="SEC36" HREF="syntax_toc.html#SEC36">Supplying coordinates for Noosa</A></H3>
+<P>
+Noosa requires the coordinates of the first character of a tree context and
+also the coordinates of the first character beyond the end of that context.
+The additional coordinates should be supplied, however, <EM>only</EM> if
+execution monitoring has actually been specified for the particular run.
+This is because the <CODE>POSITION</CODE> value will only have the necessary
+space if monitoring has been specified.
+<P>
+The simplest strategy is to define a routine to compute the appropriate
+<CODE>POSITION</CODE> value for a given token:
+<P>
+<PRE>
+POSITION PositionOf(Token_t *token)
+{ POSITION curpos;
+
+  LineOf(curpos) = token-&#62;line; ColOf(curpos) = token-&#62;col;
+#ifdef RIGHTCOORD
+  RLineOf(curpos) = LineOf(curpos);
+  RColOf(curpos) = ColOf(curpos) + strlen(token-&#62;text);
+#ifdef MONITOR
+  CumColOf(curpos) = ColOf(curpos); RCumColOf(curpos) = RColOf(curpos);
+#endif
+#endif
+  return curpos;
+}
+</PRE>
+<CODE>RIGHTCOORD</CODE> and <CODE>MONITOR</CODE> are defined by Eli for each C
+compilation if the user specifies the <CODE>+monitor</CODE> parameter to the
+derivation
+(see  <A HREF="pp_4.html#SEC39">monitor of Products and Parameters Reference</A>).
+<P>
+A node for an integer literal constant would then be built by:
+<P>
+<PRE>
+void int_literal_constant(Token *t)
+{ curpos = PositionOf(t);
+  _incrnodestack();
+  _pst[_nsp]=curpos;
+  _nst[_nsp]=MkNum(&#38;curpos,atoi(t-&#62;text));
+}
+</PRE>
+<P>
+The construction of a node whose children are on the stack becomes more
+complex, because the coordinates of the constructed node involve the
+coordinates of the first character of the leftmost child node and the
+coordinates of the first character beyond the end of rightmost child node.
+The tree stack module provides a function, <CODE>SpanOf</CODE>, to compute the
+correct coordintes:
+<P>
+<PRE>
+POSITION SpanOf(POSITION left, POSITION right);
+</PRE>
+<P>
+Using <CODE>SpanOf</CODE>, the <CODE>mult_operand</CODE> routine would be written as:
+<P>
+<PRE>
+void mult_operand(void)
+{ curpos=SpanOf(_pst[_nsp-1],_pst[_nsp]);
+   _pst[_nsp-1]=curpos;
+   _nst[_nsp-1]=MkMul(&#38;curpos,_nst[_nsp-1],_nst[_nsp]);
+  _nsp--;
+}
+</PRE>
+<P>
+<H2><A NAME="SEC37" HREF="syntax_toc.html#SEC37">Building LISTOF constructs</A></H2>
+<P>
+There are <EM>three</EM> tree construction functions associated with a
+LISTOF construct with the rule name <SAMP>`Ex'</SAMP>
+(see  <A HREF="lidoref_10.html#SEC21">Tree Construction Functions of LIDO - Reference Manual</A>):
+<P>
+<PRE>
+NODEPTR MkEx(POSITION *_coord, NODEPTR _d1);
+NODEPTR Mk0Ex(POSITION *_coord);
+NODEPTR Mk2Ex(POSITION *_coord, NODEPTR _d1, NODEPTR _d2);
+</PRE>
+Arguments <SAMP>`_d1'</SAMP> and <SAMP>`_d2'</SAMP> may be:
+<P>
+<UL>
+<LI>
+the result of <CODE>Mk0Ex</CODE>, which represents an empty portion of the list
+(any call to <CODE>Mk0Ex</CODE> can be replaced by the constant
+<CODE>NULLNODEPTR</CODE>)
+<P>
+<LI>
+the result of <CODE>Mk2Ex</CODE>, which represents a portion (possibly empty) of
+the list
+<P>
+<LI>
+any node that can be made a list element subtree by implicit insertion of
+chain contexts, which represents a single element of the list
+</UL>
+The node representing the complete <SAMP>`Ex'</SAMP> construct is the one resulting
+from a call of <CODE>MkEx</CODE>.
+<P>
+LISTOF constructs always involve either looping or recursion in a parser.
+For example, consider a language in which a block consists of an
+arbitrary non-empty sequence of declarations and statements.
+The LIDO specification for the abstract syntax might contain the rule:
+<P>
+<PRE>
+RULE Blk: Block LISTOF Declaration | Statement END;
+</PRE>
+<P>
+Suppose that the parser calls <CODE>declaration_action</CODE> after each
+<CODE>Declaration</CODE> has been recognized and <CODE>statement_action</CODE>
+after each <CODE>Statement</CODE> has been recognized.
+Moreover, it calls <CODE>block_begin</CODE> prior to beginning analysis of the
+list and <CODE>block_end</CODE> when the end of the block has been reached:
+<P>
+<PRE>
+void block_begin(void)
+{ _incrnodestack();
+  _nst[_nsp]=Mk0Blk(&#38;curpos);
+}
+
+void declaration_action(void)
+{ curpos=SpanOf(_pst[_nsp-1],_pst[_nsp]);
+  _pst[_nsp-1]=curpos;
+  _nst[_nsp-1]=Mk2Blk(&#38;curpos,_nst[_nsp-1],_nst[_nsp]);
+  _nsp--;
+}
+
+void statement_action(void)
+{ declaration_action(void) }
+
+void block_end(void)
+{ _nst[_nsp]=MkBlk(&#38;_pst[_nsp],_nst[_nsp]); }
+</PRE>
+<P>
+<H2><A NAME="SEC38" HREF="syntax_toc.html#SEC38">Running a foreign parser under Eli</A></H2>
+<P>
+There are two distinct possibilities for the implementation of a foreign
+parser:
+<P>
+<UL>
+<LI>
+The foreign parser exists as a collection of C/C++ source files and/or
+object files that can be linked with the tree construction and computation
+modules.
+(A scanner/parser created by LEX/YACC or FLEX/Bison would have this
+property.)
+<P>
+<LI>
+The foreign parser exists as an executable file that expects to load a
+shared library containing the tree construction and computation modules.
+(A scanner/parser created by a Java-based tool like ANTLR would have this
+property.)
+</UL>
+<P>
+<H3><A NAME="SEC39" HREF="syntax_toc.html#SEC39">The parser is a collection of routines</A></H3>
+<P>
+When the parser is a collection of routines, whether in source or object
+form, the files containing those routines can be listed in a <TT>`.specs'</TT>
+file
+(see  <A HREF="novice_1.html#SEC3">Descriptive Mechanisms Known to Eli of Guide for New Eli Users</A>).
+The name of that file then appears in the overall specification.
+For example, suppose that all of the components of the foreign parser are
+listed in file <TT>`parser.specs'</TT> and the tree computations are defined
+by the file <TT>`treecomp.lido'</TT>.
+Then the overall specification of the program might be <TT>`prog.specs'</TT>
+with the content:
+<P>
+<PRE>
+parser.specs
+treecomp.lido
+</PRE>
+(Normally the tree computation would involve a number of different
+specifications rather than a single <TT>`.lido'</TT> file, so a more realistic
+example would use <SAMP>`treecomp.specs'</SAMP> or <SAMP>`treecomp.fw'</SAMP> to specify it.)
+<P>
+Eli normally generates a parser from every specification.
+When a parser is supplied, this behavior must be suppressed by adding the
+parameter <CODE>+parser=none</CODE> to the derivation
+(see  <A HREF="novice_1.html#SEC5">How to Request Product Manufacture of Guide for New Eli Users</A>):
+<P>
+<PRE>
+prog.specs +parser=none :exe
+</PRE>
+<P>
+Eli also normally provides the following main program:
+<P>
+<PRE>
+int main(int argc , char *argv[])
+{
+#ifdef MONITOR
+  _dap_init (argv[0]);
+  _dapto_enter ("driver");
+#endif
+
+  ParseCommandLine(argc, argv);
+
+#include "INIT.h"
+
+  TREEBUILD();
+
+#ifdef STOPAFTERBADPARSE
+  if (ErrorCount[ERROR] == 0)
+#endif
+  ATTREVAL();
+
+#include "FINL.h"
+
+#ifdef MONITOR
+  _dapto_leave ("driver");
+#endif
+  return (ErrorCount[ERROR] &#62; 0);
+}
+</PRE>
+One possible strategy is to write a wrapper procedure named <CODE>TREEBUILD</CODE>
+that carries out all of the setup operations needed for the foreign parser
+and then invokes it.
+This can often be done by renaming a main program provided with the foreign
+parser and making a few changes to it.
+<P>
+If it is not feasible to modify the main program of the foreign parser,
+then production of Eli's main program must be suppressed by adding the
+parameter <CODE>+nomain</CODE> to the derivation:
+<P>
+<PRE>
+prog.specs +nomain +parser=none :exe
+</PRE>
+In this case, however, the interface module must:
+<P>
+<OL>
+<LI>
+include the initialization code file <TT>`INIT.h'</TT>,
+<P>
+<LI>
+invoke <CODE>ATTREVAL</CODE> after the tree has been built,
+<P>
+<LI>
+and include the finalization code file <TT>`FINL.h'</TT>.
+</OL>
+<P>
+If the parser executes a function call <SAMP>`begin_parse();'</SAMP>
+before invoking any other functions of the interface,
+and a function call <SAMP>`end_parse();'</SAMP> when it has completed recognition
+of the input text, then the implementation of these two functions might be:
+<P>
+<PRE>
+void begin_parse(void)
+{
+#ifdef MONITOR
+  _dap_init ("");  /* Argument is generally the program name */
+#endif
+
+#include "INIT.h"
+}
+
+void end_parse(void)
+{  _nst[_nsp]=MkRoot(&#38;_pst[_nsp],_nst[_nsp]);
+  ATTREVAL();
+
+#include "FINL.h"
+}
+</PRE>
+Replace "Root" by the name of the rule that creates the root node of the
+tree.
+If the root node is created by another function, omit the
+<CODE>Mk</CODE>-function call.
+<CODE>ATTREVAL</CODE> assumes that the root node is at the top of the stack;
+if this pre-condition is not satisfied then the computation will silently
+do nothing.
+<P>
+<H3><A NAME="SEC40" HREF="syntax_toc.html#SEC40">The parser is an executable file</A></H3>
+<P>
+When the parser is an executable file that expects to load a shared
+library, that library must be built from the specifications of the tree
+construction and computation
+(see  <A HREF="pp_1.html#SEC3">so of Products and Parameters Reference</A>).
+The library must not contain a parser or a main program:
+<P>
+<PRE>
+treecomp.specs +nomain +parser=none :so
+</PRE>
+Here we assume that all of the components of the LIDO specification,
+tree construction interface, and supporting modules are listed in
+<SAMP>`treecomp.specs'</SAMP>.
+<P>
+The simplest approach to integrating the foreign parser with the shared
+library is to copy it to a file with the name that the foreign parser
+expects.
+For example, if the parser program expects to load a shared library named
+<SAMP>`ParserActions.so'</SAMP>, then use the following derivation to make the
+library available under that name:
+<P>
+<PRE>
+treecomp.specs +nomain +parser=none :so &#62; libParserActions.so
+</PRE>
+(See your system documentation for the placement and naming of shared
+library files.)
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

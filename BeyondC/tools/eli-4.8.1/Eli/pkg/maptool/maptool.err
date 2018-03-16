@@ -1,0 +1,53 @@
+# $Id: maptool.err,v 1.4 1996/05/21 19:19:25 kadhim Exp $
+/NOTE/d
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Grammars./
+	p
+	d
+}
+/reached unexpectedly while matching LISTOF/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)LISTOF./
+	p
+	d
+}
+/defining the structure of a LISTOF rule/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)LISTOF./
+	p
+	d
+}
+/Multiple possible matches for this rule/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Rule Matching./
+	p
+	d
+}
+/Could not determine the start symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Nonterminals./
+	p
+	d
+}
+/One of the multiple roots/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Nonterminals./
+	p
+	d
+}
+/Abstract syntax symbols may not appear on the rhs of an equivalence class/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Symbol Mapping./
+	p
+	d
+}
+/Equivalence classes cannot have both terminals and nonterminals/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Symbol Mapping./
+	p
+	d
+}
+/Abstract nonterminal equivalenced to concrete terminals/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Symbol Mapping./
+	p
+	d
+}
+/Couldn't determine a mapping./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (syntax)Rule Mapping./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./

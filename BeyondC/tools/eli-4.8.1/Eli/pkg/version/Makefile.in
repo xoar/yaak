@@ -1,0 +1,17 @@
+# $Id: Makefile.in,v 2.2 2002/05/08 15:01:07 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+# Copyright (c) 1994, 1995 Anthony M. Sloane
+
+CC	= @CC@
+
+DIR	= pkg/version
+SRC	= version.dg
+AUX	= Makefile Makefile.in version
+CMD	=
+EXE	=
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@

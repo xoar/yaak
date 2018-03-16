@@ -1,0 +1,21 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@comment $Id: help_header,v 1.3 2007/01/09 22:57:24 profw Exp $
+@setfilename help
+@settitle Specific Errors
+@comment %**end of header
+
+@node Top
+@top
+
+This hypertext has one node for each set of messages.
+The files to which the messages might refer are accessible via the edit
+button or command (@pxref{examples, , Edit command, info, Info}).
+
+Messages having the character @kbd{*} in the first character position also
+provide access to documentation giving further information that
+may help you to understand those messages.
+They are normal menu items that can be selected by clicking on them or by
+using the menu command
+(@pxref{help-m, , Menus and the M command, info, Info}).
+

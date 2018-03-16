@@ -1,0 +1,139 @@
+# $Id: Makefile.in,v 1.2 2009/08/17 07:45:11 peter Exp $
+# Makefile for pkg/liga/backend
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+CC	=	@CC@
+
+IDL		= ../idl
+LIGASCEL	= ../ligascel
+ERR		= ../ligascel
+OPTHANDLER	= ../option
+
+DIR	=	pkg/liga/backend
+SRC	=
+
+SOURCES	= attr.c \
+	  attrdecl.c \
+	  backvisit.c \
+	  bottomup.c \
+	  visitcmp.c \
+	  expr.c \
+	  idn.c \
+	  incl.c \
+	  new_line.c \
+	  ligaback.c \
+	  Encode.c \
+	  GenMkFct.c \
+	  VoidPtrList.c \
+	  DynSpace.c \
+	  GenMon.c
+
+INCL	= attr.h \
+	  attrdecl.h \
+	  backvisit.h \
+	  bottomup.h \
+	  visitcmp.h \
+	  bool.h \
+	  expr.h \
+	  idn.h \
+	  idntbl.h \
+	  incl.h \
+	  ligaback.h \
+	  Encode.h \
+	  GenMkFct.h \
+	  VoidPtrList.h \
+	  ProdSectList.h \
+	  DynSpace.h \
+	  GenMon.h
+
+GENERATED = derivedSrcs/ptg_gen.h \
+	    derivedSrcs/ptg_gen.c \
+	    derivedSrcs/ptg.h \
+	    derivedSrcs/gettext.h \
+	    derivedSrcs/config.h \
+	    derivedSrcs/obstack.h \
+	    derivedSrcs/obstack.c \
+	    derivedSrcs/obsave.h \
+	    derivedSrcs/obsave.c \
+	    derivedSrcs/csm.c \
+	    derivedSrcs/csm.h \
+	    derivedSrcs/csmtbl.h 
+
+
+EXTSRC  = $(LIGASCEL)/OutStr.c
+
+EXTINCL = $(OPTHANDLER)/opt_input.h \
+          $(OPTHANDLER)/option_enums.h \
+          $(OPTHANDLER)/option_types.h \
+          $(LIGASCEL)/OutStr.h
+
+
+# objects
+EXTOBJ  = $(IDL)/lookup_idl.o \
+          $(IDL)/IDL.a \
+          $(OPTHANDLER)/opt_input.o \
+          $(ERR)/err.o \
+	  $(LIGASCEL)/OutStr.o \
+	  $(ERR)/source.o
+
+OBJ	= attrdecl.o \
+          expr.o \
+          incl.o \
+	  backvisit.o \
+	  bottomup.o \
+	  visitcmp.o \
+          ligaback.o \
+          attr.o \
+          idn.o \
+          derivedSrcs/ptg_gen.o \
+	  derivedSrcs/obstack.o \
+	  derivedSrcs/obsave.o \
+	  derivedSrcs/csm.o \
+	  new_line.o \
+	  Encode.o \
+	  GenMkFct.o \
+	  VoidPtrList.o \
+	  DynSpace.o \
+	  GenMon.o
+
+DISTDIR =       derivedSrcs
+COP	=       Makefile.in $(SOURCES) $(INCL) 
+AUX	=	Makefile Makefile.in $(SOURCES) $(INCL) $(GENERATED)
+COM	=
+CMD	=	$(COM)
+RCS	=	
+EXE	=	../ligaBe.exe
+GEN	=	$(OBJ)
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+# compiler options
+CFLAGS	= -I$(IDL) -I$(OPTHANDLER) -I$(LIGASCEL) -IderivedSrcs @DMONITOR_GEN@
+
+@toolmk_h@
+
+.c.o:
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(EXE): $(OBJ) $(EXTOBJ)
+	$(CC) $(CFLAGS) $(OBJ) $(EXTOBJ) -o $(EXE)
+
+
+

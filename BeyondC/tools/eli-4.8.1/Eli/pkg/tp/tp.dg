@@ -1,0 +1,46 @@
+# $Id: tp.dg,v 1.4 2001/07/09 06:35:16 tony Exp $
+# Copyright 1998, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.tp => :tp;
+:tp 'Tree parser specification'? => :FILE;
+:tp.cmpd 'Set of tp specification fragments' => :LIST;
+
+COLLECT  (:tp)
+  => (:one.tp.cmpd);
+:one.tp.cmpd 'Singleton tp specification' => :tp.cmpd;
+
+COLLECT  (:LIST :extract=:tp)
+  => (:ext.tp.cmpd);
+:ext.tp.cmpd 'Extracted tp specification fragments' => :tp.cmpd;
+
+EXEC (tpGen.sh) (.) (:tp.cmpd :cpp) (+monitor)
+  NEED (tp.exe) (tp.err) (tp.INIT.phi) (tpnode.h) (tp.dapto) (tp.tcl)
+  => (:tpGen);
+:tpGen 'Objects generated from tree parser specifications' => :DERIVED-DIRECTORY;
+
+EXEC (tpOut.sh) (:tp.cmpd :names) (:tpGen :name)
+  => (:tpOut);
+:tpOut 'Results of tree parser processing' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:tpGen) tpGenErr
+  => (:tpGenErr);
+:tpGenErr 'Identity map for errors in standard form' => :line_err;
+
+COLLECT (:allspecs +incl=(:etaIncl) :tpOut :list)
+  => (:eli*level_1_specs_in);

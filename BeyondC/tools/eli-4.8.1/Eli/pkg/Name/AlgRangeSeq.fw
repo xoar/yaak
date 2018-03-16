@@ -1,0 +1,95 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: AlgRangeSeq.fw,v 4.2 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module extends the AlgScope module by a facility that allows
+join syntactically separated ranges into one range.
+
+Using this module requires that the module for the basic
+consistent renaming task, |NAME|AlgScope is also used.
+Both modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+This module provides the following computational roles:
+
+~O~<|NAME|AlgRangeSeq.lido~>~{
+~<|NAME|RangeSequence~>
+~<|NAME|RangeElement~>
+~}
+
+|NAME|RangeSequence
+is to be inherited to a symbol that is the root of a subtree
+which contains all to be joined ranges.
+It provides all attributes provided by |NAME|RangeScope,
+but it is not a range in the sense of scope rules.
+
+Other range roles may not be inerited to |NAME|RangeSequence.
+
+~$~<|NAME|RangeSequence~>==~{
+CLASS SYMBOL |NAME|RangeSequence:
+	|NAME|Env:	Environment	INH,	/* provided */
+	|NAME|GotLocKeys:	VOID	SYNT,	/* provided */
+	|NAME|GotKeys:		VOID	INH;	/* provided */
+
+CLASS SYMBOL |NAME|RangeSequence COMPUTE
+  INH.|NAME|Env =
+	NewScope (INCLUDING |NAME|AnyScope.|NAME|Env);
+  SYNT.|NAME|GotLocKeys =
+	CONSTITUENTS |NAME|RangeElement._elt_|NAME|GotLocKeys
+		SHIELD |NAME|AnyScope;
+  INH.|NAME|GotKeys =
+	INCLUDING |NAME|AnyScope.|NAME|GotKeys
+	<- SYNT.|NAME|GotLocKeys;
+END;
+~}
+
+|NAME|RangeElement
+is the role to be inherited to symbols that represent
+to be joined ranges. It is a specialized |NAME|RangeScope.
+
+It must be contained in a |NAME|RangeSequence subtree without
+having a |NAME|RangeScope inbetween.
+
+Other range roles may not be inherited to |NAME|RangeSequence.
+
+~$~<|NAME|RangeElement~>==~{
+CLASS SYMBOL |NAME|RangeElement INHERITS |NAME|AnyScope END;
+
+CLASS SYMBOL |NAME|RangeElement:
+	|NAME|Env:	Environment	INH,	/* provided */
+	|NAME|GotLocKeys:	VOID	SYNT,	/* provided */
+	_elt_|NAME|GotLocKeys:	VOID	SYNT,	/* local */
+	|NAME|GotKeys:		VOID	INH;	/* provided */
+
+CLASS SYMBOL |NAME|RangeElement INHERITS |NAME|RangeScope COMPUTE
+  SYNT._elt_|NAME|GotLocKeys =
+	CONSTITUENTS |NAME|IdDefScope.|KEY|Key SHIELD |NAME|AnyScope;
+  INH.|NAME|Env =
+	INCLUDING |NAME|RangeSequence.|NAME|Env;
+  SYNT.|NAME|GotLocKeys =
+	INCLUDING |NAME|RangeSequence.|NAME|GotLocKeys;
+  INH.|NAME|GotKeys =
+	INCLUDING |NAME|RangeSequence.|NAME|GotKeys;
+END;
+~}

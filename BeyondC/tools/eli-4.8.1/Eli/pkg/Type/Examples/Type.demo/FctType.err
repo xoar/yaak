@@ -1,0 +1,24 @@
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  type (int, real -> real) fct;
+
+  var	fct vf;
+
+  fun f (int x, real y) real
+  begin r = x * y; end;
+
+  type (real, fct -> void) gct;
+
+  fun g (real z, gct ff) void
+  begin r = z; ff (z); end; (*err*)
+
+  var	gct vg;
+
+  vf = f;
+  
+  s = vf (i+1, 3.4);
+  vg = g; (*err*)
+  vg (vf (j, j), vg); (*errc=18*)
+end

@@ -1,0 +1,47 @@
+# $Id: Makefile.in,v 1.2 2009/05/04 15:30:26 profw Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of cola
+
+
+CC	=	@CC@
+
+DIR	= pkg/cola
+SRC	= cola.dg
+COP	= Makefile.in colaBe.sh.in version
+AUX	= $(COP) Makefile
+COM	= colaFe.sh colaLalr.sh colaOpt.sh
+CMD	= $(COM) colaBe.sh colaOut.sh
+RCS	=
+EXE	= colaAbsprs.exe colaConn.exe colaOption.exe colaPgs2cm.exe colaTbl.exe
+GEN	=
+GENINS	=
+SRCDIR	= Frames Info
+AUXDIR	= idl lib trafos lalr option
+
+@toolmk_h@
+
+colaOption.exe:	option/derivedSrcs/option.exe 
+	@rm -f $@
+	@LINK@ $? $@
+
+colaPgs2cm.exe:	trafos/pgs2cmr/derivedSrcs/pgs2cmr.exe 
+	@rm -f $@
+	@LINK@ $? $@

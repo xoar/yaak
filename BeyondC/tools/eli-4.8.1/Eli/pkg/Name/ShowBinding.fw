@@ -1,0 +1,130 @@
+@=~
+~p maximum_input_line_length = infinity
+~! $Id: ShowBinding.fw,v 5.7 2001/07/24 15:37:58 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module provides test output for name analysis.
+For each defining and each used identifier occurrence
+a line is printed like
+   m in line 23 bound in line 4 of scope in line 3
+
+The generic instance parameter is [|NAME|].
+It must be the same as that of the instantiation
+of the basic name analysis module, e.g.
+  $/Name/AlgScope.gnrc +instance=|NAME| :inst
+
+Unfortunately, this module is NOT usable if the name analysis module
+is instantiated with a referto parameter that modifies the
+key attribute name. (That parameter could not be passed to
+the instance of the SetFirst module below.)
+
+~O~<|NAME|ShowBinding.specs~>~{
+$/Adt/csm.specs
+$/Prop/SetFirst.gnrc+instance=|NAME|Line+referto=int:inst
+~}
+
+~O~<|NAME|ShowBinding.lido~>~{
+ATTR |NAME|Line: int;
+
+CLASS SYMBOL |NAME|SetDefPt INHERITS |NAME|LineSetFirst COMPUTE
+  SYNT.|NAME|Line = LINE;
+END;
+
+/* First chain path to set environment keys and line numbers: 
+
+   If you have your own ideas how to associate keys to
+   environments, override the computation of SYNT.|NAME|GotEnvKey
+   for that range, or SYNT.|NAME|GotPropEnvKey 
+   for a |NAME|ExportRange.
+
+   set |NAME|Line property to environment keys
+*/
+CHAIN _|NAME|GotEnvLine: VOID;
+
+CLASS SYMBOL ROOTCLASS COMPUTE
+  SYNT.|NAME|GotEnvKey = 
+     SetKeyOfEnv (THIS.|NAME|Env, NewKey ());
+
+  CHAINSTART HEAD._|NAME|GotEnvLine = 
+     Reset|NAME|Line (KeyOfEnv (THIS.|NAME|Env), 0)
+     <- (SYNT.|NAME|GotEnvKey,
+         CONSTITUENTS |NAME|ShowBind.Bind SHIELD ());
+END;
+
+/* To be upward compatible: */
+CLASS SYMBOL |NAME|RangeScopeProp INHERITS |NAME|ExportRange END;
+
+/* HEAD used in ExportRange, TAIL used in RangeScope
+   to allow both roles be inherited.
+*/
+CLASS SYMBOL |NAME|ExportRange COMPUTE
+  SYNT.|NAME|GotPropEnvKey = 
+     SetKeyOfEnv (THIS.|NAME|Env, THIS.|NAME|ScopeKey) /* resets the key */
+  <- SYNT.|NAME|GotEnvKey;
+
+  HEAD._|NAME|GotEnvLine = SYNT.|NAME|GotPropEnvKey
+    <- THIS._|NAME|GotEnvLine;
+END;
+
+CLASS SYMBOL |NAME|RangeScope COMPUTE
+  SYNT.|NAME|GotEnvKey = SetKeyOfEnv (THIS.|NAME|Env, NewKey ());
+
+  THIS._|NAME|GotEnvLine =
+    IF (EQ (Get|NAME|Line (KeyOfEnv (THIS.|NAME|Env), 0), 0),
+    Reset|NAME|Line (KeyOfEnv (THIS.|NAME|Env), LINE))
+    <- (SYNT.|NAME|GotEnvKey, TAIL._|NAME|GotEnvLine);
+END;
+
+/* second CHAIN pass to show identifier occurrences : */
+
+CHAIN |NAME|_Show: VOID;
+
+CLASS SYMBOL ROOTCLASS COMPUTE
+  CHAINSTART HEAD.|NAME|_Show = TAIL._|NAME|GotEnvLine
+    <- THIS.Got|NAME|Line;
+END;
+
+CLASS SYMBOL |NAME|ShowBind COMPUTE
+  THIS.|NAME|_Show =
+    IF (EQ (THIS.Bind, NoBinding),
+       printf ("%s unbound in line %d\n", 
+               StringTable (THIS.Sym), LINE),
+       printf 
+         ("%s in line %d bound in line %d of scope in line %d\n",
+          StringTable (THIS.Sym), LINE,
+          Get|NAME|Line (KeyOf (THIS.Bind), 0),
+          Get|NAME|Line (KeyOfEnv (EnvOf (THIS.Bind)), 0)))
+    <- (INCLUDING |NAME|LineRangeSetFirst.Got|NAME|Line,
+        THIS.|NAME|_Show);
+END;
+
+CLASS SYMBOL |NAME|IdDefScope INHERITS |NAME|SetDefPt, |NAME|ShowBind END;
+CLASS SYMBOL |NAME|IdInDeclarator INHERITS |NAME|SetDefPt, |NAME|ShowBind END;
+CLASS SYMBOL |NAME|IdUseEnv INHERITS |NAME|ShowBind END;
+CLASS SYMBOL |NAME|IdUseScope INHERITS |NAME|ShowBind END;
+CLASS SYMBOL |NAME|IdUseScopeProp INHERITS |NAME|ShowBind END;
+CLASS SYMBOL |NAME|QualIdUse INHERITS |NAME|ShowBind END;
+~}
+
+~O~<|NAME|ShowBinding.head~>~{
+#include "csm.h"
+~}

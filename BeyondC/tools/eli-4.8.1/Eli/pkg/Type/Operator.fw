@@ -1,0 +1,125 @@
+@=~
+~p maximum_input_line_length = infinity
+~! $Id: Operator.fw,v 1.3 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+~O~<Opr.con~>~{
+#define SrcOpr(tok,con,abs,oil) con : tok .
+#define TgtOpr(src,tgt,sig,init) 
+#include "|NAME|"
+#undef SrcOpr
+#undef TgtOpr
+~}
+
+~O~<Opr.sym~>~{
+#define SrcOpr(tok,con,abs,oil) abs ::= con .
+#define TgtOpr(src,tgt,sig,init) 
+#include "|NAME|"
+#undef SrcOpr
+#undef TgtOpr
+~}
+
+~O~<OprSymbs.lido~>~{
+ATTR OprSym: DefTableKey;
+#define SrcOpr(tok,con,abs,oil) \
+	RULE: abs ::= tok COMPUTE abs . OprSym = oil; END;
+#define TgtOpr(src,tgt,sig,init)
+#include "|NAME|"
+#undef SrcOpr
+#undef TgtOpr
+~}
+
+~O~<OprType.oil~>~{
+#define TgtOpr(src,tgt,sig,init) INDICATION src : tgt ;
+#define SrcOpr(tok,con,abs,oil) 
+#include "|NAME|"
+#undef TgtOpr
+#define TgtOpr(src,tgt,sig,init) OPER tgt sig ;
+#include "|NAME|"
+#undef TgtOpr
+#undef SrcOpr
+~}
+
+~O~<OprStr.specs~>~{
+$/Tech/Strings.specs
+~}
+
+~O~<OprType.lido~>~{
+CLASS SYMBOL BinTgtOpr: 
+   LType, RType: DefTableKey, /* required */
+   TgtOpr: tOilOp,
+   LTType, RTType, ResType: DefTableKey, /* provided */
+   TgtKey: DefTableKey; /* provided */
+
+CLASS SYMBOL BinTgtOpr COMPUTE
+  SYNT.TgtOpr =
+    OilIdOp2 (GetOilOp (THIS.OprSym, NoOilOp),
+              GetOilType (THIS.LType, NoOilType),
+              GetOilType (THIS.RType, NoOilType));
+  SYNT.ResType = 
+    OilTypeName (OilGetArgType (THIS.TgtOpr, 0));
+  SYNT.LTType = 
+    OilTypeName (OilGetArgType (THIS.TgtOpr, 1));
+  SYNT.RTType = 
+    OilTypeName (OilGetArgType (THIS.TgtOpr, 2));
+  SYNT.TgtKey = OilOpName (THIS.TgtOpr);
+END;
+
+CLASS SYMBOL UnTgtOpr: 
+   RType: DefTableKey, /* required */
+   TgtOpr: tOilOp,
+   RTType, ResType: DefTableKey, /* provided */
+   TgtKey: DefTableKey; /* provided */
+
+CLASS SYMBOL UnTgtOpr COMPUTE
+  SYNT.TgtOpr =
+    OilIdOp1 (GetOilOp (THIS.OprSym,NoOilOp),
+              GetOilType (THIS.RType, NoOilType));
+  SYNT.ResType =
+	OilTypeName (OilGetArgType (THIS.TgtOpr, 0));
+  SYNT.RTType = 
+    OilTypeName (OilGetArgType (THIS.TgtOpr, 1));
+  SYNT.TgtKey = OilOpName (THIS.TgtOpr);
+END;
+
+CLASS SYMBOL ChkOpr COMPUTE
+  IF (EQ (THIS.TgtKey, NoKey),
+  message (ERROR, "operator not defined for these operand types",
+	   0, COORDREF));
+END;
+~}
+
+~O~<OprMap.head~>~{
+#include "oiladt2.h"
+#define NoOilType ((tOilType)0)
+#define NoOilOp ((tOilOp)0)
+~}
+
+~O~<OprMap.pdl~>~{
+#define TgtOpr(src,tgt,sig,init) tgt ->  init ;
+#define SrcOpr(tok,con,abs,oil)
+#define comma ,
+#include "|NAME|"
+#undef comma
+#undef SrcOpr
+#undef TgtOpr
+~}

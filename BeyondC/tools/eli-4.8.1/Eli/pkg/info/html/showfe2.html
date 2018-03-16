@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>showFe Example (rules and computations)</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>showFe output (rules)</h1>
+<hr>
+<pre>
+RULE rule_003:
+   argument_exp_list  ::= 
+          argument_exp_list ',' Expression 
+
+   Expression.FunctionId = 0;   (F1:231:27)
+   Expression.NeedaFunc = 0;    (F4:26:3)
+   Expression.FinalType = 
+          OilSelectTypeFromTS (...); (F4:27:3)
+
+RULE rule_004:
+init_declarator  ::= declarator 
+
+   init_declarator.TypeChain = 
+         init_declarator.TypeChain; (F1:86:3)
+</pre>
+<font size=-2>[this listing is slightly abbreviated and reformatted]</font>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

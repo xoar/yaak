@@ -1,0 +1,1495 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright, 1989, The Regents of the University of Colorado
+@comment %**start of header
+@setfilename pp
+@settitle Products and Parameters Reference
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Products and Parameters Reference}
+@sp 1
+@center $Revision: 2.15 $
+@include org.tnf
+@end titlepage
+
+@iftex
+@catcode`@_=11
+@end iftex
+
+@node top, , , (dir)
+
+@ifinfo
+$Revision: 2.15 $
+@end ifinfo
+
+A @dfn{product}
+@findex product
+is a Unix file or directory that can be requested from Eli
+(@pxref{Top,,, ui, Eli User Interface Reference Manual}).
+@dfn{Parameters}
+@findex parameter
+allow the requestor to control some characteristics of the
+requested product.
+This document defines the available products and associated parameters.
+It is intended as a reference manual rather than a tutorial.
+The products and parameters are grouped by function;
+use the index to find a particular product or parameter by name.
+
+@menu
+* Processor::		Processor Generation.
+* Specifications::	Generating Specifications.
+* Diagnostics::		Reports on problems deriving a processor.
+* Testing::		Results of applying the processor to data.
+* Documentation::	Producing formatted documents.
+* Derivation::		Obtaining information about derivations.
+
+* Index::		Index to this manual.
+@end menu
+
+@iftex
+Eli's products and parameters can be divided into six groups:
+The @dfn{processor} group allows a user to generate a processor and extract it
+from Eli, in either executable or source form, or to copy the complete set of
+files defining a processor.
+Inconsistencies in the specifications cause Eli to set either warning or abort
+status for the request being made; additional information about these
+inconsistencies can be obtained via the @dfn{diagnostic} group of products.
+Even though a set of specifications is consistent, it may not be correct.
+The @dfn{testing} product group should be used to exercise the processor,
+verifying that the specifications solve the proper problem.
+Products and parameters in the @dfn{document} group provide formatted
+versions of specifications that can be put on paper or rendered as
+hypertext.
+Finally, the @dfn{derivation} group allows the user to obtain information
+about the details of how products are derived and influence the derivation
+process in certain ways.
+@end iftex
+
+@node Processor, Specifications, , top
+@chapter Processor Generation
+
+Eli's task is to create a text processor that implements a set of
+specifications.
+Two forms of that processor can be extracted from Eli: an executable form and a
+source form.
+The processor can also be tested without extracting it from Eli
+(@pxref{Testing}).
+Regardless of the ultimate disposition of the processor, its behavior can be
+influenced in a number of ways by parameters.
+
+@menu
+Products:
+* exe::         Executable file containing the generated processor.
+* so::          Shared library containing the generated processor.
+* source::      Directory of source and include files making up the processor.
+* fwGen::       Directory of FunnelWeb generated product files
+
+Parameters:
+* define::      To define C preprocessor symbols.
+* cc_flags::    To set options for the C compiler
+* cc::          To specify a particular C compiler
+* fold::        To suppress case distinctions in identifiers and keywords.
+* ignore::      To ignore certain include files.
+* parser::      To select the parser generator or omit the parser.
+* nomain::      To omit the main program.
+@end menu
+
+@node exe, so, , Processor
+@section exe --- Executable Version of the Processor
+
+@example
+@findex exe
+:exe
+@end example
+
+A binary file containing the executable program
+@findex executable program
+generated from the given specifications.
+During specification development, @code{:exe} is used as a
+means of collecting error reports (@pxref{help}):
+
+@example
+pascal.specs:exe:help
+@end example
+
+@noindent
+When this derivation yields an empty result, indicating that no errors were
+detected in the specifications, the generated processor can be tested
+by requesting the @code{stdout} (@pxref{stdout}),
+@code{output} (@pxref{output}),
+@code{dbx}, @code{gdb} (@pxref{debugging}),
+@code{mon}, @code{mongdb} (@pxref{monitoring})
+or
+@code{run} (@pxref{run})
+products.
+After testing has been completed, @code{exe} can be used to extract the
+executable processor from the cache for use in arbitrary contexts:
+
+@example
+pascal.specs:exe>pc
+@end example
+
+@node so, source, exe, Processor
+@section so --- Shared library Version of the Processor
+
+@example
+@findex so
+:so
+@end example
+
+A shared library containing the executable program
+@findex executable program
+generated from the given specifications.
+Shared libraries do not usually contain a main program, and therefore
+@code{:so} is almost always derived using the @code{+nomain} parameter
+(@pxref{nomain}).
+
+@node source, fwGen, so, Processor
+@section source --- Source Version of the Processor
+
+@example
+@findex source
+:source
+@end example
+
+A directory containing the source language files
+@findex source language file
+and header files
+@findex header file
+necessary to construct the generated processor.
+This directory is completely self-contained, unless a library specification
+was given by the user.
+All Eli library routines
+@findex library routine
+used are included in source form.
+There is also a makefile,
+@findex makefile
+so an executable processor can be constructed by
+entering the directory and giving the command @code{make}.
+
+To extract the directory from the cache, use the following Eli request:
+
+@example
+pascal.specs:source>@var{dir}
+@end example
+
+@noindent
+Here @var{dir} is the name of an existing directory.
+The directory may or may not be empty.
+If it is empty, Eli will copy all of the files needed to construct the
+processor (except user-specified libraries) from the cache to @var{dir}.
+Otherwise, Eli will copy only those files that differ from the files with
+the same name in @var{dir}.
+This means that if you alter the specifications for the processor and then
+request a new source directory, only the files actually affected by your
+specification change will be updated.
+Therefore if you run @code{make} in @var{dir}, unaltered routines will not
+be recompiled.
+
+@node fwGen, fold, source, Processor
+@section fwGen --- Obtain the Product Files Generated by FunnelWeb
+
+@example
+@findex fwGen
+:fwGen
+@end example
+
+A directory containing the files generated by the FunnelWeb "tangle" phase.
+@xref{Output Files, , , fw, FunnelWeb User's Manual}.  This derivation can only
+be applied to type-@code{fw} files.  The resulting directory will contain
+all files generated by @code{@@O} macros in the FunnelWeb file.
+For example, to generate the "tangled" files from the file @file{pascal.fw},
+use the following Eli request:
+
+@example
+pascal.fw:fwGen>@var{dir}
+@end example
+ 
+Here @var{dir} is the name of an existing directory.
+
+@node fold, define, fwGen, Processor
+@section fold --- Make the Processor Case-Insensitive
+
+@example
+@findex fold
++fold
+@end example
+
+Eli normally produces a compiler that treats upper and lower case
+@findex case-insensitivity
+@findex upper case
+@findex lower case
+@findex letters, case of
+letters as distinct characters in identifiers and keywords.
+If @code{fold} is used, implementation of the processor @code{mkidn}
+@findex mkidn
+is altered so that it treats the upper and lower case versions of a
+letter as being identical.
+
+The @code{fold} causes all identifiers to be stored in their upper-case
+form.
+When an identifier is output,
+@findex identifier output
+@findex output of identifiers
+therefore, it will appear in upper case
+regardless of its representation in the input text.
+
+@node define, cc_flags, fold, Processor
+@section define --- Set C Pre-Processor Symbols
+
+@example
+@findex define
++define='@var{item} @dots{}'
+@end example
+
+All C compilations
+@findex C compilation
+required by the derivation will be provided with flag
+@code{-D}@var{item} for each item in the argument.
+An item is any sequence of non-white-space characters other than
+apostrophes.
+Items are separated by white space.
+Any number of items may be specified.
+
+The following items are pre-defined:
+
+@table @code
+@findex STOPAFTERBADPARSE
+@item STOPAFTERBADPARSE
+Generate a processor that will terminate after parsing if syntax errors are
+detected
+(@pxref{Error Recovery,,Improving Error Recovery in the Generated Parser,
+syntax,Syntactic Analysis}).
+@end table
+
+@node cc_flags, cc, define, Processor
+@section cc_flags --- Set C Compiler Options
+
+@example
+@findex cc_flags
++cc_flags=@var{flag} @dots{}
+@end example
+
+All C compilations
+@findex C compilation
+required by the derivation will be provided with each @var{flag}
+in the argument.
+A flag is any sequence of non-white-space characters,
+possibly enclosed in apostrophes.
+Flags are separated by white space.
+Any number of flags may be specified.
+
+This parameter is often used to specify include files for components that
+are not generated by Eli.
+For example:
+
+@example
++cc_flags='-I/opt/icedtea-bin-6.1.11.1/include'
+@end example
+
+@node cc, ignore, cc_flags, Processor
+@section cc --- Choose a Particular C Compiler
+
+@example
+@findex cc
++cc=@var{command}
+@end example
+
+All C compilations
+@findex C compilation
+required by the derivation will be carried out by executing the command
+@var{command}.
+
+@node ignore, parser, cc, Processor
+@section ignore --- Do Not Verify include Files
+
+@example
+@findex ignore
++ignore='@var{path}'
+@end example
+
+Eli normally verifies the presence of files requested by @code{#include}
+@findex include
+@findex directives
+directives in any file that it processes.
+The @code{ignore} parameter tells Eli not to verify the presence of such
+files if their full names begin with @var{path}.
+
+If a derivation does not specify any @code{ignore} parameters,
+@code{+ignore='/usr/include'} is assumed.
+(This assumption is not made if any @code{ignore} parameters are given
+explicitly.)
+
+@node parser, nomain, ignore, Processor
+@section parser --- Choose the parser generator
+
+@example
+@findex parser
++parser
++parser=pgs
++parser=cola
++parser=none
+@end example
+
+Eli incorporates two parser generators,
+@findex parser generator selection
+@dfn{PGS}
+@findex PGS
+and @dfn{COLA}.
+@findex COLA
+Both produce parsers from LALR(1) grammars, and the parsers they produce
+recover automatically from syntactic errors.
+A PGS-generated parser does not reduce by chain productions.
+This means that it accepts some grammars that are not LALR(1), and the
+generated parser is faster than a COLA-generated parser for languages with
+many precedence levels in expressions.
+Parsers generated by COLA include more information in error messages
+about expected tokens than those generated by PGS do.
+
+The error reports provided by the two parser generators differ somewhat,
+and it is sometimes useful to try the other generator when one produces a
+message you don't understand.
+Remember, however, that PGS accepts a wider class of grammars.
+Thus COLA may report errors for a grammar and PGS may not.
+
+One of the two parser generators is selected as the default at the time the
+Eli system is generated.
+The default parser generator will be used if the @code{parser} parameter is
+absent.
+A request specifying @code{+parser} only will cause the non-default
+parser generator to be used.
+Specifying @code{+parser=pgs} will cause PGS to be used, while specifying
+@code{+parser=cola} will cause COLA to be used.
+
+The default parser generator can be changed by changing the shell scripts
+@file{parserOut.sh}, @file{bnfOut.sh} and @file{infoOut.sh} in directory
+@file{$elipkg/parser}.
+
+@findex parser, omitting
+@findex omitting the parser
+
+Sometimes it is desirable to not have a generated parser.  For example,
+the user may be building a tree for attribution using hand-written
+code or code produced by an application external to Eli.  Specifying
+@code{+parser=none} will cause Eli not to generate a parser.
+
+@node nomain, , parser, Processor
+@section nomain --- Omitting the main program
+
+@example
+@findex nomain
++nomain
+@end example
+
+@findex main program, omitting
+@findex omitting the main program
+
+Normally Eli generates a main program that invokes the generated
+components in an appropriate order.  Sometimes the user wants to have
+more control by providing their own main program.  In this situation
+@code{+nomain} should be specified to omit the standard Eli main
+program.
+
+@node Specifications, Diagnostics, Processor, top
+@chapter Generating Specifications
+
+Sometimes a common problem can be solved by a collection of specifications
+having a particular structure.
+These specifications themselves can be generated, given simpler
+specifications.
+The products and parameters described in this chapter are most often used
+in requests that appear in type-@code{specs} files.
+They result in specifications that are then used to describe the complete
+processor.
+
+@menu
+Products:
+* consyntax::   Concrete syntax.
+* abstree::     Abstract tree grammar.
+* absyntax::    Abstract syntax.
+* pgram::       Parsing grammar.
+* kwd::		Recognize specified literals as identifiers.
+* inst::	Instantiate a generic module.
+* ExpInfo::     Information about remote attribute access.
+* OrdInfo::     Information about attribute dependence
+* OptimInfo::   Information about attribute storage optimization
+* show::        LIDO Table Viewers showFe and showMe.
+
+Parameters:
+* instance::	Name an instance of a generic module.
+* referto::	Relate instances of generic modules.
+@end menu
+
+@node consyntax, abstree, , Specifications
+@section consyntax --- Concrete Syntax
+
+@example
+@findex consyntax
+:consyntax
+@end example
+
+Requesting @code{:consyntax} will result in a type-@file{con} file
+containing the complete concrete syntax.  This includes all concrete
+syntax rules provided by the user in type-@file{con} files (translated
+into strict BNF form) as well as rules added to the concrete
+syntax as a result of the mapping process
+(@pxref{Mapping,,,syntax,Syntactic Analysis}).
+
+@node abstree, absyntax, consyntax, Specifications
+@section abstree --- Abstract Tree Grammar
+
+@example
+@findex abstree
+:abstree
+@end example
+
+Requesting @code{:abstree} will result in a type-@file{lido} file
+containing the complete abstract tree grammar.
+This consists of all rules supplied by the user in
+type-@code{lido} files, plus any additional rules derived from rules
+appearing only in type-@code{con} files in the syntax mapping process
+(@pxref{Mapping,,,syntax,Syntactic Analysis}).
+
+@node absyntax, pgram, abstree, Specifications
+@section absyntax --- Abstract Syntax
+
+@example
+@findex absyntax
+:absyntax
+@end example
+
+Requesting @code{:absyntax} will result in a type-@code{lido} file
+containing the complete abstract syntax.
+This derivation differs from the @code{:abstree} derivation
+(@pxref{abstree}) in that rules which can only be derived
+for computed subtrees
+(@pxref{Computed Subtrees,,,lidoref,LIDO - Reference Manual})
+are not included.
+
+@node pgram, kwd, absyntax, Specifications
+@section pgram -- Parsing Grammar
+
+@example
+@findex pgram
+:pgram
+@end example
+
+The parsing grammar requested by the @code{:pgram} derivation is the
+input to the parser generator.  This includes the integer encodings of the
+terminal symbols, any directives supplied by the user to direct
+the automatic error correction of the parser, and each of the BNF rules
+in the concrete syntax with associated actions.  These actions include
+actions supplied by the user as well as actions generated to construct
+an abstract syntax tree.
+
+Note that the mapping process may cause the injection of certain chain
+rules due to @code{BOTTOMUP} constraints specified in the attribute
+@findex BOTTOMUP
+grammar.  These injected rules do not appear in the result of the
+@code{:consyntax} derivation, which makes @code{:pgram} the most appropriate
+derivation to consult when trying to resolve parsing conflicts which may
+have resulted from the injection of these chain rules.
+@xref{BOTTOMUP,,, syntax, Syntactic Analysis}.
+
+@node kwd, inst, pgram, Specifications
+@section kwd --- Recognize Specified Literals as Identifiers
+
+@example
+@findex kwd
+@var{file}.gla :kwd
+@end example
+
+Specifications that force literals whose lexical structure is defined by
+@code{@var{file}.gla} to be handled specially by the generated scanner.
+@findex scanner
+
+Normally, each literal found in the context-free grammar is recognized
+explicitly by the scanner as the specified character sequence.
+This is in contrast to identifiers, denotations and comments,
+whose lexical structures are defined by regular expressions.
+The literals are defined by their appearance in the grammar, and no
+type-@code{gla} file describes their structure.
+
+The @code{:kwd} product is used when literals are representative of the
+character strings
+@findex character strings
+that should appear in the program, but not necessarily identical to them.
+The classic case in which @code{:kwd} would be used (and from which its
+name is derived) is the recognition of mixed-case keywords.
+@findex keyword
+A literal @code{'if'} appearing in a Pascal grammar is representative of
+the character strings @code{if}, @code{If}, @code{iF} and @code{IF} but is
+identical to only the first.
+Whenever any one of these four character strings appears in a Pascal
+program, it should be recognized by the scanner as an instance of the
+literal @code{'if'}.
+All Pascal keywords behave in this fashion, and each has the form of an
+identifier.
+
+Suppose that file @code{pkeys.gla} defines the structure of the literals
+used in the grammar, and the following line were added to one of the
+type-@code{.specs} files for a Pascal compiler:
+
+@example
+pkeys.gla :kwd
+@end example
+
+This would prevent the scanner of the generated compiler from recognizing
+Pascal keywords explicitly as the character sequences specified
+by the literals given in the grammar.
+Other literals (such as @code{:=}), which did not fit the definition given
+by @code{pkeys.gla}, would still be recognized by the scanner as the
+specified character sequences.
+
+It is important to remember that the type-@file{gla} file to which the
+@code{kwd} derivation is applied defines the form of the literals @emph{in
+the grammar}, not in the input text.
+
+@node inst, ExpInfo, kwd, Specifications
+@section inst --- Instantiate a Generic Module
+
+@example
+@findex inst
+@var{file}.gnrc :inst
+@end example
+
+A specification consisting of one or more files is generated from
+@code{@var{file}.gnrc}.
+@findex instantiation
+This product is normally used to instantiate the common problem solutions
+that have been stored in the library
+@findex library
+(@pxref{Instantiation, , Module Instantiation, modlib, Specification Module Library}):
+
+@example
+$elipkg/Name/AlgScope.gnrc :inst
+@end example
+
+@noindent
+Here the path @file{$elipkg/Name} accesses the portion of the library
+devoted to problems arising in the context of name analysis
+@findex name analysis
+(@pxref{top, , Name Analysis Library, name, Specification Module Library: Name Analysis}).
+
+Type-@code{gnrc} files can be supplied by a user.
+@findex type-@code{gnrc} files
+They are simply shell scripts that carry out whatever
+actions are needed to instantiate a generic specification.
+Thus a user of Eli can construct generic specifications
+@findex constructing generic modules
+@findex generic modules, user-constructed
+appropriate to a specific domain
+@findex domain-specific modules
+and use them exactly like library specifications.
+
+Scripts appearing as type-@code{gnrc} files are invoked
+@findex invoking type-@code{gnrc} scripts
+@findex scripts, invocation via @code{inst}
+with up to three parameters.
+The first parameter is the @code{sed}(1) program,
+the second parameter is the string specified by @code{+instance},
+and the third parameter is the string specified by @code{+referto}.
+When the script is invoked, its full path name is used.
+Therefore the script can determine the directory in which it is stored,
+and access specific files in that directory.
+
+Here is an example of a type-@code{gnrc} file,
+@file{$elipkg/Name/AlgScope.gnrc}:
+
+@example
+#!/bin/sh
+# $Id: pp.tnf,v 2.15 2012/07/30 22:55:15 profw Exp $
+# Copyright, 1994, AG-Kastens, University Of Paderborn
+
+moddir=`expr $0 : '\(.*\)/.*' \| '.'`
+
+$1 -e "s/|NAME|/$2/g
+s/|KEY|/$3/g" "$moddir"/AlgScope.fw > "$2"AlgScope.fw
+@end example
+
+@noindent
+It first sets @code{moddir} to the name of the directory in which it resides,
+then uses @code{sed} to modify file @file{AlgScope.fw} in that directory.
+The script replaces the string @code{|NAME|} with the string specified by the
+@code{+instance} parameter of the original request.
+(If no @code{+instance} parameter was supplied, @code{$1} is empty and
+every occurrence of the string @code{|NAME|} is simply deleted.)
+Similarly, it either replaces the string @code{|KEY|} with the string
+specified by the @code{+referto} parameter or deletes it.
+Finally, the name of the output file depends on the
+@code{+instance} parameter of the original request.
+
+The output file will become part of the specification that contained the
+@code{:inst} request.
+
+@node ExpInfo, OrdInfo, inst, Specifications
+@section ExpInfo --- Information about remote attribute access
+
+@example
+@findex ExpInfo
+:ExpInfo
+@end example
+
+Obtain information about the processing of LIDO specifications,
+especially
+information concerning the expansion of remote attribute accesses
+(i. e. INCLUDING, CONSTITUENTS, and CHAIN). The generated listing
+describes how each remote access construct can be replaced by a
+set of equivalent computations propagating the accessed values through
+adjacent contexts. This file is useful if special difficult cases
+regarding problems with remote dependences arise.
+
+Additional information about attribute dependences and attribute
+storage optimization can be obtained by adding the parameters @code{+OrdI} and
+@code{+OptimI}. 
+
+@example 
+Example: foo.specs+OrdI:ExpInfo>
+@end example
+
+For a more detailed description of Liga's protocol options
+and more advanced options, see 
+@ref{top, ,Liga Control Language Manual, lcl, Liga Control Language Manual}.
+
+@node OrdInfo, OptimInfo, ExpInfo, Specifications
+@section OrdInfo --- Information about attribute dependence
+
+@example
+@findex OrdInfo
+:OrdInfo
+@end example
+
+
+Obtain information about the processing of LIDO specifications,
+especially
+information concerning the attribute dependences.
+The protocol provides for each grammar rule the set of direct 
+dependences between attributes occurring in this rule.
+
+Additional information about remote attribute access and attribute
+storage optimization can be obtained by adding the parameters 
+@code{+ExpI} and
+@code{+OptimI}. 
+
+@example 
+Example: foo.specs+ExpI:OrdInfo>
+@end example
+
+For a more detailed description of Liga's protocol options
+and more advanced options, see 
+@ref{top, ,Liga Control Language Manual, lcl, Liga Control Language Manual}.
+
+@node OptimInfo, show, OrdInfo, Specifications
+@section OptimInfo --- Information about attribute storage optimization
+
+@example
+@findex OptimInfo
+:OptimInfo
+@end example
+
+Obtain information about the processing of LIDO specifications,
+especially
+information on attribute storage optimization.
+For each attribute this protocol provides information where this
+attribute is stored. Possible storage locations are "tree node",
+"global variable" and "global stack".
+
+
+Additional information about remote attribute access and attribute
+dependences can be obtained by adding the parameters @code{+ExpI} and
+@code{+OrdI}. 
+
+@example 
+Example: foo.specs+ExpI:OptimInfo>
+@end example
+
+For a more detailed description of Liga's protocol options
+and more advanced options, see 
+@ref{top, ,Liga Control Language Manual, lcl, Liga Control Language Manual}.
+
+@node show, instance, OptimInfo, Specifications
+@section show --- LIDO Table Viewers showFe and showMe
+
+@example
+@findex showFe
+:showFe
+@findex showMe
+:showMe
+@end example
+
+Obtain a list of files that contain internal representations of LIDO text
+translated into readable text. @code{:showFe} shows LIDO text after
+the processing by the frontend of the Liga-System, @code{:showMe} shows
+the same information after attribute evaluator construction.
+
+These informations can be useful for debugging a LIDO-Specification or
+to understand LIGA-Processing in more depth.
+
+@xref{top, , Overview, show, SHOW - Debugging Information for LIDO}, for more details.
+
+@node instance, referto, show, Specifications
+@section instance --- Name an Instance of a Generic Module
+
+@example
+@findex instance
++instance='@var{string}'
+@end example
+
+Use @var{string} to name the instance generated by the request.
+@findex naming instances of generic modules
+@findex generic modules, naming instances
+No spaces are allowed within the @var{string}, and characters meaningful to
+the shell that interprets the associated type-@code{gnrc} file may cause
+problems.
+
+Not all generic modules allow distinct instances to be created.
+See the documentation of each such module for the precise effect of
+@code{+instance}.
+
+@node referto, ,instance, Specifications
+@section referto --- Relate Instances of Generic Modules
+
+@example
+@findex referto
++referto='@var{string}'
+@end example
+
+Use @var{string} to relate the current instance of a generic module to some
+specific instance of another generic module.
+
+Not all generic modules allow relationships to be specified.
+See the documentation of each such module for the precise effect of
+@code{+referto}.
+
+@node Diagnostics, Testing, Specifications, top
+@chapter Diagnosing Specification Inconsistencies
+
+Inconsistencies
+@findex inconsistencies
+in the specification are detected by Eli in much the same way as
+a compiler detects inconsistencies in a normal program.
+Depending upon the nature of the inconsistency, Eli will set the status
+@findex status
+of the requested processor to either ``warning'' or ``abort''.
+@findex warning
+@findex abort
+In either case, the user is informed of the status of the requested product.
+If the status is ``abort'', the product will not be delivered.
+To obtain further information about the inconsistencies,
+a request should be made to derive one of the diagnostic products
+@findex diagnostic products
+discussed in this section from the product whose status was reported as
+``warning'' or ``abort''.
+For example, suppose that the following request (@pxref{exe}) led to an abort
+status:
+
+@example
+pascal.specs :exe
+@end example
+
+Further information could then be obtained by making the request:
+
+@example
+pascal.specs :exe :help
+@end example
+
+Note that the original request is repeated exactly, with @code{:help} being
+simply added to the end.
+(@xref{objects,, Referring to Objects, ui,
+Eli User Interface Reference Manual},
+for more information about the form of a request.)
+
+@menu
+Products:
+* warning::	Anomalies noted while producing derivation for display.
+* error::	Result of error analysis.
+* help::	Additional explanation and reference to documentation.
+* parsable::    Verify that the grammar is parsable.
+* gencode::	All of the code generated by Eli from your specifications.
+@end menu
+
+@node warning, error, , Diagnostics
+@section warning --- Warning Messages and Error Reports
+
+@example
+@findex warning
+:warning
+@end example
+
+A listing of all error reports
+@findex error report
+and warning messages
+@findex warning message
+delivered by any step in a derivation.
+For example, the following request might be used during development of a
+set of specifications for a Pascal compiler:
+
+@example
+pascal.specs:exe:warning
+@end example
+
+The product being requested here is the reports of anomalies encountered
+during the derivation @code{pascal.specs:exe}.
+These reports indicate inconsistencies in the specifications listed in the
+file @file{pascal.specs}.
+
+@node error, help, warning, Diagnostics
+@section error --- Error Reports
+
+@example
+@findex error
+:error
+@end example
+
+A listing of all error reports
+@findex error report
+delivered by any step in a derivation.
+During development it is preferable to use the @code{help} product
+(@pxref{help}), because it provides more information than @code{error}.
+If a particular derivation produces a number of uninteresting warnings,
+however, @code{error} is useful.
+
+@node help, parsable, error, Diagnostics
+@section help --- Cross-Reference to Documentation
+
+@example
+@findex help
+:help
+@end example
+
+Starts an interactive
+@findex interactive
+session with the hypertext
+@findex hypertext
+reader
+(@pxref{Documentation, Documentation, System Documentation, novice, Guide
+for New Eli Users}).  This session is an explanation of reports
+@findex explanation of reports
+delivered during a derivation.  The session provides a menu of files
+containing the reports, and for each file a menu of hypertext document
+nodes pertaining to the errors in that file.
+
+Any file supplied as part of the specification can be altered
+@findex altering files
+(using the edit command of the hypertext reader),
+@findex edit command
+and when the session ends Eli will take account of those alterations.
+Generated files
+@findex generated files
+can be examined with the edit command,
+and altered copies created for testing purposes,
+but those alterations will @emph{not} be permanent.
+
+There is no use in requesting the @code{help} product unless a derivation
+has errors or warnings.
+
+@node parsable, gencode, help, Diagnostics
+@section parsable --- Verify that the Grammar is Parsable
+
+@example
+@findex parsable
+:parsable
+@end example
+
+Verifies that the grammar satisfies the conditions necessary to generate
+a parser.
+@findex generation, parser
+@findex parser generation
+
+The result of this derivation should be directed to the screen or an editor
+(@pxref{copy, , Extracting and Editing Objects, ui, Eli User Interface
+Reference Manual}).
+Using the @code{:help} derivation is @emph{not} recommended, because the
+output is hard to read.
+
+@node gencode, , parsable, Diagnostics
+@section gencode --- Code Derived from the Specifications
+
+@example
+@findex gencode
+:gencode
+@end example
+
+A directory containing the original specification files and all files
+generated from them.
+This directory is useful for exploring the relationships among the
+generated code files when certain inconsistencies are detected.
+
+Although the directory can be extracted from the cache
+(@pxref{copy, , Extracting and Editing Objects, ui, Eli User Interface
+Reference Manual}),
+it is usually examined by requesting the @code{viewlist} product:
+
+@example
+sets.specs :gencode :viewlist
+@end example
+
+@noindent
+This derived object is an interactive execution of the user's preferred
+shell in the derived directory @code{sets.specs :gencode}.
+It allows the user to employ all of the usual tools (@code{lint}(1),
+@code{ctags}(1), editors, and so forth) to perform arbitrary analysis on
+the files.
+Any file supplied as part of the specification can be altered directly,
+and when the session ends Eli will take account of those alterations.
+Generated files
+@findex generated files
+can be examined, and altered copies created for testing purposes,
+but those alterations will @emph{not} be permanent.
+
+At the beginning of the session, the directory contains only symbolic
+links.
+If you want to alter a file temporarily, simply delete the symbolic link
+and replace it with the copy of the file.
+You may also create other files in the directory as you see fit.
+If you create subdirectories of the local directory, you should delete those
+subdirectories before exiting the shell.
+Plain files need not be deleted.
+
+If you exit the shell and then re-derive @code{gencode}, any files you
+created may or may not be present.
+Thus you should not expect that files you create will be retained; any file
+you wish to keep should be written to another directory.
+
+@node Testing, Documentation, Diagnostics, top
+@chapter Testing a Generated Processor
+
+After all of the inconsistencies detected by Eli have been removed from a set of
+specifications, the generated processor must be run with typical input data
+@findex run with typical input data
+to verify that the specifications actually describe the desired behavior.
+Since improper processor behavior is always due to a specification error,
+the specifications must be altered whenever such behavior occurs.
+This means that a new processor must be generated and testing continued.
+The products and parameters described in this section allow the user to remain
+within the Eli system during this entire process.
+
+@menu
+Products:
+* run::		Execute a command in a specified directory.
+* Debugging::	Debug a program interactively at the source level.
+* Monitoring::  Monitor a program at the specification level.
+* output::	Output files from a test run.
+* stdout::	Standard output from a test run.
+
+Parameters:
+* cmd::		Command line to be executed.
+* arg::		List of files used as command line arguments.
+* debug::	Flag to request debugging information in object files.
+* monitor::     Flag to request monitoring support.
+* printtokens::	Flag to request that tokens be printed as they are read.
+@end menu
+
+@node cmd, stdout, , Testing
+@section cmd --- Command Line to be Executed
+
+@example
+@findex cmd
++cmd
+@end example
+
+A specification of a command line to be executed by the host machine.
+This parameter is a list of the words of the command line.
+Each word is specified by an odin-expression, and may be either a string or
+a file.
+Files are specified by parenthesized odin-expressions; strings are not
+parenthesized:
+
+@example
++cmd=(sets.specs :exe)
++cmd=diff (result) (expected)
++cmd=sort -u
+@end example
+
+@node stdout, output, cmd, Testing
+@section stdout --- Standard Output from Processor Execution
+
+@example
+@findex stdout
+:stdout
+@end example
+
+A file containing the result of applying a filter to another file.
+The filter is specified by the @code{+cmd} parameter attached to the
+filtered file.
+If no @code{+cmd} parameter is attached to the filtered file then the
+result is simply the filtered file itself.
+
+A typical situation is to use the generated processor to filter a data
+file:
+
+@example
+data +cmd=(sets.specs :exe) :stdout
+@end example
+
+@node output, run, stdout, Testing
+@section output --- Files Resulting from Processor Execution
+
+@example
+@findex output
+:output
+@end example
+
+The execution directory after applying a filter to a file.
+The filter is specified by the @code{+cmd} parameter attached to the
+filtered file.
+If no @code{+cmd} parameter is attached to the filtered file then the
+result will be an empty directory.
+
+A typical situation is to use the generated processor to filter a data
+file.
+If the generated processor creates files as a side effect of processing the
+data, these files will be in the derived directory:
+
+@example
+data +cmd=(sets.specs :exe) :output
+@end example
+
+@node run, Debugging, output, Testing
+@section run -- Execute the Processor in the Current Directory
+
+@example
+@findex run
+:run
+@end example
+
+Execution of a specified command line in a specified directory.
+This derivation must be applied to a directory object, and requires a
+@code{+cmd} parameter (@pxref{cmd}).
+
+@example
+. +cmd=(sets.specs :exe) (input) :run
+testdir +cmd=myprog -u (input (sets.specs :exe) :stdout) :run
+@end example
+
+Every request for @code{run} re-executes the command,
+regardless of whether anything on which the execution depends has changed.
+No other products can be derived from @code{run}.
+In particular, it is not possible to obtain warning messages or error
+reports by appending @code{:warning} or @code{:error} (@pxref{warning})
+to this derivation.
+If a warning message or error report is generated, Eli will specify
+the derivation step for which warning or abort status was set.
+The target of the derivation should be changed to this step,
+followed by @code{:warning} or @code{:error},
+and the modified request submitted to Eli.
+
+@node Debugging, Monitoring, run, Testing
+@section Debugging --- Debug a Program Interactively at the Source Level
+
+@example
+@findex dbx
+@findex gdb
+@findex core
+:dbx
++core=( @var{file} ) :dbx
+:gdb
++core=( @var{file} ) :gdb
+@end example
+
+@findex dbx
+@findex dbxtool
+@code{dbx} starts an interactive
+@findex interactive
+session with the source-level debugger
+@findex debugging
+of the machine on which Eli is running.
+This session allows controlled execution
+@findex controlled execution
+of the generated processor.
+Execution takes place in the current working directory, and
+all of the source files of the generated compiler are made available.
+@code{dbx} must be used with the @code{debug} parameter
+(@pxref{debug}).
+
+Alternatively, @code{gdb} can be used to use the GNU debugger
+@findex GNU debugger
+@code{gdb}
+@findex GDB
+instead of @code{dbx}.
+Both @code{dbx} and @code{gdb} check the environment variable
+@code{ELI_DEBUGGER}.
+@findex @code{ELI_DEBUGGER}.
+If @code{ELI_DEBUGGER} is set, then its value is taken as the name of the
+debugger to be used.
+The debugger whose name is the value of @code{ELI_DEBUGGER} must accept the
+same parameters as either the Berkeley debugger dbx or the GNU debugger
+gdb.
+After setting @code{ELI_DEBUGGER}, use either @code{dbx} or @code{gdb} to
+activate your program, depending upon which set of parameters is
+appropriate.
+
+An existing core file can be supplied by specifying the @code{core}
+parameter.
+
+Every request for @code{dbx} or @code{gdb} re-executes the generated processor,
+regardless of whether anything on which the execution depends has changed.
+No other products can be derived from @code{dbx} or @code{gdb}.
+In particular, it is not possible to obtain warning messages or error
+reports by appending @code{:warning} or @code{:error} (@pxref{warning})
+to this derivation.
+If a warning message or error report is generated, Eli will specify
+the derivation step for which warning or abort status was set.
+The target of the derivation should be changed to this step,
+followed by @code{:warning} or @code{:error},
+and the modified request submitted to Eli.
+
+@node Monitoring, monitor, Debugging, Testing
+@section Monitoring --- Monitor a program at the specification level
+
+@example
+@findex mon
+:mon
+@findex mongdb
+:mongdb
+@end example
+
+@findex mon
+@code{mon} starts an interactive session with the Noosa
+@findex Noosa
+monitoring
+@findex monitoring
+system (@pxref{,,, mon, Monitoring Reference Manual}).  This session
+allows execution monitoring
+@findex execution monitoring
+of the generated processor at the level of the specifications used to
+generate it.  This concentration on the specification level contrasts
+with the use of debuggers to monitor the processor's execution in terms
+of its source code (@pxref{Debugging}).
+
+@findex mongdb
+@code{mongdb} allows specification-level monitoring to be mixed with
+source-level debugging using gdb
+(@pxref{Debugging}).  When using this mode of monitoring, the
+source-level debugger has control of the executing program and runs as a
+child of the monitoring system.  Consequently, the monitoring system is
+inactive whenever the debugger is at its prompt level.
+These derivations can be affected by the setting of the
+@findex ELI_DEBUGGER
+@code{ELI_DEBUGGER} environment variable.  If this variable is set, it
+is assumed to be a gdb-compatible debugger.  Thus you can use other
+debuggers that support the same command-line options.  For example,
+graphical debuggers such as ddd can be used.
+
+The @code{mon} and @code{mongdb} products imply the @code{monitor}
+parameter (@pxref{monitor}) which causes the system to produce a
+processor that includes the monitoring code.  The @code{arg} parameter
+(@pxref{arg}) can be used to specify command-line arguments to the
+program being monitored.
+
+The following two derivations have the same effect:
+
+@example
+sets.specs +monitor +arg=(input) :mon
+sets.specs +arg=(input) :mon
+@end example
+
+@node monitor, arg, Monitoring, Testing
+@section monitor --- Request monitoring support
+
+@example
+@findex monitor
++monitor
+@end example
+
+If the @code{monitor} parameter is used, Eli includes monitoring support
+in the generated processor.  Processors containing monitoring support
+can be monitored at the specification level using the Noosa
+@findex Noosa
+monitoring
+@findex monitoring
+environment (@pxref{,,, mon, Execution Monitoring Reference}) via the
+@code{mon},
+@findex mon
+or @code{mongdb}
+@findex mongdb
+products (@pxref{Monitoring}), which automatically imply the
+@code{monitor} parameter.
+For @code{mongdb} to be useful, the @code{debug} parameter must also be
+used (@pxref{debug}).
+@findex debug
+
+@node arg, debug, monitor, Testing
+@section arg --- Supply Command Line Parameters
+
+@example
+@findex arg
++arg='@var{item} @dots{}'
++arg=(@var{file})
+@end example
+
+The specified items are supplied as command line parameters
+@findex command line parameters
+@findex parameters, command line
+to the generated processor when it is executed by @code{mon}
+or @code{mongdb}.
+An item is any sequence of non-white-space characters other than
+apostrophes.
+Items are separated by white space.
+Any number of items may be specified.
+
+@node debug, printtokens, arg, Testing
+@section debug --- Request debugging information in object files
+
+@example
+@findex debug
++debug
+@end example
+
+If the @code{debug} parameter is used, all compilations are given the
+@code{-g} flag.
+@findex @code{-g} flag
+This causes the compilers to provide additional information for the
+source-level debuggers @code{dbx(1)} and @code{gdb}.
+@xref{Debugging}.  In conjunction with the @code{monitor} parameter
+(@pxref{monitor}), @code{debug} enables the use of @code{mongdb}.
+@xref{Monitoring}.
+
+@node printtokens,  , debug, Testing
+@section printtokens --- Request Token Printing Code
+
+@example
+@findex printtokens
++printtokens
+@end example
+
+If @code{printtokens} is specified, the generated processor will print the
+source text coordinates,
+@findex source text coordinates
+internal code
+@findex internal code
+and intrinsic value
+@findex intrinsic value
+for each basic symbol
+@findex basic symbol
+as it is read.
+This listing is useful to verify that the lexical analysis specification is
+correct, and also to obtain a frequency distribution of the kinds of basic
+symbols appearing in a program.
+
+@node Documentation, Derivation, Testing, top
+@chapter Producing Formatted Documents
+
+Eli supports two mechanisms for producing formatted documents:
+@dfn{Texinfo}
+@findex Texinfo
+and @dfn{FunnelWeb}.
+@findex FunnelWeb
+Both on-line hypertext and printed documents can be produced from Texinfo
+(type-@code{tnf})files; arbitrary specification files and printed documents
+can be produced from FunnelWeb (type-@code{fw}) files.
+In this chapter we consider only the production of printed documents.
+
+@menu
+* ps::		PostScript file
+* dvi::		Device-independent TeX file.
+* fwTex::	TeX input file.
+* fwHtml::	HTML file.
+@end menu
+
+@node ps, dvi, , Documentation
+@section ps --- PostScript file
+
+@example
+@findex ps
+:ps
+@end example
+
+A file containing the result of formatting a type-@code{tnf} file.
+@findex formatted file
+
+
+@node dvi, fwTex, ps, Documentation
+@section dvi --- Device-independent TeX typesetter file
+
+@example
+@findex dvi
+:dvi
+@end example
+
+A file containing the result of formatting a type-@code{tnf} file.
+@findex formatted file
+This file cannot be printed directly, but must be used as input to some
+typesetter-dependent program.
+
+@node fwTex, fwHtml, dvi, Documentation
+@section fwTex --- TeX input file
+
+@example
+@findex fwTex
+:fwTex
+@end example
+
+A file suitable for input to TeX, containing the result of @dfn{weaving}
+@findex weave
+a type-@code{fw}
+@findex type-@code{fw}
+file:
+
+@example
+doc.fw :fwTex > doc.tex
+@end example
+
+@noindent
+Note that @code{fwTex} can @emph{not} be applied to a type-@code{specs}
+file.
+
+If the documentation text of the type-@code{fw} file contains TeX or LaTeX
+commands, it should also contain the following FunnelWeb typesetter pragma:
+
+@example
+@@p typesetter = tex
+@end example
+
+@noindent
+This pragma is not required if the documentation text contains no TeX or
+LaTeX commands, but including it will have no effect.
+If no typesetter pragma is given, any TeX and LaTeX commands in the
+documentation will simply appear in the output as they stand in the input.
+
+@node fwHtml, , fwTex, Documentation
+@section fwHtml --- HTML file
+
+@example
+@findex fwHtml
+:fwHtml
+@end example
+
+An HTML containing the result of @dfn{weaving} a type-@code{fw} file:
+
+@example
+doc.fw :fwHtml > doc.html
+@end example
+
+@noindent
+Note that @code{fwHtml} can @emph{not} be applied to a type-@code{specs}
+file.
+
+The documentation text of the type-@code{fw} file must contain
+the following FunnelWeb typesetter pragma:
+
+@example
+@@p typesetter = html
+@end example
+
+@node Derivation, Index, Documentation, top
+@chapter Obtaining Information About the Derivation
+
+Eli derives the requested product via a sequence of steps.
+Like any expert system,
+@findex expert system
+it is capable of providing information about those steps.
+Since one of the major goals of Eli is to hide the steps required to derive
+a particular product, thus reducing the cognitive load on the user, it does
+not automatically provide this information.
+By setting the @code{LogLevel}
+@findex @code{LogLevel}
+variable, a user can control the amount of feedback
+@findex feedback
+that Eli provides about the derivation as it is being carried out
+(@pxref{Session, Session Management, Hints on Session Management, novice, Guide for New Eli Users}).
+This feedback only provides information about @emph{what} is happening,
+not @emph{why}.
+Sometimes it is important to discover things like the names of intermediate
+products,
+@findex intermediate products
+what objects a given object depends upon,
+@findex dependence among products
+@findex products, relationships among
+and what objects a given object influences.
+That information must be accessed via specific requests.
+
+Eli does @emph{not} bring an object up to date before applying any of the
+derivations discussed in this chapter.
+If you wish to execute one of these derivations on an up-to-date object,
+you must first bring that object up to date with an explicit request.
+
+@menu
+* inputs::	A list of the objects on which this object depends.
+* outputs::	A list of the objects depending on this object.
+* test::	Ask Eli to check whether an object has been modified.
+* redo::	Ask Eli to carry out a derivation.
+@end menu
+
+@node inputs, outputs, , Derivation
+@section inputs --- Objects on which a Given Object Depends
+
+@example
+!:inputs
+@findex inputs
+@end example
+
+A list of the objects on which the given object directly depends.
+The number used to name the file in the cache and the Eli derivation is
+given for each object.
+
+@node outputs, test, inputs, Derivation
+@section outputs --- Objects Depending on a Given Object
+
+@example
+!:outputs
+@findex outputs
+@end example
+
+A list of the objects that directly depend on the given object.
+The number used to name the file in the cache and the Eli derivation is
+given for each object.
+
+@node test, redo, outputs, Derivation
+@section test --- Check Whether an Object has been Modified
+
+@example
+!:test
+@findex test
+@end example
+
+The given object is checked to see whether its last modification
+@findex last modification
+@findex modification, checking for
+time agrees with the value held by Eli.
+This product is used when you have modified an object by some external
+means, and wish to inform Eli of that modification.
+@findex external modifications, informing Eli
+For example, suppose that Eli complains that a particular object needed to
+satisfy the current request is unavailable.
+@findex ``unavailable'' error report
+You supply the object (say its name is @code{pascal.lido}) by copying it from
+some other directory.
+The following request will inform Eli of your action:
+
+@example
+pascal.lido!:test
+@end example
+
+@node redo, , test, Derivation
+@section redo --- Ask Eli to Carry Out a Derivation
+
+@example
+!:redo
+@findex redo
+@end example
+
+Tells Eli that a particular step in a derivation should be recomputed
+when it is next requested,
+even if the that step has already been computed and
+inputs to that step have not changed.
+
+This utility is useful when a transient error in a derivation step occurs,
+but the tool that implements the derivation step did not recognize it as
+a transient error:
+
+@example
+sets.specs :level_6_specs !:redo
+@end example
+
+The next time any derivation requires the object @code{sets.specs
+:level_6_specs}, it will be recomputed.
+
+@node Index, , Derivation, top
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

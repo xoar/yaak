@@ -1,0 +1,7 @@
+#! /bin/sh
+# $Id: CurrTok.gnrc,v 2.2 2003/01/07 09:25:39 cogito Exp $
+# Copyright, 1994, AG-Kastens, University Of Paderborn
+
+moddir=`expr $0 : '\(.*\)/.*' \| '.'`
+
+cp "$moddir"/CurrTok.fw CurrTok.fw

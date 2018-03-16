@@ -1,0 +1,6 @@
+# ./Odin/pkg/ipcgen/inc/Odinfile
+
+TokTyp_.h == ../ipcgen.ygi :tok.h
+
+NodTyp_.h == ../ipcgen.ygi :nod.h
+

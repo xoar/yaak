@@ -1,0 +1,9 @@
+/* $Id: eli.reqmod,v 2.3 2013/03/31 01:15:37 profw Exp $ */
+/* Specifications for the frame library routines */
+/* Copyright (c) 1991, The Regents of the University of Colorado */
+
+				/* Default components */
+driver.c			   /* Main program */
+treebuild.c			   /* Tree builder */
+eliproto.h			   /* Prototype hacks */
+$/Input/err.reqmod		   /* Error reporting module */

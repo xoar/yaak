@@ -1,0 +1,13 @@
+begin
+  var	int k;
+  var	int[5] pi, int[5] pj;
+  var	record int i, bool b, real[3] r end [2] rv;
+  var	real[6][7] m;
+  pi[1] = true;
+  pi[false] = 1;
+  k[1] = 1;
+  pi = pj;
+  rv.b = true;
+  rv[1].r = 3.2;
+  m[1] = 1.0;
+end

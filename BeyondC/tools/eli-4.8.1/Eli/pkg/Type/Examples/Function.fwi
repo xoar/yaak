@@ -1,0 +1,251 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Functions~>
+
+This chapter introduces definitions and calls of parameterized
+functions. Type analysis has to check that the signature of a 
+function call matches the signature of the called function,
+and that functions return a value of the specified type.
+
+Here is an example program that defines some functions.
+The grammar for function calls and return statements is
+given below.
+
+~O~<FunctionExamp~>~{
+begin
+  var   int i, int j,
+        bool b, bool c,
+        real r, real s;
+
+  fun f (int x, real y) real
+  begin r = x * y; return r;end;
+
+  fun g (real z) void
+  begin r = z; return; end;
+
+  s = f (i+1, 3.4);
+  g (f (j, s));
+  return;
+end
+~}
+
+We first extend the grammar by productions for 
+function declarations:
+~$~<Abstract function syntax~>==~{
+RULE: Declaration ::=  FunctionDecl END;
+RULE: FunctionDecl ::= 'fun' DefIdent Function ';' END;
+RULE: Function ::=     FunctionHead Block END;
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter END;
+RULE: Parameters LISTOF Parameter END;
+RULE: Parameter ::= TypeDenoter DefIdent END;
+~}
+
+A function type is characterized by its signature, i.e.
+the sequence of the types of its parameters and the result type.
+(Note: If we had more than one mode of parameter passing,
+the abstraction of a parameter in the function signature
+would be a pair: parameter passing mode and parameter type.)
+
+We first consider the name analysis aspect of a function
+declaration: The @code{Function} subtree is a range where the
+parameter definitions are valid. The function @code{Block} is
+nested in that range. Since the @code{DefIdent}s of parameters
+are already completely specified for name analysis, we need
+only:
+
+~$~<Function range~>==~{
+SYMBOL Function INHERITS RangeScope END;
+~}
+
+Now we consider a function declaration as a definition
+of a typed entity, and apply the same specification pattern
+as used for variable declarations.
+Furthermore, each @code{Parameter} is also a @code{TypedDefinition}.
+There is no problem in nesting definitions of typed entities
+this way.
+
+~$~<Function declaration types~>==~{
+SYMBOL FunctionDecl INHERITS TypedDefinition END;
+
+RULE: FunctionDecl ::= 'fun' DefIdent Function ';' COMPUTE
+  FunctionDecl.Type = Function.Type;
+END;
+
+RULE: Function ::= FunctionHead Block COMPUTE
+  Function.Type = FunctionHead.Type;
+END;
+
+SYMBOL Parameter INHERITS TypedDefinition END;
+
+RULE: Parameter ::= TypeDenoter DefIdent COMPUTE
+  Parameter.Type = TypeDenoter.Type;
+END;
+~}
+
+Next, we specify how the type of a function is composed.
+The @code{FunctionHead}, which contains the signature,
+is treated as a @code{TypeDenotation} for a function type.
+
+~$~<Function type~>==~{
+SYMBOL FunctionHead INHERITS TypeDenotation, OperatorDefs END;
+~}
+Furthermore, a function declaration introduces an operator.
+This is indicated by the role @code{OperatorDefs}.
+The computation @code{ListOperator} creates a new operator,
+identified by @code{FunctionHead.Type}.
+The types of the parameters together with the result type
+@code{TypeDenoter.Type} form its signature.
+
+~$~<Function signature~>==~{
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter COMPUTE
+  FunctionHead.GotOper +=
+     ListOperator (
+       FunctionHead.Type,
+       FunctionHead.Type,
+       Parameters.OpndTypeList,
+       TypeDenoter.Type);
+END;
+
+SYMBOL Parameters INHERITS OpndTypeListRoot END;
+SYMBOL Parameter INHERITS OpndTypeListElem END;
+
+RULE: Parameter ::= TypeDenoter DefIdent COMPUTE
+  Parameter.DefTableKeyElem = TypeDenoter.Type;
+END;
+~}
+
+Function calls are integrated in the expression syntax of
+our language. We chose a very general form of an @code{Expression}
+to denote the function to be called. That allows us to later expand the
+language by expressions which yield a function.
+That feature does not create additional problems for type analysis.
+
+We also introduce return statements into our language:
+
+~$~<Abstract call syntax~>==~{
+RULE: Expression ::=    Expression '(' Arguments ')' END;
+RULE: Arguments  LISTOF Argument END;
+RULE: Argument   ::=    Expression END;
+
+RULE: Statement  ::=    'return' ';' END;
+RULE: Statement  ::=    'return' Expression ';' END;
+~}
+
+Type analysis for a function call is straight-forward:
+A call is treated as an operation which takes the arguments
+as operands. @code{Expression[2]} yields the function to be
+called. Its type provides the operator indication, which may be 
+overloaded with several operations, as stated in the context
+of the function definition.
+The precoined computation @code{ListContext} connects the
+expression subtree of the arguments with @code{Expression[1]}
+representing the result.
+
+~$~<Call types~>==~{
+SYMBOL Arguments INHERITS OpndExprListRoot END;
+SYMBOL Argument INHERITS OpndExprListElem END;
+
+RULE: Expression ::= Expression '(' Arguments ')' COMPUTE
+  ListContext (Expression[1], , Arguments);
+  Indication (Expression[2].Type);
+
+  IF(BadOperator,
+    message
+      (ERROR,
+       "Call does not match the functions' signatures",
+       0, COORDREF));
+END;
+~}
+
+The following context connects the @code{Argument} node
+with the expression subtree forming the actual parameter.
+If they had the same type properties, we would have used
+a @code{TransferContext} computation. However, in our language
+we want to allow that the type of the @code{Expression} need not 
+match exactly the type required for the @code{Argument} as
+specified in the signature of the function. As in assignments
+it shall be allowed that the expression yields a value
+of type @code{real} which then is converted to an @code{int}
+value if required by the function signature, e.g. in 
+@code{f(3.4)}.
+
+Hence, we use a @code{ConversionContext} which allowes to
+connect the @code{Argument} via an operator with the 
+@code{Expression} node. The indication @code{assignOpr}
+is specified for this context. It states that the same 
+conversion operators as in assignments (i.e. @code{rToi})
+and all coercion operators (i.e. @code{iTor}) may be used to
+convert the result of the @code{Expression} to the type of the
+@code{Argument}, if necessary:
+
+~$~<Arguments~>==~{
+RULE: Argument ::= Expression COMPUTE
+  ConversionContext (Argument, , Expression);
+  Indication (assignOpr);
+END;
+~}
+
+A return statement refers to the immediately enclosing function
+declaration. It has to be checked that a value of a type is returned
+that is compatible to the result type, if the latter is not @code{void}.
+A return from the outermost program level is considered as if
+the program was a @code{void} function.
+Conversions that are additionally applicable are specified in the same 
+way as in the @code{Argument} context above.
+
+The attribute value @code{Function.ResultType} stems from the context of
+a type denotation. Hence, its value may not be used directly in a 
+compare with a type key as @code{voidType}. The function @code{FinalType}
+has to access the related type key, and the precondition
+@code{INCLUDING Program.TypeIsSet} has to be stated.
+
+~$~<Return statements~>==~{
+ATTR ResultType: DefTableKey;
+
+RULE: Statement ::= 'return' Expression ';' COMPUTE
+  RootContext (
+    INCLUDING (Function.ResultType, Program.ResultType), , Expression);
+  Indication (assignOpr);
+END;
+
+RULE: Statement ::= 'return' ';' COMPUTE
+  IF (NOT (EQ (voidType,
+               FinalType (
+                  INCLUDING (Function.ResultType, 
+                             Program.ResultType)))),
+  message (ERROR, "return value required", 0, COORDREF))
+  <- INCLUDING Program.TypeIsSet;
+END;
+
+SYMBOL Program COMPUTE 
+  SYNT.ResultType = voidType;
+END;
+
+RULE: Function ::= FunctionHead Block COMPUTE
+  Function.ResultType = FunctionHead.ResultType;
+END;
+
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter COMPUTE
+  FunctionHead.ResultType = TypeDenoter.Type;
+END;
+~}
+
+~O~<Function.lido~>~{
+~<Abstract function syntax~>
+~<Abstract call syntax~>
+~<Function declaration types~>
+~<Function range~>
+~<Function type~>
+~<Function signature~>
+~<Call types~>
+~<Arguments~>
+~<Return statements~>
+~}
+
+~O~<Function.con~>~{
+~<Function declaration syntax~>
+~<Call syntax~>
+~}
+

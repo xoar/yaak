@@ -1,0 +1,71 @@
+# Source Types
+
+*.o => :o;
+
+*.a => :a;
+
+*.sm  => :sm;
+
+
+# Input Object Types
+
+:o 'object module' => <:o_src>;
+
+:o_src 'source code for object module' => :FILE;
+
+:sm 'system model of source code files'? => :FILE;
+
+
+# Intermediate Object Types
+
+:sm.list 'list of files in a system model' => :LIST;
+
+:code.list 'list of code files' => :LIST;
+
+:libraries.view_desc 'library view description' => :FILE;
+
+
+# Output Object Types
+
+:o_of 'odinfile containing the object modules' => :FILE;
+
+:a 'object library archive'? => :FILE;
+
+:library_flags 'library command line flags' => :FILE;
+
+:libraries 'library references' => :LIST;
+
+
+# Parameter Types
+
++lib 'a library name'? => :ls;
+
++lib_sp 'name of a directory in an library search path'? => :ls;
+
+
+# Environment Variables
+
+$ODIN_IGNORE 'egrep expression for includes to ignore' = '/usr/include';
+
+$ODIN_LIB_SP 'default library search path' = '/lib /usr/lib';
+
+
+# Tools
+
+READ-LIST (:sm)
+   => (:sm.list);
+
+COLLECT (:sm.list :recurse=:sm.list)
+   => (:code.list);
+
+EXEC (o_of.sh) (:code.list :map=:o_src :ls) (:code.list :map=:o :ls)
+   => (:o_of);
+
+EXEC (ar.sh) (:o_of :vir_dir) NEEDS (:o_of :vir_tgt.list)
+   => (:a);
+
+EXEC (libraries.sh) (+lib) (+lib_sp) NEEDS (:libraries.view_desc :libraries)&
+   => (:libraries.view_desc) (:library_flags);
+
+COLLECT (:libraries.view_desc :view)
+   => (:libraries);

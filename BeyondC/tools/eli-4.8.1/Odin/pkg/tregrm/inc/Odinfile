@@ -1,0 +1,4 @@
+# ./Odin/pkg/tregrm/inc/Odinfile
+
+TokTyp_.h == ../tregrm.ygi :tok.h +default=(TokTyp_.h.dflt) :boot
+NodTyp_.h == ../tregrm.ygi :nod.h +default=(NodTyp_.h.dflt) :boot

@@ -1,0 +1,41 @@
+/* (C) Copyright 1997 University of Paderborn */
+
+/* This file is part of the Eli translator construction system.
+
+Eli is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Eli; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/*
+ * $Id: cola.dapto,v 1.4 1998/10/14 14:56:43 mjung Exp $
+ */
+
+aspect parser;
+
+event production* "Recognition of a production during parsing"
+	(int prod "Index of production",
+	 int uses "Number of preceding recognitions subsumed",
+	 int linebeg "Line number of beginning of extent",
+	 int colbeg "Column number of beginning of extent",
+	 int lineend "Line number of ending of extent",
+	 int colend "Column number of ending of extent");
+
+operation get_conc_prod "Look up the text of a production"
+	(int index "Index of the production") : str
+{
+    extern char *conc_prods[];
+
+    DAPTO_RESULT_STR (conc_prods[index]);
+}
+
+end;

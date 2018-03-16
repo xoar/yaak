@@ -1,0 +1,387 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename intro
+@setchapternewpage odd
+@settitle Introduction of specification modules
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: modlib.tnf,v 1.5 2000/11/29 14:44:16 peter Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont {Introduction of specification modules}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.5 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (dir)
+@ifinfo
+@comment  node-name,  next,  previous,  up
+@unnumbered Introduction of specification modules
+@end ifinfo
+
+@findex Library
+Eli provides a library of specification modules. Each module contains a
+complete set of specifications that solve a single common task in language
+implementation. If such a task is identified in the design of an
+application specification, the module is simply
+added to the application specification and used there.
+Most modules solve a rather small task. They can be flexibly combined
+to solve more complex problems.
+
+@menu
+Contents:
+
+* Example::         Introduction of a running example
+* Instantiation::   Explains how to use specification modules
+
+* Name:         (name).     Name analysis according to scope rules
+* Prop:         (prop).     Association of properties to definitions
+* TypeAnalysis: (type).     Type analysis tasks
+* Input:        (input).    Tasks related to input processing
+* Output:       (output).   Tasks related to generating output
+* Adt:          (adt).      Abstract data types to be used in specifications
+* Tech:         (problems). Solutions of common problems
+
+* OldModules:   (oldmod).   Migration of Old Library Module Usage
+@end menu
+
+@ifset html
+@itemize
+@item
+@ref{Example, , top, modlib, Introduction of a running example}
+@item
+@ref{Instantiation, , top, modlib, How to use Specification Modules}
+@item 
+@ref{top, , , name, Name analysis according to scope rules}
+@item
+@ref{top, , , prop, Association of properties to definitions}
+@item
+@ref{top, , , type, Type analysis tasks}
+@item
+@ref{top, , , input, Tasks related to input processing}
+@item
+@ref{top, , , output, Tasks related to generating output}
+@item
+@ref{top, , , adt, Abstract data types to be used in specifications}
+@item
+@ref{top, , , problems, Solutions of common problems}
+@item
+@ref{top, , , oldmod, Migration of Old Library Module Usage}
+@end itemize
+@end ifset
+
+The first section introduces an example that is referred to
+in the other sections to explain the use of modules in the context
+of a language implementation task. The second section explains
+how modules are obtained from the library and are related
+to users' specifications. The remaining sections describe
+sublibraries for a certain problem class each.
+
+The section @ref{top, , Name Analysis Library, oldmod, Name Analysis Library}, is a quick reference that helps
+to migrate specifications using modules of previous versions
+of this library.
+
+This document may be used according to different strategies:
+In order to become familiar with problem solving by using library
+modules one can start with the running example of section @ref{Example}, and
+extend it as described in the subsequent chapters.
+One can also start with a particular problem in mind and then
+search the corresponding chapter for a module that could be
+used to solve it. The document can also be used as a reference manual
+for the library modules. 
+In any case it is recommended to read the introduction
+of a chapter before using one of its modules.
+
+The modules solve their task by providing specification fragments
+to one or more Eli tools: Some are simply a C module, others
+contain @code{.lido}, @code{.pdl}, @code{.ptg}, or references
+to other library modules. The modules are designed such that
+as few assumptions as possible have to hold in the user's part
+of the specification where they are applied. E.g.@: @code{.lido}
+fragments supplied by library modules are mapped to the particular
+grammar of the user's specification by the inheritance construct of LIDO.
+Modules described in the @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, section may also be used
+directly in C modules or in stand-alone C programs.
+
+Most modules in the library are generic, i.e.@: the names used in a
+module can be modified by its instantiation. This facility allows to
+use the same module for different purposes, e.g.@: a counter for
+variables and another for procedures, or specify the element type of
+a generic list type implementation. Instantiations also control the
+combination of modules, e.g.@: association of properties to procedures and
+to variables which might have different name spaces.
+
+@findex Examples
+@findex examples
+@findex running example
+This document describes the task that each module solves, its interface,
+and how it can be applied in a user's specification. The descriptions
+are illustrated using a running example introduced in the next section
+(@pxref{Example}).
+Complete executable specifications for that running example
+are available in the directories @code{$/Name/Examples}
+and in @code{$/Type/Examples}.
+In general that information should be sufficient to use the modules.
+A look at the module's text may help in special cases.
+
+Users are encouraged to apply this design technique of decomposition
+into specification modules to their application as well. The structure
+of complex designs and their maintainability can thus be improved. The
+resulting modules may be reused in other applications.
+The techniques needed to instantiate user developed modules
+are described in @ref{Instantiation}.
+
+This library will be extended by adding further modules that solve
+common tasks. Hence, users are encouraged to contact their Eli 
+distributor if a module for a task
+that might be of general interest is missing, or if a solution for
+such a task can be contributed.
+
+@comment =====================================
+@node Example, Instantiation, top, top
+@findex Examples
+@findex examples
+@findex running example
+@chapter Running Example
+
+In this section we introduce an example for a language implementation task.
+It is used in the descriptions of the library modules of this
+document wherever possible. It shall serve to demonstrate the
+use of the modules in the context of a complete specification.
+Of course, such examples can only show certain aspects of the modules.
+They can not demonstrate their complete functionality and the
+variety and flexibility of possible applications.
+
+Although the example is taken from the area of programming language
+implementation, similar tasks are to be solved if languages for
+other purposes than programming, or programming languages with
+other characteristics are implemented.
+
+Complete executable specifications for this running example
+are available in the directories @code{$/Name/Examples}
+and in @code{$/Type/Examples}.
+
+For the purpose of this example we assume that a small artificial
+programming language is to be implemented.
+The basic constructs of the language are nested blocks,
+declarations of variables and of names for values, assignment
+statements and expressions as specified by the following
+concrete grammar.
+
+The overall program structure is given by
+@example
+   Program:        Source.
+   Source:         Block.
+   Block:          Compound.
+   Compound:       'begin' Declaration* Statement* 'end'.
+@end example
+@noindent
+Variable declarations specify the types of the declared variables:
+@example
+   Declaration:    'var' ObjDecls ';'.
+   ObjDecls:       ObjDecl // ','.
+   ObjDecl:        TypeDenoter Ident.
+   TypeDenoter:    Ident.
+@end example
+@noindent
+For the start of this example there is only a set of predefined
+type identifiers. In the type analysis section the language is
+extended by introduction of further types and denoters for them.
+
+For the time being there are only three forms of statements:
+@example
+   Statement:      Expression ';'.
+   Statement:      Variable '=' Expression ';'
+   Statement:      Block.
+@end example
+@noindent
+Further statements are added when necessary to explain aspects
+of module use.
+
+The expression syntax is left incomplete here in order to introduce
+operators of different precedence levels (@pxref{Operator, ,Operator Identification, type, Type analysis tasks}).
+If one wants to complete this grammar without adding operators
+one should add the production
+@example
+   Expression:     Operand.
+@end example
+@noindent
+The basic operands are
+@example
+   Operand:        IntNumber.
+   Operand:        RealNumber.
+   Operand:        Variable.
+   Variable:       Ident.
+@end example
+@noindent
+
+The non-literal tokens are defined by
+@example
+Ident:          PASCAL_IDENTIFIER
+IntNumber:      PASCAL_INTEGER
+RealNumber:     PASCAL_REAL
+                PASCAL_COMMENT
+@end example   
+
+The above grammar is chosen such that the solution of language 
+implementation tasks of name analysis, type analysis, and translation
+by using library modules can be demonstrated. It is also prepared
+to demonstrate the combination of different module uses.
+The grammar is extended where necessary in the examples of subsequent
+sections.
+
+@comment =====================================
+@node Instantiation, , Example, top
+@findex instantiation
+@chapter Instantiation and Use of Modules
+
+To use a specification module, e.g.@: the @code{AlgScope} module in the 
+@code{Name} library, 
+it is instantiated by the line
+
+@example
+   $/Name/AlgScope.gnrc :inst
+@end example
+@noindent 
+in a @code{.specs} file. All component specification files of the 
+module are thus included in the set of specifications. A derivation
+@example
+   x.specs:allspecs
+@end example
+@noindent 
+can be used to inspect all the instantiated files.
+
+The module instance obtained by the instantiation command above
+provides @code{.lido} symbol computations for a symbol named @code{IdUseEnv},
+among other specifications.
+
+The above instantiation command is sufficient if only one instantiation of 
+the @code{AlgScope} module is used.
+@findex instance names
+@findex instance parameter
+Several instantiations of the same module are distinguished by generic 
+instance names supplied as arguments of the instantiation
+
+@example
+   $/Name/AlgScope.gnrc +instance=CtrlVar :inst
+@end example
+@noindent 
+In this case another instance of the @code{AlgScope} module is generated
+having the instance name @code{CtrlVar}. It may coexist with the
+unnamed instance created above. The names of its files and
+of specified entities (symbols, attributes, etc.) are 
+prefixed by the instance identifier, e.g.@:
+@code{CtrlVarIdUseEnv}.
+
+@findex attribute @code{Key}
+@findex referto parameter
+Some modules have a second generic parameter @code{referto}.
+It may specialize the module in a second dimension on instantiation:
+The @code{AlgScope} module provides compuations for @code{Key} attributes
+in @code{IdUseEnv} contexts that represent applied occurrences of identifiers.
+In some situations it may be necessary to compute more than one
+@code{Key} attribute in an @code{IdUseEnv} context (if the identifier is
+bound in different name spaces). Hence, the @code{referto} of
+the @code{AlgScope} module modifies the names of the @code{Key} attributes.
+If the @code{AlgScope} module is instantiated by
+
+@example
+   $/Name/AlgScope.gnrc +instance=CtrlVar +referto=Ctrl :inst
+@end example
+@noindent 
+it provides computations for the attribute @code{CtrlVarIdUseEnv.CtrlKey},
+among other computations.
+
+Other modules use the @code{referto} parameter for different purposes, e.g.@:
+specifying the element type for a generic stack module.
+
+If any of the two generic parameters @code{instance} or @code{referto}
+is omitted, as in the first two examples, their value is
+assumed to be the empty string.
+
+If a module is instantiated as described its facilities can be used
+in certain components of the user's specification:
+Symbol computations as those provided by the @code{AlgScope} module
+are associated to symbols of the user's tree grammar by @code{.lido}
+constructs like
+
+@example
+   SYMBOL UseIdent INHERITS IdUseEnv END;
+@end example
+@noindent
+
+Note: The symbols provided by modules are @code{CLASS} symbols in the
+sense of LIDO, i. e. they may not be used directly as tree grammar
+symbols. @code{INHERITS} constructs like the above are needed
+to bind their computations to symbols of user's specification.
+This means avoids accidental coincidence between names of tree
+grammar symbols and of module roles.
+
+Further @code{.lido} specifications may be neccessary to supply information to
+or obtain information from the thus inherited computations.
+
+Modules may also provide C functions (directly or via specifications
+for other tools), e.g.@: functions of the environment module in case of the
+@code{AlgScope} module. They may be called in computations of the user's
+@code{.lido} specification, or in user's C modules if the appropriate
+header file is included.
+
+@findex user modules
+The same instantiation mechanism may be applied to include user defined modules:
+
+@example
+   /user/Lib/ModName.gnrc:inst
+@end example
+@noindent 
+instantiates the module @code{ModName} of a user library. 
+
+Such a module must contain of at least two files , e.g.@:
+@code{/user/Lib/ModName.fw} containing the module's specifications
+and @code{/user/Lib/ModName.gnrc}. The latter is an executable
+shell script that performs the generic module instantiation.
+It should have the following form:
+
+@example
+   #!/bin/sh
+   moddir=`expr $0 : '\(.*\)/.*' \| '.'`
+
+   $1 -e "s/|NAME|/$2/g
+   s/|KEY|/$3/g" "$moddir"/ModName.fw > "$2"ModName.fw
+@end example
+@noindent
+The last two lines use @code{sed} to substitute the @code{instance}
+parameter for any occurrence of @code{|NAME|} in the file @code{ModName.fw}
+and the @code{referto} parameter for any occurrence of @code{|KEY|}.
+
+@contents
+@bye

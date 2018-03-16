@@ -1,0 +1,134 @@
+# $Id: Makefile.in,v 1.2 2002/05/08 15:00:54 waite Exp $
+# Copyright 1992, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+CC	= @CC@
+
+# Relative pathname for the current directory
+DIR	= pkg/fw/src
+
+SRCS	= analyse.c as.c clock.c command.c data.c dump.c help.c help_gnu.c \
+	list.c lister.c machin.c main.c mapper.c memory.c misc.c option.c \
+        parser.c scanner.c section.c table.c tangle.c texhead.c weave.c \
+        writfile.c analyse.h as.h clock.h command.h data.h dump.h environ.h \
+	help.h help_gnu.h list.h lister.h machin.h mapper.h memory.h misc.h \
+	option.h parser.h scanner.h section.h style.h table.h tangle.h \
+	texhead.h weave.h writfile.h help_gnu.ctx texhead.ctx \
+	fw_errors.c fw_incl.c envmod.c envmod.h fw_specs.c BitSet.c BitSet.h \
+	weaveinfo.h weaveinfo.c weavehtml.h weavehtml.c weavel2ht.h weavel2ht.c
+OBJ	= analyse.o as.o clock.o command.o data.o dump.o help.o help_gnu.o \
+	list.o lister.o machin.o main.o mapper.o memory.o misc.o option.o \
+        parser.o scanner.o section.o table.o tangle.o texhead.o weave.o \
+        writfile.o BitSet.o pdl_gen.o csm.o err.o envmod.o obstack.o \
+	source.o deftbl.o idn.o weaveinfo.o weavehtml.o weavel2ht.o
+EXE	= fw.exe fw_errors.exe fw_incl.exe fw_specs.exe
+CMD	=
+AUX	= $(SRCS) fw.tnf weaveinfo.pdl Makefile Makefile.in
+GEN	= pdl_gen.c pdl_gen.h
+SRC	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+@Adtmk_h@
+@Inputmk_h@
+@pdlmk_h@
+@Scanmk_h@
+
+PDL	= ../../pdl/pdl.exe
+
+CFLAGS	= $(SCNINCL) $(ADTINCL) $(INPINCL) $(PDLINCL) -DNORESTORE
+
+pdl_gen.c pdl_gen.h:	weaveinfo.pdl
+	$(PDL) weaveinfo.pdl
+
+fw.exe:	$(OBJ)
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
+
+fw_errors.exe: fw_errors.o
+	$(CC) $(CFLAGS) -o $@ fw_errors.o
+
+fw_incl.exe:	fw_incl.c
+	$(CC) $(CFLAGS) -o $@ fw_incl.c
+
+fw_specs.exe:	fw_specs.c
+	$(CC) $(CFLAGS) -o $@ fw_specs.c
+
+EMLIB	= $(ELISYS)/pkg/Name
+
+BitSet.o: BitSet.c BitSet.h $(ADTLIB)/obstack.h $(INPLIB)/err.h
+analyse.o : analyse.c style.h environ.h analyse.h as.h data.h clock.h list.h \
+	table.h option.h machin.h help.h section.h writfile.h lister.h misc.h
+as.o : as.c style.h environ.h as.h machin.h
+clock.o : clock.c style.h environ.h as.h clock.h machin.h 
+command.o : command.c style.h environ.h analyse.h as.h command.h machin.h \
+	data.h clock.h list.h table.h option.h help.h section.h writfile.h \
+	dump.h lister.h memory.h mapper.h misc.h parser.h scanner.h tangle.h \
+	weave.h weaveinfo.h weavehtml.h weavel2ht.h
+data.o : data.c data.h style.h environ.h clock.h list.h table.h option.h \
+	machin.h help.h section.h writfile.h
+dump.o : dump.c style.h environ.h as.h clock.h data.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h dump.h misc.h
+envmod.o: envmod.c envmod.h BitSet.h $(INPLIB)/err.h $(PDLLIB)/deftbl.h \
+          $(ADTLIB)/obstack.h
+help.o : help.c style.h environ.h as.h help.h help_gnu.h misc.h data.h \
+	clock.h list.h table.h option.h machin.h section.h writfile.h 
+help_gnu.o : help_gnu.c style.h environ.h help_gnu.h help_gnu.ctx 
+list.o : list.c style.h environ.h as.h machin.h memory.h list.h 
+lister.o : lister.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h lister.h misc.h 
+machin.o : machin.c style.h environ.h as.h machin.h 
+main.o : main.c style.h environ.h as.h command.h machin.h data.h clock.h \
+	list.h table.h option.h help.h section.h writfile.h memory.h 
+mapper.o : mapper.c style.h environ.h as.h machin.h mapper.h memory.h 
+memory.o : memory.c style.h environ.h as.h machin.h memory.h 
+misc.o : misc.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h memory.h misc.h 
+option.o : option.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h misc.h 
+parser.o : parser.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h lister.h mapper.h \
+	memory.h misc.h parser.h
+scanner.o : scanner.c style.h environ.h as.h clock.h data.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h dump.h lister.h \
+	mapper.h memory.h misc.h scanner.h 
+section.o : section.c style.h environ.h as.h section.h 
+table.o : table.c style.h environ.h as.h machin.h memory.h table.h 
+tangle.o : tangle.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h lister.h memory.h \
+	misc.h tangle.h 
+texhead.o : texhead.c style.h environ.h texhead.h writfile.h texhead.ctx 
+weave.o : weave.c style.h environ.h as.h data.h clock.h list.h table.h \
+	option.h machin.h help.h section.h writfile.h lister.h misc.h \
+	texhead.h weave.h 
+weaveinfo.o : weaveinfo.c style.h environ.h as.h data.h clock.h list.h \
+	table.h option.h machin.h help.h section.h writfile.h lister.h misc.h \
+	texhead.h weaveinfo.h $(EMLIB)/envmod.h $(ADTLIB)/csm.h \
+	$(SCNLIB)/idn.h pdl_gen.h $(PDLLIB)/deftbl.h $(ADTLIB)/obstack.h
+weavehtml.o : weavehtml.c style.h as.h data.h lister.h machin.h misc.h \
+	table.h weavehtml.h $(EMLIB)/envmod.h $(ADTLIB)/csm.h \
+	$(SCNLIB)/idn.h pdl_gen.h environ.h clock.h list.h option.h \
+	section.h writfile.h $(PDLLIB)/deftbl.h $(ADTLIB)/obstack.h \
+	BitSet.h $(ELILIB)/eliproto.h
+weavel2ht.o : weavel2ht.c style.h as.h data.h lister.h machin.h misc.h \
+	table.h weavel2ht.h environ.h clock.h list.h option.h section.h \
+	writfile.h
+writfile.o : writfile.c style.h environ.h as.h machin.h writfile.h
+
+ 

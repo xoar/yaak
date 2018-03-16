@@ -1,0 +1,36 @@
+$Id: README,v 2.9 2009/07/01 18:36:10 profw Exp $
+
+This directory contains a source distribution of the Eli system.  In order
+to make and install Eli, you MUST have a working implementation of Odin,
+version 1.16 or later.  If Odin is not running on your machine, you must
+install it before attempting to build Eli.
+
+If Odin is running on your system, carry out the following sequence of
+steps to build the Eli system:
+
+1) Run the "configure" script
+2) Type "make"
+
+Steps (1) and (2) MUST be carried out either on the machine you intend
+to run on or on one of the same architecture, running the same version
+of the operating system, and with all additional software (e.g. Odin,
+Tcl/Tk and all specified libraries) at the same locations in the file
+system.
+
+After building the system, you can consult the on-line documentation by
+giving the command "pkg/info/info.sh" in the directory containing this
+README.  The manual that will be most helpful to you in the early stages
+is the "Guide for New Eli Users", which explains how Eli is used via a
+simple example.
+
+Mail concerning bug reports and installation problems should be sent
+to:
+
+	eli-project-users@lists.sourceforge.net
+
+For further information about Eli, consult our home page at:
+
+	http://eli-project.sourceforge.net/
+
+Eli is free software.  See the files COPYING and COPYING.LIB for copying
+conditions.

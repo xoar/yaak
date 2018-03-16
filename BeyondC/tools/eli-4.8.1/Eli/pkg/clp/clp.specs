@@ -1,0 +1,6 @@
+/* $Id: clp.specs,v 2.3 2010/05/14 20:36:21 profw Exp $ */
+
+lib/clp.head
+lib/clplib.pdl
+$/Adt/csm.specs
+clp.reqmod

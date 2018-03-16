@@ -1,0 +1,2923 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename name
+@setchapternewpage odd
+@settitle Name analysis according to scope rules
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: name.tnf,v 1.27 2008/09/05 13:49:15 peter Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Name analysis according to scope rules}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center Germany
+@sp 8
+@center $Revision: 1.27 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@chapheading Specification Module Library
+@chapheading Name analysis according to scope rules
+@end ifinfo
+
+@findex Library @code{Name}
+@findex name analysis
+@findex scope rules
+@findex consistent renaming
+@findex key
+Languages usually use names to identify objects. An object is created 
+by an explicit or implicit definition and bound to a name. In a certain
+range of the text occurrences of that name refer to that object. The
+scope rules of the language determine where that binding holds.
+For language implementation a unique name (key) is created for each distinct
+object and associated to identifiers within the scope of that binding. Name 
+analysis is completed by certain checks of relationships between identifier
+occurrences as required by the language, e.g.@: existence of a
+definition for each identifier use, multiple definitions 
+(@xref{OccCnt, , Common Aspects of Property Modules, prop, Association of properties to definitions}, @pxref{Unique, , Check for Unique Object Occurrences, prop, Association of properties to definitions}),
+or identifier use before its definition (@pxref{SetFirst, , Set a Property at the First Object Occurrence, prop, Association of properties to definitions}).
+
+This library contains a set of modules which can be used to implement
+the name analysis task according to a large variety of language rules.
+The results of these modules are used to check required
+relationships between identifier occurrences and to solve further
+subtasks of language implementation, such as type analysis or transformation.
+Solutions of these tasks are supported by modules of other
+libraries: @ref{top, , Property Library, prop, Association of properties to definitions}, @ref{top, , Type Analysis, type, Type analysis tasks}, @ref{top, , Generating Output, output, Tasks related to generating output}.
+
+The module support for name analysis is decomposed into subtasks of
+increasing complexity. They are described in subsections each.
+There you find three solution variants for Algol-like, C-like scope
+rules, and C-like scope rules computed bottom-up while the input
+is read:
+
+@menu
+* Preconditions::           Requirements for the user's tree grammar
+* Basic Scope Rules::       Modules for basic scope rules
+* Predefined Identifiers::  Modules that introduce predefined entities
+* Joined Ranges::           Several subtrees form one conceptual range
+* Scope Properties::        Scopes being propagated as object properties
+* Inheritance of Scopes::   Scopes inherited by other scopes
+* Name Analysis Test::      Test output for name analysis
+* Environment Module::      Implementation of the Contour-Model
+* Index::                   Index
+@end menu
+@iftex
+@ifclear html
+@noindent
+The chapter is structured as follows:
+@table @code
+@item Preconditions
+Requirements for the user's tree grammar
+@item Basic Scope Rules
+Modules for basic scope rules
+@item Predefined Identifiers
+Modules that introduce predefined entities
+@item Joined Ranges
+Several subtrees form one conceptual range
+@item Scope Properties
+Scopes being propagated as object properties
+@item Inheritance of Scopes
+Scopes inherited by other scopes
+@item Name Analysis Test
+Test output for name analysis
+@item Environment Module
+Implementation of the Contour-Model
+@end table
+@end ifclear
+@end iftex
+
+@findex Examples
+@findex examples
+@findex running example
+The use of these modules is demonstrated and explained in Eli's tutorial on
+name analysis. 
+(@pxref{top,Tutorial on Name Analysis,Overview,nametutorial,Tutorial on Name Analysis}).
+
+It contains three complete executable specifications called
+ 
+@example
+   AlgLike.fw,
+   CLike.fw, and
+   BuCLike.fw
+@end example
+
+You can obtain a copy of these specifications by calling Eli and
+requesting
+
+ 
+@example
+   $elipkg/Name/Examples > .
+@end example
+
+This request creates a subdirectory @code{Examples} in your
+current working directory containing the example specifications,
+test input files, and an Odinfile for automatic regression testing.
+
+
+
+@comment =====================================
+@node Preconditions, Basic Scope Rules, top, top
+@findex tree grammar
+@findex names
+@findex defining occurrences
+@findex applied occurrences
+@findex identifier roles
+@findex terminals
+@findex attribute @code{Sym}
+@chapter Tree Grammar Preconditions
+
+Names are usually represented by identifier terminals. Their notation
+is determined by a scanner specification. The grammar
+has one (or several) terminals representing
+identifiers, e.g.@: @code{Ident}, as in the running example. 
+The encoding of a particular identifier as computed by a scanner
+processor is available in contexts where an identifier terminal
+occurs.
+
+Identifiers occur in different contexts: Defining and applied
+occurrences, or different kinds of identifiers (variables, labels,
+etc.) may be distinguished. Usually the concrete syntax
+is designed first, and the different computational roles of identifiers
+are incrementally developed during the design of the
+@code{.lido} specification. Hence, it is recommended NOT to make the
+distinction in the concrete syntax. It should have the terminal
+@code{Ident} in any context.
+It is rather recommended to distinguish them by LIDO @code{RULE}s.
+
+Our running example has the concrete productions
+
+@example
+   ObjDecl:        TypeDenoter Ident.
+   TypeDenoter:    Ident.
+   Variable:       Ident.
+@end example
+@noindent
+We distinguish the different roles of identifiers by introducing new
+symbol names in the corresponding LIDO @code{RULE}s:
+
+@example
+   RULE: ObjDecl     ::= TypeDenoter DefIdent END;
+   RULE: TypeDenoter ::= TypeUseIdent END;
+   RULE: Variable    ::= UseIdent END;
+@end example
+@noindent
+Furthermore, we have to add the necessary chain @code{RULE}s:
+@example
+   RULE: DefIdent     ::= Ident END;
+   RULE: UseIdent     ::= Ident END;
+   RULE: TypeUseIdent ::= Ident END;
+@end example
+
+@findex attribute @code{Sym}
+The name analysis modules require that identifier occurrences are
+represented by nonterminals, like @code{DefIdent}, @code{UseIdent},
+@code{TypeUseIdent} as in the example. Each of these symbols
+has to have an attribute named @code{Sym} of type @code{int}
+representing the identifier encoding. A specification using these
+modules has to contain suitable computations of the @code{Sym} attributes.
+For our example they may be specified like:
+
+@example
+   ATTR Sym: int SYNT;
+   SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+   SYMBOL DefIdent     INHERITS IdentOcc END;
+   SYMBOL UseIdent     INHERITS IdentOcc END;
+   SYMBOL TypeUseIdent INHERITS IdentOcc END;
+@end example
+@noindent
+
+If your language does not syntactically distinguish between defining and 
+applied identifier occurrences, i.e.@: objects are introduced by using 
+their name, the
+above distinction is not necessary. You just introduce @code{DefIdent} 
+symbols for all occurrences.
+
+@findex root symbol
+Your grammar should have a symbol representing a
+phrase that contains all (defining and applied) occurrences of a
+name space. It is usually the root of the whole grammar, e.g.@: in the
+running example the symbol @code{Program}.
+
+@findex nested ranges
+If your language has hierarchically nested ranges defining boundaries
+for the scope of definitions, the abstract syntax should have one
+or several symbols, e.g.@: @code{Range}, @code{Block}, @code{Routine}, each
+representing a range of a name space. If the language does not have
+nested ranges for definitions you don't need such symbols.
+
+@comment =====================================
+@node Basic Scope Rules, Predefined Identifiers, Preconditions, top
+@findex basic scope rules
+@findex scope rules
+@chapter Basic Scope Rules
+
+The consistent renaming task associates to each identifier occurrence a 
+key that uniquely identifies the object named by the identifier.
+The following modules solve the basic problems of that task.
+
+@menu
+* AlgScope::  Algol-like scope rules
+* CScope::    C-like scope rules
+* BuScope::   C-like scope rules analyzed while processing input
+@end menu
+@iftex
+@table @code
+@item AlgScope
+Algol-like scope rules
+@item CScope
+C-like scope rules 
+@item BuScope
+C-like scope rules analyzed while processing input  
+@end table
+@end iftex
+
+Each of the three modules implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type @code{DefTableKey}.
+
+@findex AlgScope
+@findex Algol-like
+The @code{AlgScope} module applies Algol-like scope rules.
+They are characterized by the following description:
+
+A binding is valid within the whole smallest range containing
+the definition, except in inner ranges where a binding for the
+same identifier holds.
+That means a definition of an @code{a} in an inner range
+hides definitions of @code{a} in outer ranges.
+An identifier may be used before its definition.
+
+Usually, the scope rules of a real language are further elaborated.
+We call them Algol-like, if the above description is their
+underlying principle. For example
+Pascal's scope rules are Algol-like. They
+additionally require that an identifier is not used before its 
+definition. That restriction can be checked using an instance of the
+@code{SetFirst} module 
+(@pxref{SetFirst, , Set a Property at the First Object Occurrence, prop, Association of properties to definition}).
+
+@findex CScope
+@findex C-like
+The @code{CScope} module applies C-like scope rules.
+They are characterized by the following description:
+
+A binding is valid from the definition up to the end of the smallest
+range containing the definition, except in inner ranges
+from a definition of the same identifier to the end of that range.
+That means definitions of @code{a} in outer range are hidden
+by a definition of an @code{a} in an inner range from the
+point of the definition up to the end of the range.
+It implies that an identifier is not used before its definition.
+
+Usually, the scope rules of a real language are further elaborated.
+We call them C-like, if the above description is their
+underlying principle. For example the scope rules of the language C
+are defined for variable names C-like. But for labels names of jumps they
+are defined Algol-like.
+
+@findex BuScope
+@findex bottom-up
+The @code{BuScope} module applies C-like scope rules. Its computations
+can be executed while the input is read (i.e.@: while the tree is
+constructed bottom-up).
+An application may need this technique
+if results of the name analysis task
+influence further reading of input, or results are to be
+presented to the user while typing the input.
+
+Both Algol-like and C-like scope rules are described by six basic
+concepts. The modules provide @code{.lido} specifications with
+symbol computations for each concept:
+
+@findex IdDefScope
+@code{IdDefScope} is a symbol representing a defining identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+
+@findex IdUseEnv
+@code{IdUseEnv} is a symbol representing an applied identifier occurrence
+that is bound in the enclosing environment.
+
+@findex IdUseScope
+@code{IdUseScope} is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+
+@findex ChkIdUse
+@code{ChkIdUse} is a role that may be inherited by an applied identifier
+occurrence.
+If no definition is bound to that identifier, then the attribute
+@code{ChkIdUse.SymErr} has the value 1 and a message is issued by
+the computation:
+
+@example
+SYNT.SymMsg=
+  IF(THIS.SymErr,
+    message (ERROR, CatStrInd ("Identifier is not defined: ", THIS.Sym),
+    0, COORDREF));
+@end example
+
+@findex RootScope
+@code{RootScope} is the root symbol containing all identifier occurrences
+and all @code{RangeScope}. 
+It is automatically inherited by the root of the grammar.
+
+@findex RangeScope
+@code{RangeScope} is a symbol representing a range for the binding
+of defining identifier occurrences @code{IdDefScope}.
+It may be nested in @code{RootScope} or other ranges.
+
+These computational roles are associated to symbols of the user's
+grammar to solve the basic consistent renaming task.
+Make sure that your tree grammar is constructed according to the advices
+given in @ref{Preconditions}.
+More details about symbol computations and attributes provided
+by the three modules are given in the description of each module.
+
+@findex Examples
+@findex examples
+@findex running example
+Complete executable specifications of our running example for each of the
+three scope rule variants
+are available in
+@example
+   $/Name/Examples/AlgLike.fw
+   $/Name/Examples/CLike.fw
+   $/Name/Examples/BuCLike.fw
+@end example
+
+In our running example the roles are used as follows:
+
+@example
+   SYMBOL Program      INHERITS RootScope END;
+   SYMBOL Block        INHERITS RangeScope END;
+   SYMBOL DefIdent     INHERITS IdDefScope END;
+   SYMBOL UseIdent     INHERITS IdUseEnv END;
+   SYMBOL TypeUseIdent INHERITS IdUseEnv END;
+@end example
+@noindent
+Depending on which of the three modules is instantiated Algol-like
+or C-like name analysis is performed for this example.
+
+@findex attribute @code{Key}
+The main result of the task is the computation of the attributes
+@code{IdDefScope.Key}, @code{IdUseEnv.Key}, i.e.@: @code{DefIdent.Key},
+@code{UseIdent.Key}, and @code{TypeUseIdent.Key} in our example.
+They identify the object each identifier is bound to.
+It may be used in further computations to associate properties to it.
+
+@findex missing definition
+If no binding is found for an applied identifier occurrence the 
+@code{Key} attribute has the value @code{NoKey}.
+If that is a violation of language rules an error message
+can be issued using the role @code{ChkIdUse}:
+
+@example
+   SYMBOL UseIdent INHERITS ChkIdUse END;
+@end example
+@noindent
+
+@findex attribute Bind
+@findex Bind
+@findex type Binding
+@findex Binding
+Along with each @code{Key} attribute there is an attribute @code{Bind}
+of type @code{Binding}, e.g. @code{UseIdent.Bind}. Its value 
+characterizes a binding of an identifier @code{idn} in the
+innermost scope of an environment @code{env} to a key @code{k}.
+The three values @code{idn}, @code{env}, and @code{k} can be obtained
+from a @code{Binding} using functions defined in @ref{Environment Module}.
+If no binding is found for an applied identifier occurrence the
+@code{Bind} attribute has the value @code{NoBinding}.
+
+@findex flat range
+Although both  Algol-like and C-like scope rules are defined for
+nested ranges, the modules may be used for languages that do not
+have nested ranges, i.e.@: there is only one single flat range
+in which definitions are valid. In such a case @code{RootScope}
+is used for that range, and @code{RangeScope} is not used.
+
+@findex implicit definitions
+Another variant of these scope rules arises if a language does not
+distinguish between defining and applied identifier occurrences:
+identifiers are defined implicitly by their occurrences.
+In that case @code{IdDefScope} is used for that kind of occurrences,
+and @code{IdUseEnv} is not used.
+Of course, this concept does not make sense in languages that
+have ranges: One could not refer to an outer identifier definition
+from within an inner range.
+
+We extend our running example to show implicit definitions
+within a flat range. We add a new kind of variables, say
+control variables to the language. They are implicitly
+defined by their use in special statements or operands,
+given by the following concrete productions:
+
+@example
+   Statement:      'set' Ident 'to' Expression ';'.
+   Operand:        'use' Ident.
+@end example
+@noindent
+
+@findex separate name space
+These control variable identifiers are bound in a new name space
+separate from that of the other entities. Hence, we use a
+second instance of one of the modules. That instance is identified
+by the generic @code{instance} parameter @code{CtrlVar}:
+@example
+   $/Name/AlgScope.gnrc +instance=CtrlVar :inst
+@end example
+
+There is only one kind of occurrences for these variables,
+@code{CtrlVarUse}, which has the role @code{CtrlVarIdDefScope}.
+The @code{Program} symbol has the role @code{CtrlVarRootScope}:
+
+@example
+   RULE:  Statement  ::= 'set' CtrlVarUse 'to' Expression ';' END;
+   RULE:  Expression ::= 'use' CtrlVarUse END;
+   SYMBOL CtrlVarUse INHERITS CtrlVarIdDefScope, IdentOcc END;
+   SYMBOL Program    INHERITS CtrlVarRootScope END;
+@end example
+@noindent
+
+@comment =====================================
+@node AlgScope, CScope, Basic Scope Rules, Basic Scope Rules
+@findex Module @code{AlgScope}
+@findex Algol-like basic scope rules
+@section Algol-like Basic Scope Rules
+
+This module implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type @code{DefTableKey}
+according to Algol-like scope rules:
+
+A binding is valid within the whole smallest range containing
+the definition, except in inner ranges where a binding for the
+same identifier holds.
+
+Make sure that you have considered the advices given in
+@ref{Basic Scope Rules}.
+
+The module is instantiated by
+@example
+   $/Name/AlgScope.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+@findex separate name space
+Both generic parameters can be omitted in most of the usual applications.
+The @code{instance} parameter is used to distinguish several instances
+of this module. The scope rules of a language may require that
+identifiers are bound in different name spaces that do not affect
+each other. Then for each name space an instance of this or
+of the other basic scope modules is used.
+The @code{referto} parameter modifies the names of @code{Key} attributes
+and of @code{Bind} attributes.
+It is only used if there is an identifier occurrence in the language that
+is bound in more than one name space. These bindings are then described
+by one pair of @code{Key} and @code{Bind} attribute each.
+
+The module provides computational roles for the symbols
+@code{NAMERootScope}, @code{NAMERangeScope}, @code{NAMEAnyScope},
+@code{NAMEIdDefScope}, @code{NAMEIdUseEnv}, @code{NAMEIdUseScope},
+and @code{NAMEChkIdUse}
+to be used in @code{.lido} specifications.
+The computations of the module use functions of the library's
+environment module.
+
+@findex IdDefScope
+@code{NAMEIdDefScope} is a symbol representing a
+defining identifier occurrence.
+
+@findex IdUseEnv
+@code{NAMEIdUseEnv} is a symbol representing an applied identifier occurrence.
+
+@findex IdUseScope
+@findex attribute @code{Scope}
+@code{NAMEIdUseScope} is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+The outer environment of this range is not considered.
+
+@findex ChkIdUse
+@code{NAMEChkIdUse} is a role that may be inherited by an applied identifier
+occurrence. It issues an error message @code{identifier is not defined:}
+if no definition is bound to that identifier.
+
+@findex RootScope
+@code{NAMERootScope} is the root symbol containing all identifier occurrences
+and all @code{NAMERangeScope}. 
+It is automatically inherited by the root of the grammar.
+
+@findex RangeScope
+@code{NAMERangeScope} is a symbol representing a range for the binding
+of defining identifier occurrences @code{NAMEIdDefScope}.
+It may be nested in @code{NAMERootScope} or in other ranges.
+
+@findex AnyScope
+@code{NAMEAnyScope} comprises the roles of @code{NAMERootScope} and 
+@code{NAMERangeScope}. It may be used in constructs like
+@example
+   INCLUDING NAMEAnyScope.NAMEGotKeys
+@end example
+@noindent
+
+@findex attribute @code{Key}
+@findex attribute Bind
+@findex Bind
+@findex type Binding
+@findex Binding
+The main results of using this module are the bindings of
+identifier occurrences represented by the attributes
+@code{NAMEIdDefScope.KEYKey} and @code{NAMEIdUseEnv.KEYKey}.
+Along with each @code{Key} attribute there is an attribute @code{KEYBind}
+of type @code{Binding}, e.g. @code{UseIdent.Bind}. Its value 
+characterizes a binding of an identifier @code{idn} in the
+innermost scope of an environment @code{env} to a key @code{k}.
+The three values @code{idn}, @code{env}, and @code{k} can be obtained
+from a @code{Binding} using functions defined in @ref{Environment Module}.
+If no binding is found for an applied identifier occurrence the
+@code{Bind} attribute has the value @code{NoBinding}.
+
+Usually both @code{NAMEIdDefScope} and @code{NAMEIdUseEnv} are used.
+In specific cases of language rules any combination of
+@code{NAMEIdDefScope}, @code{NAMEIdUseEnv}, @code{NAMEIdUseScope} may be used.
+
+@findex attribute @code{Sym}
+The attributes @code{NAMEIdDefScope.Sym}, @code{NAMEIdUseEnv.Sym}, 
+@code{NAMEIdUseScope.Sym} must represent the identifier encoding.
+
+@findex attribute @code{Env}
+@findex RootEnv
+@findex root environment
+@code{NAMERootScope.NAMEEnv}
+is a root environment where all environments
+of this name space are embedded in.
+It has the value of a global variable @code{NAMERootEnv} that is assigned
+in the initialization phase of the processor.
+It allows to introduce predefinitions by initialization code,
+which then must include the file @code{NAMEAlgScope.h}.
+(@pxref{Predefined Identifiers})
+
+@code{NAMERangeScope.NAMEEnv}
+is an inherited attribute for the environment of bindings of this range.
+
+@findex attribute @code{GotKeys}
+@code{NAMEAnyScope.NAMEGotKeys}
+indicates that all keys defined in this and in all enclosing
+ranges are defined in @code{NAMEAnyScope.NAMEEnv}.
+@code{NAMEAnyScope.NAMEGotKeys} is a precondition for finding
+a binding using @code{IdUseEnv}.
+
+@findex attribute @code{GotLocKeys}
+@code{NAMEAnyScope.NAMEGotLocKeys}
+indicates that all keys are defined in this range
+are in 
+@* @code{NAMEAnyScope.NAMEEnv}.
+
+@comment =====================================
+@node CScope, BuScope, AlgScope, Basic Scope Rules
+@findex Module @code{CScope}
+@findex C-like basic scope Rules
+@section C-like Basic Scope Rules
+
+This module implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type @code{DefTableKey}
+according to C-like scope rules:
+
+A binding is valid from the definition up to the end of the smallest
+range containing the definition, except in inner ranges
+from a definition of the same identifier to the end of that range.
+
+Note: The scope rules of the programming language C are defined C-like
+in most but not in all respects: For example the scopes of names of 
+variables and functions are defined C-like, but those of
+jump labels are defined Algol-like.
+
+Make sure that you have considered the advices given in
+@ref{Basic Scope Rules}.
+
+The module is instantiated by
+@example
+   $/Name/CScope.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+@findex separate name space
+Both generic parameters can be omitted in most of the usual applications.
+The @code{instance} parameter is used to distinguish several instances
+of this module. The scope rules of a language may require that
+identifiers are bound in different name spaces that do not affect
+each other. Then for each name space an instance of this or
+of the other basic scope modules is used.
+The @code{referto} parameter modifies the names of @code{Key} attributes.
+It is only used if there is an identifier occurrence in the language that
+is bound in more than one name space. These bindings are then described
+by one @code{Key} attribute each.
+
+The module provides computational roles for the symbols
+@code{NAMERootScope}, @code{NAMERangeScope}, @code{NAMEAnyScope},
+@code{NAMEIdDefScope}, @code{NAMEIdUseEnv}, @code{NAMEIdUseScope},
+@code{NAMEChkIdUse}, @code{NAMEIdDefUse}, @code{NAMEDeclaratorWithId}, 
+and @code{NAMEIdInDeclarator}
+to be used in @code{.lido} specifications.
+The computations of the module use functions of the library's
+environment module.
+
+@findex IdDefScope
+@code{NAMEIdDefScope} is a symbol representing a
+defining identifier occurrence.
+
+@findex IdUseEnv
+@code{NAMEIdUseEnv} is a symbol representing an applied identifier occurrence.
+
+@findex ChkIdUse
+@code{NAMEChkIdUse} is a role that may be inherited by an applied identifier
+occurrence. It issues an error message @code{identifier is not defined:}
+if no definition is bound to that identifier.
+
+@findex IdUseScope
+@findex attribute @code{Scope}
+
+@code{NAMEIdUseScope} is a symbol representing an applied identifier occurrence
+that is bound in the scope of the smallest enclosing range.
+The outer environment of this range is not considered.
+
+@findex IdDefUse
+@findex attribute @code{DefCond}
+
+@code{NAMEIdDefUse} represents a defining identifier occurrence 
+like @code{NAMEIdDefScope} if 
+@* @code{INH.NAMEDefCond} is non-zero, 
+otherwise an applied occurrence like @code{NAMEIdUseEnv}.
+@code{NAMEDefCond} is to be computed by an upper computation.
+There is a default computation provided that sets
+@code{INH.NAMEDefCond} to 1 iff the identifier is not yet bound
+in the current environment.
+
+@findex DeclaratorWithId
+@findex IdInDeclarator
+The pair of roles @code{NAMEDeclaratorWithId} and @code{NAMEIdInDeclarator}
+are used to model the scope concept of declarators as defined in the
+programming language C: A defining occurrence of an identifier may be
+part of @emph{Declarator}, that is a larger construct which determines
+the type of the defined identifier, for example the definition of the array
+@code{a} in
+@example
+   int a[a+1];
+@end example
+@noindent
+Here @code{a[a+1]} is the @code{Declarator} and the first @code{a}
+is its defining occurrence.
+The scope rules of C state that the scope of the defined identifier
+begins immediately after the end of the declarator, rather than
+at the position of the defining occurrence. Hence, the @code{a}
+within the brackets is @emph{not} bound to the defined array.
+This rule is only relevant if declarators may contain applied
+identifier occurrences.
+To achieve this effect, the role @code{NAMEDeclaratorWithId} is
+to be inherited by a symbol which is the root of the declarator
+construct, and the role @code{NAMEIdInDeclarator} is inherited
+by the symbol that characterizes defining identifier occurrences
+within declarators. Make sure that the grammar guarantees a 1:1
+relation the nodes of these symbol roles in any declarator tree.
+The attribute @code{NAMEIdInDeclarator.Sym} has to be provided
+as usual. The symbol roles compute the @code{Sym} attribute
+for @code{NAMEDeclaratorWithId} and the @code{KEYKey} attribute 
+for both symbols.
+
+@findex RootScope
+@code{NAMERootScope} is the root symbol containing all identifier occurrences
+and all @code{NAMERangeScope}. 
+It is automatically inherited by the root of the grammar.
+
+@findex RangeScope
+@code{NAMERangeScope} is a symbol representing a range for the binding
+of defining identifier occurrences @code{NAMEIdDefScope}.
+It may be nested in @code{NAMERootScope} or other ranges.
+
+@findex AnyScope
+@code{NAMEAnyScope} comprises the roles of @code{NAMERootScope} and 
+@code{NAMERangeScope}. It may be used in constructs like
+@example
+   INCLUDING NAMEAnyScope.NAMEEnv
+@end example
+@noindent
+
+@findex attribute @code{Key}
+The main results of using this module are the bindings of
+identifier occurrences represented by the attributes
+@code{NAMEIdDefScope.KEYKey} and @code{NAMEIdUseEnv.KEYKey}.
+
+@findex attribute Bind
+@findex Bind
+@findex type Binding
+@findex Binding
+Along with each @code{Key} attribute there is an attribute @code{Bind}
+of type @code{Binding}, e.g. @code{UseIdent.Bind}. Its value 
+characterizes a binding of an identifier @code{idn} in the
+innermost scope of an environment @code{env} to a key @code{k}.
+The three values @code{idn}, @code{env}, and @code{k} can be obtained
+from a @code{Binding} using macros defined in @ref{Environment Module}.
+If no binding is found for an applied identifier occurrence the
+@code{Bind} attribute has the value @code{NoBinding}.
+
+Usually both @code{NAMEIdDefScope} and @code{NAMEIdUseEnv} are used.
+In specific cases of language rules any combination of
+@code{NAMEIdDefScope}, @code{NAMEIdUseEnv}, @code{NAMEIdUseScope},
+@code{NAMEIdDefUse} may be used.
+
+@findex attribute @code{Sym}
+The attributes @code{NAMEIdDefScope.Sym}, @code{NAMEIdUseEnv.Sym}, 
+@code{NAMEIdUseScope.Sym}, 
+@* @code{NAMEIdDefUse.Sym} must 
+represent the identifier encoding.
+
+@findex attribute @code{Env}
+@findex RootEnv
+@findex root environment
+@code{NAMERootScope.NAMEEnv}
+is a root environment where all environments
+of this name space are embedded in.
+
+It has the value of a global variable @code{NAMERootEnv} that is assigned
+in the initialization phase of the processor.
+It allows to introduce predefinitions by initialization code,
+which then must include the file @code{NAMECScope.h}.
+(@pxref{Predefined Identifiers})
+
+@code{NAMERangeScope.NAMEEnv}
+is an inherited attribute for the environment of bindings of this range.
+
+@findex attribute @code{GotKeys}
+@code{NAMEAnyScope.NAMEGotKeys}
+indicates that all identifier occurrences from the begin of the
+@code{NAMERootScope} up to the end of this range are bound to keys
+in @code{NAMEAnyScope.NAMEEnv}.
+
+@comment =====================================
+@node BuScope, , CScope, Basic Scope Rules
+@findex Module @code{BuScope}
+@findex C-like basic scope rules
+@findex bottom-up
+@findex BOTTOMUP
+@section C-like Basic Scope Rules Computed Bottom-Up
+
+This module implements consistent renaming of identifiers.
+The computations of this module are specified such that they are
+executed while the input program is read.
+Identifier occurrences are bound to object keys of type @code{DefTableKey}
+according to C-like scope rules.
+
+Make sure that you have considered the advices given in
+@ref{Basic Scope Rules}.
+
+The module is instantiated by
+@example
+   $/Name/BuScope.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+The functionality provided by this modules is almost the same as
+that of the @code{CScope} module (@pxref{CScope}).
+Only the differences are described here.
+
+During the bottom-up computation phase values can not be propagated
+using inherited (@code{INH}) attributes; and computations that
+affect a whole subtree, like creation of the scope for a range,
+have to be associated to a symbol node that precedes that subtree.
+For that purpose this module  provides
+additional computational roles that cooperate with the usual basic
+name analysis roles.
+
+Usually it is necessary to introduce additional symbols
+into the concrete grammar preceding range subtrees.
+They derive to nothing, and are used to carry the specific
+bottom-up computations.
+
+In our running example we would replace the productions
+@example
+   Source:         Block.
+   Statement:      Block.
+@end example
+@noindent
+by the productions
+@example
+   Source:         BuBlock Block.
+   Statement:      BuBlock Block.
+@end example
+@noindent
+and add
+@example
+   SYMBOL BuBlock INHERITS CreateNewScope, OpenNewScope END;
+@end example
+@noindent
+to the LIDO specification.
+All other module roles can be used as described for C-like scope
+rules.
+
+Usually each symbol representing a @code{NAMERangeScope} has to be
+preceded by a symbol that inherits both roles
+@code{NAMECreateNewScope} and @code{NAMEOpenNewScope}.
+
+If scopes are used as properties of objects it may be necessary
+to inherit the roles
+@code{NAMECreateNewScope}, @code{NAMERecentNewScope}, and @code{NAMEOpenNewScope}
+to different symbols which precede a symbol representing a @code{NAMERangeScope}.
+(@pxref{BuScopeProp}, @pxref{BuInh})
+
+@findex CreateNewScope
+@code{NAMECreateNewScope}
+creates a new scope that is embedded in the scope of the smallest
+enclosing range. That scope can be obtained from the
+attribute @code{SYNT.NAMENewScope}, or be accessed by a subsequent
+role @code{NAMERecentNewScope} (see below).
+
+@findex OpenNewScope
+@code{NAMEOpenNewScope}
+makes the scope obtained from @code{SYNT.NAMENewScope} become the
+current scope. The attribute @code{SYNT.NAMEOpenPrecond} can be used
+to specify a precondition for this operation.
+If @code{NAMEOpenNewScope} is inherited by a symbol representing an identifier
+occurrence
+@code{SYNT.NAMEOpenPrecond = THIS.KEYKey}
+ensures that the identifier is bound before the new scope is
+opened.
+
+@findex RecentNewScope
+@code{NAMERecentNewScope}
+accesses the most recently created new scope and provides it
+by the attribute @code{SYNT.NAMENewScope}.
+This role is used together with @code{NAMEOpenNewScope} if
+@* @code{NAMECreateNewScope} is inherited by a preceding symbol.
+
+We demonstrate the use of these roles for our running example.
+The grammar introduced in @xref{Example, , Running Example, modlib, Introduction of specification modules}, has to be modified
+in order to allow bottom-up computation. A new symbol @code{BuBlock}
+is introduced. It derives to nothing and precedes the symbol
+@code{Block} on right-hand sides of productions:
+
+@example
+  Source:         BuBlock Block.
+  Statement:      BuBlock Block.
+@end example
+@noindent
+
+The roles @code{CreateNewScope} and @code{OpenNewScope}
+introduce the scope for the subsequent @code{Block}:
+
+@example
+  SYMBOL Program  INHERITS RootScope END;
+  SYMBOL Block    INHERITS RangeScope END;
+  SYMBOL BuBlock  INHERITS CreateNewScope, OpenNewScope END;
+@end example
+
+The other roles for basic scope rules are used as described in
+@xref{CScope}.
+
+@comment =====================================
+@node Predefined Identifiers, Joined Ranges, Basic Scope Rules, top
+@findex predefined identifiers
+@findex Module @code{PreDefine}
+@findex Module @code{PreDefId}
+@chapter Predefined Identifiers
+
+In most languages some identifiers are predefined, e.g.@: names for
+basic types or for constants like @code{true} and @code{false}.
+Their definitions are valid in any program as if they were bound in the
+outermost environment. The two modules @code{PreDefine} and @code{PreDefId}
+described here allow to easily introduce such predefinitions.
+They require that one of the basic scope rule modules
+(@pxref{Basic Scope Rules}) is used.
+
+Both modules @code{PreDefine} and @code{PreDefId} are to be instantiated
+to introduce a set of predefined entities in a name space.
+
+The implementation of the modules use two functions which introduce a 
+source identifier into the identifier table and establish a binding
+for it in some environment. These functions can be used directly
+for example in cases where predefinitions are to be established for
+other environments than the outermost one. 
+Those functions are described below.
+
+The @code{PreDefine} module is instantiated by
+@example
+   $/Name/PreDefine.gnrc +instance=NAME +referto=IDENT :inst
+@end example
+@noindent
+@findex RootEnv
+@findex root environment
+The optional @code{instance} parameter characterizes the name space in which
+identifiers are to be predefined. The @code{instance} parameter
+has to be the same as that of the basic scope rule module instance
+used for that name space. Several instances of this module may address
+different name spaces.
+
+The @code{referto} parameter specifies
+the symbol name used for identifier terminals in the grammar.
+The @code{referto} parameter must not be omitted.
+
+If a grammar has several identifier terminal symbols predefinitions
+can be made using several instances of this module, if they belong
+to different name spaces.
+
+@findex function PreDefine
+@findex PreDefine
+@findex function PreDefineSym
+@findex PreDefineSym
+The module provides two functions @code{NAMEPreDefine} and 
+@code{NAMEPreDefineSym} which are called by the 
+instance of the @code{PreDefId} module.
+@code{NAMEPreDefineSym} inserts a string into the identifier module
+to be used as an @code{IDENT} symbol.
+@code{NAMEPreDefine} additionally binds that symbol to a key
+in the root environment given by the global variable @code{NAMERootEnv}.
+
+The predefined identifiers are to be described in a file as explained below.
+The name of that file has to be given as @code{referto} parameter
+of the instantiation of the @code{PreDefId} module:
+
+@example
+   $/Name/PreDefId.gnrc +instance=NAME +referto=(FILENAME) :inst
+@end example
+@noindent
+The @code{instance} parameter has to be the same as that of the
+@code{PreDefine} instance. 
+If this instantiation is contained in a @code{.specs} file and
+if the description file, say @code{Predef.d} is contained in the
+same directory, it may read
+@example
+   $/Name/PreDefId.gnrc +referto=(Predef.d) :inst
+@end example
+@noindent
+This can also be used if the @code{.specs} file and @code{Predef.d}
+are contained in a @code{.fw} specification.
+
+The description file contains a sequence of macro calls, one for each
+predefined identifier, e.g.
+@example
+  PreDefKey ("int", intKey)
+  PreDefKey ("real", realKey)
+  PreDefSym ("external", externSym)
+  PreDefSymKey ("fail", failSym, failKey)
+  PreDefSymKeyBind ("write", writeSym, writeKey, writeBind)
+@end example
+@noindent
+The sequence should not contain anything else,
+because it is expanded in several contexts where different definitions
+of those macros are valid.
+
+@findex PreDefSym
+@findex PreDefKey
+@findex PreDefSymKey
+@findex PreDefBind
+@findex PreDefKeyBind
+@findex PreDefSymKeyBind
+Each call of one of the macros establishes a predefinition for
+one identifier, and makes the result accessible via the supplied
+variable names. Usually not all of those variables are needed.
+Hence, the available macros differ in the combinations of
+those variables. We first explain the most general macro.
+The meanings of the other macros are deduced from it.
+
+@code{PreDefSymKeyBind ("xxx", sym, key, bind)} 
+encodes the character string @code{xxx} as an identifier,
+stores it in the identifier table, and stores
+the encoding in the @code{int} variable @code{sym}. 
+
+Note: The string need not obey the
+rules specified for the notation of @code{IDENT} symbols.
+That facility can be used if artifacts are predefined,
+which can not be referred to by a name in a program.
+
+@code{key} is introduced as a PDL known key.
+
+@code{key} is bound to @code{sym} in the environment @code{NAMERootEnv}.
+That binding is assigned to the @code{Binding} variable @code{bind}.
+The key, the identifier code, and the environment can be accessed
+from the @code{Binding} value (@code{KeyOf}, @code{IdnOf}, @code{EnvOf}).
+
+The variables @code{sym} and @code{bind} and the known key @code{key}
+are defined, exported, and made accessible via a @code{.HEAD.phi}
+specification. The binding is established and the assignments are
+made in the initialization phase of the processor.
+Hence, the results can be used only after that phase, i.e.@:
+during all computations in the tree.
+
+According to the above description the following macro call
+@example
+  PreDefSymKeyBind ("write", writeSym, writeKey, writeBind)
+@end example
+@noindent
+creates the following variables to be defined and initialized
+as described:
+@example
+  int writeSym;
+  DefTableKey writeKey;
+  Binding writeBind;
+@end example
+
+The other macros that are provided cause a subset of the effects
+described for @code{PreDefSymKeyBind}:
+
+@code{PreDefSymKey ("xxx", sym, key)} 
+As described above, except:
+The binding is established but not assigned to a variable.
+
+@code{PreDefKeyBind ("xxx", key, bind)} 
+As described above, except:
+The symbol is encoded and stored in the identifier table, but the encoding
+is not assigned to a variable.
+
+@code{PreDefKey ("xxx", key)} 
+As described above, except:
+Neither the symbol encoding nor the binding are stored in a variable.
+
+@code{PreDefBind ("xxx", bind)} 
+As described above, except:
+The symbol encoding is not stored in a variable. The key
+is created dynamically rather than as a known key.
+Both, symbol encoding and the key can be accessed via the stored
+@code{Binding} value. 
+
+@code{PreDefSym ("xxx", sym)}
+encodes the character string @code{xxx} as an identifier,
+stores it in the identifier table, and stores
+the encoding in the @code{int} variable @code{sym}. 
+No binding is established.
+
+The thus introduced variables and known keys may be used in
+@code{.lido} specifications;
+the known keys may be additionally used in any
+specification where PDL defined entities are available.
+
+@findex PreDefMod
+@findex Module PreDefMod
+The described modules are based on a C module which provides the
+following two functions. They may be used directly to establish
+bindings in other environments than the outermost one, for example.
+In that case it is sufficient to use the module @code{PreDefMod.specs}.
+Then the modules @code{PreDefine} and @code{PreDefId} need not be
+instantiated, if the macros explained above are not used.
+
+The two functions are:
+
+@table @code
+@findex PreDefineSym
+@findex function PreDefineSym
+@item void PreDefineSym (char *name, int code, int *sym)
+The string @code{name} is encoded with the given syntax @code{code}.
+That is usually the code of the symbol used for
+identifier terminals in the grammar (cf. the @code{referto} parameter
+in the instantiation of the module @code{PreDefine} explained above).
+@code{*sym} is set to the symbol index.
+
+@findex PreDefine
+@findex function PreDefine
+@item void PreDefine (char *name, int code, int *sym, Environment env, DefTableKey key,Binding *bind)
+The string @code{name} is encoded with the given syntax @code{code} 
+which is bound to @code{key} in the given environment @code{env}.
+@code{*sym} is set to the symbol index.
+@code{*bind} is set to the created binding, if successful, 
+otherwise to @code{NoBinding}.
+@end table
+
+In our running example we introduce predefined names for some
+basic types and for Boolean constants by the module instantiations
+@example
+   $/Name/PreDefine.gnrc +referto=Ident :inst
+   $/Name/PreDefId.gnrc +referto=(Predef.d):inst
+@end example
+@noindent
+The file @code{Predef.d} contains
+@example
+  PreDefKey ("int", intKey)
+  PreDefKey ("real", realKey)
+  PreDefKey ("bool", boolKey)
+  PreDefKey ("true", trueKey)
+  PreDefKey ("false", falseKey)
+@end example
+@noindent
+Then key names like @code{intKey} can be used e.g.@: in computations
+for type checking (@pxref{top, , Type Analysis, type, Type analysis tasks}).
+In that case it is necessary to state that @code{true} and @code{false}
+are of type bool in a @code{.pdl} specification:
+@example
+   trueKey -> TypeOf = @{boolType@};
+   falseKey -> TypeOf = @{boolType@};
+@end example
+@noindent
+It associates the @code{TypeOf} property to the predefined objects.
+
+@comment =====================================
+@node Joined Ranges, Scope Properties, Predefined Identifiers, top
+@findex Joined Ranges
+@findex AlgRangeSeq
+@findex CRangeSeq
+@findex BuRangeSeq
+@chapter Joined Ranges
+
+In some situations it is not possible to specify the tree grammar
+such that each range in the sense of scope rules is rooted
+by one single grammar symbol as required for using the role
+@code{RangeScope} of the basic scope module.
+The following three modules extend the basic scope rule modules
+(@pxref{Basic Scope Rules}) by facilities that support such cases:
+
+@menu
+* AlgRangeSeq::  Joined Ranges Algol-like
+* CRangeSeq::    Joined Ranges C-like
+* BuRangeSeq::   Joined Ranges C-like Bottom-up
+@end menu
+@iftex
+@table @code
+@item AlgRangeSeq
+Joined Ranges Algol-like
+@item CRangeSeq
+Joined Ranges C-like
+@item BuRangeSeq
+Joined Ranges C-like Bottom-up
+@end table
+@end iftex
+
+Using one of these modules requires that the corresponding
+basic scope rule module is instantiated with the same generic parameters
+@code{+instance=NAME} and @code{+referto=KEY}.
+
+This module implements the following concept:
+Several ranges in the program form one single range in the sense
+of scope rules, i.e. the definition in these ranges contribute
+to a single scope in which the applied identifier occurrences
+of these ranges are bound.
+There is a symbol which is the subtree root for all these ranges.
+But it is not a range in the sense of scope rules because it
+may also contain identifier occurrences that are bound in the
+enclosing range.
+
+The modules provide @code{.lido} specifications for the following
+computational roles:
+
+@findex RangeSequence
+@code{NAMERangeSequence}
+is to be inherited by a symbol that is the root of a subtree
+which contains all to be joined ranges.
+It provides all attributes provided by @code{NAMERangeScope},
+but it is not a range in the sense of scope rules.
+Other range roles may not be inherited by @code{NAMERangeSequence}.
+
+@findex RangeElement
+@code{NAMERangeElement}
+is the role to be inherited by symbols that represent
+ranges to be joined. It is a specialized @code{NAMERangeScope}.
+Other range roles may not be inherited by such a symbol.
+It is a specialized @code{NAMERangeScope} that must be contained in a
+@code{NAMERangeSequence} subtree without
+having a @code{NAMERangeScope} in between.
+
+We demonstrate the use of these facilities by extending the language
+of our running example by introducing an artificial language
+construct: It consists of a defining identifier occurrence,
+that is to be bound in the enclosing range,
+and two compound statements which form one single range in the sense
+of scope rules:
+
+@example
+   Statement:      Join.
+   Join:           'join' DefIdent JoinedBlock JoinedBlock 
+                   'joined' ';'.
+   JoinedBlock:    Compound.
+@end example
+
+Hence the @code{Join} symbol has the role @code{RangeSequence},
+and the @code{JoinedBlock} symbol has the role @code{RangeElement}:
+
+@example
+   RULE: Join ::= 'join' DefIdent JoinedBlock JoinedBlock 
+                  'joined' ';'
+   END;
+
+   SYMBOL Join INHERITS RangeSequence END;
+   SYMBOL JoinedBlock INHERITS RangeElement END;
+@end example
+
+This example is applicable with either the @code{AlgRangeSeq}
+module or the @code{CRangeSeq}.
+In case of Algol-like scope rules an applied identifier occurrence
+in either of the two ranges may be bound to a definition
+in either of the two ranges.
+In case of C-like scope rules an applied identifier occurrence
+in the second of the two ranges may be bound to a definition
+in either of the two ranges.
+
+In case of bottom-up computations
+using the @code{BuRangeSeq} module some modifications have to be applied
+as described for that module.
+
+@comment =====================================
+@node AlgRangeSeq, CRangeSeq, , Joined Ranges
+@findex Module @code{AlgRangeSeq}
+@section Joined Ranges Algol-like
+
+This module implements joined ranges for Algol-like scope rules
+as described in (@pxref{Joined Ranges}).
+
+The module is instantiated by
+@example
+   $/Name/AlgRangeSeq.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the module @code{AlgScope} is instantiated
+with the same values of the generic parameters.
+
+The module provides the computational roles 
+@code{NAMERangeSequence} and @code{NAMERangeElement}
+as described in @xref{Joined Ranges}.
+
+@comment =====================================
+@node CRangeSeq, BuRangeSeq, AlgRangeSeq, Joined Ranges
+@findex Module @code{CRangeSeq}
+@section Joined Ranges C-like
+
+This module implements joined ranges for C-like scope rules
+as described in (@pxref{Joined Ranges}).
+
+The module is instantiated by
+@example
+   $/Name/CRangeSeq.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the module @code{CScope} is instantiated
+with the same values of the generic parameters.
+
+The module provides the computational roles 
+@code{NAMERangeSequence} and @code{NAMERangeElement}
+as described in @xref{Joined Ranges}.
+
+@comment =====================================
+@node BuRangeSeq, , CRangeSeq, Joined Ranges
+@findex BOTTOMUP
+@findex BuRangeSeq
+@findex Module @code{BuRangeSeq}
+@section Joined Ranges C-like Bottom-up
+
+This module implements joined ranges for C-like scope rules
+as described in (@pxref{Joined Ranges}).
+Its computations are executed @code{BOTTOMUP} while the
+input is read.
+
+The module is instantiated by
+@example
+   $/Name/BuRangeSeq.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the module @code{BuScope} is instantiated
+with the same values of the generic parameters.
+
+The module provides the computational roles 
+@code{NAMERangeSequence}, @code{NAMEOpenSeqScope} and 
+@code{NAMEOpenElemScope}.
+@findex RangeSequence
+@findex OpenElemScope
+@findex OpenSeqScope
+
+@code{NAMERangeSequence}
+is to be inherited by a symbol that is the root of a subtree
+which contains all to be joined ranges.
+It provides all attributes provided by @code{NAMERangeScope},
+but it is not a range in the sense of scope rules.
+Other range roles may not be inherited by @code{NAMERangeSequence}.
+
+@code{NAMEOpenSeqScope}
+is to be inherited by a symbol that is in the subtree of
+@code{NAMERangeSequence} and precedes all to be joined ranges.
+
+@code{NAMEOpenElemScope}
+is to be inherited by a symbol that precedes each
+to be joined range.
+
+A nested @code{NAMERangeSequence} may not occur between
+@code{NAMEOpenSeqScope} and the first 
+@* @code{NAMEOpenElemScope}.
+
+The example given in @xref{Joined Ranges} is here modified for the
+bottom-up case.
+
+We demonstrate the use of these facilities by extending the language
+of our running example by introducing an artificial language
+construct: It consists of a defining identifier occurrence,
+that is to be bound in the enclosing range,
+and two compound statements which form one single range in the sense
+of scope rules.
+
+We introduce two new symbols @code{BuJoin} and @code{BuJoinEl}
+that derive to empty.
+
+@example
+   Statement:      Join.
+   Join:           'join' BuJoin DefIdent 
+                          BuJoinEl Block BuJoinEl Block 
+                   'joined' ';'.
+   BuJoin:         .
+   BuJoinEl:       .
+@end example
+
+The module roles are inherited as described above:
+
+@example
+   RULE: Join ::= 'join' BuJoin DefIdent 
+                         BuJoinEl Block BuJoinEl Block
+                  'joined' ';'
+   END;
+
+   SYMBOL Join INHERITS RangeSequence END;
+   SYMBOL BuJoin INHERITS OpenSeqScope END;
+   SYMBOL BuJoinEl INHERITS OpenElemScope END;
+   SYMBOL Block INHERITS RangeScope END;
+@end example
+
+
+
+@comment =====================================
+@node Scope Properties, Inheritance of Scopes, Joined Ranges, top
+@findex ScopeProp
+@findex CScopeProp
+@findex BuScopeProp
+@findex scope properties
+@chapter Scopes Being Properties of Objects
+
+Language constructs like modules, classes, or record types have a body
+that is a range. The set of bindings for the components defined
+in that range constitutes its scope. 
+In an applied context of a module, class, or record identifier
+its components may be selected, e.g.@: in @code{m.k},
+where @code{m} is a module identifier and @code{k} is 
+one of its components. These constructs are also called
+@emph{qualified names} in some language descriptions.
+In order to bind such applied occurrences
+of component identifiers in contexts outside their defining range,
+the scope of the range is associated as a property to the
+key of the module, class, or record identifier.
+
+This specific task of consistent renaming for component identifiers is often 
+closely related to type analysis. If @code{v} in @code{v.k} is a variable
+that has a record type, then that type key has the scope of the
+record range associated as a property 
+(@pxref{top, , Type Analysis, type, Type analysis tasks}).
+
+The following four modules extend the basic scope rule modules
+(@pxref{Basic Scope Rules}) by facilities that support scope properties.
+How to select one of the modules is explained below.
+
+@menu
+* ScopeProp::     Scope Properties without left-to-right Restrictions (recommended)
+* CScopeProp::    Scope Properties C-like (recommended only with CInh)
+* BuScopeProp::   Scope Properties C-like analyzed while processing input
+@end menu
+@iftex
+@table @code
+@item ScopeProp
+Scope Properties without left-to-right Restrictions (recommended)
+@item CScopeProp
+Scope Properties C-like (recommended only with CInh)
+@item BuScopeProp
+Scope Properties C-like analyzed while processing input
+@end table
+@end iftex
+
+The design of scope rules and their description needs careful consideration
+if the concept of scopes being properties is involved.
+We have to answer some questions on the described language before we 
+can decide which of the library modules is to be used:
+
+It is easily decided that we need the facility of scope properties:
+Assume the language has named program objects, say modules, which
+consist of a range with definitions of components or members.
+Those members are accessible outside their defining range
+wherever the name of the module is accessible:
+@example
+  module m
+    @{ int i;
+      float f (); @{...@}
+    @}
+  m:f();
+@end example
+In this example the module body is a range where the members @code{i} and 
+@code{f} are defined. The scope of the range contains bindings for
+@code{i} and @code{f}. It is a property of the module @code{m} which is
+set in the module definition. The construct @code{m:f} is a qualified name:
+A binding for @code{f} is to be found in the scope property of the
+qualifying module name @code{m}. The definitions valid in the context of
+the qualified name are irrelevant for the binding of @code{f}.
+
+The same application pattern occurs for example with types that have
+components, like record types, structure types, and union types. There 
+a component selection is usually qualified with an expression having
+such a type rather than with the type identifier itself.
+
+It is recommended to use the @code{ScopeProp} module for the specification
+of such scope patterns. It fits to any of the basic scope rule modules,
+Alg-like, C-like, or bottom-up. It does @emph{not} impose any ordering 
+restriction that would require the definition of a member to occur before
+its qualified use. For example in a language with C-like basic scope rules
+the following sequence would be acceptable:
+@example
+  module m;
+  m:f();
+  module m
+    @{ int i;
+      float f (); @{...@}
+    @}
+@end example
+Even if it should be considered erroneous to use the qualified name
+@code{f} before its definition, it is recommended to specify
+the binding in the described way, and to enforce that restriction by
+a check of the related positions.
+The same holds for bottom-up basic scope rules. One only has to be aware
+that the binding of qualified names is determined @emph{after} the
+bottom-up computations.
+
+There are a few specific reasons where the modules
+@code{CScopeProp} or @code{BuScopeProp}, 
+the C-like variants of @code{ScopeProp}
+are to be used instead: 
+
+If the basic scope rules are specified C-like using @code{BuScope}
+and the binding of qualified names has to be done by bottom-up computations,
+then @code{BuScopeProp} is to be used.
+
+If the basic scope rules are specified C-like using @code{CScope}
+and the @code{CInh} module is used to implement the concept of inheritance,
+then @code{CScopeProp} is to be used. That is always necessary when
+bindings of scope properties are needed to solve the binding of
+non-qualified names in ranges where C-like scope rules apply.
+As a consequence it is enforced that the definitions of such members
+precede their uses.
+
+The general description of this set of module is given in the section
+@pxref{ScopeProp}, the deviations of its variants are described in
+@pxref{CScopeProp}, and @pxref{BuScopeProp}.
+
+@comment =====================================
+@node ScopeProp, CScopeProp, , Scope Properties
+@findex Module @code{ScopeProp}
+@section Scope Properties without left-to-right Restrictions
+
+This module @code{ScopeProp} implements consistent renaming of identifiers
+using scopes which are properties associated to object keys.
+The module computations ensure that scope properties are associated
+and bindings are made before they are accessed. 
+This strategy fits to Algol-like scope rules, and to C-like scope rules
+if qualified names may be used before their definition.
+
+The module is instantiated by
+@example
+   $/Name/ScopeProp.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+It is required that a
+basic scope rule module is instantiated with the same generic parameters
+@code{+instance=NAME} and @code{+referto=KEY}.
+
+@findex property @code{Scope}
+Each of the modules introduces a @code{PDL} property named 
+@code{NAMEScope}
+where @code{NAME} is the value of the @code{instance} parameter.
+
+The module provide @code{.lido} specifications for the
+computational roles
+@code{NAMEExportRange},
+@code{NAMEQualIdUse}, and
+@code{NAMEChkQualIdUse}:
+
+@findex ExportRange
+@findex attribute @code{ScopeKey}
+@code{NAMEExportRange}
+is a @code{NAMERangeScope} the scope of which is associated as a value of 
+the @code{NAMEScope} property to the value of the attribute 
+@code{KEYScopeKey}. All local definitions are bound in this scope.
+The scope may be used to bind 
+qualified names (@code{NAMEQualIdUse}), or to provide the source for
+inheritance. Such uses may occur outside as well as inside of 
+that @code{NAMEExportRange}. 
+A user computation is required to set the attribute 
+@code{THIS.KEYScopeKey}. The scope will be set as a value of its 
+property @code{NAMEScope}. 
+This role is typically inherited by a grammar symbol that represents
+the body of a module, of a class, or of a record type.
+The @code{KEYScopeKey} attribute is then set to the key representing
+the module, class, or record type.
+
+@findex QualIdUse
+@findex attribute @code{ScopeKey}
+@findex attribute @code{Scope}
+@code{NAMEQualIdUse} is inherited by an applied occurrence
+of a qualified identifier. Its binding is looked up 
+in a scope that is obtained
+as a @code{NAMEScope} property from the attribute @code{THIS.NAMEScopeKey}.
+A computation of @code{INH.NAMEScopeKey} has to be provided.
+The obtained scope is available in the attribute
+@code{THIS.NAMEScope}, e.g. to support a check whether the qualification is
+correct. Alternatively, a user computation may compute @code{THIS.NAMEScope}
+instead of @code{THIS.NAMEScopeKey}.
+This role is typically inherited by a grammar symbol that represents
+a qualified identifier occurrence like @code{sleep} in @code{Thread.sleep} or 
+@code{push} in @code{st.push}. 
+The binding may be looked up in a scope associated
+to @code{Thread} or to the type of @code{st}, for example.
+
+@findex ChkQualIdUse
+@code{NAMEChkQualIdUse} can be inherited together with @code{NAMEQualIdUse}.
+It causes a message to be given, if no binding is found for the identifier.
+
+@findex GetScope
+@findex attribute GotScopeProp
+Computations of these modules also establish attributes 
+@code{NAMEGotVisibleScopePropNest}, @code{NAMEGotVisibleKeys}, 
+and @code{NAMEGotVisibleKeysNest}
+of including
+@code{NAMERangeScope}s and @code{NAMERootScope}.
+They are used in modules computations which access the 
+@code{NAMEScope} property or which look up bindings in those
+scopes. In general these attributes need not be considered in in user
+computations.
+
+We demonstrate the use of these facilities by extending the language
+of our running example by module declarations and access of
+module components. (For a complete example see the Tutorial on Name Analysis.)
+The notation is specified by the following
+two concrete productions:
+
+@example
+   Declaration:    'module' DefIdent ModBlock ';'.
+   ModBlock:       Compound.
+   Operand:        ModUseIdent '::' QualIdent.
+   ModUseIdent:    Ident.
+   QualIdent:      Ident.
+@end example
+
+The symbols inherit the roles provided by the scope property module
+as described above:
+
+@example
+   SYMBOL ModBlock INHERITS ExportRange END;
+
+   RULE: Declaration ::= 'module' DefIdent ModBlock ';' COMPUTE
+         ModBlock.ScopeKey = DefIdent.Key;
+   END;
+@end example
+
+In the context of the module declaration it is specified that
+the scope of the module body is to be associated to the key of the
+module identifier.
+
+In the context of a selection the scope is specified
+in which the selected component is to be bound.
+It is accessed from the key of the module identifier.
+Module computations establish dependences such that
+all scope properties are associated before they are accessed here:
+
+@example
+   SYMBOL ModUseIdent INHERITS
+          IdUseEnv, ChkIdUse, IdentOcc
+   END;
+
+   SYMBOL QualIdent   INHERITS
+          QualIdUse, ChkQualIdUse, IdentOcc
+   END;
+   RULE: Expression  ::= ModUseIdent '::' QualIdent COMPUTE
+         QualIdent.ScopeKey = ModUseIdent.Key;
+   END;
+@end example
+
+In order to make sure that the it is really a module identifier to
+which the selection is applied we specify the following check
+
+@example
+   RULE: Expression  ::= ModUseIdent '::' QualIdent COMPUTE
+     IF (AND (NE (QualIdent.ScopeKey, NoKey),
+              EQ (QualIdent.Scope, NoEnv)),
+     message (FATAL, CatStrInd ("module identifier required: ",
+                                ModUseIdent.Sym), 
+              0, COORDREF));
+   END;
+@end example
+
+The message is only issued if the identifier is defined but
+does not have a scope property.
+
+(The @code{Strings} module is used
+to compose the message text 
+(@pxref{Strings, , String Concatenation, problems, Solutions of common problems}).)
+
+@comment =====================================
+@node CScopeProp, BuScopeProp, ScopeProp, Scope Properties
+@findex Module @code{CScopeProp}
+@section Scope Properties C-like
+
+This module implements consistent renaming of identifiers
+using scopes which are properties associated to object keys.
+The module computations establish bindings, lookup names,
+associate scope properties, and lookup qualified names
+in left-to-right depth-first order. 
+It imposes the strong requirement that a
+qualified name, for example the @code{f} in @code{m.f},
+may not precede its definition.
+
+It is recommended to use this module only if it is needed as
+a companion of the module @code{CInh}. Otherwise @code{ScopeProp}
+should be used (@pxref{Scope Properties}).
+
+The module is instantiated by
+@example
+   $/Name/CScopeProp.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the module @code{CScope} is instantiated
+with the same values of the generic parameters.
+
+@findex ExportRange
+@findex QualIdUse
+The module provides a @code{PDL} property named @code{NAMEScope}
+and the computational roles 
+@code{NAMEExportRange},
+@code{NAMEQualIdUse}, and @code{NAMEChkQualIdUse} as
+described in @pxref{ScopeProp}.
+
+All computations of this module follow strictly C-like scope rules,
+i.e.@: binding of identifier occurrences, association of scope properties,
+and access of scope properties are done in left-to-right 
+depth-first order.
+
+@findex GetScope
+@findex attribute GotScopeProp
+Calls of @code{GetNAMEScope} in a user computation
+do not need a specific precondition if they depend on a key attribute
+of a context which is to the right of the context where the
+property is set. That is usually true for situations where
+the module role @code{NAMEQualIdUse} is used.
+Only if a particular computation is to depend on the fact that
+all scope properties of the program are associated,
+it may depend on @code{INCLUDING NAMERootScope.NAMEGotScopeProp}.
+
+@comment =====================================
+@node BuScopeProp, , CScopeProp, Scope Properties
+@findex Module @code{BuScopeProp}
+@findex bottom-up
+@section Scope Properties C-like Bottom-Up
+
+This module implements consistent renaming of identifiers
+using scopes which are properties associated to object keys.
+The module computations ensure that scope properties are associated
+and accessed in left-to-right depth-first order.
+It imposes the strong requirement that a
+qualified name, for example the @code{f} in @code{m.f},
+may not precede its definition.
+
+It is recommended to use this module only if qualified identifiers
+have to be bound in the bottom-up phase, or if the module is needed as
+a companion of the module @code{BuInh}. Otherwise @code{ScopeProp}
+should be used (@pxref{Scope Properties}).
+
+The computations provided by this module are 
+executed while reading the input.
+
+The module is instantiated by
+@example
+   $/Name/BuScopeProp.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the module @code{BuScope} is instantiated
+with the same values of the generic parameters.
+
+The module provides a @code{PDL} property named @code{NAMEScope}
+and the computational roles 
+@* @code{NAMEIdSetScopeProp},
+@code{NAMEIdGetScopeProp}, and @code{NAMEQualIdUse}.
+A role 
+@* @code{NAMERangeScopeProp} is NOT provided;
+@code{NAMERangeScope} has to be used instead.
+
+Note: The role names of the module @code{ScopeProp} as 
+@code{NAMEExportRange}, @code{QualIdUse} and @code{ChkQualIdUse}
+do not apply here.
+
+All computations of this module follow strictly C-like scope rules,
+i.e.@: binding of identifier occurrences, association of scope properties,
+and access of scope properties are done in left-to-right
+depth-first order.
+
+@findex CreateNewScope
+@findex OpenNewScope
+@findex IdSetScopeProp
+@findex OpenPrecond
+@findex attribute OpenPrecond
+As a consequence of bottom-up computation the value of a key can
+not be propagated by an upper computation to the range symbol.
+Hence, if the defining identifier occurrence precedes the range,
+the scope has to be created by the role @code{NAMECreateNewScope}
+(@pxref{BuScope}) and associated to the key in the identifier context
+using the role @code{NAMEIdSetScopeProp}.
+
+The role that opens the range scope (@code{NAMEOpenNewScope},
+@pxref{BuScope}) may also be associated to that identifier context,
+avoiding an additional symbol that derives to empty.
+
+The range symbol has the role @code{NAMERangeScope}.
+
+The module declaration of our example then reads:
+@example
+   RULE: Declaration ::= 'module' ModDefIdent Block ';' END;
+
+   SYMBOL ModDefIdent INHERITS
+          CreateNewScope, OpenNewScope, IdSetScopeProp,
+          IdDefScope, IdentOcc
+   COMPUTE
+     SYNT.OpenPrecond = SYNT.Key;
+   END;
+@end example
+
+@code{NAMEOpenPrecond} is specified to depend on the key attribute
+to ensure that the identifier is bound in the enclosing environment
+before the environment of the module range is opened.
+
+@findex GetScopeProp
+@findex QualIdUse
+@findex ScopeKey
+@findex attribute ScopeKey
+In component selections the scope property needs to be propagated
+from the context that provides it to the selector context.
+The module role @code{NAMEGetScopeProp} accesses the scope
+from the key specified by @code{KEYScopeKey} and assigns 
+it to a variable. It is used at the selector context right of it
+by the role @code{NAMEQualIdUse}.
+
+Hence, in our running example the selection is specified
+as follows:
+
+@example
+   RULE: Expression  ::= ModUseIdent '::' QualIdent END;
+
+   SYMBOL ModUseIdent INHERITS 
+          GetScopeProp, IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.ScopeKey = THIS.Key;
+   END;
+
+   SYMBOL QualIdent   INHERITS 
+          QualIdUse, ChkIdUse, IdentOcc
+   END;
+@end example
+@noindent
+
+If we had a typed record expression instead of the module identifier
+to select from, @code{ScopeKey} would be set to the type key
+instead of the module key.
+
+@comment =====================================
+@node Inheritance of Scopes, Name Analysis Test, Scope Properties, top
+@findex inheritance of scopes
+@chapter Inheritance of Scopes
+
+The basic scope rule concepts are described by hierarchically nested
+environments which reflect the structure of nested ranges in a program.
+Using scopes as properties of objects, as described in 
+@xref{Scope Properties},
+allows to export a scope with bindings from a range, propagate them by a 
+property, and bind single identifiers that occur outside of the range
+where the binding is established,
+e.g.@: a component identifier that is qualified by a module name.
+
+In this section we further extend that concept such that scope rules
+for language constructs like @code{with} statements of Pascal,
+@code{use} qualifications of Ada, or inheritance of classes as in
+object-oriented languages can be specified.
+All these constructs allow that non-qualified identifier occurrences
+may be bound to definitions contained in surrounding ranges or to definitions
+of scopes that are inherited by a surrounding range, for example
+@example
+  module m @{ int i; float f() @{...@} @}
+  @{ float g;
+    with m 
+      @{ int i; g = f();@}
+  @}
+@end example
+
+The new concept is described by an inheritance relation between scopes
+that is used when applied identifier occurrences in a range are bound
+to definitions. In the above example the range of the @code{with}-statement
+inherits the scope of the module @code{m} and is embedded in the
+surrounding range.
+
+Name analysis computations for such constructs rely on several different
+operations: scopes being created, bindings in a scope being established, 
+scope properties being set, inheritance relations between scopes
+being established. The propagation of scope properties
+is not limited to strictly nested structures. Hence, the dependencies
+between the computations are rather sophisticated.
+That is why the combination of modules is restricted.
+
+There are three modules that provide computations for the
+consistent renaming task based on inheritance. They rely on the
+use of the corresponding modules for basic scope rules and for
+scope properties:
+
+@menu
+* AlgInh::    Inheritance with Algol-like Scope Rules (recommended to be used in general)
+* CInh::      Inheritance with C-like Scope Rules
+* BuInh::     Inheritance computed while processing input
+@end menu
+@iftex
+@table @code
+@item AlgInh
+Inheritance with Algol-like Scope Rules (recommended to be used in general)
+@item CInh
+Inheritance with C-like Scope Rules
+@item BuInh
+Inheritance computed while processing input
+@end table
+@end iftex
+
+Using one of these modules requires that the corresponding
+basic scope rule module and a suitable scope property module is instantiated 
+with the same generic parameters
+@code{+instance=NAME} and @code{+referto=KEY}.
+
+Each of the three modules implements consistent renaming of identifiers.   
+Identifier occurrences are bound to object keys of type @code{DefTableKey}
+according to the following inheritance rule:
+
+An inheritance relation between scopes is introduced:
+A scope @code{c1} may inherit the bindings of a scope @code{c2}, i.e.@:
+a definition of @code{c2} is inherited by @code{c1} unless it is
+hidden by another definition of the same identifier in @code{c1}.
+A scope may inherit from several scopes (multiple inheritance).
+The inheritance relation is transitive and must be acyclic.
+
+Together with the nesting of ranges the following general scope rule
+is applied:
+
+An applied occurrence of an identifier @code{a} is bound to a definition
+of @code{a} which is contained in or inherited by the smallest
+enclosing range. 
+
+Definitions contained in a range hide definitions
+inherited (directly or indirectly) by that range.
+
+Definitions inherited by a range hide definitions of enclosing
+ranges.
+
+Using multiple inheritance a scope @code{c1} may inherit from
+a scope @code{c2} and from @code{c3}, where @code{c2} also
+inherits from @code{c3}. If both @code{c2} and @code{c3} define
+an identifier @code{a}, then the definition of @code{a} in @code{c3}
+is hidden by that of @code{c2}. This holds for
+@code{c1}, too, although there is an inheritance path from @code{c3}
+to @code{c1} that does not pass @code{c2}.
+
+If several definitions of an identifier @code{a} are inherited
+via different unrelated inheritance paths, the applied occurrence
+is bound to an arbitrary one of them.
+This module provides a means to detect that situation, in order
+to issue an error message or to access all those definitions,
+depending on the requirements of the particular language.
+
+@findex IdUseEnv
+@findex IdUseScope
+@findex QualIdUse
+If the computations of this module are used to establish inheritance
+relations, then the computations of identifier roles, like
+@code{NAMEIdUseEnv}, @code{NAMEIdUseScope}, and @code{NAMEQualIdUse}
+are modified such that inheritance relations are considered 
+when bindings are looked up.
+
+The modules provide @code{.lido} specifications for the following
+computational roles:
+
+@findex InhRange
+@findex property Scope
+@findex Scope
+@findex attribute InheritOk
+@findex InheritOk
+@code{NAMEInhRange}
+is a range that may inherit scopes exported form other ranges, but does not
+export its own scope. This role is, for example, applied to @code{with}-statements.
+The role @code{NAMEInheritScope} (see below) is used to establish
+the inheritance relations. No distinction is made whether one or more
+scopes can be inherited.
+A user computation for the @code{VOID} attribute @code{NAMEInhRange.NAMEGotInh} 
+has to be provided in upper or lower computation, such that it states
+the condition that all those inheritances are done. Usually the attributes
+@code{NAMEInheritScope.NAMEInheritOk} are used for that purpose.
+
+@code{NAMEExportInhRange}
+is both an @code{NAMEExportRange} and a @code{NAMEInhRange}, i.e. it inherits
+scopes and exports its own scope. This role is, for example, applied to 
+bodies of class declarations.
+It is essential to use this role, instead of inheriting both roles,
+@code{NAMEExportRange} and @code{NAMEInhRange}, to one grammar symbol;
+otherwise the dependences provided by the two roles could cause conflicts.
+
+@findex InheritScope
+@findex attribute InnerScope
+@findex attribute OuterScope
+@findex attribute InheritOk
+@findex attribute ScopeKey
+@findex ScopeKey
+@findex InnerScope
+@findex OuterScope
+@findex InheritOk
+@findex InheritClass
+@code{NAMEInheritScope} is used to establish one inheritance relation
+between two scopes: @code{THIS.NAMEInnerScope} is stated to inherit
+from @code{THIS.NAMEOuterScope}, both of type @code{Environment}. 
+@code{THIS.NAMEInnerScope} has to be set by a user computation, either
+in upper or lower context. Another user computation is required
+to set @code{THIS.NAMEScopeKey} in in upper or lower context.
+A provided computation obtains the @code{NAMEScope property} from it
+and sets @code{SYNT.NAMEOuterScope}. The inheritance relation is
+established by a call of the function @code{NAMEInheritClass} provided
+by the environment module.
+The attribute @code{SYNT.NAMEInheritOk} is set to 1 iff the 
+inheritance relation is legal, i.e. both scopes exist and belong to the 
+same environment hierarchy, in the outer scope bindings have not been 
+looked up before, and this inheritance does not establish a cyclic
+inheritance relation.
+
+@findex ChkInherit
+@code{NAMEChkInhinherit} can be used to issue error messages at a
+@code{NAMEInheritScope} node.
+If the outer scope does not exist, then the attribute
+@code{NAMEInheritScope.SrcErr} has the value 1 and a message is issued by
+the computation:
+
+@example
+SYNT.SrcMsg=
+  IF(THIS.SrcErr,
+    message (ERROR, "Source of inheritance is missing", 0, COORDREF));
+@end example
+
+If the stated inheritance is invalid, then the attribute
+@code{NAMEInheritScope.ScpErr} has the value 1 and a message is issued by
+the computation:
+
+@example
+SYNT.InhMsg=
+  IF(THIS.InhErr,
+    message (ERROR, "Wrong scope inherited", 0, COORDREF));
+@end example
+
+@findex ChkInhIdUse
+@findex ChkInhQualIdUse
+@code{NAMEChkInhIdUse} and @code{NAMEChkInhQuaIdUse}
+are roles to be associated to an applied identifier occurrence.
+If several definitions of the identifier are inherited on different
+unrelated inheritance paths, then the attribute
+@code{NAMEChkInhIdUse.MulErr} (or @code{NAMEChkInhQuaIdUse.MulErr})
+has the value 1 and a message is issued by the computation:
+
+@example
+SYNT.MulMsg=
+  IF(THIS.MulErr,
+    message (ERROR,
+      CatStrInd(
+        "Several definitions are inherited for: ",
+	IdnOf(THIS.|KEY|Bind)),
+      0, COORDREF));
+@end example
+
+@code{NAMEChkInhIdUse} may be used together with @code{NAMEIdUseEnv}
+or @code{NAMEIdUseScope};
+@code{NAMEChkInhQualIdUse} may be used together with 
+@code{NAMEQualIdUse}.
+
+We demonstrate the use of inheritance by extending our 
+running example by a @code{with} statement for modules
+(@pxref{Scope Properties}).
+
+@example
+   Statement:    'with' WithClause 'do' WithBody.
+   WithClause:   ModUseIdent.
+   WithBody:     Statement.
+@end example
+
+The identifier should be bound to a module. The @code{WithBody}
+inherits the module's scope. I.e.@: the definitions of the module
+body are valid in the @code{WithBody}. They may be hidden by definitions
+in ranges contained in the @code{WithBody}. They may hide definitions
+in ranges enclosing the @code{with} statement.
+Hence, the @code{WithBody} plays the role of a @code{InhRange}
+and its scope is the target of the inheritance relation.
+(The @code{WithBody} does not export its bindings.)
+The module's scope property is its source:
+
+@example
+   SYMBOL WithBody INHERITS InhRange END;
+   SYMBOL WithClause INHERITS InheritScope, ChkInherit END;
+
+   RULE: Statement ::= 'with' WithClause 'do' WithBody COMPUTE
+     WithClause.InnerScope = WithBody.Env;
+     WithBody.GotInh = WithClause.InheritOk;
+   END;
+
+   RULE: WithClause ::= ModUseIdent COMPUTE
+     WithClause.ScopeKey = ModUseIdent.Key;
+   END;
+@end example
+
+Note: In this example the @code{WithClause} can only be a simple
+identifier, @code{ModUseIdent}. If a typed expression would be
+allowed there instead, as in Pascal, the scope property would be
+associated to and obtained from type keys.
+
+Similarly we can extend the language of our running example by
+classes with multiple inheritance:
+
+@example
+   Declaration:   'class' DefIdent Inheritances ClassBlock ';'.
+   ClassBlock:    Compound.
+   Inheritances:  Inheritance*.
+   Inheritance:   ':' InheritIdent.
+   InheritIdent:  Ident.
+@end example
+
+A declaration of a class exports the bindings of the class body,
+like the declaration of a module (@pxref{Scope Properties}).
+Additionally other classes may be inherited by a class, i.e.@:
+their definitions are valid within the class body, if not
+hidden by inner definitions. The inherited definitions may hide
+definitions in ranges the class declaration is contained in.
+Hence, the scope of the class body is the target of
+all @code{Inheritances}, their sources are given by the scope
+property associated to the classes identified in the @code{Inheritances}.
+
+@example
+   SYMBOL ClassBlock INHERITS ExportRange, InhRange END;
+
+   RULE: Declaration ::= 'class' DefIdent Inheritances ClassBlock ';'
+   COMPUTE
+     ClassBlock.ScopeKey = DefIdent.Key;
+     ClassBlock.GotInh = 
+        Inheritances CONSTITUENTS InheritIdent.InheritOk;
+     Inheritances.InnerScope = ClassBlock.Env;
+   END;
+
+   SYMBOL Inheritances:  InnerScope: Environment;
+
+   SYMBOL InheritIdent INHERITS 
+          InheritScope, ChkInherit, IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.InnerScope = INCLUDING Inheritances.InnerScope;
+     SYNT.Scopekey = THIS.KeyK;
+   END;
+@end example
+
+Note: In this example the inherited classes are determined by an unqualified
+identifier each, @code{InheritIdent}. 
+In case of Algol-like scope rules that can not be extended to qualified
+identifiers, because of the dependence pattern used by the  @code{AlgInh} module.
+It would cause cyclic attribute dependences, in general.
+
+Languages (like C++) allow that different definitions of an
+identifier may be inherited on different inheritance paths
+to a range. But in that case such an identifier may not be applied
+in that range.
+This restriction is checked by the roles @code{ChkInhIdUse} and
+@code{ChkInhIdUseScopeProp}. They have to be associated to
+applied identifier symbols which are bound in the enclosing
+environment or in the scope obtained from a property,
+respectively:
+@example
+   SYMBOL UseIdent INHERITS ChkInhIdUse END;
+   SYMBOL QualIdent INHERITS ChkInhIdUseScopeProp END;
+@end example
+
+The error messages can be changed globally by symbol computations
+overriding the computations of the @code{...Msg} attributes:
+@example
+   SYMBOL UseIdent COMPUTE
+     SYNT.MulMsg=IF(THIS.MulErr,message (ERROR,
+      CatStrInd("Ambiguous symbol: ", IdnOf(THIS.|KEY|Bind)),
+      0, COORDREF));
+   END;
+@end example
+
+The above specification also fits to the specification
+for identifiers that are qualified by a module name given in 
+(@pxref{Scope Properties}).
+If in a construct @code{c::x} @code{c} is a class, then
+@code{x} is bound to a component defined in @code{c} or in a
+class inherited by @code{c}. This is the concept of the
+scope operator in C++.
+
+These examples are applied in the same way for Algol-like and for
+C-like scope rules. The differences for bottom-up computation
+are explained in the description of the @code{BuInh} module.
+
+@comment =====================================
+@node AlgInh, CInh, , Inheritance of Scopes
+@findex inheritance
+@findex Module @code{AlgInh}
+@section Inheritance with Algol-like Scope Rules
+
+This module implements consistent renaming of identifiers
+according to inheritance relations. It assumes that the scope rules
+do not restrict defining and applied occurrences of identifiers
+by a certain order in the program text, as the C-like scope rules do.
+The module computation in particular fit to Algol-like scope rules
+as described in @xref{Inheritance of Scopes}.
+
+The module is instantiated by
+@example
+   $/Name/AlgInh.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the modules @code{AlgScope} 
+and @code{ScopeProp} are instantiated   
+with the same values of the generic parameters.
+
+@findex InhRange
+@findex ExportInhRange
+@findex InheritScope
+@findex ChkInherit
+@findex ChkInhIdUse
+@findex ChkInhIdUseScopeProp
+@findex QualIdUse
+The module provides @code{.lido} specifications for the 
+computational roles @code{NAMEInhRange}, @code{NAMEExportInhRange},
+@code{NAMEInheritScope}, @code{NAMEChkInherit},
+@code{NAMEChkInhIdUse} and @code{NAMEChkInhIdUseScopeProp}
+as described in @xref{Inheritance of Scopes}.
+
+The dependence pattern used in the computations of this module, as
+described below, imposes a restriction on the use of the role 
+@code{NAMEInheritScope}, that determines an inheritance:
+In case that the inheritance is established for a @code{NAMEExportInhRange},
+the corresponding
+@code{NAMEInheritScope} may not depend on a qualified name that is bound using 
+the role @code{NAMEQualIdUse}, because the computations then may cause cyclic 
+dependences.
+
+@findex GotVisibleKeys
+@findex attribute GotVisibleKeys
+@findex GotVisibleKeysNest
+@findex attribute GotVisibleKeysNest
+@findex ExportRange
+Computations of the module provide attributes @code{NAMEAnyScope.NAMEGotVisibleKeys}.
+They describe that for all @code{NAMEExportRange}s visible from this range
+its keys have been bound, the scope property has been set, and its
+inheritance relation has been established (if any).
+Module computations use these attributes as precondition for the lookup
+of unqualified names.
+Computations of the module also provide attributes 
+@code{NAMEAnyScope.NAMEGotVisibleKeysNest}. They specify that the state described 
+above additionally holds for the visible and their recursively, directly
+nested @code{NAMEExportRange}s. 
+Module computations use these attributes as precondition for the lookup
+of qualified names.
+Usually these attributes and their dependence patterns need not be considered
+by user specifications. Only is cases where unconventional language rules
+for the export or the inheritance of bindings cause conflicts with
+these dependence patterns the computations of these attributes may be considered
+for being overridden.
+
+@comment =====================================
+@node CInh, BuInh, AlgInh, Inheritance of Scopes
+@findex inheritance
+@findex Module @code{CInh}
+@section Inheritance with C-like Scope Rules
+
+This module implements consistent renaming of identifiers
+according to inheritance relations 
+as described in @xref{Inheritance of Scopes}.
+However, the module computations establish bindings, lookup names,
+associate scope properties, establish inheritance relations, and
+lookup qualified names in left-to-right depth-first order. 
+It imposes the strong requirement that a
+qualified name, for example the @code{f} in @code{m.f},
+may not precede its definition.
+
+The module is instantiated by
+@example
+   $/Name/CInh.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the modules @code{CScope} 
+and @code{CScopeProp} are instantiated   
+with the same values of the generic parameters.
+
+The use of this module enforces the requirement that
+for any kind of identifier occurrence strictly hold that
+the definition precedes its uses.
+
+@findex InhRange
+@findex ExportInhRange
+@findex InheritScope
+@findex ChkInherit
+@findex ChkInhIdUse
+@findex ChkInhIdUseScopeProp
+@findex QualIdUse
+The module provides @code{.lido} specifications for the 
+computational roles @code{NAMEInhRange}, @code{NAMEExportInhRange},
+@code{NAMEInheritScope}, @code{NAMEChkInherit},
+@code{NAMEChkInhIdUse} and @code{NAMEChkInhIdUseScopeProp}
+as described in @xref{Inheritance of Scopes}.
+
+This module uses a strict left-to-right depth-first dependence
+pattern for all its attribute computations.
+@findex GotInhScopes
+@findex attribute GotInhScopes
+The attribute @code{NAMERootScope.NAMEGotInhScopes} states that
+all inheritance relations are established for the whole tree.
+
+@comment =====================================
+@node BuInh, , CInh, Inheritance of Scopes
+@findex C-like inheritance bottom-up
+@findex Module @code{BuInh}
+@findex bottom-up
+@section C-like Inheritance Bottom-Up
+
+This module implements consistent renaming of identifiers
+according to inheritance relations based on C-like scope rules.
+The computations can be executed while input is read.
+
+The module is instantiated by
+@example
+   $/Name/BuInh.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+
+Using this module requires that the modules @code{BuScope} 
+and @code{BuScopeProp} are instantiated   
+with the same values of the generic parameters.
+
+The use of this module enforces the requirement that
+for any kind of identifier occurrence strictly hold that
+the definition precedes its uses.
+
+@findex RangeScope
+@findex InheritScope
+@findex ChkInherit
+@findex ChkInhIdUse
+@findex ChkInhIdUseScopeProp
+The module provides @code{.lido} specifications for the
+computational roles 
+@code{NAMEInheritScope}, @code{NAMEChkInherit}
+@code{NAMEChkInhIdUse} and @code{NAMEChkInhIdUseScopeProp}
+as described in @xref{Inheritance of Scopes}.
+No additional range role (as @code{NAMEInhRange} or @code{NAMEExportInhRange})
+is provided by this module.
+The role @code{NAMERangeScope} of the basic scope rule module
+is to be used for ranges that are affected by inheritance, too.
+
+@findex InheritScope
+@findex CreateNewScope
+@findex InhPrecond
+@findex attribute InhPrecond
+@findex NewScope
+@findex attribute NewScope
+The role @code{NAMEInheritScope} differs from the description
+in @xref{Inheritance of Scopes}:
+
+The target scope for the inheritance relation is assumed to be
+computed by the role 
+@* @code{NAMECreateNewScope} in this context
+or in a preceding context. It is passed via a variable.
+If @code{NAMECreateNewScope} and @code{NAMEInheritScope}
+are used in the same context, a computation
+@code{SYNT.NAMEInhPrecond = THIS.NAMENewScope;} has to be
+added, in order to guarantee proper use of the variable.
+
+A lower computation of @code{SYNT.NAMEOuterScope} is
+required for this context.
+
+The examples given in @xref{Inheritance of Scopes} are modified
+here to allow for bottom-up computation using this module.
+
+We demonstrate the use of single inheritance by extending our 
+running example by a @code{with} statement for modules
+(@pxref{Scope Properties}).
+
+@example
+   Statement:    'with' WithUseIdent 'do' WithBody.
+   WithBody:     Statement.
+@end example
+
+The identifier should be bound to a module. The @code{WithBody}
+inherits the module's scope. I.e.@: the definitions of the module
+body are valid in the @code{WithBody}. They may be hidden by definitions
+in ranges contained in the @code{WithBody}. They may hide definitions
+in ranges enclosing the @code{with} statement.
+@code{WithBody} plays the role of a @code{RangeScope}.
+In the preceding @code{WithUseIdent} context the scope is
+created and determined to be target of an inheritance relation.
+The scope property of the module key is stated to be
+the outer scope of the inheritance relation.
+
+@example
+   RULE: Statement ::= 'with' WithUseIdent 'do' WithBody END;
+
+   SYMBOL WithBody INHERITS RangeScope END;
+
+   SYMBOL WithUseIdent INHERITS
+          GetScopeProp, CreateNewScope, InheritScope, 
+          OpenNewScope, IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.ScopeKey = SYNT.Key;
+     SYNT.OuterScope = SYNT.ScopeProp;
+     SYNT.OpenPrecond = SYNT.Key;
+   END;
+@end example
+
+Similarly we can extend the language of our running example by
+classes with multiple inheritance:
+
+The scope of the class body is created in the context
+@code{ClassDefIdent}, associated a property of the class identifier,
+and used as a target for the inheritance relations established
+in all @code{Inheritances}.
+The roles @code{RecentNewScope} and @code{OpenNewScope} in the
+newly introduced context @code{BuClass} access and open
+that scope.
+@findex RecentNewScope
+
+@example
+   RULE: Declaration ::= 'class' ClassDefIdent Inheritances 
+                                 BuClass ClassBlock ';'
+   END;
+
+   SYMBOL ClassDefIdent INHERITS
+          CreateNewScope, IdSetScopeProp, IdDefScope, IdentOcc
+   END;
+
+   SYMBOL BuClass INHERITS RecentNewScope, OpenNewScope END;
+@end example
+
+In the @code{InheritIdent} contexts the scope property of
+the identifier is accessed and determined to be the outer
+scope to be inherited to the previously created scope.
+
+@example
+   SYMBOL InheritIdent INHERITS
+          GetScopeProp, InheritScope, 
+          IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.ScopeKey = SYNT.Key;
+     SYNT.OuterScope = SYNT.ScopeProp;
+
+     IF (AND (NOT (THIS.InheritOk), NE (THIS.Key, NoKey)),
+     message (FATAL, CatStrInd ("cyclic inheritance: ", THIS.Sym),
+              0, COORDREF))
+     BOTTOMUP;
+   END;
+@end example
+
+The above specification also fits to the specification
+for identifiers that are qualified by a module name given in 
+(@pxref{Scope Properties}).
+If in a construct @code{c::x} @code{c} is a class, then
+@code{x} is bound to a component defined in @code{c} or in a
+class inherited by @code{c}. This is the concept of the
+scope operator in C++.
+
+@comment =====================================
+@node Name Analysis Test, Environment Module, Inheritance of Scopes, top
+@findex Module @code{ShowBinding}
+@findex test output
+@chapter Name Analysis Test
+
+This module augments the specified processor such that it
+produces output that makes the results of name analysis visible.
+For each identifier occurrence that has one of the identifier
+roles of the name analysis modules a line of the form
+@example
+   m in line 23 bound in line 4 of scope in line 3
+@end example
+@noindent
+is written to the standard output file.
+The first line number is that of the identifier occurrence,
+the second states where its binding was established by a defining
+occurrence, and the third where the scope of the binding
+has been created, i.e. usually the begin of the range.
+For unbound identifier occurrences a line of the form
+@example
+   m unbound in line 35
+@end example
+@noindent
+is written.
+The output is produced in left to right order of the
+identifier occurrence, independent of the order in which
+the bindings are found. The computations for producing that
+output are scheduled after the bindings are computed
+at all identifier occurrences, in order to avoid problems
+of evaluation order scheduling.
+
+The output of the processors specified in @code{$/Name/Examples}
+is produced by using this module.
+
+To achieve the effect of this module it is simply instantiated.
+No inheritance of any roles is necessary.
+
+The module is instantiated by
+@example
+   $/Name/ShowBinding.gnrc+instance=NAME :inst
+@end example
+@noindent
+The instance parameter must have the same value as that
+of the instantiation of the basic name analysis module,
+i.e. @code{AlgScope}, @code{CScope}, or @code{BuScope}.
+Several instances may be used for testing the bindings
+in different name spaces.
+Unfortunately, this module is NOT usable if the name analysis module
+is instantiated with a referto parameter that modifies the
+key attribute name.
+
+The module makes use of the facility to associate a @code{DefTableKey}
+to scopes: for each 
+@* @code{NAMERangeScope} a new key, and for each
+@code{NAMERangeScopeProp} its @code{ScopeKey}.
+@* @code{NAMERootScope.NAMEGotEnvKey} indicates that all those
+keys are associated.
+If that facility is also used independent of the @code{ShowBinding}
+module, the computations of @code{NAMERangeScope.NAMEGotEnvKey}
+and 
+@* @code{NAMERangeScopeProp.NAMEGotPropEnvKey} have to be
+overridden to avoid interference with the intended computations.
+
+@findex Line
+@findex property Line
+The module associates a property named @code{NAMELine} to each
+identifier key, and to each key of a scope. 
+Its value is the line number where the
+binding is established. An instance of the @code{NAMESetFirst}
+module is used for that purpose.
+Line number 0 is shown for definitions of identifiers and for
+scopes if they are not established by roles of name analysis
+modules. That holds in particular for predefined identifiers and
+for the root environment.
+
+@comment =====================================
+@node Environment Module, , Name Analysis Test, top
+@chapter Environment Module
+
+@findex Environment Module
+@findex Module envmod
+@findex scope
+@findex binding
+This module implements a standard contour model for name analysis.  The
+data structure is a tree of @dfn{scopes}, each of which can contain an
+arbitrary number of definitions.  A definition is a binding of an
+identifier to an object in the definition table 
+(@pxref{top,PDL Reference Manual,,deftbl,PDL Reference Manual}).
+For an identifier @code{idn} and a scope @code{sc}
+there is at most one binding in @code{sc}.
+
+@findex inheritance
+The environment module provides operations for
+building scope trees, adding definitions to specific scopes, and
+searching individual scopes or sequences of scopes for the binding of
+a particular identifier. Inheritance relations can be established
+between scopes to support object-oriented name analysis.
+
+@findex name spaces
+The module is capable of building multiple trees of scopes
+in order to model distinct name spaces, such that bindings
+in one tree do not effect the lookup in another tree.
+
+The module places no constraints on the sequence of construction, 
+definition and lookup operations; there is one exception: an
+inheritance relation may not be established for a scope that
+has already been involved in a lookup operation.
+
+The module implements certain lookup operations such that
+linear search through several scopes is avoided in order to
+reduce the amortized asymptotic cost of name analysis.
+This effect on efficiency can be lost if the sequence of
+those lookup operations arbitrarily often switches the
+scopes they are applied to.
+
+The modules described in the Name Analysis Library
+(@pxref{top,,Name Analysis,name,Specification Module Library: Name Analysis})
+provide solutions for common name analysis tasks based on this
+environment module. 
+If they are used the interface of this 
+module is available for use in @code{.lido} specifications;
+otherwise the interface is made available by adding
+@findex envmod
+@code{$/Name/envmod.specs} to the processor specification.
+In C modules the interface of the environment module is introduced
+by @code{#include "envmod.h"}.
+
+@menu
+* Types::		Exported types and values
+* Constructors::	Operations to build the scope tree
+* Inheritance::		Operations to establish inheritance
+* Bindings::		Operations to establish bindings
+* Lookup::		Operations to find bindings
+* Hidden::		Operations to find additional bindings
+* Queries::		Operations to examine environments
+@end menu
+
+@node Types
+@section Exported types and values
+
+The following types and constant values are provided to represent name
+analysis data:
+
+@findex Environment
+@findex type Environment
+@table @code
+@item Environment
+A pointer to a node in the tree of scopes.
+It is used either to refer to a single scope, or
+to refer to a scope and all the scopes that are visible from it
+(i.e. its ancestors in the tree and the scopes that are inherited 
+by each).
+
+@findex NoEnv
+@item NoEnv
+A constant of type @code{Environment} that represents no environment.
+
+@findex Binding
+@findex type Binding
+@item Binding
+A pointer to a triple
+@code{(int idn, Environment sc, DefTableKey key)} 
+that represents the binding
+of the identifier @code{idn}
+in the scope pointed to by @code{sc}
+to the entity @code{key}.
+
+@findex NoBinding
+@item NoBinding
+A constant of type @code{Binding} that represents no binding.
+
+@findex InheritPtr
+@findex type InheritPtr
+@item InheritPtr
+An opaque type used to traverse inheritance relations.
+
+@findex NoInherit
+@item NoInherit
+A constant of type @code{InheritPtr} that indicates the end of an
+inheritance traversal.
+@end table
+
+@node Constructors
+@section Operations to build the scope tree
+
+The following operations are provided for constructing the 
+tree of scopes:
+
+@findex NewEnv
+@table @code
+@item Environment NewEnv ()
+A function that creates a new tree consisting of a single, empty scope and
+returns a reference to that empty scope.  
+
+@findex NewScope
+@item Environment NewScope (Environment env)
+A function that creates a new empty scope as a child of the scope
+pointed to by @code{env} and returns a reference to that empty scope.
+@end table
+
+@node Inheritance
+@section Operations to establish inheritance
+
+An inheritance relation from scope @code{fromcl} to scope @code{tocl} means
+that the scope @code{tocl} inherits the bindings of the scope
+@code{fromcl}.
+The following operations are provided to establish and to check
+inheritance relations:
+
+@findex InheritClass
+@findex function InheritClass
+@table @code
+@item int InheritClass (Environment tocl, Environment fromcl)
+A function that establishes an inheritance relation
+from the scope @code{fromcl} to the scope @code{tocl}
+if and only if
+
+@itemize @bullet
+@item
+@code{tocl} and @code{fromcl} are different scopes in the same tree of scopes
+
+@item
+the graph of inheritance relations remains acyclic when adding the relation
+
+@item
+the scope @code{tocl} has not yet been involved in a lookup for a binding.
+@end itemize
+
+@code{InheritClass} returns 1 if the inheritance relation
+could be established; otherwise it returns 0.
+
+@findex Inheritsfrom
+@findex function Inheritsfrom
+@item int Inheritsfrom (Environment tocl, Environment fromcl)
+A function that returns 1 if @code{tocl} and @code{fromcl} are the same scopes,
+or if there is a direct or indirect inheritance relation from
+the scope @code{fromcl} to the scope @code{tocl}.
+Otherwise @code{Inheritsfrom} returns 0.
+After a call of @code{Inheritsfrom}, no further inheritance relation
+can be established for @code{tocl} or @code{fromcl}.
+@end table
+
+@node Bindings
+@section Operations to establish bindings
+
+The following operations are provided to establish a binding
+within a scope:
+
+@findex BindKey
+@findex function BindKey
+@table @code
+@item Binding BindKey (Environment env, int idn, DefTableKey key)
+A function that checks the scope referenced by its @code{env} argument for a
+binding of the identifier specified by its @code{idn} argument.  
+If no such binding is found, a binding of the identifier @code{idn}
+to the definition table object specified by @code{key} is added to scope
+@code{env}. @code{BindKey} returns the value @code{NoBinding}
+if a binding already exists, and returns the new binding otherwise.
+
+@findex AddIdn
+@findex function AddIdn
+@item int AddIdn (Environment env, int idn, DefTableKey key)
+A macro that calls @code{BindKey}.
+@code{AddIdn} returns the value @code{0} if @code{BindKey} returns
+@code{NoBinding}, and returns @code{1} otherwise.
+
+@findex BindKeyInScope
+@findex function BindKeyInScope
+@item Binding BindKeyInScope (Environment env, int idn, DefTableKey key)
+A function that has the same effect as @code{BindKey}.
+@code{BindKeyInScope} should be used for efficiency reasons
+if bindings are established in several different scopes before
+lookups are performed in them.
+
+@findex BindIdn
+@findex function BindIdn
+@item Binding BindIdn (Environment env, int idn)
+A function that checks the scope referenced by its @code{env} argument for a
+binding of the identifier specified by its @code{idn} argument.  
+If no such binding is found,
+@code{BindIdn} obtains a value from @code{NewKey()} and 
+binds @code{idn} to that value in scope @code{env}.  
+@code{BindIdn} returns the 
+the binding associated with @code{idn}.
+
+@findex DefineIdn
+@findex function DefineIdn
+@item DefTableKey DefineIdn (Environment env, int idn)
+A macro that calls @code{BindIdn} and returns the key of the binding
+returned by @code{BindIdn}.
+
+@findex BindInScope
+@findex function BindInScope
+@item Binding BindInScope (Environment env, int idn)
+A function that has the same effect as @code{BindIdn}.
+@code{BindInScope} should be used for efficiency reasons
+if bindings are established in several different scopes before
+lookups are performed in them.
+@end table
+
+These operations are very similar, but they differ in two aspects:
+
+@itemize @bullet
+@item
+The key for the new binding is given as an argument
+(@code{BindKey}, @code{AddIdn}, @code{BindKeyInScope}), or a
+new key is created for the new binding (@code{BindIdn}, @code{DefineIdn},
+@code{BindInScope}).
+
+@item
+Functions that should be preferred for efficiency reasons
+if several operations on one scope occur in sequence
+(@code{BindKey}, @code{AddIdn}, @code{BindIdn}, @code{DefineIdn}),
+or if scopes are arbitrarily switched between operations
+(@code{BindKeyInScope}, @code{BindInScope}).
+@end itemize
+
+@code{DefineIdn} and @code{AddIdn}
+are provided for compatibility with previous versions
+of the environment module.
+
+@node Lookup
+@section Operations to find bindings
+
+The following operations are provided to lookup bindings for
+given identifiers.
+For ease of understanding they
+are described here as if the bindings of scopes were traversed
+in a linear search. In fact the implementation avoids
+such linear search where possible:
+
+@findex BindingInScope
+@findex function BindingInScope
+@table @code
+@item Binding BindingInScope (Environment env, int idn)
+A function that checks the scope referenced by its @code{env} argument
+for a binding of the identifier specified by its @code{idn} argument.
+If no binding for @code{idn} is found,
+the scopes that are directly or indirectly
+inherited by @code{env} are searched.
+During that search, a scope @code{tocl}
+is considered before a scope @code{fromcl} if @code{tocl}
+inherits from @code{fromcl}.
+The first binding found is returned;
+if no binding is found then @code{NoBinding} is returned.
+
+@findex KeyInScope
+@findex function KeyInScope
+@item DefTableKey KeyInScope (Environment env, int idn)
+A macro that calls @code{BindingInScope} and returns the key of the
+binding found.
+@code{NoKey} is returned if no binding is found by @code{BindingInScope}.
+
+@findex BindingInEnv
+@findex function BindingInEnv
+@item Binding BindingInEnv (Environment env, int idn)
+A function that has the same effect as @code{BindingInScope} except that
+if no binding for @code{idn} is found for scope @code{env} 
+then the search continues as if @code{BindingInScope}
+was applied successively to ancestors of @code{env} in the tree of scopes.
+
+@findex KeyInEnv
+@findex function KeyInEnv
+@item DefTableKey KeyInEnv (Environment env, int idn)
+A macro that calls @code{BindingInEnv} and returns the key of the
+binding found.
+@code{NoKey} is returned if no binding is found by @code{BindingInEnv}.
+@end table
+
+These operations are very similar, but they differ in one aspect:
+
+@itemize @bullet
+@item
+Only the scope given as argument and those scopes it inherits 
+from are considered for the lookup 
+(@code{BindingInScope}, @code{KeyInScope}), 
+or the scope given as argument, its ancestors in the tree of scopes,
+and those scopes they inherit from are considered for the lookup 
+(@code{BindingInEnv}, @code{KeyInEnv}).
+@end itemize
+
+@code{KeyInScope} and @code{KeyInEnv} are
+are provided for compatibility with previous versions
+of the environment module.
+
+@node Hidden
+@section Operations to find additional bindings
+
+The following operations find further bindings that
+are related in some way to a given one:
+
+@findex OverridesBinding
+@findex function OverridesBinding
+@table @code
+@item Binding OverridesBinding (Binding bind)
+A function that yields a hidden binding.
+Let @code{bind} be a binding of identifier @code{idn} in a scope @code{e}.
+Then @code{OverridesBinding} returns the value that
+@code{BindingInEnv(e,idn)} would have returned if the binding @code{bind}
+had not existed.
+
+@findex NextInhBinding
+@findex function NextInhBinding
+@item Binding NextInhBinding (Environment env, Binding bind)
+A function that yields a binding that is also visible
+due to multiple inheritance relations.
+Let @code{bind} be a binding of identifier @code{idn} in a scope @code{e}
+that has been obtained by a call @code{BindingInScope(env, idn)},
+@code{BindingInEnv(env, idn)}, or @code{NextInhBinding(env, idn)},
+and let @code{tocl} be @code{env} or its next ancestor that
+inherits from @code{e}.
+Then @code{NextInhBinding} returns a binding of identifier @code{idn},
+if any, in a scope @code{ep} that is inherited by @code{tocl}
+but not by @code{e};
+otherwise @code{NoBinding} is returned.
+
+@findex NextInhKey
+@findex function NextInhKey
+@item DefTableKey NextInhKey (Environment env, int idn, DefTableKey key)
+A function that has the same effect as @code{NextInhBinding}, except that
+the keys of bindings (instead of the bindings themselves)
+are supplied and returned.
+@end table
+
+@node Queries
+@section Operations to examine environments
+
+The following operations are provided to obtain information from
+environments:
+
+@findex DefinitionsOf
+@table @code
+@item Binding DefinitionsOf(Environment env)
+A function that returns the first binding of the scope @code{env}.
+It returns @code{NoBinding} if @code{env} is @code{NoEnv} or
+if no identifiers are bound in @code{env}.
+
+@findex NextDefinition
+@item Binding NextDefinition(Binding b)
+A function that returns the next binding of the scope @code{EnvOf(b)}.
+It returns @code{NoBinding} if @code{b} is @code{NoBinding} or
+if @code{b} is the last binding of @code{EnvOf(b)}.
+
+@findex IdnOf
+@item int IdnOf(Binding b)
+A function that returns the identifier bound by @code{b}.
+It returns @code{NoIdn} if @code{b} is @code{NoBinding}.
+
+@findex KeyOf
+@item DefTableKey KeyOf(Binding b)
+A function that returns the key bound by @code{b}.
+It returns @code{NoKey} if @code{b} is @code{NoBinding}.
+
+@findex EnvOf
+@item Environment EnvOf(Binding b)
+A function that returns the environment containing @code{b}.
+It returns @code{NoEnv} if @code{b} is @code{NoBinding}.
+
+@findex ParentOf
+@item Environment ParentOf(Environment env)
+A function that returns the parent of @code{env} in a tree of scopes.
+It returns @code{NoEnv} if @code{env} is @code{NoEnv} or
+if @code{env} is the root of the tree.
+
+@findex SetKeyOfEnv
+@item DefTableKey SetKeyOfEnv(Environment env, DefTableKey k)
+A function that associates the key @code{k} with the scope @code{env}.
+It returns @code{k} unless @code{env} is @code{NoEnv};
+in that case it returns @code{NoKey}.
+
+@findex KeyOfEnv
+@item DefTableKey KeyOfEnv(Environment env)
+A function that returns the key @code{k} associated with the scope
+@code{env} by the most recent operation @code{SetKeyOfEnv(env,k)}.
+It returns @code{NoKey} if @code{env} is @code{NoEnv} or
+if @code{SetKeyOfEnv(env,k)} has never been executed.
+
+@findex IsClass
+@item int IsClass(Environment env)
+A function that returns 1 if the scope @code{env} has been argument of a
+call of @code{InheritClass}; otherwise 0 is returned.
+
+@findex DirectInherits
+@item InheritPtr DirectInherits(Environment env)
+A function that returns the first direct inheritance relation to @code{env}
+established by a call of @code{InheritClass(env,fromcl)}.
+It returns @code{NoInherit} if @code{env} is @code{NoEnv} or
+if @code{InheritClass(env,fromcl)} has never been invoked.
+
+@findex NextInherit
+@item InheritPtr NextInherit(InheritPtr inh)
+A function that returns the next direct inheritance relation.
+It returns @code{NoInherit} if @code{inh} is @code{NoInherit} or
+if there are no more direct inheritances for the given scope.
+
+@findex EnvOfInherit
+@item Environment EnvOfInherit(InheritPtr inh)
+A function that returns the scope @code{fromcl}
+of the inheritance relation @code{inh}.
+@end table
+
+@node Index, , , top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

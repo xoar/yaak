@@ -1,0 +1,8 @@
+/* $Id: count.specs,v 1.3 1994/09/07 20:54:58 waite Exp $ */
+/* Specifications defining a word-counting problem */
+
+word.gla	/* Structure of the words to be counted */
+count.c		/* Counting operations */
+count.h
+count.finl	/* Invocation of the counter finalization */
+count.head      /* Make functions known to eli */

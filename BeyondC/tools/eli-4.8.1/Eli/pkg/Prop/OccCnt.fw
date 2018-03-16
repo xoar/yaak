@@ -1,0 +1,83 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: OccCnt.fw,v 3.4 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module counts the |NAME|Count occurrences of each object identified
+by its |NAME|Count.|KEY|Key. The number of the occurrences in left-to-right
+order can be obtained by |NAME|Count.|NAME|Cnt.
+The total number of |NAME|Count occurrences of an object can be obtained by
+|NAME|TotalCnt.|NAME|TotalCnt.
+
+All |NAME|Count and |NAME|TotalCnt CLASS SYMBOLs must be in a subtree of
+|NAME|RangeCnt. |NAME|RangeCnt is inherited to the grammar root by default.
+
+The CLASS SYMBOL |NAME|TotalCnt need not be used.
+|NAME|TotalCnt may be INHERITed to the same or to different CLASS SYMBOLs.
+
+The property |NAME|Cnt of each object is set to the total number of 
+|NAME|Count occurrences when |NAME|RangeCnt.Got|NAME|Cnt holds.
+
+~O~<|NAME|OccCnt.pdl~>~{
+|NAME|Cnt:	int;
+~}
+
+~O~<|NAME|OccCnt.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RangeCnt END;
+
+/* for compatibility with old version: */
+CLASS SYMBOL |NAME|RootCnt INHERITS |NAME|RangeCnt END;
+
+CLASS SYMBOL |NAME|Count:
+		|NAME|Cnt:	int	SYNT,
+		|KEY|Key:	DefTableKey;
+
+CLASS SYMBOL |NAME|TotalCnt:
+		|NAME|TotalCnt:	int	SYNT,
+		|KEY|Key:	DefTableKey;
+
+CLASS SYMBOL |NAME|RangeCnt:
+		Got|NAME|Cnt:	VOID	SYNT;
+
+CHAIN _c|NAME|Cnt:	VOID;
+
+CLASS SYMBOL |NAME|RangeCnt	COMPUTE
+  CHAINSTART HEAD._c|NAME|Cnt = "yes";
+
+  SYNT.Got|NAME|Cnt = TAIL._c|NAME|Cnt;
+END;
+
+CLASS SYMBOL |NAME|Count	COMPUTE
+  SYNT.|NAME|Cnt = ADD (1, Get|NAME|Cnt (THIS.|KEY|Key, 0))
+	DEPENDS_ON THIS._c|NAME|Cnt;
+
+  THIS._c|NAME|Cnt = Reset|NAME|Cnt (THIS.|KEY|Key, SYNT.|NAME|Cnt);
+END;
+
+CLASS SYMBOL |NAME|TotalCnt	COMPUTE
+SYNT.|NAME|TotalCnt =
+	Get|NAME|Cnt (THIS.|KEY|Key, 0)
+	DEPENDS_ON INCLUDING |NAME|RangeCnt.Got|NAME|Cnt;
+END;
+~}

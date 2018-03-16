@@ -1,0 +1,41 @@
+/*======================================================================*
+ *									*
+ *	FILE:		app-defaults/Colors				*
+ *									*
+ *	CONTENTS:	Color part of application defaults for Gorto	*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+/* This file is part of the Eli translator construction system.
+
+Eli is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Eli; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+
+#Gorto.directDepColor:			Black
+#Gorto.inducedDepColor:			Red
+#Gorto.arrangedDepColor:			Yellow
+#Gorto.arrangedInducedDepColor:		Yellow
+#Gorto.partitionedDepColor:		Blue
+#Gorto.inducedPartitionedDepColor:	Blue
+
+#Gorto.attrColor:			Black
+#Gorto.includingAttrColor:		Black
+#Gorto.constituentAttrColor:		Black
+#Gorto.chainAttrColor:			Black
+Gorto.symbolColor:			MediumOrchid
+#Gorto.visitColor:			Red
+#Gorto.conditionColor:			Blue
+Gorto.lineColor:			SlateBlue

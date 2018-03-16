@@ -1,0 +1,18 @@
+# $Id: Odinfile,v 1.8 2008/08/22 14:50:23 pfahler Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+%hypertext == hyprtxt.specs :doc_info	# Create the info files
+
+%index     == humans.specs :index_info	# Create the global index
+gindex.tnf == humans.specs :gindex_tnf
+
+%Documents.specs == <<
+  humans.specs
+  gindex.tnf
+
+%ps   == %Documents.specs :doc_ps	# Create PostScript documents
+%pdf  == %Documents.specs :doc_pdf	# Create PDF documents
+%html == %Documents.specs :doc_html     # Create HTML documents
+
+typetutorial.tnf == ../../Type/Examples/TypeTutorial.fw:fwTexinfo
+nametutorial.tnf == ../../Name/Examples/AlgLike.fw:fwTexinfo

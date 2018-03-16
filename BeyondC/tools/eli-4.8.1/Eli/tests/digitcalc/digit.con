@@ -1,0 +1,14 @@
+/* $Id: digit.con,v 1.1 1991/07/27 06:56:24 waite Exp $ */
+/* Structure of a single digit */
+
+primary:
+   '0' &'ExprInt(0);' /
+   '1' &'ExprInt(1);' /
+   '2' &'ExprInt(2);' /
+   '3' &'ExprInt(3);' /
+   '4' &'ExprInt(4);' /
+   '5' &'ExprInt(5);' /
+   '6' &'ExprInt(6);' /
+   '7' &'ExprInt(7);' /
+   '8' &'ExprInt(8);' /
+   '9' &'ExprInt(9);' .

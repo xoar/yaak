@@ -1,0 +1,50 @@
+#!/bin/sh
+# $Id: gla_be.sh.in,v 1.3 2010/02/26 17:50:57 profw Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+# EXEC (gla_be.sh) (gla_be.exe)
+#   (:backend_data) (:flex_binary) (:accept_binary) (:lastdfa_binary)
+#   (+printtokens) (+monitor)
+#   (specs_ref) (reqmod_ref) ($ODINCACHE/PKGS/skeleton/sed.exe)
+#   => (:gla_be);
+
+ODIN_exe=$1;shift;
+ODIN_backend_data=$1;shift; ODIN_flex_binary=$1;shift;
+ODIN_accept_binary=$1;shift; ODIN_lastdfa_binary=$1;shift;
+ODIN_printtokens=$1;shift; 
+ODIN_monitor=$1;shift;
+ODIN_specs=$1;shift; ODIN_reqmod=$1;shift; SED=$1;shift;
+
+mkdir gla_be;
+
+if test '' != "$ODIN_printtokens"
+then ptokens='-d'
+fi
+
+if @SHMONITOR@
+then
+  if test '' != "ODIN_monitor"
+  then mon='-M'
+  fi
+fi
+
+$ODIN_exe $ptokens $mon $ODIN_backend_data $ODIN_lastdfa_binary \
+	$ODIN_accept_binary $ODIN_flex_binary 1>LOG 2>ERROR \
+  || { cat LOG ERROR > ERR; echo 'GLA failed' >> ERR; mv ERR ERROR; }
+if test -s ERROR
+then
+	# default error handling, for now
+	cp ERROR ERRORS
+	exit 0
+fi
+
+cp xtables.h gla_be/xtables.h
+cp xcode.h gla_be/xcode.h
+
+$SED -n -f externs $ODIN_specs \
+	| $SED -e "s;^;$ODINCACHE/PKGS/;" \
+	> gla_be/gla_be.specs
+
+$SED -n -f externs $ODIN_reqmod \
+	| $SED -e "s;^;$ODINCACHE/PKGS/;" \
+	> gla_be/gla_be.reqmod

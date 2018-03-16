@@ -1,0 +1,126 @@
+# $Id: info.dg,v 2.20 2009/10/21 21:06:07 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.tnf => :tnf;
+:tnf 'Specification of a hypertext document'? => :FILE;
+
+EXEC (makeinfo.sh) (texinfo/makeinfo.exe) (:tnf) tnf_dir tnf_node
+  => (:tnf_dir) (:tnf_node);
+:tnf_dir 'Directory holding the start node for browsing' => :DERIVED-DIRECTORY;
+:tnf_node 'Name of the node at which browsing should start' => :FILE;
+
+EXEC (hypertext.sh) (.) (:tnf_dir) (:tnf_node) display
+  => (:display);
+:display 'Hypertext presentation of an object'? => :EXECUTABLE;
+
+EXEC (help.sh) (help_header) (help_trailer) (hypermsg.exe) (:filtered)
+     (:errfiles :list :pasted)
+  => (:help_tnf);
+:help_tnf 'Help display' => :FILE;
+
+EXEC (makeinfo.sh) (texinfo/makeinfo.exe)
+     (:warn +docref :expand_hooks :help_tnf) help_dir help_node
+  => (:help_dir) (:help_node);
+:help_dir 'Directory holding the start node for browsing' => :DERIVED-DIRECTORY;
+:help_node 'Name of the node at which browsing should start' => :FILE;
+
+EXEC (hypertext.sh) (.) (:help_dir) (:help_node) help
+  => (:help);
+:help 'Hypertext presentation of messages'? => :EXECUTABLE;
+
+EXEC (std_err.sh) (+hookvalue) (:FILE) (+docref)
+  => (:std_err);
+:std_err 'Relate messages to system documentation' => :FILE;
++docref 'Switch to relate messages to system documentation' => :first;
+
+EXEC (all_info.sh) (:allspecs :extract=:tnf :ls) (texinfo/makeinfo.exe)
+  NEEDS (:allspecs :extract=:tnf)
+  => (:gindex_tnf) (:index_info);
+:gindex_tnf 'Global index for a set of texinfo documents'?    => <:tnf>;
+:index_info 'Hypertext index for a set of texinfo documents'? => :FILE;
+
+EXEC (info_data.sh) (texinfo/makeinfo.exe) (:tnf)
+  => (:info_data);
+:info_data 'Data for the hypertext browser' => :DERIVED-DIRECTORY;
+
+COLLECT (:info_data :list)
+  => (:info_data_list);
+:info_data_list 'Objects needed by hypertext browser' => :LIST;
+
+COLLECT (:allspecs :extract=:tnf :map=:info_data_list)
+  => (:doc_info);
+:doc_info 'Hypertext for a collection of texinfo documents'? => :LIST;
+
+COLLECT (:allspecs :extract=:tnf :map=:ps)
+  => (:doc_ps);
+:doc_ps 'PostScript for a collection of texinfo documents'? => :LIST;
+
+COLLECT (:allspecs :extract=:tnf :map=:pdf)
+  => (:doc_pdf);
+:doc_pdf 'PDF for a collection of texinfo documents'? => :LIST;
+
+:html 'HyperText Markup Language file'? => :FILE;
+*.html => :html;
+
+COLLECT (:allspecs :tnfhtml :list)
+  => (:doc_html);
+:doc_html 'HTML for a collection of texinfo documents'? => :LIST;
+
+EXEC (tex_input.sh) (:tnf) (+single)
+  => (:tex_input);
+:tex_input 'TeX input modified for single/double sided' => <:tex>;
++single 'Create single-sided version of printed documentation'? => :first;
+
+EXEC (tex.sh) (+usepdf) (:tex_input :rootName) (:tex_input :texsp)
+     (:tex_input :tnfauxin.vtd :vir_dir)&
+   NEEDS (:tex_input :texbasis :extract=:tex)
+     (:tex_input :texbasis :extract=:sty)
+     (:tex_input :tnfauxin.vtd :vir_tgt.list)&
+   => (:tnfdvi) (:tnflog) (:tnfaux) (:tnfndx) (:tnfpdf);
+:tnfdvi 'Device independent format file'              => :dvi;
+:tnfpdf 'PDF created from TeX or LaTeX'               => :FILE;
+:tnflog 'Log file output by tex'                      => :tex.log;
+:tnfaux 'Auxiliary files potentially modified by TeX' => :DERIVED-DIRECTORY;
+:tnfndx 'Directory of sorted index files'             => :DERIVED-DIRECTORY;
+
+EXEC (texi2html.sh) (texi2html) (:allspecs :extract=:tnf :dir_of :vir_dir)
+     (html/HEAD.html) (html/FOOT.html)
+   NEEDS (:allspecs :extract=:tnf)
+   => (:tnfhtml);
+:tnfhtml 'HTML files created from TeXInfo' => :DERIVED-DIRECTORY;
+
+EXEC (index.sh) (:tex_input :tnfndx) (texinfo/texindex.exe)
+  => (:tnfsndx);
+:tnfsndx 'Sorted index with initial letters' => :DERIVED-DIRECTORY;
+
+EXEC (tnfauxin.sh) (:tex_input :rootName) (:tex_input :tnfaux)
+     (:tex_input :tnfsndx)
+  => (:tnfauxin.vtd);
+:tnfauxin.vtd 'Auxiliary files input to the formatting step' => :vtd;
+
+COLLECT (:tex_input +texsearch=(:tnf :dir) (tnf) (.) ($ODINCACHE/PKGS/liga/Info) :texps)
+  => (:info.ps);
+:info.ps 'PostScript from texinfo' => :REFERENCE :ps;
+
+COLLECT (:tex_input +texsearch=(:tnf :dir) (tnf) (.) ($ODINCACHE/PKGS/liga/Info) +usepdf :tnfpdf)
+  => (:info.pdf);
+:info.pdf 'PDF from texinfo' => :REFERENCE :pdf;
+
+EXEC '/bin/cp' (doc.sh) odin_help
+   => (:odin_help);

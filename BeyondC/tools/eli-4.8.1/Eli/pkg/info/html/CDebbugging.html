@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>C Language Source Code Debuggers</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Debug a generated language processor at the source level</h1>
+
+<hr>
+<b>Eli request:</b> 
+
+<pre>
+    xyz.specs : dbx
+</pre>
+
+<p>
+Executes the language processor unter the control of the source level
+debugger specified in environment variable 
+<tt>ELI_DEBUGGER</tt>.
+
+<p>
+<b>Eli request:</b> 
+
+<pre>
+    xyz.specs : +debug : exe>.
+</pre>
+
+generates the language processor with debugging information turned on
+(C compiler option "-g").
+
+<p>
+<b>Eli request:</b> 
+
+<pre>
+    xyz.specs : source > xyz.src
+</pre>
+
+generates the language processor's sources.
+These can be compiled outside of Eli with debugging information turned on to
+allow for source level debugging, e.g.:
+
+<pre>
+   cd xyz.src;
+   make CC="cc -g"
+   workshop xyz.exe
+</pre>
+
+</h2>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

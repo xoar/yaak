@@ -1,0 +1,16 @@
+begin
+  val x = 0;
+  module m
+	begin	val a = 1;
+		val b = 2;
+		with m do a;
+	end;
+  module n
+	begin	val a = 1; 
+		val c = 3;
+		with m do a;
+	end;
+  with m do with n do
+	begin a; b;
+	end;
+end

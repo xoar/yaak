@@ -1,0 +1,50 @@
+# $Id: oldodin.dg,v 1.4 2010/02/26 17:50:57 profw Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Missing definitions
+
++gnu 'use gnu tools' => :first;
+
+# Directory types
+
+:dirnames 'Names of the files in a directory' => :FILE;
+:direlms 'Elements of a directory' => :LIST;
+:dir_of 'Odinfile describing a virtual directory' => :FILE;
+:expanddir 'Files in a directory' => :expandlist;
+:expandspecs 'Specs file' => :expandlist;
+:expandfile 'Arbitrary file' => :expandlist;
+:expandlist 'Files in a list of files and directories' => :LIST;
+
+# Directory operations
+
+COLLECT (:DERIVED-DIRECTORY :direlms :map=:expandlist) => (:expanddir);
+
+COLLECT (:specs :allspecs) => (:expandspecs);
+
+COLLECT (:FILE) => (:expandfile);
+
+EXEC (ls.sh) (:DERIVED-DIRECTORY) => (:dirnames);
+
+READ-LIST (:dirnames) => (:direlms);
+
+NAMES (:direlms) => (:names);
+
+LABELS (:direlms) => (:labels);
+
+EXEC (dir.sh) (:LIST :labels) (:LIST :ls) => (:dir_of);

@@ -1,0 +1,119 @@
+# Source Types
+
+*.cxx => :cxx;
+
+*.C => :cxx;
+
+*.cc => :cxx;
+
+*.c\+\+ => :cxx;
+
+*.cxx.sm  => :cxx.sm;
+
+*.C.sm => :cxx.sm;
+
+*.cc.sm => :cxx.sm;
+
+*.c\+\+.sm => :cxx.sm;
+
+*.SM => :cxx.sm;
+
+
+# Input Object Types
+
+:cxx 'C++ source code'? => :o_src;
+
+:cxx.sm 'system model for a C++ program'? => :FILE;
+
+
+# Intermediate Object Types
+
+:cxx_inc.view_desc 'view description of C++ style included files' => :FILE;
+
+:cxx_inc 'list of potential C++ style included files' => :LIST;
+
+:all_cxx_inc 'list of C++ style transitively included files' => :LIST;
+
+:cxx.one.list 'list of a single C++ file' => :code.list :cxx.exe.list;
+
+:cxx.sm.list 'list of files in a C++ system model' => :sm.list :cxx.exe.list;
+
+:cxx.exe.list 'list of files in a C++ system' => :LIST;
+
+
+# Output Object Types
+
+:exe 'executable binary'? => :FILE;
+
+
+# Parameter Types
+
++purify 'purify flag'? => :cat;
+
++define 'macro definition'? => :cat;
+
++debug 'debug switch'? => :first;
+
++optimize 'optimization flag'? => :first;
+
++prof 'profiling flag'? => :first;
+
++eprof 'profiling flag for linking'? => :first;
+
++cxx 'name of the C++ compiler'? => :first;
+
++cxx_flags 'flags for C++ compilation'? => :cat;
+
++ld_flags 'flags for ld'? => :cat;
+
++inc_sp 'name of a directory in an include search path'? => :ls;
+
++ignore 'egrep expression for includes to ignore'? => :ls;
+
++home 'home directory for relative pathnames' => :first;
+
+
+# Environment Variables
+
+$ODIN_CXX_HOME 'directory containing the C++ compiler' = '';
+
+$ODIN_CXX_DEBUGF 'debug flag for C++ compiler' = '-g';
+
+$ODIN_CXX_I 'directory containing default C++ include files' = '/usr/lib/CC/include';
+
+$ODIN_CXX_PTR 'template repository directory' = '1';
+
+$ODIN_CXX_LD_DEBUGF 'debug flag for C++ linker' = '-g';
+
+$ODIN_CXX_LD_LIBRARY_PATH 'load library path for C++' = '/usr/lib/CC';
+
+$ODIN_CXX_IGNORE_ERR 'egrep expression for errors to ignore' = '';
+
+
+# Tools
+
+COLLECT (:cxx)
+   => (:cxx.one.list);
+
+READ-LIST (:cxx.sm)
+   => (:cxx.sm.list);
+
+EXEC (cxx_inc.sh) (:FILE) (:FILE :dir)@ (+home)@ (+inc_sp) (+ignore)
+   => (:cxx_inc.view_desc);
+
+COLLECT (:cxx_inc.view_desc :view)
+   => (:cxx_inc);
+
+COLLECT (:cxx_inc :map=:all_cxx_inc) (:cxx_inc)
+   => (:all_cxx_inc);
+
+EXEC (CC.sh) (:cxx) (ptr_of :vir_dir) (:cxx :dir)@ (+inc_sp)
+ (+gnu) (+debug) (+prof) (+optimize) (+define) (+cxx) (+cxx_flags) (abort_msgs)
+ NEEDS (:cxx +home=(:cxx :dir) :lookup=:all_cxx_inc)
+   => (:o);
+
+EXEC (ld.sh) (:o_of :vir_dir) (:library_flags) (ptr_of :vir_dir)
+ (+define) (+inc_sp) (+gnu) (+purify) (+debug) (+prof) (+eprof)
+ (+cxx) (+ld_flags)
+ NEEDS (:o_of :vir_tgt.list) (:libraries) (:cxx.exe.list)@
+   => (:exe);

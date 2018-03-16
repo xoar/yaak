@@ -1,0 +1,23 @@
+% Should list all chapters you want to include in the output
+%\includeonly{title,lang,build,code}
+
+\documentclass{article}
+
+\usepackage[letterpaper,textwidth=6.5in,textheight=8.5in]{geometry}
+\usepackage{alltt}
+\usepackage{html}
+% Choose the appropriate graphics package
+\ifx\pdftexversion\undefined
+  \usepackage[dvips]{graphicx}
+\else
+  \usepackage[pdftex]{graphicx}
+\fi
+
+\begin{document}
+
+\include{title}
+\include{lang}
+\include{build}
+\include{code}
+
+\end{document}

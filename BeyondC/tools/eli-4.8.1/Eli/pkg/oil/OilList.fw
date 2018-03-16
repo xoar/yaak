@@ -1,0 +1,186 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: OilList.fw,v 1.2 1999/09/16 14:45:16 waite Exp $
+~!
+~! (C) Copyright 1998 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module provides computations that implement parameter lists and
+argument lists for operator identification of function calls.
+The elements are arranged in left-to-right order as they occur in the tree.
+
+The CLASS SYMBOL ParameterListElem is to be inherited by those
+SYMBOLs that contribute parameter types to the parameter list.
+The value of the attribute ParameterListElem.GivenType 
+(of type tOilType) must be set by the user.
+
+The CLASS SYMBOL ParameterListRoot is to be inherited by a 
+SYMBOL that has all of the parameter SYMBOLs in its subtrees.
+The result of the computation is the attribute
+ParameterListRoot.ParameterList of type tOilArgSig, which specifies all of
+the parameter types.
+In order to obtain a complete signature for the function, the result type
+(ResType, for example) must be added:
+OilAddArgSig(ResType, ParameterListRoot.ParameterList)
+
+Note: The implementation of the ParameterListRoot and ParameterListElem
+roles builds a list of parameter types, which is then recursively walked to
+construct the Oil signature.
+This mechanism avoids the need to specify right-to-left computations,
+at the cost of storage for the intermediate list.
+The remaining computational roles do not incur this cost.
+
+The CLASS SYMBOL ArgumentListElem is to be inherited by those 
+SYMBOLs that contribute arguments to the argument list.
+The value of the attribute ArgumentListElem.GivenType 
+(of type tOilType) must be set by the user.
+
+The CLASS SYMBOL ArgumentListRoot is to be inherited by a 
+SYMBOL that has all of the argument SYMBOLs in its subtrees.
+The result of the computation is the attribute ArgumentListRoot.ArgumentList
+of type tOilSetSig, which specifies all of the argument types.
+It can be used in a call to OilIdOpTSn to identify a function whose
+parameter types could be the result of coercing the argument types.
+
+The operand types of the identified function can also be distributed to the
+elements of the argument list.
+
+The CLASS SYMBOL ArgumentDeListElem is to be inherited by those
+SYMBOLs that contribute arguments to the argument list.
+The result of the computation is the attribute ArgumentDeListElem.RequiredType
+of type tOilType, which specifies the type required by the function for that
+argument.
+
+The CLASS SYMBOL ArgumentDeListRoot is to be inherited by a
+SYMBOL that has all of the argument SYMBOLs in its subtrees.
+The value of the attribute ArgumentDeListRoot.Operator (of type tOilOp)
+must be set by the user.
+
+Please note that it is not sensible to try to test the value of
+ArgumentDeListElem.RequiredType against the a priori type of the argument
+expression for the purpose of error reporting.
+The reason is that if ArgumentDeListRoot.Operator is a valid operator
+then there is no error, and if ArgumentDeListRoot.Operator is an invalid
+operator then there is no information about the required types of the
+arguments.
+
+The only reason for providing the ArgumentDeListRoot and ArgumentDeListElem
+roles is to support code generation, where the type to which an argument
+value must be coerced is needed.
+
+~O~<OilList.specs~>~{
+$/oil/oil.specs
+$/Adt/List.gnrc+instance=tOilType+referto=oiladt2:inst
+~}
+
+~O~<OilList.lido~>~{
+/* Construction of Oil parameter signatures: */
+
+CLASS SYMBOL ParameterListRoot: 
+             _tOilTypeauxList: tOilTypeList,
+             ParameterList: tOilArgSig;
+
+CLASS SYMBOL ParameterListElem: GivenType: tOilType;
+
+CHAIN _ctOilTypeListPtr: tOilTypeListPtr;
+
+CLASS SYMBOL ParameterListRoot COMPUTE
+  SYNT._tOilTypeauxList = NULLtOilTypeList;
+  CHAINSTART HEAD._ctOilTypeListPtr = 
+     _OilListADDROF (SYNT._tOilTypeauxList);
+  SYNT.ParameterList = 
+    _MakeOilArgSig (THIS._tOilTypeauxList)
+    <- TAIL._ctOilTypeListPtr;
+END;
+
+CLASS SYMBOL ParameterListElem COMPUTE
+  THIS._ctOilTypeListPtr = 
+     RefEndConstOilTypeList 
+       (THIS._ctOilTypeListPtr, THIS.GivenType);
+END;
+
+/* Construction of Oil argument signatures: */
+
+CLASS SYMBOL ArgumentListRoot: ArgumentList, _argList: tOilSetSig;
+CLASS SYMBOL ArgumentListElem: GivenType: tOilType;
+
+CHAIN _cargListPtr: tOilTypeSetListPtr;
+
+CLASS SYMBOL ArgumentListRoot COMPUTE
+  SYNT._argList=OilEmptySetSig;
+  CHAINSTART HEAD._cargListPtr=_OilListADDROF(SYNT._argList);
+  SYNT.ArgumentList=THIS._argList <- TAIL._cargListPtr;
+END;
+
+CLASS SYMBOL ArgumentListElem COMPUTE
+  THIS._cargListPtr=
+    RefEndConstOilTypeSetList(THIS._cargListPtr,OilTypeToSet(THIS.GivenType));
+END;
+
+/* Distribution of Oil signatures, an Oil type for each argument: */
+
+CLASS SYMBOL ArgumentDeListRoot: Operator: tOilOp, ArgumentListTail: tOilArgSig;
+CLASS SYMBOL ArgumentDeListElem: RequiredType: tOilType;
+
+CHAIN ArgumentDeList: tOilArgSig;
+
+CLASS SYMBOL ArgumentDeListRoot COMPUTE
+  CHAINSTART HEAD.ArgumentDeList=OilArgTypesOf(THIS.Operator);
+  SYNT.ArgumentListTail=TAIL.ArgumentDeList;
+END;
+
+CLASS SYMBOL ArgumentDeListElem COMPUTE
+  SYNT.RequiredType=OilArgType(THIS.ArgumentDeList);
+  THIS.ArgumentDeList=OilNextArg(THIS.ArgumentDeList);
+END;
+~}
+
+~O~<OilList.HEAD.phi~>~{
+#define _OilListADDROF(x) (&(x))
+#include "OilList.h"
+~}
+
+~O~<OilList.h~>~{
+#include "eliproto.h"
+#include "oiladt2.h"
+#include "tOilTypeList.h"
+
+extern tOilArgSig _MakeOilArgSig ELI_ARG((tOilTypeList));
+~}
+
+~O~<OilList.c~>~{
+#include "OilList.h"
+
+#if PROTO_OK
+tOilArgSig _MakeOilArgSig (tOilTypeList tpl)
+#else
+tOilArgSig _MakeOilArgSig (tpl) tOilTypeList tpl;
+#endif
+{
+  if (tpl == NULLtOilTypeList)
+       return OilNewArgSig();
+  else return 
+         OilAddArgSig 
+           (HeadtOilTypeList (tpl),
+            _MakeOilArgSig (TailtOilTypeList (tpl)));
+}
+~}

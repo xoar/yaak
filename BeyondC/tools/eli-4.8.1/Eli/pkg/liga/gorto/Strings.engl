@@ -1,0 +1,168 @@
+/*======================================================================*
+ *									*
+ *	FILE:		app-defaults/Strings.english			*
+ *									*
+ *	CONTENTS:	String part of application defaults for Gorto	*
+ *			(English version)				*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+/* This file is part of the Eli translator construction system.
+
+Eli is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Eli; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+
+!			MAIN MENU
+
+Gorto*mainMenuButton.label:		Main Menu
+Gorto*mainMenu.Label:			Main Menu
+Gorto*mainMenu*lido*label:		Lido window
+Gorto*mainMenu*close*label:		Close all windows
+Gorto*mainMenu*recompute*label:		New computation
+Gorto*mainMenu*hide*label:		Hide attribute
+Gorto*mainMenu*unhide*label:		Unhide attribute
+Gorto*mainMenu*partDeps*label:		Show Partitioned Dependencies
+Gorto*mainMenu*quit*label:		Leave GORTO
+
+Gorto*mainMenu*topological*label:	Topolocigal Strategy
+Gorto*mainMenu*partition*label:		Partition Strategy
+
+
+!			PRODUCTION PART OF MAIN WINDOW
+
+Gorto*rules.label:			Rules
+Gorto*rules.cyclic.label:		Cyclic
+Gorto*rules.arranged.label:		Arranged
+Gorto*rules.changed.label:		Changed
+Gorto*rules.visitSeq.label:		Visit-Sequence
+
+Gorto*topologicalMenuButton.label:	Topological Strategy
+Gorto*topologicalMenu.label:		Topological Strategy
+Gorto*topologicalMenu*early.label:	Early
+
+
+!			SYMBOL PART OF MAIN WINDOW
+
+Gorto*symbols.label:			Symbols
+Gorto*symbols.cyclic.label:		Cyclic
+Gorto*symbols.arranged.label:		Arranged
+Gorto*symbols.changed.label:		Changed
+Gorto*symbols.partitioned.label:	Partitioned
+
+Gorto*partitionMenuButton.label:	Partition Strategy
+Gorto*partitionMenu.label:		Partition Strategy
+Gorto*partitionMenu*branchAndBound.label:Branch & Bound
+Gorto*partitionMenu*early.label:	Early
+Gorto*partitionMenu*late.label:		Late
+Gorto*partitionMenu*automatically.label:Arrange Automatically
+
+
+!			HIDE / UNHIDE
+
+Gorto*hide*label.label:			Hide Attribute:
+Gorto*hide*cancel.label:		Cancel
+Gorto*hide*confirm.label:		Confirm
+Gorto*hide*including.label:		Including
+Gorto*hide*constituent.label:		Constituent
+Gorto*hide*chain.label:			Chain
+
+Gorto*unhide*label.label:		Unhide Attribute:
+Gorto*unhide*cancel.label:		Cancel
+Gorto*unhide*confirm.label:		Confirm
+Gorto*unhide*including.label:		Including
+Gorto*unhide*constituent.label:		Constituent
+Gorto*unhide*chain.label:		Chain
+
+
+!			RULE MENU
+
+Gorto*ruleMenu.Label:			Rule Menu
+Gorto*ruleMenu*close.label:		Close this production
+Gorto*ruleMenu*closeAll.label:		Close all productions
+Gorto*ruleMenu*followInduced.label:	Follow all marks
+Gorto*ruleMenu*visitSeq.label:		Show visit-sequence
+
+
+!			SYMBOLS
+
+Gorto*symbolMenu.Label:			Symbol Menu
+Gorto*symbolMenu*close.label:		Close this symbol
+Gorto*symbolMenu*closeAll.label:	Close all symbols
+Gorto*symbolMenu*freeAttr.label:	Remove arranged dependencies
+Gorto*symbolMenu*force.label:		Force partition
+Gorto*symbolMenu*productions.label:	Select production
+Gorto*symbolMenu*lifetime.label:	Show last BmNF use
+
+Gorto.symbolRules*label.label:		Select Production
+Gorto.symbolRules*cancel.label:		Cancel
+
+
+!			VISIT_SEQUENCE MENU
+
+Gorto*visitSeqMenu.Label:		Visit-Sequence Menu
+Gorto*visitSeqMenu*close.label:		Close this visit-sequence
+Gorto*visitSeqMenu*closeAll.label:	Close all visit-sequences
+Gorto*visitSeqMenu*noLifetimes.label:	Don\'t show last attribute use
+Gorto*visitSeqMenu*fixElem.label:	Fix position of this element
+Gorto*visitSeqMenu*freeVisitSeq.label:	Remove arranged dependencies
+
+
+!			STRINGS
+
+Gorto.emptyListString:		<empty>
+Gorto.directRuleState:		Constructing direct rule graphs
+Gorto.directSymbolState:	Constructing direct symbol graphs
+Gorto.optionState:		Reading order options
+Gorto.transitiveState:		Constructing transitive graphs
+Gorto.inducedState:		Constructing induced graphs
+Gorto.arrangeOptionState:	Introducing arrange options
+Gorto.arrangedState:		Constructing arranged graphs
+Gorto.partitionState:		Computing partitions
+Gorto.partitionedState:		Constructing partitioned graphs
+Gorto.visitSeqState:		Constructing visit sequences
+Gorto.lifetimeState:		Computing attribute lifetimes
+Gorto.infoState:		Computing display information
+Gorto.hideState:		Awaiting an attribute name to hide
+Gorto.unhideState:		Awaiting an attribute name to unhide
+Gorto.directDisplay:		Displaying direct graphs
+Gorto.transitiveDisplay:	Displaying transitive graphs
+Gorto.inducedDisplay:		Displaying induced graphs
+Gorto.arrangedDisplay:		Displaying arranged graphs
+Gorto.partDisplay:		Displaying partitioned graphs
+Gorto.visitSeqDisplay:		Displaying visit sequences
+Gorto.constructIDLState:	Constructing IDL output structure
+Gorto.ouputState:		Writing output files
+Gorto.noRecomputeString:	No Recompute necessary\!
+Gorto.ruleString:		Rule
+Gorto.symbolString:		Symbol
+Gorto.transferString:		\
+This dependency was generated\nby expansion of transfer.
+Gorto.includingString:		\
+This dependency was generated\nby expansion of including.
+Gorto.constituentString:	\
+This dependency was generated\nby expansion of constituent(s).
+Gorto.chainString:		\
+This dependency was generated\nby expansion of chain.
+Gorto.unknownDepString:		\
+This dependency was generated\nwith unknown reason.
+Gorto.cyclicString:		Cyclic
+Gorto.arrangedString:		Arranged
+Gorto.changedString:		Changed
+Gorto.partitionedString:	Partitioned
+Gorto.visitSeqString:		Visit-Sequence
+Gorto.forcedString:		Forced
+Gorto.cycleMessage:		This would yield a cycle\!
+Gorto.noBmNFMessage:		This attribute is never used in BmNF

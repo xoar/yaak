@@ -1,0 +1,581 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from lex.tnf on 5 December 2013 -->
+
+<TITLE>Lexical Analysis - The Generated Lexical Analyzer Module</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Lexical Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC26" HREF="lex_toc.html#SEC26">The Generated Lexical Analyzer Module</A></H1>
+<P>
+This chapter discusses the generated lexical analyzer module,
+its interface,
+and its relationship to other modules in the generated processor.
+An understanding of the material here is not necessary for normal use of
+the lexical analyzer.
+<P>
+There are some special circumstances in which it is necessary to change the
+interactions between the lexical analyzer and its environment.
+For example, there is a mismatch between the lexical analyzer and
+the source code input module of a FORTRAN 90 compiler:
+The unit of input text dealt with by the source code module is the line,
+the unit dealt with by the lexical analyzer is the statement, and there is no
+relationship between lines and statements.
+One line may contain many statements, or one statement may be spread over
+many lines.
+This mismatch problem is solved by requiring the two modules to interact via
+a buffer, and managing that buffer so that it contains both
+an integral number of lines
+and an integral number of statements.
+Because the lexical analyzer normally works directly in the source module's
+buffer, that solution requires a change in the relationship between
+the lexical analyzer and its environment.
+<P>
+The interaction between the lexical analyzer and its environment is governed
+by the following interface:
+<P>
+<A NAME="IDX159"></A>
+<A NAME="IDX160"></A>
+<A NAME="IDX161"></A>
+<A NAME="IDX162"></A>
+<A NAME="IDX163"></A>
+<A NAME="IDX164"></A>
+<PRE>
+#include "gla.h"
+/* Entities exported by the lexical analyzer module
+ * NORETURN	(constant)	Classification of a comment
+ * ResetScan	(variable)	Flag causing scan pointer reset
+ * TokenStart	(variable)	Address of first classified character
+ * TokenEnd	(variable)	Address of first unclassified character
+ * StartLine	(variable)	Column index = (TokenEnd - StartLine)
+ * glalex	(operation)	Classify the next character sequence
+ ***/
+</PRE>
+<P>
+There are three distinct aspects of the relationship between
+the lexical analyzer and its environment,
+and each is dealt with in one section of this chapter.
+First we consider how the lexical analyzer selects the character sequence to be
+scanned, then we see how the lexical analyzer's attention can be switched, and
+finally how the classification results are reported.
+<P>
+<H2><A NAME="SEC27" HREF="lex_toc.html#SEC27">Interaction Between the Lexical Analyzer and the Text</A></H2>
+<P>
+There is no internal storage for text in the lexical analyzer module.
+Instead, <CODE>TokenEnd</CODE> is set to point to arbitrary text storage.
+(Normally the pointer is to the source buffer,
+see  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>.)
+The text pointed to must be an arbitrary sequence of characters, the last
+of which is an ASCII NUL.
+<P>
+At the beginning of a scan, <CODE>TokenEnd</CODE> points to the beginning of
+the string on which a sequence is to be classified.
+The lexical analyzer tests that string against its set of regular expressions,
+finding the longest sequence that begins with the first character and
+matches one of the regular expressions.
+<P>
+If the regular expression matched is associated with an auxiliary scanner
+then that auxiliary scanner is invoked with the matched sequence
+(see  <A HREF="lex_1.html#SEC9">Building scanners</A>).
+The auxiliary scanner returns a pointer to the first character that
+should not be considered part of the character sequence being matched,
+and that pointer becomes the value of <CODE>TokenEnd</CODE>.
+<CODE>TokenStart</CODE> is set to point to the first character of the string.
+<P>
+When no initial character sequence matches any of the regular
+expressions an error report is issued, <CODE>TokenEnd</CODE> is advanced by one
+position (thus discarding the first character of the string), and the
+process is restarted.
+If the string is initially empty, no attempt is made to match any regular
+expressions.
+Instead, the auxiliary scanner <CODE>auxNUL</CODE> is invoked immediately.
+If this auxiliary scanner returns a pointer to an empty string then the
+auxiliary scanner <CODE>auxEOF</CODE> is invoked immediately.
+Finally, if <CODE>auxEOF</CODE> returns a pointer to an empty string then the
+Token processor <CODE>EndOfText</CODE> is invoked immediately.
+(If either <CODE>auxNUL</CODE> or <CODE>auxEOF</CODE> returns a pointer to a non-empty
+string, scanning begins on this string as though <CODE>TokenEnd</CODE> had
+pointed to it initially.)
+<P>
+<CODE>TokenStart</CODE> addresses a sequence of length <CODE>TokenEnd-TokenStart</CODE>
+when a token processor is invoked
+(see  <A HREF="lex_1.html#SEC10">Token Processors</A>).
+Because <CODE>TokenStart</CODE> and <CODE>TokenEnd</CODE> are exported variables, the
+token processor may change them if that is appropriate.
+All memory locations below the location pointed to by <CODE>TokenStart</CODE>
+are undefined in the fullest sense of the word:
+Their contents are unknown, and they may not even exist.
+Memory locations beginning with the one pointed to by <CODE>TokenStart</CODE>,
+up to but not including the one pointed to by <CODE>TokenEnd</CODE>, are known to
+contain a sequence of non-NUL characters.
+<CODE>TokenEnd</CODE> points to a sequence of characters, the last of which is an
+ASCII NUL.
+If the token processor modifies the contents of <CODE>TokenStart</CODE> or
+<CODE>TokenEnd</CODE>, it must ensure that these conditions hold after the
+modification.
+<P>
+<H2><A NAME="SEC28" HREF="lex_toc.html#SEC28">Resetting the Scan Pointer</A></H2>
+<P>
+If the exported variable <CODE>ResetScan</CODE> is non-zero when the operation
+<CODE>glalex</CODE> is invoked, the lexical analyzer's first action is to execute the
+macro <CODE>SCANPTR</CODE>.
+<CODE>SCANPTR</CODE> guarantees that <CODE>TokenEnd</CODE> addresses the string to be
+scanned.
+If <CODE>ResetScan</CODE> is zero when <CODE>glalex</CODE> is invoked, <CODE>TokenEnd</CODE>
+is assumed to address that string already.
+<CODE>ResetScan</CODE> is statically initialized to <CODE>1</CODE>, meaning that
+<CODE>SCANPTR</CODE> will be executed on the first invocation of <CODE>glalex</CODE>.
+<P>
+In the distributed system, <CODE>SCANPTR</CODE> sets <CODE>TokenEnd</CODE> to point to
+the first character of the source module's text buffer.
+Since this is also the first character of a line, <CODE>StartLine</CODE> must
+also be set (see  <A HREF="lex_3.html#SEC17">Maintaining the Source Text Coordinates</A>):
+<P>
+<A NAME="IDX165"></A>
+<PRE>
+#define SCANPTR { TokenEnd = TEXTSTART; StartLine = TokenEnd - 1; }
+</PRE>
+<P>
+See  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>.
+This implementation can be changed by supplying a file <TT>`scanops.h'</TT>,
+containing a new definition of <CODE>SCANPTR</CODE>,
+as one of your specification files.
+<P>
+<CODE>ResetScan</CODE> is set to zero after <CODE>SCANPTR</CODE> has been executed.
+Normally, it will never again have the value <CODE>1</CODE>.
+Thus <CODE>SCANPTR</CODE> will not be executed on any subsequent invocation of
+<CODE>glalex</CODE>.
+Periodic refilling of the source module's text buffer and associated
+re-setting of <CODE>TokenEnd</CODE> is handled by <CODE>auxNUL</CODE>
+when the lexical analyzer detects that the string is exhausted.
+More complex behavior, using <CODE>ResetScan</CODE> to force resets at arbitrary
+points, is always possible via token processors or other clients.
+<P>
+<CODE>TokenEnd</CODE> is statically initialized to <CODE>0</CODE>.
+Once scanning has begun, <CODE>TokenEnd</CODE> should always point to a location
+in the source buffer (see  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>).
+Thus <CODE>SCANPTR</CODE> can normally distinguish between initialization and
+arbitrary re-setting by testing <CODE>TokenEnd</CODE>.
+(If user code sets <CODE>TokenEnd</CODE> to <CODE>0</CODE>, of course, this test may
+not be valid.)
+<P>
+<H2><A NAME="SEC29" HREF="lex_toc.html#SEC29">The Classification Operation</A></H2>
+<P>
+The classification operation <CODE>glalex</CODE> is invoked with a pointer to an
+integer variable that may be set to the value
+representing the classified sequence.
+An integer result specifying the classification is returned by
+<CODE>glalex</CODE>, and the coordinates of the first character of the sequence
+are stored in the error module's exported variable <CODE>curpos</CODE>
+(see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of Library Reference Manual</A>).
+<P>
+There are three points at which these interactions can be altered:
+<P>
+<OL>
+<LI>
+Setting coordinate values
+<LI>
+Deciding on a continuation after a classification
+<LI>
+Returning a classification
+</OL>
+<P>
+All of these alterations are made by supplying macro definitions in a
+specification file called <TT>`scanops.h'</TT>.
+The remainder of this section defines the macro interfaces and gives the
+default implementations.
+<P>
+<H3><A NAME="SEC30" HREF="lex_toc.html#SEC30">Setting coordinate values</A></H3>
+<P>
+The coordinates of the first character of a sequence are set by the macro
+<CODE>SETCOORD</CODE>.
+Its default implementation uses the standard coordinate invariant
+(see  <A HREF="lex_3.html#SEC17">Maintaining the Source Text Coordinates</A>):
+<P>
+<A NAME="IDX166"></A>
+<PRE>
+/* Set the coordinates of the current token
+ *   On entry-
+ *     LineNum=index of the current line in the entire source text
+ *     p=index of the current column in the entire source line
+ *   On exit-
+ *     curpos has been updated to contain the current position as its
+ *     left coordinate
+ */
+#define SETCOORD(p) { LineOf(curpos) = LineNum; ColOf(curpos) = (p); }
+</PRE>
+<P>
+When execution monitoring
+(see  <A HREF="mon_toc.html">Monitoring of Monitoring</A>) is in effect, more care
+must be taken.
+<A NAME="IDX167"></A>
+In addition to the above, <CODE>SETCOORD</CODE> must also set the cumulative
+column position, which is the column position within the overall input
+stream (as opposed to just the current input file).
+Ordinarily the two column positions will be the same, so the default
+implementation of <CODE>SETCOORD</CODE> for monitoring is:
+<P>
+<PRE>
+#define SETCOORD(p) { LineOf(curpos) = LineNum; \
+		      ColOf(curpos) = CumColOf(curpos) = (p); }
+</PRE>
+<P>
+When monitoring, it is also necessary to set the coordinates of the
+first character beyond the sequence.
+This is handled by the macro <CODE>SETENDCOORD</CODE>:
+<P>
+<A NAME="IDX168"></A>
+<PRE>
+/* Set the coordinates of the end of the current token
+ *   On entry-
+ *     LineNum=index of the current line in the entire source text
+ *     p=index of the current column in the entire source line
+ *   On exit-
+ *     curpos has been updated to contain the current position as its
+ *     right coordinate
+ */
+#ifndef SETENDCOORD
+#define SETENDCOORD(p) { RLineOf(curpos) = LineNum; \
+			 RColOf(curpos) = RCumColOf(curpos) = (p); }
+#endif
+</PRE>
+<P>
+<H3><A NAME="SEC31" HREF="lex_toc.html#SEC31">Deciding on a continuation after a classification</A></H3>
+<P>
+Classification is complete after the regular expression has been matched,
+any specified auxiliary scanner invoked, and any specified token processor
+invoked.
+At this point, one of three distinct actions is possible:
+<P>
+<DL COMPACT>
+<DT><CODE>RETURN v</CODE>
+<DD>Terminate the invocation of <CODE>glalex</CODE>, returning the value <CODE>v</CODE> as
+the classification.
+<DT><CODE>goto rescan</CODE>
+<DD>Start a new scan at the character addressed by <CODE>TokenEnd</CODE>,
+without changing the coordinate value.
+<DT><CODE>continue</CODE>
+<DD>Start a new scan at the character addressed by <CODE>TokenEnd</CODE>,
+resetting the coordinates to the coordinates of that character.
+</DL>
+<P>
+<CODE>WRAPUP</CODE> is the macro responsible for deciding among these
+possibilities.
+When it is executed, <CODE>TokenEnd</CODE> addresses the first character beyond
+the classified sequence and <CODE>extcode</CODE> holds the classification code.
+Here is the default implementation:
+<P>
+<A NAME="IDX169"></A>
+<PRE>
+#define WRAPUP { if (extcode != NORETURN) RETURN extcode; }
+</PRE>
+<P>
+If <CODE>WRAPUP</CODE> does not transfer control, the result is the
+<CODE>continue</CODE> action.
+Thus the default implementation of <CODE>WRAPUP</CODE> terminates the invocation
+of <CODE>glalex</CODE> if the current character sequence is not classified as a
+comment (<CODE>extcode != NORETURN</CODE>), and starts a new scan at the next
+character if the current character sequence is classified as a comment.
+<P>
+If execution monitoring is in effect, the classification event must be
+reported in addition to selecting a continuation:
+<P>
+<A NAME="IDX170"></A>
+<PRE>
+#define WRAPUPMONITOR { \
+  if (extcode != NORETURN) { \
+    char save = *TokenEnd; \
+    *TokenEnd = '\0'; \
+    generate_token("token", LineOf(curpos), ColOf(curpos), \
+		    CumColOf(curpos), RLineOf(curpos), RColOf(curpos), \
+		    RCumColOf(curpos), TokenStart, TokenEnd - TokenStart, \
+		    *v, extcode); \
+    *TokenEnd = save; \
+  } \
+}
+</PRE>
+<P>
+<CODE>WRAPUPMONITOR</CODE> is invoked instead of <CODE>WRAPUP</CODE> if execution
+monitoring is in effect.
+<P>
+<H3><A NAME="SEC32" HREF="lex_toc.html#SEC32">Returning a classification</A></H3>
+<P>
+Once the decision has been made to terminate the <CODE>glalex</CODE> operation
+and report the classification, it is possible to carry out arbitrary
+operations in addition to returning the classification code.
+For example, execution monitoring requires that this event be reported.
+Here is the default implementation:
+<P>
+<A NAME="IDX171"></A>
+<A NAME="IDX172"></A>
+<PRE>
+#ifdef MONITOR
+#define RETURN(v) { generate_leave("lexical"); return v; }
+#else
+#define RETURN(v) { return v; }
+#endif
+</PRE>
+<P>
+<H2><A NAME="SEC33" HREF="lex_toc.html#SEC33">An Example of Interface Usage</A></H2>
+<P>
+Recognition of Occam2 block structure from indentation is an example of
+how a token processor might use the lexical analyzer interface
+(see  <A HREF="lex_4.html#SEC22">Using Literal Symbols to Represent Other Things</A>).
+The token processor <CODE>OccamIndent</CODE> is invoked after a newline character
+(possibly followed by spaces and/or tabs) has been recognized:
+<P>
+<PRE>
+#include "err.h"
+#include "gla.h"
+#include "source.h"
+#include "litcode.h"
+
+extern char *auxNUL();
+extern char *coordAdjust();
+
+#define MAXNEST 50
+static int IndentStack[MAXNEST] = {1};
+static int *Current = IndentStack;
+
+void
+OccamIndent(char *start, int length, int *syncode, int *intrinsic)
+{ if (start[length] == '\0') {
+    start = auxNUL(start, length);
+    if (start[length] != '\0') { TokenEnd = start; return; };
+    TokenEnd = start + length;
+  }
+
+  if (*TokenEnd == '\0' &#38;&#38; Current == IndentStack) return;
+
+  { char *OldStart = StartLine;
+    int OldLine = LineNum, Position;
+
+    (void)coordAdjust(start, length); Position = TokenEnd-StartLine;
+    if (*Current == Position) *syncode = Separate;
+    else if (*Current &#60; Position) {
+      *syncode = Initiate;
+      if (Current == IndentStack + MAXNEST)
+        message(DEADLY, "Nesting depth exceeded", 0, &#38;curpos);
+      *++Current = Position;
+    } else {
+      *syncode = Terminate; Current--;
+      LineNum = OldLine; StartLine = OldStart; TokenEnd = start;
+    }
+  }
+}
+</PRE>
+<P>
+Since the source buffer is guaranteed only to hold an integral number of
+lines (see  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>),
+<CODE>OccamIndent</CODE> must first refill the buffer if necessary.
+The library routine <CODE>auxNUL</CODE> carries out this task, returning a
+pointer to the character sequence passed to it
+(see  <A HREF="lex_1.html#SEC8">Available scanners</A>).
+Remember that the character sequence may be moved in the process of refilling
+the buffer, and therefore it is vital to reset both <CODE>start</CODE> and
+<CODE>TokenEnd</CODE> after the operation.
+<P>
+If <CODE>auxNUL</CODE> is invoked and adds characters to the buffer, then those
+characters might be white space that should have been part of the original
+pattern.
+In this case <CODE>OccamIndent</CODE> can return, having set <CODE>TokenEnd</CODE> to
+point to the first character of the original sequence.
+Since the sequence was initially classified as a comment (because the
+specification did not begin with an identifier followed by a colon,
+see  <A HREF="lex_4.html#SEC22">Using Literal Symbols to Represent Other Things</A>), the
+overall effect will be to re-scan the newline and the text now following
+it.
+<P>
+If <CODE>auxNUL</CODE> is invoked but does not add characters to the buffer, then
+the newline originally matched is the last character of the file.
+<CODE>TokenEnd</CODE> should be set to point to the character following the
+newline.
+<P>
+When the end of the file has been reached, and no blocks remain
+unterminated, then the newline character has no meaning.
+By returning under these conditions, <CODE>OccamIndent</CODE> classifies the
+newline as a comment.
+Otherwise, the character sequence matched by the pattern must be
+interpreted on the basis of the indentation it represents.
+<P>
+Because a single character sequence may terminate any number of blocks, it
+may be necessary to interpret it as a sequence of terminators.
+The easiest way to do this is to keep re-scanning the same sequence,
+returning one terminator each time, until all of the relevant blocks have
+been terminated.
+In order to make that possible, <CODE>OccamIndent</CODE> must save the current
+values of the pointer from which column indexes are determined
+(<CODE>StartLine</CODE>) and the cumulative line number (<CODE>LineNum</CODE>).
+<P>
+The pattern with which <CODE>OccamIndent</CODE> is associated will match a
+character sequence beginning with a newline and containing an arbitrary
+sequence of spaces and tabs.
+To determine the column index of the first character following this
+sequence, apply <CODE>coordAdjust</CODE> to it (see  <A HREF="lex_1.html#SEC8">Available scanners</A>).
+That auxiliary scanner leaves the character sequence unchanged, but
+re-establishes the invariant on <CODE>LineNum</CODE> and <CODE>StartLine</CODE>
+(see  <A HREF="lex_3.html#SEC17">Maintaining the Source Text Coordinates</A>).
+After the invariant is re-established, the column index can be computed.
+<P>
+<CODE>Current</CODE> points to the element of <CODE>IndentStack</CODE> containing the
+column index of the first character of a line belonging to the current block.
+(If no block has been opened, the value is 1.)
+When the column index of the character following the initial white space
+is equal to this value, that white space should be classified as a
+separator.
+Otherwise, if the column index shows an indentation then the white space
+should be classified as an initiator and the new column position should be
+pushed onto the stack.
+Stack overflow is a deadly error, making further processing impossible
+(see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of Library Reference Manual</A>).
+Finally, if the column index shows an exdentation then the white space
+should be classified as a terminator and the column position for the
+terminated block deleted from the stack.
+<P>
+When a newline terminates a block, it must be re-scanned and interpreted in
+the context of the text surrounding the terminated block.
+Therefore in this case <CODE>StartLine</CODE> and <CODE>LineNum</CODE> are restored to
+the values they had before <CODE>coordAdjust</CODE> was invoked, and
+<CODE>TokenStart</CODE> is set to point to the newline character at the start of
+the sequence.
+Thus the next invocation of the lexical analyzer will again recognize the
+sequence and invoke <CODE>OccamIndent</CODE> to interpret it.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

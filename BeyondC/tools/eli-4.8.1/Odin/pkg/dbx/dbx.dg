@@ -1,0 +1,17 @@
+
+# Output Object Types
+
+:dbx 'symbolic debugger run'? => :EXECUTABLE;
+
+
+# Parameter Types
+
++core 'core dump'? => :first;
+
++gnu 'use gnu tools'? => :first;
+
+
+# Tools
+
+EXEC (dbx.sh) (:exe) (+core) (+gnu) 
+   => (:dbx);

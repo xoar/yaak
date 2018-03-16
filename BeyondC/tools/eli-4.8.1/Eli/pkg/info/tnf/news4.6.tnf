@@ -1,0 +1,138 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@setfilename news4.6
+@settitle New Features of Eli Version 4.6
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{New Features of Eli Version 4.6}
+@sp 4
+@center Uwe Kastens
+@sp 1
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 2
+@center A. M. Sloane
+@sp 1
+@center Department of Computing
+@center Division of Information and Communication Sciences
+@center Macquarie University
+@center Sydney, NSW 2109 
+@center Australia
+@sp 2
+@center W. M. Waite
+@sp 1
+@center Department of Electrical and Computer Engineering
+@center University of Colorado
+@center Boulder, CO  80309-0425
+@center USA
+@sp 4
+@center $Date: 2009/07/19 21:07:35 $
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node Top
+@top New Features of Eli Version 4.6
+
+This document gives information about new facilities available in Eli
+version 4.6 and those modifications made since the previous distributed
+Eli version 4.5 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here.
+
+@menu
+* Package::		Additional Packages
+* EliCmd::		New @code{eli} Parameter
+* installpkg::		The @code{installpkg} Product
+
+* Index::                       
+@end menu
+
+@node Package
+@chapter Additional Packages
+
+Eli is a collection of
+@cindex package
+@dfn{packages} that define sets of
+tools and workflow patterns.
+The actual generation process is handled by
+@cindex Odin
+@dfn{Odin},
+a program designed to manage a collection of artifacts and tools
+to provide products that are up-to-date
+with respect to all of the raw material on which they are based.
+
+Many of the packages included in the Eli distribution define tools and
+workflow patterns that, although they support text-processor generation,
+are useful for other applications.
+Version 4.6 simplifies the processes of modifying existing packages
+and of adding new packages to take advantage of these facilities.
+
+We are also making additional packages available individually in
+conjunction with the standard Eli distribution.
+These additional packages are distributed as tar files whose names begin
+with @code{pkg-}.
+
+For those interested in constructing their own packages, the best reference
+is the book @cite{Generating Software from Specifications}
+(see @code{http://www.jbpub.com/catalog/0763741248/}).
+
+@node EliCmd
+@chapter New @code{eli} Parameter
+
+We have added a parameter
+@cindex @code{-p} parameter
+@cindex parameters, @code{-p}
+@code{-p @samp{dir}} to the
+@cindex @code{eli} command
+@cindex commands, @code{eli}
+@code{eli} command
+(@pxref{Capability,,Packages in the cache,sysadmin,
+Eli System Administration Guide}).
+Here @samp{dir} is the absolute path name of a directory containing either
+a package or a package collection
+(@pxref{Packages,,Package Management,sysadmin,
+Eli System Administration Guide}).
+
+An @code{eli} command may have any number of @code{-p} parameters, which
+are considered in order from left to right.
+They are effective only when the cache specified by the @code{eli} command
+does not exist, or when it is being rebuilt because the @code{-R} parameter
+is also given.
+In either case, the package(s) specified are added to the set of packages
+to be used in building the cache
+(@pxref{Caches,,Cache Management,sysadmin,Eli System Administration Guide}).
+
+@node installpkg
+@chapter The @code{installpkg} Product
+
+The standard Eli packages can be installed in a
+@cindex package library
+library that can be updated
+without affecting any caches currently being used
+(@pxref{Install,,Installation,sysadmin,Eli System Administration Guide}).
+Updates only take effect if a new cache is created or an existing cache is
+reset by executing and @code{eli} command on that cache with the @code{-R}
+parameter.
+
+We have added the
+@cindex @code{installpkg} product
+@code{installpkg} product to allow users to install
+additional packages in the standard library or to create their own
+libraries
+(@pxref{PkgInstall,,Installing additional packages,sysadmin,
+Eli System Administration Guide}).
+To take advantage of this facility, the packages must be @dfn{versioned}
+(@pxref{Versioning,,Versioned packages,sysadmin,
+Eli System Administration Guide}).
+
+@node Index
+@unnumbered Index
+@printindex cp
+@contents
+@bye

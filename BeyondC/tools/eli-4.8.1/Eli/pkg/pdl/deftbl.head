@@ -1,0 +1,5 @@
+/* $Id: deftbl.head,v 1.1 1992/06/20 19:04:11 kadhim Exp $ */
+/* Type definitions for the property list module */
+
+#include "deftbl.h"
+

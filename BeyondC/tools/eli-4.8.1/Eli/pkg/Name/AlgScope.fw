@@ -1,0 +1,293 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: AlgScope.fw,v 5.2 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements consistent renaming of identifiers.
+Identifier occurrences are bound to object keys of type DefTableKey
+according to Algol-like scope rules:
+
+A binding is valid within the whole smallest range containing
+the definition, except in inner ranges where a binding for the
+same identifier holds.
+
+A binding is to be understood as a triple (idn, env, k) such that
+the identifier idn is bound to the key k in the innermost scope
+of the environment env. This module establishes bindings
+for defining identifier occurrences and searches bindings for
+used identifier occurrences. The results of these operations
+are provided as attributes of symbols which represent identifier
+occurrences. There is always a pair of such attributes, one
+of type Binding, that allows to access the triple information,
+and one of type DefTableKey, that is the key component of the
+triple. 
+(The latter is kept for backward compatibility and
+for convenience of use. The describing text below refers only
+to the key attribute, it does not mention explicitly that
+a binding attribute comes along with it.)
+
+This module is instantiated generically.
+If identifiers are to be bound in different name spaces that do not
+affect each other, then several instantiations of this module
+are to be used.
+
+On instantiation an optional
+instance parameter may be supplied. Its value is preceeded to names
+used in this module in order to allow several instances of the
+module to coincide in one specification. If this text is obtained
+from an instantiation the instance parameter is the string enclosed
+in the following brackets [|NAME|]. In order to see which names
+are affected by the instance parameter you may look at the non-instantiated
+module.
+
+On instantiation an optional
+referto parameter may be supplied. Its value is preceeded to
+Key attribute names in order to allow one symbol representing an
+identifier occurrence to be bound in different name spaces.
+If that is not the case the referto parameter should not be set
+to simplify the use of other library modules that depend on
+Key attributes.
+If this text is obtained
+from an instantiation the referto parameter is the string enclosed
+in the following brackets [|KEY|].
+
+This module provides the following computational roles:
+
+~O~<|NAME|AlgScope.lido~>~{
+~<|NAME|RootScope~>
+~<|NAME|RangeScope~>
+~<|NAME|AnyScope~>
+~<|NAME|IdDefScope~>
+~<|NAME|IdUseEnv~>
+~<|NAME|IdUseScope~>
+~<|NAME|ChkIdUse~>
+~}
+
+Usage Overview:
+
+|NAME|RootScope is inherited to the grammar root by default.
+The other SYMBOLs
+may be used depending on the particular scope rule to be specified.
+
+The main results of using this module are the bindings of
+identifier occurrences represented by the attibutes
+|NAME|IdDefScope.|KEY|Key, |NAME|IdUseEnv.|KEY|Key, and
+|NAME|IdUseScope.|KEY|Key.
+|NAME|ChkIdUse may be used to issue a message if the is no such binding.
+
+Usually both |NAME|IdDefScope and |NAME|IdUseEnv are used.
+In specific cases of language rules any combination of
+|NAME|IdDefScope, |NAME|IdUseEnv, |NAME|IdUseScope
+may be used.
+
+The attributes |NAME|IdDefScope.Sym, |NAME|IdUseEnv.Sym, 
+|NAME|IdUseScope.Sym must represent the identifier encoding.
+
+The Computational Roles:
+
+|NAME|RootScope is the root symbol containing all identifier occurrences
+and all |NAME|RangeScope. 
+
+SYNT.|NAME|Env is a fresh root environment where all environments
+of this name space are embedded in.
+It has the value of a global variable |NAME|RootEnv that is assigned
+in the initialization phase of the processor.
+It allows to introduce predefinitions by initialization code.
+
+SYNT.|NAME|GotKeys and SYNT.|NAME|GotLocKeys
+indicate that all keys defined in the root range are in SYNT.|NAME|Env.
+
+~$~<|NAME|RootScope~>==~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RootScope END;
+
+CLASS SYMBOL |NAME|RootScope:
+	|NAME|Env:	Environment	SYNT,	/* provided */
+	|NAME|GotLocKeys:	VOID	SYNT,	/* provided */
+	|NAME|GotKeys:		VOID	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|Env = |NAME|RootEnv;
+  SYNT.|NAME|GotLocKeys =
+	CONSTITUENTS |NAME|IdDefScope.|KEY|Key 
+	SHIELD (|NAME|RangeScope, |NAME|RootScope);
+  SYNT.|NAME|GotKeys = SYNT.|NAME|GotLocKeys;
+END;
+~}
+
+|NAME|RangeScope 
+is a symbol representing a range for the binding
+of defining identifier occurrences |NAME|IdDefScope.
+It may be nested in |NAME|RootScope or other ranges.
+
+INH.|NAME|Env
+is an environment of bindings.
+It may be overridden by an upper computation to get one environment
+for several |NAME|RangeScope forming one conceptual range.
+If INH.|NAME|Env is overridden, the computation of INH.|NAME|GotKeys must 
+be overridden accordingly by an upper computation.
+
+SYNT.|NAME|GotLocKeys
+indicates that all keys defined in this range (not regarding inner ranges)
+are in INH.|NAME|Env.
+
+INH.|NAME|GotKeys
+indicates that all keys defined in this and in all enclosing
+ranges are in INH.|NAME|Env. It is a precondition for finding
+a binding in |NAME|IdUseEnv.
+
+~$~<|NAME|RangeScope~>==~{
+CLASS SYMBOL |NAME|RangeScope:
+	|NAME|Env:	Environment	INH,	/* provided */
+	|NAME|GotLocKeys:	VOID	SYNT,	/* provided */
+	|NAME|GotKeys:		VOID	INH;	/* provided */
+
+CLASS SYMBOL |NAME|RangeScope COMPUTE
+  INH.|NAME|Env =
+  	NewScope (INCLUDING |NAME|AnyScope.|NAME|Env);
+  SYNT.|NAME|GotLocKeys =
+	CONSTITUENTS |NAME|IdDefScope.|KEY|Key SHIELD |NAME|AnyScope;
+  INH.|NAME|GotKeys =
+	INCLUDING |NAME|AnyScope.|NAME|GotKeys
+	<- SYNT.|NAME|GotLocKeys;
+END;
+~}
+
+|NAME|AnyScope 
+comprises the roles of |NAME|RootScope and |NAME|RangeScope.
+It may be used in constructs like INCLUDING |NAME|AnyScope.GotKeys.
+
+~$~<|NAME|AnyScope~>==~{
+CLASS SYMBOL |NAME|AnyScope END;
+CLASS SYMBOL |NAME|RootScope	INHERITS |NAME|AnyScope END;
+CLASS SYMBOL |NAME|RangeScope	INHERITS |NAME|AnyScope END;
+~}
+
+|NAME|IdDefScope 
+is a defining identifier occurrence THIS.Sym that is to be defined 
+in the scope of the immediately enclosing |NAME|AnyScope.
+
+~$~<|NAME|IdDefScope~>==~{
+CLASS SYMBOL |NAME|IdDefScope:
+	|KEY|Bind:	Binding		SYNT,	/* provided */
+	|KEY|Key:	DefTableKey	SYNT,	/* provided */
+	Sym:		int;			/* required */
+
+CLASS SYMBOL |NAME|IdDefScope COMPUTE
+  SYNT.|KEY|Bind =
+	BindIdn (INCLUDING |NAME|AnyScope.|NAME|Env, THIS.Sym);
+  SYNT.|KEY|Key = KeyOf (SYNT.|KEY|Bind);
+END;
+~}
+
+|NAME|IdUseEnv 
+is an applied identifier occurrence THIS.Sym that is to be
+bound in the scope of the immediately enclosing |NAME|AnyScope.
+
+~$~<|NAME|IdUseEnv~>==~{
+CLASS SYMBOL |NAME|IdUseEnv:
+	|KEY|Bind:	Binding		SYNT,	/* provided */
+	|KEY|Key:	DefTableKey	SYNT,	/* provided */
+	Sym:		int;			/* required */
+
+CLASS SYMBOL |NAME|IdUseEnv INHERITS _|NAME|InhPrecondDefault COMPUTE
+  SYNT.|KEY|Bind =
+	BindingInEnv (INCLUDING |NAME|AnyScope.|NAME|Env, THIS.Sym)
+	<- (INCLUDING |NAME|AnyScope.|NAME|GotKeys,
+	    SYNT._|NAME|InhPrecond);
+  SYNT.|KEY|Key = KeyOf (SYNT.|KEY|Bind);
+END;
+
+CLASS SYMBOL _|NAME|InhPrecondDefault:
+	_|NAME|InhPrecond:	VOID	SYNT;	/* local */
+CLASS SYMBOL _|NAME|InhPrecondDefault COMPUTE
+  SYNT._|NAME|InhPrecond = "yes";
+END;
+~}
+
+|NAME|IdUseScope
+is a symbol representing an applied identifier occurrence
+THIS.Sym that is to be bound in the scope of the
+smallest enclosing range. Enclosing environments are not considered.
+
+~$~<|NAME|IdUseScope~>==~{
+CLASS SYMBOL |NAME|IdUseScope:
+	Sym:		int,			/* required */
+	|KEY|Bind:	Binding		SYNT,	/* provided */
+	|KEY|Key:	DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|IdUseScope INHERITS _|NAME|InhPrecondDefault COMPUTE
+  SYNT.|KEY|Bind =
+	BindingInScope (INCLUDING |NAME|AnyScope.|NAME|Env, THIS.Sym)
+	<- (INCLUDING |NAME|AnyScope.|NAME|GotLocKeys,
+	    SYNT._|NAME|InhPrecond);
+  SYNT.|KEY|Key = KeyOf (SYNT.|KEY|Bind);
+END;
+~}
+
+|NAME|ChkIdUse
+may be used for any applied identifier occurrence to issue an error
+message if no binding is found.
+
+~$~<|NAME|ChkIdUse~>==~{
+CLASS SYMBOL |NAME|ChkIdUse:
+	|KEY|Key:	DefTableKey	SYNT,	/* required */
+	Sym:		int,			/* required */
+	SymErr:		int		SYNT,	/* provided */
+	SymMsg:		VOID		SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|ChkIdUse COMPUTE
+  SYNT.SymErr = EQ (THIS.|KEY|Key, NoKey);
+  SYNT.SymMsg = IF (THIS.SymErr,
+    message (ERROR, CatStrInd ("Identifier is not defined: ", THIS.Sym),
+           0, COORDREF));
+END;
+~}
+
+The following C module provides the variable |NAME|RootEnv, which may be
+used for initialization of bindings in the root environment,
+as done by the predefinition modules.
+
+~O~<|NAME|AlgScope.head~>~{
+#include "|NAME|AlgScope.h"
+#include "err.h"
+~}
+
+~O~<|NAME|AlgScope.h~>~{
+#include "envmod.h"
+extern Environment |NAME|RootEnv;
+~}
+
+~O~<|NAME|AlgScope.c~>~{
+#include "|NAME|AlgScope.h"
+Environment |NAME|RootEnv = NoEnv;
+~}
+
+~O~<|NAME|AlgScope.init~>~{
+if (|NAME|RootEnv == NoEnv) |NAME|RootEnv = NewEnv ();
+~}
+
+~O~<|NAME|AlgScope.specs~>~{
+$/Name/envmod.specs
+$/Tech/Strings.specs
+~}
+

@@ -1,0 +1,1202 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright, 1989, The Regents of the University of Colorado
+@comment %**start of header
+@setfilename ui
+@settitle Eli User Interface Reference Manual
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Eli User Interface Reference Manual}
+@sp 1
+@center $Revision: 2.5 $
+@include org.tnf
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@node top, , , (dir)
+
+@ifinfo
+$Revision: 2.5 $
+@end ifinfo
+
+Eli focuses a user's attention on the information required to specify a
+text processor, rather than the tools implementing it, by automating the
+process of tool invocation.
+Desired products, such as an executable program or the result of a test
+run, are regarded as @dfn{derived objects}.
+Eli responds to a request for a derived object by invoking the minimum
+number of tools necessary to produce that object.
+Derived objects are automatically stored for re-use in future derivations,
+thereby significantly shortening the time required to satisfy requests.
+
+This document is a reference manual for the general mechanisms by which a
+user can describe objects, make requests, and tailor Eli's behavior.
+For suggestions on using Eli to carry out specific tasks,
+@pxref{Example,,Example,novice,Guide for New Eli Users};
+for a complete list of the kinds of objects that can be derived,
+@pxref{Top, , , pp, Products and Parameters}.
+
+Although our primary emphasis here is on interactive use of Eli,
+all of the material except command line editing and the interactive help
+facility also applies to non-interactive use.
+The description of the Odinfile (@pxref{Odinfile}) is particularly
+important in that context.
+
+@menu
+* Objects::             Referring to objects.
+* Query::               Bringing objects up to date.
+* Copy::                Extracting and editing objects.
+* Unix::                Running Unix commands from Eli.
+* Odinfile::		Defining targets to simplify requests.
+* Command editing::     Recalling and editing previous commands.
+* Variables::           Influencing Eli with variables.
+* Help::                Obtaining information about valid options.
+* Index::
+@end menu
+
+@node objects, query, , top
+@chapter Referring to Objects
+
+The objects in Eli's universe are divided into two classes,
+@dfn{source objects}
+@findex source object
+and @dfn{derived objects}.
+@findex derived object
+Source objects are owned by the user of Eli,
+and may be manipulated in any way.
+Derived objects are owned by Eli; the user may inspect them
+or obtain copies of them on request,
+but has no direct access to them and cannot change them.
+Each derived object can be manufactured from some set of source
+objects, and therefore does not represent any @emph{new} information.
+
+Every object has a @dfn{name}.
+@findex object name
+@findex name, of an object
+The name of a source object is its Unix file name and
+the name of a derived object is an @dfn{odin-expression}.
+@findex odin-expressions
+@findex expressions for derived objects
+The remainder of this chapter explains the form and meaning of an
+odin-expression.
+
+Eli splits each file name into two parts: a @dfn{root} and a @dfn{type-name}.
+The type-name is the longest suffix of the
+file name that matches one of the declared source type suffixes.
+If no suffix match is found, the type-name is the empty string.
+
+@menu
+* lexical conventions::
+* selection expressions::
+* derivation expressions::
+* parameterization expressions::
+@end menu
+
+@node lexical conventions, selection expressions, , objects
+@section Lexical Conventions
+
+Lexically, an odin-expression consists of a sequence of
+@dfn{identifier} and @dfn{operator} tokens
+terminated by a newline character.
+An odin-expression can be continued on multiple lines
+by escaping each newline character with a backslash.
+This backslash (but not the newline) is deleted
+before the expression is parsed.
+Multiple odin-expressions can be specified on the same line
+by separating them with semicolons.
+
+An identifier token is just a sequence of characters.
+The following characters must be escaped to be included in an identifier:
+
+@example
+: + = ( ) / % ; ? $ < > ! <space> <tab> <newline> # \ '
+@end example
+
+@noindent
+A single character can be escaped by preceding it with a backslash
+(e.g. @code{lost\+found}).
+A sequence of characters can be escaped
+by enclosing them in apostrophes (e.g. @code{'lost+found'}).
+
+Unescaped @dfn{white space} characters (spaces, tabs, and newlines)
+are ignored during parsing except when they separate adjacent identifiers.
+A comment begins with a sharp and is terminated by the next newline character:
+
+@example
+# this is a comment
+@end example
+
+@noindent
+Each comment is equivalent to white space.
+
+An odin-expression can be surrounded by parentheses.
+Parentheses are required for nested odin-expressions
+(such as values of parameters) or for the empty expression
+@code{()} which represents an immutable empty file.
+
+@node selection expressions, derivation expressions, lexical conventions, objects
+@section Selection Expressions
+
+A selection expression, indicated by the slash operator,
+selects a file from a directory.
+The argument to the slash operator is the file name of the desired file.
+For example, the following odin-expression
+selects @code{prog.c} from the directory @code{src}:
+
+@example
+src/prog.c
+@end example
+
+@noindent
+Any special character must be escaped.
+For example, @code{src/c++/prog.c}
+must be escaped, as in @code{src/c\+\+/prog.c} or @code{'src/c++/prog.c'}.
+
+@node derivation expressions, parameterization expressions, selection expressions, objects
+@section Derivation Expressions
+
+A derivation expression, indicated by the colon operator,
+is used to specify a derived object.
+The argument to the colon operator is an @dfn{object type}
+(or @dfn{product})
+(@pxref{Top, , , pp, Products and Parameters}):
+
+@example
+sets.specs :exe
+sets.specs :source :names
+@end example
+
+@noindent
+The first line names the executable program derived from the specifications
+enumerated in file @file{sets.specs}, while the second names a text file
+containing the names of the C files, header files and Makefile from which
+that program can be built.
+
+A derived object can be a directory,
+in which case it is called a @dfn{derived directory}.
+Elements of a derived directory are selected with the
+same slash operator used to select elements of source directories.
+For example, if @code{examples/sets.specs:source} is a derived directory
+containing the source code files that implement a text processor,
+and this directory contains three files named
+@file{Makefile}, @file{driver.c}, and @file{HEAD.h},
+then these three files are named by the odin-expressions:
+
+@example
+examples/sets.specs:source/Makefile
+examples/sets.specs:source/driver.c
+examples/sets.specs:source/HEAD.h
+@end example
+
+@node parameterization expressions, , derivation expressions, objects
+@section Parameterization Expressions
+
+A parameterization expression, indicated by the @kbd{+} operator,
+extends an object with additional information
+that affects the derived objects produced from that object.
+The argument to the @kbd{+} operator is a @dfn{parameter type}
+@findex parameter type
+@findex type, of a parameter in an odin-expression
+(@pxref{Top, , , pp, Products and Parameters}),
+optionally followed by an @kbd{=} operator and a @dfn{value}
+@findex parameter value
+@findex value, of a parameter in an odin-expression
+consisting of a sequence of
+one or more identifiers and parenthesized odin-expressions:
+
+@example
+test +cmd=(sets.specs +fold :exe) +cmd=data :run
+test +cmd=(sets.specs +fold :exe) data :run
+test +cmd=(sets.specs +fold=' ' :exe) data :run
+test +cmd=(sets.specs +fold :exe) +cmd=data +cmd=data :run
+@end example
+
+@noindent
+(We shall see that all of these lines are equivalent.)
+
+If the parameter value is omitted,
+it is equivalent to specifying the identifier consisting of a single space
+@code{' '} as the value.
+
+The parameter values of a given parameter type in an odin-expression
+form an ordered set,
+where the order of the values is the order specified in the odin-expression.
+If multiple copies of the same parameter value appear, only the first
+of the multiple copies is kept.
+The parameter value lists of each parameter type are disjoint,
+therefore, the order of parameters of different types is not significant.
+
+If a parameter has a value that is a sequence,
+that value is only considered the same as another identical sequence.
+Thus the following odin-expression is @emph{not} equivalent to those given
+above:
+
+@example
+test +cmd=(sets.specs +fold :exe) data +cmd=data :run
+@end example
+
+@noindent
+Although @code{data} is an element of the parameter value list for
+parameter type @code{cmd}, it was introduced as part of a sequence.
+Its second appearance is as a single value, which is @emph{not} equivalent
+to the previous sequence.
+Therefore it will not be considered a duplicate element, and the final list
+will be @code{(sets.specs +fold :exe) data data}.
+
+Frequently, several odin-expressions share a common set of parameters.
+To support this kind of sharing,
+a parameterization expression can take the form of
+a @kbd{+} followed by a parenthesized odin-expression.
+The common set of parameters are then stored in the file
+named by the odin-expression.
+For example, suppose the file @file{my.prms} contained the text:
+
+@example
++debug +lib_sp=(/local/lib) +monitor +fold
+@end example
+
+@noindent
+The odin-expression @code{my.prms} denotes the file @file{my.prms} in the
+current directory, so the following odin-expressions would be equivalent:
+
+@example
+sets.specs +(my.prms) :exe
+sets.specs +debug +lib_sp=(/local/lib) +monitor +fold :exe
+@end example
+
+@node query, copy, objects, top
+@chapter Bringing Objects Up To Date
+
+A command consisting simply of an odin-expression requests Eli to
+bring the object named by the odin-expression up to
+date and report information (such as error and warning messages
+produced by tool steps that were run) concerning the object's status.
+The level of detail of this information is controlled by the value of the
+@code{ErrLevel} and @code{WarnLevel} variables
+(@pxref{errlevel, , ErrLevel}).
+
+@menu
+* Status::
+* error and warning messages::
+@end menu
+
+@node Status, error and warning messages, , query
+@section Status of Objects
+
+Associated with each object is a status level,
+where the status level is one of @code{OK}, @code{WARNING}, @code{ERROR},
+@code{CIRCULAR}, @code{NOFILE}, and @code{ABORT}.
+@code{OK} is the maximum status level and @code{ABORT} the minimum.
+
+The status of a given derived object depends on
+the results of the tools that produced that object.
+If any tool generated warning messages,
+the status level of the given object is at most @code{WARNING}.
+If any tool generated error messages,
+the status level of the given object is at most @code{ERROR}.
+If an object that was needed to create the
+given object is the object itself,
+the status level of the given object is at most @code{CIRCULAR}.
+If any object that was needed to generate the given object did not exist,
+the status level of the given object is at most @code{NOFILE}.
+If any object that was needed to
+generate the given object had status level @code{ERROR} or less,
+then the status level of the given object is set to be @code{ABORT}.
+
+The status of a source object is @code{NOFILE}
+if the host file does not exist,
+the status of the value of its target value
+(@pxref{Odinfile})
+if it is a target, and otherwise @code{OK}.
+
+@node error and warning messages,  , Status, query
+@section Error and Warning Messages
+
+The warning or error messages produced by all tool invocations
+are saved by Eli.
+The difference between an error and a warning is that
+an error prevents the tool from generating its output,
+while a warning indicates that although output was generated,
+it might be faulty.
+An example of an error message from a loader is:
+
+@example
+Unsatisfied external reference: "proc1".
+@end example
+
+An example of a warning message from a loader is:
+
+@example
+Multiply defined external: "proc2", first copy loaded.
+@end example
+
+A text file containing a summary of all error messages for an object
+can be obtained by applying the @code{:err} derivation to the object:
+
+@example
+prog.c :exe :err
+@end example
+
+@noindent
+Here file @code{prog.c:exe:err} contains a summary of all error messages
+produced by any tool used in the generation of the @code{prog.c:exe} object.
+The @code{:warn} derivation produces a text file containing both
+warning and error messages for an object.
+
+The @code{:err} and @code{:warn} derivations show the error reports just as
+they are produced by the tools.
+Eli's @code{error} derivation relates error messages to the source files
+causing them, and @code{:warning} does the same for both error and warning
+messages.
+Still more sophisticated anlysis is provided by the @code{:help}
+derivation, which starts a browsing session that links the errors to
+documentation and also makes the appropriate files available to the editor.
+These derivations have the same form as the derivations yielding the raw
+reports:
+
+@example
+prog.c :exe :error
+prog.c :exe :warning
+prog.c :exe :help
+@end example
+
+@node copy, unix, query, top
+@chapter Extracting and Editing Objects
+
+A command that includes an angle bracket (@kbd{>} or @kbd{<}) requests Eli
+to copy the contents of a specified object into another object.
+The copy is performed only if the status level
+of the specified object is no lower than @code{WARNING}
+(@pxref{Status}).
+The destination of the copy must be a source object,
+because only source objects can be directly modified by a user.
+
+There are two forms of the copy odin-command:
+@dfn{copy-to},
+@findex copy commands
+@findex @kbd{>}
+indicated by a right-angle-bracket @kbd{>}, and
+@dfn{copy-from},
+@findex @kbd{<}
+indicated by a left-angle-bracket @kbd{<}.
+Examples of these two odin-commands are:
+
+@example
+-> sets.specs +debug :exe > prog
+-> prog < sets.specs +debug :exe
+@end example
+
+If the destination object is a directory, the @dfn{label}
+of the specified object is used to name the new copy.
+The label of a source file is
+the last component of the pathname of the source file.
+The label of a derived object is @var{source-label.type-name}
+where @var{type-name} is the name of the output type
+of the tool that produced it
+(@pxref{Top, , , pp, Products and Parameters})
+and @var{source-label} is the label of the source file
+from which it is derived.
+For example, the label of @code{/usr/src/sets.specs} is @code{sets.specs} and
+the label of @code{/usr/src/sets.specs:exe} is @code{sets.specs.exe}.
+
+If a list is copied into a directory,
+each element of the list is copied individually into the directory.
+
+@menu
+* copying to standard output::
+* editing with the copy odin-command::
+@end menu
+
+@node copying to standard output, editing with the copy odin-command, , copy
+@section Copying to Standard Output
+
+If the destination object is omitted from a copy-to odin-command,
+the specified object is displayed on the current standard output device.
+For example, the odin-command:
+
+@example
+-> sets.con >
+@end example
+
+displays the file named @code{sets.con}.
+
+@node editing with the copy odin-command,  , copying to standard output, copy
+@section Editing with the Copy Command
+
+If only the destination object is specified in a copy-from odin-command,
+the specified object is given to the host-system editor
+indicated by the @code{$EDITOR} environment variable
+(@pxref{envvar, , Environment Variables})
+with the @code{vi} editor the default.
+For example, if the value of the @code{$EDITOR} variable is @code{emacs},
+then the following odin-command invokes the @code{emacs} editor
+on the file @code{prog.c}.
+
+@example
+-> prog.c <
+@end example
+
+
+@node unix, Odinfile, copy, top
+@chapter Execute Commands
+
+A command that includes an exclamation point (@kbd{!}) requests Eli to
+execute a host command.
+In its most general form, such a command consists of an odin-expression
+followed by an exclamation-point and a host-command line.
+Either the odin-expression or the host-command can be omitted:
+
+@example
+-> input +cmd=(sets.specs:exe) :stdout !more -s
+-> ! ls *.c
+-> build.specs :exe !
+-> commands !
+@end example
+
+@noindent
+The result of the command is to bring the object named by the
+odin-expression up to date,
+append its filename to the host-command line,
+and give the resulting extended host-command line
+to the host system for execution.
+
+If the host-command is omitted, the object itself is executed.
+If execute permission is set for the object,
+it is given to the host operating system for execution;
+otherwise, the object is assumed to contain @code{eli} commands that
+are executed by the interpreter.
+
+The exclamation-point has the special lexical property that if the
+first non-white space character following it
+is not a colon, a semicolon, or an equal sign,
+then the rest of the line is treated as a single escaped sequence of
+characters.
+This avoids the confusion resulting from interactions between host-command
+and Eli character escape conventions.
+A leading colon, equal sign, or white space character can be
+included in the escaped sequence of characters by preceding it
+with a backslash.
+
+@node Odinfile, Command editing, unix, top
+@chapter The Odinfile
+
+Eli consults file @file{Odinfile}
+@findex @file{Odinfile}
+in the current directory for information about the task at hand.
+@file{Odinfile} is used to define one or more @dfn{targets}.
+@findex target
+Most targets define some product that can be requested,
+using the notation @var{target} @code{==} @var{odin-expression}.
+Here are examples of the three common kinds of target:
+
+@table @code
+@item mkhdr == sets.specs :exe
+@findex @code{==}
+@code{mkhdr} is a @dfn{file target}.
+@findex file target
+This line specifies that @code{mkhdr} should always be equal to the derived
+file object @code{sets.specs :exe}.
+If the command @code{eli mkhdr}
+is given in a directory with a file @file{Odinfile} containing this line,
+it will result in a non-interactive Eli session guaranteeing that
+file @code{mkhdr} in this directory is up to date.
+(The same effect can be obtained in an interactive session by
+responding to the @code{->} prompt with
+@code{mkhdr}.)
+
+@item %results == input +cmd=(mkhdr) :stdout
+@findex @code{%}
+@code{%results} is a @dfn{virtual target}.
+@findex virtual target
+A virtual target is simply a name for an odin-expression, and can be used
+wherever and odin-expression is required.
+If the command @code{eli} @code{'%results>'}
+is given in a directory with a file @file{Odinfile} containing this line,
+it will result in a non-interactive Eli session guaranteeing that
+the derived object @code{input +cmd=(mkhdr) :stdout} is up to date,
+and writing the content to the standard output.
+(The same effect can be obtained in an interactive session by
+responding to the @code{->} prompt with @code{%results>}.)
+
+@item %test ! == . +cmd=diff (%results) (result) :run
+@findex @code{!}
+@code{%test} is an @dfn{executable target}.
+@findex executable target
+An executable target is a target that is executable.
+If the command @code{eli %test}
+is given in a directory with a file @file{Odinfile} containing this line,
+it will result in a non-interactive Eli session guaranteeing that
+the derived object @code{input +cmd=(mkhdr) :stdout} (named
+@code{%results}) is up to date,
+and executing the @code{diff} command with this object and the file
+@file{result} from the current directory as arguments.
+Execution will take place in the current directory.
+(The same effect can be obtained in an interactive session by
+responding to the @code{->} prompt with @code{%test}.)
+@end table
+
+The value of a target can also be specified directly as lines of text
+(a @emph{here document}), instead of as an @var{odin-expression}.
+In that case, the value declaration consists of
+two left-angle-brackets optionally followed by an arbitrary tag identifier.
+For example, the following @file{Odinfile} entry
+declares @code{prog.c.sm} to be a virtual text target:
+
+@example
+%prog.specs == << END
+    main.c
+    routines.c
+END
+@end example
+
+@noindent
+The value of @code{prog.specs} is then a file containing the text:
+
+@example
+    main.c
+    routines.c
+@end example
+
+If the tag identifier is omitted, the text value ends at the first line
+containing only whitespace characters.
+Thus the previous definition could also be written as:
+
+@example
+%prog.specs == <<
+    main.c
+    routines.c
+
+@end example
+
+@node Command editing, Variables, Odinfile, top
+@chapter The Command Editing Mechanism
+
+During an interactive Eli session, an odin-command may be edited
+before it is interpreted by typing either control characters
+or escape sequences.
+(An escape sequence is entered by typing @kbd{ESC} followed by one or
+more characters.
+Note that unlike control keys, case matters in escape sequences;
+@kbd{ESC F} is not the same as @kbd{ESC f}.)
+
+A control character or escape sequence may be typed anywhere on the line,
+not just at the beginning.
+In addition, a return may also be typed anywhere on the line, not just at
+the end.
+
+Most control characters and escape sequences may be given a repeat count,
+@var{n}, where @var{n} is a number.
+To enter a repeat count, type the escape key, the number, and then
+the character or escape sequence:
+
+@example
+ESC 4 ^F
+@end example
+
+@noindent
+This sequence moves the cursor forward four characters.
+If a command may be given a repeat count then the text ``[@var{n}]''
+is given at the end of its description.
+
+Eli accepts the following control characters when editing odin-commands:
+
+@table @kbd
+@item ^A
+Move to the beginning of the line
+
+@item ^B
+Move left (backwards) [@var{n}]
+
+@item ^D
+Delete character [@var{n}]
+
+@item ^E
+Move to end of line
+
+@item ^F
+Move right (forwards) [@var{n}]
+
+@item ^G
+Ring the bell
+
+@item ^H
+Delete character before cursor (backspace key) [@var{n}]
+
+@item ^I
+Complete filename (tab key); see below
+
+@item ^J
+Done with line (return key)
+
+@item ^K
+Kill to end of line (or column [@var{n}])
+
+@item ^L
+Redisplay line
+
+@item ^M
+Done with line (alternate return key)
+
+@item ^N
+Get next line from history [@var{n}]
+
+@item ^P
+Get previous line from history [@var{n}]
+
+@item ^R
+Search backward (forward if [@var{n}]) through history for text;
+must start line if text begins with an uparrow
+
+@item ^T
+Transpose characters
+
+@item ^V
+Insert next character, even if it is an edit command
+
+@item ^W
+Wipe to the mark
+
+@item ^X^X
+Exchange current location and mark
+
+@item ^Y
+Yank back last killed text
+
+@item ^[
+Start an escape sequence (escape key)
+
+@item ^]@var{c}
+Move forward to next character @var{c}
+
+@item ^?
+Delete character before cursor (delete key) [@var{n}]
+@end table
+
+Eli accepts the following escape sequences when editing odin-commands:
+
+@table @kbd
+@item ESC ^H
+Delete previous word (backspace key) [@var{n}]
+
+@item ESC DEL
+Delete previous word (delete key) [@var{n}]
+
+@item ESC SP
+Set the mark (space key); see ^X^X and ^Y above
+
+@item ESC .
+Get the last (or [@var{n}]'th) word from previous line
+
+@item ESC ?
+Show possible completions; see below
+
+@item ESC <
+Move to start of history
+
+@item ESC >
+Move to end of history
+
+@item ESC b
+Move backward a word [@var{n}]
+
+@item ESC d
+Delete word under cursor [@var{n}]
+
+@item ESC f
+Move forward a word [@var{n}]
+
+@item ESC l
+Make word lowercase [@var{n}]
+
+@item ESC m
+Toggle whether 8-bit chars display normally or with the @code{M-} prefix
+
+@item ESC u
+Make word uppercase [@var{n}]
+
+@item ESC y
+Yank back last killed text
+
+@item ESC w
+Make area up to mark yankable
+
+@item ESC @var{nn}
+Set repeat count to the number @var{nn}
+
+@item ESC @var{C}
+Read from environment variable @var{_C_}, where @var{C} is an uppercase letter
+@end table
+
+If you type the escape key followed by an uppercase letter, @var{C},
+then the contents of the environment variable @var{_C_}
+are read in as if you had typed them at the keyboard.
+For example, if the variable @code{_L_} contains the following:
+
+@example
+^A^Kecho '^V^[[H^V^[[2J'^M
+@end example
+
+Then typing @code{ESC L} will move to the beginning of the line, kill the
+entire line, enter the echo command needed to clear the terminal (if your
+terminal is like a VT-100), and send the line back to Eli.
+
+The command editing mechanism also supports filename completion.
+Suppose the root directory has the following files in it:
+
+@example
+bin	vmunix	core	vmunix.old
+@end example
+
+If you type @code{rm /v} and then the tab key, Eli will finish off
+as much of the name as possible by adding @code{munix}.
+Because the name is not unique, it will then beep.
+If you type the escape key and a question mark, it will display the
+two choices.
+If you then type a period and a tab, Eli will finish off the filename
+for you:
+
+@example
+rm /v[TAB]@var{munix}.[TAB]@var{old}
+@end example
+
+The tab key is shown by @code{[TAB]} and the automatically-entered text
+is shown as @var{munix}.
+
+@node Variables, Help, Command editing, top
+@chapter Variables
+
+The behavior of Eli can be modified by changing the value
+of an @dfn{Odin variable}.
+The functions affected by Odin variables are
+the current working directory,
+the distributed parallel build facility,
+the help facility, the error and log facility,
+the file change notification facility, and
+the maximum total file system space used by derived objects.
+
+A variable assignment odin-command consists of the name of an Odin variable
+followed by an @kbd{=} operator and an odin-expression.
+For example, the following odin-commands
+assign the value @code{../src} to the @code{Dir} variable
+and the value @code{4} to the @code{WarnLevel} variable
+(Odin variable names are case-insensitive).
+
+@example
+-> dir = ../src
+-> warnlevel = 4
+@end example
+
+
+If the value is omitted from a variable assignment odin-command,
+Eli displays the current value of the specified variable.
+After the preceding odin-commands, the current value of @code{WarnLevel}
+is found by the command:
+
+@example
+-> warnlevel =
+4
+@end example
+
+The Odin variables and their default values are:
+
+@itemize
+@item
+@code{Dir} = eli_invocation_directory
+@findex @code{Dir}
+@item
+@code{MaxBuilds} = 2
+@findex @code{MaxBuilds}
+@item
+@code{BuildHosts} = LOCAL : LOCAL
+@findex @code{BuildHosts}
+@item
+@code{Size} = 0
+@findex @code{Size}
+@item
+@code{KeepGoing} = yes
+@findex @code{KeepGoing}
+@item
+@code{History} = yes
+@findex @code{History}
+@item
+@code{LogLevel} = 2
+@findex @code{LogLevel}
+@item
+@code{ErrLevel} = 3
+@findex @code{ErrLevel}
+@item
+@code{WarnLevel} = 2
+@findex @code{WarnLevel}
+@item
+@code{HelpLevel} = 1
+@findex @code{HelpLevel}
+@item
+@code{VerifyLevel} = 2
+@findex @code{VerifyLevel}
+@end itemize
+
+An initial value for an Odin variable can be
+specified in an environment variable whose name is the
+the Odin variable name in capital letters preceded by the
+string @code{ODIN}.  For example, the initial value for @code{MaxBuilds}
+is specified in the @code{ODINMAXBUILDS} environment variable.
+
+@menu
+* dir::
+* buildhosts maxbuilds::
+* keepgoing::
+* history::
+* errlevel::
+* helplevel::
+* verifylevel::
+* size::
+* envvar::
+@end menu
+
+@node dir, buildhosts maxbuilds, , Variables
+@section Dir
+
+The current working directory can be changed by assigning a new value
+to the @code{Dir} variable.
+The value of the current working directory is especially significant for Eli,
+since it identifies source objects by their absolute pathname,
+and the current working directory provides the absolute pathname
+for all relative names.
+
+@node buildhosts maxbuilds, keepgoing, dir, Variables
+@section BuildHosts, MaxBuilds
+
+The @code{BuildHosts} variable specifies the list of hosts that are used to
+execute the tools that generate the derived objects.
+A tool is executed on the first entry in the @code{BuildHosts}
+list that does not have a currently executing tool.
+The name @code{LOCAL} refers to the local host.
+The @code{MaxBuilds} variable specifies the maximum number of tools
+to execute in parallel.
+
+The hosts in @code{BuildHosts} must have
+the same machine architecture and file namespace as the local host.
+
+A remote build host is activated by executing the shell script
+@code{rbs.sh} from the @code{odin} package.
+It may be necessary to customize this script for different operating
+systems.
+
+@node keepgoing, history, buildhosts maxbuilds, Variables
+@section KeepGoing
+
+When a build step reports errors, Eli will continue with build
+steps that do not depend on the failed build step.
+Setting the value of the @code{KeepGoing} variable to @code{no}
+will cause Eli to terminate the build when any build step reports an error.
+
+@node history, errlevel, keepgoing, Variables
+@section History
+
+The @code{History} variable specifies whether the command line editing
+is supported by Eli when it is used as an interactive command interpreter
+(@pxref{Command editing}).
+
+@node errlevel, helplevel, history, Variables
+@section ErrLevel, WarnLevel, LogLevel
+
+When an odin-command is executed, Eli indicates any errors or
+warnings associated with the odin-expressions specified in that odin-command.
+The @code{ErrLevel} and @code{WarnLevel} variables specify
+how detailed this report is.
+In particular, the user can choose whether
+to see final status information,
+to see messages incrementally as they are produced by tools steps,
+or to see a summary of all relevant messages (including those from
+previously cached tool steps).
+
+Eli can also produce a variety of information about the activities
+it is performing, such as a brief description of each tool that is
+invoked to satisfy a given request.
+The @code{LogLevel} variable specifies how detailed these messages are.
+
+@node helplevel, verifylevel, errlevel, Variables
+@section HelpLevel
+
+The @code{HelpLevel} variable specifies what degree of detail
+is provided when the user asks for a list of possible file or parameter types
+(@pxref{Help}).
+Normally, only commonly used types are described, but the @code{HelpLevel}
+can be increased to have all possible types described.
+
+@node verifylevel, size, helplevel, Variables
+@section VerifyLevel
+
+By default, Eli checks the modification dates of all relevant source files
+at the beginning of a session and before each interactive odin-command.
+If all file modifications during the session are performed through
+copy odin-commands or through an editor that has been upgraded
+to send a @code{filename!:test} odin-command to Eli whenever @code{filename}
+is modified,
+the @code{VerifyLevel} variable can be set to @code{1} and only the check
+at the beginning of the session is performed.
+If all file modifications since the last session have been performed
+in the above manner,
+@code{VerifyLevel} can be set to @code{0} and the initial check
+is avoided as well.
+
+@node size, envvar, verifylevel, Variables
+@section Size
+
+The value of the @code{Size} variable indicates how much disk space
+(in kilobytes) is currently being used by derived files.
+
+@node envvar,  , size, Variables
+@section Environment Variables
+
+Environment variables can be used in odin-commands given during interactive
+sessions, but are not allowed in an Odinfile
+(@pxref{Odinfile}).
+For example, if the environment variable @code{$HOME} has the value
+@file{/u/geoff}, then the following two odin-commands are equivalent.
+
+@example
+-> $HOME/sets.specs :exe
+-> /u/geoff/sets.specs :exe
+@end example
+
+The value of an environment variable can be quoted by immediately
+preceding it with a quoted identifier.
+For example, if the value of @code{$DATA} is @code{/french/words},
+then the following two odin-commands are equivalent.
+
+@example
+-> sets.specs +monitor +arg='/u/geoff'$DATA :mon
+-> sets.specs +monitor +arg='/u/geoff/french/words' :mon
+@end example
+
+An environment variable is given a new value
+with a variable assignment odin-command of the form:
+@var{Variable} @code{= !} @var{Value}.
+(Note the use of @kbd{!}, in contrast to an odin-variable assignment.
+It suspends Eli's lexical conventions -- @pxref{unix, , Execute Commands}.)
+Thus the following odin-command sets the value of the environment variable
+@code{$HOME} to the value @file{/u/clemm}:
+
+@example
+-> HOME = !/u/clemm
+@end example
+
+The expressions @code{~} and @code{~name} are treated as if they were
+environment variables, bound respectively to the login directory of the current
+user and the login directory of the user with login @code{name}.
+
+@node Help, Index, Variables, Top
+@chapter The Help Facility
+
+A simple context-sensitive help facility is provided
+to describe the syntax of odin-commands
+and the currently available object types and parameter types.
+If a user types a question-mark anywhere in an odin-command,
+Eli provides a description of what could appear at that location
+in the odin-command.
+
+@menu
+* source type help::
+* derivation help::
+* parameterization help::
+* variable help::
+@end menu
+
+@node source type help, derivation help, , Help
+@section Source Type Help
+
+If a list of the declared source object type-names is desired,
+a question-mark can be put in place of the extension for a file:
+
+@example
+-> sets?
+?*? Known Suffix Types:
+.lex_code ..... Basic symbol coding
+.reqmod ....... Names of required files overridable by the user
+.reqsym ....... Entry point symbols of required modules
+.dapto ........ Specification of events and messages for monitoring
+.delit ........ Literals to be deleted from the finite-state machine
+.specs ........ Set of specifications defining the desired processor
+.cola ......... Options for the parser generator cola
+.finl ......... Operations to be executed after finishing
+.gnrc ......... Generic module specification
+.head ......... Information to be prefaced to attribution modules
+.init ......... Operations to be executed before starting
+.libs ......... Libraries to include in the link
+.lido ......... Attribute grammar written in LIDO
+.perr ......... Parser error recovery information
+.roff ......... nroff/troff input
+,eqn .......... eqn input
+.bib .......... TeX bibliograph database
+.clp .......... CLP specification
+.con .......... Concrete syntax
+.ctl .......... Control options for LIGA processing
+.dvi .......... Device-independent formatted file from TeX
+.gla .......... Structure of comments and named terminals
+.map .......... Concrete/Abstract syntax mapping
+.oil .......... OIL specification
+.pdl .......... PDL specification
+.phi .......... Files to be included at specified places
+.ptg .......... PTG specification
+.str .......... String table initialization
+.sym .......... Symbolic grammar mappings
+.tex .......... TeX formatter input
+.tnf .......... Specification of a hypertext document
+.ygi .......... input grammar for the Tregrm tree-building parser generator
+,vw ........... a view-path system model
+.dg ........... Odin Derivation Graph
+.fw ........... FunnelWeb specification
+.ps ........... Postscript file
+.sm ........... system model of source code files
+,v ............ RCS version control file
+.a ............ object library archive
+.f ............ Fortran77 source code
+.l ............ scanner grammar
+.y ............ YACC input
+@end example
+
+This should be interpreted to mean that Eli will understand the types of
+the following source files (among others):
+
+@example
+sets.specs
+fortran.con
+build.HEAD.phi
+@end example
+
+@node derivation help, parameterization help, source type help, Help
+@section Derivation Help
+
+If a list of possible derivations is desired,
+a question-mark can be put in place of the derivation name,
+and Eli responds with a list of the
+possible object types that can appear at that position:
+
+@example
+-> sets.specs :exe :?
+*?* Possible Derivations:
+name .......... name of a file
+dir ........... directory of a file
+exe ........... Executable program
+label ......... label of a file
+warn .......... warnings
+help .......... Hypertext presentation of messages
+warning ....... Standard presentation of warning messages
+error ......... Standard presentation of error messages
+err ........... errors
+filename ...... filename of a file
+depend ........ source dependencies
+profile ....... execution profile
+redo .......... redo this object step
+redo_errs ..... redo all steps with errors
+diff .......... differences between two files
+rcp ........... archive
+roff .......... nroff/troff input
+eqn ........... output from eqn
+tbl ........... output from tbl
+nroff ......... output from nroff
+stdout ........ standard output from a test run
+output ........ output files from a test run
+@end example
+
+This should be interpreted to mean that Eli will understand the following
+derivations (among others):
+
+@example
+sets.specs :exe :help
+sets.specs :exe :redo
+sets.specs :exe :depend
+@end example
+
+@node parameterization help, variable help, derivation help, Help
+@section Parameterization Help
+
+If a list of the possible parameter types is desired,
+a question-mark can be put in place of the parameter,
+and Eli responds with a list of the possible
+parameter types that can appear at that position:
+
+@example
+-> sets.specs :exe +?
+*?* Possible Parameters :
+ignore ........ Prefix of include file names to be ignored
+lib ........... a library name
+lib_sp ........ name of a directory in an library search path
+prof_data ..... trace file
+prof_flags .... prof flags
+default ....... default value
+other ......... another file
+f_dest ........ file destination
+d_dest ........ directory destination
+mp ............ macro package
+cmd ........... host command
+need .......... run dependency
+@end example
+
+This should be interpreted to mean that Eli will understand the following
+derivations (among others):
+
+@example
+sets.specs :exe +ignore ...
+sets.specs :exe +d_dest ...
+sets.specs :exe +prof_data ...
+@end example
+
+A more exact form of parameter help can be specified by indicating
+which derivation you intend to apply to the parameterized object:
+
+@example
+-> sets.specs :exe +? :profile
+*?* Possible Parameters :
+prof_data ..... trace file
+prof_flags .... prof flags
+@end example
+
+This should be interpreted to mean that Eli will understand the following
+derivation (among others):
+
+@example
+sets.specs :exe +prof_data=foo :profile
+@end example
+
+Since the @code{+cmd} parameter is not relevant to the derivation
+from @code{:exe} to @code{:profile}, it is not listed.
+
+@node variable help,  , parameterization help, Help
+@section Variable Help
+
+A list of the available variable names is generated in response
+to the request @code{?=}:
+
+@example
+-> ? =
+Dir MaxBuilds BuildHosts Size KeepGoing History
+LogLevel ErrLevel WarnLevel HelpLevel VerifyLevel
+@end example
+
+A description of the possible values that can be assigned to a
+given variable is generated in response to the @var{Variable} @code{= ?}:
+
+@example
+   -> LogLevel = ?
+   0: No log information is generated.
+   1: Build commands are echoed.
+   2: And Eli commands.
+   3: And names of objects with errors.
+   4: And names of objects generated by tool scripts.
+   5: And names of objects generated by internal tools.
+   6: And names of objects deleted.
+   7: And names of objects touched by broadcast.
+@end example
+
+@node Index, , Help, Top
+@unnumbered Index
+@printindex fn
+
+@contents
+@bye

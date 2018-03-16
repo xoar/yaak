@@ -1,0 +1,25 @@
+# Output Object Types
+
+:run 'execution of a command line' => :EXECUTABLE;
+
+:stdout 'standard output from a test run'? => :PIPE;
+
+:output 'output files from a test run'? => :DERIVED-DIRECTORY;
+
+
+# Parameter Types
+
++cmd 'host command'? => :LIST;
+
++need 'run dependency'? => :LIST;
+
+
+# Tools
+
+EXEC (run.sh) (:FILE) (+cmd :ls) NEEDS (+cmd)& (+need)
+   => (:run);
+
+EXEC (pipe.run.sh) (:FILE) (+cmd :ls) NEEDS (+cmd) (+need)
+   => (:stdout) (:output);
+
+

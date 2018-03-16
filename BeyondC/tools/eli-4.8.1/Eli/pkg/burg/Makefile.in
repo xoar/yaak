@@ -1,0 +1,18 @@
+# $Id: Makefile.in,v 1.2 2003/06/30 02:19:03 waite Exp $
+# Bottom-up rewriting system generator
+# Copyright 1997, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/burg
+SRC	= burg.dg burg.err
+AUX	= Makefile.in Makefile version
+CMD	= burgOut.sh burgGen.sh
+EXE	= burg.exe
+AUXDIR	= burg
+
+@toolmk_h@
+
+burg.exe:	burg/burg.exe
+	@rm -f $@
+	@LINK@ $? $@

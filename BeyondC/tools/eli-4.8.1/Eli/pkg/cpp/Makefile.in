@@ -1,0 +1,21 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:45:00 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+# Copyright (c) 1994, 1995 Anthony M. Sloane
+
+CC	= @CC@
+
+DIR	= pkg/cpp
+SRC	= cpp.dg
+AUX	= Makefile Makefile.in do_cpp.sh.cpp version
+CMD	= cpp.sh cppErr.sh cpp_tab.sh do_cpp.sh incl.dir.sh
+EXE	= cpp.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= gnu_cpp
+
+@toolmk_h@
+
+cpp.exe:	gnu_cpp/cpp.exe
+	@rm -f $@
+	@LINK@ $? $@

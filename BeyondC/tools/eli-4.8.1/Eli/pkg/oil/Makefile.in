@@ -1,0 +1,22 @@
+# $Id: Makefile.in,v 1.4 2010/03/18 19:30:45 profw Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/oil
+SRC	= oil.dg oil.err oil.pdl oil.specs oil.dapto oil.tcl \
+	  oiladt2.h oiladt2a.c oiladt2c.c oiladt2d.c oiladt2f.c \
+	  oiladt2b.c oiladt2b.h OilList.fw oil.reqmod
+AUX	= oil.tnf Makefile Makefile.in version
+CMD	= oil_gen.sh oil_out.sh
+EXE	= oil.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= specs
+
+@toolmk_h@
+
+oil.exe:	specs/oil.exe
+	@rm -f $@
+	@LINK@ $? $@

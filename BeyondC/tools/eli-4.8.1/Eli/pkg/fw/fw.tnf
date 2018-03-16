@@ -1,0 +1,1702 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename fw
+@setchapternewpage odd
+@settitle FunnelWeb
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: fw.tnf,v 1.14 2013/02/02 04:34:47 profw Exp $
+
+@titlepage
+@sp 1
+@center @titlefont{FunnelWeb}
+@sp 4
+@center $Revision: 1.14 $
+@sp 4
+@center Based on the FunnelWeb User's Manual by Ross N. Williams
+@sp 2
+@center University of Paderborn
+@center D-4790 Paderborn
+@center F.R.G
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@comment *****************************************************************
+@node Top, Introduction, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@unnumbered FunnelWeb
+@end ifinfo
+
+@findex .fw
+@findex .fwi
+@findex literate programming
+FunnelWeb is a literate programming system.  It allows the construction
+of specifications containing both documentation and code fragments.  In
+Eli these specifications have @file{.fw} or @file{.fwi} file types.
+
+A FunnelWeb specification can contain documentation and fragments of
+code written in other Eli specification languages.  Eli will process a
+FunnelWeb specification as if it was a collection of specifications;
+just those specifications that it describes.  Also, it is possible to
+generate a documentation file from a FunnelWeb specification.  This
+documentation comprises the literate version of the specifications.
+
+This document is a reference manual for the contents of FunnelWeb
+specifications emphasizing the use of FunnelWeb in Eli.
+
+@menu
+* Introduction::		Things to get you started.
+
+FunnelWeb to produce Code:
+* Output Files::		How to include a specification fragment.
+* Extracting::                  Extracting Output Files with Eli.
+* Macros::			Defining and Macros.
+* Macro Calls::                 Using a Macro.
+* Macro Expansion::             Controlling Macro Expansion.
+
+FunnelWeb to typeset Documentation:
+* Target::			Selecting the Documentation processor.
+* Typesetting::                 Typesetting the Document with Eli.
+* Structure::                   Structuring the Documentation.
+* Marking Text::                Changing Character Layout.
+* Formatting::                  More Text Formatting.
+
+Miscellenous:
+* Input Processing::            How FunnelWeb preprocesses its input.
+* Grammar::                     FunnelWeb Syntax Description
+* Index::			An index to this manual.
+@end menu
+
+The complete FunnelWeb distribution is available via anonymous
+ftp from "ftp.ross.net" in the directory "clients/ross/funnelweb". 
+The Version 3.0 of the original FunnelWeb Users-Manual can also 
+be found in the Eli-Distribution in directory Eli/pkg/fw.
+
+@node Introduction, Output Files, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+This chapter contains an example for a first funnelweb specification. The
+commands used in this example are explained and Eli is used to generate a 
+documentation and to process the specification contained in this example.
+
+@findex Examples, FunnelWeb
+@findex FunnelWeb Example
+@example
+@@=~
+~p maximum_input_line_length = infinity
+~p maximum_output_line_length = infinity
+~p typesetter = texinfo
+~t title titlefont left "A First Funnelweb Specification"
+
+The file ~@{helloworld.lido~@} contains a minimal Eli-Specification, which
+accepts only the empty input file and prints ~@{Hello, World~@} to the
+standard output.
+
+~O~<helloworld.lido~>~@{
+RULE:   root ::= 
+COMPUTE
+        printf("Hello, World\n");
+END;
+~@}
+@end example
+
+Copy this specification file into the file @file{first.fw}. Now, you can
+use the following Eli-derivations:
+
+@table @code
+@findex @code{exe}
+@item first.fw:exe > first.exe
+Generates an executable processor from the specification and copies it
+as @file{first.exe} onto the harddisk.
+
+@item () +cmd=(first.fw:exe) :stdout>
+Generates an executable processor from the specification, runs it with
+an empty input file and shows its output.
+
+@findex @code{fwTexinfo}
+@findex @code{display}
+@item first.fw :fwTexinfo :display
+Generates the processor documentation and shows it in a window.
+
+@findex @code{dvi}
+@findex @code{xdvi}
+@item first.fw :fwTexinfo :dvi !xdvi
+Generates the processor documentation and runs it through texinfo to
+generate a @file{.dvi}-file. Then, it executes @code{xdvi} to show the
+documentation.
+
+@findex @code{pdf}
+@findex @code{acroread}
+@item first.fw :fwTexinfo :pdf !acroread
+Generates the processor documentation and runs it through texinfo and
+pdflatex to generate a @file{.pdf}-file.
+Then, it executes @code{acroread} to show the documentation.
+@end table
+
+In the following, the different components of the above specification
+are explained.
+
+@example
+@@=~
+@end example
+
+A FunnelWeb-Specification-file is built up from normal characters and
+FunnelWeb Commands. Every FunnelWeb-command starts with the
+macro-character which is @code{@@} by default. Some times it would be
+more convenient to change the macro character to some other, less used
+character. The above command changes the macro-character to @code{~}.
+
+@findex output file line length
+@findex input file line length
+@findex maximum output line length
+@findex maximum input line length
+
+@example
+~p @samp{maximum_input_line_length} = infinity
+~p @samp{maximum_output_line_length} = infinity
+@end example
+
+Normally, a funnelweb-specification file consists of lines with a
+maximal length of 80 and produces output-files consisting of lines,
+which are also 80 characters long. The above lines switch off these
+limitations.
+
+@findex typesetter
+@findex texinfo
+@example
+~p @samp{typesetter} =  @samp{texinfo}
+@end example
+
+FunnelWeb can produce documentation in one of a number of different formats.
+The above line selects @code{TexInfo} and is
+needed to use the @code{:fwTexinfo}-derivation in Eli.
+@xref{Target}, for more information.
+
+@example
+~t title titlefont left "A First Funnelweb Specification"
+@end example
+
+This is a special insertion that can be used to typeset a document-title
+for the generated document. Other possible insertins are a table of
+contents and a page break. @xref{Formatting}, for more information.
+
+@example
+The file ~@{helloworld.lido~@} contains ... standard output.
+@end example
+
+Any text between Macro-definitions and output-file-definitions contains
+documentation that is processed when a formatted documentation is
+requested. You can structure your document (@pxref{Structure}), change
+the font for text-parts (@pxref{Marking Text}) and insert special text
+parts such as a title or a table of contents (@pxref{Formatting}).
+
+@example
+~O~<helloworld.lido~>~@{
+...
+~@}
+@end example
+
+The specification-parts that should be processed by Eli are marked as
+Output-files with this command. Any text between the opening and the
+closing brace goes into the specified file, @file{helloworld.lido} in
+this case. Another method of composing output text are macros which can
+have parameters and are substituted in the output file command. 
+
+@chapter Producing Specifications
+
+@node Output Files, Extracting, Introduction, Top
+@comment  node-name,  next,  previous,  up
+@section Output Files
+
+@display
+@var{outputfile} ::= (@samp{@@N} | @samp{@@O}) @var{filename} [@samp{==}] @samp{@@@{} @var{expression} @samp{@@@}} .
+@end display
+
+When processing to obtain the specification, these directives create an
+@findex output files
+@findex filename
+output file named @dfn{filename} that contains an 
+@dfn{expression} consisting of text and calls to macros (defined
+later). Filenames must be unique within a FunnelWeb-file.
+
+The @samp{==}-part is optional an can be left out. It is included to
+pair the same option for macros.
+
+When processing to obtain the documentation, the @var{expression} is
+printed using the @code{tt font}. Above, the filename is set and below a
+note is included that this code is attached to an output file.
+
+The difference between @samp{@@N} and @samp{@@O} lies in the way in which
+the files are treated by Eli.
+A file extracted by @samp{@@O} becomes part of the specification described
+by the FunnelWeb file, while a file extracted by @samp{@@N} does not.
+@findex non-product files
+@findex files, non-product
+Most files should be extracted by @samp{@@O}; @dfn{non-product files},
+extracted by @samp{@@N}, are those that are used in the derivation of
+product components, but are not themselves components of the product.
+
+As an example of the use of a non-product file, consider the problem of
+making keywords case-insensitive but retaining case sensitivity in
+identifiers
+(@pxref{Keywords, , Making Literal Symbols Case Insensitive, lex,
+Lexical Analysis}).
+Here is a portion of a FunnelWeb file implementing such a processor:
+
+@example
+@@O@@<nolit.gla@@>==@@@{
+identifier: C_IDENTIFIER
+@@@}
+
+@@N@@<keyword.gla@@>==@@@{
+$[a-z]+
+@@@}
+
+@@O@@<keyword.specs@@>==@@@{
+keyword.gla :kwd
+@@@}
+@end example
+
+Note that the file @file{keyword.gla} can @emph{not} form part of the final
+product specification.
+If it did, the specified processor would treat all completely lower case
+identifiers as comments!
+Nevertheless, file @file{keyword.gla} is necessary to specify the
+representation of the keywords in the @emph{grammar} so that they can be
+extracted and processed separately
+(@pxref{Keywords, , Making Literal Symbols Case Insensitive, lex,
+Lexical Analysis}).
+Thus file @file{keyword.gla} is extracted by @samp{@@N}, while the other
+files are extracted by @samp{@@O}.
+
+@node Extracting, Macros, Output Files, Top
+@section Extracting Output Files with Eli
+
+Within Eli, the derivation @code{:fwGen} can be used to obtain a
+directory that contains all the output files contained in a FunnelWeb
+specification. With the sample specification from the Introduction, you
+can run following Eli-derivations:
+
+@table @code
+@item first.fw :fwGen !ls
+This generates a directory containing all the output files (only
+@file{helloworld.lido} in this case) and runs the command @code{ls} with
+its name.
+
+@item first.fw :fwGen/helloworld.lido>
+This generates a directory containing all the output files from
+@file{first.fw}. It then selects the file @file{helloworld.lido} and
+copies its contents to the standard output.
+@end table
+
+@node Macros, Macro Calls, Extracting, Top
+@comment  node-name,  next,  previous,  up
+@section Macros
+
+A macro definition
+binds a unique @dfn{macro name} to a @dfn{macro body} containing an
+@dfn{expression} consisting of text, calls to other macros, and formal
+parameters.  The syntax for a macro definition is as follows:
+
+@display
+@var{macro} ::= @samp{@@$} @var{name} [@var{formal_parameter_list}] 
+                [@samp{@@Z}] [@samp{@@M}] [@samp{==} / @samp{+=}] @samp{@@@{} @var{expression} @samp{@@@}} .
+@end display
+
+@findex macro attributes
+The complexity of the macro definition syntax is mostly to enable the
+user to attach various attributes to the macro.
+
+By default, a macro must be invoked exactly once by one other
+@findex @@Z
+macro or by an output file command. However, if the user uses the @code{@@Z}
+sequence in the macro definition, the macro is then permitted to be
+invoked zero times, as well as once.  Similarly, if the user uses the
+@findex @@M
+@code{@@M} sequence in the macro definition, the macro is permitted to be called
+many times as well as once.  If both @code{@@Z} and @code{@@M} are
+present then the macro is permitted to be invoked zero, one, or many
+times.
+
+The purpose of enforcing the default ``exactly one call'' rule is to
+flag pieces of code that the user may have defined in a macro but not
+hooked into the rest of the program.  Experience shows that this is a
+common error.  Similarly, it can be dangerous to multiply invoke a macro
+intended to be invoked only once.  For example, it may be dangerous to
+invoke a scrap of non-idempotent initialization code in two different
+parts of the main function of a program!
+
+If the text string @code{==}
+@findex ==
+(or nothing) follows the macro name, the expression that follows is the
+entire text of the macro body.  If the text string @code{+=}
+@findex +=
+follows the macro name, then more than one such definition is allowed
+(but not required) in the document and the body of the macro consists of
+the concatenation of all such expressions in the order in which they
+occur in the input file.  Such a macro is said to be additive and is
+@dfn{additively defined}.  Thus a macro body can either be defined in one
+place using one definition (using @code{==}) or it can be
+@emph{distributed} throughout the input file in a sequence of one or
+more macro definitions (using @code{+=}).  If neither @code{==} and
+@code{+=} are present, FunnelWeb assumes a default of @code{==}.
+
+Additively defined macros can have parameter lists and @code{@@Z} and
+@code{@@M} attributes, but these must be specified only in the first
+definition of the macro.  However, @code{+=} must appear in each
+definition.
+
+@menu
+* Names::			Macro names.
+* Parameter Lists::		Formal parameter lists to macros.
+@end menu
+
+@node Names, Parameter Lists,  , Macros
+@subsection Names
+@findex names
+@findex macro names
+@findex section names
+
+Names are used to identify macros and sections.  A name consists of a
+sequence of from zero to 80 printable characters, including the blank
+character.  End of line characters are not permitted in names.  Names are
+case sensitive; two different macros are permitted to have names that
+differ in case only.  Like free text, names are typeset by FunnelWeb and
+are safe from misinterpretation by the target typesetter.  For example,
+it is quite acceptable to use the macro name @code{@@<\medskip@@>}
+even if the target typesetter is @TeX{}.
+
+@display
+@var{name} ::= @samp{@@<} @var{name_text} @samp{@@>} .
+
+@var{name_text} ::= @{@var{ordinary_char} / @var{text_special}@} .
+
+@end display
+
+@node Parameter Lists,  , Names, Macros
+@subsection Formal Parameter Lists
+@findex formal parameter lists
+
+FunnelWeb allows macros to have up to nine macro parameters, named
+@code{@@1},
+@findex @@1...
+@code{@@2},..., @code{@@9}.  If a macro does not have a formal parameter
+list, it is defined to have no parameters, and an actual parameter list
+must not appear at the point of call.  If a macro has a formal parameter
+list, it is defined to have one or more parameters, and a corresponding
+actual parameter must be supplied for each formal parameter, at the
+point of call.
+
+Because FunnelWeb parameters have predictable names, the only
+information that a formal parameter list need convey is @emph{how many}
+parameters a macro has.  For this reason a formal parameter list takes
+the form of the highest numbered formal parameter desired, enclosed in
+parentheses sequences.
+
+@display
+@var{formal_parameter_list} ::= @samp{@@(} @var{formal_parameter} @samp{@@)} .
+
+@var{formal_parameter} ::= @samp{@@1} / @samp{@@2} / @samp{@@3} / @samp{@@4} / @samp{@@5} /
+                            @samp{@@6} / @samp{@@7} / @samp{@@8} / @samp{@@9} .
+@end display
+
+@node Macro Calls, Macro Expansion, Macros, Top
+@comment  node-name,  next,  previous,  up
+@section Macro Calls
+
+A macro call consists of a name optionally followed by an actual
+parameter list.  The number of parameters in the actual parameter list
+must be the same as the number of formal parameters specified in the
+definition of the macro.  If the macro has no formal parameter list, its
+call must have no actual parameter list.
+
+@display
+@var{macro_call} ::= @var{name} [@var{actual_parameter_list}] .
+
+@var{actual_parameter_list} ::= @samp{@@(} @var{actpar} @{ @samp{@@,} @var{actpar} @} @samp{@@)} .
+
+@var{actpar} ::= @var{expression} /
+                            ( @var{whitespace} @samp{@@"} @var{expression} @samp{@@"} @var{whitespace} ) .
+
+@var{whitespace} ::= @{@samp{ } / @var{eol}@} .
+@end display
+
+FunnelWeb allows parameters to be passed directly, or delimited by
+special double quotes.
+@findex macro parameter delimiting
+Each form is useful under different circumstances.  Direct specification
+is useful where the parameters are short and can be all placed on one
+line.  Double quoted parameters allow whitespace on either side (that is
+not considered part of the parameter) and are useful for laying out
+rather messy parameters.  Here are examples of the two forms.
+
+@example
+@@<Generic Loop@@>@@(
+   @@"x:=1;@@"  @@,
+   @@"x<=10;@@" @@,
+   @@"print "x=%u, x^2=%u",x,x*x;
+   x:=x+1;@@+@@"
+@@)
+
+@@<Colours@@>@@(red@@,green@@,blue@@,yellow@@)
+@end example
+
+As shown, the two forms may be mixed within the same parameter list.
+
+Formal parameters can appear in the expressions forming macro bodies in
+accordance with the syntax rules defined above.  A formal parameter
+expands to the text of the expansion of its corresponding actual
+parameter.  There is nothing preventing a formal parameter being provided
+as part of an expression that forms an actual parameter.  If that
+happens, the formal parameter is bound to the actual parameter of the
+calling macro, not the called macro.  After the following definitions,
+
+@example
+@@$@@<One@@>@@(@@1@@)=@@@{A walrus in @@1 is a walrus in vain.@@@}
+@@$@@<Two@@>@@(@@1@@)=@@@{@@<One@@>@@(S@@1n@@)@@@}
+@end example
+@noindent
+the call
+
+@example
+@@<Two@@>@@(pai@@)
+@end example
+@noindent
+will result in the expansion
+
+@example
+A walrus in Spain is a walrus in vain.
+@end example
+
+
+
+@node Macro Expansion, Target, Macro Calls, Top
+@comment  node-name,  next,  previous,  up
+@section Controlling Macro Expansion
+
+@subsection Indentation
+
+@findex indentation
+
+When FunnelWeb expands a macro, it can do so in two ways.  First it can
+treat the text it is processing as a one-dimensional stream of text, and
+merely insert the body of the macro in place of the macro call.  Second,
+it can treat the text of the macro as a two dimensional object and
+indent each line of the macro body by the amount that the macro call
+itself was indented.  Consider the following macros.
+
+@example
+@@$@@<Loop Structure@@>@@@{@@-
+i=1;
+while (i<=N)
+   @@<Loop body@@>
+endwhile
+@@@}
+
+@@$@@<Loop body@@>@@@{@@-
+a[i]:=0;
+i:=i+1;@@@}
+@end example
+
+Under the regime of @dfn{no indentation}
+@findex indentation, none
+the loop structure macro expands to:
+
+@example
+i=1;
+while (i<=N)
+   a[i]:=0;
+i:=i+1;
+endwhile
+@end example
+
+Under the regime of @dfn{blank indentation}
+@findex indentation, blank
+the loop structure macro expands to:
+
+@example
+i=1;
+while (i<=N)
+   a[i]:=0;
+   i:=i+1;
+endwhile
+@end example
+
+The @code{indentation} pragma determines which of these two regimes will
+be used to expand the macros when constructing the product files.  The
+syntax of the pragma is:
+
+@display
+@var{pragma_indent} ::= @var{ps} @samp{indentation} @var{s} @samp{=} @var{s} (@samp{blank} / @samp{none}) .
+
+@var{s} ::= @{@samp{ }@}+ .
+
+@var{ps} ::= (@samp{@@p} / @samp{@@P}) @samp{ } .
+@end display
+
+Its two forms look like this:
+
+@example
+@@p indentation = blank
+@@p indentation = none
+@end example
+
+In the current version of FunnelWeb, the indentation regime is an
+attribute that is attached to an entire run of Tangle; it is not
+possible to bind it to particular product files or to particular macros.
+As a result, it doesn't matter where indentation pragmas occur in the
+input file or how many there are so long as they are all the same.  By
+default FunnelWeb uses blank indentation.
+
+@subsection Output Length
+
+@findex product file line length
+@findex output file line length
+@findex maximum product file line length
+@findex maximum output line length
+
+FunnelWeb also keeps an
+eye on the line lengths of product files and flags all lines longer than
+a certain limit with error messages.  Unlike the maximum input line
+length, which can vary dynamically throughout the input file, the
+maximum product file line length remains fixed throughout the generation
+of all the product files.  The maximum product file line length pragma
+allows this value to be set.  If there is more than one such pragma in an
+input file, the pragmas must all specify the same value.
+
+@display
+@var{pragma_moll} ::= @var{ps} @samp{maximum_output_line_length} @var{s} @samp{=} @var{s} @var{numorinf} .
+
+@var{s} ::= @{@samp{ }@}+ .
+
+@var{ps} ::= (@samp{@@p} / @samp{@@P}) @samp{ } .
+
+@var{number} ::= @{ @var{decimal_digit} @}+ .
+
+@var{numorinf} ::= @var{number} / @samp{infinity} .
+@end display
+
+The default value is 80 characters.
+
+@chapter Producing Documentation
+
+@node Target, Typesetting, Macro Expansion, Top
+@comment  node-name,  next,  previous,  up
+@section Specifying the Typesetter
+
+@findex typesetter
+One of the design goals of FunnelWeb was to provide a @emph{typesetter}
+independent literate programming system.  By this is meant that it be
+possible to create FunnelWeb input files that do not contain
+typesetter-specific commands.
+
+The difficulty with providing typesetter-independent typesetting is that
+each desired typesetting feature must be recreated in a
+typesetter-independent FunnelWeb typesetting construct that FunnelWeb
+can translate into whatever typesetting language is being targeted by
+Weave.  Taken to the extreme, this would result in FunnelWeb providing
+the full syntactic and semantic power of @TeX{}, but with a more
+generic, FunnelWeb-specific syntax.  This was unfeasible in the time
+available, and undesirable as well.
+
+The compromise struck in the FunnelWeb design is to provide a set of
+primitive typesetter-independent typesetting features that are implemented
+@findex typesetter directives
+by FunnelWeb.  These are the @dfn{typesetter directives}.
+If the user is prepared to restrict to these directives, then the user's
+FunnelWeb document will be both target-language and typesetter
+independent.  However, if the user wishes to use the more sophisticated
+features of the target typesetting system, the user can specify the
+typesetter in a @code{typesetter} pragma and then place typesetter
+commands in the free text of the FunnelWeb document where they will be
+passed verbatim to the documentation file.  The choice of the trade-off
+between typesetter independence and typesetting power is left to the
+user.
+
+The @code{typesetter} pragma allows the user to specify whether the
+input file is supposed to be typesetter-independent, or whether it
+contains commands in a particular typesetter language.  The pragma has
+the following syntax.
+
+@display
+@var{pragma_typesetter} ::= 
+   @var{ps} @samp{typesetter} @var{s} @samp{=} @var{s}
+     (@samp{none} / @samp{tex} / @samp{latex} / @samp{html} / @samp{texinfo} /
+      @samp{latex2html}).
+
+@var{s} ::= @{@samp{ }@}+ .
+
+@var{ps} ::= (@samp{@@p} / @samp{@@P}) @samp{ } .
+@end display
+
+The six forms of the pragma look like this.
+
+@example
+@@p typesetter = none
+@@p typesetter = tex
+@@p typesetter = latex
+@@p typesetter = html
+@@p typesetter = texinfo
+@@p typesetter = latex2html
+@end example
+
+A source file can contain more than one typesetter pragma, but they must
+all specify the same value.
+The default is @code{none}, in which case FunnelWeb assumes that the
+documentation file is to be typeset with TeX but that the user has not
+included any explicit TeX markup.
+If the typesetter setting is not @code{none}, FunnelWeb assumes that the
+free text may contain explicit markup for the specified typesetter.
+
+The typesetter setting affects three things:
+
+@table @asis
+@item Handling of free text
+If the typesetter setting is not @code{none}, FunnelWeb writes the free text
+@emph{directly} to the documentation file without changing it in any way.
+This means that if (say) @code{\centerline} appears in the
+input file, it will copied directly to the documentation file.  If the
+typesetter is @code{none}, Weave intercepts any characters or sequences
+that might have a special meaning to TeX and replaces
+them with TeX commands to typeset the sequences so that they will
+appear as they do in the input.
+For example, if @code{$} (the @TeX{} mathematics mode character)
+appears in the input file, it will be
+be written to the documentation file as @code{\$}.
+
+@item Handling of macro text
+Text within macros and literal strings always appears in the documentation
+exactly as it does in the FunnelWeb source.
+Weave intercepts any characters or sequences that might have a special
+meaning to the specified typesetter and replaces them with commands to
+typeset that material as it appears in the input.
+
+@item Boilerplate
+If the typesetter setting is @code{none} or @code{tex}, the documentation
+file will begin with a collection of TeX macros implementing FunnelWeb
+constructs and commands to protect TeX markup.
+A FunnelWeb file using either of these settings need have no explicit
+markup whatsoever.
+No such boilerplate is included for any other typesetter settings.
+Thus any markup required by the specified typesetter must appear
+explicitly in the FunnelWeb file.
+(For example, if the typesetter setting is @code{latex} then the FunnelWeb
+file must contain an explicit @code{\documentclass} command.)
+@end table
+
+@node Typesetting, Structure, Target, Top
+@section Typesetting Documentation with Eli
+
+Within the Eli-Implementation of FunnelWeb, the usage of a
+typesetter-directive is a precondition for the generation of a
+documentation in the same format. 
+
+@table @code
+@item @@p typesetter = none
+@itemx @@p typesetter = tex
+@itemx @@p typesetter = latex
+@itemx @@p typesetter = latex2html
+When these or no typesetter-directive is used, the derivation
+@code{:fwTex} can be used to obtain a @file{.tex}-type file. A file of
+this type can be converted into a @file{.dvi}-file by application of the
+@code{:dvi}-derivation or into a @file{.ps}-file by application of the
+@code{:ps}-derivation. Of course you need a @TeX{} implementation to
+use these derivations.
+
+The user must supply an appropriate LaTeX preamble,
+@code{\begin@{document@}} and @code{\end@{document@}} as part of
+the document text when using either @code{latex} or @code{latex2html}.
+This means that it is possible to combine the outputs from several
+@code{:fwTex} derivations into a single document by using appropriate
+LaTeX @code{\input} commands.
+
+The preamble must include the LaTeX command @code{\usepackage@{alltt@}}
+for either @code{latex} or @code{latex2html},
+and @code{latex2html} also requires @code{\usepackage@{html@}}.
+
+Pragmas @code{latex} and @code{latex2html} normally translate the FunnelWeb
+section directives into LaTeX sectioning commands as follows:
+
+@itemize
+@item
+@code{@@A} @code{\section}
+@item
+@code{@@B} @code{\subsection}
+@item
+@code{@@C} @code{\subsubsection}
+@item
+@code{@@D} @code{\paragraph}
+@item
+@code{@@E} @code{\subparagraph}
+@end itemize
+
+If the @code{+chapter} parameter is passed to the @code{:fwTex} derivation,
+however, the translation is:
+
+@itemize
+@item
+@code{@@A} @code{\chapter}
+@item
+@code{@@B} @code{\section}
+@item
+@code{@@C} @code{\subsection}
+@item
+@code{@@D} @code{\subsubsection}
+@item
+@code{@@E} @code{\paragraph}
+@end itemize
+
+@item @@p typesetter = texinfo
+When these directive is used, the derivation @code{:fwTexinfo} can be
+used to obtain a @file{.tnf}-type file. Since @file{.tnf}-files are
+valid @TeX{}-files, all the derivations for @code{.tex}-files are also
+valid for @code{.tnf}-files. Additionally, @code{.tnf}-type files can be
+converted into info-files which can be shown with the Eli-Info-Browser
+by application of the @code{:display}-derivation.
+
+@item @@p typesetter = html
+When these directive is used, the derivation @code{:fwHtml} can be used
+to obtain a @file{.html}-type file. This file can be extracted from Eli
+and can be loaded into your favorite html-browser.
+@end table
+
+@node Structure, Marking Text, Typesetting, Top
+@comment  node-name,  next,  previous,  up
+@section Structure
+
+The section directive provides a way for the user to structure the
+program and documentation into a hierarchical tree
+structure,
+@findex tree structure
+just as in most large documents.  A section construct consists of a
+case-insensitive identifying letter, which determines the absolute level
+of the section in the document, and an optional section name, which has
+exactly the same syntax as a macro name.
+
+@display
+@var{section} ::= @samp{@@} @var{levelchar} [@var{name}] .
+
+@var{levelchar} ::= @samp{A} / @samp{B} / @samp{C} / @samp{D} / @samp{E} /
+                @samp{a} / @samp{b} / @samp{c} / @samp{d} / @samp{e} .
+
+@var{name} ::= @samp{@@<} @var{name_text} @samp{@@>} .
+
+@var{name_text} ::= @{@var{ordinary_char} / @var{text_special}@} .
+@end display
+
+The section construct is not quite ``inline'' as it must appear only at
+the start of a line.  However, unlike the @code{@@i}, @code{@@p}, and
+@code{@@t} constructs, it does not consume the remainder of the line
+(although it would be silly to place anything on the same line anyway).
+
+FunnelWeb provides five levels of sections, ranging from the highest
+level of @code{A} to the lowest level of @code{E}.  FunnelWeb input
+files need not contain any sections at all, but if they do, the first
+section must be at level @code{A}, and following sections must not skip
+hierarchical levels (e.g. an @code{@@D} cannot follow an @code{@@B}).
+FunnelWeb generates an error if a level is skipped.
+
+All section @emph{must} have names associated with them, but for
+convenience, the section name is optional if the section contains one or
+more macro definitions (ie.@: at least one macro definition appears
+between the section construct in question and the next section construct
+in the input file.).  In this case, the section @emph{inherits} the name
+of the first macro defined in the section.  This feature streamlines the
+input file, avoiding duplicate name inconsistencies.
+
+Any sequence of printable characters can be used in the section name,
+@findex section names
+even the target typesetter's escape sequence (eg.@: in @TeX{},
+@code{\}).
+
+The following example demonstrates the section construct.
+
+@example
+@@A@@<Life Simulation@@>
+
+This is the main simulation module for planet earth, simulated
+down to the molecular level.  This is a REALLY big program.  I
+mean really big.  I mean, if you thought the X-Windows source
+code was big, you're in for a shock...
+
+@@B We start by looking at the code for six legged stick
+insects as they form a good example of a typical
+object-oriented animal implementation.
+
+@@$@@<Six Legged Stick Insects@@>@@@{@@-
+slsi.creep; slsi.crawl; slsi.creep;@@@}
+@end example
+
+In the above example, the name for the level A section is provided
+explicitly, while the name for the level B section will be inherited
+from the macro name.
+
+@node Marking Text, Formatting, Structure, Top
+@comment  node-name,  next,  previous,  up
+@section Marking Text
+
+@subsection Typesetting a literal string
+
+Experience has shown that one of the most common typesetting
+requirements is that of being able to typeset small program fragments in
+the middle of the documenting free text.  Typically there is a frequent
+need to refer to program identifiers, and it assists the reader to have
+such identifiers typeset in the same manner as the program text in the
+macro definition.
+
+To specify that some text be typeset in @code{tt font}, enclose the text
+in curly brace special sequences as follows.
+
+@display
+@var{literal} ::= @samp{@@@{} @var{ordinary_text} @samp{@@@}} .
+@end display
+
+As in macro names, section names, and macro bodies, the text contained
+within the literal construct is protected by FunnelWeb from any
+non-literal interpretation by the typesetter and the user is free to
+enclose @emph{any} text covered by the definition @var{ordinary_text}.
+FunnelWeb guarantees that, no matter what the text is, it will be
+typeset in @code{tt font} exactly as it appears.  However, the text will
+be filled and justified into a paragraph as usual.
+
+Here is an example of the use of the construct:
+
+@example
+@@C The @@@{WOMBAT@@@} (Waste Of Money, Brains, And Time)
+function calls the @@@{kangaroo@@@} input function which has
+been known to cause keybounce.  This keybounce can be
+dampened using the @@@{wet_sloth@@@} subsystem.
+@end example
+
+@subsection Emphasising a string
+
+The emphasis directive is very similar to the literal directive except
+that it causes its argument to be typeset in an emphasised manner (eg.@:
+italics).  Like the literal directive, the emphasis directive protects
+its text argument.
+
+@display
+@var{emphasise} ::= @samp{@@/} @var{ordinary_text} @samp{@@/} .
+@end display
+
+Example:
+
+@example
+@@C What you @@/really@@/ need, of course, is a @@/great@@/,
+@@/big@@/, network with packets just flying
+@@/everywhere@@/.  This section implements an interface to
+such a @@/humungeous@@/ network.
+@end example
+
+@node Formatting, Input Processing, Marking Text, Top
+@comment  node-name,  next,  previous,  up
+@section Formatting
+
+@subsection Forcing a Pagebreak
+
+The new page pragma is a typesetting pragma with the following syntax.
+
+@display
+@var{ftd_newpage} ::= @samp{@@t } @samp{new_page} .
+@end display
+
+Its only form looks like this.
+
+@example
+@@t new_page
+@end example
+
+Its sole effect is to cause a ``skip to a new page'' command to be
+inserted into the documentation file.  The new page command is such that
+if the typesetter is already at the top of a page, it will skip to the
+top of the next page.
+
+@subsection Producing a table of contents
+
+The table of contents pragma is a typesetting pragma with the following
+syntax.
+
+@display
+@var{ftd_toc} ::= @samp{@@t } @samp{table_of_contents} .
+@end display
+
+Its only form looks like this.
+
+@example
+@@t table_of_contents
+@end example
+
+Its sole effect is to instruct FunnelWeb to insert a table of contents at
+this point in the printed documentation.  This pragma does not skip to the
+top of a new page first.
+
+@subsection Inserting blank vertical space
+
+@findex vskip
+The vertical skip pragma is a typesetting pragma that instructs Weave to
+insert a specified amount of vertical space into the documentation.  The
+pragma has the following syntax.
+
+@display
+@var{ftd_vskip} ::= @samp{@@t } @samp{vskip} @samp{ } @var{number} @samp{ mm}.
+@end display
+
+For example:
+
+@example
+@@t vskip 26 mm
+@end example
+
+@subsection Specifying the title of your document
+
+The title pragma is a typesetting pragma with the following syntax.
+
+@display
+@var{ftd_title} ::= @var{ts} @samp{title} @var{s} @var{font} @var{s} @var{alignment} @var{text} .
+
+@var{font} ::= @samp{normalfont} / @samp{titlefont} / @samp{smalltitlefont} .
+
+@var{alignment} ::= @samp{left} / @samp{centre} / @samp{right} .
+
+@var{text} ::= @samp{"} @{@var{printable_char}@} @samp{"} .
+@end display
+
+Its effect is to instruct Weave to insert a single line into the printed
+documentation containing the specified text set in the specified font
+and aligned in the specified manner.  The double quotes delimiting the
+text are for show only; if you want to put a double quote in the string,
+you don't need to double them.
+
+Here is an example of the pragma.
+
+@example
+@@t title smalltitlefont centre "How to Flip a Bit"
+@end example
+
+@node Input Processing, Grammar, Formatting, Top
+@comment  node-name,  next,  previous,  up
+@chapter Input Processing
+
+@menu
+* Special::			Special sequences.
+* Setting Special::		Setting the special character.
+* Inserting Special::		Inserting the special character into the text.
+* Inserting Arbitrary::		Inserting arbitrary characters into the text.
+* Comments::			Comments.
+* Quick Names::			Using shorter names for macros.
+* Inserting EOL::		Inserting end of line markers.
+* Suppressing End of Line::	Suppressing end of line markers.
+* Include Files::		Separating FunnelWeb specifications.
+* Input Length::                Maximum Input Line Length.
+
+@end menu
+
+@node Special, Setting Special, Input Processing, Input Processing
+@section Special Sequences
+
+The scanner scans the input file from top to bottom, left to right,
+treating the input as ordinary text (to be handed directly to the parser
+as a text token) unless it encounters the @dfn{special character}
+@findex special character
+which introduces a @dfn{special sequence}.
+@findex special sequence
+Thus, the scanner partitions the input file into ordinary text and
+special sequences.  (The control character is often referred to as the
+@dfn{escape character} or the @dfn{control character} in other systems.
+However, as there is great potential to confuse these names with the
+@dfn{escape} character (ASCII 27) and ASCII @dfn{control} characters,
+the term @dfn{special} has been chosen instead.  This results in the
+terms @dfn{special character} and @dfn{special sequence}.)
+
+@display
+@var{input_file} ::= @{@var{ordinary_text} / @var{special_sequence}@} .
+@end display
+
+Upon startup, the special character
+@findex default special character
+is @code{@@}, but it can be changed using the
+<special>@code{=}<new_special> special sequence.  Rather than using
+<special> whenever the special character appears, this document uses the
+default special character @code{@@} to represent the current special
+character.  More importantly, FunnelWeb's error messages all use the
+default special character in their error messages even if the special
+character has been changed.
+
+An occurrence of the special character in the input file introduces a
+special sequence.  The kind of special sequence is determined by the
+character following the special character.  Only printable characters can
+follow the special character.
+
+The following table gives all the possible characters that can follow
+the special character, and the legality of each sequence.  The item
+headings give the ASCII number of each ASCII character and the special
+sequence for that character.  The descriptions start with one of three
+characters: @code{-} means that the sequence is illegal.  @code{S}
+indicates that the sequence is a @dfn{simple sequence}
+@findex simple sequence
+(with no attributes or side effects) that appears exactly as shown and
+is converted directly into a token and fed to the parser.  Finally,
+@code{C} indicates that the special sequence is complex, possibly having
+a following syntax or producing funny side effects.
+
+@table @asis
+@item 000--008
+Unprintable characters and hence illegal. 
+@item 009
+Tab.  Converted by Eli (not FunnelWeb) into the appropriate number of
+spaces.
+@item 010--031
+Unprintable characters and hence illegal. 
+@item 032  @@
+- Illegal (space).
+@item 033  @@!
+C Comment.
+@item 034  @@"
+S Parameter delimiter.
+@item 035  @@#
+C Short name sequence.
+@item 036  @@$
+S Start of macro definition.
+@item 037  @@%
+- Illegal.
+@item 038  @@&
+- Illegal.
+@item 039  @@'
+- Illegal.
+@item 040  @@(
+S Open parameter list.
+@item 041  @@)
+S Close parameter list.
+@item 042  @@*
+- Illegal.
+@item 043  @@+
+C Insert newline.
+@item 044  @@,
+S Parameter separator.
+@item 045  @@-
+C Suppress end of line marker.
+@item 046  @@.
+- Illegal.
+@item 047  @@/
+S Open or close emphasised text.
+@item 048  @@0
+- Illegal.
+@item 049  @@1
+S Formal parameter 1.
+@item 050  @@2
+S Formal parameter 2.
+@item 051  @@3
+S Formal parameter 3.
+@item 052  @@4
+S Formal parameter 4.
+@item 053  @@5
+S Formal parameter 5.
+@item 054  @@6
+S Formal parameter 6.
+@item 055  @@7
+S Formal parameter 7.
+@item 056  @@8
+S Formal parameter 8.
+@item 057  @@9
+S Formal parameter 9.
+@item 058  @@:
+- Illegal.
+@item 059  @@;
+- Illegal.
+@item 060  @@<
+S Open macro name.
+@item 061  @@=
+C Set special character.
+@item 062  @@>
+S Close macro name.
+@item 063  @@?
+- Illegal.  Reserved for future use.
+@item 064  @@@@
+C Insert special character into text.
+@item 065  @@A
+S New section (level 1).
+@item 066  @@B
+S New section (level 2).
+@item 067  @@C
+S New section (level 3).
+@item 068  @@D
+S New section (level 4).
+@item 069  @@E
+S New section (level 5).
+@item 070  @@F
+- Illegal.
+@item 071  @@G
+- Illegal.
+@item 072  @@H
+- Illegal.
+@item 073  @@I
+C Include file.
+@item 074  @@J
+- Illegal.
+@item 075  @@K
+- Illegal.
+@item 076  @@L
+- Illegal.
+@item 077  @@M
+S Tag macro as being allowed to be called many times.
+@item 078  @@N
+- Illegal.
+@item 079  @@O
+S New macro attached to product file.  Has to be at start of line.
+@item 080  @@P
+C Pragma.
+@item 081  @@Q
+- Illegal.
+@item 082  @@R
+- Illegal.
+@item 083  @@S
+- Illegal.
+@item 084  @@T
+C Typesetter directive.
+@item 085  @@U
+- Illegal.
+@item 086  @@V
+- Illegal.
+@item 087  @@W
+- Illegal.
+@item 088  @@X
+- Illegal.
+@item 089  @@Y
+- Illegal.
+@item 090  @@Z
+S Tags macro as being allowed to be called zero times.
+@item 091  @@[
+- Illegal.  Reserved for future use.
+@item 092  @@\
+- Illegal.
+@item 093  @@]
+- Illegal.  Reserved for future use.
+@item 094  @@^
+C Insert control character into text
+@item 095  @@_
+- Illegal.
+@item 096  @@`
+- Illegal.
+@item 097  @@a--@@z
+Identical to @@A--@@Z.
+@item 123  @@@{
+S Open macro body/Open literal directive.
+@item 124  @@|
+- Illegal.
+@item 125  @@@}
+S Close macro body/Close literal directive.
+@item 126  @@~
+- Illegal.
+@item 127--255
+Not standard printable ASCII characters and are illegal.
+@end table
+
+The most important thing to remember about the scanner is that
+@emph{nothing happens unless the special character is seen.} There are
+no funny sequences that will cause strange things to happen.  The best
+way to view a FunnelWeb document at the scanner level is as a body of
+text punctuated by special sequences that serve to structure the text at
+a higher level.
+
+The remaining description of the scanner consists of a detailed description
+of the effect of each complex special sequence.
+
+@node Setting Special, Inserting Special, Special, Input Processing
+@section Setting the Special Character
+@findex setting special character
+@findex special character, setting
+
+The special character can be set using the sequence
+<special>@code{=}<newspecialchar>.  For example, @code{@@=#} would change
+the special character to a hash (@code{#}) character.  The special
+character may be set to any printable ASCII character except the blank
+character (ie.@: any character in the ASCII range 33--126).  In normal use,
+it should not be necessary to change the special character of FunnelWeb,
+and it is probably best to avoid changing the special character so as
+not to confuse FunnelWeb readers conditioned to the @code{@@} character.
+However, the feature is very useful where the text being prepared
+contains many @code{@@} characters (eg.@: a list of internet electronic
+mail addresses).
+
+@node Inserting Special, Inserting Arbitrary, Setting Special, Input Processing
+@section Inserting the Special Character into the Text
+@findex inserting special character into text
+@findex special character, inserting
+
+The special sequence <special>@code{@@} inserts the special character
+into the text as if it were not special at all.  The @code{@@} of this
+sequence has nothing to do with the current special character.  If the
+current special character is @code{P} then the sequence @code{P@@} will
+insert a @code{P} into the text.  Example: @code{@@@@#@@=#@@#@@#=@@@@@@}
+translates to @code{@@#@@#@@}.
+
+@node Inserting Arbitrary, Comments, Inserting Special, Input Processing
+@section Inserting Arbitrary Characters into the Text
+@findex arbitrary characters, inserting into text
+@findex inserting arbitrary characters into text
+@findex control characters, inserting into text
+@findex inserting control characters into text
+
+While FunnelWeb does not tolerate unprintable characters in the input
+file (except for the end of line character and the tabs that Eli expands
+into spaces), it does allow the user to specify that unprintable
+characters appear in the product file.  The @code{@@^} sequence inserts a
+single character of the user's choosing into the text.  The character
+can be specified by giving its ASCII number in one of four bases:
+binary, octal, decimal, and hexadecimal.  Here is the syntax:
+
+@display
+@var{control_sequence} ::= @samp{@@^} @var{char_spec} .
+
+@var{char_spec} ::= @var{binary} / @var{octal} / @var{decimal} / @var{hexadecimal} .
+
+@var{binary} ::= (@samp{b} / @samp{B}) @samp{(} @{@var{binary_digit}@}8 @samp{)} .
+
+@var{octal} ::= (@samp{o} / @samp{O} / @samp{q} / @samp{Q}) @samp{(} @{@var{octal_digit}@}3 @samp{)} .
+
+@var{decimal} ::= (@samp{d} / @samp{D}) @samp{(} @{@var{decimal_digit}@}3 @samp{)} .
+
+@var{hexadecimal} ::= (@samp{h} / @samp{H} / @samp{x} / @samp{X}) @samp{(} @{@var{hex_digit}@}2 @samp{)} .
+
+@var{binary_digit} ::= @samp{0} / @samp{1} .
+
+@var{octal_digit} ::= @var{binary_digit} / @samp{2} / @samp{3} / @samp{4} / @samp{5} / @samp{6} / @samp{7} .
+
+@var{decimal_digit} ::= @var{octal_digit} / @samp{8} / @samp{9} .
+
+@var{hex_digit} ::= @var{decimal_digit} / @samp{A} / @samp{B} / @samp{C} / @samp{D} / @samp{E} / @samp{F} /
+                       @samp{a} / @samp{b} / @samp{c} / @samp{d} / @samp{e} / @samp{f} .
+@end display
+
+Example:
+
+@example
+@@! Unix Make requires that productions commence with tab characters.
+@@^D(009)prog.o <- prog.c
+@end example
+
+Note that the decimal @code{9} is expressed with leading zeros as
+@code{009}.  FunnelWeb requires a fixed number of digits for each base.
+Eight digits for base two, three digits for base ten, three digits for
+base eight and two digits for base sixteen.
+
+FunnelWeb treats the character resulting from a @code{@@^} sequence as
+ordinary text in every sense.  If your input file contains many
+instances of a particular control character, you can package it up in a
+macro like any other text.  In particular, quick names can be used to
+great effect:
+
+@example
+@@! Unix "Make" requires that productions commence with tab characters.
+@@! So we define a macro with a quick name as a tab character.
+@@$@@#T@@@{@@^D(009)@@@}
+@@! And use it in our productions.
+@@#Tprog.o <- prog.c
+@@#Ta.out <- prog.o
+@end example
+
+Warning: If you insert a Unix
+@findex Unix newline
+newline character (decimal 10) into the text, FunnelWeb will treat this
+as an end of line sequence regardless of what the character sequence for
+end of line is on the machine upon which it is running.  Unix EOL is
+FunnelWeb's internal representation for end of line.  Thus, in the
+current version of FunnelWeb, inserting character 10 into the text is
+impossible unless this also happens to be the character used by the
+operating system to mark the end of line.
+
+@node Comments, Quick Names, Inserting Arbitrary, Input Processing
+@section Comments
+@findex comments
+
+When FunnelWeb encounters the @code{@@!}
+@findex @@!
+sequence during its left-to-right scan of the line, it throws away the
+rest of the line (including the EOL) without analysing it further.
+Comments can appear in any line except @code{@@i}, @code{@@t}, and
+@code{@@p} lines.
+
+FunnelWeb comments can be used to insert comments into your input file
+that will neither appear in the product files nor in the documentation
+file, but will be solely for the benefit of those reading and editing
+the input file directly.  Example:
+
+@example
+@@! I have used a quick macro for this definition as it will be used often.
+@@$@@#C@@@{--@@@}
+@end example
+
+Because comments are defined to include the end-of-line marker, care
+must be taken when they are being added or removed within the text of
+macro bodies.  For example the text fragment
+
+@example
+for (i=0;i<MAXVAL;i++)      @@! Print out a[0..MAXVAL-1].
+   printf("%u\n",a[i]);
+@end example
+@noindent
+will expand to
+
+@example
+for (i=0;i<MAXVAL;i++)         printf("%u\n",a[i]);
+@end example
+
+This problem really has no solution; if FunnelWeb comments were defined
+to omit the end of line marker, the expanded text would contain trailing
+blanks!  As it is, FunnelWeb comments are designed to support single
+line comments which can be inserted and removed as a line without
+causing trouble.  For example:
+
+@example
+@@! Print out a[0..MAXVAL-1].
+for (i=0;i<MAXVAL;i++)
+   printf("%u\n",a[i]);
+@end example
+
+If you want a comment construct that does not enclose the end of line
+marker, combine the insert end of line construct @code{@@+} with the
+comment construct @code{@@!} as in
+
+@example
+for (i=0;i<MAXVAL;i++)      @@+@@! Print out a[0..MAXVAL-1].
+   printf("%u\n",a[i]);
+@end example
+
+FunnelWeb comments should really only be used to comment the FunnelWeb
+constructs being used in the input file.  Comments on the target code are
+best placed in comments in the target language or in the documenting
+text surrounding the macro definitions.  In the example above, a C
+comment would have been more appropriate.
+
+@node Quick Names, Inserting EOL, Comments, Input Processing
+@section Quick Names
+@findex quick names
+@findex names, quick
+
+FunnelWeb provides a @dfn{quick name} syntax as an alternative, for
+macros whose name consists of a single character, to the angle bracket
+syntax usually used (eg.@: @code{@@<Sloth@@>}).  A quick name sequence
+consists of @code{@@#}@var{x} where @var{x}, the name of the macro,
+can be any printable character except space.
+
+@display
+@var{quick_name} ::= @samp{@@#} @var{non_space_printable} .
+@end display
+
+The result is identical to the
+equivalent ordinary name syntax, but is
+shorter.  For example, @code{@@#X} is equivalent to @code{@@<X@@>}.
+This shorter way of writing one-character macro names is more convenient where
+a macro must be used very often.  For example, the macro calls in the
+following fragment of an Ada program are a little clumsy.
+
+@example
+@@! Define @@<D@@> as "" to turn on debug code and "--" to turn it off.
+@@$@@<D@@>@@@{--@@@}
+@@<D@@>assert(b>3);
+@@<D@@>if x>7 then write("error") end if
+@end example
+
+The calls can be shortened using the alternative syntax.
+
+@example
+@@! Define @@#| as "" to turn on debug code and "--" to turn it off.
+@@$@@#|@@@{--@@@}
+@@#|assert(b>3);
+@@#|if x>7 then write("error") end if
+@end example
+
+@node Inserting EOL, Suppressing End of Line, Quick Names, Input Processing
+@section Inserting End of Line Markers
+@findex inserting EOL markers
+@findex EOL markers, inserting
+
+An end of line marker/character can be inserted into the text using the
+@code{@@+}
+@findex @@+
+sequence.  This is exactly equivalent to a real end of line in the text
+at the point where it occurs.  While this feature may sound rather
+useless, it is very useful for laying out the input file.  For example,
+the following input data for a database program
+
+@example
+Animal = Kangaroo
+Size   = Medium
+Speed  = Fast
+
+Animal = Sloth
+Size   = Medium
+Speed  = Slow
+
+Animal = Walrus
+Size   = Big
+Speed  = Medium
+@end example
+@noindent
+can be converted into
+
+@example
+Animal = Kangaroo  @@+Size = Medium  @@+Speed = Fast    @@+
+Animal = Sloth     @@+Size = Medium  @@+Speed = Slow    @@+
+Animal = Walrus    @@+Size = Big     @@+Speed = Medium  @@+
+@end example
+@noindent
+which is easier to read, and more easily allows comparisons between
+records.
+
+@node Suppressing End of Line, Include Files, Inserting EOL, Input Processing
+@section Suppressing End of Line Markers
+@findex EOL markers, suppressing
+@findex suppressing EOL markers
+
+End of line markers can be suppressed by the @code{@@-}
+@findex @@-
+sequence.  A single occurrence of a @code{@@-} sequence serves to
+suppress only the end of line marker following it and must appear
+@emph{exactly} before the end of line marker to be suppressed.  No trailing
+spaces, @code{@@!} comments, or any other characters are permitted
+between a @code{@@-} sequence and the end of line that it is supposed to
+suppress.  The @code{@@-} sequence is useful for constructing long output
+lines without them having to appear in the input.  It can also be used
+in the same way as the @code{@@+} was used in the previous section to
+assist in exposing the structure of output text without affecting the
+output text itself.  Finally, it is invaluable for suppressing the EOL
+after the opening macro text @code{@@@{} construct.  For example:
+
+@example
+@@$@@<Walrus@@>@@@{@@-
+I am the walrus!@@@}
+@end example
+@noindent
+is equivalent to
+
+@example
+@@$@@<Walrus@@>@@@{I am the walrus!@@@}
+@end example
+
+The comment construct (@code{@@!}) can also be used to suppress end of
+lines.  However, the @code{@@-} construct should be preferred for this
+purpose as it makes explicit the programmer's intent to suppress the end
+of line.
+
+@node Include Files, Input Length, Suppressing End of Line, Input Processing
+@section Include Files
+@findex include files
+
+FunnelWeb provides an include file facility with a maximum depth of 10.
+When FunnelWeb sees a line of the form @code{@@i <filename>},
+@findex @@i
+it replaces the entire line (including the EOL) with the contents of the
+specified include file.  FunnelWeb's include file facility is intended to
+operate at the line level.  If the last line of the include file is not
+terminated by an EOL, FunnelWeb issues a warning and inserts one (in the
+copy in memory).  In Eli, an include file must have type @file{.fwi}.
+@findex .fwi
+
+The @code{@@i} construct is illegal if it appears anywhere except at the
+start of a line.  The construct must be followed by a single blank.  The
+file name is defined to be everything between the blank and the end of
+the line (no comments (@code{@@!}) please!).  Example: If the input file
+is
+
+@example
+"Uh Oh, It's the Fuzz.  We're busted!" said Baby Bear.
+@@i mr_plod.txt
+"Quick! Flush the stash down the dunny and let's split." said Father Bear.
+@end example
+@noindent
+and there is a file called @file{mr_plod.txt} containing
+
+@example
+"'Ello, 'Ello, 'Ello! What's all this 'ere then?" Mr Plod exclaimed.
+@end example
+@noindent
+then the scanner translates the input file into
+
+@example
+"Uh Oh, It's the Fuzz.  We're busted!" said Baby Bear.
+"'Ello, 'Ello, 'Ello! What's all this 'ere then?" Mr Plod exclaimed.
+"Quick! Flush the stash down the dunny and let's split." said Father Bear.
+@end example
+
+As a point of terminology, FunnelWeb calls the original input file the
+@dfn{input file} and calls include files and their included files
+@dfn{include files}.
+
+The include file construct operates at a very low level.  An include line
+can appear anywhere in the input file regardless of the context of the
+surrounding lines.
+
+FunnelWeb sets the special character to the default (@code{@@}) at the
+start of each include file and restores it to its previous value at the
+end of the include file.  This allows macro libraries to be constructed
+and included that are independent of the prevailing special character at
+the point of inclusion.  The same goes for the input line length limit
+which is reset to the default value at the start of each include file
+and restored to its previous value afterwards.
+
+@node Input Length, , Include Files, Input Processing
+@section Maximum Input Line Length
+@findex input file line length
+@findex maximum input line length
+
+FunnelWeb generates an error for each input line that exceeds a certain
+maximum number of characters.  At the start of the processing of each
+input file and each include file, this maximum is set to a default value
+of 80.  However, the maximum can be changed using a maximum input line
+length pragma.
+
+@display
+@var{pragma_mill} ::= @var{ps} @samp{maximum_input_line_length} @var{s} @samp{=} @var{s} @var{numorinf} .
+
+@var{ps} ::= (@samp{@@p} / @samp{@@P}) @samp{ } .
+
+@var{number} ::= @{ @var{decimal_digit} @}+ .
+
+@var{numorinf} ::= @var{number} / @samp{infinity} .
+
+@var{s} ::= @{@samp{ }@}+ .
+
+@end display
+
+The maximum input line length can be varied @emph{dynamically}
+throughout the input file.  Each maximum input line length pragma's scope
+covers the line following the pragma through to and including the next
+maximum input line length pragma, but not covering any intervening
+include files.  At the start of an include file, FunnelWeb resets the
+maximum input line length to the default value.  It restores it to its
+previous value at the end of the include file.
+
+This pragma is useful for detecting text that has strayed off the right
+side of the screen when editing.  If you use FunnelWeb, and set the
+maximum input line length to be the width of your editing window, you
+will never be caught by, for example, off-screen opening comment
+symbols.  You can also be sure that your source text can be printed raw,
+if necessary, without lines wrapping around.
+
+@node Grammar, Index, Input Processing, Top
+@comment  node-name,  next,  previous,  up
+@chapter Grammar
+
+@display
+@var{input_file} ::= @{@var{ordinary_text} / @var{special_sequence}@} .
+
+@var{control_sequence} ::= @samp{@@^} @var{char_spec} .
+
+@var{char_spec} ::= @var{binary} / @var{octal} / @var{decimal} / @var{hexadecimal} .
+
+@var{binary} ::= (@samp{b} / @samp{B}) @samp{(} @{@var{binary_digit}@}8 @samp{)} .
+
+@var{octal} ::= (@samp{o} / @samp{O} / @samp{q} / @samp{Q}) @samp{(} @{@var{octal_digit}@}3 @samp{)} .
+
+@var{decimal} ::= (@samp{d} / @samp{D}) @samp{(} @{@var{decimal_digit}@}3 @samp{)} .
+
+@var{hexadecimal} ::= (@samp{h} / @samp{H} / @samp{x} / @samp{X}) @samp{(} @{@var{hex_digit}@}2 @samp{)} .
+
+@var{binary_digit} ::= @samp{0} / @samp{1} .
+
+@var{octal_digit} ::= @var{binary_digit} / @samp{2} / @samp{3} / @samp{4} / @samp{5} / @samp{6} / @samp{7} .
+
+@var{decimal_digit} ::= @var{octal_digit} / @samp{8} / @samp{9} .
+
+@var{hex_digit} ::= @var{decimal_digit} / @samp{A} / @samp{B} / @samp{C} / @samp{D} / @samp{E} / @samp{F} /
+                       @samp{a} / @samp{b} / @samp{c} / @samp{d} / @samp{e} / @samp{f} .
+
+@var{quick_name} ::= @samp{@@#} @var{non_space_printable} .
+
+@var{pragma} ::= @var{pragma_indent} / @var{pragma_mill} / @var{pragma_moll} / 
+                            @var{pragma_typesetter} .
+
+@var{s} ::= @{@samp{ }@}+ .
+
+@var{ps} ::= (@samp{@@p} / @samp{@@P}) @samp{ } .
+
+@var{number} ::= @{ @var{decimal_digit} @}+ .
+
+@var{numorinf} ::= @var{number} / @samp{infinity} .
+
+@var{pragma_indent} ::= @var{ps} @samp{indentation} @var{s} @samp{=} @var{s} (@samp{blank} / @samp{none}) .
+
+@var{pragma_mill} ::= @var{ps} @samp{maximum_input_line_length} @var{s} @samp{=} @var{s} @var{numorinf} .
+
+@var{pragma_moll} ::= @var{ps} @samp{maximum_output_line_length} @var{s} @samp{=} @var{s} @var{numorinf} .
+
+@var{pragma_typesetter} ::= @var{ps} @samp{typesetter} @var{s} @samp{=} @var{s} (@samp{none} / @samp{tex} / @samp{texinfo}).
+
+@var{ftd} ::= @var{ftd_newpage} / @var{ftd_toc} / @var{ftd_vskip} / @var{ftd_title} .
+
+@var{ts} ::= @samp{@@t } .
+
+@var{ftd_newpage} ::= @var{ts} @samp{new_page} .
+
+@var{ftd_toc} ::= @var{ts} @samp{table_of_contents} .
+
+@var{ftd_vskip} ::= @var{ts} @samp{vskip} @var{s} @var{number} @var{s} @samp{mm} .
+
+@var{ftd_title} ::= @var{ts} @samp{title} @var{s} @var{font} @var{s} @var{alignment} @var{text} .
+
+@var{font} ::= @samp{normalfont} / @samp{titlefont} / @samp{smalltitlefont} .
+
+@var{alignment} ::= @samp{left} / @samp{centre} / @samp{right} .
+
+@var{text} ::= @samp{"} @{@var{printable_char}@} @samp{"} .
+
+@var{input_file} ::= @{@var{text} / @var{macro} / @var{directive}@} .
+
+@var{free_text} ::= @var{ordinary_text} .
+
+@var{ordinary_text} ::= @{@var{ordinary_char} / @var{eol} / @var{text_special}@}+ .
+
+@var{text_special} ::= @samp{@@+} / @samp{@@@@} / @samp{@@^} @var{char_spec} .
+
+@var{ordinary_char} ::= @samp{ }..@samp{~}-@var{special} .
+
+@var{directive} ::= @var{ftd} / @var{itd} .
+
+@var{itd} ::= @var{section} / @var{literal} / @var{emphasis} .
+
+@var{section} ::= @samp{@@} @var{levelchar} [@var{name}] .
+
+@var{levelchar} ::= @samp{A} / @samp{B} / @samp{C} / @samp{D} / @samp{E} /
+                            @samp{a} / @samp{b} / @samp{c} / @samp{d} / @samp{e} .
+
+@var{literal} ::= @samp{@@@{} @var{ordinary_text} @samp{@@@}} .
+
+@var{emphasise} ::= @samp{@@/} @var{ordinary_text} @samp{@@/} .
+
+@var{macro} ::= (@samp{@@O} / @samp{@@$}) @var{name} [@var{formal_parameter_list}] .
+                            [@samp{@@Z}] [@samp{@@M}] [@samp{==} / @samp{+=}] @samp{@@@{} @var{expression} @samp{@@@}} .
+
+@var{name} ::= @samp{@@<} @var{name_text} @samp{@@>} .
+
+@var{name_text} ::= @{@var{ordinary_char} / @var{text_special}@} .
+
+@var{formal_parameter_list} ::= @samp{@@(} @var{formal_parameter} @samp{@@)} .
+
+@var{formal_parameter} ::= @samp{@@1} / @samp{@@2} / @samp{@@3} / @samp{@@4} / @samp{@@5} /
+                            @samp{@@6} / @samp{@@7} / @samp{@@8} / @samp{@@9} .
+
+@var{expression} ::= @{@var{ordinary_text} / @var{macro_call} / @var{formal_parameter}@} .
+
+@var{macro_call} ::= @var{name} [@var{actual_parameter_list}] .
+
+@var{actual_parameter_list} ::= @samp{@@(} @var{actpar} @{ @samp{@@,} @var{actpar} @} @samp{@@)} .
+
+@var{actpar} ::= @var{expression} /
+                            ( @var{whitespace} @samp{@@"} @var{expression} @samp{@@"} @var{whitespace} ) .
+
+@var{whitespace} ::= @{@samp{ } / @var{eol}@} .
+@end display
+
+@node Index,  , Grammar, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

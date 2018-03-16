@@ -1,0 +1,102 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: AdaptOil.fw,v 3.3 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+~O~<AdaptOil.pdl~>~{
+OilType:        tOilType; "oiladt2.h"
+~}
+
+~O~<AdaptOil.init~>~{
+  InitMapTypeOil ();
+~}
+
+~O~<AdaptOil.head~>~{
+#include "AdaptOil.h"
+~}
+
+~O~<AdaptOil.h~>~{
+#ifndef ADAPTOIL_H
+#define ADAPTOIL_H
+
+#include "oiladt2.h"
+#include "deftbl.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern void InitMapTypeOil (void);
+extern tOilType MapTypeToOil (DefTableKey key);
+extern DefTableKey MapTypeFromOil (tOilType toil);
+#else
+extern void InitMapTypeOil ();
+extern tOilType MapTypeToOil ();
+extern DefTableKey MapTypeFromOil ();
+#endif
+
+#endif
+~}
+
+~O~<AdaptOil.c~>~{
+#include "AdaptOil.h"
+#include "OilDecls.h"
+#include "pdl_gen.h"
+#include "HEAD.h"
+
+static int _InitMapTypeOilDone = 0;
+
+#if defined(__cplusplus) || defined(__STDC__)
+void InitMapTypeOil (void)
+#else
+void InitMapTypeOil ()
+#endif
+{
+#define RelateKeyToOil(key,oilid) ResetOilType (key, oilid);
+RelateKeysToOil;
+#undef RelateKeyToOil
+_InitMapTypeOilDone = 1;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+tOilType MapTypeToOil (DefTableKey key)
+#else
+tOilType MapTypeToOil (key) DefTableKey key;
+#endif
+{
+if (!_InitMapTypeOilDone) InitMapTypeOil ();
+return GetOilType (key, OilErrorType());
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey MapTypeFromOil (tOilType toil)
+#else
+DefTableKey MapTypeFromOil (toil) tOilType toil;
+#endif
+{
+#define RelateKeyToOil(key,oilid) \
+	if (toil == oilid) return key; else
+
+RelateKeysToOil;
+return NoKey;
+#undef RelateKeyToOil
+}
+~}

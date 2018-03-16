@@ -1,0 +1,148 @@
+@=~
+~p maximum_input_line_length = infinity
+~! $Id: BuType.fw,v 3.4 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+~O~<|NAME|Type.pdl~>~{
+|NAME|TypeOf:	DefTableKey;
+|NAME|DefType:	DefTableKey [Trans];
+~}
+
+~O~<|NAME|Type.specs~>~{
+$/Prop/PropLib.fw
+~}
+
+~O~<|NAME|Type.lido~>~{
+ATTR |NAME|Type: DefTableKey;
+CHAIN |NAME|GotTypes: VOID;
+
+CLASS SYMBOL |NAME|AnyRangeType:
+	|NAME|GotAllTypes:	VOID;
+
+CLASS SYMBOL |NAME|RootType INHERITS |NAME|AnyRangeType COMPUTE
+  CHAINSTART HEAD.|NAME|GotTypes = "yes";
+  SYNT.|NAME|GotAllTypes = TAIL.|NAME|GotTypes;
+END;
+
+CLASS SYMBOL |NAME|RangeType COMPUTE
+  SYNT.|NAME|GotAllTypes = TAIL.|NAME|GotTypes;
+END;
+
+CLASS SYMBOL |NAME|SetType COMPUTE
+  SYNT.|NAME|Type = ORDER (
+	Reset|NAME|TypeOf (THIS.|KEY|Key, |NAME|Type),
+	|NAME|Type)
+	DEPENDS_ON THIS.|NAME|GotTypes;
+  THIS.|NAME|GotTypes = SYNT.|NAME|Type;
+END;
+
+CLASS SYMBOL |NAME|DefType:	|NAME|DefTypeOk: int;
+CLASS SYMBOL |NAME|DefType COMPUTE
+  INH.|NAME|DefTypeOk =
+	NOT (|NAME|RecursiveDefType (THIS.|KEY|Key, |NAME|Type))
+	DEPENDS_ON THIS.|NAME|GotTypes;
+  THIS.|NAME|GotTypes =
+	Reset|NAME|DefType (THIS.|KEY|Key, |NAME|Type);
+END;
+
+CLASS SYMBOL |NAME|GetType COMPUTE
+  SYNT.|NAME|Type = 
+	_|NAME|ASSIGN (|NAME|Type, 
+		Trans|NAME|DefType (Get|NAME|TypeOf (THIS.|KEY|Key, NoKey)))
+	DEPENDS_ON THIS.|NAME|GotTypes;
+END;
+
+CLASS SYMBOL |NAME|GetTypeScope:
+        |NAME|Scope:    Environment;
+
+CLASS SYMBOL |NAME|GetTypeScope INHERITS |NAME|GetType COMPUTE
+  SYNT.|NAME|Scope =
+        _|NAME|ASSIGN (|NAME|ScopeProp, 
+			Get|NAME|Scope (
+				Trans|NAME|DefType (SYNT.|NAME|Type), NoEnv));
+END;
+
+CLASS SYMBOL |NAME|GetTypeKey COMPUTE
+  SYNT.|NAME|Type =
+        _|NAME|ASSIGN (|NAME|Type, THIS.|KEY|Key)
+        DEPENDS_ON THIS.|NAME|GotTypes;
+END;
+~}
+
+~O~<|NAME|Type.head~>~{
+#include "|NAME|Type.h"
+~}
+
+~O~<|NAME|Type.h~>~{
+#include "deftbl.h"
+
+extern DefTableKey |NAME|Type;
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|RecursiveDefType (DefTableKey t1, DefTableKey t2);
+#else
+extern int |NAME|RecursiveDefType ();
+#endif
+/* On exit
+ *    returns 1 if t1 is t2 or the DefType relation applied to t2
+ *    directly or indirectly leads to t1; otherwise 0 is returned.
+ */
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|SameType (DefTableKey t1, DefTableKey t2);
+#else
+int |NAME|SameType ();
+#endif
+~}
+
+~O~<|NAME|Type.c~>~{
+#include "pdl_gen.h"
+#include "|NAME|Type.h"
+
+DefTableKey |NAME|Type;
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|RecursiveDefType (DefTableKey t1, DefTableKey t2)
+#else
+extern int |NAME|RecursiveDefType (t1, t2) DefTableKey t1, t2;
+#endif
+{
+  if (t1 == NoKey) return 0;
+  while (t2 != NoKey)
+        if (t1 == t2)
+                return 1;
+        else    t2 = GetDefType (t2, NoKey);
+  return 0;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+int |NAME|SameType (DefTableKey t1, DefTableKey t2)
+#else
+int |NAME|SameType (t1, t2) DefTableKey t1, t2;
+#endif
+{
+t1 = Trans|NAME|DefType (t1); t2 = Trans|NAME|DefType (t2);
+return ((t1==NoKey) || (t2==NoKey) || (t1==t2));
+}
+~}
+

@@ -1,0 +1,1140 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from lex.tnf on 5 December 2013 -->
+
+<TITLE>Lexical Analysis - Specifications</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Lexical Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<A NAME="IDX1"></A>
+<H1><A NAME="SEC1" HREF="lex_toc.html#SEC1">Specifications</A></H1>
+<P>
+A specification consists of a <DFN>regular expression</DFN>,
+possibly the name of an <DFN>auxiliary scanner</DFN>,
+and possibly the name of a <DFN>token processor</DFN>.
+Sequences of input characters are classified initially on the basis of the
+regular expression they match.
+If the line containing the regular expression also contains the name of an
+auxiliary scanner, then that scanner is invoked after the regular
+expression has been matched.
+An auxiliary scanner may lengthen or shorten the character sequence being
+classified.
+If the line containing the regular expression also contains the name of a token
+processor, then that token processor is invoked after any auxiliary scanner.
+A token processor may change the initial classification of the sequence,
+and may also calculate a value representing the sequence.
+<P>
+Specifications are provided in type-<TT>`gla'</TT> files whose contents obey
+the following phrase structure:
+<P>
+<A NAME="IDX2"></A>
+<PRE>
+File: ( Specification NewLine )* .
+Specification:
+    [ TokenName ':' ]
+    Pattern
+    [ '(' AuxiliaryScannerName ')' ]
+    [ '[' TokenProcessorName ']' ] .
+Pattern: RegularExpression / CannedSpecificationName .
+TokenName: Identifier .
+CannedSpecificationName: Identifier .
+AuxiliaryScannerName: Identifier .
+TokenProcessorName: Identifier .
+</PRE>
+<P>
+An <CODE>Identifier</CODE> is defined as in C, and a type-<TT>`gla'</TT> file may
+contain arbitrary empty lines, C comments and pre-processor directives.
+Comments may also be written as character sequences enclosed in braces
+(<CODE>{ }</CODE>) that do not themselves include braces.
+<P>
+The remainder of this chapter explains each of these components of the
+description in detail.
+<P>
+<A NAME="IDX3"></A>
+<H2><A NAME="SEC2" HREF="lex_toc.html#SEC2">Regular Expressions</A></H2>
+A regular expression is a pattern that defines a set of character
+sequences:
+If the regular expression matches a particular sequence then that sequence
+is a member of the set; otherwise it is not a member.
+Here is a summary of Eli's regular expression notation:
+<P>
+<DL COMPACT>
+<DT><CODE>c</CODE>
+<DD>matches the character <CODE>c</CODE>, unless <CODE>c</CODE> is space, tab, newline
+or one of <CODE>\ " . [ ] ^ ( ) | ? + * { } / $ &#60;</CODE>
+<DT><CODE>\c</CODE>
+<DD>matches <CODE>c</CODE>
+(see  <A HREF="lex_1.html#SEC3">Matching operator characters</A>)
+<DT><CODE>"s"</CODE>
+<DD>matches the sequence <CODE>s</CODE>
+(see  <A HREF="lex_1.html#SEC3">Matching operator characters</A>)
+<DT><CODE>.</CODE>
+<DD>matches any character except newline
+<DT><CODE>[xyz]</CODE>
+<DD>matches exactly one of the characters <CODE>x</CODE>, <CODE>y</CODE> or <CODE>z</CODE>
+<DT><CODE>[^xyz]</CODE>
+<DD>matches exactly one character that is <EM>not</EM> <CODE>x</CODE>, <CODE>y</CODE> or
+<CODE>z</CODE>
+<DT><CODE>[c-d]</CODE>
+<DD>matches exactly one of the characters whose ASCII codes lie between the
+codes for <CODE>c</CODE> and <CODE>d</CODE> (inclusive)
+<DT><CODE>(e)</CODE>
+<DD>matches a sequence matched by <CODE>e</CODE>
+<DT><CODE>ef</CODE>
+<DD>matches a sequence matched by <CODE>e</CODE> followed by a sequence matched by
+<CODE>f</CODE>
+<DT><CODE>e|f</CODE>
+<DD>matches either a sequence matched by <CODE>e</CODE> or a sequence matched by
+<CODE>f</CODE>
+<DT><CODE>e?</CODE>
+<DD>matches either an empty sequence or a sequence matched by <CODE>e</CODE>
+<DT><CODE>e+</CODE>
+<DD>matches one or more occurrences of a sequence matched by <CODE>e</CODE>
+<DT><CODE>e*</CODE>
+<DD>matches either an empty sequence or one or more occurrences of a
+sequence matched by <CODE>e</CODE>
+<DT><CODE>e{<VAR>m</VAR>,<VAR>n</VAR>}</CODE>
+<DD>matches a sequence of no fewer than <VAR>m</VAR> and no more than <VAR>n</VAR>
+occurrences of a sequence matched by <CODE>e</CODE>
+</DL>
+<P>
+Each of the regular expressions <CODE>e?</CODE>, <CODE>e+</CODE>, <CODE>e*</CODE> and
+<CODE>e{<VAR>m</VAR>,<VAR>n</VAR>}</CODE> matches the longest sequence of characters
+consonant with its definition.
+<P>
+In a type-<TT>`gla'</TT> file, each regular expression
+is delimited on the left by <CODE>$</CODE> and on the right by white space:
+<P>
+<PRE>
+$a57D
+$[0-9]+
+$[a-zA-Z_][a-zA-Z_0-9]*
+</PRE>
+<P>
+The first example matches the single character sequence <CODE>a57D</CODE>,
+while the second matches a sequence of one or more digits.
+The third describes C-style identifiers: an initial letter
+or underscore, followed by zero or more alphanumeric characters or underscores.
+<P>
+<A NAME="IDX4"></A>
+<H3><A NAME="SEC3" HREF="lex_toc.html#SEC3">Matching operator characters</A></H3>
+<P>
+A regular expression consists of <DFN>text characters</DFN>
+<A NAME="IDX5"></A>
+(which match the corresponding characters in the input character sequences)
+and <DFN>operator characters</DFN>
+<A NAME="IDX6"></A>
+(which specify repetitions, choices and other features).
+The operator characters are the following:
+<P>
+<PRE>
+\ " . [ ] ^ ( ) | ? + * { } / $ &#60;
+</PRE>
+<P>
+Space, tab, newline and characters appearing in this list are <EM>not</EM>
+text characters; every other character <EM>is</EM> a text character.
+<P>
+If an operator character is to match an instance of itself in the input
+sequence then it must be marked in the regular expression as being a text
+character.
+This can be done by preceding it with backslash (<CODE>\</CODE>).
+<A NAME="IDX7"></A>
+Any occurrence of an operator character (including backslash) that is
+preceded by backslash loses its operator status and
+is considered to be a text character.
+The text characters space, tab and newline are represented as
+<CODE>\040</CODE>,
+<A NAME="IDX8"></A>
+<CODE>\t</CODE>
+<A NAME="IDX9"></A>
+and <CODE>\n</CODE>
+<A NAME="IDX10"></A>
+respectively;
+<CODE>\b</CODE> represents the text character "backspace".
+Any character except the ASCII NUL (code 0)
+can also be represented by a backslash, followed by zero, followed by the ASCII
+code for the character written as a sequence of up to three octal digits (the
+representation of a space character always has this form).
+<P>
+A sequence of operator characters can be used as a sequence of text characters
+by surrounding the sequence with double quote operators (<CODE>"</CODE>):
+<A NAME="IDX12"></A>
+<A NAME="IDX11"></A>
+<P>
+<PRE>
+xyz"++"
+"xyz++"
+</PRE>
+<P>
+Both of these patterns match the string <CODE>xyz++</CODE>.
+As shown, it is harmless but unnecessary to quote a character that is not an
+operator.
+<P>
+Backslash is also effective within a sequence surrounded by double quote
+operators, and must be used to mark backslash, quote and white space:
+<P>
+<PRE>
+"\t\\\040\"\040.\040[\040]\040^"
+</PRE>
+<P>
+This pattern matches an initial segment of the operator character display
+at the beginning of this section.
+<P>
+<A NAME="IDX13"></A>
+<H3><A NAME="SEC4" HREF="lex_toc.html#SEC4">Character classes</A></H3>
+A <DFN>character class</DFN> is a pattern that defines a set of characters and
+matches exactly one character from that set.
+The simplest character class representation is the period (<CODE>.</CODE>),
+<A NAME="IDX15"></A>
+<A NAME="IDX16"></A>
+<A NAME="IDX14"></A>
+which defines the set of all characters except newline.
+Character classes can also be represented using the operator pair <CODE>[ ]</CODE>.
+<A NAME="IDX17"></A>
+<CODE>[Abc]</CODE> defines the set of three characters <CODE>A</CODE>, <CODE>b</CODE>,
+and <CODE>c</CODE>.
+<P>
+Within square brackets, most operator meanings are ignored.
+Only four characters are special: <CODE>\</CODE>, <CODE>-</CODE>, <CODE>^</CODE> and
+<CODE>]</CODE>.
+In particular, the double quote character (<CODE>"</CODE>) is not considered
+special and therefore cannot be used to surround a sequence of operator
+characters.
+The <CODE>\</CODE> character provides the usual escapes within character class
+brackets.
+Thus <CODE>[[\]]</CODE> matches either <CODE>[</CODE> or <CODE>]</CODE>,
+because <CODE>\</CODE> causes the first <CODE>]</CODE> in the character class
+representation to be taken as a normal character
+rather than the closing bracket of the representation.
+The following specification causes an error, however:
+<PRE>
+[["]"]
+</PRE>
+The quote is not special in a character class,
+so the first <CODE>]</CODE> is the closing bracket of the set.
+The second <CODE>"</CODE> is therefore outside the definition of the character
+class, and is taken as the beginning of a quoted string containing the second
+<CODE>]</CODE>.
+Since there is no closing quote for this string, it is erroneous.
+<P>
+If the first character after the opening bracket of a character class
+is <CODE>^</CODE>,
+<A NAME="IDX19"></A>
+<A NAME="IDX18"></A>
+the set defined by the remainder of the character class is complemented
+with respect to the computer's character set.
+Using this notation, the character class represented by <CODE>.</CODE> can be
+described as <CODE>[^\n]</CODE>.
+<P>
+If <CODE>^</CODE> appears as any character of a class except the first,
+it is not considered to be an operator.
+Thus <CODE>[^abc]</CODE> matches any character except <CODE>a</CODE>, <CODE>b</CODE>,
+or <CODE>c</CODE> but <CODE>[a^bc]</CODE> or <CODE>[abc^]</CODE> matches <CODE>a</CODE>, <CODE>b</CODE>,
+<CODE>c</CODE> or <CODE>^</CODE>.
+<P>
+Within a character class representation, <CODE>-</CODE>
+<A NAME="IDX21"></A>
+<A NAME="IDX22"></A>
+<A NAME="IDX23"></A>
+<A NAME="IDX20"></A>
+can be used to define a set of characters in terms of a range.
+For example, <CODE>a-z</CODE> defines the set of lower-case letters and
+<CODE>A-Z</CODE> defines the set of upper-case letters.
+The endpoints of a range may be specified in either order
+(i.e. both <CODE>0-9</CODE> and <CODE>9-0</CODE> define the set of digits).
+Ranges can also be defined in terms of specific ASCII codes:
+<CODE>\041-\0176</CODE> is the set of all visible ASCII characters.
+Using <CODE>-</CODE> between any pair of characters that are not
+both upper case letters, both lower case letters, or both digits
+defines an implementation-dependent set and will generate a warning.
+<P>
+Any number of ranges can be used in the representation of a character
+class.
+For example, <CODE>[a-z0-9&#60;&#62;_]</CODE> will match any lower case letter, digit,
+angle bracket or underline while <CODE>[^a-zA-Z]</CODE> will match any character
+that is not a letter.
+If it is desired to include the character <CODE>-</CODE> in a character class,
+it should either be escaped with <CODE>\</CODE>
+or it should occupy the first or last position.
+Thus <CODE>[-+0-9]</CODE> will match <CODE>+</CODE>, <CODE>-</CODE> or any digit,
+as will <CODE>[0-9\-+]</CODE>.
+<P>
+<H3><A NAME="SEC5" HREF="lex_toc.html#SEC5">Building complex regular expressions</A></H3>
+<P>
+Single characters, character strings and character classes are all simple
+regular expressions.
+Each matches a particular set of character sequences.
+More complex patterns are built from these simple regular expressions by
+concatenation, alternation and repetition.
+The components of a complex pattern may be grouped by enclosing them in
+parentheses; a parenthesized expression behaves like a simple regular
+expression in further compositions.
+<P>
+Components must not be separated by white space, because white space
+terminates a regular expression.
+<P>
+When a complex regular expression is written as a sequence of components,
+<A NAME="IDX24"></A>
+the resulting pattern will match a sequence of characters consisting of
+a subsequence matching the first component,
+followed by a subsequence matching the second component,
+and so on:
+<P>
+<PRE>
+[1-9]\.[0-9][0-9]
+</PRE>
+<P>
+This complex expression has four components:
+three character classes and the text character <CODE>.</CODE> (the backslash
+converts the operator character <CODE>.</CODE> to a text character).
+It matches character sequences like <CODE>2.54</CODE> and <CODE>9.99</CODE>,
+but not <CODE>0.59</CODE>, <CODE>45.678</CODE> or <CODE>1x23</CODE>.
+<P>
+When the components of a complex regular expression are separated by the
+operator <CODE>|</CODE>,
+<A NAME="IDX26"></A>
+<A NAME="IDX25"></A>
+the resulting pattern will match a sequence of characters
+that matches at least one of the components:
+<P>
+<PRE>
+[A-Za-z]|[1-9][0-9]&#38;
+</PRE>
+<P>
+This complex expression has two immediate components:
+a character class and a complex expression that is the result of
+concatenating two character classes and a single character.
+The complete expression matches character sequences like <CODE>B</CODE> and
+<CODE>10&#38;</CODE>, but not <CODE>X11</CODE> or <CODE>A&#38;</CODE>.
+<P>
+Concatenation takes precedence over alternation in constructing a complex 
+regular expression, so this example is equivalent to
+<CODE>[A-Za-z]|([1-9][0-9]&#38;)</CODE>.
+Parentheses can be used to group the expression differently:
+<P>
+<PRE>
+([A-Za-z]|[1-9][0-9])&#38;
+</PRE>
+<P>
+This complex expression also has two immediate components, but they are
+a parenthesized expression and a single character.
+The complete expression matches character sequences like <CODE>B&#38;</CODE> and
+<CODE>10&#38;</CODE>.
+<P>
+When a complex regular expression consists of a single component
+followed by the operator <CODE>?</CODE>,
+<A NAME="IDX28"></A>
+<A NAME="IDX29"></A>
+<A NAME="IDX27"></A>
+the resulting pattern will match either an empty sequence
+or a sequence of characters that matches the component:
+<P>
+<PRE>
+(-|\+?)[1-9]
+</PRE>
+<P>
+Here the operand of <CODE>?</CODE> is the text character <CODE>+</CODE>.
+This complex expression matches character sequences like <CODE>-1</CODE>,
+<CODE>+2</CODE> and <CODE>3</CODE>.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+<P>
+The <CODE>?</CODE> operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+<P>
+When a complex regular expression consists of a single component
+followed by the operator <CODE>+</CODE>,
+<A NAME="IDX31"></A>
+<A NAME="IDX32"></A>
+<A NAME="IDX30"></A>
+the resulting pattern will match a sequence of characters
+that matches one or more successive occurrences of a sequence matching
+the component:
+<P>
+<PRE>
+[0-9]+
+</PRE>
+<P>
+This complex expression has one immediate component:
+a character class.
+It matches character sequences like <CODE>0</CODE> and <CODE>1019</CODE>.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+<P>
+The <CODE>+</CODE> operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+<P>
+When a complex regular expression consists of a single component
+followed by the operator <CODE>*</CODE>,
+<A NAME="IDX34"></A>
+<A NAME="IDX33"></A>
+the resulting pattern will match a sequence of characters
+that matches an empty sequence or one or more successive occurrences
+of a sequence matching the component:
+<P>
+<PRE>
+[1-9][0-9]*
+</PRE>
+<P>
+This complex expression has two immediate components:
+a character class and a complex expression whose operator is <CODE>*</CODE>.
+That complex expression, in turn, has a single character class component.
+The complete expression matches character sequences like <CODE>1</CODE> and
+<CODE>2992</CODE>, but not <CODE>0</CODE> or <CODE>0101</CODE>.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+<P>
+The <CODE>*</CODE> operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+For example, <CODE>([1-9][0-9])*</CODE> would match character sequences like
+<CODE>1019</CODE> and <CODE>2992</CODE>, but not <CODE>1</CODE> or <CODE>123</CODE>.
+<P>
+When a complex regular expression consists of a single component
+followed by the operator <CODE>{<VAR>m</VAR>,<VAR>n</VAR>}</CODE>
+<A NAME="IDX35"></A>
+(<VAR>m</VAR> and <VAR>n</VAR> integers greater than 0),
+the resulting pattern will match a sequence of characters
+that matches no fewer than <VAR>m</VAR> and no more than <VAR>n</VAR>
+successive occurrences of a sequence matching the component:
+<P>
+<PRE>
+[A-Za-z][A-Za-z0-9]{1,5}
+</PRE>
+<P>
+This complex expression has two immediate components:
+a character class and a complex expression whose operator is
+<CODE>{1,5}</CODE>.
+That complex expression, in turn, has a single character class component.
+The complete expression matches character sequences like <CODE>A1</CODE> and
+<CODE>xyzzy</CODE>, but not <CODE>identifier</CODE> or <CODE>01July</CODE>.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+<P>
+The <CODE>{<VAR>m</VAR>,<VAR>n</VAR>}</CODE> operator takes precedence over
+both concatenation and alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+For example, <CODE>([1-9][0-9]){1,2}</CODE> would match character sequences
+like <CODE>10</CODE> and <CODE>2992</CODE>,
+but not <CODE>1</CODE>, <CODE>123</CODE> or <CODE>123456</CODE>.
+<P>
+<H3><A NAME="SEC6" HREF="lex_toc.html#SEC6">What happens if the specification is ambiguous?</A></H3>
+<P>
+When more than one expression can match the current character sequence,
+a choice is made as follows:
+<P>
+<OL>
+<LI>
+The longest match is preferred.
+<A NAME="IDX36"></A>
+<LI>
+Among rules which match the same number of characters, the rule given
+first is preferred.
+<A NAME="IDX38"></A>
+<A NAME="IDX37"></A>
+</OL>
+<P>
+Thus, suppose we have the following descriptions:
+<P>
+<PRE>
+Limit: $55
+Speed: $[0-9]+
+</PRE>
+<P>
+If the input text is <CODE>550kts</CODE> then the sequence <CODE>550</CODE>
+is classified as <CODE>Speed</CODE>, because <CODE>[0-9]+</CODE> matches three characters
+while <CODE>55</CODE> matches only two.
+If the input is <CODE>55mph</CODE> then both patterns match two characters,
+and the sequence <CODE>55</CODE> is classified as <CODE>Limit</CODE> because <CODE>Limit</CODE>
+was given first.
+Any shorter sequence of digits (e.g. <CODE>5kph</CODE>) would not match the
+regular expression <CODE>55</CODE>
+and so the <CODE>Speed</CODE> classification would be used.
+<P>
+When more than one type-<TT>`gla'</TT> file is provided, specifications in
+different files have no defined order.
+Thus if <CODE>Limit</CODE> and <CODE>Speed</CODE> appeared in different files,
+classification of the sequence <CODE>55</CODE> would be undefined.
+If an ambiguity between two descriptions is to be resolved on the basis of
+their order of appearance, they must be given within the same
+type-<TT>`gla'</TT> file.
+<P>
+<A NAME="IDX39"></A>
+<A NAME="IDX40"></A>
+<H2><A NAME="SEC7" HREF="lex_toc.html#SEC7">Auxiliary Scanners</A></H2>
+<P>
+An auxiliary scanner is a routine to be invoked after the pattern described
+by the regular expression has been matched.
+The routine is passed a pointer to the matched string and the length of that
+string, and it returns a pointer to the first character that is not to be
+considered part of the string matched.
+Thus an auxiliary scanner may increase, reduce or leave unchanged
+the number of characters matched by the regular expression.
+This allows a user to specify operationally patterns that are
+tedious or impossible to describe using regular expressions
+(e.g. nested comments), or that require special operations during the match
+(e.g. sequences containing tabs or newlines -- see  <A HREF="lex_3.html#SEC16">Spaces, Tabs and Newlines</A>),
+or that would benefit from specialized error reporting.
+<P>
+An auxiliary scanner is invoked by giving its name, surrounded by
+parentheses (<CODE>( )</CODE>), on the same line as the associated
+regular expression:
+<P>
+<A NAME="IDX41"></A>
+<PRE>
+$--  (auxEOL)
+</PRE>
+This specification invokes the auxiliary scanner <CODE>auxEOL</CODE>
+whenever a sequence of two dashes is recognized, and passes it a pointer to
+the first of the two dashes and a length of 2.
+As described below, <CODE>auxEOL</CODE> returns a pointer to the first character
+of the next line, after having updated the coordinate information.
+This specification is the implementation of the canned description
+<CODE>ADA_COMMENT</CODE>.
+<P>
+The remainder of this section describes the auxiliary scanners that
+are available in the Eli library, and also
+explains how to implement auxiliary scanners for
+tasks that are specific to your problem.
+<P>
+<H3><A NAME="SEC8" HREF="lex_toc.html#SEC8">Available scanners</A></H3>
+<P>
+All of the auxiliary scanners described in this section can be used simply
+by mentioning their names in a specification line.
+They can also be invoked from arbitrary C programs if the invoker includes
+the header file <TT>`ScanProc.h'</TT>.
+(The source code for that file is <TT>`$elipkg/Scan/ScanProc.h'</TT>.)
+<P>
+The name of the file containing each available auxiliary scanner is also
+given in this section.
+It is not necessary to examine this file in order to use the auxiliary
+scanner, but sometimes an existing auxiliary scanner can be useful as a
+starting point for solving a similar problem
+(see  <A HREF="lex_1.html#SEC9">Building scanners</A>).
+<P>
+<DL COMPACT>
+<A NAME="IDX42"></A>
+<DT><CODE>auxNUL</CODE>
+<DD>This routine is invoked automatically when the first character of a
+sequence is the ASCII NUL character, a pattern that cannot be specified by
+a regular expression.
+In that case, the character sequence matched by the associated pattern is
+an empty sequence.
+If information remains in the current input file, <CODE>auxNUL</CODE> returns a
+pointer to the empty sequence at the beginning of that information.
+Effectively, this is a pointer to the new information.
+<P>
+This routine is also invoked by any scanner that must accept a newline
+character and continue.
+Since an ASCII NUL character signalling the end of the current information
+in the buffer can occur immediately after any newline, a scanner that
+accepts a newline and continues must check for NUL.
+If a NUL is found, the scanner invokes <CODE>auxNUL</CODE>.
+Here is a typical code sequence that such a scanner might use.
+The variable <CODE>p</CODE> is the scan pointer and
+<CODE>start</CODE> points to the beginning of the current token:
+<P>
+<PRE>
+if (*p == '\0') {
+  int current = p - start;
+  TokenStart = start = auxNUL(start, current);
+  p = start + current;
+  StartLine = p - 1;
+  if (*p == '\0') {
+    /* Code to deal appropriately with end-of-file.
+     * Some of the possibilities are:
+     *   1. Output an error report and return p
+     *   2. Simply return p
+     *   3. Move to another file and continue
+     ***/
+  }
+}
+</PRE>
+<P>
+If information remains in the current input file, the library version of
+<CODE>auxNUL</CODE> (see  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>)
+appends that information to the character sequence
+matched by the associated pattern, possibly relocating the character
+sequence matched by the associated pattern.
+It returns a pointer to the first character of the sequence matched by the
+associated pattern.
+Source code: <TT>`$elipkg/Scan/auxNUL.c'</TT>.
+<P>
+To obtain different behavior when the first character of a sequence is the
+ASCII NUL character, supply your own routine with the name <CODE>auxNUL</CODE> in
+a type-<TT>`c'</TT> file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+<P>
+<A NAME="IDX43"></A>
+<DT><CODE>auxEOF</CODE>
+<DD>This routine is invoked automatically when the first character of a
+sequence is the ASCII NUL character, a pattern that cannot be specified by
+a regular expression, and no information remains in the current input file.
+In that case, the character sequence matched by the associated pattern is
+an empty sequence.
+<P>
+The library version of
+<CODE>auxEOF</CODE> simply returns the argument supplied to it.
+Source code: <TT>`$elipkg/Scan/auxEOF.c'</TT>.
+<P>
+To obtain different behavior when the first character of a sequence is the
+ASCII NUL character, and no information remains in the current input file,
+supply your own routine with the name <CODE>auxEOF</CODE> in a type-<TT>`c'</TT> file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+<P>
+<A NAME="IDX44"></A>
+<DT><CODE>coordAdjust</CODE>
+<DD>Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information to reflect the tabs and newlines
+in that sequence.
+Source code: <TT>`$elipkg/Scan/coordAdjust.c'</TT>
+<P>
+<A NAME="IDX45"></A>
+<DT><CODE>auxNewLine</CODE>
+<DD>Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information under the assumption that the last
+character of that sequence is a newline.
+(This is a special case that can be handled more efficiently than the
+general case, for which <CODE>coordAdjust</CODE> would be used.)
+Source code: <TT>`$elipkg/Scan/auxNewLine.c'</TT>
+<P>
+<A NAME="IDX46"></A>
+<DT><CODE>auxTab</CODE>
+<DD>Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information under the assumption that the last
+character of that sequence is a tab.
+(This is a special case that can be handled more efficiently than the
+general case, for which <CODE>coordAdjust</CODE> would be used.)
+Source code: <TT>`$elipkg/Scan/auxTab.c'</TT>
+<P>
+<A NAME="IDX47"></A>
+<DT><CODE>auxEOL</CODE>
+<DD>Extends the character sequence matched by the associated pattern to the end
+of the current line, including the terminating newline.
+Updates the coordinate information to reflect the new position.
+Source code: <TT>`$elipkg/Scan/auxScanEOL.c'</TT>
+<P>
+<A NAME="IDX48"></A>
+<DT><CODE>auxNoEOL</CODE>
+<DD>Extends the character sequence matched by the associated pattern to the end
+of the current line, but does not include the terminating newline.
+Updates the coordinate information to reflect the new position.
+Source code: <TT>`$elipkg/Scan/auxNoEOL.c'</TT>
+<P>
+<A NAME="IDX49"></A>
+<DT><CODE>auxCString</CODE>
+<DD>Completes a C string constant when provided with the opening quote
+(<CODE>"</CODE>).
+Updates the coordinate information to reflect the tabs and newlines
+in that sequence.
+Source code: <TT>`$elipkg/Scan/CchStr.c'</TT>.
+<P>
+<A NAME="IDX50"></A>
+<DT><CODE>auxCChar</CODE>
+<DD>Completes a C character constant when provided with the opening quote
+(<CODE>'</CODE>).
+Source code: <TT>`$elipkg/Scan/CchStr.c'</TT>.
+<P>
+<A NAME="IDX51"></A>
+<DT><CODE>auxCComment</CODE>
+<DD>Completes a C comment when provided with the opening delimiter
+(<CODE>/*</CODE>).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+<P>
+The comment is terminated by the delimiter <CODE>*/</CODE>, and may not contain
+nested comments.
+<P>
+Source code: <TT>`$elipkg/Scan/Ccomment.c'</TT>
+<P>
+<A NAME="IDX52"></A>
+<DT><CODE>auxM2String</CODE>
+<DD>Completes a string constant when provided with the opening quote,
+possibly followed by other characters.
+Updates the coordinate information to reflect the tabs
+in that sequence.
+<P>
+The string constant is terminated by an occurrence of the opening quote.
+If a newline or the end of the input text is reached before the constant
+terminates, <CODE>auxM2String</CODE> reports an error.
+<P>
+For Modula2, the opening quote is either the character <CODE>'</CODE> or the
+character <CODE>"</CODE>.
+This auxiliary scanner simply uses the first character of the string matched
+by the regular expression as the opening quote character, so it can
+complete any sequence of characters that is terminated by
+the first character,
+and is contained wholly within a single source line.
+Note that the characters matched by the regular expression are <EM>not</EM>
+re-scanned for a closing quote.
+<P>
+Source code: <TT>`$elipkg/Scan/M2chStr.c'</TT>
+<P>
+<A NAME="IDX53"></A>
+<DT><CODE>auxM3Comment</CODE>
+<DD>Completes a Modula2 or Modula3 comment when provided with the opening
+delimiter (<CODE>(*</CODE>).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+<P>
+The comment is terminated by the delimiter <CODE>*)</CODE>, and may contain
+nested comments.
+<P>
+Source code: <TT>`$elipkg/Scan/M3comment.c'</TT>
+<P>
+<A NAME="IDX54"></A>
+<DT><CODE>auxPascalString</CODE>
+<DD>Completes a string constant when provided with the opening quote,
+possibly followed by other characters.
+Updates the coordinate information to reflect the tabs
+in that sequence.
+<P>
+The string constant is terminated by an occurrence of the opening quote
+that is not immediately followed by another occurrence of the opening
+quote.
+(Thus the opening quote character may appear doubled within the string.)
+If a newline or the end of the input text is reached before the constant
+terminates, <CODE>auxPascalString</CODE> reports an error.
+<P>
+For Pascal, the opening quote is the character <CODE>'</CODE>.
+This auxiliary scanner simply uses the first character of the string matched
+by the regular expression as the opening quote character, so it can
+complete any sequence of characters that is terminated by
+a single occurrence of the first character,
+and not by two successive occurrences of that character,
+and is contained wholly within a single source line.
+Note that the characters matched by the regular expression are <EM>not</EM>
+re-scanned for a closing quote.
+<P>
+Source code: <TT>`$elipkg/Scan/pascalStr.c'</TT>
+<P>
+<A NAME="IDX55"></A>
+<DT><CODE>auxPascalComment</CODE>
+<DD>Completes a Pascal comment when provided with the opening delimiter
+(either <CODE>{</CODE> or <CODE>(*</CODE>).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+<P>
+A comment is terminated by either the delimiter <CODE>}</CODE> or the delimiter
+<CODE>*)</CODE>, regardless of the opening delimiter.
+Comments may <EM>not</EM> be nested.
+<P>
+Source code: <TT>`$elipkg/Scan/pascalCom.c'</TT>
+<P>
+<A NAME="IDX56"></A>
+<DT><CODE>Ctext</CODE>
+<DD>Completes a C compound statement when provided with the opening brace
+(<CODE>{</CODE>).
+Updates the coordinate information to reflect the tabs and newlines
+in the compound statement.
+<P>
+A compound statement is terminated by the matching close brace (<CODE>}</CODE>).
+Compound statements may be nested, and unmatched braces may be embedded in
+C strings, character constants or comments.
+<P>
+Source code: <TT>`$elipkg/Scan/Ctext.c'</TT>
+</DL>
+<P>
+<H3><A NAME="SEC9" HREF="lex_toc.html#SEC9">Building scanners</A></H3>
+<P>
+All auxiliary scanners obey the same interface conventions:
+<P>
+<PRE>
+extern char *Name(char *start, int length);
+/* Auxiliary scanner "Name"
+ *   On entry-
+ *     start points to the first character matching the associated
+ *       regular expression
+ *     length=number of characters matching the associated
+ *       regular expression
+ *   On exit-
+ *     Name points to the first character that does not belong to the
+ *       character sequence being classified
+ ***/
+</PRE>
+<P>
+Unless otherwise stated, <CODE>Name&#62;=start</CODE> on return,
+and all characters in the half-open interval <CODE>[start,Name)</CODE>
+are in memory.
+<P>
+Any auxiliary scanner that passes over tabs or newline characters must
+update coordinate information
+(see  <A HREF="lex_3.html#SEC17">Maintaining the Source Text Coordinates</A>).
+In addition, if the character following a newline is an ASCII NUL
+then the source buffer must be refilled
+(see  <A HREF="lib_1.html#SEC3">Text Input of Library Reference Manual</A>).
+The easiest way to develop an auxiliary scanner is therefore to start with
+one from the library that solves a similar problem.
+Source file names for all of the available auxiliary scanners are given
+in the previous subsection.
+To obtain a copy of (say) the source code for <CODE>auxNUL</CODE> as file
+<TT>`MyScanner.c'</TT> in your current directory, give the Eli request:
+<P>
+<PRE>
+-&#62; $elipkg/Scan/auxNUL.c &#62; MyScanner.c
+</PRE>
+<P>
+After modifying <TT>`MyScanner.c'</TT>, simply add its name to your
+type-<TT>`specs'</TT> file to make it available.
+<P>
+<H2><A NAME="SEC10" HREF="lex_toc.html#SEC10">Token Processors</A></H2>
+<P>
+A token processor is a routine to be invoked after the pattern described
+by the regular expression has been matched, and after any associated
+auxiliary scanner has been invoked.
+It is passed a pointer to the matching character sequence,
+the length of that sequence,
+a pointer to an integer variable containing the classification, and
+a pointer to an integer variable to hold a value
+representing the character sequence.
+The token processor may change the classification,
+and may compute a value to represent the sequence.
+<P>
+A token processor is invoked by giving its name, surrounded by
+brackets (<CODE>[ ]</CODE>), on the same line as the associated
+regular expression:
+<P>
+<A NAME="IDX57"></A>
+<PRE>
+Integer: $[0-9]+  [mkint]
+</PRE>
+This specification invokes the token processor <CODE>mkint</CODE>
+whenever a sequence of digits is recognized.
+The arguments are a pointer to the first digit,
+the length of the digit sequence,
+a pointer to an integer variable containing the classification code for
+<CODE>Integer</CODE>,
+and a pointer to an integer variable to hold a value
+representing the digit sequence.
+As described below, <CODE>mkint</CODE> leaves the character sequence and
+its classification unchanged and
+sets the value to the decimal integer denoted by the digit sequence.
+This specification is the implementation of the canned description
+<CODE>PASCAL_INTEGER</CODE>.
+<P>
+This section describes the token processors that are available in the
+Eli library, and also explains how to implement token processors for
+tasks that are specific to your problem.
+<P>
+<H3><A NAME="SEC11" HREF="lex_toc.html#SEC11">Available processors</A></H3>
+<P>
+All of the token processors described in this section can be used simply
+by mentioning their names in a specification line.
+They can also be invoked from arbitrary C programs if the invoker includes
+the header file <TT>`ScanProc.h'</TT>.
+(The source code for that file is <TT>`$elipkg/Scan/ScanProc.h'</TT>.)
+<P>
+The name of the file containing each available token processor is also
+given in this section.
+It is not necessary to examine that file in order to use the token
+processor, but sometimes an existing token processor can be useful
+as a starting point for solving a similar problem
+(see  <A HREF="lex_1.html#SEC12">Building processors</A>).
+<P>
+<DL COMPACT>
+<A NAME="IDX58"></A>
+<DT><CODE>c_mkchar</CODE>
+<DD>Assumes that the character sequence has the form of a C character constant.
+Sets the value to the integer encoding of that character constant.
+Does not alter the initial classification.
+Source file: <TT>`$elipkg/Scan/CchStr.c'</TT>.
+<P>
+<A NAME="IDX59"></A>
+<DT><CODE>c_mkint</CODE>
+<DD>Assumes that the character sequence has the form of a C integer constant.
+Sets the value to the integer represented by that constant.
+Does not alter the initial classification.
+Source file: <TT>`$elipkg/Scan/int.c'</TT>.
+<P>
+<A NAME="IDX60"></A>
+<DT><CODE>c_mkstr</CODE>
+<DD>Assumes that the character sequence has the form of a C string constant.
+Stores a new copy of that constant in the character storage module
+and sets the value to the index of that copy
+(see  <A HREF="lib_1.html#SEC6">Character String Storage of Library Reference Manual</A>).
+If the character constant contains an escape sequence representing ASCII
+NUL, it is truncated and an error report is issued.
+The last character of the stored constant is the character preceding the
+first NUL.
+Does not alter the initial classification.
+Source file: <TT>`$elipkg/Scan/CchStr.c'</TT>.
+<P>
+<A NAME="IDX61"></A>
+<DT><CODE>EndOfText</CODE>
+<DD>This processor is invoked automatically
+when the end of the input text is reached.
+It assumes that the character sequence is empty, and does nothing.
+Source file: <TT>`$elipkg/Scan/dflteot.c'</TT>.
+<P>
+To obtain different behavior when the end of the input text is reached,
+supply your own routine with the name <CODE>EndOfText</CODE> in
+a type-<TT>`c'</TT> file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+<P>
+<A NAME="IDX62"></A>
+<DT><CODE>lexerr</CODE>
+<DD>Reports that the character sequence is not a token.
+Does not alter the initial classification, and does not compute a value.
+There is no source file for this token processor; it is a component of the
+scanner itself, but its interface is exported so that it can be used by
+other modules.
+<P>
+<A NAME="IDX63"></A>
+<DT><CODE>mkidn</CODE>
+<DD>Looks the character sequence up in the identifier table
+(see  <A HREF="lib_1.html#SEC8">Unique Identifier Management of Library Reference Manual</A>).
+If it is not in the table, it is added with its classification unchanged.
+Otherwise <CODE>mkidn</CODE> changes the initial classification to the
+classification given by the identifier table.
+(The identifier table can be initialized with pre-classified character
+strings, see  <A HREF="lex_4.html#SEC20">Literal Symbols</A>.)
+<P>
+In any case, <CODE>mkidn</CODE> sets the value to the (unique) index
+of the character sequence in the character storage module
+(see  <A HREF="lib_1.html#SEC6">Character String Storage of Library Reference Manual</A>).
+Source file: <TT>`$elipkg/Scan/idn.c'</TT>.
+<P>
+<A NAME="IDX64"></A>
+<DT><CODE>mkint</CODE>
+<DD>Assumes that the character sequence consists of one or more decimal digits.
+Sets the value to the integer denoted by that sequence of digits.
+Does not alter the initial classification.
+Source file: <TT>`$elipkg/Scan/int.c'</TT>.
+<P>
+<A NAME="IDX65"></A>
+<DT><CODE>mkstr</CODE>
+<DD>Stores a new copy of the character sequence in the character storage module
+and sets the value to the index of that copy
+(see  <A HREF="lib_1.html#SEC6">Character String Storage of Library Reference Manual</A>).
+Does not alter the initial classification.
+Source file: <TT>`$elipkg/Scan/str.c'</TT>.
+<P>
+<A NAME="IDX66"></A>
+<DT><CODE>modula_mkint</CODE>
+<DD>Assumes that the character sequence consists of one or more hexadecimal
+digits, possibly followed by a radix marker.
+Sets the value to the integer denoted by that sequence of digits,
+interpreted in the given radix.
+Does not alter the initial classification.
+<P>
+Valid radix markers are <CODE>B</CODE> and <CODE>C</CODE> (indicating radix 8), and
+<CODE>H</CODE> (indicating radix 16).
+Sequences of digits not followed by a radix marker are assumed to be radix
+10.
+<P>
+Source file: <TT>`$elipkg/Scan/M2int.c'</TT>.
+<P>
+</DL>
+<P>
+<H3><A NAME="SEC12" HREF="lex_toc.html#SEC12">Building processors</A></H3>
+<P>
+All token processors obey the same interface conventions:
+<P>
+<PRE>
+extern void Name(const char *start, int length, int *syncode, int *intrinsic);
+/* Token processor "Name"
+ *   On entry-
+ *     start points to the first character of the sequence being classified
+ *     length=length of the sequence being classified
+ *     syncode points to a location containing the initial classification
+ *     intrinsic points to a location to receive the value
+ *   On exit-
+ *     syncode points to a location containing the final classification
+ *     intrinsic points to a location containing the value (if relevant)
+ ***/
+</PRE>
+<P>
+The token processor can change the classification of the character sequence.
+It may carry out any computation whatsoever, involving arbitrary modules,
+to obtain the information it needs.
+Eli generates a file called <TT>`termcode.h'</TT>
+<A NAME="IDX68"></A>
+<A NAME="IDX67"></A>
+that contains <CODE>#define</CODE> directives specifying the classification code
+for each symbol appearing before a colon at the beginning of a line in a
+type-<TT>`gla'</TT> file.
+Thus if <CODE>name: ...</CODE> is a line in a type-<TT>`gla'</TT> file,
+a processor can use the following sequence to change the
+classification of any character sequence, including one that is initially
+classified as a comment, to <CODE>name</CODE>:
+<P>
+<PRE>
+#include "termcode.h"
+...
+   *syncode = name;
+...
+</PRE>
+<P>
+All comments are classified by the value of the symbol <CODE>NORETURN</CODE>,
+exported by the lexical analyzer module in file <TT>`gla.h'</TT>.
+A token processor can cause the character sequence matched by its
+associated regular expression to be considered a comment by setting the
+classification to <CODE>NORETURN</CODE>:
+<P>
+<A NAME="IDX69"></A>
+<PRE>
+#include "gla.h"
+...
+   *syncode = NORETURN;
+...
+</PRE>
+<P>
+The easiest way to develop a token processor is to start with
+one from the library that solves a similar problem.
+Source file names for all of the available token processors are given
+in the previous subsection.
+To obtain a copy of (say) the source code for <CODE>EndOfText</CODE> as file
+<TT>`MyProcessor.c'</TT> in your current directory, give the Eli request:
+<P>
+<PRE>
+-&#62; $elipkg/Scan/dflteot.c &#62; MyProcessor.c
+</PRE>
+<P>
+After modifying <TT>`MyProcessor.c'</TT>, simply add its name to your
+type-<TT>`specs'</TT> file to make it available.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

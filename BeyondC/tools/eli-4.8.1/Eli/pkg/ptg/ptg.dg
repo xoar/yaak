@@ -1,0 +1,48 @@
+# $Id: ptg.dg,v 2.7 2002/05/23 11:14:07 peter Exp $
+# Copyright (C) 1997 University of Paderborn
+# 
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.ptg => :ptg;
+:ptg 'PTG specification'? => :FILE;
+
+:ptg.cmpd 'Set of ptg specification fragments' => :LIST;
+
+COLLECT  (:ptg)
+  => (:one.ptg.cmpd);
+:one.ptg.cmpd 'Singleton ptg specification' => :ptg.cmpd;
+
+COLLECT  (:LIST :extract=:ptg)
+  => (:ext.ptg.cmpd);
+:ext.ptg.cmpd 'Extracted ptg specification fragments' => :ptg.cmpd;
+
+EXEC (ptg_gen.sh) (.) (:ptg.cmpd :cpp)
+  => (:ptg_gen);
+:ptg_gen 'Objects generated from PTG specifications' => :DERIVED-DIRECTORY;
+
+EXEC (ptg_out.sh) (.) (:ptg.cmpd :names) (:ptg_gen :name) (+monitor)
+  NEEDS (ptgadt.ptg.phi) (ptgadt.head) (ptgadt.reqmod) (ptg.dapto) (ptg.tcl)
+  => (:ptg_out);
+:ptg_out 'Results of PTG processing' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:ptg_gen) ptg_genErr
+  => (:ptg_genErr);
+:ptg_genErr 'Identity map for errors in standard form' => :line_err;
+
+COLLECT (:allspecs +incl=(:etaIncl) :ptg_out :list)
+  => (:eli*level_1_specs_in);
+

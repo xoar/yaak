@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>OrdInfo Example </title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>OrdInfo output (direct rule)</h1>
+<hr>
+
+<p>
+<pre>
+DIRECT GRAPH FOR RULE rule_066 ROW 2251; COL 6
+  identifier_list_opt ::= 
+  ATNO ATNAME                                 DEP
+  0    identifier_list_opt.TypeChain_post     []
+  1    identifier_list_opt.TypeChain_pre      []
+  2    identifier_list_opt._C_TagGotKeys_post [3]
+  3    identifier_list_opt._C_TagGotKeys_pre  []
+END RULE
+
+DIRECT GRAPH FOR RULE rule_067 ROW 2255; COL 6
+  identifier_list_opt ::=   identifier_list
+  ATNO ATNAME                                 DEP
+  0    identifier_list_opt.TypeChain_post     [4]
+  1    identifier_list_opt.TypeChain_pre      []
+  2    identifier_list_opt._C_TagGotKeys_post [3]
+  3    identifier_list_opt._C_TagGotKeys_pre  []
+  4    identifier_list.TypeChain_post         []
+  5    identifier_list.TypeChain_pre          [1]
+END RULE
+</pre>
+<font size=-2>[this listing is slightly abbreviated and reformatted]</font>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

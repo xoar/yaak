@@ -1,0 +1,35 @@
+# $Id: Makefile.in,v 1.2 2002/12/27 20:29:21 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+
+CC	= @CC@
+CFLAGS	= -g
+
+SHELL	= /bin/sh
+
+OBJS	= sed.o utils.o regex.o getopt.o getopt1.o @ALLOCA@
+
+.SUFFIXES:
+.SUFFIXES:	.c .o
+
+all:	sed.exe
+
+tidy:
+	rm -f *.o *~
+
+clean:	tidy
+	rm -f sed.exe
+
+distclean:	clean
+	rm -f Makefile config.h config.cache config.log config.status
+
+sed.exe:	$(OBJS)
+	$(CC) -o $@ $(OBJS)
+
+.c.o:
+	$(CC) @DEFS@ $(CFLAGS) -c $<
+
+sed.o:		regex.h getopt.h config.h
+regex.o:	regex.h config.h
+getopt.o:	getopt.h config.h
+getopt1.o:	getopt.h config.h
+alloca.o:	config.h

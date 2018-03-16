@@ -1,0 +1,7 @@
+begin
+  var int a, bool b;
+  begin var real a, real int;
+	a; int;
+  end;
+  true;
+end

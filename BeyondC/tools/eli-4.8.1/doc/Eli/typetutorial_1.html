@@ -1,0 +1,523 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Kernel Language</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC1" HREF="typetutorial_toc.html#SEC1">Kernel Language</A></H1>
+<P>
+We start with a very simple kernel language where a <CODE>Program</CODE>
+is a <CODE>Block</CODE> consisting of <CODE>Declarations</CODE> for variables,
+assignment <CODE>Statements</CODE>, and trivial <CODE>Expressions</CODE>.
+Other forms of <CODE>Declarations</CODE>
+and <CODE>Expressions</CODE> are added to the grammar when the
+type analysis task is further refined.
+<P>
+Here is a simple example program:
+<P>
+<B>SimpleExamp</B>[1]==
+<PRE>
+begin
+  var   int i, int j,
+        bool b, bool c,
+        int r, int s;
+  i = 1;
+  b = true;
+  r = 3;
+  j = i;
+  c = b;
+  s = r;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+Structure and notation of the kernel language is specified here
+by its abstract syntax.
+<P>
+<I>Abstract Kernel syntax</I>[2]==
+<PRE>
+RULE: Program      ::=    Block END;
+RULE: Block        ::=    'begin' Declarations Statements 'end' END;
+RULE: Declarations LISTOF Declaration END;
+RULE: Statements   LISTOF Statement END;
+
+RULE: Declaration  ::=    'var' ObjDecls ';' END;
+RULE: ObjDecls     LISTOF ObjDecl  END;
+RULE: ObjDecl      ::=    TypeDenoter DefIdent END;
+RULE: TypeDenoter  ::=    'int' END;
+RULE: TypeDenoter  ::=    'bool' END;
+RULE: TypeDenoter  ::=    'void' END;
+
+RULE: Statement    ::=    Variable '=' Expression ';' END;
+RULE: Statement    ::=    Expression ';' END;
+
+RULE: Expression   ::=    Variable END;
+RULE: Expression   ::=    IntNumber END;
+RULE: Expression   ::=    'true' END;
+RULE: Expression   ::=    'false' END;
+
+RULE: Variable     ::=    UseIdent END;
+
+RULE: DefIdent     ::=    Ident END;
+RULE: UseIdent     ::=    Ident END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+Concrete syntax rules corresponding to the <CODE>LISTOF</CODE> constructs
+above, specifications of the notations of
+identifiers, literals, and comments are given in the appendix.
+<P>
+<H2><A NAME="SEC2" HREF="typetutorial_toc.html#SEC2">Basic Scope Rules</A></H2>
+<P>
+The basic task of name analysis is consistent renaming.
+For each identifier occurrence a <CODE>Key</CODE> attribute is computed such
+that it identifies a program entity uniquely. 
+<CODE>Key</CODE>s are used to associate properties
+to program entities and to retrieve those properties in different
+contexts. The symbols <CODE>DefIdent</CODE>, <CODE>UseIdent</CODE>
+distinguish defining and used identifier occurrences.
+<P>
+The scope rules of a language determine how identifier occurrences
+are bound to program entities. We specify Algol-like scope rules
+for our language. The basic Algol-like scope rule reads:
+<P>
+<BLOCKQUOTE>
+A definition of an identifier <CODE>a</CODE> is valid in the whole smallest
+range that encloses that definition, except inner ranges that
+contain another definition of <CODE>a</CODE>.
+</BLOCKQUOTE>
+<P>
+Hence, a definition in an outer range is hidden by a definition
+of the same identifier in an inner range for the whole inner range.
+Identifiers may be applied before they are defined.
+<P>
+We instantiate a library module that provides computations
+according to this scope rule:
+<P>
+<I>Basic scope module</I>[3]==
+<PRE>
+$/Name/AlgScope.gnrc:inst
+</PRE>
+<PRE>
+This macro is invoked in definition 14.
+</PRE>
+<P>
+The use of that module requires that every identifier occurrence
+has the attribute <CODE>Sym</CODE> representing
+the identifier encoding. Hence we specify a computational role
+<CODE>IdentOcc</CODE> that provides that attribute, and will be inherited
+by any identifier occurrence.
+<P>
+The computational roles <CODE>RangeScope</CODE>,
+<CODE>IdDefScope</CODE>, and <CODE>IdUseEnv</CODE> are associated to the corresponding
+symbols of our grammar:
+<P>
+<I>Kernel scope rules</I>[4]==
+<PRE>
+TERM Ident: int;
+ATTR Sym: int;
+CLASS SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+SYMBOL Block    INHERITS RangeScope END;
+SYMBOL DefIdent INHERITS IdDefScope, IdentOcc END;
+SYMBOL UseIdent INHERITS IdUseEnv, IdentOcc END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+Erroneous programs may violate the scope rules in two different
+situations:
+<P>
+<UL>
+<LI>
+A particular applied identifier occurrence has no valid defining
+identifier occurrence.
+<P>
+<LI>
+There are more than one defining identifier occurrences for the same
+identifier in a range.
+</UL>
+<P>
+Such situations shall be indicated by error messages.
+Furthermore, we want every defining occurrence of a multiply
+defined identifier be marked by a message.
+<P>
+For that purpose we use the following two library modules:
+<P>
+<I>Message support</I>[5]==
+<PRE>
+$/Tech/Strings.specs
+$/Prop/OccCnt.gnrc:inst
+</PRE>
+<PRE>
+This macro is invoked in definition 14.
+</PRE>
+<P>
+The <CODE>Strings</CODE> module provides a function that concatenates
+a string and an identifier, to be used for error messages
+related to identifiers.
+<P>
+The <CODE>OccCnt</CODE> module provides computations that count how
+often an entity identified by a <CODE>Key</CODE> attribute occurs
+in certain contexts, in our case in a defining context.
+<P>
+The check for existence of a definition is directly obtained from
+the module role <CODE>ChkIdUse</CODE>.
+For the second check we specify a computational role
+<CODE>ChkUnique</CODE> in order to reuse it for several grammar symbols.
+If an entity occurs more than once in the <CODE>ChkUnique</CODE>
+context it is multiply defined.
+<P>
+<I>Scope checks</I>[6]==
+<PRE>
+SYMBOL UseIdent INHERITS ChkIdUse END;
+SYMBOL DefIdent INHERITS ChkUnique END;
+
+SYMBOL ChkUnique INHERITS Count, TotalCnt COMPUTE
+  IF (GT (THIS.TotalCnt, 1),
+  message (ERROR, 
+           CatStrInd ("identifier is multiply defined: ", 
+                      THIS.Sym),
+           0, COORDREF));
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+<H2><A NAME="SEC3" HREF="typetutorial_toc.html#SEC3">Types in the Kernel Language</A></H2>
+<P>
+We use the modules <CODE>Typing</CODE> to support type analysis.
+As we are going to specify structural equivalence for some
+kinds of type, we also instantiate the module <CODE>StructEquiv</CODE>.
+<I>Type analysis module</I>[7]==
+<PRE>
+$/Type/Typing.gnrc:inst
+$/Type/StructEquiv.fw
+</PRE>
+<PRE>
+This macro is invoked in definition 14.
+</PRE>
+<P>
+So, we have to adopt the modules' strategy for representing types:
+<P>
+Types are represented by <CODE>DefTableKey</CODE>s.
+Such a key is created for each program construct which
+denotes a particular type. The unknown type is represented
+by <CODE>NoKey</CODE>. 
+<P>
+The kernel language has only language defined types:
+<CODE>int</CODE>, <CODE>bool</CODE>, and <CODE>void</CODE>.
+Each of them is represented by a known key. 
+Here we introduce only the key for the type <CODE>void</CODE>, as the other
+types occur in operator specification, and are introduced there:
+<I>Language defined type keys</I>[8]==
+<PRE>
+voidType -&#62; IsType = {1};
+</PRE>
+<PRE>
+This macro is invoked in definition 15.
+</PRE>
+<P>
+All type keys have a property <CODE>IsType</CODE>, which distinguishes 
+them from keys representing entities other than types. 
+Usually the property <CODE>IsType</CODE> is not set or accessed by user 
+specifications. Module roles ensure that they are properly used.
+<P>
+The following computations set the <CODE>Type</CODE> attributes of the
+constructs that denote languge defined types:
+<I>Language defined types</I>[9]==
+<PRE>
+RULE: TypeDenoter ::= 'int'  COMPUTE TypeDenoter.Type = intType;  END;
+RULE: TypeDenoter ::= 'bool' COMPUTE TypeDenoter.Type = boolType; END;
+RULE: TypeDenoter ::= 'void' COMPUTE TypeDenoter.Type = voidType; END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+Further forms of <CODE>TypeDenoter</CODE>s for user defined types are 
+specified in subsequent sections.
+<P>
+We now consider a variable declaration as an example for
+a language construct that defines a typed entity.
+In our language a variable declaration may define several
+variables. An <CODE>ObjDecl</CODE> states the type and the name for
+each of them. 
+<P>
+The pair of module roles <CODE>TypedDefinition</CODE> and <CODE>TypedDefId</CODE>
+supports the pattern of declaring typed entities:
+<CODE>ObjDecl</CODE> has the role <CODE>TypedDefinition</CODE>, i.e. a construct
+that specifies the types of all <CODE>TypedDefId</CODE>s in its subtree.
+The attribute <CODE>ObjDecl.Type</CODE> has to be set appropriately:
+<P>
+<I>Declarations</I>[10]==
+<PRE>
+SYMBOL ObjDecl INHERITS TypedDefinition END;
+SYMBOL DefIdent INHERITS TypedDefId END;
+
+ATTR Type: DefTableKey;
+
+RULE: ObjDecl ::= TypeDenoter DefIdent COMPUTE
+  ObjDecl.Type = TypeDenoter.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+The module roles <CODE>TypedUseId</CODE> classifies a used name of a typed 
+entity, and causes the attribute  <CODE>TypedUseId.Type</CODE>
+to be set to the type defined for that entity.
+The corresponding check role issues messages if that classification
+is violated:
+<P>
+<I>Typed identifiers</I>[11]==
+<PRE>
+SYMBOL UseIdent INHERITS TypedUseId, ChkTypedUseId END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+In order to report some results of the type analysis
+we associate two properties to every type key:
+a string value <CODE>TypeName</CODE> and the number of the
+line where the type is introduced. (The latter will become
+more significant when user defined types are defined for
+the language.)
+<P>
+<I>Output properties</I>[12]==
+<PRE>
+TypeName: CharPtr; "Strings.h"
+TypeLine: int;
+
+intType -&#62;  TypeName = {"int"};
+boolType -&#62; TypeName = {"bool"};
+voidType -&#62; TypeName = {"void"};
+
+intType -&#62;  TypeLine = {0};
+boolType -&#62; TypeLine = {0};
+voidType -&#62; TypeLine = {0};
+</PRE>
+<PRE>
+This macro is invoked in definition 15.
+</PRE>
+<P>
+For every used identifier the name and the defining line of its type 
+is printed:
+<I>Kernel output</I>[13]==
+<PRE>
+SYMBOL UseIdent INHERITS PrtType END;
+
+SYMBOL PrtType COMPUTE
+  printf ("line %d Type %s defined in line %d\n", LINE,
+          GetTypeName (THIS.Type, "no type name"),
+          GetTypeLine (THIS.Type, 0))
+  &#60;- INCLUDING  Program.TypeIsSet;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 16.
+</PRE>
+<P>
+<B>Kernel.specs</B>[14]==
+<PRE>
+<I>Basic scope module</I>[3]
+<I>Message support</I>[5]
+<I>Type analysis module</I>[7]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Kernel.pdl</B>[15]==
+<PRE>
+<I>Language defined type keys</I>[8]
+<I>Output properties</I>[12]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Kernel.lido</B>[16]==
+<PRE>
+<I>Abstract Kernel syntax</I>[2]
+<I>Kernel scope rules</I>[4]
+<I>Scope checks</I>[6]
+<I>Language defined types</I>[9]
+<I>Declarations</I>[10]
+<I>Typed identifiers</I>[11]
+<I>Kernel output</I>[13]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Kernel.gla</B>[17]==
+<PRE>
+<I>Token notation</I>[137]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Kernel.con</B>[18]==
+<PRE>
+<I>Concrete Kernel syntax</I>[135]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Oprand.sym</B>[19]==
+<PRE>
+<I>Expression mapping</I>[136]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

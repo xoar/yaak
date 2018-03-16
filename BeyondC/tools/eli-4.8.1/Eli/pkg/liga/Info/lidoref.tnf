@@ -1,0 +1,2558 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+
+@setfilename lidoref
+@settitle LIDO - Reference Manual
+@setchapternewpage odd
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: lidoref.tnf,v 4.34 2013/10/21 11:21:43 peter Exp $
+@paragraphindent 0
+
+@titlepage
+@center @titlefont{LIDO - Reference Manual}
+@sp 4
+@center $Revision: 4.34 $
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center Compiler and Programming Language Group
+@center Faculty of Electrical Engineering, Computer Science and Mathematics
+@center University of Paderborn, Germany
+@sp 4
+@center Copyright, 1997 University of Paderborn
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@node top, , , (dir)
+@comment  node-name,  next,  previous,  up
+
+@ifinfo
+@set nottex
+@end ifinfo
+@ifset html
+@set nottex
+@end ifset
+
+@ifinfo
+@unnumbered LIDO - Reference Manual
+@end ifinfo
+@ifset nottex
+$Revision: 4.34 $
+
+This is a reference manual for LIDO, a language for the specification of
+computations in trees. It is used to specify all computations of the analysis
+phase and the translation phase of a language processor, which are to be
+executed on the abstract tree. The main purpose of a LIDO specification is to
+describe which computations have to be executed in which tree context, how those
+computations depend on each other, and which values are propagated from one
+computation to another. The functions called in computations and the types of
+propagated values are implemented in C; those implementations are not part of a
+LIDO specification.
+
+@menu
+* Introduction::
+* Overall Structure::
+* Rule Specifications::
+	* Productions::
+* Symbol Specifications::
+* Computations::
+        * Attribute Computations and Plain Computations::
+        * Accumulating Computations::
+* Attributes::
+	* Types and Classes of Attributes::
+* Expressions::
+	* Dependent Expressions::
+	* Terminal Access::
+	* Simple Expressions::
+* Inheritance of Computations::
+* Remote Attribute Access::
+	* INCLUDING::
+	* CONSTITUENT(S)::
+	* CHAIN::
+* Computed Subtrees::
+	* Tree Construction Functions::
+* Iterations::
+* Predefined Entities::
+* Outdated Constructs::
+* Syntax::
+* Index::
+@end menu
+@end ifset
+
+@comment ****************************************************************
+@node Introduction, Overall Structure, , top
+@chapter Introduction
+@comment ****************************************************************
+
+This is a reference manual for LIDO, a language for the specification of
+computations in trees. It is used to specify all computations of the analysis
+phase and the translation phase of a language processor, which are to be
+executed on the abstract tree. The main purpose of a LIDO specification is to
+describe which computations have to be executed in which tree context, how those
+computations depend on each other, and which values are propagated from one
+computation to another. The functions called in computations and the types of
+propagated values are implemented in C; those implementations are not part of a
+LIDO specification.
+@findex Introduction
+
+The LIGA system processes a LIDO specification and generates an evaluator
+in form of a 
+C module from it. LIGA automatically determines a tree walk strategy and the
+evaluation order of computations on the base of the specified dependencies.
+Attribute grammars are the formal model for this process. 
+@findex LIDO
+@findex LIGA
+
+This document is intended to provide precise definitions of LIDO constructs
+and of rules of the language LIDO. For studying the use of LIDO in
+more complex and complete translation specifications we recommend
+to read the explained example specifications in
+$/Name/Examples/AlgLike.fw and in
+$/Type/Examples/Type.fw.
+
+Other documents related to LIDO are:
+
+@iftex
+@itemize
+@item @ref{top, , , comptrees, LIDO - Computation in Trees}.
+Introduces and explains typical uses of LIDO constructs.
+
+@item @ref{top, , , lcl, LIGA - Control Language}.
+Describes how variants in LIGA's processing can
+be controlled.
+
+@item @ref{top, , , show, Show}.
+Describes how to obtain debugging information for LIDO.
+
+@item @ref{top, , , gorto, GORTO - Graphical Order Tool}.
+Describes how to trace dependencies graphically.
+
+@item @ref{top, , , modlib, ModLib - Specification Module Library}.
+Describes how to use precoined solutions of common problems.
+@end itemize
+@end iftex
+
+@ifinfo
+@example
+* LIDO - Computation in Trees: (comptrees).
+introduces and explains typical uses of LIDO constructs.
+
+* LIGA - Control Language: (lcl).
+describes how variants in LIGA's processing can
+be controlled.
+
+* Show: (show).
+describes how to obtain debugging information for LIDO.
+
+* GORTO - Graphical Order Tool: (gorto).
+describes how to trace dependencies graphically.
+
+* ModLib - Specification Module Library: (modlib).
+describes how to use precoined solutions of common problems.
+@end example
+@end ifinfo
+
+@comment ****************************************************************
+@node Overall Structure, Rule Specifications, Introduction, top
+@chapter Overall Structure
+@comment ****************************************************************
+
+A LIDO text specifies an evaluator for executing computations driven by a
+tree walk. A tree grammar specifies the structure of trees. 
+Computations
+are associated with rules and symbols of the tree grammar. Computations may
+depend on one another via typed attributes.
+
+In Eli a LIDO
+specification is usually composed of several components supplied by the
+user, derived from libraries, or generated by Eli tools. The components
+are combined into one file and then processed by LIGA.
+
+@findex Specification
+@findex Overall Structure
+
+@subsubheading Syntax
+@example
+    LIDOSpec       ::=  Specification
+    Specification  ::=  Specification Specification |
+                     |  RuleSpec ';' | SymComp ';' 
+                     |  SymSpec ';'  | TermSpec ';'
+                     |  AttrSpec ';' | ChainSpec ';'
+@end example
+
+@subsubheading Examples
+@example
+    RULE p: Stmt  ::= 'while' Expr 'do' Stmt COMPUTE
+      Expr.postType = boolType
+    END;
+
+    SYMBOL Expr COMPUTE
+      Compatible (THIS.preType, THIS.postType);
+    END;
+
+    ATTR preType, postType: DefTableKey;
+@end example
+
+There is no restriction on the order of specifications. Any permutation of
+specifications has the same meaning.
+
+LIDO objects such as rules, symbols, or attributes are identified by their
+names. They are introduced by using them in LIDO constructs. There
+are no explicit declarations in LIDO.
+
+Specifications associate certain properties with an object, 
+e. g. computations are associated with 
+a rule, or a type with an attribute name. There may be several specifications for
+the same object as long as the specified properties are not contradictory.
+
+In the syntax of this document we distinguish names for objects of different
+kinds, e. g. @code{RuleName}, @code{SymbName}, @code{TypeName}. The syntax
+rules for names are omitted in the rest of this document. The following
+rules are assumed for @code{XYZNames}
+@findex Names
+@findex identifiers
+
+@example
+    XYZName  ::= Identifier
+    XYZNames ::= XYZName | XYZNames ',' XYZNames
+@end example
+
+All names are written as identifiers in C.
+
+@subsubheading Restrictions
+
+It is strongly recommended @emph{not} to use names that begin with an underscore
+or which have the form @code{rule_i} where i is a number, in order to
+avoid interference with identifiers generated by LIGA.
+
+@code{RuleNames}, @code{SymbNames}, and @code{TypeNames} must be mutually
+distinct.
+@code{AttrNames} must be different from @code{ChainNames}.
+
+@comment ****************************************************************
+@node Rule Specifications, Symbol Specifications, Overall Structure, top
+@chapter Rule Specifications
+@comment ****************************************************************
+
+A rule specification specifies a production of the tree grammar, and may
+associate some computations with the rule context. They are executed in 
+every context which represents that rule in a particular tree.
+@findex @code{RULE}
+@findex rule specification
+@findex Rule Specifications
+
+@ifinfo
+The notation of tree grammar productions is described in
+@menu
+* Productions::
+@end menu
+@end ifinfo
+
+@subsubheading Syntax
+@example
+    RuleSpec ::= 'RULE' [RuleName] ':' Production Computations 'END'
+@end example
+
+Example:
+@example
+    RULE p: Stmt  ::= 'while' Expr 'do' Stmt COMPUTE
+      Expr.postType = boolType
+    END;
+@end example
+
+There may be several rule specifications that refer to the same rule.
+In that case the associated computations are accumulated.
+
+The set of productions of all rules forms the tree grammar. It must
+have exactly one root symbol that does not occur on any right-hand
+side of a production.
+@findex root symbol
+
+Eli usually generates some rule specifications (without computations)
+from the concrete grammar in order to complete the tree grammar.
+@findex concrete grammar
+@findex tree grammar
+
+In general the @code{RuleName} is omitted. The rule is then identified
+by the production. LIGA generates a name of the form @code{rule_i}, with
+a unique number @code{i} for such a rule.
+A meaningful @code{RuleName} should be specified for rules that are
+part of computed subtrees, since the name of the tree construction
+function is derived from it (@pxref{Computed Subtrees}).
+Also using the @code{RuleFct} feature may give rise to explicitly
+name rules (@pxref{Predefined Entities}).
+@findex @code{RuleName}
+
+
+@subsubheading Restrictions
+
+Two unnamed rule specifications refer to the same rule if their productions
+are identical.
+
+A named rule specification and an unnamed one refer to the same rule if
+their productions are identical. In that case there must not be another
+rule specification with the same production but a different name.
+
+Two named rule specifications with the same @code{RuleName} must have
+the same production.
+
+Note: Two rule specifications with different names, but equal productions, are
+only reasonable if they belong to computed subtrees rather to subtrees
+constructed by a parser.
+@findex production
+@findex Production
+
+@comment ****************************************************************
+@node Productions, , , Rule Specifications
+@section Productions
+@comment ****************************************************************
+
+A production as part of a rule specification describes the structure
+of the rule context. Computations associated with the rule may use or define
+attributes of nonterminal symbols that occur in the production. The set
+of all productions in a LIDO specification defines the tree grammar.
+@findex tree grammar
+@findex Productions
+
+@subsubheading Syntax
+@example
+    Production     ::= SymbName '::=' Symbols
+                     | SymbName 'LISTOF' Elements
+
+    Symbols        ::= Symbols Symbols |
+                     | SymbName | Literal
+
+    Elements       ::=  Elements '|' Elements |
+                     | SymbName
+
+    TermSpec       ::= 'TERM' SymbNames ':' TypeName
+@end example
+@findex Production
+@findex Symbols
+@findex Elements
+@findex @code{TERM}
+@findex @code{LISTOF}
+@findex SymbName
+
+@subsubheading Examples
+
+@example
+    Stmt ::= 'while' Expr 'do' Stmt
+    DefIdent ::= Identifier
+    Declarations LISTOF ProcDecl | VarDecl
+    TERM Identifier: int;
+@end example
+
+Productions are composed of nonterminal symbols, named terminal symbols,
+and literal terminals.
+@findex nonterminal
+@findex terminal
+
+The @code{SymbName} on the left-hand side of a production is a nonterminal.
+A @code{SymbName} that does not occur on the left-hand side of any production
+denotes a named terminal. A nonterminal symbol that does not occur on
+the right-hand side of any production is the root of the tree grammar.
+
+We say the rule context is a @dfn{lower context} for the left-hand side 
+nonterminal, and an @dfn{upper context} for any right-hand side 
+nonterminal.
+
+Literal terminals are denoted by arbitrary non empty strings enclosed in
+single quotes. A quote that is part of such string is denoted by two single
+quotes.
+@findex literal terminals
+
+Literal terminals do not contribute to the trees specified by the tree
+grammar. They only relate tree productions to concrete productions
+describing the input text, and distinguish otherwise equal productions.
+
+Named terminal symbols do not contribute to the trees specified by the
+tree grammar. They are related to named terminal symbols of corresponding
+concrete productions describing the input text. A value derived from such an
+input token may be used in computations which are associated with the rule of the
+production or with the symbol on the left-hand side of the production. (If
+the tree context is constructed by a computation, rather than by parsing the
+input text, then that value is supplied as an argument to the call of the
+construction function (@pxref{Tree Construction Functions}).)
+@findex named terminals
+
+The type of the value provided by a named terminal symbol is specified
+by a @code{TERM} specification. If there is no such specification the type
+@code{int} is assumed.
+
+There are two forms of productions: plain productions and @code{LISTOF}
+productions.
+
+A plain production defines tree contexts with a node for the left-hand side
+nonterminal having a sequence of subtrees, one for each nonterminal
+on the right-hand side.
+
+Computations may refer to any attribute of any nonterminal in the production.
+If one nonterminal occurs more than once in the production references to
+the occurrences in computations are distinguished by indices (starting
+from 1).
+
+A @code{LISTOF} production defines tree contexts with a node for the
+left-hand side nonterminal having an arbitrary long sequence of subtrees each
+rooted by a nonterminal specified as a @code{LISTOF} element. That
+sequence may be empty, even if there is no empty @code{LISTOF} element
+specified.
+@findex index
+
+Computations associated with the rule of a @code{LISTOF} production may only
+refer to attributes of the left-hand side symbol. Attributes of the
+element subtrees are referenced only by remote attribute access
+(@pxref{Remote Attribute Access}).
+
+@subsubheading Restrictions
+
+There must be exactly one root nonterminal which does not occur on any
+right-hand side of a tree grammar production.
+@findex root symbol
+
+If @code{X} is the left-hand side symbol of a @code{LISTOF} production,
+then there may not be a different production (neither @code{LISTOF} nor
+plain) that also has @code{X} on its left-hand side.
+
+Named terminals may not be @code{LISTOF} elements.
+
+A literal terminal may not be the empty string.
+
+
+@comment ****************************************************************
+@node Symbol Specifications, Computations, Rule Specifications, top
+@chapter Symbol Specifications
+@comment ****************************************************************
+
+A symbol specification associates computations with a symbol. They are
+executed for every node which represents that symbol in a particular
+tree.
+@findex Symbol Specifications
+@findex symbol specification
+@findex @code{CLASS} symbols
+@findex @code{TREE} symbols
+
+Symbols may be introduced which do not occur in the tree grammar. They are called
+@dfn{@code{CLASS} symbols} and represent a computational role. 
+Their computations
+may be inherited directly or indirectly by grammar symbols.
+Symbols that do occur in the tree grammar are called 
+@dfn{@code{TREE} symbols}.
+
+@subsubheading Syntax
+@example
+    SymComp    ::= SymbKind SymbName [ Inheritance ] Computations 'END'
+
+    SymbKind   ::= 'SYMBOL' | 'CLASS' 'SYMBOL' | 'TREE' 'SYMBOL'
+@end example
+@findex SymbKind
+@findex SymbName
+@findex Inheritance
+@findex @code{SYMBOL}
+@findex @code{CLASS}
+@findex @code{TREE}
+
+Example:
+@example
+    TREE SYMBOL Expr COMPUTE
+      SYNT.coercion = coerce (THIS.preType, THIS.postType);
+      INH.IsValContext = true;
+      Compatible (THIS.preType, THIS.postType);
+    END;
+@end example
+
+A symbol specified @code{TREE} occurs in a tree grammar production,
+a symbol specified @code{CLASS} does not. If neither is specified
+the symbol kind is determined by its occurrence in the tree grammar.
+(Only the computations of @code{CLASS} symbols may be inherited
+by other symbols.)
+
+@findex @code{ROOTCLASS}
+The @code{CLASS} symbol @code{ROOTCLASS} is predefined.
+It is implicitly inherited by the root of the tree grammar.
+Hence, any computation associated with @code{ROOTCLASS} is
+inherited by the root context. This facility is to be used
+to specify computational roles for the root which are
+grammar independent, and which need not be inherited explicitly.
+
+Note: There may be @code{TREE} symbols that do not occur in the
+user supplied rules, but only in those generated from the
+concrete grammar. In those cases it is recommended to explicitly
+specify their kind to be @code{TREE}, in order to get more
+specific error reports in cases of accidental mismatches.
+@findex tree grammar
+
+Two sets of computations are associated with a symbol: the 
+@dfn{lower computations},
+which are executed in every lower context of the symbol, i. e. in a context
+whose production has the symbol on its left-hand side, and the 
+@dfn{upper computations}, which are executed in every 
+upper context, i. e. in a context
+whose production has the symbol on its right-hand side. The upper computations
+are executed once for each right-hand side occurrence of the symbol.
+@findex lower computations
+@findex upper computations
+
+Each symbol has two disjoint sets of attributes: 
+@dfn{synthesized} (@code{SYNT})
+attributes that are defined by computations in lower 
+contexts of the symbol,
+and @dfn{inherited} (@code{INH}) attributes that are defined by 
+computations in upper contexts of the symbol.
+
+In a symbol computation only attributes of that symbol may be used or
+defined (except the use of remote attributes). 
+Those attributes are denoted
+@code{SYNT.a} if @code{a} is a synthesized attribute,
+@code{INH.b} if @code{b} is an inherited attribute.
+An attribute of the symbol may also be denoted @code{THIS.c}.
+In this case the attribute class must be specified in another
+occurrence of that attribute.
+@findex attribute class
+@findex class of attributes
+@findex synthesized attribute
+@findex inherited attribute
+@findex @code{SYNT}
+@findex @code{INH}
+@findex @code{THIS}
+
+A computation that defines a synthesized (an inherited) attribute of
+the symbol belongs to the set of lower (upper) computations. 
+A @dfn{plain computation} defining no attribute belongs to the set of lower
+computations (@pxref{Computations}).
+@findex plain computation
+
+There may be several symbol specifications for one symbol. In that case the
+associated computations are accumulated.
+
+If both a symbol computation and a rule computation define the same attribute
+of that symbol, the rule computation will be executed in that context,
+overriding the symbol computation.
+
+Plain computations can not be overridden.
+
+@subsubheading Restrictions
+
+The kind of a symbol, @code{TREE} or @code{CLASS} may not be 
+specified contradictory.
+
+@code{CLASS SYMBOL}s may not be used in productions.
+
+@code{TREE SYMBOL}s may not be used in @code{INHERITS} clauses
+(@pxref{Inheritance of Computations}).
+
+@comment ****************************************************************
+@node Computations, Attributes, Symbol Specifications, top
+@chapter Computations
+@comment ****************************************************************
+
+@findex Computations
+Computations are associated with rules or with symbols. Each computation
+(that is not overridden) is executed exactly once for every instance
+of its context in a particular tree. A computation may yield a value
+denoted as an attribute which may be used by other computations.
+Computations may also be specified as depending on one another without
+passing a value in order to specify dependences on side-effects of
+computations.
+(@pxref{Dependent Expressions}).
+@findex side-effects
+
+@subsubheading Syntax
+@example
+    Computations ::=  [ 'COMPUTE' Computation ]
+
+    Computation  ::=  Computation Computation |
+                   | Attribute '=' Expression Terminator
+                   | Expression Terminator
+                   | Attribute '+=' Expression Terminator
+
+    Terminator   ::= ';'
+                   | 'BOTTOMUP' ';'
+@end example
+
+@findex Computations
+@findex Terminator
+@findex COMPUTE
+@findex BOTTOMUP
+
+There are three forms of computations: @dfn{attribute computations} denoted
+as an assignment to an attribute,  @dfn{plain computations}
+that are simple expressions, and @dfn{accumulating computations} which
+are a special variant of attribute computations, distinguished by the @code{+=}
+token.
+
+@ifinfo
+The different forms of computations are described in
+@menu
+* Attribute Computations and Plain Computations::
+* Accumulating Computations::
+@end menu
+@end ifinfo
+
+
+@findex attribute computations
+@findex plain computations
+@findex accumulating computations
+
+@comment ****************************************************************
+@node Attribute Computations and Plain Computations, Accumulating Computations, , Computations
+@section Attribute Computations and Plain Computations
+@comment ****************************************************************
+
+The following example shows a sequence of two attribute computations
+and two plain computations:
+@subsubheading Examples
+@example
+    COMPUTE
+      Expr.postType = boolType;
+      Stmt[1].code = PTGWhile (Expr.code, Stmt[2].code);
+      printf ("while loop in line %d\n", LINE);
+      printf ("value = %d\n", Expr.val) BOTTOMUP;
+    END;
+@end example
+
+@findex attribute computations
+@findex plain computations
+ A computation is executed by evaluating its expression. It depends
+on every attribute that occurs in the expression regardless whether the
+attribute is used for the evaluation. We say those attributes are
+the @dfn{preconditions} of the computation.
+The attribute on the left-hand side of an attribute computation
+represents the @dfn{postcondition} of that computation.
+Plain computations do not establish a postcondition for
+any other computation. 
+The evaluator is generated such that the
+computations are executed in an order that obeys these dependencies
+for any tree of the tree grammar.
+@findex precondition
+@findex postcondition
+@findex dependencies
+
+If both a symbol computation and a rule computation define the same attribute
+of a symbol, the rule computation will be executed in that context,
+overriding the symbol computation.
+
+An expression may occur in @dfn{value context}, where it must yield
+a value, or it may occur in @dfn{@code{VOID} context}, where 
+it may or may not yield a value. 
+If it does yield a value in @code{VOID} context, the value is discarded.
+These terms will be used in sections below where further constructs
+are introduced which contain expressions.
+
+If the left-hand side attribute of an attribute computation
+has a type different from @code{VOID} the right-hand side expression
+is in value context; the result of 
+the expression evaluation is assigned to the attribute.
+If the left-hand side attribute has the type @code{VOID} the 
+right-hand side expression is in @code{VOID} context.
+In this case the
+attribute simply states the postcondition that the computation has been
+executed.
+@findex type @code{VOID}
+@findex @code{VOID} context
+@findex value context
+@findex attribute type
+@findex type
+@findex @code{VOID}
+
+A plain computation is in @code{VOID} context, i. e. it may or may not
+yield a value.
+
+Computations may be specified to be executed @code{BOTTOMUP}, that means
+while the input is being
+read and the tree is being built.
+LIGA then tries to arrange the computations
+such that those are executed already when their tree node is constructed.
+This facility is useful for example if the generated language processor
+is to produce output while its input is supplied (like desktop calculators),
+or if a computation is used to switch the input file.
+
+Note: A @code{BOTTOMUP} computation may depend on other computations.
+These dependencies should be specified the usual way. Such
+precondition computations should NOT be specified @code{BOTTOMUP}
+unless they themselves are to be related to input processing.
+Without such an over-specification LIGA can apply more sophisticated
+means to correctly schedule the precondition computations
+automatically.
+
+Note: Due to the parser's lookahead, one token beyond the last token
+of the context of the @code{BOTTOMUP} computation is read before
+before the computation is executed.
+@findex bottom-up computations
+
+@subsubheading Restrictions
+
+If the attribute in an attribute computation has a non-@code{VOID} type
+the evaluation of the expression must yield a value of that type. This
+condition is not checked by LIGA. It is checked by the compiler
+that compiles the generated evaluator.
+
+Multiple symbol computations that define the same
+attribute are forbidden.
+
+There must be exactly one attribute computation for each synthesized
+attribute of the left-hand side nonterminal and for each inherited
+attribute of each nonterminal occurrence on the right-hand side 
+in the production of a rule context, or such a computation is inherited
+in the rule context.
+(For accumulating computations a different rule applies.)
+
+There may not be any cyclic dependencies between computations for
+any tree of the tree grammar.
+@findex cyclic dependencies
+
+Contexts that may belong to subtrees which are built by 
+computations (@pxref{Computed Subtrees}) may not have
+computations that are marked @code{BOTTOMUP} or contribute to
+@code{BOTTOMUP} computations.
+
+LIGA may fail to allocate @code{BOTTOMUP} computations as required
+due to attribute dependencies or due to LIGA's evaluation strategy.
+In such cases messages are given.
+
+@comment ****************************************************************
+@node Accumulating Computations, , Attribute Computations and Plain Computations, Computations
+@section Accumulating Computations
+@comment ****************************************************************
+
+@findex accumulating computations
+
+There are situations where a @code{VOID} attribute, say
+@code{Program.AnalysisDone}, represents a computational state which
+is reached when several computations are executed, which conceptually belong to
+different sections of the LIDO text. Instead of moving all these
+computations to the only place where @code{Program.AnalysisDone} is computed,
+several accumulating computations may stay in their conceptual context
+and contribute dependences to that attribute.
+
+A computation is marked to be accumulating by the @code{+=} token. 
+The following example demonstrates the above mentioned use
+of accumulating computations:
+@example
+RULE: Program ::= Statements COMPUTE
+   Program.AnalysisDone += DoThis ( );
+END;
+  ....
+RULE: Program ::= Statements COMPUTE
+   Program.AnalysisDone += DoThat ( ) <- Statements.checked;
+END;
+@end example 
+Two accumulating computations contribute both to the attribute
+@code{Program.AnalysisDone}, such that it represents the state when
+the calls @code{DoThis ( )} and @code{DoThat ( )} are executed after the
+pre-condition @code{Statements.checked} has been reached.
+The two accumulating computations above have the same effect as if there
+was a single computation, as in
+@example
+RULE: Program ::= Statements COMPUTE
+   Program.AnalysisDone = ORDER (DoThis ( ), DoThat ( )) 
+                          <- Statements.checked;
+END;
+@end example
+The order in which @code{DoThis ( )} and @code{DoThat ( )} are executed
+is arbitrarily decided by the Liga system.
+
+Accumulating computations may be formulated in rule context
+or in the context of @code{TREE} or @code{CLASS} symbols. Rule attributes may
+also be computed by accumulating computations.
+
+@findex accumulating attribute
+Only @code{VOID} attributes may have accumulating computations.
+If an attribute has an accumulating computation, it is called an
+accumulating attribute, and all its computations must be accumulating.
+Attributes are not explicitly defined to be accumulating.
+If an attribute is not defined explicitly, it has the type @code{VOID} by default.
+Hence, accumulating attributes need not be defined explicitly, at all.
+
+The set of accumulating computations of an attribute is combined
+into a single computation, containing all dependences and
+function calls of the contributing accumulating computations, as 
+shown above.
+
+Accumulating computations may be inherited from @code{CLASS} symbols.
+In contrast to non-accumulating computations, there is no
+hiding for accumulating computations: All accumulating computations 
+that lie on an inheritance path to an accumulating attribute
+in a rule context are combined. For example, add the following
+specifications to the above example:
+
+@example 
+SYMBOL Program INHERITS AddOn COMPUTE
+  SYNT. AnalysisDone += AllWaysDo ( );
+END;
+CLASS SYMBOL AddOn COMPUTE
+  SYNT. AnalysisDone += AndAlsoDo ();
+END;
+@end example 
+Then all four computations for @code{Program.AnalysisDone} 
+(two in the RULE context above, one in the TREE symbol context @code{Program}, and one
+inherited from the @code{CLASS} symbol @code{AddOn})
+will be combined into one. It characterizes the state after execution of the 
+four function calls and the computation of @code{Statements.checked}.
+
+@subsubheading Restrictions
+
+If an attribute has an accumulating computation, it is called an accumulating
+attribute, and may not have or inherit non-accumulating computations.
+
+An accumulating attribute must have type @code{VOID}.
+
+Let @code{X} be the left-hand side nonterminal in a rule @code{r} and @code{X.s} an
+accumulating synthesized attribute, then there must be at least one
+accumulating computation for @code{X.s} in @code{r} or inherited there.
+
+Let @code{X[i]} be an occurrence of the nonterminal @code{X} on the right-hand side of
+the rule @code{r} and @code{X.s} an accumulating inherited attribute, then there must
+be at least one accumulating computation for @code{X[i].s} in @code{r}
+or inherited there.
+
+@code{CHAIN} computations and @code{CHAIN} attributes may not be 
+accumulating.
+
+@comment ****************************************************************
+@node Attributes, Expressions, Computations, top
+@chapter Attributes
+@comment ****************************************************************
+
+@findex Attributes
+Attributes are associated with symbols and with rules. 
+They are defined and used in rule computations
+and in symbol computations.
+@findex attributes
+
+Each symbol has two disjoint sets of attributes: 
+@dfn{synthesized} (@code{SYNT})
+attributes that are defined by computations in lower 
+contexts of the symbol,
+and @dfn{inherited} (@code{INH}) attributes that are defined by 
+computations in upper contexts of the symbol.
+@findex attribute class
+@findex class of attributes
+@findex synthesized
+@findex inherited
+@findex @code{SYNT}
+@findex @code{INH}
+@findex lower context
+@findex upper context
+
+Attributes are introduced by their occurrence in computations.
+They are not explicitly declared. How types and classes of attributes
+are determined is described in @ref{Types and Classes of Attributes}.
+
+@ifinfo
+Types and classes of attributes are described in
+@menu
+* Types and Classes of Attributes::
+@end menu
+@end ifinfo
+
+@subsubheading Syntax
+@example
+    Attribute ::= SymbolRef '.' AttrName
+                | RuleAttr
+    RuleAttr  ::= '.' AttrName
+    SymbolRef ::= SymbName
+                | SymbName '[' Number ']'
+    RhsAttrs  ::= 'RHS' '.' AttrName
+@end example
+@findex Attribute
+@findex SymbolRef
+@findex AttrName
+@findex RuleAttr
+@findex Number
+@findex index
+@findex RhsAttrs
+@findex RHS
+
+@subsubheading Examples
+@example
+    RULE: Stmt ::= 'while' Expr 'do' Stmt COMPUTE ...
+      ... Expr.postType ...
+      ... Stmt[1].code ...
+      ... .label ...
+      ... RuleFct ("PTG", RHS.Ptg) ...
+    END;
+    SYMBOL Expr COMPUTE
+      ... SYNT.preType ...
+      ... INH.postType ...
+      ... THIS.preType ...
+      ... RuleFct ("PTG", RHS.Ptg) ...
+    END;
+@end example
+
+Attributes in rule computations have the form @code{X.a} or @code{X[i].a}
+where @code{X} is a nonterminal in the production of the rule. They refer
+to the attribute @code{a} of the tree node corresponding to @code{X}. The
+index distinguishes multiple occurrences of the nonterminal in the
+production, counting from left to right starting at 1.
+
+@dfn{Rule attributes} of the form @code{.b} may be used in rule computations,
+to simplify reuse of computed values. They are defined and used
+within the computations of a single rule. They are not associated with any
+symbol.
+@findex rule attributes
+
+In symbol computations attributes of the considered symbol are denoted using
+@code{SYNT}, @code{INH}, or @code{THIS} instead of the @code{SymbName}:
+@code{SYNT.a} for a synthesized attribute,
+@code{INH.b} for an inherited attribute, or @code{THIS.c} 
+leaving the attribute class to be specified elsewhere.
+@findex attribute class
+@findex class of attributes
+@findex synthesized
+@findex inherited
+@findex @code{SYNT}
+@findex @code{INH}
+@findex @code{THIS}
+
+A @code{RhsAttrs} construct, such as @code{RHS.a},
+is a shorthand for a sequence of attributes all named @code{a},
+one for each right-hand side nonterminal of the rule context 
+associated with the
+computation. If there is more than one such nonterminal
+the construct may only occur in function
+calls, where it contributes part of the argument sequence,
+or in @code{DependsClauses}(@pxref{Dependent Expressions}).
+If a symbol computation contains a @code{RhsAttrs} its
+sequence of attributes is determined for each rule context
+of the symbol individually. In combination with the predefined
+function @code{RuleFct} a @code{RhsAttrs} construct
+may be used to specify a call pattern
+that is instantiated differently for each rule context 
+(@pxref{Predefined Entities}).
+@findex @code{RhsAttrs}
+@findex RuleFct
+
+@subsubheading Restrictions
+
+The @code{SymbolRef} must occur in the production of the rule.
+
+The @code{SymbolRef} must be indexed if and only if the symbol
+occurs more than once in the production.
+
+The index of a @code{SymbolRef} must identify an occurrence of the
+symbol in the production.
+
+@code{SymbNames} and indices may not be used in attributes of symbol
+computations.
+
+Rule attributes may not be used in symbol computations.
+
+@comment ****************************************************************
+@node Types and Classes of Attributes, , , Attributes
+@section Types and Classes of Attributes
+@comment ****************************************************************
+
+Each attribute has a certain type characterizing the values propagated by
+the attribute. 
+Attributes that describe only postconditions of computations
+without propagating a value have the predefined type @code{VOID}.
+Non-@code{VOID} types must be specified explicitly.
+@findex Types and Classes of Attributes
+@findex attribute type
+@findex type
+
+Each attribute has either the class synthesized (@code{SYNT}),
+if it is computed in all lower contexts of its symbol,
+or it has the class inherited
+(@code{INH}), if it is computed in all upper
+contexts of its symbol. Attribute classes are usually derived from
+computations without explicit specifications.
+@findex attribute class
+@findex class of attributes
+@findex synthesized
+@findex inherited
+@findex @code{SYNT}
+@findex @code{INH}
+
+@subsubheading Syntax
+@example
+    AttrSpec     ::= 'ATTR' AttrNames ':' TypeName [ AttrClass ]
+
+    SymSpec      ::= SymbKind SymbNames ':' [ AttrSpecs ]
+
+    AttrSpecs    ::= AttrSpecs ',' AttrSpecs
+                   | AttrNames ':' TypeName [ AttrClass ]
+
+    AttrClass    ::= 'SYNT' | 'INH'
+@end example
+@findex AttrNames
+@findex TypeName
+@findex AttrClass
+@findex AttrSpecs
+@findex @code{ATTR}
+
+@subsubheading Examples
+@example
+    ATTR code: PTGNode SYNT;
+    SYMBOL Expr, UseIdent: preType, postType: DefTableKey;
+@end example
+
+An attribute name specification (@code{ATTR}) 
+determines the type and optionally the class
+of all attributes having one of the @code{AttrNames}.
+
+An @code{AttrSpec} for a nonterminal determines the type and 
+optionally the class of attributes given by the @code{AttrNames} 
+for all nonterminals given by @code{SymbNames}. These
+specifications override the type and the attribute class stated by @code{ATTR}
+specifications.
+@findex attribute class
+@findex class of attributes
+
+If the type of an attribute is left unspecified it is assumed to be
+@code{VOID}.
+
+Note: Misspelling of an attribute name in a computation
+leads to introduction of a
+@code{VOID} attribute, and is usually indicated by messages on missing
+computations for that attribute or illegal use of a @code{VOID}
+attribute.
+@findex @code{VOID}
+
+Note: The type of a non-@code{VOID} rule attribute has to be specified
+by @code{ATTR} specifications.
+@findex rule attribute type
+
+@subsubheading Restrictions
+
+There may be several @code{ATTR}specifications for the same
+@code{AttrName} provided their properties are not contradictory.
+
+A specified attribute class must be consistent with all computations
+of that attribute.
+
+@code{VOID} attributes may not be used in value contexts.
+@findex @code{VOID} context
+
+The type specified for an attribute must denote an assignable C type that is
+available in the generated evaluator.
+LIGA does not check whether non-@code{VOID} attributes are used 
+consistently with respect to their types. 
+Violations will be indicated when the generated
+evaluator is compiled.
+
+@comment ****************************************************************
+@node Expressions, Inheritance of Computations, Attributes, top
+@chapter Expressions
+@comment ****************************************************************
+
+An expression is evaluated as part of a computation. The evaluation may
+yield a value, cause an effect, or both.
+@findex Expressions
+@findex expressions
+
+@ifinfo
+Different forms of expressions are described in
+@menu
+* Dependent Expressions::
+* Terminal Access::
+* Simple Expressions::
+@end menu
+@end ifinfo
+
+@comment ****************************************************************
+@node Dependent Expressions, Terminal Access, , Expressions
+@section Dependent Expressions
+@comment ****************************************************************
+
+The evaluation of an expression depends on all attributes to which it refers.
+The expression is evaluated only after all
+those attributes are evaluated.
+@findex Dependent Expressions
+
+Further attributes may be added as preconditions for expression evaluation
+without using their values for computing the expression's result. The
+additional attributes may describe a computational state that has to be reached
+before the expression is evaluated. These attributes are specified by a 
+@code{DependsClause}.
+@findex precondition
+
+@subsubheading Syntax
+@example
+    Expression    ::= SimpExpr [ DependsClause ]
+    DependsClause ::= '<-' DepAttrList
+    DepAttrList   ::= DepAttr
+                    | '(' DepAttrs ')'
+    DepAttrs      ::= DepAttrs ',' DepAttrs
+                    | DepAttr
+    DepAttr       ::= Attribute | RemoteAccess | RhsAttrs
+@end example
+@findex Expression
+@findex DependsClause
+@findex DepAttrList
+@findex DepAttrs
+@findex DepAttr
+
+@subsubheading Examples
+@example
+    GetProp (UseId.Key,0) <- UseId.PropIsSet
+    printf ("%s ", Opr.String) <- (Expr[2].printed, Expr.[3].printed)
+@end example
+
+A @code{DependsClause} has a @code{VOID} context, i.e. its attributes
+may have any type; their values are discarded.
+@findex @code{VOID} context
+
+@comment ****************************************************************
+@node Terminal Access, Simple Expressions, Dependent Expressions, Expressions
+@section Terminal Access
+@comment ****************************************************************
+
+@findex Terminal Access
+Named terminal symbols that occur in a production represent values
+that are usually obtained from corresponding input tokens when the
+tree node is constructed. Those values can be used in both rule 
+and symbol computations.
+@findex named terminals
+
+@subsubheading Syntax
+@example
+    SimpExpr ::= SymbolRef
+               | 'TERM' [ '[' Number ']' ]
+@end example
+@findex SimpExpr
+@findex @code{TERM}
+@findex index
+
+@subsubheading Examples
+@example
+    RULE:   DefIdent ::= Ident COMPUTE
+      DefIdent.Key = DefineIdn (DefIdent.Env, Ident);
+    END;
+    RULE:   Point ::= '(' Numb Numb ')' COMPUTE
+      printf ("X = %d, Y = %d\n", Numb[1], Numb[2]);
+    END;
+    SYMBOL Point COMPUTE
+      printf ("X = %d, Y = %d\n", TERM[1], TERM[2]);
+    END;
+@end example
+
+In rule computations the value of a terminal in the production
+is denoted by the @code{SymbName}, which is indexed if and only if there
+are multiple occurrences of the @code{SymbName} in the production.
+
+Note: In a rule computation a non-indexed identifier that is not a name
+of a symbol in the production of this rule denotes some entity of
+the generated C program, even if it coincides with the name of a
+terminal that occurs in other productions.
+
+In lower computations of a symbol @code{X} terminal values are accessed by
+@code{TERM} or @code{TERM[i]}, where @code{TERM} is equivalent to
+@code{TERM[1]}. @code{TERM[i]} denotes the @code{i}-th terminal in each
+production that has @code{X} (or a symbol that inherits @code{X}) on its
+left-hand side, regardless of the terminal's name.
+@findex lower computation
+
+@subsubheading Restrictions
+
+@code{TERM} must not be used in rule computations or in upper symbol
+computations.
+
+A terminal accessed in a symbol computation must exist in every production
+the computation is associated with.
+
+@comment ****************************************************************
+@node Simple Expressions, , Terminal Access, Expressions
+@section Simple Expressions
+@comment ****************************************************************
+
+@findex Simple Expressions
+Expressions are written as nested function calls where the basic operands are
+attributes, C identifiers and C literals. 
+The functions are either predefined in LIDO or
+their definitions are supplied by the user in the form of C functions or
+macros outside the LIDO specification. There is no operator notation for
+expressions in LIDO.
+@findex function calls
+@findex C literals
+@findex literals
+
+@subsubheading Syntax
+@example
+    SimpExpr  ::= C_Name | C_Integer | C_Float | C_Char | C_String
+                |  Attribute | RemoteAccess | RhsAttrs
+                |  FunctionName '(' [ Arguments ] ')'
+    Arguments ::= Arguments ',' Arguments
+                |  Expression
+@end example
+@findex SimpExpr
+@findex Arguments
+@findex C_Name
+@findex C_Integer
+@findex C_Float
+@findex C_Char
+@findex C_String
+@findex FunctionName
+
+@subsubheading Examples
+@example
+    printf ("Val = %d\n", Expr.val)
+    IF (LT (Expr.val, 0), 0, Expr.val)
+@end example
+
+Evaluation of a function call notation in LIDO has the same effect and
+result as the equivalent notation in C.
+
+There are some predefined @code{FunctionNames} that have a special
+meaning in LIDO (@pxref{Predefined Entities}).
+
+Function calls need not yield a value if they are in a @code{VOID} context.
+All arguments of a function call are in a value context.
+@findex @code{VOID} context
+@findex value context
+
+@code{C_Name}, @code{C_Integer}, @code{C_Float}, @code{C_Char}, 
+@code{C_String} are names and literals denoted as in C.
+
+@subsubheading Restrictions
+
+Every @code{FunctionName} and @code{C_Name} must be predefined in LIDO or
+supplied by a user definition.
+
+All arguments of non-predefined functions must yield a (non-@code{VOID})
+value. For predefined LIDO functions specific rules apply
+(@pxref{Predefined Entities}).
+
+Type consistency for non-@code{VOID} types is not checked by LIGA.
+Those checks are deferred to the compilation of the generated evaluator.
+
+A @code{C_Name} or a @code{FunctionName} should not begin with an underscore,
+in order to avoid conflicts with LIGA generated identifiers.
+
+@comment ****************************************************************
+@node Inheritance of Computations, Remote Attribute Access, Expressions, top
+@chapter Inheritance of Computations
+@comment ****************************************************************
+
+A set of related computations can be associated with a @code{CLASS} symbol
+describing a certain computational role. It can be inherited 
+by @code{TREE} symbols or by other @code{CLASS} symbols, 
+thus specifying that they play this role and reusing its computations.
+A symbol can play several roles at the same time (multiple inheritance).
+Inherited computations can be overridden
+by other computations of attributes having the same name. 
+@code{CLASS} specifications
+have the same notation and meaning as @code{SYMBOL} specifications.
+@findex Inheritance of Computations
+@findex @code{CLASS} symbols
+@findex inheritance
+@findex multiple inheritance
+@findex overriding
+
+@subsubheading Syntax
+@example
+    Specification ::= SymbKind SymbName [ Inheritance ]
+                       Computations 'END' ';'
+    Inheritance   ::= 'INHERITS' SymbNames
+@end example
+@findex Inheritance
+@findex @code{INHERITS}
+
+Example:
+@example
+      CLASS SYMBOL RootSetLine COMPUTE
+        SYNT.GotLine = CONSTITUENTS KeySetLine.GotLine;
+      END;
+
+      CLASS SYMBOL KeySetLine COMPUTE
+        SYNT.GotLine = ResetLine (THIS.Key,LINE);
+      END;
+
+      CLASS SYMBOL KeyPrintLine COMPUTE
+        printf ("identifier in Line %d defined in line %d\n",
+                LINE, GetLine (THIS.Key,o))
+           <- INCLUDING RootSetLine.GotLine;
+      END;
+
+      SYMBOL VarDefId  INHERITS KeySetLine   END;
+      SYMBOL ProcDefID INHERITS KeySetLine   END;
+      SYMBOL UseIdent  INHERITS KeyPrintLine END;
+      SYMBOL Program   INHERITS RootSetLine  END;
+@end example
+
+@code{CLASS} computations obey the same rules as symbol computation.
+
+The sets of lower and upper class computations may be accumulated from
+several @code{CLASS} specifications for the same class.
+
+@code{CLASS} computations may be inherited by @code{TREE}
+symbols or by other @code{CLASS} symbols.
+
+A @code{CLASS} or a @code{TREE} symbol @code{Target} inherits the 
+computations from a
+@code{CLASS} @code{Source} if there is a @code{Target INHERITS Source} relation
+specified. The complete inheritance relation is accumulated by all
+@code{INHERITS} specifications.
+@findex inheritance relation
+
+A computation is inherited only once even if there are several paths to
+it in the inheritance relation.
+
+A computation for an attribute @code{a} associated with a @code{CLASS} 
+or a @code{TREE} symbol
+overrides any computation for @code{a} inherited from a @code{CLASS}
+symbol.
+
+Note: Plain computations can not be overridden.
+@findex plain computations
+
+The computations inherited by a @code{CLASS} symbol belong to 
+the computation sets of the
+@code{CLASS} symbol and may be subject to further inheritance.
+
+@subsubheading Restrictions
+
+@code{TREE} symbols and @code{CLASS} symbols 
+may not inherit from @code{TREE} symbols.
+
+The inheritance relation must not be cyclic.
+
+If @code{C} inherits from @code{CLASS} symbols @code{C1} and 
+@code{C2}, and if both
+@code{C1} and @code{C2} have computations for an attribute @code{a}, 
+it is undefined which one is inherited by @code{C}.
+
+@comment ****************************************************************
+@node Remote Attribute Access, Computed Subtrees, Inheritance of Computations, top
+@chapter Remote Attribute Access
+@comment ****************************************************************
+
+Remote access constructs are used to relate computations 
+that belong to distant contexts
+in the tree, rather than those of adjacent contexts. The
+@code{INCLUDING} construct accesses attributes of symbols that are further up
+in the tree (i. e. closer to the root). The @code{CONSTITUENT(S)} construct
+accesses attributes of symbols that are further down in the tree (i. e. closer
+to the leaves). The @code{CHAIN} construct relates computations in a
+left-to-right depth-first order within subtrees.
+@findex Remote Attribute Access
+@findex @code{INCLUDING}
+@findex @code{CONSTITUENT(S)}
+@findex @code{CHAIN}
+
+These constructs may propagate values or simply specify
+dependencies between computations.
+
+Remote access constructs are used to abstract from the particular tree structure
+between related computations. Computational patterns can be specified
+independent of the particular grammar using remote access in
+combination with symbol computations and @code{CLASS} symbols. Reusable specification
+modules are based on that technique.
+@findex @code{CLASS} symbols
+
+@ifinfo
+The three forms of remote access constructs are described in
+@menu
+* INCLUDING::
+* CONSTITUENT(S)::
+* CHAIN::
+@end menu
+@end ifinfo
+
+@comment ****************************************************************
+@node INCLUDING, CONSTITUENT(S), , Remote Attribute Access
+@section INCLUDING
+@comment ****************************************************************
+
+The @code{INCLUDING}-construct accesses an attribute of a symbol that is on the
+path towards the tree root. Hence, several computations in a subtree may depend
+on an attribute at the subtree root.
+@findex @code{INCLUDING}
+
+@subsubheading Syntax
+@example
+    RemoteAccess ::= 'INCLUDING' RemAttrList
+    RemAttrList  ::=  RemAttr | '(' RemAttrs ')'
+    RemAttrs     ::=  RemAttr ',' RemAttrs '|' RemAttr
+    RemAttr      ::=  SymbName '.' AttrName
+@end example
+@findex RemoteAccess    
+@findex RemAttrList
+@findex RemAttrs
+
+@subsubheading Examples
+@example
+    INCLUDING Range.Env
+    INCLUDING (Block.Scope, Root.Env)
+@end example
+
+The @code{RemAttrList} specifies the set of attributes referred to by the 
+@code{INCLUDING} construct, called the @dfn{referred set}. On evaluation it accesses an 
+attribute of the first symbol on the
+path to the root which is in that set.
+@findex referred set
+
+An @code{INCLUDING} in a rule computation accesses an attribute of a symbol
+above the current context, even if the left-hand side symbol is in the
+@code{RemAttrList}.
+
+An @code{INCLUDING} in a symbol computation accesses an attribute of a symbol
+above the current one, even if the current one is in the @code{RemAttrList}.
+
+An attribute of a @code{CLASS} symbol @code{C.a} in the @code{RemAttrList} contributes
+attributes @code{X.a} to the referred set for all @code{TREE} 
+symbols @code{X} by which @code{C} is inherited.
+
+An @code{INCLUDING} in a @code{VOID} context does not cause a value to be
+propagated; it just states a dependency.
+@findex @code{VOID} context
+
+@subsubheading Restrictions
+
+The referred set may not be empty, unless the computation which contains it
+is not part of or inherited by any rule context.
+@findex referred set
+
+The tree grammar must guarantee that in every tree there is at least one of the
+symbols of the referred set above the context of the @code{INCLUDING}.
+@findex tree grammar
+
+The referred set must not contain different attributes of the same symbol.
+
+The types of the attributes in the referred set must be equal, unless
+@code{INCLUDING} is in a @code{VOID} context.
+@findex attribute type
+@findex type
+
+@comment ****************************************************************
+@node CONSTITUENT(S), CHAIN, INCLUDING, Remote Attribute Access
+@section CONSTITUENT(S)
+@comment ****************************************************************
+
+The @code{CONSTITUENTS}-construct accesses attributes of symbols that are in
+the subtree of the current context. Hence, it may depend on several
+computations in the subtree. If values are to be propagated they are combined
+by user defined functions.
+@findex @code{CONSTITUENT(S)}
+
+The @code{CONSTITUENT}-construct accesses a single attribute instance of a
+symbol that is in the subtree of the current context.
+
+@subsubheading Syntax
+@example
+    RemoteAccess ::= [ SymbolRef ] 'CONSTITUENT' 
+                     RemAttrList [ ShieldClause ]
+                   | [ SymbolRef ] 'CONSTITUENTS' 
+                     RemAttrList [ ShieldClause ] [ WithClause ]
+    ShieldClause ::= 'SHIELD' SymbNameList
+    SymbNameList ::= SymbName | '(' SymbNames ')' | '(' ')'
+    WithClause   ::= 'WITH' '(' TypeName ',' CombFctName ',' 
+                                SingleFctName ',' NullFctName ')'
+@end example
+@findex RemoteAccess
+@findex ShieldClause
+@findex SymbNameList
+@findex WithClause
+@findex @code{CONSTITUENT}
+@findex @code{CONSTITUENTS}
+@findex @code{SHIELD}
+@findex @code{WITH}
+@findex TypeName
+@findex CombFctName
+@findex SingleFctName
+@findex NullFctName
+
+@subsubheading Examples
+@example
+    CONSTITUENT Declarator.type
+    Declarations CONSTITUENTS DefIdent.GotType
+    CONSTITUENTS Range.GotLocKeys SHIELD Range
+    CONSTITUENTS Stmt.code SHIELD Stmt
+       WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull)
+@end example
+
+The @code{RemAttrList} specifies the set of attributes referred to
+by the @code{CONSTITUENT(S)} construct, called the @dfn{referred set}.
+On evaluation it accesses all
+instances of attributes of that set which are in a certain range of the subtree
+of the current context. That range is determined by its root node, which itself
+does not belong to the range, and by the set of shield symbols. The tree nodes
+below a shield symbol are excluded from that range.
+@findex referred set
+
+In a rule computation the root of the tree range is the node corresponding to
+the left-hand side of the production. The optional @code{SymbolRef} may
+restrict the root of the tree range to a node corresponding to a symbol of the
+right-hand side of the production.
+
+In a (lower or upper) symbol computation the root of the tree range is the node
+corresponding to that symbol.
+
+If the optional @code{ShieldClause} is given it specifies the set of shielded
+symbols. If an empty @code{ShieldClause} is given,
+no symbols are shielded from the tree range.
+If the @code{ShieldClause} is omitted then the root symbol of the tree range
+(as described above) is shielded from the range.
+@findex shielding
+
+An attribute of a @code{CLASS} symbol @code{C.a} in the @code{RemAttrList} contributes
+attributes @code{X.a} to the referred set for all @code{TREE} symbols @code{X}
+to which @code{C} is inherited.
+@findex @code{CLASS} symbols
+@findex @code{TREE} symbols
+
+A @code{CLASS} symbol @code{C} in the @code{ShieldClause} contributes symbols @code{X}
+to the set of shielded symbols for all @code{TREE} symbols @code{X} to which
+@code{C} is inherited.
+
+A @code{CONSTITUENT(S)} in a @code{VOID} context simply states a dependency 
+and does not cause a value to be propagated.
+@findex @code{VOID} context
+
+For a @code{CONSTITUENTS} that is not in @code{VOID} context a
+@code{WithClause} specifies how the values of the accessed attribute instances
+are combined into one value.
+
+The given @code{TypeName} specifies the type of the result and of 
+intermediate values.
+@findex attribute type
+@findex type
+
+The @code{CombFctName} specifies a function (or macro) that is 
+applied to two values of the given type and 
+yields one value of that type.
+
+The @code{SingleFctName} specifies a function (or macro) that is 
+applied to each accessed attribute instance and yields a value
+of the given type.
+
+The @code{NullFctName} specifies a function (or macro) that has no
+argument and yields an intermediate value. It is called for every node in the
+tree range that could have referred attribute instances below it according to the
+tree grammar, but for the particular tree it has none. Hence, the result of
+this function should be neutral with respect to the combine function.
+
+It is guaranteed that the combine function is applied to 
+intermediate values
+according to a post-order projection of the accessed tree nodes. 
+It is left
+open in which associative order that function combines intermediate 
+values.
+
+The referred set of a @code{CONSTITUENTS}
+may be empty if no attributes of the @code{RemAttrList}
+are reachable in the subtree or if @code{CLASS} symbols in the
+@code{RemAttrList} are not inherited to any @code{TREE} symbol.
+In that case a @code{VOID} @code{CONSTITUENTS} is ignored,
+and a value @code{CONSTITUENTS} results in a call of 
+the @code{NullFctName}.
+
+@subsubheading Restrictions
+
+A @code{SymbolRef} must denote a right-hand side symbol of the production. It
+must not be specified in symbol computations.
+
+A @code{CONSTITUENTS} in a value context must have a @code{WithClause}.
+
+For a @code{CONSTITUENT} the tree grammar must guarantee that the accessed 
+attribute instance is uniquely determined for every tree.
+@findex tree grammar
+
+The @code{RemAttrs} must have the same type if the @code{CONSTITUENT(S)} is in
+value context.
+@findex value context
+
+@comment ****************************************************************
+@node CHAIN, , CONSTITUENT(S), Remote Attribute Access
+@section CHAIN
+@comment ****************************************************************
+
+Chains relate computations in left-to-right depth-first order within certain
+subtrees. A chain may propagate values or just specify dependencies in that
+order. Only effective computations, that compute a new chain value or a new
+post-condition need to be specified. They are automatically linked in the
+described order.
+@findex @code{CHAIN}
+@findex chain
+
+The basic idea is captured by the following diagram representing the
+way of a chain through the tree context of a rule graphically:
+@example
+        RULE: LhsSym ::= RhsSym1 RhsSym2 END;
+
+                 |                ^
+                 v                |
+                 u     LhsSym     d
+                /                  ^
+               /                    \
+              /        _____         \
+             /         |   |          \
+            v          |   v           \
+            d  RhsSym1 u   d  RhsSym2   u
+            |          ^   |            ^
+            |          |   |            |
+            ------------   --------------
+@end example
+The arcs represent the path of the chain through this context,
+coming in from the upper context of @code{LhsSym}, going through the
+two subtrees, and leaving to the upper context.
+That chain propagation is established automatically if the chain is not
+used in this context.
+Usually, some of the three arcs inside the the context may be specified
+by explicit computations that
+use and define the chain at a certain symbol occurrence.
+The @code{u} and @code{d} in the graphic stand for usable and definable
+chain accesses respectively.
+
+Chain accesses are denoted like attribute accesses with a @code{ChainName}
+instead of an attribute name.
+
+@subsubheading Syntax
+@example
+    ChainSpec     ::= 'CHAIN' ChainNames ':' TypeName
+
+    Computation   ::= 'CHAINSTART' Attribute '=' Expression Terminator
+
+    Attribute     ::= SymbolRef '.' ChainName
+@end example
+@findex @code{CHAINSTART}
+@findex ChainName
+
+@subsubheading Examples
+@example
+    CHAIN cnt : int
+    RULE: Block ::= '@{' Decls Stmts '@}' COMPUTE
+      CHAINSTART Stmts.cnt = 0;
+      printf ("Block has %d statements\n", Stmts.cnt);
+    END;
+    RULE: Stmt ::= Var '=' Expr ';' COMPUTE
+      Stmt.cnt = ADD (Stmt.cnt, 1);
+    END;
+
+    CHAIN codeseq: PTGNode;
+    SYMBOL Block COMPUTE
+      CHAINSTART HEAD.codeseq = PTGNULL;
+      SYNT.transl = TAIL.codeseq;
+    END;
+    SYMBOL Stmt COMPUTE
+      THIS.codeseq = PTGSeq (THIS.codeseq, THIS.transl);
+    END;
+@end example
+
+A @code{CHAIN} specification introduces the name and the type of a chain. Any
+attribute notation using a @code{ChainName} denotes a chain access.
+
+A chain states a precondition and a postcondition for each symbol node on the
+chain. The precondition is set by the upper context of the symbol,
+the postcondition by its lower context.
+They can be understood as an implicitly introduced pair of attributes, an
+inherited one for the precondition and a synthesized one 
+for the postcondition. 
+
+A computation is allocated on the chain if it
+depends on the chain and its result contributes to the chain.
+Such computations are automatically linked in left-to-right depth-first
+order.
+A computation is only linked in chain order if it defines the chain and depends
+directly or indirectly on it. A computation that only accesses the chain
+without defining it is not necessarily executed in chain order.
+
+A computation that defines a chain without directly or indirectly accessing it
+breaks the chain, i. e. the execution order of subsequent chain computations is
+independent of those prior to this computation.
+
+There may be several instances of a chain that have the same name
+and type. Each instance is identified by a context
+that contains a @code{CHAINSTART} computation for that chain.
+Chain references in subtrees of such a @code{CHAINSTART} context
+belong to that instance, unless they belong to a nested instance
+of @code{CHAINSTART} context deeper in the tree.
+Different instances of a chain are not related to
+each other, regardless of whether they are nested or separate.
+However, they may be explicitly connected by computations.
+The structure of the tree grammar must ensure that there is a 
+@code{CHAINSTART} context above any computation that
+refers to the chain.
+
+A @code{CHAINSTART} computation defines the initial value of a chain.
+The chain is started at the symbol specified as the destination of
+the @code{CHAINSTART} computation. It must be the leftmost of the
+right-hand side symbols which the chain is to be passed through.
+@code{HEAD.c} may be used for a chain @code{c}
+to denote the leftmost symbol of the right-hand side, in symbol computations
+as well as in rule computations.
+
+A computation may refer to a chain @code{c} by one of the following
+notations: @code{X.c} in rule computations, 
+@code{THIS.c}, @code{SYNT.c}, @code{INH.c} in symbol computations,
+@code{HEAD.c}, and @code{TAIL.c} in both rule and symbol computations.
+@findex @code{THIS}
+@findex @code{SYNT}
+@findex @code{INH}
+@findex @code{HEAD}
+@findex @code{TAIL}
+@findex @code{CHAINSTART}
+
+The notations @code{X.c} and @code{THIS.c} have different meanings
+depending on their occurrence in a defining position of an attribute
+computation or in an applied position within an expression:
+
+In rule computations the following holds:
+If @code{X} is the left-hand side symbol of the production,
+then an applied occurrence @code{X.c} denotes
+the chain's precondition at @code{X};
+a defining occurrence @code{X.c} denotes
+the chain's postcondition at @code{X}.
+If @code{X} is a right-hand side symbol of the production,
+then a defining occurrence @code{X.c} denotes
+the chain's precondition at @code{X};
+an applied occurrence @code{X.c} denotes
+the chain's postcondition at @code{X}.
+
+In symbol contexts only lower computations may access or define a chain.
+An applied occurrence of @code{THIS.c}
+denotes the chain's precondition of that symbol;
+@code{INH.c} may be used instead.
+A defining occurrence of @code{THIS.c}
+denotes the chain's postcondition of that symbol;
+@code{SYNT.c} may be used instead.
+@findex precondition
+@findex postcondition
+
+The notation @code{HEAD.c} can be used to define the chain's
+precondition of the leftmost subtree.
+The notation @code{TAIL.c} can be used to access the chain's 
+postcondition of the rightmost subtree.
+These notations can be used in symbol computations
+and in rule computations. If used in a rule computation that
+rule must have at least one subtree.
+@findex @code{TAIL}
+
+If @code{HEAD.c}, @code{TAIL.c}, or @code{CHAINSTART} is used in a
+symbol computation that is inherited by a rule which has no subtree,
+they have the same effect as if there was a subtree which passes
+the chain dependency and the chain value, if any, unchanged.
+
+In the following example a chain @code{c} is used in symbol computations.
+They state that the functions @code{Prefix} and @code{Suffix}
+are called on the chain for every @code{Expression} context.
+The @code{Prefix} call is applied to the incoming chain and
+specifies the chain precondition for the leftmost
+subtree of @code{Expression}.
+The @code{Suffix} call is applied to the result of the
+rightmost subtree and specifies the chain postcondition of
+this @code{Expression}:
+@example
+    SYMBOL Expression COMPUTE
+        HEAD.c = Prefix (THIS.c);
+        THIS.c = Suffix (TAIL.c);
+    END;
+@end example
+
+@subsubheading Restrictions
+
+Every @code{ChainName} must be different from any attribute name and any
+@code{AttrName}.
+
+The tree grammar must guarantee that each access of a chain is in a subtree of
+a @code{CHAINSTART} context for that chain.
+Furthermore that subtree may not be to the left of the symbol where
+the @code{CHAINSTART} initiates the chain.
+@findex tree grammar
+
+None of @code{THIS.c}, @code{SYNT.c}, @code{INH.c}, @code{TAIL.c}
+may be used in upper symbol computations.
+
+@code{HEAD.c} must not be used in applied positions.
+
+@code{TAIL.c} must not be used in defining positions.
+
+Chains can not be accessed in @code{INCLUDING} or
+@code{CONSTITUENT(S)} constructs.
+
+@comment ****************************************************************
+@node Computed Subtrees, Iterations, Remote Attribute Access, top
+@chapter Computed Subtrees
+@comment ****************************************************************
+
+In general the tree represents the abstract structure of the input text and is
+built by scanning and parsing the input. That initial tree may be augmented by
+subtrees which result from certain computations. This feature can be used for
+translation into target trees which also contain computations that are
+executed in the usual way.
+@findex Computed Subtrees
+
+The tree construction functions generated by LIGA are used to build such
+subtrees. They are inserted into the initial tree at certain positions
+specified in productions.
+
+@ifinfo
+The tree construction functions are described in
+@menu
+* Tree Construction Functions::
+@end menu
+@end ifinfo
+
+@subsubheading Syntax
+@example
+    Symbols ::= '$' SymbName
+@end example
+@findex Symbols
+
+@subsubheading Examples
+@example
+    RULE: Block ::= '@{' Decl Stmts '@}' $ Target COMPUTE
+      Target.GENTREE =
+           MkTBlock (COORDREF, Dels.tcode, Stmt.tcode);
+    END;
+    RULE TBlock: Target ::= TSeq TSeq COMPUTE ... END;
+@end example
+
+Trees may be the result of computations using LIGA's tree construction functions as
+described below (@pxref{Tree Construction Functions}).
+
+Tree values may be propagated between computations using attributes of the
+predefined type @code{NODEPTR} (@pxref{Predefined Entities}).
+@findex @code{NODEPTR}
+@findex type @code{NODEPTR}
+
+Tree values are inserted into the tree in contexts where the right-hand
+side of the production specifies @dfn{insertion points} 
+of the form @code{$ X} where @code{X} is a nonterminal name.
+@findex insertion points
+
+The insertion is specified by a computation of the attribute @code{X.GENTREE}
+where @code{X} is the insertion point symbol and @code{GENTREE} is 
+a predefined attribute name for inherited attributes of insertion 
+symbols (@pxref{Predefined Entities}). The computation
+must yield a value of type @code{NODEPTR} that is a legal tree 
+with respect to
+the tree grammar for @code{X}: LIGA guarantees that the computations in the
+inserted tree are not executed before the tree is inserted.
+@findex @code{GENTREE}
+@findex attribute @code{GENTREE}
+
+The tree grammar productions for computed trees may be disjoint from or may
+overlap with the productions for the initial tree.
+@findex tree grammar
+@findex productions
+
+Computed trees may again have insertion points in their productions.
+
+@subsubheading Restrictions
+
+There must be exactly one insertion computation for each insertion point of a
+rule context.
+
+There may not be an insertion computation for a symbol that is not an insertion
+point.
+
+Inserted trees must be legal with respect to the tree grammar. This property is
+checked at runtime of the evaluator.
+
+No computation that establishes a precondition for a tree insertion may
+depended on a computation within the inserted tree.
+
+Contexts that may belong to subtrees which are built by
+computations may not have
+computations that are marked @code{BOTTOMUP} or contribute to
+@code{BOTTOMUP} computations (@pxref{Computations}).
+@findex bottom-up computations
+@findex BOTTOMUP
+
+@comment ****************************************************************
+@node Tree Construction Functions, , , Computed Subtrees
+@section Tree Construction Functions
+@comment ****************************************************************
+
+LIGA generates a set of tree construction functions, one for each
+rule context. They may be used in computations to build trees which are then 
+inserted at insertion points. Their names and signatures reflect the 
+rule name and the right-hand side of the production.
+@findex Tree Construction Functions
+@findex Mk-Functions
+
+For a rule
+@example
+    RULE pBlock: Block::= '@{' Decls Stmts '@}' END
+@end example
+
+there is a function
+@example
+    NODEPTR MkpBlock (POSITION *c, NODEPTR d1, NODEPTR d2)
+@end example
+
+The function name is the rule name prefixed by @code{Mk}. Hence, it is
+recommended not to omit the rule name when its construction function
+is to be used.
+
+LIGA's tree construction functions are ready to be used in attribute 
+computations. If they are to be applied in user-supplied C-code an include 
+directive
+
+@example
+   #include "treecon.h"
+@end example
+
+has to be used to make the function definitions available.
+
+The first parameter of every function is a pointer to a 
+source coordinate. 
+That argument may be obtained from the coordinate of the context where
+the function is called. It is used for error reporting, see 
+@ref{Predefined Entities, , @code{COORDREF}}.
+
+The following parameters correspond to the sequence of non-literal
+symbols of the right-hand side of the production.
+For each nonterminal in the production there is a parameter of type
+@code{NODEPTR}. Its argument must be a pointer to the root node of a 
+suitable subtree, built by node construction functions.
+@findex @code{NODEPTR}
+For each insertion point in the production there is a parameter of
+type @code{NODEPTR}. Its argument should be @code{NULLNODEPTR}, since that
+subtree is inserted later by a computation.
+@findex @code{NULLNODEPTR}
+For each named terminal in the production there is a parameter
+of the type of the terminal. Its argument is the value that is to
+be passed to terminal uses in computations.
+@findex terminal
+@findex named terminal
+
+Functions for chain productions, the right-hand side of which consists
+of exactly one nonterminal, need not be called explicitly. The nodes
+for those contexts are inserted implicitly when the upper context 
+is built.
+@findex chain productions
+@findex @code{LISTOF} productions
+
+@code{LISTOF} productions have a specific set of tree 
+construction functions:
+For a rule like
+
+@example
+    RULE pDecls: Decls LISTOF Var | Proc | END;
+@end example
+the functions
+@example
+    NODEPTR MkpDecls (POSITION *c, NODEPTR l)
+    NODEPTR Mk2pDecls (POSITION *c, NODEPTR ll, NODEPTR lr)
+@end example
+
+are provided, where @code{Mk2pDecls} constructs internal list context
+nodes and @code{MkpDecls} builds the root context of the list.
+
+The arguments for each of the parameters @code{l}, @code{ll}, and 
+@code{lr}
+can be @code{NULLNODEPTR} representing an empty list, a pointer to a list
+element node, a node that can be made a list element subtree by implicit 
+insertion of chain contexts, or the result of a @code{Mk2}-function call
+representing a sublist.
+
+The @code{Mk2}-functions concatenate two intermediate list 
+representations into one retaining the order of their elements.
+
+@code{Mk0}-macros are generated. They take only the @code{POSITION}
+but no tree as argument, and return  @code{NULLNODEPTR} representing an 
+empty list. These macros usually need not be used.
+
+The @code{LISTOF} subtree must be finally built by a call of the 
+root context function. 
+
+
+@comment ****************************************************************
+@node Iterations, Predefined Entities, Computed Subtrees, top
+@chapter Iterations
+@comment ****************************************************************
+
+The general principle of computations in trees guarantees that the 
+computations specified for each tree node context are executed exactly
+once. 
+The iteration construct allows to specify cyclic dependencies that may 
+cause certain computations to be iterated until a specified 
+condition holds.
+@findex Iterations
+
+@subsubheading Syntax
+@example
+    Computation ::= Iteration Terminator
+                  | Attribute '=' Iteration Terminator
+    Iteration   ::= 'UNTIL' Expression
+                    'ITERATE' Attribute '=' Expression
+@end example
+@findex Iteration
+@findex @code{UNTIL}
+@findex @code{ITERATE}
+
+Example:
+@example
+    ATTR cnt, incr: int;
+    RULE: R ::= X COMPUTE
+      X.cnt = 1;
+      R.done = UNTIL GT (X.cnt, 10) ITERATE X.cnt = X.incr;
+    END;
+    RULE: X ::= SomeThing COMPUTE
+      X.incr = ORDER (printf ("%d\n", X.cnt), ADD (X.cnt, 1));
+    END;
+@end example
+
+The execution of an iteration establishes the postcondition specified by
+the @code{UNTIL} expression.
+@findex postcondition
+@findex iteration
+
+The attribute defined in the @code{ITERATE}-clause is the iteration
+attribute.
+The expression of that definition usually depends cyclically on the 
+iteration attribute itself. There has to be another non 
+cyclically dependent computation for the iteration attribute, which 
+is executed initially before the iteration.
+The iteration attribute may be a @code{VOID} attribute. All computations 
+that depend on the iteration attribute are executed at least once.
+@findex @code{VOID}
+
+The @code{ITERATE} computation and all computations that depend on it
+are reexecuted if the @code{UNTIL} condition does not hold. 
+
+@subsubheading Restrictions
+
+The @code{UNTIL} condition must yield an @code{int} value being used as
+a conditional value.
+
+There must be an initializing non-cyclic definition for the iteration
+attribute.
+
+The cyclic dependencies involved in the iteration may not include 
+computations of upper contexts of the iteration context.
+@findex cyclic dependencies
+
+Some computations that do not lie on the iteration cycle may also be 
+reexecuted on iteration if not specified otherwise. This effect can be
+avoided by specifying the initial iteration attribute computation to 
+depend on them, or by specifying them to depend on the postcondition of
+the iteration.
+
+There may be several iterations for the same iteration attribute. The so 
+specified iterations may be arbitrary merged if not otherwise specified.
+In any case the @code{UNTIL} conditions hold after completion of the 
+iterations.
+
+Termination of iterations has to be ensured by suitable @code{UNTIL}
+conditions and computations.
+
+The iteration attribute may not be a chain attribute.
+
+@comment ****************************************************************
+@node Predefined Entities, Outdated Constructs, Iterations, top
+@chapter Predefined Entities
+@comment ****************************************************************
+
+The names described in this chapter have a predefined meaning
+in LIDO specifications.
+@findex Predefined Entities
+
+The following types are predefined in LIDO:
+@findex @code{VOID}
+@findex @code{NODEPTR}
+@findex @code{NULLNODEPTR}
+@findex @code{int}
+
+@table @code
+@item VOID
+Attributes of this type describe a computational state without
+propagating values between computations. Those attributes do not
+occur as data objects in the generated evaluator.
+
+@item int
+The terminal type.
+
+@item NODEPTR
+Attributes of this type represent computed subtrees.
+@end table
+
+The predefined value @code{NULLNODEPTR} of type @code{NODEPTR}
+denotes no tree.
+
+@findex @code{ROOTCLASS}
+The @code{CLASS} symbol @code{ROOTCLASS} is predefined.
+It is implicitly inherited by the root of the tree grammar
+(@pxref{Symbol Specifications}).
+
+The following attribute is predefined in LIDO:
+@findex @code{GENTREE}
+@findex insertion points
+
+@table @code
+@item GENTREE
+Every insertion point symbol has an attribute @code{GENTREE} of
+type @code{NODEPTR}.
+@end table
+
+The following functional notations have a specific meaning in LIDO.
+They are translated into suitable C constructs rather than into
+function calls:
+
+@table @code
+@item IF (a, b, c)
+denotes a conditional expression.
+At runtime either @code{b} or @code{c} is evaluated, if @code{a}
+yields a non-zero or a zero value. 
+For determination of the static evaluation order
+each of @code{a, b, c} contribute to the precondition of the
+computation that contains the @code{IF} construct.
+If it occurs in value context 
+@code{b} and @code{c} are in value context, too.
+Then @code{b} and @code{c} have to yield values of the same type
+(not checked by LIGA). Otherwise @code{b} and @code{c} are
+in @code{VOID} context and may or may not yield a value of some type.
+
+@item IF (a, b)
+is a conditional computation of
+@code{b}, which is executed only if @code{a} yields a non-zero value.
+For determination of the static evaluation order
+both @code{a} and @code{b} contribute to the precondition of the
+computation that contains the @code{IF} construct.
+This @code{IF} construct must occur in @code{VOID} context.
+@code{b} is in VOID context, too.
+@findex @code{IF}
+
+@item ORDER (a, b, ..., x)
+The arguments are evaluated in the specified order. 
+If it occurs in @code{VOID} 
+context all arguments are in @code{VOID} context. 
+If it occurs in value context it yields the result of the 
+last argument @code{x}.
+The others are in @code{VOID} context and may or may not yield a value.
+For determination of the static evaluation order
+all arguments of the @code{ORDER} construct contribute to the
+precondition of the computation containing it.
+Any nesting of @code{ORDER}, @code{IF}, function calls, 
+and other expressions is
+allowed, as long as the stated conditions for @code{VOID} and value
+contexts hold.
+@findex @code{ORDER}
+
+@item RuleFct (C_String, arguments ...)
+A call of this function is substituted by a call 
+of a function whose name is composed of the @code{C_String} and
+the name of the rule that has (or inherits) this call.
+The remaining arguments are taken as arguments of the substituted
+call. E.g. in a rule named @code{rBlock} a call
+@code{RuleFct ("PTG", a, b)} is substituted by
+@code{PTGrBlock (a, b)}.
+@findex RuleFct
+
+@item RhsFct (C_String, arguments ...)
+A call of this function is substituted by a call
+of a function whose name is composed of the @code{C_String} and
+and two numbers that indicate how many nonterminals and terminals
+are on the right-hand side of the rule that has (or inherits) this call.
+The remaining arguments are taken as arguments of the substituted
+call. E.g. in a rule @code{RULE: X ::= Id Y Id Z Id END;},
+where @code{Y, Z} are nonterminals, and @code{Id} is a terminal,
+a call @code{RhsFct ("PTGChoice", a, b)} is substituted by
+@code{PTGChoice_2_3 (a, b)}.
+Usually, @code{RhsFct} will be used in symbol computations,
+having arguments that are obtained by the @code{RHS} construct and
+by a @code{TermFct} call.
+@findex RhsFct
+
+@item TermFct (C_String, arguments ...)
+A call of this function is substituted by a comma separated
+sequence of calls 
+of functions whose names are composed of the @code{C_String} and
+the name of the non-literal terminals in the rule
+that has (or inherits) this call.
+The remaining arguments are taken as arguments of the substituted
+calls. E.g. the following symbol computation
+@example
+  SYMBOL X COMPUTE
+    SYNT.Ptg = f (TermFct ("ToPtg", TERM));
+  END;
+  RULE: X ::= Y Number Z Ident ';' END;
+@end example
+yields the following rule computation
+@example
+  RULE: X ::= Y Number Z Ident ';' COMPUTE
+    X.Ptg = f (ToPtgNumber (Number), ToPtgIdent (Ident));
+  END;
+@end example
+The order of the calls corresponds to the order of the terminals
+in the rule. The @code{TermFct} call must occur on argument
+position if there is more than one terminal in the rule.
+@findex TermFct
+@end table
+
+The following names can be used in computations to obtain
+values that are specific for the context in the abstract tree
+in which the computation occurs:
+
+@table @code
+@item LINE
+the source line number of the tree context.
+@findex @code{LINE}
+@item COL
+the source column number of the tree context.
+@findex @code{COL}
+@item COORDREF
+the address of the source coordinates of the tree context,
+to be used for example in calls of the message routine of 
+the error module or in calls of tree construction functions.
+@findex @code{COORDREF}
+@item RULENAME
+a string literal for the rule name of the tree context,
+to be used for example in symbol computations.
+@findex @code{RULENAME}
+@end table
+
+Note: These names are translated by LIGA into specific constructs of the
+evaluator. Hence, they can not be used with this meaning in macros
+that are expanded when the evaluator is translated.
+(That was allowed in previous versions of LIGA.)
+
+
+The following C macros are defined as described for the generated 
+evaluator, and can be used in the LIDO text:
+
+@example
+   APPLY (f, a, ... )  (*f) (a, ... )   a call of the function @code{f}
+                                        with the remaining arguments
+
+   CAST(tp,ex)         ( (tp) (ex) )
+   SELECT(str,fld)     ( (str).fld )
+   PTRSELECT(str,fld)  ( (str)->fld )
+   INDEX(arr,indx)     ( (arr)[indx] )
+
+   ADD(lop,rop)        ( lop + rop )
+   SUB(lop,rop)        ( lop - rop )
+   MUL(lop,rop)        ( lop * rop )
+   DIV(lop,rop)        ( lop / rop )
+   MOD(lop,rop)        ( lop % rop )
+   NEG(op)             ( -op )
+
+   NOT(op)             ( !op )
+   AND(lop,rop)        ( lop && rop )
+   OR(lop,rop)         ( lop || rop )
+
+   BITAND(lop,rop)     ( lop & rop )
+   BITOR(lop,rop)      ( lop | rop )
+   BITXOR(lop,rop)     ( lop ^ rop )
+
+   GT(lop,rop)         ( lop > rop )
+   LT(lop,rop)         ( lop < rop )
+   EQ(lop,rop)         ( lop == rop )
+   NE(lop,rop)         ( lop != rop )
+   GE(lop,rop)         ( lop >= rop )
+   LE(lop,rop)         ( lop <= rop )
+
+   VOIDEN(a)           ((void)a)
+
+   IDENTICAL(a)        (a)
+   ZERO()              0  
+   ONE()               1
+   ARGTOONE(x)         1
+@end example
+The last four macros are especially useful in 
+@code{WITH} clauses of @code{CONSTITUENTS} constructs.
+@findex @code{BITAND}
+@findex @code{BITOR}
+@findex @code{BITXOR}
+@findex @code{APPLY}
+@findex @code{ADD}
+@findex @code{SUB}
+@findex @code{MUL}
+@findex @code{DIV}
+@findex @code{MOD}
+@findex @code{NEG}
+@findex @code{OR}
+@findex @code{AND}
+@findex @code{NOT}
+@findex @code{GT}
+@findex @code{LT}
+@findex @code{EQ}
+@findex @code{NE}
+@findex @code{GE}
+@findex @code{LE}
+@findex @code{VOIDEN}
+@findex @code{IDENTICAL}
+@findex @code{ONE}
+@findex @code{ZERO}
+@findex @code{ARGTOONE}
+
+
+@comment ****************************************************************
+@node Outdated Constructs, Syntax, Predefined Entities, top
+@chapter Outdated Constructs
+@comment ****************************************************************
+
+The following constructs are still supported to achieve compatibility
+with previous LIDO versions. Their use is strongly discouraged.
+@findex Outdated Constructs
+@findex terminals
+@findex named terminals
+
+@menu
+* Terminals::
+* Keywords::
+* Pragmas::
+@end menu
+
+@comment *************************
+@node Terminals, Keywords, , Outdated Constructs
+@section Terminals
+@comment *************************
+
+In previous versions of LIDO terminal symbols could have attributes,
+at most one synthesized and several inherited. They were associated
+explicitly by specifications of the form
+@example
+   TERM Identifier: Sym: int;
+@end example
+@findex @code{TERM}
+
+Attributes of terminals could be used in attribute notations
+or @code{CONSTITUENT(S)} constructs:
+@example
+   Identifier.Sym
+   CONSTITUENT Identifier.Sym
+@end example
+If the above constructs occur in a specification a new nonterminal
+symbol that has the specified attributes is introduced by LIGA,
+as well as a production that derives to the terminal.
+@findex @code{CONSTITUENT}
+@findex @code{CONSTITUENTS}
+
+Terminal symbols could be element of a @code{LISTOF} production:
+@example
+   Idents LISTOF Identifier
+@end example
+This facility is NOT allowed anymore. It is indicated by an error
+message, and has to be transformed explicitly.
+@findex @code{LISTOF}
+
+@comment *************************
+@node Keywords, Pragmas, Terminals, Outdated Constructs
+@section Keywords
+@comment *************************
+
+The key word @code{DEPENDS_ON} introducing a @code{DependsClause}
+is now abbreviated by the token @code{<-}.
+
+The key word @code{NONTERM} should be replaced by @code{SYMBOL}.
+@example
+   NONTERM Stmt: code: PTGNode;
+   NONTERM Stmt COMPUTE ... END;
+@end example
+
+@comment *************************
+@node Pragmas, , Keywords, Outdated Constructs
+@section Pragmas
+@comment *************************
+
+@findex @code{LIGAPragma}
+@findex @code{Pragma}
+The pragma notations are substituted by simpler notations:
+
+Calling a function the name of which is composed from a string and the
+rule name, e.g.
+@example
+   LIGAPragma (RuleFct, "PTG", ...)
+@end example
+is now achieved by
+@example
+   RuleFct ("PTG", ...)
+@end example
+See @pxref{Predefined Entities}.
+@findex RuleFct
+
+A pattern for the sequence of right-hand side attributes, e.g
+@example
+   LIGAPragma (RhsAttrs, Ptg)
+@end example
+is now written
+@example
+   RHS.Ptg
+@end example
+Hence a combination of both features above, like
+@example
+  SYMBOL Reproduce COMPUTE
+     SYNT.Ptg = LIGAPragma (RuleFct, "PTG", LIGAPragma (RhsAttrs, Ptg));
+  END;
+@end example
+is now written
+@example
+  SYMBOL Reproduce COMPUTE
+     SYNT.Ptg = RuleFct ("PTG", RHS.Ptg);
+  END:
+@end example
+See @pxref{Attributes}.
+@findex RhsAttrs
+
+Computations were specified to be executed while the input is being read
+and the tree is being built using a pragma 
+@example
+   LIGAPragma (BottomUp, printf("early output\n"));
+@end example
+Now the keyword @code{BOTTOMUP} is added to the computation:
+@example
+   printf("early output\n") BOTTOMUP;
+@end example
+See @pxref{Computations}.
+@findex BottomUp
+
+@comment ****************************************************************
+@node Syntax, Index, Outdated Constructs, top
+@chapter Syntax
+@comment ****************************************************************
+
+@findex Syntax
+@findex comments
+@findex line comments
+This section contains an overview over the LIDO Syntax.
+Outdated LIDO constructs described in the previous chapter are
+left out in this grammar.
+For further explanations refer to previous chapters.
+
+@example
+    LIDOSpec       ::=  Specification
+    Specification  ::=  Specification Specification |
+                     |  RuleSpec ';' | SymComp ';' 
+                     |  SymSpec ';'  | TermSpec ';'
+                     |  AttrSpec ';' | ChainSpec ';'
+
+    RuleSpec       ::= 'RULE' [RuleName] ':' Production Computations 'END'
+    SymComp        ::= SymbKind SymbName [ Inheritance ] Computations 'END'
+    TermSpec       ::= 'TERM' SymbNames ':' TypeName
+    SymSpec        ::= SymbKind SymbNames ':' [ AttrSpecs ]
+    AttrSpec       ::= 'ATTR' AttrNames ':' TypeName [ AttrClass ]
+    ChainSpec      ::= 'CHAIN' ChainNames ':' TypeName
+
+    AttrSpecs      ::= AttrSpecs ',' AttrSpecs
+                     | AttrNames ':' TypeName [ AttrClass ]
+
+    SymbKind       ::= 'SYMBOL' | 'CLASS' 'SYMBOL' | 'TREE' 'SYMBOL'
+    AttrClass      ::= 'SYNT' | 'INH'
+
+    Production     ::= SymbName '::=' Symbols
+                     | SymbName 'LISTOF' Elements
+
+    Symbols        ::= Symbols Symbols |
+                     | SymbName | Literal | '$' SymbName
+
+    Elements       ::= Elements '|' Elements |
+                     |   SymbName
+
+    Computations   ::= [ 'COMPUTE' Computation ]
+
+    Computation    ::= Computation Computation |
+                     | Expression Terminator
+                     | Attribute '=' Expression Terminator
+                     | 'CHAINSTART' Attribute '=' Expression Terminator
+                     | Iteration Terminator
+                     | Attribute '=' Iteration Terminator
+    Terminator     ::= ';' 
+                     | 'BOTTOMUP' ';'
+
+    Iteration      ::= 'UNTIL' Expression
+                       'ITERATE' Attribute '=' Expression
+
+    Attribute      ::= SymbolRef '.' AttrName
+                     | SymbolRef '.' ChainName
+                     | RuleAttr
+    RuleAttr       ::= '.' AttrName
+    SymbolRef      ::= SymbName
+                     | SymbName '[' Number ']'
+
+    Expression     ::= SimpExpr [ DependsClause ]
+
+    DependsClause  ::= '<-' DepAttrList
+    DepAttrList    ::= DepAttr
+                     | '(' DepAttrs ')'
+    DepAttrs       ::= DepAttrs ',' DepAttrs
+                     | DepAttr
+    DepAttr        ::= Attribute | RemoteAccess | RhsAttrs
+
+    SimpExpr       ::= C_Name | C_Integer | C_Float | C_Char | C_String
+                     | Attribute | RemoteAccess
+                     | RhsAttrs
+                     | FunctionName '(' [ Arguments ] ')'
+                     | SymbolRef
+                     | 'TERM' [ '[' Number ']' ]
+
+    RhsAttrs       ::= 'RHS' '.' AttrName
+
+    Arguments      ::= Arguments ',' Arguments
+                     |  Expression
+
+    Inheritance    ::= 'INHERITS' SymbNames
+
+    RemoteAccess   ::= 'INCLUDING' RemAttrList
+                     | [ SymbolRef ] 'CONSTITUENT'
+                       RemAttrList [ ShieldClause ]
+                     | [ SymbolRef ] 'CONSTITUENTS' 
+                       RemAttrList [ ShieldClause ] [ WithClause ]
+
+    RemAttrList    ::=  RemAttr | '(' RemAttrs ')'
+    RemAttrs       ::=  RemAttr ',' RemAttrs 
+    RemAttrs       ::=  RemAttr 
+    RemAttr        ::=  SymbName '.' AttrName
+
+    ShieldClause   ::= 'SHIELD' SymbNameList
+    SymbNameList   ::= SymbName | '(' SymbNames ')' | '(' ')'
+
+    WithClause     ::= 'WITH' '(' TypeName ',' CombFctName ','
+                                SingleFctName ',' NullFctName ')'
+@end example
+
+Literals in expressions (@code{C_Name}, @code{C_Integer},
+@code{C_Float}, @code{C_Char}, @code{C_String}) are written as in C.
+
+Literals in productions (@code{Literal}) are written as strings in
+Pascal.
+
+This syntax distinguishes names for objects of different
+kinds, e. g. @code{RuleName}, @code{SymbName}, @code{TypeName}. 
+The syntax
+rules for names are omitted. The following
+rules are assumed for @code{XYZNames}:
+@findex identifiers
+
+@example
+    XYZName  ::= Identifier
+    XYZNames ::= XYZName | XYZNames ',' XYZNames
+@end example
+
+Identifiers are written as in C.
+
+LIDO text may contain bracketed non nested comments in the style of C or
+Pascal
+@example
+   /* This is a comment */
+   (* This is a comment *)
+@end example
+or line comments like
+@example
+   % The rest of this line is a comment
+@end example
+
+@comment ****************************************************************
+@node Index, , Syntax, top
+@unnumbered Index
+@comment ****************************************************************
+
+@printindex fn
+@contents
+@bye
+

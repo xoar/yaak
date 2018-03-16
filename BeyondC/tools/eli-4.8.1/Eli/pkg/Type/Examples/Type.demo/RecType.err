@@ -1,0 +1,19 @@
+begin
+
+  type uuu uuu;
+
+  type vvv www;
+  type www qqq;
+  type qqq vvv;
+
+  var uuu vuu;
+  var www vww;
+
+  vuu = vww;
+
+end
+
+
+
+
+

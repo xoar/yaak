@@ -1,0 +1,196 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~p maximum_output_line_length = infinity
+
+~! $Id: StringOut.fw,v 1.7 1998/09/14 15:14:06 mjung Exp peter $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+~t title titlefont centre "Module StringOutput"
+
+This module supplies a PTG Output function, that implements a
+PTG Output function that performs output into a string buffer. It
+uses the module ~{PtgOutput~} to support a means of dynamic
+selection of PTG Output rountines.
+
+To use the module, simply include it's name ~{StringOutput.fw~}
+into a ~{.specs~} file. Through this, some C-functions are included into
+your specification. The module interface will be described in the next
+section. After this, the implementation for the string output module
+is shown.
+
+~A~<Interface~>
+
+~$~<Interface Definition~>+=~{
+char *PTG_StringOut ELI_ARG((PTGNode root));
+~}
+
+This function recursively prints the output text of the specified 
+node into a string buffer. The string buffer is automatically maintained
+by the use of the ~{Obstack~} module.
+
+~$~<Interface Definition~>+=~{
+void FreeStringOut();
+~}
+
+This function frees all buffers, that have been allocated by calls to the
+~{PTG_StringOut~} function.
+
+~A~<Implementation~>
+
+The String-Output module needs to maintain a string buffer that is
+large enough for the output of the PTG Node. To do so, it needs to 
+postprocess the PTG-Output and uses the module ~{PTGOutput~} that
+coordinates different PTG Postprocessors.
+
+Furthermore, it needs to allocate a buffer that is long enough for
+the output. It inherits this functionality from the ~{Obstack~} module.
+
+~O~<StringOutput.specs~>~{
+$/Output/PtgOutput.fw
+$/Adt/obstack.specs
+~}
+
+As status information of the module, we need an obstack to store the
+string in. Furthermore, we need a pointer to the first allocation in this
+obstack to implement the ~{FreeStringOut~}-function.
+
+~$~<Variables~>+=~{
+static Obstack obst_stringout;
+static void *obst_base = 0;~}
+
+A static function is called automatically at the first invocation to 
+initialize output.
+
+~$~<Functions~>+=~{
+static void InitStringOut()
+{
+   if (obst_base)
+      return;
+
+   obstack_init(&obst_stringout);
+   obst_base = obstack_alloc(&obst_stringout, 0);
+}
+~}
+
+The ~{FreeStringOut~}-function simply deallocates the first allocated string
+to free all strings that have been allocated afterwards. This is an often used
+technique with the obstack module.
+
+~$~<Functions~>+=~{
+void FreeStringOut()
+{
+   if (!obst_base)
+      return;
+
+   obstack_free(&obst_stringout, obst_base);
+   obst_base = obstack_alloc(&obst_stringout, 0);
+}
+~}
+
+To use the module ~{PtgOutput~}, some output-functions have to be
+defined. The minimal interface would only define a string output
+function. We will also define a function for character output.
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+static void PrintString(PTG_OUTPUT_FILE f, const char *s)
+#else
+static void PrintString(f, s) PTG_OUTPUT_FILE f; char *s;
+#endif
+{
+   obstack_grow(&obst_stringout, s, strlen(s));
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+static void PrintChar(PTG_OUTPUT_FILE f, char c)
+#else
+static void PrintChar(f, c) PTG_OUTPUT_FILE f; char c;
+#endif
+{
+   obstack_1grow(&obst_stringout, c);
+}
+~}
+
+Now we can define the desired String-output function.
+
+~$~<Functions~>+=~{
+#if defined(__STDC__) || defined(__cplusplus)
+char *PTG_StringOut(PTGNode root)
+#else
+char *PTG_StringOut(root) PTGNode root;
+#endif
+{
+   /* Allocate the 'file' for ptg */
+   PtgFilePtr ptgfile = NewPtgFile(0, PrintString);
+   char *result = 0;
+
+   ptgfile->PrintChar = PrintChar;
+
+   /* Initialize Obstack, if necessary */
+   InitStringOut();
+ 
+   /* Create new blank region */
+   obstack_blank(&obst_stringout, 0);
+
+   /* Process the node into the region */
+   PTGProcess(ptgfile, root);
+  
+   /* Null terminate the string */
+   obstack_1grow(&obst_stringout, '\0');
+
+   /* Retrieve the resulting string */
+   result = (char *)obstack_finish(&obst_stringout);
+   
+   /* Remove the 'file' */
+   FreePtgFile(ptgfile);
+
+   return result;
+}
+~}
+
+~A~<Collecting the Output file~>
+
+~O~<StringOutput.h~>~{
+#ifndef _STRING_OUTPUT_H
+#define _STRING_OUTPUT_H
+
+#include "ptg_gen.h"
+
+~<Interface Definition~>
+
+#endif
+~}
+
+~O~<StringOutput.c~>~{
+#include "StringOutput.h"
+#include "obstack.h"
+
+~<Variables~>
+
+~<Functions~>
+
+~}
+
+~O~<StringOutput.HEAD.phi~>~{
+#include "StringOutput.h"
+~}
+

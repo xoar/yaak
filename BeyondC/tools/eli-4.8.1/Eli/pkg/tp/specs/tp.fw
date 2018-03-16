@@ -1,0 +1,1119 @@
+@A@<Source Language@>
+
+A tree parser specification has the following structure:
+
+@$@<Tree Structure@>==@{
+RULE: Source      LISTOF Include | Declaration | Pattern    END;
+RULE: Include     ::=    String                             END; 
+RULE: Declaration ::=    Nonterms ':' Type ';'              END;
+RULE: Nonterms    LISTOF SymbolDef                          END;
+RULE: Pattern     ::=    Signature ':'  Identifier Cost ';' END; 
+RULE: Pattern     ::=    Signature '::' Identifier Cost ';' END; 
+RULE: Signature   ::=    SymbolUse '::=' Child Function     END; 
+RULE: Child       ::=    SymbolUse                          END;
+RULE: Child       ::=    Terminal '(' ')'                   END; 
+RULE: Child       ::=    Terminal '(' Children ')'          END; 
+RULE: Children    ::=    Children ',' Child                 END; 
+RULE: Children    ::=    Child                              END; 
+RULE: Function    ::=                                       END; 
+RULE: Cost        ::=                                       END; 
+RULE: Cost        ::=    'COST' Integer                     END; 
+RULE: Type        ::=    Identifier                         END; 
+RULE: Terminal    ::=    Identifier                         END; 
+RULE: SymbolDef   ::=    Identifier                         END; 
+RULE: SymbolUse   ::=    Identifier                         END;
+@}
+
+The nonterminal symbols in a @{Declaration@} are separated by commas:
+
+@O@<tp.con@>==@{
+Nonterms: SymbolDef // ',' .
+@}
+
+Identifiers, integers, strings, and comments are similar to those of C:
+
+@O@<tp.gla@>==@{
+Identifier:	C_IDENTIFIER
+Integer:	$[0-9]+		[mkint]
+String:		$\"[^"]+\"	[mkidn]
+		C_COMMENT
+		AWK_COMMENT
+@}
+
+An @{AWK_COMMENT@} begins with the character @{#@} and ends at the end of
+the line.
+Treating this as a comment allows the compiler to ignore line information
+inserted by the C pre-processor.
+
+@B
+
+@$@<Terminals@>==@{
+SYMBOL Terminal INHERITS SetKind COMPUTE
+  SYNT.Kind=1;
+  IF(EQ(GetArity(THIS.Key,100),100),
+    message(ERROR,"Inconsistent arity",0,COORDREF))
+    <- INCLUDING Source.GotAllArities;
+END;
+
+SYMBOL Source COMPUTE
+  SYNT.GotAllArities=CONSTITUENTS Terminal.GotArity;
+END;
+@}
+
+@$@<Terminal properties@>==@{
+Arity: int [Is];
+Index: int [Terminal];
+
+TYPE Terminal(DefTableKey key)
+{ static int index = 1;
+
+  if (key == NoKey) return 0;
+  if (!ACCESS) VALUE = index++;
+  return VALUE;
+}
+@}
+
+@B
+
+@$@<Nonterminals@>==@{
+ATTR type: DefTableKey;
+
+SYMBOL Source COMPUTE
+  SYNT.GotAllTypes=CONSTITUENTS SymbolDef.GotType <- THIS.GotAllSymbols;
+  SYNT.GotAllUses=CONSTITUENTS Child.GotUse;
+END;
+
+RULE: Declaration ::= Nonterms ':' Type ';'
+COMPUTE
+  Declaration.type=Type.Key;
+END;
+
+SYMBOL SymbolDef INHERITS SetKind COMPUTE
+  SYNT.Kind=2;
+  SYNT.GotType=ResetType(THIS.Key,THIS.type);
+  SYNT.type=INCLUDING Declaration.type;
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  Child.GotUse=ResetUsed(SymbolUse.Key,1);
+END;
+
+SYMBOL Child COMPUTE
+  SYNT.GotUse=1;
+END;
+@}
+
+@$@<Nonterminal properties@>==@{
+Type: DefTableKey;
+Used: int;
+@}
+
+@B
+
+@$@<Types@>==@{
+SYMBOL Source COMPUTE
+  SYNT.GotAllSymbols=CONSTITUENTS Type.GotSymbol;
+END;
+
+SYMBOL Type COMPUTE
+  SYNT.GotSymbol=ResetSym(THIS.Key,THIS.Sym);
+END;
+@}
+
+@$@<Type properties@>==@{
+Sym: int;
+@}
+
+@B
+
+@$@<Patterns@>==@{
+CHAIN index: int;
+ATTR value: int;
+
+SYMBOL Source COMPUTE
+  CHAINSTART HEAD.index=1;
+END;
+
+RULE: Pattern ::= Signature ':' Identifier Cost ';'
+COMPUTE
+  Pattern.index=ADD(Pattern.index,1);
+END;
+
+RULE: Pattern ::= Signature '::' Identifier Cost ';'
+COMPUTE
+  Pattern.index=ADD(Pattern.index,2);
+END;
+
+RULE: Cost ::=
+COMPUTE
+  Cost.value=1;
+END;
+
+RULE: Cost ::= 'COST' Integer
+COMPUTE
+  Cost.value=Integer;
+END;
+@}
+
+@B
+
+@$@<Signatures@>==@{
+CHAIN sigs, comsigs, funs: VOID;
+ATTR Kind, IsNt, ntcount, struct: int;
+
+
+SYMBOL Source COMPUTE
+  CHAINSTART HEAD.sigs=CONSTITUENTS Child.IsNt;
+  CHAINSTART HEAD.comsigs = TAIL.sigs;
+  CHAINSTART HEAD.funs=TAIL.comsigs;
+END;
+
+SYMBOL Child COMPUTE
+  SYNT.ntcount=
+    CONSTITUENTS Child.IsNt WITH(int, ADD, IDENTICAL, ZERO);
+END;
+
+SYMBOL SymbolUse INHERITS GetKind END;
+
+ATTR ComSym: int;
+SYMBOL Signature COMPUTE
+  SYNT.ComSym = 0;
+END;
+
+RULE: Signature ::= SymbolUse '::=' Child Function
+COMPUTE
+  Signature.type=
+    GetType(SymbolUse.Key,NoKey) <- INCLUDING Source.GotAllTypes;
+  IF(EQ(Signature.type,NoKey),
+    message(ERROR,CatStrInd("No type declared for ",SymbolUse.Sym),0,COORDREF));
+
+  Signature.Sym=
+    ORDER(obstack_1grow(SigObstk,'\0'),MakeName(obstack_finish(SigObstk)))
+    <- Child.sigs;
+  Signature.ComSym=IF(INCLUDING Pattern.IsCommutative,
+    ORDER(obstack_1grow(SigObstk,'\0'),MakeName(obstack_finish(SigObstk))),
+    0)
+    <- Child.comsigs;
+  
+  Signature.struct=Function.Sym;
+  Signature.sigs=Signature.Sym;
+  Signature.funs=Function.Sym;
+  Child.sigs=
+    ORDER(
+      obstack_grow(
+        SigObstk,
+	StringTable(SymbolUse.Sym),
+	strlen(StringTable(SymbolUse.Sym))),
+      obstack_1grow(SigObstk,':'))
+    <- Signature.sigs;
+
+  Signature.comsigs=Signature.ComSym;
+  Child.comsigs=IF(INCLUDING Pattern.IsCommutative,
+    ORDER(
+      obstack_grow(
+        SigObstk,
+	StringTable(SymbolUse.Sym),
+	strlen(StringTable(SymbolUse.Sym))),
+      obstack_1grow(SigObstk,':')))
+    <- Signature.comsigs;
+    
+  Child.funs=
+      IF(EQ(Child.ntcount,0),obstack_grow(SigObstk,"TP_0", 4),
+      IF(EQ(Child.ntcount,1),obstack_grow(SigObstk,"TP_1", 4),
+      IF(EQ(Child.ntcount,2),obstack_grow(SigObstk,"TP_2", 4))))
+    <- Signature.funs;
+  Function.Sym=
+    ORDER(obstack_1grow(SigObstk,'\0'),MakeName(obstack_finish(SigObstk)))
+    <- Child.funs;
+  Function.ntcount=Child.ntcount;
+END;
+
+RULE: Function ::=
+COMPUTE
+  Function.Key=DefineIdn(INCLUDING Source.Env,Function.Sym);
+END;
+
+ATTR RightSym, LeftSym: int;
+SYMBOL Children COMPUTE
+  SYNT.LeftSym = 0;
+  INH.RightSym = 0;
+END;
+
+SYMBOL Child COMPUTE
+  SYNT.Sym = 0;
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  Child.Sym = SymbolUse.Sym;
+  Child.IsNt=EQ(SymbolUse.HasKind,2);
+  Child.sigs=
+    IF(Child.IsNt,
+      obstack_grow(
+        SigObstk,
+	StringTable(SymbolUse.Sym),
+	strlen(StringTable(SymbolUse.Sym))))
+    <- Child.sigs;
+  Child.funs=
+    IF(NOT(Child.IsNt),
+      ORDER(
+        obstack_1grow(SigObstk,'_'),
+        obstack_grow(
+	  SigObstk,
+	  StringTable(SymbolUse.Sym),
+	  strlen(StringTable(SymbolUse.Sym)))))
+    <- Child.funs;
+END;
+
+ATTR HasNt: int;
+
+RULE: Child ::= Terminal '(' ')'
+COMPUTE
+  Child.IsNt=1;
+  Child.sigs=
+    obstack_grow(
+      SigObstk,
+      StringTable(Terminal.Sym),
+      strlen(StringTable(Terminal.Sym)))
+    <- Child.sigs;
+  Child.comsigs=
+    IF(INCLUDING Pattern.IsCommutative,
+      obstack_grow(
+        SigObstk,
+        StringTable(Terminal.Sym),
+        strlen(StringTable(Terminal.Sym))))
+      <- Child.comsigs;
+  Terminal.GotArity=IsArity(Terminal.Key,0,100);
+END;
+
+RULE: Child ::= Terminal '(' Children ')'
+COMPUTE
+  .HasNt=
+    CONSTITUENTS Child.IsNt WITH (int, OR, IDENTICAL, ZERO);
+  Child.IsNt=1;
+  Children.sigs=
+    ORDER(
+      obstack_grow(
+        SigObstk,
+	StringTable(Terminal.Sym),
+	strlen(StringTable(Terminal.Sym))),
+      IF(.HasNt,obstack_1grow(SigObstk,'(')))
+    <- Child.sigs;
+  Child.sigs=IF(.HasNt,obstack_1grow(SigObstk,')')) <- Children.sigs;
+  Children.comsigs=IF(INCLUDING Pattern.IsCommutative,
+      ORDER(
+        obstack_grow(
+	  SigObstk,
+	  StringTable(Terminal.Sym),
+	  strlen(StringTable(Terminal.Sym))),
+        IF(.HasNt,obstack_1grow(SigObstk,'('))))
+    <- Child.comsigs;
+  Child.comsigs=IF(INCLUDING Pattern.IsCommutative,
+    IF(.HasNt,obstack_1grow(SigObstk,')')))
+    <- Children.comsigs;
+  Terminal.GotArity=IsArity(Terminal.Key,Child.ntcount,100);
+END;
+
+RULE: Children ::= Children ',' Child
+COMPUTE
+  Children[2].RightSym = Child.Sym;
+  Child.sigs=IF(Child.IsNt,obstack_1grow(SigObstk,',')) <- Children[2].sigs;
+  Children[1].comsigs=IF(INCLUDING Pattern.IsCommutative,
+    IF(Child.IsNt,
+      ORDER(
+        obstack_1grow(SigObstk,','),
+        IF(EQ(Children[2].ntindex,1),
+          obstack_grow(
+	    SigObstk,
+	    StringTable(Children[2].LeftSym),
+	    strlen(StringTable(Children[2].LeftSym))),
+          obstack_grow(
+	    SigObstk,
+	    StringTable(Child.Sym),
+	    strlen(StringTable(Child.Sym)))))))
+    <- Child.comsigs;
+END;
+
+RULE: Children ::= Child 
+COMPUTE
+  Children.LeftSym = Child.Sym;
+  Children.comsigs=
+    IF(INCLUDING Pattern.IsCommutative,
+      obstack_grow(
+        SigObstk,
+	StringTable(Children.RightSym),
+	strlen(StringTable(Children.RightSym))))
+    <- Children.comsigs;
+END;
+@}
+
+@$@<Signature obstack pointer@>==@{
+ObstackP SigObstk;
+@}
+
+@$@<Signature obstack storage@>==@{
+{ static Obstack Sigs; SigObstk = &Sigs; obstack_init(SigObstk); }
+@}
+
+@B
+
+@$@<Reduce function arguments@>==@{
+CHAIN ntindex, tindex: int;
+
+RULE: Signature ::= SymbolUse '::=' Child Function
+COMPUTE
+  CHAINSTART Child.ntindex=0;
+  CHAINSTART Child.tindex=0;
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  Child.ntindex=ADD(Child.ntindex,Child.IsNt);
+  Child.tindex=ADD(Child.tindex,NOT(Child.IsNt));
+END;
+@}
+
+@A
+
+@$@<Name Analysis@>==@{
+ATTR Sym: int;
+ATTR Bind: Binding;
+ATTR Key: DefTableKey;
+
+SYMBOL Source    INHERITS RootScope         END;
+SYMBOL Include   INHERITS IdOcc, IdDefScope END;
+SYMBOL Terminal  INHERITS IdOcc, IdDefScope END;
+SYMBOL Type      INHERITS IdOcc, IdDefScope END;
+SYMBOL SymbolDef INHERITS IdOcc, IdDefScope END;
+SYMBOL SymbolUse INHERITS IdOcc, IdUseEnv   END;
+
+SYMBOL IdOcc COMPUTE SYNT.Sym=TERM; END;
+
+SYMBOL Signature INHERITS Unique COMPUTE
+  SYNT.Bind=BindIdn(INCLUDING AnyScope.Env,THIS.Sym);
+  SYNT.Key=KeyOf(SYNT.Bind);
+  IF(NOT(THIS.Unique),
+    message(ERROR,"Multiply-defined pattern",0,COORDREF));
+END;
+@}
+
+@A
+
+@$@<Output@>==@{
+CHAIN Includes: PTGNode;
+ATTR Ptg: PTGNode;
+
+SYMBOL Source COMPUTE
+  CHAINSTART HEAD.Includes=PTGNULL;
+  CHAINSTART HEAD.Termcodes=PTGNULL;
+  CHAINSTART HEAD.Builders=PTGNULL;
+  CHAINSTART HEAD.Forwards=PTGNULL;
+  CHAINSTART HEAD.Reducers=PTGNULL;
+  CHAINSTART HEAD.Transforms=PTGNULL;
+  CHAINSTART HEAD.Macros=PTGNULL;
+  CHAINSTART HEAD.Externs=PTGNULL;
+  PTGOutFile(
+    "tp_gen.burg",
+    PTGBurg(
+      TAIL.Termcodes,
+      CONSTITUENTS Pattern.Ptg WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull),
+      TAIL.Builders,
+      TAIL.Forwards,
+      TAIL.Reducers,
+      TAIL.Transforms));
+  PTGOutFile(
+    "tp_gen.h",
+    PTGHeader(
+      TAIL.Includes,
+      TAIL.Macros,
+      TAIL.Externs));
+END;
+
+SYMBOL Include INHERITS FirstOcc COMPUTE
+  THIS.Includes=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(THIS.Includes,PTGInclude(PTGId(THIS.Sym))),
+      THIS.Includes);
+END;
+@}
+
+@$@<Burg pattern@>==@{
+Burg:
+  "%{\n"
+  "#include \"tp_gen.h\"\n"
+  "#define NODEPTR_TYPE TPNode\n"
+  "#define OP_LABEL(p) ((p)->op)\n"
+  "#define LEFT_CHILD(p) ((p)->left)\n"
+  "#define RIGHT_CHILD(p) ((p)->right)\n"
+  "#define STATE_LABEL(p) ((p)->state_label)\n"
+  "#define PANIC printf\n"
+  "#ifdef MONITOR\n"
+  "#define COORD(p) ((p)->loc)\n"
+  "#else\n"
+  "#define COORD(p) NoPosition\n"
+  "#endif\n"
+  "%}\n\n"
+  "%term\n"
+  $
+  "%%\n"
+  $
+  "%%\n\n"
+  "#include \"csm.h\"\n"
+  "#include \"obstack.h\"\n\n"
+  "static Obstack obstk;\n"
+  "static ObstackP scaffold = (ObstackP)0;\n\n"
+  "static int HasError = 0;\n\n"
+  "void\n"
+  "TP_init()\n"
+  "{ scaffold = &obstk; obstack_init(scaffold); }\n\n"
+  "#ifdef MONITOR\n"
+  "TPNode\n"
+  "#ifdef PROTO_OK\n"
+  "TPCoord(TPNode node, CoordPtr coord)\n"
+  "#else\n"
+  "TPCoord(node, coord) TPNode node; CoordPtr coord;\n"
+  "#endif\n"
+  "{\n"
+  "  node->loc = coord;\n"
+  "  return node; }\n"
+  "#endif\n\n"
+  "static void\n"
+  "#ifdef PROTO_OK\n"
+  "BuildError(TPNode node)\n"
+  "#else\n"
+  "BuildError(node) TPNode node;\n"
+  "#endif\n"
+  "{ char *msg;\n"
+  "  int badkids = 0;\n"
+  "  obstack_grow(Csm_obstk, \"No rule matches \\\"\", 18);\n"
+  "  obstack_grow(\n"
+  "    Csm_obstk,\n"
+  "    TP_opname[OP_LABEL(node)],\n"
+  "    strlen(TP_opname[OP_LABEL(node)]));\n"
+  "  obstack_1grow(Csm_obstk, '(');\n"
+  "  if (TP_arity[OP_LABEL(node)] > 0) {\n"
+  "    if (!STATE_LABEL(LEFT_CHILD(node))) badkids++;\n"
+  "    obstack_grow(\n"
+  "      Csm_obstk,\n"
+  "      TP_opname[OP_LABEL(LEFT_CHILD(node))],\n"
+  "      strlen(TP_opname[OP_LABEL(LEFT_CHILD(node))]));\n"
+  "  }\n"
+  "  if (TP_arity[OP_LABEL(node)] > 1) {\n"
+  "    if (!STATE_LABEL(RIGHT_CHILD(node))) badkids++;\n"
+  "    obstack_1grow(Csm_obstk, ',');\n"
+  "    obstack_grow(\n"
+  "      Csm_obstk,\n"
+  "      TP_opname[OP_LABEL(RIGHT_CHILD(node))],\n"
+  "      strlen(TP_opname[OP_LABEL(RIGHT_CHILD(node))]));\n"
+  "  }\n"
+  "  msg = (char *)obstack_copy0(Csm_obstk, \")\\\"\", 3);\n"
+  "  if (badkids) obstack_free(Csm_obstk, msg);\n"
+  "  else message(ERROR, msg, 0, COORD(node));\n"
+  "  HasError++;\n"
+  "}\n\n"
+  "static void\n"
+  "#ifdef PROTO_OK\n"
+  "ReduceError(TPNode p, int goalnt)\n"
+  "#else\n"
+  "ReduceError(p, goalnt) TPNode p; int goalnt;\n"
+  "#endif\n"
+  "{ if (HasError == 0 && !STATE_LABEL(p)) BuildError(p);\n"
+  "  if (HasError > 0)\n"
+  "    message(DEADLY,\"Can't parse a tree with errors\",0,COORD(p));\n"
+  "  obstack_grow(Csm_obstk, \"No \\\"\", 5);\n"
+  "  obstack_grow(Csm_obstk, TP_opname[p->op], strlen(TP_opname[p->op]));\n"
+  "  obstack_1grow(Csm_obstk, '(');\n"
+  "  if (TP_arity[p->op] > 0)\n"
+  "    obstack_grow(\n"
+  "      Csm_obstk,\n"
+  "     TP_opname[p->left->op],\n"
+  "     strlen(TP_opname[p->left->op]));\n"
+  "  if (TP_arity[p->op] > 1) {\n"
+  "    obstack_1grow(Csm_obstk, ',');\n"
+  "    obstack_grow(\n"
+  "      Csm_obstk,\n"
+  "      TP_opname[p->right->op],\n"
+  "      strlen(TP_opname[p->right->op]));\n"
+  "  }\n"
+  "  obstack_grow(Csm_obstk, \")\\\" rule builds \", 16);\n"
+  "  message(DEADLY,\n"
+  "    (char *)obstack_copy0(\n"
+  "      Csm_obstk,\n"
+  "      TP_ntname[goalnt],\n"
+  "      strlen(TP_ntname[goalnt])),\n"
+  "    0,\n"
+  "    COORD(p));\n"
+  "}\n\n"
+  $		/* Builders */
+  $ "\n"	/* Forwards */
+  $		/* Reducers */
+  $		/* Transforms */
+
+Include:
+  "#include " $ "\n"
+
+Header:
+  "#ifndef TP_GEN_H\n"
+  "#define TP_GEN_H\n\n"
+  "#include \"eliproto.h\"\n"
+  "#include \"err.h\"\n"
+  "#include \"tpnode.h\"\n"
+  $ "\n"	/* Includes */
+  $ "\n"	/* Macros */
+  "extern const char *TP_opname[];\n"
+  "extern char  TP_arity[];\n"
+  "extern const char *TP_string[];\n"
+  "extern short TP_cost[][4];\n"
+  "extern const char *TP_ntname[];\n\n"
+  "extern void TP_init ELI_ARG((void));\n"
+  "#ifdef MONITOR\n"
+  "extern TPNode TPCoord ELI_ARG((TPNode node, CoordPtr coord));\n"
+  "#else\n"
+  "#define TPCoord(n,c) (n)\n"
+  "#endif\n"
+  "extern int TP_op_label ELI_ARG((TPNode));\n"
+  "extern int TP_state_label ELI_ARG((TPNode));\n"
+  "extern TPNode TP_child ELI_ARG((TPNode,int));\n"
+  $ "\n"	/* Externs */
+  "#ifdef MONITOR\n"
+  "/* Monitoring support */\n\n"
+  "#define DAPTO_RESULTTPNode(e)\tDAPTO_RESULT_PTR (e)\n"
+  "#define DAPTO_ARGTPNode(e)\tDAPTO_ARG_PTR (e, TPNode)\n\n"
+  "#endif\n\n"
+  "#endif\n"
+@}
+
+@B
+
+@$@<Terminal output@>==@{
+CHAIN Termcodes: PTGNode;
+CHAIN Macros: PTGNode;
+
+SYMBOL Terminal INHERITS FirstOcc COMPUTE
+  THIS.Termcodes=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Termcodes,
+        PTGTerm(PTGId(THIS.Sym),TerminalIndex(THIS.Key))),
+      THIS.Termcodes);
+  THIS.Macros=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Macros,
+        PTGMacro(PTGId(THIS.Sym),TerminalIndex(THIS.Key))),
+      THIS.Macros);
+END;
+@}
+
+@$@<Terminal patterns@>==@{
+Term:
+  $ "=" $ int "\n"
+
+Macro:
+  "#define " $ " " $ int "\n"
+@}
+
+@B
+
+@$@<Template output@>==@{
+ATTR id: PTGNode;
+
+ATTR IsCommutative: int;
+SYMBOL Pattern COMPUTE
+  SYNT.IsCommutative = 0;
+END;
+
+RULE: Pattern ::= Signature ':' Identifier Cost ';'
+COMPUTE
+  Pattern.IsCommutative = 0;
+  .id=PTGId(Identifier);
+  Pattern.Ptg=
+    PTGPattern(PTGId(Signature.Sym),Pattern.index,Cost.value,.id);
+END;
+
+RULE: Pattern ::= Signature '::' Identifier Cost ';'
+COMPUTE
+  Pattern.IsCommutative = 1;
+  .id=PTGId(Identifier);
+  Pattern.Ptg=PTGSeq(
+    PTGPattern(PTGId(Signature.Sym),Pattern.index,Cost.value,.id),
+    PTGPattern(PTGId(Signature.ComSym),ADD(Pattern.index,1),Cost.value,.id));
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  Child.Ptg=
+    IF(EQ(SymbolUse.HasKind,NEG(1)),
+      PTGId(SymbolUse.Sym),
+      PTGNULL);
+END;
+
+SYMBOL Child COMPUTE
+  SYNT.Ptg=PTGNULL;
+END;
+@}
+
+@$@<Template patterns@>==@{
+Pattern:
+  $ " = " $ int " (" $ int "); /* " $ " */\n"
+
+Commute:
+  $1 ": " $2 "(" $3 "," $4 $5 ")"
+@}
+
+@B
+
+@$@<Constructor output@>==@{
+CHAIN Builders, FieldDecls, ArgDecls, ArgNames, FieldSets, Externs: PTGNode;
+ATTR typeSym: PTGNode;
+
+SYMBOL Signature COMPUTE
+  CHAINSTART HEAD.FieldDecls=PTGNULL;
+  CHAINSTART HEAD.ArgDecls=PTGNULL;
+  CHAINSTART HEAD.ArgNames=PTGNULL;
+  CHAINSTART HEAD.FieldSets=PTGNULL;
+END;
+
+SYMBOL Function INHERITS FirstOcc COMPUTE
+  THIS.Builders=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Builders,
+        IF(EQ(THIS.ntcount,0),
+          PTGBuild0(
+            PTGId(THIS.Sym),
+            THIS.FieldDecls,
+            THIS.ArgDecls,
+            THIS.ArgNames,
+            THIS.FieldSets),
+        IF(EQ(THIS.ntcount,1),
+          PTGBuild1(
+            PTGId(THIS.Sym),
+            THIS.FieldDecls,
+            THIS.ArgDecls,
+            THIS.ArgNames,
+            THIS.FieldSets),
+        IF(EQ(THIS.ntcount,2),
+          PTGBuild2(
+            PTGId(THIS.Sym),
+            THIS.FieldDecls,
+            THIS.ArgDecls,
+            THIS.ArgNames,
+            THIS.FieldSets),
+          PTGNULL)))),
+      THIS.Builders);
+  THIS.Externs=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Externs,
+        IF(EQ(THIS.ntcount,0),PTGExtern0(PTGId(THIS.Sym),THIS.ArgDecls),
+        IF(EQ(THIS.ntcount,1),PTGExtern1(PTGId(THIS.Sym),THIS.ArgDecls),
+        IF(EQ(THIS.ntcount,2),PTGExtern2(PTGId(THIS.Sym),THIS.ArgDecls),
+        PTGNULL)))),
+      THIS.Externs);
+END;
+
+SYMBOL SymbolUse COMPUTE
+  SYNT.typeSym=PTGId(THIS.Sym);
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  Child.FieldDecls=
+    IF(NOT(Child.IsNt),
+      PTGSeq(
+        Child.FieldDecls,
+        PTGFieldDecl(SymbolUse.typeSym,Child.tindex)),
+      Child.FieldDecls);
+  Child.ArgDecls=
+    IF(NOT(Child.IsNt),
+      PTGSeq(
+        Child.ArgDecls,
+        PTGArgDecl(SymbolUse.typeSym,Child.tindex)),
+      Child.ArgDecls);
+  Child.ArgNames=
+    IF(NOT(Child.IsNt),
+      PTGSeq(
+        Child.ArgNames,
+        PTGArgName(Child.tindex)),
+      Child.ArgNames);
+  Child.FieldSets=
+    IF(NOT(Child.IsNt),
+      PTGSeq(
+        Child.FieldSets,
+        PTGFieldSet(Child.tindex)),
+      Child.FieldSets);
+END;
+@}
+
+@$@<Constructor patterns@>==@{
+Build0:
+  "struct " $1 " {\n"
+  "#ifdef MONITOR\n"
+  "  CoordPtr loc;\n"
+  "#endif\n"
+  "  int op, state_label; " $2 "\n"
+  "};\n\n"
+  "TPNode\n"
+  "#ifdef PROTO_OK\n"
+  $1 "(int op" $3 ")\n"
+  "#else\n"
+  $1 "(op" $4 ") int op; " $2 "\n"
+  "#endif\n"
+  "{ struct " $1 " temp;\n\n"
+  "  if (TP_arity[op] != 0) {\n"
+  "    obstack_grow(Csm_obstk, TP_opname[op], strlen(TP_opname[op]));\n"
+  "    message(DEADLY,\n"
+  "      (char *)obstack_copy0(Csm_obstk, \" used with arity 0\", 18),\n"
+  "      0,\n"
+  "      NoPosition);\n"
+  "  }\n"
+  "  temp.op = op;\n"
+  "  temp.state_label = TP_state(op, 0, 0);\n"
+  "#ifdef MONITOR\n"
+  "  temp.loc = NoPosition;\n"
+  "#endif\n"
+  $5
+  "  return (TPNode)obstack_copy(scaffold, &temp, sizeof(temp));\n"
+  "}\n\n"
+
+Build1:
+  "struct " $1 " {\n"
+  "#ifdef MONITOR\n"
+  "  CoordPtr loc;\n"
+  "#endif\n"
+  "  int op, state_label; TPNode left; " $2 "\n"
+  "};\n\n"
+  "TPNode\n"
+  "#ifdef PROTO_OK\n"
+  $1 "(int op, TPNode left" $3 ")\n"
+  "#else\n"
+  $1 "(op, left" $4 ") int op; TPNode left; " $2 "\n"
+  "#endif\n"
+  "{ struct " $1 " temp;\n\n"
+  "  if (TP_arity[op] != 1) {\n"
+  "    obstack_grow(Csm_obstk, TP_opname[op], strlen(TP_opname[op]));\n"
+  "    message(DEADLY,\n"
+  "      (char *)obstack_copy0(Csm_obstk, \" used with arity 1\", 18),\n"
+  "      0,\n"
+  "      NoPosition);\n"
+  "  }\n"
+  "  if (!STATE_LABEL(left)) BuildError(left);\n"
+  "  temp.op = op;\n"
+  "  temp.state_label = TP_state(op, STATE_LABEL(left), 0);\n"
+  "  temp.left = left;\n"
+  "#ifdef MONITOR\n"
+  "  temp.loc = NoPosition;\n"
+  "#endif\n"
+  $5
+  "  return (TPNode)obstack_copy(scaffold, &temp, sizeof(temp));\n"
+  "}\n\n"
+
+Build2:
+  "struct " $1 " {\n"
+  "#ifdef MONITOR\n"
+  "  CoordPtr loc;\n"
+  "#endif\n"
+  "  int op, state_label; TPNode left, right; " $2 "\n"
+  "};\n\n"
+  "TPNode\n"
+  "#ifdef PROTO_OK\n"
+  $1 "(int op, TPNode left, TPNode right" $3 ")\n"
+  "#else\n"
+  $1 "(op, left, right" $4 ") int op; TPNode left, right; " $2 "\n"
+  "#endif\n"
+  "{ struct " $1 " temp;\n\n"
+  "  if (TP_arity[op] != 2) {\n"
+  "    obstack_grow(Csm_obstk, TP_opname[op], strlen(TP_opname[op]));\n"
+  "    message(DEADLY,\n"
+  "      (char *)obstack_copy0(Csm_obstk, \" used with arity 2\", 18),\n"
+  "      0,\n"
+  "      NoPosition);\n"
+  "  }\n"
+  "  if (!STATE_LABEL(left)) BuildError(left);\n"
+  "  if (!STATE_LABEL(right)) BuildError(right);\n"
+  "  temp.op = op;\n"
+  "  temp.state_label = TP_state(op,STATE_LABEL(left),STATE_LABEL(right));\n"
+  "  temp.left = left;\n"
+  "  temp.right = right;\n"
+  "#ifdef MONITOR\n"
+  "  temp.loc = NoPosition;\n"
+  "#endif\n"
+  $5
+  "  return (TPNode)obstack_copy(scaffold, &temp, sizeof(temp));\n"
+  "}\n\n"
+
+FieldDecl:
+  $ " f_" $ int "; "
+
+ArgDecl:
+  ", " $ " f_" $ int
+
+ArgName:
+  ", f_" $ int
+
+FieldSet:
+  "  temp.f_" $1 int "=f_" $1 int ";\n"
+
+Extern0:
+  "extern TPNode " $ " ELI_ARG((int op" $ "));\n"
+
+Extern1:
+  "extern TPNode " $ " ELI_ARG((int op, TPNode left" $ "));\n"
+
+Extern2:
+  "extern TPNode " $
+    " ELI_ARG((int op, TPNode left, TPNode right" $ "));\n"
+@}
+
+@B
+
+@$@<Type output@>==@{
+CHAIN Forwards, Reducers, leaves, revers: PTGNode;
+
+SYMBOL Source COMPUTE
+  SYNT.GotAllCases=CONSTITUENTS Pattern.GotCase;
+END;
+
+SYMBOL Type INHERITS FirstOcc COMPUTE
+  THIS.Forwards=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Forwards,
+        PTGForward(
+          PTGId(THIS.Sym),
+          PTGId(ObtainSymbol(THIS.Key,THIS.Sym)))),
+      THIS.Forwards);
+  THIS.Reducers=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.Reducers,
+        PTGReducer(
+          PTGId(THIS.Sym),
+          PTGId(ObtainSymbol(THIS.Key,THIS.Sym)),
+          GetCases(THIS.Key,PTGNULL) <- INCLUDING Source.GotAllCases,
+          THIS.Sym)),
+      THIS.Reducers);
+END;
+
+RULE: Pattern ::= Signature ':' Identifier Cost ';'
+COMPUTE
+  CHAINSTART Signature.leaves=PTGNULL;
+  CHAINSTART Signature.revers=PTGNULL;
+  Pattern.GotCase=
+    UpdateCases(Signature.type,PTGCase(Pattern.index,.id,Signature.leaves));
+END;
+
+RULE: Pattern ::= Signature '::' Identifier Cost ';'
+COMPUTE
+  CHAINSTART Signature.leaves=PTGNULL;
+  CHAINSTART Signature.revers=PTGNULL;
+  Pattern.GotCase=
+    UpdateCases(
+      Signature.type,
+      PTGSeq(
+        PTGCase(Pattern.index,.id,Signature.leaves),
+        PTGCase(ADD(Pattern.index,1),.id,Signature.revers)));
+END;
+
+RULE: Child ::= SymbolUse
+COMPUTE
+  .type=GetType(SymbolUse.Key,NoKey) <- INCLUDING Source.GotAllTypes;
+  Child.leaves=
+    PTGCommaSeq(
+      Child.leaves,
+      IF(Child.IsNt,
+        PTGReducerCall(
+          PTGId(ObtainSymbol(.type,GetSym(.type,0))),
+          Child.ntindex),
+        PTGGetValue(
+          PTGId(INCLUDING Signature.struct),
+          Child.tindex)));
+  Child.revers=
+    PTGCommaSeq(
+      Child.revers,
+      IF(Child.IsNt,
+        PTGReducerCall(
+          PTGId(ObtainSymbol(.type,GetSym(.type,0))),
+          IF(EQ(Child.ntindex,0),1,IF(EQ(Child.ntindex,1),0,Child.ntindex))),
+        PTGGetValue(
+          PTGId(INCLUDING Signature.struct),
+          Child.tindex)));
+END;
+@}
+
+@$@<Type output properties@>==@{
+Symbol: int [Obtain];
+
+int Obtain(DefTableKey key, int sym)
+{ if (key == NoKey) return 0;
+  if (!ACCESS) VALUE = IndCatStrStr("Reduce_",StringTable(sym));
+  return VALUE;
+} "Strings.h"
+
+Cases: PTGNode [Update];
+
+void Update(DefTableKey key, PTGNode add)
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = add;
+  else VALUE = PTGSeq(VALUE, add);
+} "ptg_gen.h"
+@}
+
+@$@<Type patterns@>==@{
+Reducer:
+  "static " $1 "\n"
+  "#ifdef PROTO_OK\n"
+  $2 "(TPNode p, int goalnt)\n"
+  "#else\n"
+  $2 "(p, goalnt) TPNode p; int goalnt;\n"
+  "#endif\n"
+  "{ int eruleno = TP_rule(STATE_LABEL(p), goalnt);\n"
+  "  short *nts = TP_nts[eruleno];\n"
+  "  TPNode kids[10];\n\n"
+  "  if (!eruleno) ReduceError(p, goalnt);\n"
+  "  TP_kids(p, eruleno, kids);\n"
+  "\n"
+  "  switch (eruleno) {\n"
+  "  default: message(DEADLY,\"Invalid reduction\"," $4 int ",NoPosition);\n"
+  $3
+  "  }\n"
+  "exit(1);\n"
+  "}\n\n"
+
+Forward:
+  "static " $1 " " $2 " ELI_ARG((TPNode p, int goalnt));\n"
+
+Case:
+  "  case " $ int ": return " $ "(" $ ");\n"
+
+ReducerCall:
+  $1 "(kids[" $2 int "],nts[" $2 int "])"
+
+GetValue:
+  "((struct " $1 " *)p)->f_" $2 int
+@}
+
+@B
+
+@$@<Transformation output@>==@{
+CHAIN Transforms: PTGNode;
+
+SYMBOL SymbolDef COMPUTE
+  THIS.Transforms=
+    PTGSeq(
+      THIS.Transforms,
+      PTGTransform(
+        PTGId(THIS.Sym),
+        PTGId(GetSym(THIS.type,0) <- INCLUDING Source.GotAllTypes)));
+  THIS.Externs=
+    PTGSeq(
+      THIS.Externs,
+      PTGTransformDecl(
+        PTGId(THIS.Sym),
+        PTGId(GetSym(THIS.type,0) <- INCLUDING Source.GotAllTypes)));
+END;
+@}
+
+@$@<Transformation patterns@>==@{
+Transform:
+  $2 "\n"
+  "#ifdef PROTO_OK\n"
+  "TP_" $1 "(TPNode p)\n"
+  "#else\n"
+  "TP_" $1 "(p) TPNode p;\n"
+  "#endif\n"
+  "{ return Reduce_" $2 "(p, TP_" $1 "_NT); }\n\n"
+
+TransformDecl:
+  "extern " $2 " TP_" $1 " ELI_ARG((TPNode));\n"
+@}
+
+@A@<Specification Files@>
+
+@B
+
+@O@<tp.lido@>==@{
+@<Tree Structure@>
+@<Terminals@>
+@<Nonterminals@>
+@<Types@>
+@<Patterns@>
+@<Signatures@>
+@<Reduce function arguments@>
+@<Name Analysis@>
+@<Output@>
+@<Terminal output@>
+@<Template output@>
+@<Constructor output@>
+@<Type output@>
+@<Transformation output@>
+@}
+
+@B
+
+@O@<tp.pdl@>==@{
+@<Terminal properties@>
+@<Nonterminal properties@>
+@<Type properties@>
+@<Type output properties@>
+@}
+
+@B
+
+@O@<tp.ptg@>==@{
+@<Burg pattern@>
+@<Terminal patterns@>
+@<Template patterns@>
+@<Constructor patterns@>
+@<Type patterns@>
+@<Transformation patterns@>
+@}
+
+@B
+
+@O@<tp.specs@>==@{
+$/Tech/MakeName.gnrc +instance=Identifier :inst
+$/Prop/Kind.gnrc     :inst
+$/Prop/Unique.gnrc   :inst
+$/Prop/FirstOcc.gnrc :inst
+$/Name/AlgScope.gnrc :inst
+$/Output/PtgCommon.fw
+$/Tech/Strings.specs
+@}
+
+
+@B
+
+@O@<tp.h@>==@{
+#ifndef TP_H
+#define TP_H
+
+#include "obstack.h"
+
+extern ObstackP SigObstk;
+
+#endif
+@}
+
+@B
+
+@O@<tp.c@>==@{
+static char rcsid[] = "$Id: tp.fw,v 1.13 2009/10/05 03:24:06 profw Exp $";
+#include "tp.h"
+
+@<Signature obstack pointer@>
+@}
+
+@B
+
+@O@<tp.HEAD.phi@>==@{
+#include "tp.h"
+@}
+
+@B
+
+@O@<tp.INIT.phi@>==@{
+@<Signature obstack storage@>
+@}

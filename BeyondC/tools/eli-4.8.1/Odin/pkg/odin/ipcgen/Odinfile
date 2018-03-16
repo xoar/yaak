@@ -1,0 +1,10 @@
+%exe == %ipcgen.c.sm +ignore=\\.hh\$ :exe
+
+%lint! == <<
+   %ipcgen.c.sm +debug +ignore=\\.hh\$ :lint >
+
+%ipcgen.c.sm == <<
+   ipcgen.ygi
+   ig-main.c; ig-gen.c; ig-yylex.c
+   ../if-err.c +define=NO_IPC
+   ../if-file.c; ../if-io.c; ../if-nod.c; ../if-symbol.c

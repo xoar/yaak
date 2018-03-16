@@ -1,0 +1,220 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@setfilename news4.5
+@settitle New Features of Eli Version 4.5
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{New Features of Eli Version 4.5}
+@sp 4
+@center Uwe Kastens
+@sp 1
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 2
+@center A. M. Sloane
+@sp 1
+@center Department of Computing
+@center Division of Information and Communication Sciences
+@center Macquarie University
+@center Sydney, NSW 2109 
+@center Australia
+@sp 2
+@center W. M. Waite
+@sp 1
+@center Department of Electrical and Computer Engineering
+@center University of Colorado
+@center Boulder, CO  80309-0425
+@center USA
+@sp 4
+@center $Date: 2008/08/27 13:44:24 $
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node Top
+@top New Features of Eli Version 4.5
+
+This document gives information about new facilities available in Eli
+version 4.5 and those modifications made since the previous distributed
+Eli version 4.4 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here.
+
+@menu
+* Type::		New type analysis modules
+* Name::		Updated name analysis modules
+* LIGA::		New LIGA front-end
+
+* Index::                       
+@end menu
+
+@node Type
+@chapter New type analysis modules
+
+@cindex type analysis
+Type analysis is complex, even for simple languages, but it is based
+upon a number of language-independent concepts.
+The type analysis of source text in a particular language can be described
+in terms of those concepts, by identifying constructs playing specific
+@cindex role, computational
+@cindex computational role
+roles in the type system of that language.
+Once that identification has been made, most of the code required to carry
+out the analysis can be deduced automatically.
+We have added attribution modules to Eli that are sufficient to describe
+most type analysis problems in a straightforward manner
+(@pxref{Top,Type Analysis Reference Manual,Overview,type,
+Type Analysis Reference Manual}).
+
+These modules support language concepts such as the following:
+
+@itemize @bullet
+@item
+language- and user-defined types
+@item
+name or structural equivalence of types
+@item
+language- and user-defined operators, procedures, and methods
+@item
+expressions with coercion, explicit type conversion, and overloaded operators
+@end itemize
+
+@noindent
+They encapsulate the necessary computations and the dependence
+relationships among them, and export a nomenclature for language
+constructs.
+Type analyzer code for a particular compiler can be created by
+instantiating the appropriate modules and then classifying the constructs
+of the given source language according to that scheme.
+For example, after instantiating the @code{Expression} module, all of the
+code needed to analyze an infix operator with two operands can be obtained
+by classifying the appropriate abstract syntax rule as a
+@code{DyadicContext}.
+
+For a tutorial on the use of the new modules,
+@pxref{Top,Tutorial on Type Analysis,Overview,typetutorial,
+Tutorial on Type Analysis}.
+
+@node Name
+@chapter New name analysis modules
+
+The name analysis modules that support scopes being properties
+and scopes being inherited
+have been updated mainly in oder to fit together with the
+updated modules for type analysis.
+
+In the module @code{ScopeProp} the following role names have been changed:
+@code{ExportRange} replaces @code{RangeScopeProp},
+@code{QualIdUse} replaces @code{IdUseScopeProp}.
+@code{ChkQualIdUse} has been added.
+Furthermore, the dependence pattern used for the computations of the
+module roles have been changed to a less restrictive one.
+
+The module @code{AlgScopeProp} has been removed. The module @code{ScopeProp}
+is to be used instead.
+
+In the module @code{CScopeProp} the role names are adapted to those of 
+@code{ScopeProp}.
+
+The module @code{BuScopeProp} has been left unchanged.
+
+In the module @code{AlgInh} the following role names have been changed:
+@code{InhRange} replaces @code{RangeSnglInh} and @code{RangeMulInh},
+@code{ChkQualIdUse} replaces @code{ChkIdUseScopeProp}.
+
+A new role @code{ExportInhRange} combines @code{InhRange} and 
+@code{ExportInhRange}. @code{RangeQualInhScope} has been deleted.
+
+@code{Inheritscope} now does not require to compute
+@code{Inheritscope.OuterScope} by a user computation, 
+@code{Inheritscope.ScopeKey} may be computed instead.
+
+In the module @code{CInh} the role names are adapted to those of 
+@code{AlgInh}.
+
+The module @code{BuInh} has been left unchanged.
+
+For further information see the Name Analysis documentation 
+@pxref{Top,Name Analysis Reference Manual,Overview,name,
+Name Analysis Reference Manual}.
+and the
+@pxref{Top,Tutorial on Name Analysis,Overview,nametutorial,
+Tutorial on Name Analysis}.
+
+@node LIGA
+@chapter New LIGA front-end
+The front-end of the Liga attribute evaluator generator has been 
+re-implemented. The main changes are:
+
+@itemize @bullet
+@item
+Old-style terminal attribution which had already been marked "outdated" 
+in the previous Eli versions has now been disabled.
+This means that specifications like
+@cindex outdated constructs
+@example
+ATTR c: int;
+
+RULE p: R ::= X COMPUTE
+  R.c = X.c;
+END;
+
+@end example
+
+where @code{X} is a terminal symbol now lead to an error message:
+
+@example
+"ERROR:  ERROR: A terminal has no attributes"
+
+@end example
+@cindex terminal attribute
+
+@item
+The key word NONTERM is no longer supported. It should be replaced by SYMBOL.
+@cindex NONTERM
+
+@item
+Improved error messages, e.g.
+
+@example
+"ERROR: Symbol does neither occur in syntax nor in symbol attribution"
+@end example
+
+becomes
+
+@example
+"ERROR: Symbol does not occur in rule or definition: IddDefScope"
+@end example
+
+@item
+New protocol feature of the new liga frontend.
+This protocol provides information about
+the compound liga input specification:
+@cindex liga protocol
+@cindex feInfo
+
+@itemize @minus
+@item tree and class symbols, their attributes and their inheritance relation
+@item rule attributes
+@item remote access constructs INCLUDING, CONSTITUENT, and CONSTITUENTS
+@item inheritance of computations
+@end itemize
+
+Invoke the liga frontend protocol generator by:
+
+@example
+   <yourspec>:feInfo:viewlist
+@end example
+
+@end itemize
+
+@node Index
+@unnumbered Index
+@printindex cp
+@contents
+@bye

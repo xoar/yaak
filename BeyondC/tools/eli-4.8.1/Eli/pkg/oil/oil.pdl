@@ -1,0 +1,8 @@
+/* $Id: oil.pdl,v 2.1 1995/12/08 04:31:17 waite Exp $ */
+/* Properties of Oil names */
+
+"oiladt2.h"
+
+OilType: tOilType;
+OilOp: tOilOp;
+OilClass: tOilClass;

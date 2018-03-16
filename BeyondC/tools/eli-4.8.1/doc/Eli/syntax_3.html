@@ -1,0 +1,480 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from syntax.tnf on 5 December 2013 -->
+
+<TITLE>Syntactic Analysis - How to Resolve Parsing Conflicts</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Syntactic Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC23" HREF="syntax_toc.html#SEC23">How to Resolve Parsing Conflicts</A></H1>
+<P>
+Eli attempts to construct a particular kind of parser
+from the context-free grammar specifying the desired phrase structure.
+If this attempt fails, Eli reports that failure by describing a set of
+<DFN>conflicts</DFN>.
+<A NAME="IDX78"></A>
+In order to understand what these conflicts mean, and to understand how
+they might be resolved, it is necessary to have a rudimentary idea of how
+the constructed parser determines the phrase structure of the input text.
+<P>
+A context-free grammar is said to be <DFN>ambiguous</DFN>
+<A NAME="IDX79"></A>
+if it permits more than one phrase structure to describe a single input text.
+Most conflicts are the result of such ambiguities, and
+there are three ways of resolving
+<A NAME="IDX80"></A>
+them:
+<P>
+<OL>
+<LI>
+Change the grammar so that only one phrase structure is possible.
+<P>
+<LI>
+Provide additional information that causes the parser to select one of the
+set of phrase structures.
+<P>
+<LI>
+Change the form of the input text to avoid the ambiguity.
+</OL>
+<P>
+Note that all of these methods result in the parser recognizing a different
+language than the one described by the original grammar.
+<P>
+<H2><A NAME="SEC24" HREF="syntax_toc.html#SEC24">How the generated parser determines phrase structure</A></H2>
+<P>
+The generated parser
+<A NAME="IDX81"></A>
+is a finite-state machine
+<A NAME="IDX82"></A>
+with a stack
+<A NAME="IDX83"></A>
+of states.
+<A NAME="IDX84"></A>
+This machine examines the input text from left to right, one basic symbol
+<A NAME="IDX86"></A>
+<A NAME="IDX85"></A>
+at a time.
+The current state of the machine is the one at the top of the stack.
+It defines the set of productions the parser might be recognizing,
+and its progress
+<A NAME="IDX87"></A>
+in recognizing each.
+For example, consider the following trivial grammar:
+<P>
+<PRE>
+Sentence: Expression.
+Expression: Primary.
+Expression: Expression '+' Primary.
+Primary: Integer.
+Primary: Id.
+</PRE>
+<P>
+Initially, the parser might be recognizing the first production, but in
+order to do so it must recognize either the second or the third.
+In order to recognize the second production, it must recognize either the
+fourth or fifth.
+Finally, because we are considering the initial situation, no progress has
+been made in recognizing any of these productions.
+All of the information expressed by this paragraph is represented by the
+initial state, which is the only element of the stack.
+<P>
+On the basis of the state at the top of the stack, and the basic symbol
+being examined, the machine decides on one of two moves:
+<A NAME="IDX88"></A>
+<P>
+<DL COMPACT>
+<A NAME="IDX89"></A>
+<DT><CODE>Shift</CODE>
+<DD>Accept the basic symbol as the corresponding terminal, push a new
+state onto the stack, and examine the next basic symbol.
+<P>
+<A NAME="IDX90"></A>
+<DT><CODE>Reduce</CODE>
+<DD>Note that a specific phrase has been recognized, remove a number of states
+equal to the number of symbols in the sequence of the corresponding
+production from the stack, push a new state onto the stack,
+and examine the current basic symbol again.
+</DL>
+<P>
+The parser halts
+<A NAME="IDX91"></A>
+after the reduce move noting that the production containing the axiom
+<A NAME="IDX92"></A>
+has been recognized.
+<P>
+If the first basic symbol of the text were an identifier,
+a parser for the sample grammar would make a shift move.
+The new state would be one in which the parser had completely recognized
+the fifth production.
+Regardless of the next basic symbol, the parser would then make a reduce
+move because the fifth production has been recognized.
+One state would be removed from the stack, and a new state pushed
+in which the the parser had completely recognized the second production.
+Again the parser would make a reduce move, removing one state from the
+stack and pushing a state in which the parser had either completely
+recognized the first production or recognized the first symbol of the
+third production.
+<P>
+The parser's next move is determined by the current input symbol.
+<A NAME="IDX94"></A>
+<A NAME="IDX93"></A>
+If the text is empty then the parser makes the reduce move noting that the
+first production has been recognized and halts.
+If the current symbol of the text is '+' then the parser makes a shift
+move.
+<P>
+A conflict occurs when the information available (the current state and the
+basic symbol being examined) does not allow the parser to make a unique
+decision.
+If either a shift or a reduce is possible,
+the conflict is a <DFN>shift-reduce conflict</DFN>;
+<A NAME="IDX95"></A>
+if more than one phrase could have been recognized,
+the conflict is a <DFN>reduce-reduce conflict</DFN>.
+<A NAME="IDX96"></A>
+<P>
+The classic example of a shift-reduce conflict
+<A NAME="IDX97"></A>
+is the so-called "dangling else problem":
+<A NAME="IDX98"></A>
+<P>
+<PRE>
+Statement: 'if' Expression 'then' Statement.
+Statement: 'if' Expression 'then' Statement 'else' Statement.
+</PRE>
+<P>
+A parser built from a grammar containing these productions will have at
+least one state in which it could be recognizing either, and has just
+completed recognition of the <CODE>Statement</CODE> following <CODE>then</CODE>.
+Suppose that the current basic symbol is <CODE>else</CODE>;
+what move should the parser make next?
+<P>
+Clearly it could shift, accepting the <CODE>else</CODE> and
+going to a state in which it is recognizing the second production and
+has just completed recognition of the <CODE>else</CODE>.
+It could also reduce, however, recognizing an instance of the first
+production, popping four elements from the stack and returning to the
+current state.
+Thus there is a shift-reduce conflict.
+<P>
+The conflict here is due to an ambiguity in the grammar.
+Consider the following input text (E1 and E2 are arbitrary expressions, S1
+and S2 are statements that do not contain <CODE>if</CODE>):
+<P>
+<PRE>
+if E1 then if E2 then S1 else S2
+</PRE>
+<P>
+There are two possible phrase structures for this text, depending on
+whether the <CODE>else</CODE> is assumed to belong with the first or second
+<CODE>if</CODE>:
+<P>
+<PRE>
+if E1 then {if E2 then S1} else S2
+if E1 then {if E2 then S1 else S2}
+</PRE>
+<P>
+In each case the bracketed sub-sequence is a <CODE>Statement</CODE>
+according to one of the given rules, and the entire line is a
+<CODE>Statement</CODE> according to the other.
+Both are perfectly legal phrase structures according to the grammar.
+<P>
+The following description of integer denotations in various bases
+leads to a reduce-reduce conflict:
+<A NAME="IDX99"></A>
+<P>
+<PRE>
+Denotation: Seq / Seq Base.
+Seq: Digit / Seq Next.
+Next: Digit / Hexit.
+Digit: '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'.
+Hexit: 'a' / 'b' / 'c' / 'd' / 'e' / 'f'.
+Base: 'b' / 'o' / 'e' / 'x'.
+</PRE>
+<P>
+When <CODE>Base</CODE> is omitted, the integer is assumed to be decimal if it
+contains no <CODE>Hexit</CODE> and hexadecimal otherwise.
+An explicit <CODE>Base</CODE> indicates the base of the digits to be 2, 8, 10 or 16
+respectively.
+<P>
+One of the states of the parser constructed from this grammar indicates
+that either the <CODE>Hexit</CODE> <CODE>b</CODE> or the <CODE>Base</CODE> <CODE>b</CODE> has been
+recognized.
+If the input is not empty then the parser has recognized a <CODE>Hexit</CODE>,
+but either is possible if the input is empty.
+Thus the parser cannot determine the production by which to reduce, and the
+conflict arises.
+<P>
+This conflict indicates an ambiguity in the grammar, exemplified by the
+input text "1b".
+Two phrase structures are possible, one yielding the value "1 base 2" and
+the other yielding the value "1b base 16".
+<P>
+<H2><A NAME="SEC25" HREF="syntax_toc.html#SEC25">Conflict resolution by changing the grammar</A></H2>
+<P>
+An ambiguity can sometimes be resolved by changing the grammar.
+<A NAME="IDX101"></A>
+<A NAME="IDX102"></A>
+<A NAME="IDX100"></A>
+The altered grammar must define exactly the same set of input texts as the
+grammar that gave rise to the conflict, but it cannot describe more than
+one phrase structure for any particular text.
+That phrase structure must reflect the meaning of the text as defined by
+the language design.
+<P>
+Most languages solve the dangling else problem
+<A NAME="IDX103"></A>
+by associating an <CODE>else</CODE> with the closest <CODE>if</CODE>.
+Here is an unambiguous grammar describing that phrase structure:
+<P>
+<PRE>
+Statement: matched / unmatched.
+matched:
+   'if' Expression 'then' matched 'else' matched /
+   Others.
+unmatched:
+   'if' Expression 'then' matched 'else' unmatched /
+   'if' Expression 'then' Statement.
+</PRE>
+<P>
+(<CODE>Others</CODE> stands for all sequences by which <CODE>Statement</CODE>
+could be replaced that contain no <CODE>if</CODE>.)
+<P>
+If the identifiers <CODE>Statement</CODE>, <CODE>matched</CODE> and <CODE>unmatched</CODE>
+are placed in an equivalence class, then this grammar yields exactly the
+same phrase structure as the ambiguous grammar given in the previous
+section.
+It is therefore acceptable as far as the remainder of the translation
+problem is concerned.
+<P>
+<H2><A NAME="SEC26" HREF="syntax_toc.html#SEC26">Conflict resolution by ignoring possible structures</A></H2>
+<P>
+When Eli is constructing a parser from a grammar,
+<A NAME="IDX104"></A>
+it computes a set of symbols called the <DFN>exact right context</DFN>
+<A NAME="IDX105"></A>
+for each production in each state.
+The exact right context of a production in a state contains all of the symbols
+that could follow the phrase associated with that production in that state.
+It is possible for the parser to reduce by a production if the current
+state indicates that all of the symbols in the production's sequence have
+been accepted, and the next basic symbol of the input is a member of the
+exact right context of that production in that state.
+<P>
+By adding a <DFN>modification</DFN>
+<A NAME="IDX107"></A>
+<A NAME="IDX108"></A>
+<A NAME="IDX109"></A>
+<A NAME="IDX106"></A>
+to the description of a production in a
+type-<TT>`con'</TT> file, the user can specify that a particular symbol be
+deleted from one or more exact right contexts.
+The user is, in effect, telling Eli that these symbols cannot follow the
+phrase associated with that production in that state.
+In other words, the parser is to ignore phrase structures in which the
+specified symbol follows the phrase.
+<P>
+A modification is a sequence consisting of either a dollar (<KBD>$</KBD>)
+<A NAME="IDX110"></A>
+or at-rate-of (<KBD>@</KBD>)
+<A NAME="IDX111"></A>
+followed by a terminal.
+<A NAME="IDX112"></A>
+It can be placed anywhere within a production, and more than one
+modification can appear in a single production.
+If a modification is introduced but no conflict is resolved thereby,
+an error is reported.
+<A NAME="IDX114"></A>
+<A NAME="IDX113"></A>
+<P>
+Suppose that a modification <CODE>$S</CODE> is introduced into a production
+<CODE>P</CODE>.
+The effect of this modification is to delete the symbol <CODE>S</CODE> from the
+exact right context of production <CODE>P</CODE>.
+This kind of modification can be used to solve the dangling else problem:
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+<A NAME="IDX115"></A>
+<P>
+<PRE>
+Statement: 'if' Expression 'then' Statement $'else'.
+Statement: 'if' Expression 'then' Statement 'else' Statement.
+</PRE>
+<P>
+The modification introduced into the first production removes <CODE>else</CODE> from
+the exact right context of that production, and therefore makes a reduce
+move impossible for the parser when it is in the state indicating that it
+is recognizing one of these productions and has just recognized the first
+<CODE>Statement</CODE>.
+Since the reduce move is impossible, there is no shift-reduce conflict.
+<P>
+Suppose that a modification <CODE>@S</CODE> is introduced into a production
+<CODE>P</CODE>.
+The effect of this modification is to delete the symbol <CODE>S</CODE> from the
+exact right context of any production involved in a reduce-reduce conflict
+with production <CODE>P</CODE>.
+This kind of modification can be used to solve the integer denotation
+problem:
+<A NAME="IDX119"></A>
+<A NAME="IDX118"></A>
+<P>
+<PRE>
+Denotation: Seq / Seq Base.
+Seq: Digit / Seq Next.
+Next: Digit / Hexit.
+Digit: '0' / '1' / '2' / '3' / '4' / '5' / '6' / '7' / '8' / '9'.
+Hexit: 'a' / 'b' / 'c' / 'd' / 'e' / 'f'.
+Base: 'b' @EOF / 'o' / 'e' @EOF / 'x'.
+</PRE>
+<P>
+The two modifications introduced into the productions remove <CODE>EOF</CODE>
+<A NAME="IDX121"></A>
+<A NAME="IDX122"></A>
+<A NAME="IDX120"></A>
+(the empty input text) from the exact right contexts of the <CODE>Hexit</CODE>
+productions that conflict with these two <CODE>Base</CODE> productions, and
+therefore make it impossible to reduce the <CODE>Hexit</CODE> productions when
+the parser is in the state indicating it has completed recognizing either a
+<CODE>Hexit</CODE> or <CODE>Base</CODE> and the input is empty.
+A <KBD>b</KBD> or <KBD>e</KBD> at the end of an input text will thus always be
+interpreted as a marker: "1b" means "1 base 2", not "1b base 16".
+("1b base 16" would have to be written as "1bx".)
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

@@ -1,0 +1,64 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: FirstOcc.fw,v 3.6 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module determines whether a |NAME|FirstOcc of an object identified
+by its |NAME|FirstOcc.|KEY|Key is the first occurrence in left-to-right
+order. Then |NAME|FirstOcc.Is|NAME|FirstOcc is 1, otherwise 0.
+
+All |NAME|FirstOcc CLASS SYMBOLs must be in a subtree of |NAME|RangeFirstOcc.
+
+~O~<|NAME|FirstOcc.pdl~>~{
+|NAME|FirstOcc:	int [SetGet];
+~}
+
+~O~<|NAME|FirstOcc.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RangeFirstOcc END;
+
+CLASS SYMBOL |NAME|RangeFirstOcc:
+		Got|NAME|FirstOcc:	VOID;
+
+CLASS SYMBOL |NAME|FirstOcc:
+		|KEY|Key:			DefTableKey,
+		Is|NAME|FirstOcc:	int;
+
+CHAIN _|NAME|FirstOcc:	VOID;
+
+CLASS SYMBOL |NAME|RangeFirstOcc COMPUTE
+  CHAINSTART HEAD._|NAME|FirstOcc = "yes";
+  SYNT.Got|NAME|FirstOcc = TAIL._|NAME|FirstOcc;
+END;
+
+CLASS SYMBOL |NAME|FirstOcc	COMPUTE
+  SYNT.Is|NAME|FirstOcc =
+	SetGet|NAME|FirstOcc (THIS.|KEY|Key, 1, 0)
+	DEPENDS_ON THIS._|NAME|FirstOcc;
+  THIS._|NAME|FirstOcc = SYNT.Is|NAME|FirstOcc;
+END;
+~}
+
+~O~<|NAME|FirstOcc.specs~>~{
+$/Prop/PropLib.fw
+~}

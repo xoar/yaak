@@ -1,0 +1,888 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+~! $Id: BuCLike.fw,v 4.9 2008/08/22 12:35:23 peter Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+~t vskip 40 mm
+~t title titlefont centre "Tutorial on Name Analysis"
+~t vskip 20 mm
+
+This tutorial introduces to the solution of the name analysis
+task in language implementation. It demonstrates many aspects of
+that task which occur in programming languages or special purpose
+languages. They are developed from basic ones, such as nested scopes,
+up to more complex ones, such as classes with multiple inheritance.
+
+
+This tutorial may be used as a practical introduction to the
+specification techniques for name analysis, or as a source of
+examples that show how to solve certain problems, or as a source of
+hints for language design.
+
+This file is an executable specification. An analyzer for a small
+artificial language can be generated from it. The language is
+kept small by restricting it to those constructs necessary to
+demonstrate the name analysis task, not regarding its usability
+for programming. Its notation is inspired by Pascal,
+although the name analysis rules are not taken from Pascal.
+The generated analyzer produces output that reports the result of
+name analysis, i. e. the binding of identifier occurrences.
+
+The explanations in this tutorial assume that the reader is familiar
+with the use of the Eli system, with the use of its module library,
+and knows the general description of the name analysis task
+in the documentation of the module library,
+see @ref{top, , Name Analysis, name, Specification Module Library: Name-Analysis}.
+
+This tutorial is available in three variants that differ in the
+basic underlying scope rules, C-like or Algol-like.
+The third variant is based on C-like scope rules; its computations
+are executed while the input is read.
+The specifications differ only in which library modules being
+used, and, in a few places, where they are applied.
+This variant of the tutorial shows the
+C-like
+scope rules.
+
+Furthermore, we assume that the application requires
+the name analysis task to be executed interleaved with processing
+the input. That may be necessary because its results may
+influence further reading of input, or results are to be
+presented to the user while typing the input.
+
+Hence, in some contexts some computations are to be executed 
+immediately, i.e. before the rest of the input is read and before
+tree is completed. Such computations a marked @code{BOTTOMUP}.
+The system tries to arrange them such that they are
+executed already when their context node is constructed.
+
+
+~A~<Kernel Grammar~>
+
+The kernel grammar of the example language specifies the structure
+for @code{Program}, @code{Block} consisting of @code{Declarations}
+and @code{Statements}, and trivial @code{Expressions}.
+Different forms of @code{Declarations}, @code{Statements},
+and @code{Expressions} are added to the grammar as the
+name analysis task is further refined.
+
+Contexts like @code{Block} usually need computations which
+conceptually belong to this symbol, but have to be executed
+before the @code{Block} subtree is completed. For that purpose
+we have to modify the concrete grammar by inserting a new
+symbol, here @code{BuBlock}, that precedes @code{Block} in
+a production. It carries the early to be executed computations
+and derives to nothing.
+
+~O~<Core.con~>~{
+Program:	Source.
+
+Source:		BuBlock Block.
+BuBlock:	.
+Block:		Compound.
+Compound:	'begin' Declaration* Statement* 'end'.
+
+
+Statement:	Expression ';'.
+Expression:	Operand.
+Operand:	IntNumber.
+~}
+
+@code{Expressions} and @code{Operands} are represented by
+@code{Expression} contexts in the tree grammar.
+
+~O~<Core.sym~>~{
+Expression ::= Operand.
+~}
+
+The notation of identifiers and numbers is chosen as in Pascal.
+
+~O~<Core.gla~>~{
+Ident:		PASCAL_IDENTIFIER
+IntNumber:	PASCAL_INTEGER
+		PASCAL_COMMENT
+~}
+
+In the course of refining the name analysis task we will introduce
+several different contexts for identifier occurrences.
+Each occurrence has to have the attribute @code{Sym} representing
+the identifier encoding. Hence we specify a computational role
+@code{IdentOcc} that provides that attribute, and will be inherited
+by any identifier occurrence.
+
+~O~<Core.lido~>~{
+TERM Ident: int;
+ATTR Sym: int;
+CLASS SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+~}
+
+~A~<Basic Scope Rules~>
+
+In many cases of name analysis the language distinguishes between
+defining occurrences of identifiers in declaration and applied
+occurrences in expressions (an example with only one kind of identifier
+occurrence is shown below).
+Hence, we extend our kernel grammar by @code{DefIdent} for
+defining occurrences of identifiers and @code{UseIdent}
+for applied occurrences, and by @code{Declarations}
+that introduce names for values.
+An @code{Expression} can be an applied identifier occurrence.
+
+Furthermore we introduce nested @code{Block}s by deriving them from
+@code{Expressions}, and hence also from @code{Statements}.
+
+The @code{Block} in the production for @code{Expression} is preceded
+by a @code{BuBlock}, due to the same reason as explained above.
+
+~O~<CoreScope.con~>~{
+Declaration:	'val' ValDecls ';'.
+ValDecls:	ValDecl // ','.
+ValDecl:	DefIdent '=' Expression.
+Expression:	BuBlock Block.
+Operand:	UseIdent.
+
+DefIdent:	Ident.
+UseIdent:	Ident.
+~}
+
+The basic task of name analysis is consistent renaming.
+For each identifier occurrence a @code{Key} attribute is computed such
+that identifier occurrences that refer to the same object in the program have
+the same @code{Key} attribute value. Hence @code{Key}s identify
+program objects uniquely. @code{Key}s are used to associate properties
+with program objects and to retrieve those properties in different
+contexts.
+
+The scope rules of a language determine how identifier occurrences
+are bound to program objects.
+The basic C-like scope rule reads:
+
+@quotation
+A definition of an identifier @code{a} is valid in from the definition
+up to the end of the smallest range that encloses that definition,
+except from a definition of @code{a} in an inner range up to the
+end of that inner range.
+@end quotation
+
+Hence, a definition in an outer range is hidden by a definition
+of the same identifier in an inner range from the inner definition
+up to the end of the inner range.
+Identifiers may not be applied before they are defined.
+
+We instantiate a library module that provides computations
+according to this scope rule:
+
+~O~<CoreScope.specs~>~{
+$/Name/BuScope.gnrc:inst
+~}
+
+The computational roles @code{RangeScope},
+@code{IdDefScope}, and @code{IdUseEnv} are associated with the corresponding
+symbols of our grammar.
+
+The computations related to a range create a new scope and open
+it for binding identifiers. 
+In the bottom-up case they do not belong to the @code{RangeScope}.
+They are made effective by associating the roles @code{CreateNewScope}
+and @code{OpenNewScope} to the symbol @code{BuBlock} introduced
+for that purpose.
+
+~O~<CoreScope.lido~>~{
+SYMBOL Block	INHERITS RangeScope END;
+SYMBOL BuBlock	INHERITS CreateNewScope, OpenNewScope END;
+
+SYMBOL DefIdent	INHERITS IdDefScope, IdentOcc END;
+SYMBOL UseIdent	INHERITS IdUseEnv, IdentOcc END;
+~}
+
+As a result attributes @code{DefIdent.Key} and @code{UseIdent.Key}
+are computed according to the scope rules.
+
+~A~<Produce Output of Identifier binding~>
+
+We want to test the name analysis of our compiler.
+For that purpose we instantiate a library module that provides
+computations which report the results of name analysis.
+It is instantiated in the same way as the basic
+name analysis module:
+
+~O~<NameTest.specs~>~{
+$/Name/ShowBinding.gnrc:inst
+~}
+
+As a result the generated compiler will produce a line
+for every identifier occurrence like
+@example
+m in line 23 bound in line 4 of scope in line 3
+@end example
+
+~A~<Messages on Scope Rule Violations~>
+
+Erroneous programs may violate the scope rules in one of two
+cases:
+
+A particular applied identifier occurrence has no valid defining 
+identifier occurrence.
+
+An identifier in a range may have more one defining occurrences.
+
+Such situations shall be indicated by error messages.
+Furthermore, we want every defining occurrence of a multiply
+defined identifier to be marked by a message.
+It is clear that such messages can not be given immediately
+while the input is read.
+
+For that purpose we use the following two library modules:
+
+~O~<CoreChk.specs~>~{
+$/Tech/Strings.specs
+$/Prop/OccCnt.gnrc:inst
+~}
+
+The @code{Strings} module provides a function that concatenates
+a error message string and an identifier in case of error messages
+related to identifiers,
+see @ref{Strings, , String Concatenation, problems, Specification Module Library: Common Problems}.
+
+The @code{OccCnt} module provides computations that count how
+often an object identified by a @code{Key} attribute occurs
+in a certain context, in our case in a defining context.
+@xref{OccCnt, , Count Occurrences of Objects, prop, Specification Module Library: Properties of Definitions}, for more information.
+
+The check for existence of a definition is directly obtained from
+the module role @code{ChkIdUse}. 
+For the second check we specify a computational role
+@code{ChkUnique} in order to reuse it for several grammar symbols.
+If an object occurs more than once in the @code{ChkUnique}
+context it is multiply defined.
+
+~O~<CoreChk.lido~>~{
+SYMBOL ChkUnique INHERITS Count, TotalCnt COMPUTE
+  IF (GT (THIS.TotalCnt, 1),
+  message (ERROR, CatStrInd ("identifier is multiply defined: ", 
+			     THIS.Sym),
+           0, COORDREF));
+END;
+
+SYMBOL UseIdent INHERITS ChkIdUse END;
+SYMBOL DefIdent	INHERITS ChkUnique END;
+~}
+
+~A~<Predefined Identifiers~>
+
+Almost all languages have certain identifiers being predefined
+for any program. This facility is demonstrated by introducing
+typed variable declarations to our language:
+
+~O~<Predef.con~>~{
+Declaration:	'var' VarDecls ';'.
+VarDecls:	VarDecl // ','.
+VarDecl:	TypeUseIdent DefIdent.
+TypeUseIdent:	Ident.
+~}
+
+The type of a declared variable is given by a @code{TypeUseIdent}.
+A @code{TypeUseIdent} has the same computational roles which we 
+associated with
+applied identifier occurrences, except that it is not checked for
+being defined since we assume that only predefined type
+identifiers are used:
+
+~O~<Predef.lido~>~{
+SYMBOL TypeUseIdent INHERITS IdUseEnv, IdentOcc END;
+~}
+
+The technique for predefining identifiers is provided by the
+library modules @code{PreDefine} and @code{PreDefId}, see
+see @xref{Predefined Identifiers, , Predefined Identifiers, name, Specification Module Library: Name Analysis}.
+@code{PreDefine} is instantiated with the @code{Ident} symbol
+name as generic parameter.
+@code{PreDefId} is instantiated with the file name @code{Predef.d}.
+That file contains a sequence of macro calls, like
+@code{PreDefKey ("int", intKey)}.
+Each introduces a string and the name of a key.
+The identifier is then bound to that key 
+in the outermost environment of each program.
+Those @code{Keys} could be used in computations, e.g. for type checking
+(We do not make use of this facility here.)
+
+~O~<Predef.specs~>~{
+$/Name/PreDefine.gnrc+referto=Ident:inst
+$/Name/PreDefId.gnrc+referto=(Predef.d):inst
+~}
+
+~O~<Predef.d~>~{
+PreDefKey ("int", intKey)
+PreDefKey ("real", realKey)
+PreDefKey ("bool", boolKey)
+PreDefKey ("true", trueKey)
+PreDefKey ("false", falseKey)
+~}
+
+~A~<Joined Ranges~>
+
+In our language subtrees rooted by a @code{Block} symbol 
+exactly cover a range of the program in the sense of the
+scope rules. Hence, we could simply associate the role
+@code{RangeScope} with @code{Block} above.
+
+However, there are situations where a range in the sense of the
+scope rules extends over several subtrees, but their common
+root can not be taken as the scope range.
+Such a situation occurs for example in Pascal, where
+the formal parameter list of a procedure and the
+procedure body form a single range.
+
+The @code{join} statement below demonstrates such a situation.
+It consists of two blocks which together shall form one
+range in the sense of the scope rules.
+I. e. any definition of the first block is also valid in the second.
+But the identifier after the @code{join} symbol is defined in the
+enclosing range.
+
+~O~<Join.con~>~{
+Statement:	Join.
+Join:		'join' BuJoin DefIdent
+			BuJoined Block BuJoined Block
+		'joined' ';'.
+BuJoin:		.
+BuJoined:	.
+~}
+
+We could modify the grammar in order to get a single symbol
+representing that range. But that may not be desirable
+due to parsing reasons. The problem is solved by the following
+technique:
+
+A symbol, here @code{Join}, is identified such that it contains both
+ranges. It has the module role @code{RangeSequence}, which does
+not constitute a range in the sense of scope rules.
+Hence the @code{DefIdent} belongs to a range that encloses
+the statement.
+
+The two @code{Blocks} below the @code{Join} symbol then form
+a range in the sense of scope rules.
+
+The symbols @code{BuJoin} and @code{BuJoined} are introduced
+to carry particular operations in the bottom-up computation
+order. @code{BuJoin} precedes a sequence of related ranges,
+@code{BuJoined} precedes each component range.
+
+The following library module provides additional roles for
+such related ranges:
+
+~O~<Join.specs~>~{
+$/Name/BuRangeSeq.gnrc:inst
+~}
+
+The role @code{RangeSequence} characterizes a symbol above all
+component ranges. It is not a range in the sense of scope rules.
+@code{OpenSeqScope} is inherited by the symbol preceding it.
+Each component range is preceded by a symbol that inherits
+the role @code{OpenElemScope}.
+
+~O~<Join.lido~>~{
+RULE: Join ::= 'join' BuJoin DefIdent
+			BuJoined Block BuJoined Block
+               'joined' ';'
+END;
+
+SYMBOL Join INHERITS RangeSequence END;
+SYMBOL BuJoin INHERITS OpenSeqScope END;
+SYMBOL BuJoined INHERITS OpenElemScope END;
+~}
+
+
+~A~<A Second Name Space~>
+
+The scope rules of some languages define several distinct
+name spaces, i.e. the identifier occurrences in one
+name space do not affect bindings in another name space.
+In C for example variable identifiers and label identifiers
+belong to different name spaces.
+
+We demonstrate that aspect by introducing a special kind
+of variable to our language. Such variables are set by a special
+statement, and accessed by special operands. Hence,
+the identifier occurrences are syntactically distinguished from
+identifier occurrences of the name space used so far.
+
+~O~<Flat.con~>~{
+Statement:	'set' CtrlVarUse 'to' Expression ';'.
+Operand:	'use' CtrlVarUse.
+CtrlVarUse:	Ident.
+~}
+
+We use another instantiation of the scope rule library module
+to specify the scope rules for the second name space:
+
+~O~<Flat.specs~>~{
+$/Name/BuScope.gnrc+instance=CtrlVar:inst
+~}
+
+The @code{instance} parameter is set to @code{CtrlVar}
+to distinguish the module instance from the one for the
+first name space.
+
+We demonstrate another variant of scope rules for our
+new @code{CtrlVar} name space:
+There is no nesting of ranges, i.e. the @code{Program}
+is the only range of a flat name space. Furthermore,
+identifiers are implicitly defined by using them.
+Hence, there is only one kind of identifier occurrences.
+It has the role of a defining occurrence (@code{CtrlVarIdDefScope}),
+i.e. a new object key is created, if the identifier
+is not yet bound.
+
+~O~<Flat.lido~>~{
+SYMBOL Source  INHERITS CtrlVarRangeScope END;
+SYMBOL CtrlVarUse INHERITS CtrlVarIdDefScope, IdentOcc END;
+~}
+
+Since we allow the use of @code{CtrlVar} before it is set,
+these scope rules can not be violated. Hence, we do not need
+any checks or messages.
+
+~A~<Scopes being Properties of Objects~>
+
+Certain language constructs require that a set of
+bindings, i.e. a scope is associated as a property of an object.
+We demonstrate this facility by introducing modules
+to our language:
+
+~O~<ScopeProp.con~>~{
+Declaration:	'module' ModDefIdent Block ';'.
+ModDefIdent:	Ident.
+Operand:	ModUseIdent '::' QualIdent.
+ModUseIdent:	Ident.
+QualIdent:	Ident.
+~}
+
+Any object @code{a} declared in the @code{ModBlock} of a module @code{m},
+but not in deeper nested @code{Blocks}, can be accessed
+by @code{m::a} wherever @code{m} is bound to that module.
+We say the identifier occurrence of @code{a} is qualified by @code{m}.
+
+A library module provides computational roles for scopes being
+associated with object keys:
+
+~O~<ScopeProp.specs~>~{
+$/Name/BuScopeProp.gnrc:inst
+~}
+
+The scope of the module body, with its local definitions,
+is associated as a property with the key representing the module.
+The computations for that purpose are to be associated to a
+symbol which precedes the @code{Block} symbol, @code{ModDefIdent}
+in this case. They are obtained by a combination of
+three roles of the library module,
+@code{CreateNewScope}, @code{OpenNewScope}, and @code{IdSetScopeProp}.
+The computation of @code{OpenPrecond} ensures that the module
+identifier is bound in the enclosing range before the new scope
+of the module range is opened.
+
+~O~<ScopePropDef.lido~>~{
+RULE: Declaration ::= 'module' ModDefIdent Block ';' END;
+
+SYMBOL ModDefIdent INHERITS
+	CreateNewScope, OpenNewScope, IdSetScopeProp,
+	ChkUnique, IdDefScope, IdentOcc
+COMPUTE
+  SYNT.OpenPrecond = SYNT.Key;
+END;
+~}
+
+In binding a qualified identifier occurrence, @code{QualIdent},
+the scope property associated with the @code{ModUseIdent.Key}
+is accessed, and the role @code{QualIdUse} is used for
+@code{QualIdent}.
+It requires that the scope property is made available by a computation
+@code{GetScopeProp} at the preceding @code{ModUseIdent} symbol.
+The attribute @code{ModUseIdent.ScopeKey} specifies the key
+the scope property is accessed from.
+
+We assume that @code{ModUseIdent} indeed has an associated scope.
+An error message is issued if that
+assumption is violated, e.g. in the case of a variable identifier.
+
+In addition, the roles used for applied identifier occurrences
+are associated.
+
+~O~<ScopePropUse.lido~>~{
+RULE: Expression ::= ModUseIdent '::' QualIdent END;
+
+SYMBOL ModUseIdent INHERITS
+	GetScopeProp, 
+	IdUseEnv, ChkIdUse, IdentOcc
+COMPUTE
+  SYNT.ScopeKey = SYNT.Key;
+
+  IF (AND (NE (THIS.Key, NoKey),
+	   EQ (GetScope (THIS.Key, NoEnv), NoEnv)),
+  message (FATAL, CatStrInd ("module or class identifier required: ",
+			      THIS.Sym), 0, COORDREF))
+  BOTTOMUP;
+END;
+
+SYMBOL QualIdent INHERITS
+	IdUseScopeProp, ChkIdUse, IdentOcc
+END;
+~}
+
+~A~<Insertion of Scopes into the Environment Hierarchy~>
+
+We now demonstrate
+how scopes obtained from object properties are inserted
+into the environment hierarchy given by the syntactically nested
+ranges. For this purpose we extend our module example.
+
+
+We introduce a @code{with} statement that allows 
+the components of a module to be used without qualification in the
+@code{WithBody}. (This construct is similar to the
+@code{with} statement in Pascal, where record variables
+are used instead of the module identifiers discussed here. It directly
+corresponds to the @code{use} construct in Ada.)
+
+~O~<ScopeInsert.con~>~{
+Statement:	'with' WithUseIdent 'do' WithBody.
+WithUseIdent:	Ident.
+WithBody:	Statement.
+~}
+
+The @code{WithBody} is a special kind of range:
+The scope rule for our @code{with} statement require
+that the scope of the module stated by the 
+@code{WithUseIdent}
+is inserted in the environment hierarchy between the
+scope of the @code{WithBody} and the environment
+formed by the range nest that encloses the @code{with} statement.
+I.e. a definition in a range enclosing the @code{with} statement
+may be hidden by a definition of the module; those definitions
+may be hidden within the @code{WithBody}. (In the case of our
+language the @code{WithBody} may not directly contain declarations,
+although deeper nested @code{Blocks} may contain such declarations.)
+
+We use another library module to support such embedding of
+environments
+(@pxref{Inheritance of Scopes, , Inheritance of Scopes, name, Specification Module Library: Name Analysis}):
+
+~O~<ScopeInsert.specs~>~{
+$/Name/BuInh.gnrc:inst
+~}
+
+The facility of inserting an environment obtained from a scope
+property of an object is provided by
+a combination of module roles which are associated to the
+preceding @code{WithUseIdent} symbol:
+@code{GetScopeProp}, @code{CreateNewScope}, 
+@code{InheritScope}, and @code{OpenNewScope}.
+
+~O~<ScopeInsert.lido~>~{
+RULE: Statement ::= 'with' WithUseIdent 'do' WithBody END;
+
+SYMBOL WithBody INHERITS RangeScope END;
+
+SYMBOL WithUseIdent INHERITS
+	GetScopeProp, CreateNewScope, 
+        InheritScope, ChkInherit, OpenNewScope,
+	IdUseEnv, ChkIdUse, IdentOcc
+COMPUTE
+  SYNT.ScopeKey = SYNT.Key;
+  SYNT.OuterScope = SYNT.ScopeProp;
+  SYNT.OpenPrecond = SYNT.Key;
+END;
+~}
+
+The attribute computations above further parameterize the module
+roles: The scope property is to be accessed from the
+@code{WithUseIdent.Key}; the inherited scope is the thus obtained
+scope property; the new scope may not be opened before the
+@code{WithUseIdent.Key} is bound in the enclosing environment.
+
+~A~<Classes with Multiple Inheritance~>
+
+Our previous examples of modules and @code{with} statements can
+be easily combined to demonstrate the scope rules for object
+oriented classes with multiple inheritance.
+
+To avoid confusion with the so far specified scope rules
+we introduce a new language construct for declaration
+of classes:
+
+~O~<Class.con~>~{
+Declaration:	'class' ClassDefIdent Inheritances BuClass Block ';'.
+ClassDefIdent:	Ident.
+BuClass:	.
+Inheritances:	Inheritance*.
+Inheritance:	':' InheritIdent.
+InheritIdent:	Ident.
+~}
+
+Applied identifier occurrences within the body of a class
+are bound to definitions of that range, or to definitions
+that are visible due to inheritances from other classes
+(or modules), or to definitions in the ranges that enclose
+the class declaration.
+
+Hence, the scopes obtained from inheritances are inserted
+into the environment hierarchy of the class body, as
+in the case of our @code{with} statements.
+
+Since classes that are used for inheritance may
+inherit from other classes, the inheritance relation must form
+a partial order. It must not be cyclic.
+A class @code{c1} may inherit from a class @code{c2} via
+several paths through the inheritance relation.
+
+That partial order governs hiding of definitions:
+A definition of an identifier @code{a} in the body of a class
+@code{c} hides definitions of @code{a} in any class directly
+or indirectly inherited by @code{c}.
+
+Hence, the scope property of a class is the scope of the
+class body embedded in the environment of the
+inheritance relation for that class.
+
+Wherever the class identifier is visible it can be used for
+qualified access, as introduced for modules:
+A qualified access @code{c::a} identifies an @code{a} defined
+in the body of class @code{c} or in a class inherited by @code{c}
+according to the inheritance relation.
+
+These scope rules are specified using the techniques of the
+last two examples:
+A class has a scope property, as a module has; and
+a class body inherits other scopes as our @code{with} statement
+does. In this case there may be multiple scopes to be
+inherited. 
+Hence, the @code{ClassBlock} combines the two roles
+@code{RangeScopeProp} and @code{RangeMulInh} of the library module.
+
+The module roles @code{CreateNewScope} and @code{IdSetScopeProp}
+create the scope for the class body and associate the the scope
+property to the key of the @code{ClassDefIdent}.
+At the symbol @code{BuClass} that scope is accessed,
+@code{RecentNewScope} and opened.
+
+~O~<Class.lido~>~{
+RULE: Declaration ::= 'class'
+                      ClassDefIdent Inheritances BuClass Block ';'
+END;
+
+SYMBOL ClassDefIdent INHERITS
+	CreateNewScope, IdSetScopeProp, 
+	ChkUnique, IdDefScope, IdentOcc
+END;
+
+SYMBOL BuClass INHERITS RecentNewScope, OpenNewScope END;
+~}
+
+The @code{Inheritances} affect the scope of the class body,
+like the @code{WithBody} in the example above.
+
+
+As there may be several @code{Inheritances} the attribute
+@code{Inheritances.ToEnv} is accessed from each.
+The @code{InheritIdent} has the role @code{InheritScope} provided
+by the library module for scope properties already used above.
+It adds each single inheritance to the inheritance relation
+of the class scope specified by @code{INCLUDING Inheritances.ToEnv}.
+
+The role @code{GetScopeProp} accesses the scope property of
+@code{InheritIdent.Key}; the role @code{InheritScope} inherits
+it to the previously created new scope.
+
+The role @code{InheritScope} yields an attribute @code{InheritOk}.
+It indicates whether the inheritance relation is not cyclic.
+It is checked by @code{ChkInherit}.
+
+~O~<ClassInherit.lido~>~{
+SYMBOL InheritIdent INHERITS
+	GetScopeProp, InheritScope, ChkInherit,
+	IdUseEnv, ChkIdUse, IdentOcc
+COMPUTE
+  SYNT.ScopeKey = SYNT.Key;
+  SYNT.OuterScope = SYNT.ScopeProp;
+
+  IF (AND (NOT (THIS.InheritOk), NE (THIS.Key, NoKey)),
+  message (FATAL, CatStrInd ("cyclic inheritance: ", THIS.Sym),
+	   0, COORDREF))
+  BOTTOMUP;
+END;
+~}
+
+It has also to be checked that the @code{InheritIdent} is bound
+to an object (class or module) that has a scope property.
+
+We now introduce an additional uniqueness requirement for inheritance:
+If an applied identifier occurrence is bound to a definition
+in an inherited environment there must not be a not hidden binding of 
+that identifier in another inherited environment.
+Such an alternative binding is checked by @code{ChkInhIdUse} for
+all @code{IdUseEnv} occurrences and by @code{ChkInhIdUseScopeProp}
+for all @code{QualIdUse} occurrences:
+
+~O~<UniqueInherit.lido~>~{
+SYMBOL UseIdent INHERITS ChkInhIdUse END;
+SYMBOL TypeUseIdent INHERITS ChkInhIdUse END;
+SYMBOL QualIdent INHERITS ChkInhIdUseScopeProp END;
+SYMBOL SelectIdent INHERITS ChkInhIdUseScopeProp END;
+~}
+
+~A~<Objects Having a Scope Type~>
+
+This example demonstrates a typical situation where the tasks
+of name analysis and type analysis are interleaved.
+Since type analysis is not the topic of this tutorial,
+we concentrate on one aspect where it affects name analysis.
+
+We extend our language by class variables. Such a variable
+is declared by @code{v : c} where @code{c} is a class identifier.
+The variable @code{v} is a structure that has the components
+declared for @code{c} and for the classes inherited by @code{c}.
+
+With this extension class declarations can be considered as declarations
+of type names which are used as type identifiers in variable declarations.
+
+In order to access the components of a class variable we introduce
+a selection construct, that is similar to the qualified access
+construct:
+
+~O~<ScopeType.con~>~{
+Operand:	ModVarUseIdent '.' SelectIdent.
+ModVarUseIdent:	Ident.
+SelectIdent:	Ident.
+~}
+
+We here specify a very simple version of type analysis:
+Types are represented by @code{DefTableKey}s.
+A property @code{TypeOf} associates a type with an object key:
+
+~O~<ScopeType.pdl~>~{
+TypeOf: DefTableKey;
+~}
+
+The following computational roles ensure that the @code{TypeOf}
+is also set and accessed in @code{BOTTOMUP} order.
+Contexts like those of variable declarations, @code{VarDecl}
+require the type of the @code{TypeUseIdent} be propagated
+to the right brother symbol @code{DefIdent}.
+In @code{BOTTOMUP} computations inherited attributes can not be used
+for such propagation. We use a global variable @code{_V_Type} instead
+for that purpose.
+
+~O~<TypeModule.lido~>~{
+ATTR Type: DefTableKey;
+
+CLASS SYMBOL TypeIdUse COMPUTE
+  T_Assign (_V_Type, THIS.Key) BOTTOMUP;
+END;
+
+CLASS SYMBOL SetType COMPUTE
+  ResetTypeOf (THIS.Key, _V_Type) BOTTOMUP;
+END;
+
+CLASS SYMBOL GetType COMPUTE
+  SYNT.Type = GetTypeOf (THIS.Key, NoKey) BOTTOMUP;
+END;
+~}
+
+That variable and the assignment operation for it is defined
+by the following C module:
+
+~O~<TypeModule.head~>~{
+#include "TypeModule.h"
+~}
+
+~O~<TypeModule.h~>~{
+#ifndef _TypeModule_h
+#define _TypeModule_h
+
+#include "envmod.h"
+extern DefTableKey _V_Type;
+#define T_Assign(l,r) (l) = (r)
+
+#endif
+~}
+
+~O~<TypeModule.c~>~{
+#include "TypeModule.h"
+DefTableKey _V_Type = NoKey;
+~}
+
+Usually the defining occurrences of identifiers, @code{DefIdent}
+in our language, are the contexts where the type of the
+object is specified. Hence they have the role of @code{SetType}.
+
+As we here are only interested in types of variables, we specify
+a default unknown type represented by @code{NoKey}.
+In variable declarations the type of the declared identifier
+is specified to be the key of the type identifier.
+
+In the context of applied identifier occurrences, @code{UseIdent},
+their type may be used for further analysis. They have the
+role @code{GetType}.
+
+~O~<ScopeType.lido~>~{
+SYMBOL DefIdent INHERITS SetType END;
+SYMBOL TypeUseIdent INHERITS TypeIdUse END;
+SYMBOL UseIdent INHERITS GetType END;
+~}
+
+The select construct combines the technique of using
+a scope property, as introduced for qualified access (@code{QualIdent}
+above), and type analysis:
+@code{SelectIdent} has the @code{IdUseScopeProp} role. The identifier
+is bound in the scope associated with the type of the variable
+identifier.
+The library module role @code{GetScopeProp} accesses that scope
+property from the @code{Type} attribute at the preceding 
+@code{ModVarUseIdent}.
+
+~O~<SelectType.lido~>~{
+RULE: Expression ::= ModVarUseIdent '.' SelectIdent END;
+
+SYMBOL ModVarUseIdent INHERITS
+	GetScopeProp, GetType,
+	IdUseEnv, ChkIdUse, IdentOcc
+COMPUTE
+  SYNT.ScopeKey = SYNT.Type;
+
+  IF (EQ (SYNT.ScopeProp, NoEnv),
+  message (FATAL, "module variable required for selection",
+	   0, COORDREF))
+  BOTTOMUP;
+END;
+
+SYMBOL SelectIdent INHERITS
+	IdUseScopeProp, ChkIdUse, IdentOcc
+END;
+~}
+
+Similar to previous examples we have to check that the type of the
+variable really allows selection.
+The precondition of the check guarantees that all scope properties are set.
+It is established by the library module.
+

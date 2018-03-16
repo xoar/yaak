@@ -1,0 +1,515 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from type.tnf on 5 December 2013 -->
+
+<TITLE>Type Analysis - Types, Operators, and Indications</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC2" HREF="type_toc.html#SEC2">Types, Operators, and Indications</A></H1>
+<P>
+A <EM>type</EM> characterizes a subset of values in the universe
+manipulated by the program,
+an <EM>operator</EM> defines an operation applied to operands of
+specified types to produce a result of a specific type, and
+an <EM>indication</EM> defines a set of operators.
+These three concepts form the basis for any type model.
+The designer must specify language-defined types, operators, and
+indications; it may also be possible for the user to provide additional
+specifications as part of a program
+(see  <A HREF="type_5.html#SEC19">User-Defined Types</A>).
+<P>
+Although language-defined types may be specified individually,
+they are usually introduced by language-defined operator specifications.
+These, along with language-defined indication specifications,
+are described in a language called <EM>OIL</EM>
+(see  <A HREF="oil_3.html#SEC8">OIL's Specification Language of Oil Reference Manual</A>).
+OIL text is written in a file whose name has the form <SAMP>`name'</SAMP><CODE>.oil</CODE>.
+<P>
+<H2><A NAME="SEC3" HREF="type_toc.html#SEC3">Language-defined types</A></H2>
+<A NAME="IDX1"></A>
+<A NAME="IDX2"></A>
+<A NAME="IDX3"></A>
+<P>
+Each type is represented by a unique definition table key whose
+<CODE>IsType</CODE> property has the value 1.
+Further properties of that key may be used to provide information about
+that particular type.
+<CODE>NoKey</CODE> represents an unknown or non-existent type.
+<P>
+Language-defined types like "integer" are represented by known keys
+(see  <A HREF="deftbl_3.html#SEC15">Initializations of Definition Table</A>).
+The known key name can be used directly in an attribute computation.
+For example, suppose that the designer chose <CODE>intType</CODE> as the name of
+the known key for the Java integer type.
+The following rule would then interpret the keyword <CODE>int</CODE> as
+denoting that type:
+<P>
+<PRE>
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+</PRE>
+<P>
+Language-defined types are sometimes denoted by pre-defined identifiers
+(as in Pascal) instead of keywords.
+This approach increases the complexity of the specification by introducing
+type identifiers
+(see  <A HREF="type_5.html#SEC21">Type identifiers</A>).
+It also allows a user to re-define the names of language-defined types as
+names of variables or parameters,
+making programs very hard to understand.
+We recommend that designers use keywords to denote language-defined types.
+<P>
+<H2><A NAME="SEC4" HREF="type_toc.html#SEC4">Language-defined operators</A></H2>
+<P>
+An operator has a fixed signature, and is represented by a unique
+definition table key.
+Properties of that key may be used to provide information about that
+particular operator.
+<CODE>NoKey</CODE> represents an unknown or non-existent operator.
+<A NAME="IDX4"></A>
+<A NAME="IDX5"></A>
+<P>
+The OIL statement <CODE>OPER <SAMP>`opr'</SAMP> <SAMP>`sig'</SAMP>;</CODE> defines
+the key and signature of an operator:
+<P>
+<DL COMPACT>
+<DT><SAMP>`opr'</SAMP>
+<DD>The name of the known definition table key representing the operator.
+Multiple operator definitions with the same value of <SAMP>`opr'</SAMP>
+are not allowed.
+<P>
+<DT><SAMP>`sig'</SAMP>
+<DD>The signature of the operator represented by <SAMP>`opr'</SAMP>.
+It consists of a parenthesized (possibly empty), comma-separated list of
+operand types followed by a colon and a return type.
+All of the types in the signature are automatically defined as known keys
+representing types; no further specification is required.
+</DL>
+Only one occurrence of the keyword <CODE>OPER</CODE> is required for a sequence
+of contiguous operator definitions:
+<P>
+<PRE>
+OPER
+  iAddOp (intType,intType):intType;
+  fAddOp (floatType,floatType):floatType;
+  iGtrOp (intType,intType):boolType;
+</PRE>
+<P>
+The known keys named <CODE>intType</CODE>, <CODE>floatType</CODE>, and <CODE>boolType</CODE>
+are defined by this specification,
+each with its <CODE>IsType</CODE> property set to 1.
+Known keys named <CODE>iAddOp</CODE>, <CODE>fAddOp</CODE>, and <CODE>iGtrOp</CODE> are also
+defined;
+no further specification of these names is necessary.
+<P>
+Often there are a number of language-defined operators sharing the same
+signature.
+A shorthand notation for describing such a situation allows the designer
+to provide a comma-separated list of operator names and write the shared
+signature only once:
+<P>
+<PRE>
+OPER
+  iAddOp,iSubOp,iMulOp,iDivOp (intType,intType):intType;
+  fAddOp,fSubOp,fMulOp,fDivOp (floatType,floatType):floatType;
+</PRE>
+<P>
+<H2><A NAME="SEC5" HREF="type_toc.html#SEC5">Language-defined indications</A></H2>
+<P>
+Each operator must belong to a set of operators associated with some
+indication, also represented by a unique definition table key.
+Properties of that key may be used to provide additional information about
+that indication.
+<CODE>NoKey</CODE> represents an unknown or non-existent indication.
+<A NAME="IDX6"></A>
+<A NAME="IDX7"></A>
+<P>
+The OIL statement <CODE>INDICATION <SAMP>`ind'</SAMP>: <SAMP>`list'</SAMP>;</CODE> defines
+a subset of the operators associated with an indication:
+<P>
+<DL COMPACT>
+<DT><SAMP>`ind'</SAMP>
+<DD>The known definition table key representing the indication.
+Multiple indication definitions with the same value of <SAMP>`ind'</SAMP>
+are allowed.
+In that case, the operator set associated with the indication is the union
+of the sets specified by the individual definitions.
+<P>
+<DT><SAMP>`list'</SAMP>
+<DD>A comma-separated list of operators in the indication's set.
+</DL>
+Only one occurrence of the keyword <CODE>INDICATION</CODE> is required
+for a sequence of contiguous indication definitions:
+<P>
+<PRE>
+INDICATION
+  PlusInd: iAddOp, fAddOp;
+  MinusInd: iSubOp, fSubOp;
+</PRE>
+<P>
+<H2><A NAME="SEC6" HREF="type_toc.html#SEC6">Language-defined coercibility</A></H2>
+<P>
+Language properties like the "usual arithmetic conversions"
+of C and the "widening conversions" of Java allow the compiler to
+accept an operand of one type as though it were a value of another type.  
+We use the relation <CODE>acceptableAs</CODE> on types to model these
+properties.
+<CODE>acceptableAs</CODE> is a partial order:
+<P>
+<DL COMPACT>
+<DT><EM>Reflexive</EM>
+<DD>(<SAMP>`T'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T'</SAMP>) for any type <SAMP>`T'</SAMP>
+<P>
+<DT><EM>Transitive</EM>
+<DD>(<SAMP>`T'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T1'</SAMP>) and
+(<SAMP>`T1'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T2'</SAMP>)
+for some types <SAMP>`T'</SAMP>, <SAMP>`T1'</SAMP>, and <SAMP>`T2'</SAMP>
+implies (<SAMP>`T'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T2'</SAMP>)
+<P>
+<DT><EM>Antisymmetric</EM>
+<DD>(<SAMP>`T'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T1'</SAMP>) and
+(<SAMP>`T1'</SAMP> <CODE>acceptableAs</CODE> <SAMP>`T'</SAMP>)
+implies <SAMP>`T'</SAMP> is identical to <SAMP>`T1'</SAMP>
+</DL>
+<P>
+To see why these properties are important, consider the following
+expression in C or Java (<CODE>s</CODE> is of type <CODE>short</CODE> and <CODE>f</CODE> is
+of type <CODE>float</CODE>):
+<P>
+<PRE>
+s + f
+</PRE>
+<P>
+Both C and Java allow implicit conversion of <CODE>short</CODE> to <CODE>int</CODE> and
+<CODE>int</CODE> to <CODE>float</CODE> in the context of an arithmetic operand.
+Thus a designer would specify (<CODE>short</CODE> <CODE>acceptableAs</CODE> <CODE>int</CODE>)
+and (<CODE>int</CODE> <CODE>acceptableAs</CODE> <CODE>float</CODE>) for C or Java.
+Transitivity guarantees that (<CODE>short</CODE> <CODE>acceptableAs</CODE> <CODE>float</CODE>),
+and reflexivity guarantees that (<CODE>float</CODE> <CODE>acceptableAs</CODE> <CODE>float</CODE>),
+so the operator <CODE>fAddOp</CODE> can be selected from the set associated
+with the indication <CODE>PlusInd</CODE> of the last section.
+<P>
+Suppose that (<CODE>float</CODE> <CODE>acceptableAs</CODE> <CODE>int</CODE>).
+In that case, the meaning of the expression is ambiguous.
+There is no way to decide whether to select the operator <CODE>iAddOp</CODE> or
+the operator <CODE>fAddOp</CODE> from <CODE>PlusInd</CODE>'s set.
+But because <CODE>acceptableAs</CODE> is antisymmetric,
+(<CODE>float</CODE> <CODE>acceptableAs</CODE> <CODE>int</CODE>) would imply that
+<CODE>int</CODE> and <CODE>float</CODE> were identical types.
+Thus the designer cannot specify
+(<CODE>float</CODE> <CODE>acceptableAs</CODE> <CODE>int</CODE>) for C or Java.
+<P>
+The <CODE>acceptableAs</CODE> relation is specified by defining <EM>coercion</EM>
+operators.
+<A NAME="IDX9"></A>
+<A NAME="IDX8"></A>
+The OIL statement <CODE>COERCION <SAMP>`opr'</SAMP> <SAMP>`sig'</SAMP>;</CODE> defines
+the key and signature of a coercion:
+<P>
+<DL COMPACT>
+<DT><SAMP>`opr'</SAMP>
+<DD>The name of the known definition table key representing the coercion operator.
+If <SAMP>`opr'</SAMP> is omitted, the OIL compiler will generate a unique name
+internally.
+Multiple coercion definitions with the same value of <SAMP>`opr'</SAMP>
+are not allowed.
+A coercion definition cannot have the same value of <SAMP>`opr'</SAMP> as an
+operator definition.
+<P>
+<DT><SAMP>`sig'</SAMP>
+<DD>The signature of the coercion operator represented by <SAMP>`opr'</SAMP>.
+It consists of a parenthesized operand type followed by a colon and
+a return type.
+Both types in the signature are automatically defined as known keys
+representing types; no further specification is required.
+</DL>
+Only one occurrence of the keyword <CODE>COERCION</CODE> is required for
+a sequence of contiguous coercion operator definitions:
+<P>
+<PRE>
+COERCION
+  sToi (shortType):intType;
+       (intType):floatType;
+</PRE>
+<P>
+This specification illustrates both named and anonymous coercions.
+Generally speaking, coercions need be named only if they are to be
+discussed in associated documentation or extracted to support further
+processing (such as the evaluation of constant expressions).
+<P>
+<H2><A NAME="SEC7" HREF="type_toc.html#SEC7">Reducing specification size</A></H2>
+<P>
+A full specification of language-defined operators often leads to a
+combinatorial explosion.
+In many applications the effects of this explosion on the written
+specification can be mitigated by avoiding unnecessary operator names.
+For example, the task of type analysis is to verify type correctness;
+the identity of the operator that models the type behavior at a specific
+node is normally irrelevant.
+<P>
+Language definitions avoid combinatorial explosions by giving names to sets
+of types and then defining properties of operations in terms of these sets
+rather than the individual elements.
+For example, the C definition describes operations on "arithmetic types"
+rather than describing those operations on integers and then again on
+floating-point values.
+OIL provides a notation for naming and manipulating sets of types that
+allows the designer to encode such language definitions directly.
+<P>
+The OIL statement <CODE>SET <SAMP>`name'</SAMP> = <SAMP>`expr'</SAMP> ;</CODE> defines a set of
+types:
+<P>
+<DL COMPACT>
+<DT><SAMP>`name'</SAMP>
+<DD>An identifier naming a set.
+Multiple sets with the same name are not allowed.
+<P>
+<DT><SAMP>`expr'</SAMP>
+<DD>An expression defining the types that are members of the set.
+There are five possible expression formats:
+<P>
+<DL COMPACT>
+<DT><CODE>[ <SAMP>`elements'</SAMP> ]</CODE>
+<DD>Each member of the comma-separated list <SAMP>`elements'</SAMP> is a known key
+representing a type.
+That type is an element of the value of this expression.
+There are no other elements.
+<P>
+<DT><SAMP>`name'</SAMP>
+<DD>The previously-defined set <SAMP>`name'</SAMP> is the value of this expression.
+<P>
+<DT><CODE><SAMP>`s1'</SAMP> + <SAMP>`s2'</SAMP></CODE>
+<DD>The value of this expression is the union of
+set <SAMP>`s1'</SAMP> and set <SAMP>`s2'</SAMP>.
+<P>
+<DT><CODE><SAMP>`s1'</SAMP> * <SAMP>`s2'</SAMP></CODE>
+<DD>The value of this expression is the intersection of
+set <SAMP>`s1'</SAMP> and set <SAMP>`s2'</SAMP>.
+<P>
+<DT><CODE><SAMP>`s1'</SAMP> - <SAMP>`s2'</SAMP></CODE>
+<DD>The value of this expression is the set of elements of <SAMP>`s1'</SAMP>
+that are not elements of <SAMP>`s2'</SAMP>.
+</DL>
+</DL>
+<P>
+Here are some definitions that mirror the C language standard:
+<P>
+<PRE>
+SET Signed_IntegerType =
+  [signed_charType, shortType, intType, longType];
+
+SET Unsigned_IntegerType =
+  [unsigned_charType, unsigned_shortType,
+   unsigned_intType,  unsigned_longType];
+
+SET FloatingType =
+  [floatType, doubleType, long_doubleType];
+
+SET IntegralType =
+  [charType] + Signed_IntegerType + Unsigned_IntegerType;
+
+SET ArithmeticType = IntegralType + FloatingType;
+
+SET ScalarType = ArithmeticType + [VoidPointerType];
+</PRE>
+<P>
+A specific context in a program will often require a value that can be of
+any type in a particular set.
+For example, the condition value in a C <CODE>if</CODE> statement or
+conditional expression can be of any scalar type.
+We model this situation by defining a "type" (<CODE>scalarType</CODE>, say) and
+making each scalar type acceptable as that type.
+The context can then require a value of <CODE>scalarType</CODE>, and any scalar
+type will be acceptable.
+<P>
+When a type set name is used in an <CODE>OPER</CODE> or <CODE>COERCION</CODE>
+signature, the result is a number of distinct operators.
+Each operator's signature is constructed by consistently substituting
+one element of the named type set for each instance of the type name.
+Thus every scalar type can be made acceptable as <CODE>scalarType</CODE> as
+follows:
+<P>
+<PRE>
+COERCION (ScalarType):scalarType;
+</PRE>
+<P>
+Similarly, signatures containing type set names can be used to reduce the
+number of specifications needed for operators.
+For example, consider the following specification:
+<P>
+<PRE>
+OPER ArithOp (ArithmeticType, ArithmeticType): ArithmeticType;
+</PRE>
+<P>
+It defines a set of 12 operators, each named by the known key
+<CODE>ArithOp</CODE>.
+Each operator has a distinct signature, one of which is
+<CODE>(charType,charType):charType</CODE>.
+That signature results from the consistent substitution of the
+<CODE>charType</CODE> element of <CODE>ArithmeticType</CODE> for the name of that set
+in the <CODE>OPER</CODE> statement's signature.
+<P>
+This set of 12 operators can be associated with an indication:
+<P>
+<PRE>
+INDICATION ArithInd: ArithOp;
+</PRE>
+<P>
+Because the same element of a type set is substituted for each instance
+of the name of that set in a signature, the only way to get all
+combinations of elements is to create another name for that set and use
+both names in the signature.
+For example, a value of any scalar type in C can be cast to any other
+scalar type:
+<P>
+<PRE>
+SET CastResult = ScalarType;
+OPER ScalarCast (ScalarType):CastResult;
+</PRE>
+<P>
+One of the operators named by the known key <CODE>ScalarCast</CODE> has the
+signature <CODE>(charType):floatType</CODE>.
+That signature results from substituting the <CODE>charType</CODE> element of
+<CODE>ScalarType</CODE> for the name of that set and the <CODE>floatType</CODE> element
+of <CODE>CastResult</CODE> for the name of that set.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

@@ -1,0 +1,30 @@
+# $Id: Makefile.in,v 1.4 2009/05/04 15:31:13 profw Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/pgs
+SRC	= pgs.dg parser.c eingabe.err StructConn pgs.dapto
+AUX	= pgsGen.sh.in Makefile.in Makefile version
+CMD	= pgsInfo.sh pgsGen.sh pgsGenErr.sh pgsOut.sh pgsConflict.sh
+EXE	= eingabe.exe analyse.exe pgs_optim.exe buildtab.exe
+SRCDIR	=
+AUXDIR	= src
+
+@toolmk_h@
+
+eingabe.exe:	src/eingabe.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+analyse.exe:	src/analyse.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+pgs_optim.exe:	src/pgs_optim.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+buildtab.exe:	src/buildtab.exe
+	@rm -f $@
+	@LINK@ $? $@

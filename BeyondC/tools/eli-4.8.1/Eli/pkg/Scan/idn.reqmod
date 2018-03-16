@@ -1,0 +1,6 @@
+/* $Id: idn.reqmod,v 1.7 2010/02/26 17:50:56 profw Exp $ */
+/* Modules needed by the unique identifier management module */
+
+idn.h
+idn.c
+idntbl.h

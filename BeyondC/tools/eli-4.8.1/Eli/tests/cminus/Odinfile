@@ -1,0 +1,9 @@
+# $Id: Odinfile,v 1.4 1996/03/31 14:46:04 waite Exp $
+
+%program == c--lint.specs +parser=cola +monitor :exe
+%source == c--lint.specs +monitor :source
+
+%results == input +cmd=(%program) :stdout
+%warnings == %results :warning
+%diffcmd == . +cmd=diff (%results) (result) :run
+%test ! == %diffcmd

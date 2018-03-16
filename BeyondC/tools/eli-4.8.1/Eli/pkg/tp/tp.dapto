@@ -1,0 +1,37 @@
+/* $Id: tp.dapto,v 1.1 2000/08/21 04:49:00 waite Exp $
+ * Copyright 2000, The Regents of the University of Colorado
+ * 
+ * This file is part of the Eli translator construction system.
+ * 
+ * Eli is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2, or (at your option) any later
+ * version.
+ * 
+ * Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with Eli; see the file COPYING.  If not, write to the Free Software
+ * Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+aspect tp;
+
+"tp_gen.h"
+
+operation get_tp_node
+  "Return the description of a tree parser node"
+  (TPNode node "The relevant node") : str
+{ int arity;
+  TPNode p;
+  DAPTO_RESULT_STR(TP_opname[TP_op_label(node)]);
+  arity = TP_arity[TP_op_label(node)];
+  DAPTO_RESULT_INT(arity);
+  if (arity > 0) { p = TP_child(node, 0); DAPTO_RESULTTPNode(p); }
+  if (arity > 1) { p = TP_child(node, 1); DAPTO_RESULTTPNode(p); }
+}
+
+end;

@@ -1,0 +1,461 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from tp.tnf on 5 December 2013 -->
+
+<TITLE>Tree Parsing - The Tree Patterns</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tree Parsing</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC5" HREF="tp_toc.html#SEC5">The Tree Patterns</A></H1>
+<P>
+The tree patterns describe a set of derivations for trees.
+They are based on the
+<A NAME="IDX16"></A>
+ranked alphabet of symbols represented by tree nodes
+and also on a finite set of
+<A NAME="IDX17"></A>
+<DFN>nonterminals</DFN>.
+The ranked alphabet and the set of nonterminals are disjoint.
+<P>
+Each nonterminal represents a relevant interpretation of a node.
+For example, if the tree parser was intended to select machine instructions
+to implement expression evaluation, the nonterminal <CODE>IntReg</CODE> might be
+used to represent the interpretation "an integer value in a register".
+A derivation could interpret either a leaf describing an integer constant
+or a node describing an addition operation in that way.
+Another derivation could interpret the same addition node as
+"a floating-point value in a register" (possibly represented by the
+nonterminal <CODE>FltReg</CODE>).
+<P>
+Each rule characterizes a context in which a specific action is to be
+performed.
+For code selection there might be one rule characterizing an integer addition
+instruction and another characterizing a floating-point addition
+instruction.
+An integer addition instruction that required both of its operands to be in
+registers and delivered its result to a register would be characterized by
+a rule involving only <CODE>IntReg</CODE> nonterminals.
+<P>
+Most rules characterize contexts consisting of single
+tree nodes.
+Some contexts, however, do not involve any tree nodes at all.
+Suppose that a node is interpreted as leaving an integer value in a
+register, and there is an instruction that converts an integer value in a
+register to a floating-point value in a register.
+If the original node is the child of a node demanding a floating-point
+value in a register, the tree parser can supply the implied conversion
+instruction by using the rule characterizing its context in the
+derivation.
+<P>
+It is also possible to write a rule characterizing a context consisting of
+several nodes.
+Some machines have complex addressing functions that involve summing the
+contents of two registers and a constant and then accessing a value at the
+resulting address.
+In this case, a single rule with a pattern containing two
+addition operations and placing appropriate interpretations on the operands
+would characterize the context in which the addressing function action was
+performed.
+<P>
+The set of patterns is generally ambiguous.
+In order to disambiguate them, each rule has an associated
+<A NAME="IDX18"></A>
+<DFN>cost</DFN>.
+Costs are non-negative integer values, and default to 1 if left
+unspecified.
+The tree parser selects the derivation having the lowest total cost.
+We will ignore the cost in this chapter
+(see  <A HREF="tp_4.html#SEC13">Summary of the Specification Language</A>).
+<P>
+<A NAME="IDX19"></A>
+<H2><A NAME="SEC6" HREF="tp_toc.html#SEC6">Rules Describing Tree Nodes</A></H2>
+<P>
+A rule describing a single tree node has the following general form:
+<P>
+<PRE>
+N0 ::= s(Ni,aj)
+</PRE>
+Here <CODE>N0</CODE> is a nonterminal,
+<CODE>s</CODE> an element of the ranked alphabet,
+<CODE>Ni</CODE> a (possibly empty) list of nonterminals,
+and <CODE>aj</CODE> a (possibly empty) list of attribute types.
+If one of <CODE>Ni</CODE> and <CODE>aj</CODE> is empty then the comma separating them
+is omitted; if both are empty both the comma and parentheses are omitted.
+<P>
+Recall that trees describing simple arithmetic expressions could be based
+upon the following ranked alphabet:
+<P>
+<PRE>
+IntegerVal   FloatingVal   IntegerVar   FloatingVar
+Negative
+Plus         Minus         Star         Slash
+</PRE>
+Suppose that the tree parser is to select machine instructions that
+evaluate the expression described by the tree being parsed.
+Assume that the target machine has a simple RISC architecture, in which all
+operands must be loaded into registers and every operation leaves its
+result in a register.
+<P>
+One context relevant to instruction selection is that of an <CODE>IntegerVal</CODE>
+leaf.
+This context corresponds to the selection of an instruction to load an
+integer constant operand into a register.
+It could be characterized by the following rule:
+<P>
+<PRE>
+IntReg ::= IntegerVal(int)
+</PRE>
+<P>
+This rule describes a single node, and has the form <CODE>N0 ::= s(a1)</CODE>.
+<CODE>N0</CODE> is the nonterminal <CODE>IntReg</CODE>, which places the interpretation
+"an integer value in a register" on the node.
+<CODE>IntegerVal</CODE> is the element <CODE>s</CODE> of the ranked alphabet.
+Since <CODE>IntegerVal</CODE> has arity 0, no nonterminals may appear between the
+parentheses.
+As discussed above (see  <A HREF="tp_1.html#SEC3">Decorating Nodes</A>), the leaf has
+a single associated attribute to specify the value it represents.
+This value is a string table index of type <CODE>int</CODE>,
+so the rule contains the type identifier <CODE>int</CODE>.
+<P>
+Another context related to instruction selection is that of a <CODE>Plus</CODE>
+node.
+This context corresponds to the selection of an instruction to add the
+contents of two registers, leaving the result in a register.
+It could be characterized by the following rule:
+<P>
+<PRE>
+IntReg ::= Plus(IntReg,IntReg)
+</PRE>
+<P>
+This rule describes a single node, and has the form <CODE>N0 ::= s(N1,N2)</CODE>.
+<CODE>N0</CODE> is the nonterminal <CODE>IntReg</CODE>, which places the interpretation
+"an integer value in a register" on the node.
+<CODE>Plus</CODE> is the element <CODE>s</CODE> of the ranked alphabet.
+Since <CODE>Plus</CODE> has arity 2, two nonterminals must appear between the
+parentheses.
+<CODE>IntReg</CODE> is the appropriate nonterminal in this case, because it
+places the interpretation "an integer value in a register" on both
+children and the machine's integer addition instruction requires both of its
+operands in registers.
+<P>
+If the target machine had floating-point operations as well as integer
+operations, a complete set of rules characterizing the relevant contexts
+in trees describing simple arithmetic expressions might be:
+<P>
+<PRE>
+IntReg ::= IntegerVal(int)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= Negative(IntReg)
+IntReg ::= Plus(IntReg,IntReg)
+IntReg ::= Minus(IntReg,IntReg)
+IntReg ::= Star(IntReg,IntReg)
+IntReg ::= Slash(IntReg,IntReg)
+
+FltReg ::= FloatingVal(int)
+FltReg ::= FloatingVar(DefTableKey)
+FltReg ::= Negative(FltReg)
+FltReg ::= Plus(FltReg,FltReg)
+FltReg ::= Minus(FltReg,FltReg)
+FltReg ::= Star(FltReg,FltReg)
+FltReg ::= Slash(FltReg,FltReg)
+</PRE>
+<P>
+It is important to remember that the tree to be parsed involves only the
+nodes representing the symbols of the ranked alphabet
+(<CODE>IntegerVal</CODE>, <CODE>Plus</CODE>, etc.)
+The tree parser constructs a derivation of that tree in terms of the
+tree patterns.
+That derivation consists of applications of the rules,
+and those rules must be applied consistently with respect to
+the nonterminals.
+For example, recall the tree describing <SAMP>`k-3'</SAMP>:
+<P>
+<DL COMPACT>
+<DT><SAMP>`k-3'</SAMP>
+<DD><CODE>Minus(IntegerVar,IntegerVal)</CODE>
+</DL>
+<P>
+This tree could be derived by applying the following rules:
+<P>
+<PRE>
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= IntegerVal(int)
+IntReg ::= Minus(IntReg,IntReg)
+</PRE>
+<P>
+<A NAME="IDX20"></A>
+<H2><A NAME="SEC7" HREF="tp_toc.html#SEC7">Chain Rules</A></H2>
+<P>
+A chain rule has the following general form:
+<P>
+<PRE>
+N0 ::= N1
+</PRE>
+<P>
+Here <CODE>N0</CODE> and <CODE>N1</CODE> are both nonterminals.
+<P>
+A chain rule is used in the derivation of a tree when the interpretation
+of a node differs from the interpretation required by its parent.
+It does not describe any tree node, but simply indicates that the
+difference in interpretations is allowed.
+<P>
+The patterns in the last section
+(see  <A HREF="tp_2.html#SEC6">Rules Describing Tree Nodes</A>)
+cannot derive the tree for the expression <SAMP>`k-2.3'</SAMP>:
+<P>
+<PRE>
+IntReg ::= IntegerVar(DefTableKey)
+FltReg ::= FloatingVal(int)
+IntReg ::= Minus(IntReg,IntReg)   /* Fails */
+FltReg ::= Minus(FltReg,FltReg)   /* Fails also */
+</PRE>
+Both rules describing the <CODE>Minus</CODE> node demand operands of the same
+interpretation, and in this tree the operands have different
+interpretations.
+<P>
+Suppose that it is possible to convert an <CODE>IntReg</CODE> to a
+<CODE>FltReg</CODE> without loss of information.
+If this is true, then the value of <SAMP>`k'</SAMP> could be converted to a
+floating-point value and the result used as the first child of the
+<CODE>Minus</CODE> node.
+The possibility of such a conversion is indicated by adding the following
+chain rule to the patterns given in the last section:
+<P>
+<PRE>
+FltReg ::= IntReg
+</PRE>
+<P>
+If this chain rule is one of the patterns then the derivation of
+<SAMP>`k-2.3'</SAMP> would be:
+<P>
+<PRE>
+IntReg ::= IntegerVar(DefTableKey)
+FltReg ::= IntReg
+FltReg ::= FloatingVal(int)
+FltReg ::= Minus(FltReg,FltReg)
+</PRE>
+<P>
+Now consider the expression <SAMP>`k-3'</SAMP> from the last section.
+With the addition of the chain rule, <EM>two</EM> derivations are
+possible:
+<P>
+<PRE>
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= IntegerVal(int)
+IntReg ::= Minus(IntReg,IntReg)
+
+IntReg ::= IntegerVar(DefTableKey)
+FltReg ::= IntReg
+IntReg ::= IntegerVal(int)
+FltReg ::= IntReg
+FltReg ::= Minus(FltReg,FltReg)
+</PRE>
+<P>
+Remember, however, that each rule has an associated cost.
+That cost defaults to 1 when it isn't specified, so each of the rules in
+this example has cost 1.
+The cost of a derivation is simply the sum of the costs of the rules from
+which it is constituted.
+Thus the cost of the first derivation above is 3 and the cost of the second
+is 5.
+The tree parser always selects the derivation with the lowest cost, so the
+derivation of <SAMP>`k-3'</SAMP> will be the first of the two given.
+<P>
+<A NAME="IDX21"></A>
+<H2><A NAME="SEC8" HREF="tp_toc.html#SEC8">Rules Describing Tree Fragments</A></H2>
+<P>
+The right-hand side of a rule describing a tree fragment defines that
+fragment with nonterminal leaves.
+Some examples are:
+<P>
+<PRE>
+N0 ::= s(t(N1),N2)
+N0 ::= s(N1,t(N2))
+N0 ::= s(t(N1),u(N2))
+N0 ::= s(t(s(N1,N2)),N3)
+</PRE>
+<P>
+Here <CODE>N0</CODE> is a nonterminal, <CODE>s</CODE>, <CODE>t</CODE> and <CODE>u</CODE> are
+elements of the ranked alphabet, and <CODE>N1</CODE>, <CODE>N2</CODE> and <CODE>N3</CODE>
+are nonterminals.
+No attribute types are allowed in in a rule describing a tree fragment.
+<P>
+Recall the tree used to describe a C conditional expression:
+<A NAME="IDX22"></A>
+<P>
+<DL COMPACT>
+<DT><SAMP>`i&#62;j ? i-j : j-i'</SAMP>
+<DD><PRE>
+Conditional(
+  Greater(IntegerVar,IntegerVar),
+  Alternatives(
+    Minus(IntegerVar,IntegerVar),
+    Minus(IntegerVar,IntegerVar)))
+</PRE>
+</DL>
+The following rules might be used to describe the tree fragment resulting
+from the conditional:
+<P>
+<PRE>
+IntReg ::= Conditional(IntReg,Alternatives(IntReg,IntReg))
+FltReg ::= Conditional(IntReg,Alternatives(FltReg,FltReg))
+</PRE>
+<P>
+If these tree fragment rules (and appropriate rules for <CODE>Greater</CODE>)
+are part of the specification then the derivation of
+<SAMP>`i&#62;j ? i-j : j-i'</SAMP> would be:
+<P>
+<PRE>
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= Greater(IntReg,IntReg)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= Minus(IntReg,IntReg)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= IntegerVar(DefTableKey)
+IntReg ::= Minus(IntReg,IntReg)
+IntReg ::= Conditional(IntReg,Alternatives(IntReg,IntReg))
+</PRE>
+Notice that there are no derivation steps corresponding to the components
+of the tree fragment resulting from the conditional; there is only a single
+derivation step corresponding to the entire fragment.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

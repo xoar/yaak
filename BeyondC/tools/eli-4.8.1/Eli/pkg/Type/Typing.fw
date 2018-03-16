@@ -1,0 +1,420 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: Typing.fw,v 1.16 2008/08/22 13:41:56 peter Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements a set of concepts that are basic for
+the type analysis task in many statically typed languages:
+Definition and use of typed objects, notation of user defined
+types, and definition and use of  type identifiers.
+
+This module is instantiated by
+
+@example
+   $/Type/Typing.gnrc +referto=|KEY| :inst
+@end example
+@noindent
+The @code{referto} parameter modifies the names
+of @code{Key} attributes, and hence, has to be the same as the
+@code{referto} parameter used for the module instance that supplied
+those attributes.
+
+The module uses the following basic concepts for implementation
+of type analysis tasks:
+
+Types are represented by @code{DefTableKeys}.
+Such a key is created for each program construct which
+denotes a particular type.
+The roles of this module associate the property @code{IsType}
+(set to 1) to such type keys in order to distinguish them
+from keys for other objects.
+Further properties may be associated to characterize the particular type.
+@findex IsType
+@findex property IsType
+
+@code{NoKey} represents the unknown Type.
+@findex NoKey
+
+The property @code{TypeOf} is associated to typed objects
+and states the type of the object.
+@findex TypeOf
+@findex property TypeOf
+
+~O~<Typing.pdl~>~{
+TypeOf: DefTableKey [KReset];
+IsType: int [KReset];
+ComponentTypes: DefTableKeyList;	"DefTableKeyList.h"
+~}
+
+Identifiers may be defined to denote types. They may be
+introduced by type definitions.
+In case of a type definition which simply renames the type given 
+by a type identifier, it is assumed that both type identifiers 
+refer to the same type.
+
+This module uses an instance of the @code{Defer} module
+to relate keys that represent the same type
+(@pxref{Defer,,Deferred Property Association,type,Type analysis tasks}).
+A type identifier keys refers indirectly via the @code{Defer} relation
+to a type key, where the type properties are associated to.
+Any type property of a type denoted by a key @code{k} of a type
+identifier has to be accessed from the type key at the end
+of the @code{Defer} chain obtained by a call @code{TransDefer (k)}.
+@findex Defer
+@findex Module Defer
+@findex property Defer
+@findex TransDefer
+@findex function TransDefer
+
+~O~<Typing.specs~>~{
+$/Type/Defer.gnrc+referto='|KEY|':inst
+$/Adt/PtrList.gnrc+instance=DefTableKey+referto=deftbl:inst
+~}
+
+This module provides the following computational roles:
+
+@code{RootType}: 
+the root symbol.
+@findex RootType
+
+@code{TypedDefinition}: 
+a definition that defines one or several typed objects.
+@findex TypedDefinition
+
+@code{TypedDefId}: 
+a defining occurrence of an identifier for a typed object.
+@findex TypedDefId
+
+@code{TypedUseId}: 
+an applied occurrence of an identifier for a typed object.
+@findex TypedUseId
+
+@code{ChkTypedUseId}:
+checks that the key represents a typed object.
+@findex ChkTypedUseId
+
+@code{TypeDefDefId}:
+a defining occurrence of a type identifer.
+@findex TypeDefDefId
+
+@code{ChkTypeDefDefId}:
+checks that a type identifer is defined acyclic.
+@findex ChkTypeDefDefId
+
+@code{TypeDefUseId}:
+an applied occurrence of a type identifer.
+@findex TypeDefUseId
+
+@code{ChkTypeDefUseId}:
+checks that the key represents a type.
+@findex ChkTypeDefUseId
+
+@code{TypeDenotation}:
+a type denotation.
+@findex TypeDenotation
+
+At least the roles @code{RootType}, @code{TypedDefinition},
+@code{TypedDefId}, @code{TypedUseId}, @code{TypedUseId},
+and @code{TypeDefUseId}
+are used. Those are sufficient for languages that have only 
+predefined types. User defined types require the use of
+@code{TypeDenotation}.
+For type definitions @code{TypeDefDefId} and @code{ChkTypeDefDefId}.
+
+The roles are described as follows:
+
+@code{TypedDefinition}
+is a context where one or several typed objects are defined
+in its subtree, using the role @code{TypedDefId}.
+They all have the same type which is to be computed as
+the attribute @code{THIS.Type}.
+@findex Type
+@findex attribute Type
+
+~$~<TypedDefinition~>==~{
+CLASS SYMBOL TypedDefinition:
+	Type:	DefTableKey; /* required */
+~}
+
+@code{TypedDefId}
+is a defining occurrence of an identifier for a typed object.
+The @code{TypeOf} property is associated to @code{THIS.|KEY|Key}.
+It is obtained from the attribute @code{INH.Type}.
+A default computation for @code{INH.Type} is provided
+that takes the type from @code{INCLUDING TypedDefinition.Type}.
+Further properties may be associated to the object along
+with its type. Then the postcondition of their computation should 
+be @code{INH.GotProp} which is empty by default.
+
+An attribute @code{SYNT.TypeIsSet} represents the state
+where the @code{TypeOf} property of this @code{TypedDefId} has been
+set. The default computations of @code{TypedDefId} and @code{TypedUseId}
+are set up such that the @code{TypeOf} properties of all
+@code{TypedDefId} are set before any @code{TypeOf} property of
+a @code{TypedUseId} is accessed. In cases where a different dependency
+pattern is needed, it can be obtained by overriding the
+computations of @code{SYNT.TypeIsSet} in the two contexts.
+An example for a different dependency pattern is a left-to-right
+chain which may allow to set the type in a defining occurrence using
+applied occurrences that have been set before.
+@findex GotProp
+@findex attribute GotProp
+@findex TypeIsSet
+@findex attribute TypeIsSet
+
+~$~<TypedDefId~>==~{
+CLASS SYMBOL TypedDefId:
+	TypeIsSet:	VOID		INH,	/* provided */
+	|KEY|Key:	DefTableKey,		/* required */
+	GotProp:	VOID		INH,	/* default */
+	Type: 		DefTableKey	INH;	/* default */
+
+CLASS SYMBOL TypedDefId COMPUTE
+  INH.Type = INCLUDING TypedDefinition.Type;
+  INH.GotProp = "yes";
+  INH.TypeIsSet = ResetTypeOf (THIS.|KEY|Key, THIS.Type)
+	<- INH.GotProp;
+END;
+~}
+
+@code{TypedUseId}
+is an applied occurrence of an identifier for a typed object.
+The attribute @code{SYNT.Type} is the type associated to the object.
+The @code{Defer} chain is already walked down to the type key.
+See the explanation of the attribute @code{SYNT.TypeIsSet} 
+for the role @code{TypedDefId}.
+ 
+@code{ChkTypedUseId}
+checks that the key represents a typed object.
+
+~$~<TypedUseId~>==~{
+CLASS SYMBOL TypedUseId:
+	TypeIsSet:	VOID		SYNT,   /* default */
+	|KEY|Key:	DefTableKey,		/* required */
+	Type: 		DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL TypedUseId COMPUTE
+  SYNT.Type = 
+     TransDefer (GetTypeOf (THIS.|KEY|Key, NoKey))
+     <- SYNT.TypeIsSet;
+  SYNT.TypeIsSet = INCLUDING RootType.TypeIsSet;
+END;
+
+CLASS SYMBOL ChkTypedUseId:
+	Sym:		int,			/* required */
+	|KEY|Key:	DefTableKey,		/* required */
+	Type: 		DefTableKey;		/* required */
+
+CLASS SYMBOL ChkTypedUseId COMPUTE
+  IF (AND (NE (THIS.|KEY|Key, NoKey), 
+           EQ (THIS.Type, NoKey)),
+  message (ERROR, CatStrInd ("Must denote a typed object: ",
+                             THIS.Sym), 0, COORDREF));
+
+  IF (GetIsType (THIS.|KEY|Key, 0),
+  message (ERROR, CatStrInd ("Type identifier not allowed: ",
+                             THIS.Sym), 0, COORDREF));
+END;
+~}
+
+Types are denoted either by a used occurrence of a type identifier,
+role @code{TypeDefUseId}, or by some composite @code{TypeDenotation}.
+Either role provides a @code{Type} attribute representing the denoted
+type. 
+
+@code{TypeDefUseId}
+is an applied occurrence of a type identifier.
+The @code{Type} attribute is its key which is related to the
+type key by the @code{Defer} relation.
+The @code{TypeKey} attribute is the type key. 
+If structural equivalence is specified, it is the uniquely
+representing type key.
+ 
+@code{ChkTypeDefUseId}
+is usually inherited along with @code{TypeDefUseId}.
+It issues an error message if the identifier does not
+denote a type.
+
+@code{TypeDenotation}
+characterizes a context that denotes a user defined type,
+e.g. an arry type.
+The attribute @code{SYNT.Type} is a new, unique type key.
+If the type rules of the language state that a thus denoted
+type is equivalent to any other type, suitable functions
+that check for type equivalence are to be specified.
+The @code{TypeKey} attribute is the type key. 
+If structural equivalence is specified, it is the uniquely
+representing type key.
+
+Any property that further describes the type has
+to be associated to @code{SYNT.Type} by computations that
+establish the postcondition @code{SYNT.GotType}.
+(Its default is the empty postcondition.)
+It guarantees that the properties
+can be accessed when an object having that type is used
+(role @code{TypedUseId}).
+@findex GotType
+@findex attribute GotType
+
+~$~<TypeDenotation~>==~{
+CLASS SYMBOL TypeDenotation:
+	Type:		DefTableKey	SYNT,	/* provided */
+	TypeKey:	DefTableKey	SYNT,	/* provided */
+	GotType:	VOID		SYNT;	/* default */
+
+CLASS SYMBOL TypeDenotation COMPUTE
+  SYNT.Type = KResetIsType (NewKey (), 1);
+  SYNT.GotType = SYNT.Type;
+  SYNT.TypeKey = TransDefer(THIS.Type) 
+    <- INCLUDING RootType.GotAllTypes;
+END;
+~}
+
+@code{TypeDefDefId}
+is a defining occurrences of a type identifier.
+Its key is related by the @code{Defer} relation to the
+attribute @code{THIS.Type}. Its computation has to be provided.
+The @code{TypeKey} attribute is the type key. 
+If structural equivalence is specified, it is the uniquely
+representing type key.
+
+@code{ChkTypeDefDefId}
+checks that its attribute @code{THIS.Type} refers to a type,
+and that the type does not refer to itself.
+It is usually inherited alon with @code{TypeDefDefId}.
+
+~$~<Type identifiers~>==~{
+CLASS SYMBOL TypeDefDefId:
+	Type: 		  DefTableKey,		/* required */
+	TypeKey:	  DefTableKey	SYNT,	/* provided */
+	|KEY|DeferredKey: DefTableKey;		/* provided */
+
+CLASS SYMBOL TypeDefDefId INHERITS SetDeferId COMPUTE
+  SYNT.|KEY|DeferredKey = THIS.Type;
+  SYNT.TypeKey = TransDefer(THIS.Type) 
+    <- INCLUDING RootType.GotAllTypes;
+END;
+
+CLASS SYMBOL ChkTypeDefDefId INHERITS ChkSetDeferId COMPUTE
+  IF (AND (NE (THIS.|KEY|Key, NoKey),
+           NOT (GetIsType (TransDefer (THIS.|KEY|Key), 0))),
+  message (ERROR, CatStrInd ("Must define a type: ", THIS.Sym),
+           0, COORDREF))
+  <- INCLUDING RootType.GotUserTypes;
+END;
+
+CLASS SYMBOL TypeDefUseId:
+	|KEY|Key:	DefTableKey,		/* required */
+	TypeKey:	DefTableKey	SYNT,	/* provided */
+	Type: 		DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL TypeDefUseId COMPUTE
+  SYNT.Type = THIS.|KEY|Key;
+  SYNT.TypeKey = TransDefer(THIS.Type) 
+    <- INCLUDING RootType.GotAllTypes;
+END;
+
+CLASS SYMBOL ChkTypeDefUseId:
+	Sym:		int,			/* required */
+	|KEY|Key:	DefTableKey,		/* required */
+	Type: 		DefTableKey;		/* required */
+
+CLASS SYMBOL ChkTypeDefUseId COMPUTE
+  IF (AND (NE (THIS.|KEY|Key, NoKey),
+           NOT (GetIsType (TransDefer (THIS.|KEY|Key), 0))),
+  message (ERROR, CatStrInd ("Must be a type identifier: ", THIS.Sym),
+           0, COORDREF))
+  <- INCLUDING RootType.GotUserTypes;
+END;
+~}
+
+@code{RootType}
+is inherited to the grammar root by default.
+It ensures that all @code{TypeOf} and @code{Defer} properties
+are established when a @code{Type} attribute
+is computed. (The same holds for properties that are defined
+along with types.)
+That condition is provided by the
+condition attribute @code{SYNT.GotType}.
+Computations that access type properties, e.g. 
+those which decompose composite types,
+have to be specified to depend on @code{INCLUDING RootType.GotType}.
+
+~$~<RootType~>==~{
+CLASS SYMBOL ROOTCLASS INHERITS RootType END;
+
+CLASS SYMBOL RootType INHERITS RootDefer COMPUTE
+  SYNT.GotUserTypes =
+     CONSTITUENTS TypeDenotation.GotType SHIELD RootType
+     <- THIS.GotDefer;
+  SYNT.GotType = "yes";
+  SYNT.GotAllTypes = 
+     FinalizeTypes()
+     <- (THIS.GotUserTypes, THIS.GotType);
+   SYNT.TypeIsSet =
+     CONSTITUENTS TypedDefId.TypeIsSet SHIELD RootType
+     <- THIS.GotAllTypes;  
+END;
+~}
+
+
+Composition of the specifications
+---------------------------------
+
+~O~<Typing.lido~>~{
+~<TypedDefId~>
+~<TypedDefinition~>
+~<TypedUseId~>
+~<Type identifiers~>
+~<TypeDenotation~>
+~<RootType~>
+~}
+
+~O~<Typing.lido.eta~>==~{
+#define FinalType(x) IDENTICAL(TransDefer(x)<-INCLUDING RootType.GotAllTypes)
+~}
+
+~O~<Typing.reqmod~>==~{
+$/Type/nameeqv.c
+$/Type/nameeqv.h
+~}
+
+~O~<Typing.HEAD.phi~>~{
+#include "nameeqv.h"
+~}
+
+
+~O~<Typing.h~>==~{
+#ifndef TYPING_H
+#define TYPING_H
+
+#include "pdl_gen.h"
+
+#define FinalType(x) TransDefer(x)
+#define NewType() KResetIsType(NewKey(),1)
+
+#endif
+~}
+
+@unnumbered Index
+@printindex fn

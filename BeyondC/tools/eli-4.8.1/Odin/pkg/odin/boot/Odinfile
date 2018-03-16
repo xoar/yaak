@@ -1,0 +1,17 @@
+%boot.sm == <<
+   client-yacc.c; fsys-yacc.c; default-dg.c; stub-in.c; stub-out.c
+
+client-yacc.c == ../client.ygi,c +yaccid=oc :c \
+   +cmd='sed -e "/extern char/d" -e "/^# *line/d"' :stdout
+
+default-dg.c == () +cmd=(../../dg%exe) (../../PKGLST) (../..) 0 \
+   +need=(../../PKGLST +cmd=sed '"s,\\(.*\\),\\1/\\1.dg,"' :stdout:list) \
+   :output/DG.c
+
+fsys-yacc.c == ../fsys.ygi,c :c \
+   +cmd='sed -e "/extern char/d" -e "/^# *line/d"' :stdout
+
+stub-in.c == ../if-stub.c +cmd=(../ipcgen%exe) :output/IN.c
+
+stub-out.c == ../if-stub.c +cmd=(../ipcgen%exe) :output/OUT.c
+

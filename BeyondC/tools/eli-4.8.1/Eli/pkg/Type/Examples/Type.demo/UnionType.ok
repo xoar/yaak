@@ -1,0 +1,19 @@
+begin
+  type union int, bool end ibU;
+  var  ibU vibU;
+  type union bool, int end biU;
+  var  biU vbiU;
+  var  union int, bool end vib;
+
+  type union int[5], bool[5] end iAbAU;
+  var  iAbAU viAbAU;
+  var  int[5] viA;
+
+  var   int j;
+
+  vib = vibU;
+  viA = <int[5]> viAbAU;
+  case viAbAU of
+    int[5] t: j = t[1];
+  end
+end

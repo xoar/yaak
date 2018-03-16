@@ -1,0 +1,7 @@
+begin
+  var   record int i, bool b, real r end va;
+  var   record int i, bool b, real r end vc;
+  var   record int j, bool k, real l end vd;
+  va = vc;
+  va = vd;
+end

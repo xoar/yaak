@@ -1,0 +1,91 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Appendix: Syntax~>
+
+~B~<Concrete Kernel Syntax~>
+
+~$~<Concrete Kernel syntax~>==~{
+Declarations:	Declaration*.
+Declaration:	'var' ObjDecls ';'.
+ObjDecls:	[ObjDecl // ','].
+Statements:	Statement*.
+
+Expression:	Factor.
+Factor:		Operand.
+Operand:	IntNumber.
+Operand:	RealNumber.
+Operand:	'true'.
+Operand:	'false'.
+Operand:	Variable.
+~}
+
+The expression syntax is prepared to introduce operators
+of different precedences (2 for binary and 1 for unary operators).
+
+@code{Factor} and @code{Operand} are represented by
+@code{Expression} contexts in the tree grammar:
+
+~$~<Expression mapping~>==~{
+Expression ::= Factor Operand.
+~}
+
+The notation of identifiers, numbers, and comments is chosen as in Pascal:
+
+~$~<Token notation~>==~{
+Ident:		PASCAL_IDENTIFIER
+IntNumber:	PASCAL_INTEGER
+RealNumber:	PASCAL_REAL
+		PASCAL_COMMENT
+~}
+
+~B~<Concrete Expression Syntax~>
+
+~$~<Expression syntax~>==~{
+Expression:	Expression AddOpr Factor.
+Factor:		Factor MulOpr Operand.
+Operand:	MonOpr Operand.
+Operand:	'(' Expression ')'.
+AddOpr:		'+' / '-'.
+MulOpr:		'*' / '/'.
+MonOpr:		'+' / '-' / '!'.
+~}
+
+The following specification unifies the binary operators that have
+different precedences into one symbol class @code{BinOpr} of the
+abstract syntax. 
+
+~$~<Operators~>==~{
+BinOpr ::= AddOpr MulOpr.
+UnOpr ::= MonOpr.
+~}
+
+~B~<Concrete Function Syntax~>
+
+~$~<Function declaration syntax~>==~{
+Parameters:	[Parameter // ','].
+~}
+
+~$~<Call syntax~>==~{
+Arguments:	[Argument // ','].
+~}
+
+~$~<Function type syntax~>==~{
+ParamTypes:	[ParamType // ','].
+~}
+
+~B~<Other concrete productions~>
+
+~$~<Concrete pointer syntax~>==~{
+Operand: 'nil'.
+~}
+
+Concrete notations are stated for the comma separated
+sequence of type denoters. The specific precedence of the
+cast expression and its parentheses avoid a parsing conflict.
+~$~<Concrete union syntax~>==~{
+UnitedTypes: UnitedTypes ',' UnitedType.
+UnitedTypes: UnitedType.
+Operand: '<' TypeDenoter '>' Operand.
+~}

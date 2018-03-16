@@ -1,0 +1,18 @@
+# $Id: Makefile.in,v 1.3 2009/08/02 17:57:56 profw Exp $
+# Copyright 2002, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/Unparser
+SRC	= version Analysis.fw Cpp.fw Idem.fw Java.fw Tree.fw Xml.fw
+AUX	= Makefile.in Makefile
+CMD	=
+GEN	=
+GENINS	= Unparser.dg
+EXE	=
+AUXDIR	=
+
+@toolmk_h@
+
+Unparser.dg:
+	cp /dev/null $@

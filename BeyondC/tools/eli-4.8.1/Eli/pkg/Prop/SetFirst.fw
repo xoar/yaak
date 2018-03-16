@@ -1,0 +1,70 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: SetFirst.fw,v 3.6 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module associates values of type |TYPE| as property |NAME|
+to objects identified by keys.
+
+Values are associated in |NAME|SetFirst CLASS SYMBOL context:
+If the object |NAME|SetFirst.Key has no |NAME|SetFirst occurrence
+to its left its property |NAME| is set to the value
+of the attribute |NAME|SetFirst.|NAME|.
+
+All |NAME|SetFirst occurrences must be within a subtree rooted
+by |NAME|RangeSetFirst.
+|NAME|RangeSetFirst is inherited to the grammar root by default.
+
+|NAME|RangeSetFirst.Got|NAME| indicates that all values are associated.
+
+~O~<|NAME|SetFirst.pdl~>~{
+|NAME|:	|TYPE| [SetOnce];
+~}
+
+~O~<|NAME|SetFirst.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RangeSetFirst END;
+
+CLASS SYMBOL |NAME|RangeSetFirst:
+		Got|NAME|:	VOID;
+
+CLASS SYMBOL |NAME|SetFirst:
+		|NAME|:		|TYPE|,
+		Key:		DefTableKey;
+
+CHAIN _|NAME|SetFirst:	VOID;
+
+CLASS SYMBOL |NAME|RangeSetFirst COMPUTE
+  CHAINSTART HEAD._|NAME|SetFirst = "yes";
+  SYNT.Got|NAME| = TAIL._|NAME|SetFirst;
+END;
+
+CLASS SYMBOL |NAME|SetFirst	COMPUTE
+  THIS._|NAME|SetFirst = SetOnce|NAME| (THIS.Key, THIS.|NAME|)
+	DEPENDS_ON THIS._|NAME|SetFirst;
+END;
+~}
+
+~O~<|NAME|SetFirst.specs~>~{
+$/Prop/PropLib.fw
+~}

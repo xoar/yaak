@@ -1,0 +1,28 @@
+#! /bin/sh
+# Create SourceForge documents from local documents
+
+if test $# -ne 0
+then
+  echo "Usage: $0"
+  exit 1
+fi
+
+if test -d elionline 
+then rm -rf elionline/*
+else mkdir elionline
+fi
+
+cd doc/Eli
+PDF=`ls *.pdf`
+HTML=`ls *.html`
+cd ../..
+
+for f in $PDF
+do cp doc/Eli/$f elionline
+done
+
+for f in $HTML
+do sed -e '/|DELETE FOR SOURCEFORGE LOGO|/d' doc/Eli/$f > elionline/$f
+done
+
+cp -r doc/Eli/gifs elionline

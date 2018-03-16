@@ -1,0 +1,15 @@
+# $Id: Odinfile,v 1.5 1999/01/10 01:39:23 tony Exp $
+
+%program == clptest.specs :exe
+%source == clptest.specs :source
+
+%results1 == () +cmd=(%program) '-c -w -o fred -1 -man -w -S -temp=eugene -ms -@ 42 -w whammo 42 -99 -C83 -z67 -Zap 169 mac harold' (input) :stdout
+%results2 == () +cmd=(%program) '-c --' (input) (Odinfile) (result1) :stdout
+
+%diffcmd1 == . +cmd=diff (%results1) (result1) :run
+%diffcmd2 == . +cmd=diff (%results2) (result2) :run
+
+%test ! == <<
+  %diffcmd1
+  %diffcmd2
+ 

@@ -1,0 +1,134 @@
+@p maximum_input_line_length = infinity
+
+@O@<elisave.c@>@{@-
+/* (C) Copyright 1998, University of Paderborn */
+
+/* This file is part of the Eli Module Library.
+
+The Eli Module Library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Library General Public License as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+
+The Eli Module Library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with the Eli Module Library; see the file COPYING.LIB.
+If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+Suite 330, Boston, MA 02111-1307, USA.  */
+
+/* As a special exception, when this file is copied by Eli into the
+   directory resulting from a :source derivation, you may use that
+   created file as a part of that directory without restriction. */
+
+#include "elisave.h"
+#include "obsave.h"
+
+/* Specify at least one module that "supports" saving.
+ * If that does not exist, a syntax error will occur. */
+
+void *SaveModulenone()
+{
+	return (void *)0;
+}
+
+void 
+#ifdef PROTO_OK
+RestoreModulenone(void *base)
+#else
+RestoreModulenone(base) void *base;
+#endif
+{
+}
+
+
+#define SAVE(module) \
+extern void *SaveModule##module ELI_ARG(()); \
+extern void RestoreModule##module ELI_ARG((void *base));
+
+#include "save.eta.h"
+#undef SAVE
+
+#define SAVE(module) \
+	void * module##state;
+	
+static struct savestruct {
+#include "save.eta.h"
+#undef SAVE
+} s;
+
+void *SaveModules()
+{
+
+#define SAVE(module) \
+	s.module##state = SaveModule##module();
+#include "save.eta.h"
+#undef SAVE
+
+	return SaveData(&s, sizeof(s));
+}
+
+void
+#ifdef PROTO_OK
+RestoreModules(void *base)
+#else
+RestoreModules(base) void *base;
+#endif
+{
+	RestoreData(base);
+
+#define SAVE(module) \
+	RestoreModule##module (s.module##state);
+#include "save.eta.h"
+#undef SAVE
+}
+@}
+
+
+@O@<elisave.h@>@{@-
+/* (C) Copyright 1998, University of Paderborn */
+
+/* This file is part of the Eli Module Library.
+
+The Eli Module Library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Library General Public License as
+published by the Free Software Foundation; either version 2 of the
+License, or (at your option) any later version.
+
+The Eli Module Library is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with the Eli Module Library; see the file COPYING.LIB.
+If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+Suite 330, Boston, MA 02111-1307, USA.  */
+
+/* As a special exception, when this file is copied by Eli into the
+   directory resulting from a :source derivation, you may use that
+   created file as a part of that directory without restriction. */
+
+#ifndef ELISAVE_H
+#define ELISAVE_H
+
+#include "eliproto.h"
+
+void *SaveModules ELI_ARG((void));
+void RestoreModules ELI_ARG((void *base));
+
+#endif
+@}
+
+@O@<elisave.save.eta@>@{@-
+/* empty file to make sure, the file save.eta.h will be generated */
+SAVE(none)
+
+@}
+
+@O@<elisave.specs@>@{@-
+$/Adt/obsave.specs
+@}

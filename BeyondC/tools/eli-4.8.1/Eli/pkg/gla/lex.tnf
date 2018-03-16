@@ -1,0 +1,2657 @@
+\input texinfo     @c -*-texinfo-*-
+@comment Copyright, 1992, The Regents of the University of Colorado
+@comment %**start of header
+@setfilename lex
+@settitle Lexical Analysis
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Lexical Analysis}
+@sp 1
+@center $Revision: 2.29 $
+@include org.tnf
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@node Top, , (dir), (dir)
+
+@ifinfo
+$Revision: 2.29 $
+@end ifinfo
+
+The purpose of the lexical analyzer is to partition the input text,
+delivering a sequence of @dfn{comments} and @dfn{basic symbols}.
+Comments are character sequences to be ignored, while basic symbols are
+character sequences that correspond to terminal symbols of the grammar
+defining the phrase structure of the input
+(@pxref{Phrases, , Context-Free Grammars and Parsing, syntax, Syntactic
+Analysis}).
+
+A user must define the forms of comments and the forms of all basic symbols
+corresponding to non-literal terminal symbols of the grammar.
+Eli can deduce the form of a literal terminal symbol from the grammar
+specification.
+
+The definition consists of one or more type-@file{gla} files.
+Each line of a type-@file{gla} file describes a set of character sequences.
+If a line begins with an identifier followed by a colon (@key{:}), then all
+of the character sequences described by the line are instances of
+the non-literal terminal symbol named by that identifier;
+otherwise they are comments.
+
+Here is an example of a type-@file{gla} file:
+
+@example
+HexInteger:  $0[Xx][0-9A-Fa-f]+
+             $!  (auxEOL)
+Identifier:  C_IDENTIFIER
+@end example
+
+@noindent
+The first line of this specification uses a regular expression to define a
+hexadecimal integer as a zero, followed by the letter @code{X} (either
+upper or lower case) and one or more hexadecimal digits represented in the
+usual way.
+In the second line, one form of comment is defined by a regular expression
+and the name of a C routine.
+The C routine will be invoked when the regular expression has been matched.
+This approach allows the user to define character sequences operationally
+when a declarative definition is tedious or does not support appropriate
+error reporting.
+
+Since certain lexical structures are common to many languages, Eli provides
+a library of definitions that can be invoked simply be giving their names.
+@code{C_IDENTIFIER}, in the third line, is such an invocation.
+The effect of the third line is to define the form of the basic symbol
+@code{Identifier} as that of an identifier in C: a letter or underscore
+followed by some sequence of letters, digits and underscores.
+
+@iftex
+Chapter 1 defines the usage, form and content of specifications provided by
+the user as type-@file{gla} files.
+Those specifications may refer to canned descriptions, which are defined in
+Chapter 2.
+Chapter 3 presents the default processing of spaces, tabs and newlines and
+explains how to define other strategies.
+The treatment and meaning of literal terminal symbols is discussed in
+Chapter 4, and Chapter 5 explains how a generated lexical analyzer can be
+made insensitive to the case of letters.
+Complex lexical analysis problems may require modification of the behavior
+of the generated module; Chapter 6 discusses the possibilities.
+@end iftex
+
+@menu
+* Specifications::	A notation for describing character sequences.
+* Canned Descriptions::	Descriptions of commonly-used character sequences.
+* White Space::		Dealing with spaces, tabs and newlines.
+* Literal Symbols::	Descriptions obtained from other Eli specifications.
+* Case Insensitivity::	Treating upper- and lower-case letters identically
+* Generated Module::	Possible modifications for complex problems.
+
+* Index::               Index to this manual.
+
+ --- The Detailed Node Listing ---
+
+Specifications
+
+* Regular Expressions::	A declarative specification of character sequences.
+* Auxiliary Scanners::	An operational specification of character sequences.
+* Token Processors::	Post-isolation analyses of character sequences.
+
+Regular Expressions
+
+* Quoting::  		Matching operator characters.
+* Classes::   	 	Sets of characters specified easily.
+* Composition::   	Building complex expressions
+* Ambiguity::  		What happens if the specification is ambiguous?
+
+Building complex regular expressions
+
+* Several::	Matching one sequence followed by another
+* Bar::		Matching either one sequence or another
+* Query::	Matching either a sequence or nothing at all
+* Plus::	Matching one or more successive occurrences of a sequence
+* Star::	Matching zero or more successive occurrences of a sequence
+* Count::	Matching some number of successive occurrences of a sequence
+
+Auxiliary Scanners
+
+* Available scanners::	Auxiliary scanners you can use directly
+* Building scanners::	How to construct your own auxiliary scanners
+
+Token Processors
+
+* Available Processors::	Token processors you can use directly
+* Building Processors::		How to construct your own token processors
+
+Canned Symbol Descriptions
+
+* Available Descriptions::	Names and informal characterizations
+* Definitions of Descriptions::	Specifications substituted for the names
+
+Spaces, Tabs and Newlines
+
+* Coordinates::	Maintaining the source text coordinates
+* Skipping::	Restoring the default behavior for white space
+
+Maintaining the Source Text Coordinates
+
+* Updating with code::		How the invariant is maintained
+* Updating with scanners::	Auxiliary scanners maintaining the invariant
+
+Literal Symbols
+
+* Overriding::	Overriding the Default Treatment of Literal Symbols
+* Surrogates::	Using Literal Symbols to Represent Other Things
+
+Overriding the Default Treatment of Literal Symbols
+
+* Override example::	A situation in which a complex operation is useful
+* The delit file::	Marking the literal symbol as a special case
+* Specifying behavior::	Providing a specification for the literal symbol
+
+Case Insensitivity
+
+* Folding::	A Case-Insensitive Token Processor
+* Keywords::	Making Literal Symbols Case Insensitive
+
+The Generated Lexical Analyzer Module
+
+* Text::	How the lexical analyzer interacts with the text
+* Reset::	How the scan pointer is reset
+* Classify::	How the next character sequence is classified
+* Occam::	An Example of Interface Usage
+
+The Classification Operation
+
+* Position::	Setting coordinate values
+* Continue::	Deciding on a continuation after a classification
+* Return::	Returning a classification
+@end menu
+
+@node Specifications, Canned Descriptions, , Top
+@chapter Specifications
+@findex Specifications
+
+A specification consists of a @dfn{regular expression},
+possibly the name of an @dfn{auxiliary scanner},
+and possibly the name of a @dfn{token processor}.
+Sequences of input characters are classified initially on the basis of the
+regular expression they match.
+If the line containing the regular expression also contains the name of an
+auxiliary scanner, then that scanner is invoked after the regular
+expression has been matched.
+An auxiliary scanner may lengthen or shorten the character sequence being
+classified.
+If the line containing the regular expression also contains the name of a token
+processor, then that token processor is invoked after any auxiliary scanner.
+A token processor may change the initial classification of the sequence,
+and may also calculate a value representing the sequence.
+
+Specifications are provided in type-@file{gla} files whose contents obey
+the following phrase structure:
+
+@example
+@findex grammar
+File: ( Specification NewLine )* .
+Specification:
+    [ TokenName ':' ]
+    Pattern
+    [ '(' AuxiliaryScannerName ')' ]
+    [ '[' TokenProcessorName ']' ] .
+Pattern: RegularExpression / CannedSpecificationName .
+TokenName: Identifier .
+CannedSpecificationName: Identifier .
+AuxiliaryScannerName: Identifier .
+TokenProcessorName: Identifier .
+@end example
+
+An @code{Identifier} is defined as in C, and a type-@file{gla} file may
+contain arbitrary empty lines, C comments and pre-processor directives.
+Comments may also be written as character sequences enclosed in braces
+(@code{@{ @}}) that do not themselves include braces.
+
+@iftex
+The remainder of this chapter explains each of these components of the
+description in detail.
+@end iftex
+
+@menu
+* Regular Expressions::	A declarative specification of character sequences.
+* Auxiliary Scanners::	An operational specification of character sequences.
+* Token Processors::	Post-isolation analyses of character sequences.
+@end menu
+
+@node Regular Expressions, Auxiliary Scanners, , Specifications
+@section Regular Expressions
+@findex regular expression
+A regular expression is a pattern that defines a set of character
+sequences:
+If the regular expression matches a particular sequence then that sequence
+is a member of the set; otherwise it is not a member.
+Here is a summary of Eli's regular expression notation:
+
+@table @code
+@item c
+matches the character @code{c}, unless @code{c} is space, tab, newline
+or one of @code{\ " . [ ] ^ ( ) | ? + * @{ @} / $ <}
+@item \c
+matches @code{c}
+(@pxref{Quoting, , Matching Operator Characters})
+@item "s"
+matches the sequence @code{s}
+(@pxref{Quoting, , Matching Operator Characters})
+@item .
+matches any character except newline
+@item [xyz]
+matches exactly one of the characters @code{x}, @code{y} or @code{z}
+@item [^xyz]
+matches exactly one character that is @emph{not} @code{x}, @code{y} or
+@code{z}
+@item [c-d]
+matches exactly one of the characters whose ASCII codes lie between the
+codes for @code{c} and @code{d} (inclusive)
+@item (e)
+matches a sequence matched by @code{e}
+@item ef
+matches a sequence matched by @code{e} followed by a sequence matched by
+@code{f}
+@item e|f
+matches either a sequence matched by @code{e} or a sequence matched by
+@code{f}
+@item e?
+matches either an empty sequence or a sequence matched by @code{e}
+@item e+
+matches one or more occurrences of a sequence matched by @code{e}
+@item e*
+matches either an empty sequence or one or more occurrences of a
+sequence matched by @code{e}
+@item e@{@var{m},@var{n}@}
+matches a sequence of no fewer than @var{m} and no more than @var{n}
+occurrences of a sequence matched by @code{e}
+@end table
+
+@noindent
+Each of the regular expressions @code{e?}, @code{e+}, @code{e*} and
+@code{e@{@var{m},@var{n}@}} matches the longest sequence of characters
+consonant with its definition.
+
+In a type-@file{gla} file, each regular expression
+is delimited on the left by @code{$} and on the right by white space:
+
+@example
+$a57D
+$[0-9]+
+$[a-zA-Z_][a-zA-Z_0-9]*
+@end example
+
+The first example matches the single character sequence @code{a57D},
+while the second matches a sequence of one or more digits.
+The third describes C-style identifiers: an initial letter
+or underscore, followed by zero or more alphanumeric characters or underscores.
+
+@menu
+* Quoting::  		Matching operator characters.
+* Classes::   	 	Sets of characters specified easily.
+* Composition::   	Building complex expressions
+* Ambiguity::  		What happens if the specification is ambiguous?
+@end menu
+
+@node Quoting, Classes,  , Regular Expressions
+@subsection Matching operator characters
+@findex operator character
+
+A regular expression consists of @dfn{text characters}
+@findex text character
+(which match the corresponding characters in the input character sequences)
+and @dfn{operator characters}
+@findex operator character
+(which specify repetitions, choices and other features).
+The operator characters are the following:
+
+@example
+\ " . [ ] ^ ( ) | ? + * @{ @} / $ <
+@end example
+
+@noindent
+Space, tab, newline and characters appearing in this list are @emph{not}
+text characters; every other character @emph{is} a text character.
+
+If an operator character is to match an instance of itself in the input
+sequence then it must be marked in the regular expression as being a text
+character.
+This can be done by preceding it with backslash (@code{\}).
+@findex backslash
+Any occurrence of an operator character (including backslash) that is
+preceded by backslash loses its operator status and
+is considered to be a text character.
+The text characters space, tab and newline are represented as
+@code{\040},
+@findex @code{\040}
+@code{\t}
+@findex @code{\t}
+and @code{\n}
+@findex @code{\b}
+respectively;
+@code{\b} represents the text character ``backspace''.
+Any character except the ASCII NUL (code 0)
+can also be represented by a backslash, followed by zero, followed by the ASCII
+code for the character written as a sequence of up to three octal digits (the
+representation of a space character always has this form).
+
+A sequence of operator characters can be used as a sequence of text characters
+by surrounding the sequence with double quote operators (@code{"}):
+@findex quote
+@findex double quote
+
+@example
+xyz"++"
+"xyz++"
+@end example
+
+@noindent
+Both of these patterns match the string @code{xyz++}.
+As shown, it is harmless but unnecessary to quote a character that is not an
+operator.
+
+Backslash is also effective within a sequence surrounded by double quote
+operators, and must be used to mark backslash, quote and white space:
+
+@example
+"\t\\\040\"\040.\040[\040]\040^"
+@end example
+
+@noindent
+This pattern matches an initial segment of the operator character display
+at the beginning of this section.
+
+@node Classes, Composition, Quoting, Regular Expressions
+@subsection Character classes
+@findex classes
+A @dfn{character class} is a pattern that defines a set of characters and
+matches exactly one character from that set.
+The simplest character class representation is the period (@code{.}),
+@findex dot
+@findex period
+@findex @code{.}
+which defines the set of all characters except newline.
+Character classes can also be represented using the operator pair @code{[ ]}.
+@findex @code{[ ]}
+@code{[Abc]} defines the set of three characters @code{A}, @code{b},
+and @code{c}.
+
+Within square brackets, most operator meanings are ignored.
+Only four characters are special: @code{\}, @code{-}, @code{^} and
+@code{]}.
+In particular, the double quote character (@code{"}) is not considered
+special and therefore cannot be used to surround a sequence of operator
+characters.
+The @code{\} character provides the usual escapes within character class
+brackets.
+Thus @code{[[\]]} matches either @code{[} or @code{]},
+because @code{\} causes the first @code{]} in the character class
+representation to be taken as a normal character
+rather than the closing bracket of the representation.
+The following specification causes an error, however:
+@example
+[["]"]
+@end example
+@noindent
+The quote is not special in a character class,
+so the first @code{]} is the closing bracket of the set.
+The second @code{"} is therefore outside the definition of the character
+class, and is taken as the beginning of a quoted string containing the second
+@code{]}.
+Since there is no closing quote for this string, it is erroneous.
+
+If the first character after the opening bracket of a character class
+is @code{^},
+@findex complement
+@findex @code{^}
+the set defined by the remainder of the character class is complemented
+with respect to the computer's character set.
+Using this notation, the character class represented by @code{.} can be
+described as @code{[^\n]}.
+
+If @code{^} appears as any character of a class except the first,
+it is not considered to be an operator.
+Thus @code{[^abc]} matches any character except @code{a}, @code{b},
+or @code{c} but @code{[a^bc]} or @code{[abc^]} matches @code{a}, @code{b},
+@code{c} or @code{^}.
+
+Within a character class representation, @code{-}
+@findex @code{-}
+@findex dash
+@findex minus
+@findex range
+can be used to define a set of characters in terms of a range.
+For example, @code{a-z} defines the set of lower-case letters and
+@code{A-Z} defines the set of upper-case letters.
+The endpoints of a range may be specified in either order
+(i.e. both @code{0-9} and @code{9-0} define the set of digits).
+Ranges can also be defined in terms of specific ASCII codes:
+@code{\041-\0176} is the set of all visible ASCII characters.
+Using @code{-} between any pair of characters that are not
+both upper case letters, both lower case letters, or both digits
+defines an implementation-dependent set and will generate a warning.
+
+Any number of ranges can be used in the representation of a character
+class.
+For example, @code{[a-z0-9<>_]} will match any lower case letter, digit,
+angle bracket or underline while @code{[^a-zA-Z]} will match any character
+that is not a letter.
+If it is desired to include the character @code{-} in a character class,
+it should either be escaped with @code{\}
+or it should occupy the first or last position.
+Thus @code{[-+0-9]} will match @code{+}, @code{-} or any digit,
+as will @code{[0-9\-+]}.
+
+@node Composition, Ambiguity, Classes, Regular Expressions
+@subsection Building complex regular expressions
+
+Single characters, character strings and character classes are all simple
+regular expressions.
+Each matches a particular set of character sequences.
+More complex patterns are built from these simple regular expressions by
+concatenation, alternation and repetition.
+The components of a complex pattern may be grouped by enclosing them in
+parentheses; a parenthesized expression behaves like a simple regular
+expression in further compositions.
+
+Components must not be separated by white space, because white space
+terminates a regular expression.
+
+@menu
+* Several::	Matching one sequence followed by another
+* Bar::		Matching either one sequence or another
+* Query::	Matching either a sequence or nothing at all
+* Plus::	Matching one or more successive occurrences of a sequence
+* Star::	Matching zero or more successive occurrences of a sequence
+* Count::	Matching some number of successive occurrences of a sequence
+@end menu
+
+@node Several, Bar, , Composition
+@ifinfo
+@subsubheading Matching one sequence followed by another
+@end ifinfo
+
+When a complex regular expression is written as a sequence of components,
+@findex concatenation
+the resulting pattern will match a sequence of characters consisting of
+a subsequence matching the first component,
+followed by a subsequence matching the second component,
+and so on:
+
+@example
+[1-9]\.[0-9][0-9]
+@end example
+
+@noindent
+This complex expression has four components:
+three character classes and the text character @code{.} (the backslash
+converts the operator character @code{.} to a text character).
+It matches character sequences like @code{2.54} and @code{9.99},
+but not @code{0.59}, @code{45.678} or @code{1x23}.
+
+@node Bar, Query, Several, Composition
+@ifinfo
+@subsubheading Matching either one sequence or another
+@end ifinfo
+
+When the components of a complex regular expression are separated by the
+operator @code{|},
+@findex alternation
+@findex @code{|}
+the resulting pattern will match a sequence of characters
+that matches at least one of the components:
+
+@example
+[A-Za-z]|[1-9][0-9]&
+@end example
+
+@noindent
+This complex expression has two immediate components:
+a character class and a complex expression that is the result of
+concatenating two character classes and a single character.
+The complete expression matches character sequences like @code{B} and
+@code{10&}, but not @code{X11} or @code{A&}.
+
+Concatenation takes precedence over alternation in constructing a complex 
+regular expression, so this example is equivalent to
+@code{[A-Za-z]|([1-9][0-9]&)}.
+Parentheses can be used to group the expression differently:
+
+@example
+([A-Za-z]|[1-9][0-9])&
+@end example
+
+@noindent
+This complex expression also has two immediate components, but they are
+a parenthesized expression and a single character.
+The complete expression matches character sequences like @code{B&} and
+@code{10&}.
+
+@node Query, Plus, Bar, Composition
+@ifinfo
+@subsubheading Matching either a sequence or nothing at all
+@end ifinfo
+
+When a complex regular expression consists of a single component
+followed by the operator @code{?},
+@findex @code{?}
+@findex optional
+@findex zero or one
+the resulting pattern will match either an empty sequence
+or a sequence of characters that matches the component:
+
+@example
+(-|\+?)[1-9]
+@end example
+
+@noindent
+Here the operand of @code{?} is the text character @code{+}.
+This complex expression matches character sequences like @code{-1},
+@code{+2} and @code{3}.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+
+The @code{?} operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+
+@node Plus, Star, Query, Composition
+@ifinfo
+@subsubheading Matching one or more successive occurrences of a sequence
+@end ifinfo
+
+When a complex regular expression consists of a single component
+followed by the operator @code{+},
+@findex @code{+}
+@findex repetition
+@findex one or more
+the resulting pattern will match a sequence of characters
+that matches one or more successive occurrences of a sequence matching
+the component:
+
+@example
+[0-9]+
+@end example
+
+@noindent
+This complex expression has one immediate component:
+a character class.
+It matches character sequences like @code{0} and @code{1019}.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+
+The @code{+} operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+
+@node Star, Count, Plus, Composition
+@ifinfo
+@subsubheading Matching zero or more successive occurrences of a sequence
+@end ifinfo
+
+When a complex regular expression consists of a single component
+followed by the operator @code{*},
+@findex @code{*}
+@findex zero or more
+the resulting pattern will match a sequence of characters
+that matches an empty sequence or one or more successive occurrences
+of a sequence matching the component:
+
+@example
+[1-9][0-9]*
+@end example
+
+@noindent
+This complex expression has two immediate components:
+a character class and a complex expression whose operator is @code{*}.
+That complex expression, in turn, has a single character class component.
+The complete expression matches character sequences like @code{1} and
+@code{2992}, but not @code{0} or @code{0101}.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+
+The @code{*} operator takes precedence over both concatenation and
+alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+For example, @code{([1-9][0-9])*} would match character sequences like
+@code{1019} and @code{2992}, but not @code{1} or @code{123}.
+
+@node Count, , Star, Composition
+@ifinfo
+@subsubheading Matching some number of successive occurrences of a sequence
+@end ifinfo
+
+When a complex regular expression consists of a single component
+followed by the operator @code{@{@var{m},@var{n}@}}
+@findex @code{@{ @}}
+(@var{m} and @var{n} integers greater than 0),
+the resulting pattern will match a sequence of characters
+that matches no fewer than @var{m} and no more than @var{n}
+successive occurrences of a sequence matching the component:
+
+@example
+[A-Za-z][A-Za-z0-9]@{1,5@}
+@end example
+
+@noindent
+This complex expression has two immediate components:
+a character class and a complex expression whose operator is
+@code{@{1,5@}}.
+That complex expression, in turn, has a single character class component.
+The complete expression matches character sequences like @code{A1} and
+@code{xyzzy}, but not @code{identifier} or @code{01July}.
+In each case, the pattern matches the longest sequence of characters
+consonant with its definition.
+
+The @code{@{@var{m},@var{n}@}} operator takes precedence over
+both concatenation and alternation.
+If its operand is a complex expression involving either of these
+operations, that complex expression must be parenthesized.
+For example, @code{([1-9][0-9])@{1,2@}} would match character sequences
+like @code{10} and @code{2992},
+but not @code{1}, @code{123} or @code{123456}.
+
+@node Ambiguity, , Composition, Regular Expressions
+@subsection What happens if the specification is ambiguous?
+
+When more than one expression can match the current character sequence,
+a choice is made as follows:
+
+@enumerate
+@item
+The longest match is preferred.
+@findex longest match
+@item
+Among rules which match the same number of characters, the rule given
+first is preferred.
+@findex ordering of specifications
+@findex specification ordering
+@end enumerate
+
+Thus, suppose we have the following descriptions:
+
+@example
+Limit: $55
+Speed: $[0-9]+
+@end example
+
+If the input text is @code{550kts} then the sequence @code{550}
+is classified as @code{Speed}, because @code{[0-9]+} matches three characters
+while @code{55} matches only two.
+If the input is @code{55mph} then both patterns match two characters,
+and the sequence @code{55} is classified as @code{Limit} because @code{Limit}
+was given first.
+Any shorter sequence of digits (e.g. @code{5kph}) would not match the
+regular expression @code{55}
+and so the @code{Speed} classification would be used.
+
+When more than one type-@file{gla} file is provided, specifications in
+different files have no defined order.
+Thus if @code{Limit} and @code{Speed} appeared in different files,
+classification of the sequence @code{55} would be undefined.
+If an ambiguity between two descriptions is to be resolved on the basis of
+their order of appearance, they must be given within the same
+type-@file{gla} file.
+
+@node Auxiliary Scanners, Token Processors, Regular Expressions, Specifications
+@section Auxiliary Scanners
+@findex auxiliary scanner
+@findex scanner
+
+An auxiliary scanner is a routine to be invoked after the pattern described
+by the regular expression has been matched.
+The routine is passed a pointer to the matched string and the length of that
+string, and it returns a pointer to the first character that is not to be
+considered part of the string matched.
+Thus an auxiliary scanner may increase, reduce or leave unchanged
+the number of characters matched by the regular expression.
+This allows a user to specify operationally patterns that are
+tedious or impossible to describe using regular expressions
+(e.g. nested comments), or that require special operations during the match
+(e.g. sequences containing tabs or newlines --- @pxref{White Space}),
+or that would benefit from specialized error reporting.
+
+An auxiliary scanner is invoked by giving its name, surrounded by
+parentheses (@code{( )}), on the same line as the associated
+regular expression:
+
+@example
+@findex @code{auxEOL}
+$--  (auxEOL)
+@end example
+@noindent
+This specification invokes the auxiliary scanner @code{auxEOL}
+whenever a sequence of two dashes is recognized, and passes it a pointer to
+the first of the two dashes and a length of 2.
+As described below, @code{auxEOL} returns a pointer to the first character
+of the next line, after having updated the coordinate information.
+This specification is the implementation of the canned description
+@code{ADA_COMMENT}.
+
+@iftex
+The remainder of this section describes the auxiliary scanners that
+are available in the Eli library, and also
+explains how to implement auxiliary scanners for
+tasks that are specific to your problem.
+@end iftex
+
+@menu
+* Available scanners::	Auxiliary scanners you can use directly
+* Building scanners::	How to construct your own auxiliary scanners
+@end menu
+
+@node Available scanners, Building scanners, , Auxiliary Scanners
+@subsection Available scanners
+
+All of the auxiliary scanners described in this section can be used simply
+by mentioning their names in a specification line.
+They can also be invoked from arbitrary C programs if the invoker includes
+the header file @file{ScanProc.h}.
+(The source code for that file is @file{$elipkg/Scan/ScanProc.h}.)
+
+The name of the file containing each available auxiliary scanner is also
+given in this section.
+It is not necessary to examine this file in order to use the auxiliary
+scanner, but sometimes an existing auxiliary scanner can be useful as a
+starting point for solving a similar problem
+(@pxref{Building scanners}).
+
+@table @code
+@item auxNUL
+@findex @code{auxNUL}
+This routine is invoked automatically when the first character of a
+sequence is the ASCII NUL character, a pattern that cannot be specified by
+a regular expression.
+In that case, the character sequence matched by the associated pattern is
+an empty sequence.
+If information remains in the current input file, @code{auxNUL} returns a
+pointer to the empty sequence at the beginning of that information.
+Effectively, this is a pointer to the new information.
+
+This routine is also invoked by any scanner that must accept a newline
+character and continue.
+Since an ASCII NUL character signalling the end of the current information
+in the buffer can occur immediately after any newline, a scanner that
+accepts a newline and continues must check for NUL.
+If a NUL is found, the scanner invokes @code{auxNUL}.
+Here is a typical code sequence that such a scanner might use.
+The variable @code{p} is the scan pointer and
+@code{start} points to the beginning of the current token:
+
+@example
+if (*p == '\0') @{
+  int current = p - start;
+  TokenStart = start = auxNUL(start, current);
+  p = start + current;
+  StartLine = p - 1;
+  if (*p == '\0') @{
+    /* Code to deal appropriately with end-of-file.
+     * Some of the possibilities are:
+     *   1. Output an error report and return p
+     *   2. Simply return p
+     *   3. Move to another file and continue
+     ***/
+  @}
+@}
+@end example
+
+If information remains in the current input file, the library version of
+@code{auxNUL} (@pxref{source, , Text Input, lib, Library Reference Manual})
+appends that information to the character sequence
+matched by the associated pattern, possibly relocating the character
+sequence matched by the associated pattern.
+It returns a pointer to the first character of the sequence matched by the
+associated pattern.
+Source code: @file{$elipkg/Scan/auxNUL.c}.
+
+To obtain different behavior when the first character of a sequence is the
+ASCII NUL character, supply your own routine with the name @code{auxNUL} in
+a type-@file{c} file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+
+@item auxEOF
+@findex @code{auxEOF}
+This routine is invoked automatically when the first character of a
+sequence is the ASCII NUL character, a pattern that cannot be specified by
+a regular expression, and no information remains in the current input file.
+In that case, the character sequence matched by the associated pattern is
+an empty sequence.
+
+The library version of
+@code{auxEOF} simply returns the argument supplied to it.
+Source code: @file{$elipkg/Scan/auxEOF.c}.
+
+To obtain different behavior when the first character of a sequence is the
+ASCII NUL character, and no information remains in the current input file,
+supply your own routine with the name @code{auxEOF} in a type-@file{c} file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+
+@item coordAdjust
+@findex @code{coordAdjust}
+Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information to reflect the tabs and newlines
+in that sequence.
+Source code: @file{$elipkg/Scan/coordAdjust.c}
+
+@item auxNewLine
+@findex @code{auxNewLine}
+Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information under the assumption that the last
+character of that sequence is a newline.
+(This is a special case that can be handled more efficiently than the
+general case, for which @code{coordAdjust} would be used.)
+Source code: @file{$elipkg/Scan/auxNewLine.c}
+
+@item auxTab
+@findex @code{auxTab}
+Leaves the character sequence matched by the associated pattern unchanged.
+Updates the coordinate information under the assumption that the last
+character of that sequence is a tab.
+(This is a special case that can be handled more efficiently than the
+general case, for which @code{coordAdjust} would be used.)
+Source code: @file{$elipkg/Scan/auxTab.c}
+
+@item auxEOL
+@findex @code{auxEOL}
+Extends the character sequence matched by the associated pattern to the end
+of the current line, including the terminating newline.
+Updates the coordinate information to reflect the new position.
+Source code: @file{$elipkg/Scan/auxScanEOL.c}
+
+@item auxNoEOL
+@findex @code{auxNoEOL}
+Extends the character sequence matched by the associated pattern to the end
+of the current line, but does not include the terminating newline.
+Updates the coordinate information to reflect the new position.
+Source code: @file{$elipkg/Scan/auxNoEOL.c}
+
+@item auxCString
+@findex @code{auxCString}
+Completes a C string constant when provided with the opening quote
+(@code{"}).
+Updates the coordinate information to reflect the tabs and newlines
+in that sequence.
+Source code: @file{$elipkg/Scan/CchStr.c}.
+
+@item auxCChar
+@findex @code{auxCChar}
+Completes a C character constant when provided with the opening quote
+(@code{'}).
+Source code: @file{$elipkg/Scan/CchStr.c}.
+
+@item auxCComment
+@findex @code{auxCComment}
+Completes a C comment when provided with the opening delimiter
+(@code{/*}).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+
+The comment is terminated by the delimiter @code{*/}, and may not contain
+nested comments.
+
+Source code: @file{$elipkg/Scan/Ccomment.c}
+
+@item auxM2String
+@findex @code{auxM2String}
+Completes a string constant when provided with the opening quote,
+possibly followed by other characters.
+Updates the coordinate information to reflect the tabs
+in that sequence.
+
+The string constant is terminated by an occurrence of the opening quote.
+If a newline or the end of the input text is reached before the constant
+terminates, @code{auxM2String} reports an error.
+
+For Modula2, the opening quote is either the character @code{'} or the
+character @code{"}.
+This auxiliary scanner simply uses the first character of the string matched
+by the regular expression as the opening quote character, so it can
+complete any sequence of characters that is terminated by
+the first character,
+and is contained wholly within a single source line.
+Note that the characters matched by the regular expression are @emph{not}
+re-scanned for a closing quote.
+
+Source code: @file{$elipkg/Scan/M2chStr.c}
+
+@item auxM3Comment
+@findex @code{auxM3Comment}
+Completes a Modula2 or Modula3 comment when provided with the opening
+delimiter (@code{(*}).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+
+The comment is terminated by the delimiter @code{*)}, and may contain
+nested comments.
+
+Source code: @file{$elipkg/Scan/M3comment.c}
+
+@item auxPascalString
+@findex @code{auxPascalString}
+Completes a string constant when provided with the opening quote,
+possibly followed by other characters.
+Updates the coordinate information to reflect the tabs
+in that sequence.
+
+The string constant is terminated by an occurrence of the opening quote
+that is not immediately followed by another occurrence of the opening
+quote.
+(Thus the opening quote character may appear doubled within the string.)
+If a newline or the end of the input text is reached before the constant
+terminates, @code{auxPascalString} reports an error.
+
+For Pascal, the opening quote is the character @code{'}.
+This auxiliary scanner simply uses the first character of the string matched
+by the regular expression as the opening quote character, so it can
+complete any sequence of characters that is terminated by
+a single occurrence of the first character,
+and not by two successive occurrences of that character,
+and is contained wholly within a single source line.
+Note that the characters matched by the regular expression are @emph{not}
+re-scanned for a closing quote.
+
+Source code: @file{$elipkg/Scan/pascalStr.c}
+
+@item auxPascalComment
+@findex @code{auxPascalComment}
+Completes a Pascal comment when provided with the opening delimiter
+(either @code{@{} or @code{(*}).
+Updates the coordinate information to reflect the tabs and newlines
+in the comment.
+
+A comment is terminated by either the delimiter @code{@}} or the delimiter
+@code{*)}, regardless of the opening delimiter.
+Comments may @emph{not} be nested.
+
+Source code: @file{$elipkg/Scan/pascalCom.c}
+
+@item Ctext
+@findex @code{Ctext}
+Completes a C compound statement when provided with the opening brace
+(@code{@{}).
+Updates the coordinate information to reflect the tabs and newlines
+in the compound statement.
+
+A compound statement is terminated by the matching close brace (@code{@}}).
+Compound statements may be nested, and unmatched braces may be embedded in
+C strings, character constants or comments.
+
+Source code: @file{$elipkg/Scan/Ctext.c}
+@end table
+
+@node Building scanners, , Available scanners, Auxiliary Scanners
+@subsection Building scanners
+
+All auxiliary scanners obey the same interface conventions:
+
+@example
+extern char *Name(char *start, int length);
+/* Auxiliary scanner "Name"
+ *   On entry-
+ *     start points to the first character matching the associated
+ *       regular expression
+ *     length=number of characters matching the associated
+ *       regular expression
+ *   On exit-
+ *     Name points to the first character that does not belong to the
+ *       character sequence being classified
+ ***/
+@end example
+
+@noindent
+Unless otherwise stated, @code{Name>=start} on return,
+and all characters in the half-open interval @code{[start,Name)}
+are in memory.
+
+Any auxiliary scanner that passes over tabs or newline characters must
+update coordinate information
+(@pxref{Coordinates, , Maintaining the Source Text Coordinates}).
+In addition, if the character following a newline is an ASCII NUL
+then the source buffer must be refilled
+(@pxref{source, , Text Input, lib, Library Reference Manual}).
+The easiest way to develop an auxiliary scanner is therefore to start with
+one from the library that solves a similar problem.
+Source file names for all of the available auxiliary scanners are given
+in the previous subsection.
+To obtain a copy of (say) the source code for @code{auxNUL} as file
+@file{MyScanner.c} in your current directory, give the Eli request:
+
+@example
+-> $elipkg/Scan/auxNUL.c > MyScanner.c
+@end example
+
+@noindent
+After modifying @file{MyScanner.c}, simply add its name to your
+type-@file{specs} file to make it available.
+
+@node Token Processors, , Auxiliary Scanners, Specifications
+@section Token Processors
+
+A token processor is a routine to be invoked after the pattern described
+by the regular expression has been matched, and after any associated
+auxiliary scanner has been invoked.
+It is passed a pointer to the matching character sequence,
+the length of that sequence,
+a pointer to an integer variable containing the classification, and
+a pointer to an integer variable to hold a value
+representing the character sequence.
+The token processor may change the classification,
+and may compute a value to represent the sequence.
+
+A token processor is invoked by giving its name, surrounded by
+brackets (@code{[ ]}), on the same line as the associated
+regular expression:
+
+@example
+@findex @code{mkint}
+Integer: $[0-9]+  [mkint]
+@end example
+@noindent
+This specification invokes the token processor @code{mkint}
+whenever a sequence of digits is recognized.
+The arguments are a pointer to the first digit,
+the length of the digit sequence,
+a pointer to an integer variable containing the classification code for
+@code{Integer},
+and a pointer to an integer variable to hold a value
+representing the digit sequence.
+As described below, @code{mkint} leaves the character sequence and
+its classification unchanged and
+sets the value to the decimal integer denoted by the digit sequence.
+This specification is the implementation of the canned description
+@code{PASCAL_INTEGER}.
+
+@iftex
+This section describes the token processors that are available in the
+Eli library, and also explains how to implement token processors for
+tasks that are specific to your problem.
+@end iftex
+
+@menu
+* Available Processors::	Token processors you can use directly
+* Building Processors::		How to construct your own token processors
+@end menu
+
+@node Available Processors, Building Processors, , Token Processors
+@subsection Available processors
+
+All of the token processors described in this section can be used simply
+by mentioning their names in a specification line.
+They can also be invoked from arbitrary C programs if the invoker includes
+the header file @file{ScanProc.h}.
+(The source code for that file is @file{$elipkg/Scan/ScanProc.h}.)
+
+The name of the file containing each available token processor is also
+given in this section.
+It is not necessary to examine that file in order to use the token
+processor, but sometimes an existing token processor can be useful
+as a starting point for solving a similar problem
+(@pxref{Building Processors}).
+
+@table @code
+@item c_mkchar
+@findex @code{c_mkchar}
+Assumes that the character sequence has the form of a C character constant.
+Sets the value to the integer encoding of that character constant.
+Does not alter the initial classification.
+Source file: @file{$elipkg/Scan/CchStr.c}.
+
+@item c_mkint
+@findex @code{c_mkint}
+Assumes that the character sequence has the form of a C integer constant.
+Sets the value to the integer represented by that constant.
+Does not alter the initial classification.
+Source file: @file{$elipkg/Scan/int.c}.
+
+@item c_mkstr
+@findex @code{c_mkstr}
+Assumes that the character sequence has the form of a C string constant.
+Stores a new copy of that constant in the character storage module
+and sets the value to the index of that copy
+(@pxref{storage, , Character String Storage, lib, Library Reference
+Manual}).
+If the character constant contains an escape sequence representing ASCII
+NUL, it is truncated and an error report is issued.
+The last character of the stored constant is the character preceding the
+first NUL.
+Does not alter the initial classification.
+Source file: @file{$elipkg/Scan/CchStr.c}.
+
+@item EndOfText
+@findex EndOfText
+This processor is invoked automatically
+when the end of the input text is reached.
+It assumes that the character sequence is empty, and does nothing.
+Source file: @file{$elipkg/Scan/dflteot.c}.
+
+To obtain different behavior when the end of the input text is reached,
+supply your own routine with the name @code{EndOfText} in
+a type-@file{c} file.
+The easiest way to do this is to copy the source code for the library routine
+into a local file and then modify it.
+
+@item lexerr
+@findex lexerr
+Reports that the character sequence is not a token.
+Does not alter the initial classification, and does not compute a value.
+There is no source file for this token processor; it is a component of the
+scanner itself, but its interface is exported so that it can be used by
+other modules.
+
+@item mkidn
+@findex @code{mkidn}
+Looks the character sequence up in the identifier table
+(@pxref{identifier, , Unique Identifier Management, lib, Library Reference
+Manual}).
+If it is not in the table, it is added with its classification unchanged.
+Otherwise @code{mkidn} changes the initial classification to the
+classification given by the identifier table.
+(The identifier table can be initialized with pre-classified character
+strings, @pxref{Literal Symbols}.)
+
+In any case, @code{mkidn} sets the value to the (unique) index
+of the character sequence in the character storage module
+(@pxref{storage, , Character String Storage, lib, Library Reference
+Manual}).
+Source file: @file{$elipkg/Scan/idn.c}.
+
+@item mkint
+@findex @code{mkint}
+Assumes that the character sequence consists of one or more decimal digits.
+Sets the value to the integer denoted by that sequence of digits.
+Does not alter the initial classification.
+Source file: @file{$elipkg/Scan/int.c}.
+
+@item mkstr
+@findex @code{mkstr}
+Stores a new copy of the character sequence in the character storage module
+and sets the value to the index of that copy
+(@pxref{storage, , Character String Storage, lib, Library Reference
+Manual}).
+Does not alter the initial classification.
+Source file: @file{$elipkg/Scan/str.c}.
+
+@item modula_mkint
+@findex @code{modula_mkint}
+Assumes that the character sequence consists of one or more hexadecimal
+digits, possibly followed by a radix marker.
+Sets the value to the integer denoted by that sequence of digits,
+interpreted in the given radix.
+Does not alter the initial classification.
+
+Valid radix markers are @code{B} and @code{C} (indicating radix 8), and
+@code{H} (indicating radix 16).
+Sequences of digits not followed by a radix marker are assumed to be radix
+10.
+
+Source file: @file{$elipkg/Scan/M2int.c}.
+
+@end table
+
+@node Building Processors, , Available Processors, Token Processors
+@subsection Building processors
+
+All token processors obey the same interface conventions:
+
+@example
+extern void Name(const char *start, int length, int *syncode, int *intrinsic);
+/* Token processor "Name"
+ *   On entry-
+ *     start points to the first character of the sequence being classified
+ *     length=length of the sequence being classified
+ *     syncode points to a location containing the initial classification
+ *     intrinsic points to a location to receive the value
+ *   On exit-
+ *     syncode points to a location containing the final classification
+ *     intrinsic points to a location containing the value (if relevant)
+ ***/
+@end example
+
+The token processor can change the classification of the character sequence.
+It may carry out any computation whatsoever, involving arbitrary modules,
+to obtain the information it needs.
+Eli generates a file called @file{termcode.h}
+@findex termcode.h
+@findex encodings of non-literals
+that contains @code{#define} directives specifying the classification code
+for each symbol appearing before a colon at the beginning of a line in a
+type-@file{gla} file.
+Thus if @code{name: ...} is a line in a type-@file{gla} file,
+a processor can use the following sequence to change the
+classification of any character sequence, including one that is initially
+classified as a comment, to @code{name}:
+
+@example
+#include "termcode.h"
+...
+   *syncode = name;
+...
+@end example
+
+All comments are classified by the value of the symbol @code{NORETURN},
+exported by the lexical analyzer module in file @file{gla.h}.
+A token processor can cause the character sequence matched by its
+associated regular expression to be considered a comment by setting the
+classification to @code{NORETURN}:
+
+@example
+@findex @code{NORETURN}
+#include "gla.h"
+...
+   *syncode = NORETURN;
+...
+@end example
+
+The easiest way to develop a token processor is to start with
+one from the library that solves a similar problem.
+Source file names for all of the available token processors are given
+in the previous subsection.
+To obtain a copy of (say) the source code for @code{EndOfText} as file
+@file{MyProcessor.c} in your current directory, give the Eli request:
+
+@example
+-> $elipkg/Scan/dflteot.c > MyProcessor.c
+@end example
+
+@noindent
+After modifying @file{MyProcessor.c}, simply add its name to your
+type-@file{specs} file to make it available.
+
+@node Canned Descriptions, White Space, Specifications, Top
+@chapter Canned Symbol Descriptions
+@findex canned symbols
+@findex predefined symbols
+@findex built-in symbols
+For many applications, the exact structure of the symbols that must be
+recognized is not important or the problem description specifies
+that the symbols should be the same as the symbols used in some other
+situation (e.g. identifiers might be specified to use the same format as
+C identifiers).
+To cover this common situation, Eli provides a set of canned symbol
+descriptions.
+
+To use a canned description, simply write the canned description's
+identifier in a specification instead of writing a regular expression.
+For example, the following type-@file{gla} file tells Eli that the input
+text will contain C-style identifiers and strings, Ada-style comments,
+and Pascal-style integers:
+
+@findex @code{C_IDENTIFIER}
+@findex @code{ADA_COMMENT}
+@findex @code{C_STRING_LIT}
+@findex @code{PASCAL_INTEGER}
+@example
+Identifier: C_IDENTIFIER
+            ADA_COMMENT
+String:     C_STRING_LIT
+Integer:    PASCAL_INTEGER
+@end example
+
+@code{Identifier}, @code{String} and @code{Integer} would appear as
+non-literal terminal symbols in the context-free grammar defining the
+phrase structure of this input text
+(@pxref{Notation, , How to describe a context-free grammar, syntax, Syntax
+Analysis}).
+
+The available canned descriptions are defined later in this section.
+All of these definitions include a regular expression, and some include
+auxiliary scanners and/or token processors.
+An auxiliary scanner or token processor specified by a canned description
+can be overridden by nominating a different one in the specification that
+names the canned description.
+For example, the canned description @code{PASCAL_STRING} includes the token
+processor @code{mkstr} (@pxref{Available scanners}).
+This token processor stores multiple copies of the same string in the
+character storage module.
+The following specification overrides @code{mkstr} with @code{mkidn}, which
+stores only one copy of each distinct string:
+
+@findex @code{PASCAL_STRING}
+@findex @code{mkidn}
+@example
+Str: PASCAL_STRING [mkidn]
+@end example
+
+@noindent
+The auxiliary scanner @code{auxPascalString}, included in the canned
+description, is not overridden by this specification.
+
+@iftex
+The remainder of this section characterizes the canned descriptions that are
+available in the Eli library, and also gives their definitions.
+@end iftex
+
+@menu
+* Available Descriptions::	Names and informal characterizations
+* Definitions of Descriptions::	Specifications substituted for the names
+@end menu
+
+@node Available Descriptions, Definitions of Descriptions, , Canned Descriptions
+@section Available Descriptions
+
+Each of the identifiers in the following list is the name of a canned
+description specifying the lexical structure of some component of an
+existing programming language.
+Here they are simply characterized by the role they play in that language.
+A complete definition of each, consisting of a regular expression, possibly
+an auxiliary scanner name, and possibly a token processor name, is given in
+the next section.
+
+When building a new language, it is a good idea to use canned descriptions
+for lexical components:
+Time is not wasted in deciding on their form, mistakes are not made in
+their implementation, and users are familiar with them.
+
+The list also provides canned descriptions for spaces, tabs and newlines.
+These white space characters are treated as comments by default.
+If, however, you define any pattern that will accept a white space
+character in its first position, this pattern overrides the
+default treatment and that white space character will be accepted @emph{only}
+in contexts that are specified explicitly
+(@pxref{White Space, , Spaces Tabs and Newlines}).
+For example, suppose that the following pattern were defined
+and that no other patterns contain spaces:
+
+@example
+Separator:  $\040+#\040+
+@end example
+
+@noindent
+In that situation, a space will be accepted only if it is part of a
+@code{Separator}.
+To treat spaces that are not part of a @code{Separator} as comments,
+include the canned description @code{SPACES} as a comment specification:
+
+@example
+Separator:  $\040+#\040+
+            SPACES
+@end example
+
+Note that only a white space character that appears at the beginning of a
+pattern loses its default interpretation in this way.
+In this example, neither the tab nor the newline appeared at the beginning
+of a pattern and therefore tabs and newlines continue to be treated as
+comments.
+
+@table @code
+@item C_IDENTIFIER, C_INTEGER, C_INT_DENOTATION, C_FLOAT, C_STRING_LIT, C_CHAR_CONSTANT, C_COMMENT
+@findex @code{C_IDENTIFIER}
+@findex @code{C_INTEGER}
+@findex @code{C_INT_DENOTATION}
+@findex @code{C_FLOAT}
+@findex @code{C_STRING_LIT}
+@findex @code{C_CHAR_CONSTANT}
+@findex @code{C_COMMENT}
+Identifiers, integer constants, floating point constants, string
+literals, character literals, and comments from the C programming
+language, respectively.
+
+@code{C_INTEGER} does not permit the L or U flags, but does correctly
+accept all other C integer denotations.
+By default, it uses @code{c_mkint} to convert the denotation to an
+internal @code{int} value.
+@code{c_mkint} obeys the C rules for determining the radix of the conversion.
+
+@code{C_INT_DENOTATION} accepts all valid ANSI C integer denotations.
+By default, it uses @code{mkstr} to deliver a unique string table index for
+every occurrence of a denotation.
+This behavior is often overridden by adding @code{[mkidn]}:
+
+@example
+Integer:  C_INT_DENOTATION [mkidn]
+@end example
+
+@noindent
+In this case, two identical denotations will have the same string table
+index.
+
+@item C_IDENTIFIER_ISO
+@findex C_IDENTIFIER_ISO
+Character sequences obeying the the definition of a C identifier, but
+accepting all ISO/IEC 8859-1 letters.
+Care must be taken in using this description because these identifiers are
+not acceptable to most C compilers.
+That means they cannot usually be used as (parts of) identifiers in
+generated code.
+
+@item PASCAL_IDENTIFIER, PASCAL_INTEGER, PASCAL_REAL, PASCAL_STRING, PASCAL_COMMENT
+@findex @code{PASCAL_IDENTIFIER}
+@findex @code{PASCAL_INTEGER}
+@findex @code{PASCAL_REAL}
+@findex @code{PASCAL_STRING}
+@findex @code{PASCAL_COMMENT}
+Identifiers, integer constants, real constants, string literals, and
+comments from the Pascal programming language, respectively.
+@item MODULA2_INTEGER, MODULA2_CHARINT, MODULA2_LITERALDQ, MODULA2_LITERALSQ, MODULA2_COMMENT
+@findex @code{MODULA2_INTEGER}
+@findex @code{MODULA2_CHARINT}
+@findex @code{MODULA2_LITERALDQ}
+@findex @code{MODULA2_LITERALSQ}
+@findex @code{MODULA2_COMMENT}
+Integer constants, characters specified using character codes, string
+literals delimited by double and single quotes, and comments from the
+Modula-2 programming language, respectively.
+@item MODULA3_COMMENT
+@findex @code{MODULA3_COMMENT}
+Comments from the Modula-3 programming language.
+@item ADA_IDENTIFIER, ADA_COMMENT
+@findex @code{ADA_IDENTIFIER}
+@findex @code{ADA_COMMENT}
+Identifiers and comments from the Ada programming language.
+@item AWK_COMMENT
+@findex @code{AWK_COMMENT}
+Comments from the AWK programming language.
+@item SPACES
+@findex @code{SPACES}
+Sequence of one or more spaces.
+@item TAB
+@findex @code{TAB}
+A single horizontal tab.
+@item NEW_LINE
+@findex @code{NEW_LINE}
+A single newline.
+@end table
+
+@node Definitions of Descriptions, , Available Descriptions, Canned Descriptions
+@section Definitions of Canned Descriptions
+
+Eli textually replaces a reference to a canned description with its
+definition.
+If a user nominates an auxiliary scanner and/or a token processor
+for a canned description, that overrides the corresponding nomination
+appearing in the definition of the canned description.
+
+The following is an alphabetized list of the canned descriptions
+available in the Eli library, with their definitions.
+Use this list as a formal definition, and as an example for constructing
+specifications.
+(@code{C_FLOAT} and @code{PASCAL_REAL} have definitions that are too long
+to fit on one line of this document.
+Each is, however, a single line in the specification file.)
+
+@table @code
+@findex @code{ADA_COMMENT}
+@findex @code{auxEOL}
+@item ADA_COMMENT
+@code{$-- (auxEOL)}
+@findex @code{ADA_IDENTIFIER}
+@item ADA_IDENTIFIER
+@code{$[a-zA-Z](_?[a-zA-Z0-9])* [mkidn]}
+@findex @code{AWK_COMMENT}
+@item AWK_COMMENT
+@code{$# (auxEOL)}
+@findex @code{C_COMMENT}
+@findex @code{auxCComment}
+@item C_COMMENT
+@code{$"/*" (auxCComment)}
+@findex @code{C_CHAR_CONSTANT}
+@findex @code{auxCChar}
+@findex @code{c_mkchar}
+@item C_CHAR_CONSTANT
+@code{$' (auxCChar) [c_mkchar]}
+@findex @code{C_FLOAT}
+@findex @code{mkstr}
+@item C_FLOAT
+@code{$((([0-9]+\.[0-9]*|\.[0-9]+)((e|E)(\+|-)?[0-9]+)?)|
+([0-9]+(e|E)(\+|-)?[0-9]+))[fFlL]? [mkstr]}
+@findex @code{C_IDENTIFIER}
+@findex @code{mkidn}
+@item C_IDENTIFIER
+@code{$[a-zA-Z_][a-zA-Z_0-9]* [mkidn]}
+@findex @code{C_INTEGER}
+@findex @code{c_mkint}
+@item C_INTEGER
+@code{$([0-9]+|0[xX][0-9a-fA-F]*) [c_mkint]}
+@findex @code{C_INT_DENOTATION}
+@findex @code{mkstr}
+@item C_INT_DENOTATION
+@code{$([1-9][0-9]*|0[0-7]*|0[xX][0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)? [mkstr]}
+@findex @code{C_STRING_LIT}
+@findex @code{mkstr}
+@findex @code{auxCString}
+@item C_STRING_LIT
+@code{$\" (auxCString) [mkstr]}
+@findex @code{MODULA_INTEGER}
+@item MODULA_INTEGER
+@code{$[0-9][0-9A-Fa-f]*[BCH]? [modula_mkint]}
+@findex @code{MODULA2_COMMENT}
+@findex @code{MODULA3_COMMENT}
+@findex @code{auxM3Comment}
+@item MODULA2_COMMENT, MODULA3_COMMENT
+@code{$\(\* (auxM3Comment)}
+@findex @code{MODULA2_CHARINT}
+@findex @code{modula_mkint}
+@item MODULA2_CHARINT
+@code{$[0-9][0-9A-Fa-f]*C [modula_mkint]}
+@findex @code{MODULA2_INTEGER}
+@item MODULA2_INTEGER
+@code{$[0-9][0-9A-Fa-f]*[BH]? [modula_mkint]}
+@findex @code{MODULA2_LITERALDQ}
+@findex auxM2@code{StringDQ}
+@findex @code{mkstr}
+@item MODULA2_LITERALDQ
+@code{$\" (auxM2String) [mkstr]}
+@findex @code{MODULA2_LITERALSQ}
+@findex auxM2@code{StringSQ}
+@item MODULA2_LITERALSQ
+@code{$\' (auxM2String) [mkstr]}
+@findex @code{PASCAL_COMMENT}
+@findex @code{auxPascalComment}
+@item PASCAL_COMMENT
+@code{$"@{"|"(*" (auxPascalComment)}
+@findex @code{PASCAL_IDENTIFIER}
+@item PASCAL_IDENTIFIER
+@code{$[a-zA-Z][a-zA-Z0-9]*  [mkidn]}
+@findex @code{PASCAL_INTEGER}
+@item PASCAL_INTEGER
+@code{$[0-9]+  [mkint]}
+@findex @code{PASCAL_REAL}
+@item PASCAL_REAL
+@code{$(([0-9]+\.[0-9]+)((e|E)(\+|-)?[0-9]+)?)|([0-9]+(e|E)(\+|-)?[0-9]+)
+[mkstr]}
+@findex @code{PASCAL_STRING}
+@findex @code{auxPascalString}
+@item PASCAL_STRING
+@code{$' (auxPascalString) [mkstr]}
+@item SPACES
+@code{$\040+}
+@findex \040+
+@item TAB
+@code{$\t (auxTab)}
+@findex @code{auxTab}
+@item NEW_LINE
+@code{$[\r\n] (auxNewLine)}
+@findex @code{NEW_LINE}
+@end table
+
+@node White Space, Literal Symbols, Canned Descriptions, Top
+@chapter Spaces, Tabs and Newlines
+
+An Eli-generated processor examines its input text sequentially,
+recognizing character sequences in the order in which they appear.
+At each point it matches the longest possible sequence,
+classifies that sequence,
+and then begins anew with the next character.
+If the first character of a sequence is a space, tab or newline
+@findex space defaults
+@findex tab defaults
+@findex newline defaults
+@findex white space defaults
+@findex default behavior for white space
+then the default behavior is to classify the sequence consisting of
+that character and all succeeding spaces, tabs and newlines as a comment.
+This behavior is consistent with the definitions of most programming
+languages, and is reasonable in a large fraction of text processing tasks.
+
+Even though tabs and newlines are considered comments by default, some
+processing is needed to account for their effect on the source text
+position.
+Eli-generated processors define a two-dimensional coordinate system 
+(line number and column index), which they use to link error reports to the
+source text
+(@pxref{error, , Source Text Coordinates and Error Reporting, lib, Library
+Reference Manual}).
+
+White space may be significant in two situations:
+
+@enumerate
+@item
+Within a character sequence, such as spaces in a string
+@item
+On its own, such as line boundaries in a type-@file{gla} file
+@end enumerate
+
+@noindent
+Appropriate white space may be specified as part of the description of a
+complete character sequence (provided that it is not at the beginning)
+without disrupting the default behavior.
+(Coordinate processing for tabs and newlines must be provided if they are
+allowed within the sequence.)
+The default behavior is overridden, however, by any specification of white
+space on its own or at the beginning of another character sequence.
+Overriding is specific to the white space character used:
+a specification of new behavior for a space overrides the default behavior
+for a space, but not the default behavior for a tab or newline.
+
+@iftex
+The following sections explain how coordinate processing is provided for
+newlines and tabs, and how to re-establish default behavior of white space
+on its own when white space can occur at the beginning of another character
+sequence.
+@end iftex
+
+@menu
+* Coordinates::	Maintaining the source text coordinates
+* Skipping::	Restoring the default behavior for white space
+* Illegal::	Making White Space Illegal
+@end menu
+
+@node Coordinates, Skipping, , White Space
+@section Maintaining the Source Text Coordinates
+
+The raw data for determining coordinates are two variables,
+@code{LineNum} (an integer variable exported by the error module,
+@pxref{error, , Source Text Coordinates and Error Reporting, lib, Library
+Reference Manual}) and
+@code{StartLine} (a character pointer exported by the lexical analyzer).
+The following invariant must be maintained on these variables:
+
+@example
+@findex @code{LineNum}
+@findex @code{StartLine}
+LineNum=Cumulative index of the current line in the input text
+(Pointer to current character)-StartLine=index of the current character
+    in the current line
+@end example
+
+@noindent
+This invariant must hold whenever
+the lexical analyzer begins to process a character sequence.
+It may be destroyed during the processing of that sequence, but must be
+re-established before processing of the next character sequence begins.
+
+@menu
+* Updating with code::		How the invariant is maintained
+* Updating with scanners::	Auxiliary scanners maintaining the invariant
+@end menu
+
+@node Updating with code, Updating with scanners, , Coordinates
+@ifinfo
+@subsubheading How the invariant is maintained
+@end ifinfo
+
+@code{LineNum} is initially 1, and must be incremented each time the
+lexical analyzer advances beyond a newline character in the input text.
+At the beginning of each line, @code{StartLine} must be set to point to the
+character position preceding the first character of that line.
+As the current character pointer is advanced, the condition on
+@code{StartLine} is maintained automatically unless the character pointer
+advances over a tab character.
+
+A tab character in the input text represents one or more spaces, depending
+upon its position relative to the next tab stop, but it occupies only one
+character position.
+If the tab represents @var{n} spaces, @var{n-1} must be subtracted from
+@code{StartLine} to maintain the invariant.
+
+Because the value of @var{n} depends upon the index of the current
+character and the settings of the tab stops in the line, Eli provides an
+operation @code{TABSIZE(i)} (defined in file @file{tabsize.h})
+to compute it.
+The argument @code{i} is the index in the current line of the character
+position beyond that containing the tab, and the result is
+the number of spaces that must be added to reach the next tab stop.
+
+Suppose that @code{p} is a pointer to the current input character.
+Here is a code sequence that maintains the condition on @code{StartLine}
+when a tab is encountered:
+
+@example
+#include "tabsize.h"
+...
+  if ((*p++) == '\t') StartLine -= TABSIZE(p - StartLine);
+...
+@end example
+
+@code{TABSIZE} defines the positions of the tab stops.
+The default implementation provides tab stops every 8 character positions.
+A user changes this default by supplying a new version of the Eli library
+routine @code{TabSize}.
+The source code for the library version of this routine can be obtained by
+making the following request:
+
+@example
+-> $elipkg/gla/tabsize.c > MyTabSize.c
+@end example
+
+@noindent
+After modifying the routine appropriately, add the name @code{MyTabSize.c}
+to your type-@file{specs} file.
+
+@node Updating with scanners, , Updating with code, Coordinates
+@ifinfo
+@subsubheading Auxiliary scanners maintaining the invariant
+@end ifinfo
+
+The coordinate invariant is maintained automatically if no patterns
+matching tabs or newline characters are defined, and no auxiliary scanners
+that advance over tabs or newline characters are provided by the user.
+If such patterns or scanners are needed, then the user must define them in
+such a way that they maintain the coordinate invariant.
+
+Three auxiliary scanners
+(@code{coordAdjust}, @code{auxTab} and @code{auxNewLine})
+are available to maintain the coordinate invariant
+for a regular expression that matches tabs or newline characters
+(@pxref{Available scanners}).
+While these auxiliary scanners could be invoked by user-defined auxiliary
+scanners that advance over tabs or newline characters, it is often
+simpler to include the appropriate code to maintain the coordinate
+invariant.
+
+For an example of the use of code in an auxiliary scanner to maintain the
+coordinate invariant, see the library version of @code{auxNUL}.
+
+@node Skipping, Illegal, Coordinates, White Space
+@section Restoring the Default Behavior for White Space
+
+When a pattern beginning with a space, tab or newline character overrides
+the default behavior for that character, the character will only be
+accepted as part of an explicit pattern.
+The default behavior can be restored by using one of the canned
+descriptions @code{SPACES}, @code{TAB} or @code{NEW_LINE} respectively
+(@pxref{Available Descriptions}):
+
+@example
+@findex @code{SPACES}
+@findex @code{\040}
+Define:  $\040+define
+         SPACES
+@end example
+
+@noindent
+Here the pattern for @code{Define} overrides the default behavior for space
+characters.
+If this were the only specification, spaces in the input text
+would only be accepted if they occurred immediately before the character
+sequence @code{define}.
+By adding the canned description @code{SPACES}, and classifying the
+sequences it matches as comments, the default behavior is restored.
+
+Note that this specification is ambiguous:
+A sequence of spaces followed by @code{define} could either match the
+@code{Define} pattern or the spaces alone could be classified as
+the comment specified by @code{SPACES}.
+The principle of the longest match guarantees that in this case the
+sequence will be classified as @code{Define}
+(@pxref{Ambiguity}).
+
+@node Illegal, , Skipping, White Space
+@section Making White Space Illegal
+
+When white space is illegal at the beginning of a pattern, the default
+treatment of white space must be overridden with an explicit comment
+pattern.
+Because the sequence is specified to be a comment, nothing will be returned
+to the parser.
+A token processor like @code{lexerr} can be used to report the error:
+
+@example
+@findex @code{Reporting a lexical error}
+@findex @code{Lexical errors}
+@findex @code{Errors, lexical}
+	SPACES	[lexerr]
+@end example
+
+The canned descriptions @code{SPACES}, @code{TAB} and @code{NEW_LINE}
+should be used as patterns in such specifications because they handle all
+of the coordinate updating
+(@pxref{Coordinates,,Maintaining the source text coordinates}).
+
+@node Literal Symbols, Case Insensitivity, White Space, Top
+@chapter Literal Symbols
+
+If the generated processor includes a parser
+(@pxref{Top, Parsing, , syntax, Syntactic Analysis}),
+then Eli will extract the descriptions of any literal terminal symbols from
+the context-free grammar defining that parser and add them to the
+specifications provided by type-@file{gla} files.
+For example, consider the following context-free grammar:
+
+@example
+Program: Expression .
+Expression: Evaluation / Binding .
+Evaluation:
+  Constant / BoundVariable /
+  '(' Expression '+' Expression ')' /
+  '(' Expression '*' Expression ')' .
+Binding: 'let' BoundVariable '=' Evaluation 'in' Expression .
+@end example
+
+@noindent
+This grammar has nine terminal symbols.
+Two (@code{Constant} and @code{BoundVariable}) are given by identifiers,
+and the other seven (@code{(}, @code{)}, @code{+}, @code{*}, @code{let},
+@code{=} and @code{in}) are given by literals.
+
+Only the character sequences to be classified as @code{Constant} or
+@code{BoundVariable}, and those to be classified as comments, need be
+defined by type-@file{gla} files.
+Descriptions of the symbols given as literals will be automatically
+extracted from the grammar by Eli.
+Thus the lexical analyzer for this language might be described by a single
+type-@file{gla} file containing the following:
+
+@example
+Constant:      PASCAL_INTEGER
+BoundVariable: PASCAL_IDENTIFIER
+               PASCAL_COMMENT
+@end example
+
+@menu
+* Overriding::	Overriding the Default Treatment of Literal Symbols
+* Surrogates::	Using Literal Symbols to Represent Other Things
+@end menu
+
+@node Overriding, Surrogates, , Literal Symbols
+@section Overriding the Default Treatment of Literal Symbols
+
+By default, a literal terminal symbol specified in a context-free grammar
+supplied to Eli will be recognized as though it had been specified by the
+appropriate regular expression.
+Thus the literal symbols @code{'+'} and @code{'let'} will be recognized as
+though the following specifications had been given by the user:
+
+@example
+Plus:  $\+
+Let:   $let
+@end example
+
+@noindent
+(Here @code{Plus} and @code{Let} are arbitrary identifiers describing the
+initial classifications of the literal symbols.
+No such identifiers are actually supplied by Eli, but the literal symbols
+are @emph{not} initially classified as comments.)
+
+In some situations it is useful to carry out more complex operations at the
+time the literal symbol is recognized.
+In this case, the user must do two things:
+
+@enumerate
+@item
+Mark the literal symbol as being a special case.
+
+@item
+Provide a specification for the literal symbol.
+@end enumerate
+
+@menu
+* Override example::	A situation in which a complex operation is useful
+* The delit file::	Marking the literal symbol as a special case
+* Specifying behavior::	Providing a specification for the literal symbol
+@end menu
+
+@node Override example, The delit file, , Overriding
+@ifinfo
+@subsubheading A situation in which a complex operation is useful
+@end ifinfo
+
+As a concrete example, suppose that @code{%%} were used as a major separator
+in the input text and could appear either once or twice.
+Assume that the first occurrence is required, and the second is optional.
+All text following the second occurrence is to be ignored.
+
+One approach to this problem would be to count the number of occurrences of
+the literal symbol @code{%%}, advancing to the end of the input text after
+the second.
+This could be done by an auxiliary scanner (@pxref{Auxiliary Scanners})
+that either returns a pointer to the character following the @code{%%} or
+a pointer to the ASCII NUL terminating the input text,
+and a token processor (@pxref{Token Processors})
+that reclassifies the second occurrence of @code{%%} as a comment.
+The grammar would specify only the required first occurrence of @code{%%}.
+
+@node The delit file, Specifying behavior, Override example, Overriding
+@ifinfo
+@subsubheading Marking the literal symbol as a special case
+@end ifinfo
+
+In order to mark the literal symbol @code{%%} as a special case that
+should not receive the default treatment, the user must supply a
+type-@file{delit} file specifying that symbol as a regular expression.
+The entry in the type-@file{delit} file also needs to define an identifier
+to represent the classification:
+
+@example
+$%%  PercentPercent
+@end example
+
+Each line of a type-@file{delit} file consists of a regular expression and
+an identifier, separated by white space.
+The regular expression must describe a literal symbol appearing in a
+context-free grammar supplied to Eli.
+That literal symbol will not be incorporated automatically into the
+generated lexical analyzer; it must be specified explicitly by the user.
+The identifier will be given the appropriate value by an Eli-generated
+@code{#define} directive in file @file{litcode.h}.
+
+@node Specifying behavior, , The delit file, Overriding
+@ifinfo
+@subsubheading Providing a specification for the literal symbol
+@end ifinfo
+
+In our example, @code{%%} could be specified by the following line of a
+type-@file{gla} file:
+
+@example
+  $%%  (SkipOrNot) [CommentOrNot]
+@end example
+
+@noindent
+Initially, the separator will be classed as a comment because there is no
+identifier preceding the regular expression.
+@code{SkipOrNot} will use a state variable to decide whether or not to skip
+text (@pxref{Building scanners}),
+while @code{CommentOrNot} will use the same state variable to decide
+whether or not to change the classification to @code{PercentPercent}
+(@pxref{Building Processors}):
+
+@example
+#include <fcntl.h>
+#include "source.h"
+#include "litcode.h"
+
+static int Second = 0;
+
+char *
+SkipOrNot(char *start, int length)
+@{ if (!Second) return start + length;
+  (void)close(finlBuf());
+  initBuf("/dev/null", open("/dev/null", O_RDONLY));
+  return TEXTSTART;
+@}
+
+void
+CommentOrNot(char *start, int length, int *syncode, int *intrinsic)
+@{ if (!Second) @{ Second++; *syncode = PercentPercent; @}
+@}
+@end example
+
+@noindent
+The remainder of the text is skipped by closing the current input file and
+opening an empty file to read
+(@pxref{source, , Text Input, lib, Library Reference Manual}).
+Since @code{%%} is initially classified as a comment, its classification
+must be changed only on the first occurrence.
+
+File @file{fcntl.h} defines @code{open} and @code{O_RDONLY},
+@file{source.h} defines @code{initBuf}, @code{finlBuf} and
+@code{TEXTSTART},
+and @file{litcode.h} defines @code{PercentPercent}.
+
+@node Surrogates, , Overriding, Literal Symbols
+@section Using Literal Symbols to Represent Other Things
+
+In some cases the phrase structure of a language depends upon
+layout cues rather than visible character sequences.
+For example, indentation is used in Occam2 to indicate block structure:
+If the first non-blank character of a line is indented further than the
+first non-blank character of the line preceding it,
+then the new line begins a new block.
+If the first non-blank character of a line is not indented as far as the
+first non-blank character of the line preceding it, then the old line ends
+one or more blocks depending on the difference in indentation.
+If the first non-blank characters of two successive lines are indented by
+the same amount, then the lines simply contain adjacent statements of the
+same block.
+
+Layout cues can be represented by literal symbols in the context-free grammar
+that describes the phrase structure.
+The processing needed to recognize the layout cues can then be described in
+any convenient manner, and the sequence of white space characters implementing 
+those cues can be classified as the appropriate literal symbol.
+
+Suppose that the beginning of a block is represented in the Occam2 grammar
+by the literal symbol @code{'@{'}, the statement separator by @code{';'},
+and the end of a block by @code{'@}'}.
+In the input text, blocks and statement separators are defined by layout
+cues as described above.
+A type-@file{delit} file marks the literal symbols as requiring special
+recognition and associates an identifier with each:
+
+@example
+$\@{  Initiate
+$;  Separate
+$\@}  Terminate
+@end example
+
+Indentation can be specified as white space following a new line:
+
+@example
+  $\n[\t\040]*  [OccamIndent]
+@end example
+
+@noindent
+The token processor @code{OccamIndent} would carry out all of the processing
+necessary to determine the meaning of the indentation.
+This processing is complex, involving interactions with several other
+components of the generated lexical analyzer
+(@pxref{Occam, , An Example of Interface Usage}).
+It constitutes an operational definition of the meaning of indentation in
+Occam2.
+
+@node Case Insensitivity, Generated Module, Literal Symbols, Top
+@chapter Case Insensitivity
+
+The default behavior of an Eli-generated lexical analyzer is to treat each
+ASCII character as an entity distinct from all other ASCII characters.
+This behavior is inappropriate for applications that do not distinguish
+upper-case letters from lower-case letters in certain contexts.
+For example, a Pascal compiler ignores the case of letters in identifiers
+and keywords, but distinguishes them in strings.
+Thus the Pascal identifiers @code{MyId}, @code{MYID} and @code{myid} are
+identical but the strings @code{'MyString'}, @code{'MYSTRING'} and
+@code{'mystring'} are different.
+
+Case insensitivity is reflected in the identity of character sequences.
+In other words, the character sequences @code{MyId}, @code{MYID} and
+@code{myid} are considered to be identical character sequences if and only
+if the generated processor is insensitive to the case of letters.
+Two character sequences are identical as far as the remainder of the
+processor is concerned if they have the same classification and their
+values are equal (@pxref{Specifications}).
+Since the classification and value are determined by the token processor,
+it is the token processor that must implement case insensitivity.
+
+Two conditions must be met if a processor is to be insensitive to case:
+
+@enumerate
+@item
+A token processor that maintains a table of character sequences
+in which all letters are of one case must be available.
+
+@item
+The specification of each case-insensitive character sequence
+must invoke such a token processor.
+@end enumerate
+
+@menu
+* Folding::	A Case-Insensitive Token Processor
+* Keywords::	Making Literal Symbols Case Insensitive
+@end menu
+
+@node Folding, Keywords, , Case Insensitivity
+@section A Case-Insensitive Token Processor
+
+The token processor @code{mkidn}
+@findex @code{mkidn}
+maintains a table of character sequences
+and provides the same classification and value for
+identical character sequences.
+Normally, @code{mkidn} treats upper-case letters and lower-case letters as
+different characters.
+This behavior is controlled by an exported variable, @code{dofold}
+(@pxref{identifier, , Unique Identifier Management, lib, Library Reference
+Manual}):
+When @code{dofold=0} character sequences are entered into the table as they
+are specified to @code{mkidn}; otherwise all letters in the sequence are
+converted to upper case before the sequence is entered into the table.
+
+Although the value of @code{dofold} could be altered on the basis of
+context by user-defined code, it is normally constant throughout the
+processor's execution.
+To generate a processor in which @code{dofold=1}, specify the parameter
+@code{+fold} in the request
+(@pxref{fold, , fold -- Make the Processor Case-Insensitive, pp, Products
+and Parameters Reference Manual}).
+If this parameter is not specified in the request, Eli will produce a
+processor with @code{dofold=0}.
+
+The value set by @code{mkidn} is the (unique) index of
+the transformed character sequence in the table.
+Thus if that value is used to retrieve the sequence at a later time, the
+result will be the original sequence with all lower-case letters replaced
+by their upper-case equivalents.
+
+@node Keywords, , Folding, Case Insensitivity
+@section Making Literal Symbols Case Insensitive
+
+Since literal symbols are recognized exactly as they stand in the grammar,
+they are case sensitive by definition.
+For example, if a grammar for Pascal contains the literal symbol
+@code{'begin'} then the generated processor will recognize only the
+character sequence @code{begin} as an instance of that literal symbol.
+This behavior could be changed by redefining the literal symbol as a
+nonliteral symbol (say) @code{BEGIN}, and providing the following
+specification in a type-@file{gla} file:
+
+@example
+BEGIN:  $[Bb][Ee][Gg][Ii][Nn]  [mkidn]
+@end example
+
+@noindent
+If the number of literal symbols to be treated as case-insensitive is
+large, this is a very tedious and error-prone approach.
+It also distorts the grammar by converting literal terminal symbols
+to non-literal terminal symbols.
+
+To solve this problem, Eli allows the user to specify a set of literal
+symbols that should be placed into the table used by @code{mkidn}, with
+their classification codes, at the time the generated lexical analyzer is
+loaded.
+If the @code{+fold} parameter is also specified, all lower-case letters in
+these symbols will be replaced by their upper-case equivalents before the
+symbol is placed into the table.
+The desired behavior is then obtained by invoking @code{mkidn} after
+recognizing the appropriate character sequence in the input text.
+
+The set of literal symbols to be placed into the table is specified by
+giving a sequence of regular expressions in a type-@file{gla} file, and
+then deriving the @code{:kwd} product from that file
+(@pxref{kwd, , kwd -- Recognize Specified Literals as Identifiers, pp,
+Products and Parameters Reference Manual}).
+The regular expressions describe the form of the literal symbols in the
+grammar, @emph{not} the input character sequences to be recognized.
+
+Suppose, for example, that a Pascal grammar specified all keywords as
+literal symbols made up of lower-case letters:
+
+@example
+Statement:
+  ...
+  'while' Expression 'do' Statement /
+  ...
+@end example
+
+@noindent
+A type-@file{gla} file describing the form these symbols take in the
+grammar would consist of the single line @code{$[a-z]+}.
+If the name of that file was @file{PascalKey.gla} then the user could tell
+Eli to initialize @code{mkidn}'s table with all of the keywords by
+including the following line in a type-@file{specs} file:
+
+@example
+PascalKey.gla :kwd
+@end example
+
+In Pascal, keywords have the form of identifiers in the input text.
+Therefore the canned description @code{PASCAL_IDENTIFIER} suffices to
+recognize both identifiers and keywords.
+@code{PASCAL_IDENTIFIER} invokes @code{mkidn} to obtain the classification
+and value of the sequence recognized by the regular
+expression @code{$[a-zA-Z][a-zA-Z0-9]*}.
+Since @code{mkidn}'s table has been initialized with the character
+sequences for the literal keyword symbols, and their classifications,
+they will be appropriately recognized.
+
+The @code{:kwd} product and the @code{+fold} parameter are independent of
+one another.
+Thus, in order to make the generated lexical analyzer accept Pascal
+keywords with arbitrary case the user must both provide the @code{:kwd}
+specification and derive with the @code{+fold} parameter.
+
+@node Generated Module, Index, Case Insensitivity, Top
+@chapter The Generated Lexical Analyzer Module
+
+This chapter discusses the generated lexical analyzer module,
+its interface,
+and its relationship to other modules in the generated processor.
+An understanding of the material here is not necessary for normal use of
+the lexical analyzer.
+
+There are some special circumstances in which it is necessary to change the
+interactions between the lexical analyzer and its environment.
+For example, there is a mismatch between the lexical analyzer and
+the source code input module of a FORTRAN 90 compiler:
+The unit of input text dealt with by the source code module is the line,
+the unit dealt with by the lexical analyzer is the statement, and there is no
+relationship between lines and statements.
+One line may contain many statements, or one statement may be spread over
+many lines.
+This mismatch problem is solved by requiring the two modules to interact via
+a buffer, and managing that buffer so that it contains both
+an integral number of lines
+and an integral number of statements.
+Because the lexical analyzer normally works directly in the source module's
+buffer, that solution requires a change in the relationship between
+the lexical analyzer and its environment.
+
+The interaction between the lexical analyzer and its environment is governed
+by the following interface:
+
+@example
+@findex @code{NORETURN}
+@findex @code{ResetScan}
+@findex @code{TokenStart}
+@findex @code{TokenEnd}
+@findex @code{StartLine}
+@findex @code{glalex}
+#include "gla.h"
+/* Entities exported by the lexical analyzer module
+ * NORETURN	(constant)	Classification of a comment
+ * ResetScan	(variable)	Flag causing scan pointer reset
+ * TokenStart	(variable)	Address of first classified character
+ * TokenEnd	(variable)	Address of first unclassified character
+ * StartLine	(variable)	Column index = (TokenEnd - StartLine)
+ * glalex	(operation)	Classify the next character sequence
+ ***/
+@end example
+
+@iftex
+There are three distinct aspects of the relationship between
+the lexical analyzer and its environment,
+and each is dealt with in one section of this chapter.
+First we consider how the lexical analyzer selects the character sequence to be
+scanned, then we see how the lexical analyzer's attention can be switched, and
+finally how the classification results are reported.
+@end iftex
+
+@menu
+* Text::	How the lexical analyzer interacts with the text
+* Reset::	How the scan pointer is reset
+* Classify::	How the next character sequence is classified
+* Occam::	An Example of Interface Usage
+@end menu
+
+@node Text, Reset, , Generated Module
+@section Interaction Between the Lexical Analyzer and the Text
+
+There is no internal storage for text in the lexical analyzer module.
+Instead, @code{TokenEnd} is set to point to arbitrary text storage.
+(Normally the pointer is to the source buffer,
+@pxref{source, , Text Input, lib, Library Reference Manual}.)
+The text pointed to must be an arbitrary sequence of characters, the last
+of which is an ASCII NUL.
+
+At the beginning of a scan, @code{TokenEnd} points to the beginning of
+the string on which a sequence is to be classified.
+The lexical analyzer tests that string against its set of regular expressions,
+finding the longest sequence that begins with the first character and
+matches one of the regular expressions.
+
+If the regular expression matched is associated with an auxiliary scanner
+then that auxiliary scanner is invoked with the matched sequence
+(@pxref{Building scanners}).
+The auxiliary scanner returns a pointer to the first character that
+should not be considered part of the character sequence being matched,
+and that pointer becomes the value of @code{TokenEnd}.
+@code{TokenStart} is set to point to the first character of the string.
+
+When no initial character sequence matches any of the regular
+expressions an error report is issued, @code{TokenEnd} is advanced by one
+position (thus discarding the first character of the string), and the
+process is restarted.
+If the string is initially empty, no attempt is made to match any regular
+expressions.
+Instead, the auxiliary scanner @code{auxNUL} is invoked immediately.
+If this auxiliary scanner returns a pointer to an empty string then the
+auxiliary scanner @code{auxEOF} is invoked immediately.
+Finally, if @code{auxEOF} returns a pointer to an empty string then the
+Token processor @code{EndOfText} is invoked immediately.
+(If either @code{auxNUL} or @code{auxEOF} returns a pointer to a non-empty
+string, scanning begins on this string as though @code{TokenEnd} had
+pointed to it initially.)
+
+@code{TokenStart} addresses a sequence of length @code{TokenEnd-TokenStart}
+when a token processor is invoked
+(@pxref{Token Processors, , Building Processors}).
+Because @code{TokenStart} and @code{TokenEnd} are exported variables, the
+token processor may change them if that is appropriate.
+All memory locations below the location pointed to by @code{TokenStart}
+are undefined in the fullest sense of the word:
+Their contents are unknown, and they may not even exist.
+Memory locations beginning with the one pointed to by @code{TokenStart},
+up to but not including the one pointed to by @code{TokenEnd}, are known to
+contain a sequence of non-NUL characters.
+@code{TokenEnd} points to a sequence of characters, the last of which is an
+ASCII NUL.
+If the token processor modifies the contents of @code{TokenStart} or
+@code{TokenEnd}, it must ensure that these conditions hold after the
+modification.
+
+@node Reset, Classify, Text, Generated Module
+@section Resetting the Scan Pointer
+
+If the exported variable @code{ResetScan} is non-zero when the operation
+@code{glalex} is invoked, the lexical analyzer's first action is to execute the
+macro @code{SCANPTR}.
+@code{SCANPTR} guarantees that @code{TokenEnd} addresses the string to be
+scanned.
+If @code{ResetScan} is zero when @code{glalex} is invoked, @code{TokenEnd}
+is assumed to address that string already.
+@code{ResetScan} is statically initialized to @code{1}, meaning that
+@code{SCANPTR} will be executed on the first invocation of @code{glalex}.
+
+In the distributed system, @code{SCANPTR} sets @code{TokenEnd} to point to
+the first character of the source module's text buffer.
+Since this is also the first character of a line, @code{StartLine} must
+also be set (@pxref{Coordinates, , Maintaining the Source Text Coordinates}):
+
+@example
+@findex @code{SCANPTR}
+#define SCANPTR @{ TokenEnd = TEXTSTART; StartLine = TokenEnd - 1; @}
+@end example
+
+@noindent
+@xref{source, , Text Input, lib, Library Reference Manual}.
+This implementation can be changed by supplying a file @file{scanops.h},
+containing a new definition of @code{SCANPTR},
+as one of your specification files.
+
+@code{ResetScan} is set to zero after @code{SCANPTR} has been executed.
+Normally, it will never again have the value @code{1}.
+Thus @code{SCANPTR} will not be executed on any subsequent invocation of
+@code{glalex}.
+Periodic refilling of the source module's text buffer and associated
+re-setting of @code{TokenEnd} is handled by @code{auxNUL}
+when the lexical analyzer detects that the string is exhausted.
+More complex behavior, using @code{ResetScan} to force resets at arbitrary
+points, is always possible via token processors or other clients.
+
+@code{TokenEnd} is statically initialized to @code{0}.
+Once scanning has begun, @code{TokenEnd} should always point to a location
+in the source buffer (@pxref{source, , Text Input, lib, Library Reference
+Manual}).
+Thus @code{SCANPTR} can normally distinguish between initialization and
+arbitrary re-setting by testing @code{TokenEnd}.
+(If user code sets @code{TokenEnd} to @code{0}, of course, this test may
+not be valid.)
+
+@node Classify, Occam, Reset, Generated Module
+@section The Classification Operation
+
+The classification operation @code{glalex} is invoked with a pointer to an
+integer variable that may be set to the value
+representing the classified sequence.
+An integer result specifying the classification is returned by
+@code{glalex}, and the coordinates of the first character of the sequence
+are stored in the error module's exported variable @code{curpos}
+(@pxref{error, , Source Text Coordinates and Error Reporting, lib,
+Library Reference Manual}).
+
+There are three points at which these interactions can be altered:
+
+@enumerate
+@item
+Setting coordinate values
+@item
+Deciding on a continuation after a classification
+@item
+Returning a classification
+@end enumerate
+
+@noindent
+All of these alterations are made by supplying macro definitions in a
+specification file called @file{scanops.h}.
+The remainder of this section defines the macro interfaces and gives the
+default implementations.
+
+@menu
+* Position::	Setting coordinate values
+* Continue::	Deciding on a continuation after a classification
+* Return::	Returning a classification
+@end menu
+
+@node Position, Continue, , Classify
+@subsection Setting coordinate values
+
+The coordinates of the first character of a sequence are set by the macro
+@code{SETCOORD}.
+Its default implementation uses the standard coordinate invariant
+(@pxref{Coordinates, , Maintaining the Source Text Coordinates}):
+
+@example
+@findex @code{SETCOORD}
+/* Set the coordinates of the current token
+ *   On entry-
+ *     LineNum=index of the current line in the entire source text
+ *     p=index of the current column in the entire source line
+ *   On exit-
+ *     curpos has been updated to contain the current position as its
+ *     left coordinate
+ */
+#define SETCOORD(p) @{ LineOf(curpos) = LineNum; ColOf(curpos) = (p); @}
+@end example
+
+When execution monitoring
+(@pxref{Top, , Monitoring, mon, Monitoring}) is in effect, more care
+must be taken.
+@findex cumulative column
+In addition to the above, @code{SETCOORD} must also set the cumulative
+column position, which is the column position within the overall input
+stream (as opposed to just the current input file).
+Ordinarily the two column positions will be the same, so the default
+implementation of @code{SETCOORD} for monitoring is:
+
+@example
+#define SETCOORD(p) @{ LineOf(curpos) = LineNum; \
+		      ColOf(curpos) = CumColOf(curpos) = (p); @}
+@end example
+
+When monitoring, it is also necessary to set the coordinates of the
+first character beyond the sequence.
+This is handled by the macro @code{SETENDCOORD}:
+
+@example
+@findex @code{SETENDCOORD}
+/* Set the coordinates of the end of the current token
+ *   On entry-
+ *     LineNum=index of the current line in the entire source text
+ *     p=index of the current column in the entire source line
+ *   On exit-
+ *     curpos has been updated to contain the current position as its
+ *     right coordinate
+ */
+#ifndef SETENDCOORD
+#define SETENDCOORD(p) @{ RLineOf(curpos) = LineNum; \
+			 RColOf(curpos) = RCumColOf(curpos) = (p); @}
+#endif
+@end example
+
+@node Continue, Return, Position, Classify
+@subsection Deciding on a continuation after a classification
+
+Classification is complete after the regular expression has been matched,
+any specified auxiliary scanner invoked, and any specified token processor
+invoked.
+At this point, one of three distinct actions is possible:
+
+@table @code
+@item RETURN v
+Terminate the invocation of @code{glalex}, returning the value @code{v} as
+the classification.
+@item goto rescan
+Start a new scan at the character addressed by @code{TokenEnd},
+without changing the coordinate value.
+@item continue
+Start a new scan at the character addressed by @code{TokenEnd},
+resetting the coordinates to the coordinates of that character.
+@end table
+
+@code{WRAPUP} is the macro responsible for deciding among these
+possibilities.
+When it is executed, @code{TokenEnd} addresses the first character beyond
+the classified sequence and @code{extcode} holds the classification code.
+Here is the default implementation:
+
+@example
+@findex @code{WRAPUP}
+#define WRAPUP @{ if (extcode != NORETURN) RETURN extcode; @}
+@end example
+
+@noindent
+If @code{WRAPUP} does not transfer control, the result is the
+@code{continue} action.
+Thus the default implementation of @code{WRAPUP} terminates the invocation
+of @code{glalex} if the current character sequence is not classified as a
+comment (@code{extcode != NORETURN}), and starts a new scan at the next
+character if the current character sequence is classified as a comment.
+
+If execution monitoring is in effect, the classification event must be
+reported in addition to selecting a continuation:
+
+@example
+@findex @code{WRAPUPMONITOR}
+#define WRAPUPMONITOR @{ \
+  if (extcode != NORETURN) @{ \
+    char save = *TokenEnd; \
+    *TokenEnd = '\0'; \
+    generate_token("token", LineOf(curpos), ColOf(curpos), \
+		    CumColOf(curpos), RLineOf(curpos), RColOf(curpos), \
+		    RCumColOf(curpos), TokenStart, TokenEnd - TokenStart, \
+		    *v, extcode); \
+    *TokenEnd = save; \
+  @} \
+@}
+@end example
+
+@noindent
+@code{WRAPUPMONITOR} is invoked instead of @code{WRAPUP} if execution
+monitoring is in effect.
+
+@node Return, , Continue, Classify
+@subsection Returning a classification
+
+Once the decision has been made to terminate the @code{glalex} operation
+and report the classification, it is possible to carry out arbitrary
+operations in addition to returning the classification code.
+For example, execution monitoring requires that this event be reported.
+Here is the default implementation:
+
+@example
+@findex @code{MONITOR}
+@findex @code{RETURN}
+#ifdef MONITOR
+#define RETURN(v) @{ generate_leave("lexical"); return v; @}
+#else
+#define RETURN(v) @{ return v; @}
+#endif
+@end example
+
+@node Occam, , Classify, Generated Module
+@section An Example of Interface Usage
+
+Recognition of Occam2 block structure from indentation is an example of
+how a token processor might use the lexical analyzer interface
+(@pxref{Surrogates, , Using Literal Symbols to Represent Other Things}).
+The token processor @code{OccamIndent} is invoked after a newline character
+(possibly followed by spaces and/or tabs) has been recognized:
+
+@example
+#include "err.h"
+#include "gla.h"
+#include "source.h"
+#include "litcode.h"
+
+extern char *auxNUL();
+extern char *coordAdjust();
+
+#define MAXNEST 50
+static int IndentStack[MAXNEST] = @{1@};
+static int *Current = IndentStack;
+
+void
+OccamIndent(char *start, int length, int *syncode, int *intrinsic)
+@{ if (start[length] == '\0') @{
+    start = auxNUL(start, length);
+    if (start[length] != '\0') @{ TokenEnd = start; return; @};
+    TokenEnd = start + length;
+  @}
+
+  if (*TokenEnd == '\0' && Current == IndentStack) return;
+
+  @{ char *OldStart = StartLine;
+    int OldLine = LineNum, Position;
+
+    (void)coordAdjust(start, length); Position = TokenEnd-StartLine;
+    if (*Current == Position) *syncode = Separate;
+    else if (*Current < Position) @{
+      *syncode = Initiate;
+      if (Current == IndentStack + MAXNEST)
+        message(DEADLY, "Nesting depth exceeded", 0, &curpos);
+      *++Current = Position;
+    @} else @{
+      *syncode = Terminate; Current--;
+      LineNum = OldLine; StartLine = OldStart; TokenEnd = start;
+    @}
+  @}
+@}
+@end example
+
+Since the source buffer is guaranteed only to hold an integral number of
+lines (@pxref{source, , Text Input, lib, Library Reference Manual}),
+@code{OccamIndent} must first refill the buffer if necessary.
+The library routine @code{auxNUL} carries out this task, returning a
+pointer to the character sequence passed to it
+(@pxref{Available scanners}).
+Remember that the character sequence may be moved in the process of refilling
+the buffer, and therefore it is vital to reset both @code{start} and
+@code{TokenEnd} after the operation.
+
+If @code{auxNUL} is invoked and adds characters to the buffer, then those
+characters might be white space that should have been part of the original
+pattern.
+In this case @code{OccamIndent} can return, having set @code{TokenEnd} to
+point to the first character of the original sequence.
+Since the sequence was initially classified as a comment (because the
+specification did not begin with an identifier followed by a colon,
+@pxref{Surrogates, , Using Literal Symbols to Represent Other Things}), the
+overall effect will be to re-scan the newline and the text now following
+it.
+
+If @code{auxNUL} is invoked but does not add characters to the buffer, then
+the newline originally matched is the last character of the file.
+@code{TokenEnd} should be set to point to the character following the
+newline.
+
+When the end of the file has been reached, and no blocks remain
+unterminated, then the newline character has no meaning.
+By returning under these conditions, @code{OccamIndent} classifies the
+newline as a comment.
+Otherwise, the character sequence matched by the pattern must be
+interpreted on the basis of the indentation it represents.
+
+Because a single character sequence may terminate any number of blocks, it
+may be necessary to interpret it as a sequence of terminators.
+The easiest way to do this is to keep re-scanning the same sequence,
+returning one terminator each time, until all of the relevant blocks have
+been terminated.
+In order to make that possible, @code{OccamIndent} must save the current
+values of the pointer from which column indexes are determined
+(@code{StartLine}) and the cumulative line number (@code{LineNum}).
+
+The pattern with which @code{OccamIndent} is associated will match a
+character sequence beginning with a newline and containing an arbitrary
+sequence of spaces and tabs.
+To determine the column index of the first character following this
+sequence, apply @code{coordAdjust} to it (@pxref{Available scanners}).
+That auxiliary scanner leaves the character sequence unchanged, but
+re-establishes the invariant on @code{LineNum} and @code{StartLine}
+(@pxref{Coordinates, , Maintaining the Source Text Coordinates}).
+After the invariant is re-established, the column index can be computed.
+
+@code{Current} points to the element of @code{IndentStack} containing the
+column index of the first character of a line belonging to the current block.
+(If no block has been opened, the value is 1.)
+When the column index of the character following the initial white space
+is equal to this value, that white space should be classified as a
+separator.
+Otherwise, if the column index shows an indentation then the white space
+should be classified as an initiator and the new column position should be
+pushed onto the stack.
+Stack overflow is a deadly error, making further processing impossible
+(@pxref{error, , Source Text Coordinates and Error Reporting, lib, Library
+Reference Manual}).
+Finally, if the column index shows an exdentation then the white space
+should be classified as a terminator and the column position for the
+terminated block deleted from the stack.
+
+When a newline terminates a block, it must be re-scanned and interpreted in
+the context of the text surrounding the terminated block.
+Therefore in this case @code{StartLine} and @code{LineNum} are restored to
+the values they had before @code{coordAdjust} was invoked, and
+@code{TokenStart} is set to point to the newline character at the start of
+the sequence.
+Thus the next invocation of the lexical analyzer will again recognize the
+sequence and invoke @code{OccamIndent} to interpret it.
+
+@node Index,  , Generated Module, Top
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

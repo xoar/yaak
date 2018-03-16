@@ -1,0 +1,173 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: PtrList.fw,v 1.7 2009/01/02 10:30:14 peter Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements linear lists whose elements are of type |TYPE|
+which must be a pointer type.
+The list type is |TYPE|List.
+
+The element type |TYPE| given by the instance parameter 
+must be defined in a header file |HDR|
+where |HDR| is the value of the referto parameter.
+
+Instantiation of this module creates a header file that defines
+the same entities as defined by the List module.
+They are mapped to those of an instance of the
+List module with VoidPtr (void*) being its element type.
+
+Hence, several instances of this module reuse only one implementation
+of list operations without loss of type safety.
+
+~O~<|TYPE|PtrList.specs~>~{
+$/Adt/List.gnrc+instance=VoidPtr+referto=VoidPtr:inst
+~}
+
+~O~<|TYPE|List.h~>~{
+#ifndef _|TYPE|LIST_H
+#define _|TYPE|LIST_H
+
+/* include header file defining |TYPE| if |HDR| is set: */
+#define EMPTY|HDR|HDR
+#ifndef EMPTYHDR
+#include "|HDR|.h"
+#endif
+#undef EMPTY|HDR|HDR
+
+#include "VoidPtrList.h"
+
+typedef VoidPtrList	|TYPE|List;
+typedef VoidPtrList    *|TYPE|ListPtr;
+typedef VoidPtrCmpFctType     |TYPE|CmpFctType;
+
+#define NULL|TYPE|List		((|TYPE|List)0)
+#define Null|TYPE|List()	((|TYPE|List)0)
+#define Single|TYPE|List(e)	(Cons|TYPE|List((e),NULL|TYPE|List))
+
+#define Finl|TYPE|List		FinlVoidPtrList
+
+#define Cons|TYPE|List(e,l)	ConsVoidPtrList ((VoidPtr)(e),(l))
+
+#define Head|TYPE|List(l)	((|TYPE|)(HeadVoidPtrList (l)))
+
+#define Tail|TYPE|List(l)	TailVoidPtrList (l)
+
+#define Length|TYPE|List(l)	LengthVoidPtrList (l)
+
+#define IthElem|TYPE|List(l,i)	((|TYPE|)(IthElemVoidPtrList (l, i)))
+
+#define Copy|TYPE|List(l,cp)	CopyVoidPtrList (l, cp)
+
+#define App|TYPE|List(l1,l2)	AppVoidPtrList (l1, l2)
+
+#define AppEl|TYPE|List(l,e)	AppElVoidPtrList (l, (VoidPtr)e)
+
+#define InsertAfter|TYPE|List(l,e) \
+	InsertAfterVoidPtrList (l, (VoidPtr)e)
+
+#define OrderedInsert|TYPE|List(l,e,fcmp) \
+	OrderedInsertVoidPtrList (l, (VoidPtr)e, (VoidPtrCmpFctType)fcmp)
+
+#define RefEndCons|TYPE|List(addr,e) \
+	RefEndConsVoidPtrList (addr, (VoidPtr)e)
+
+#define RefEndApp|TYPE|List(addr,l) \
+	RefEndAppVoidPtrList (addr, l)
+
+#define ElemIn|TYPE|List(e,l,cmpfct) \
+	ElemInVoidPtrList ((VoidPtr)e, l, (VoidPtrCmpFctType)cmpfct)
+
+#define AddToSet|TYPE|List(e,l,cmpfct) \
+	AddToSetVoidPtrList ((VoidPtr)e, l, (VoidPtrCmpFctType)cmpfct)
+
+#define AddToOrderedSet|TYPE|List(e,l,cmpfct) \
+	AddToOrderedSetVoidPtrList ((VoidPtr)e, l, (VoidPtrCmpFctType)cmpfct)
+
+#define Map|TYPE|List(l,f) \
+	MapVoidPtrList (l,(VoidPtrMapFct)f)
+
+#define Comp|TYPE|List(l1,l2,f) \
+	CompVoidPtrList (l1, l2, (VoidPtrCmpFctType)f)
+
+#define Sum|TYPE|List(l,f,a) \
+	SumVoidPtrList (l, (VoidPtrSumFct)f, (VoidPtr)a)
+
+#ifdef MONITOR
+#define DAPTO_RESULT|TYPE|List(l) DAPTO_RESULT_PTR(l)
+#define DAPTO_ARG|TYPE|List(l)    DAPTO_ARG_PTR (l, |TYPE|List)
+#endif
+
+#endif
+~}
+
+~O~<|TYPE|PtrList.head~>~{
+#include "|TYPE|List.h"
+~}
+
+~O~<|TYPE|PtrList.dapto~>~{
+aspect |TYPE|PtrList;
+
+"|TYPE|List.h"
+
+operation get_|TYPE|List_elems
+    "Return the |TYPE| list elements"
+    (|TYPE|List lst "The list") : str
+{
+    |TYPE| elem;
+
+    for ( ; lst != NULL|TYPE|List; lst = Tail|TYPE|List(lst)) {
+	elem = Head|TYPE|List(lst);
+	DAPTO_RESULT_PTR(elem);
+    }
+}
+
+end;
+~}
+
+~O~<|TYPE|PtrList.tcl~>~{
+set n(|TYPE|List,desc) "|TYPE| List"
+
+proc n_|TYPE|List_open {text lst} {
+    n_say "$text\n"
+    if {$lst == 0} {
+        n_say "  NULL|TYPE|List\n"
+    } else {
+        set lst [n_hextodec $lst]
+        set r [n_send get_|TYPE|List_elems $lst]
+        set c 0
+        foreach i $r {
+            n_say "  "
+            n_say_val |TYPE| $i
+            n_say "\n"
+            incr c
+        }
+        if {$c == 0} {
+            n_say "  Empty\n"
+        }
+    }
+}
+
+proc n_|TYPE|List_say {lst} {
+    n_say "|TYPE|List:0x[n_dectohex $lst]"
+}
+~}

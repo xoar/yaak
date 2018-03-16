@@ -1,0 +1,559 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@setfilename news4.4
+@settitle New Features of Eli Version 4.4
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{New Features of Eli Version 4.4}
+@sp 4
+@center Uwe Kastens
+@sp 1
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 2
+@center A. M. Sloane
+@sp 1
+@center Department of Computing
+@center Division of Information and Communication Sciences
+@center Macquarie University
+@center Sydney, NSW 2109 
+@center Australia
+@sp 2
+@center W. M. Waite
+@sp 1
+@center Department of Electrical and Computer Engineering
+@center University of Colorado
+@center Boulder, CO  80309-0425
+@center USA
+@sp 4
+@center $Date: 2008/06/25 18:19:23 $
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node Top
+@top New Features of Eli Version 4.4
+
+This document gives information about new facilities available in Eli
+version 4.4 and those modifications made since the previous distributed
+Eli version 4.3 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here.
+
+@menu
+* Windows::		Eli can now run under Windows.
+* PDF::			Producing portable document files
+* Indexes::		Including indexes in LaTeX documents
+* Unparsers::		New functionality for unparser generation.
+* nomain::		Eli-generated code as a component
+* CDeclarators::	Name analysis for declarators as in C
+* ScopeProp::		Scope Properties without Ordering Restrictions
+* OilNoOverload::	Better error reporting for known operators
+* Has::			Additional property access function
+* Conflicts::		New error reporting for parser conflicts
+* Hashing::		Using anything to access information
+* StrArith::		Simplified arithmetic on strings
+
+* Index::                       
+@end menu
+
+@node Windows
+@chapter Eli can now run under Windows
+
+@findex Windows
+@findex Cygwin
+Eli 4.4.0 now runs reliably in the Cygwin Unix environment under
+Windows NT, 2000, and XP.
+Windows 3.1, 95, 98, and ME do not support pre-emption and true
+multi-threading.
+Eli is a multi-threaded program and therefore randomly deadlocks under these
+systems.
+Unfortunately, Eli is considerably slower under Cygwin than it is under Unix.
+
+For full instructions on how to obtain Cygwin and implement Eli under it,
+see the file @file{README.Windows} in the top-level directory of the Eli
+4.4.0 distribution.
+
+@node PDF
+@chapter Producing portable document files
+
+@findex PDF files
+Eli now uses pdftex and pdflatex to produce PDF files.
+The original source for the text may be TeX or LaTeX, FunnelWeb, or
+Texinfo.
+
+@findex tex
+@findex latex
+@findex texinfo
+A conversion from TeX, LaTeX, or Texinfo to PDF is obtained simply by
+requesting the @code{:pdf} product:
+
+@example
+foo.tex :pdf
+bar.tnf :pdf
+@end example
+
+@findex FunnelWeb
+FunnelWeb formatting is complicated by the @code{typesetter} option
+(@pxref{Typesetting, @@p typesetter, Typesetting Documentation with Eli, fw,
+FunnelWeb}).
+You must choose the correct weaver for the option and include it in the
+request.
+For example, suppose that your FunnelWeb file did not use the
+@code{typesetter} option.
+In that case, @code{fwTex} is the correct weaver:
+
+@example
+MySpec.fw :fwTex :pdf
+@end example
+
+You will @emph{not} be able to produce PDF files from FunnelWeb files that
+specify @samp{@@p typesetter = html}.
+
+It is also possible to use a type-@file{specs} file to specify a collection
+of type-@file{tnf} files, all of which are to be formatted.
+Suppose that the collection is defined by @file{Doc.specs}, that
+@file{ps} is the directory into which PostScript files are to be placed,
+and that @file{pdf} is the directory into which PDF files are to be placed.
+Here is a request that yields one PostScript file in directory @file{ps}
+for each type-@file{tnf} file whose name appears in @file{Doc.specs}.
+That PostScript file is formatted for two-sided printing, with each chapter
+starting on an odd-numbered page:
+
+@example
+Doc.specs :ps >ps
+@end example
+
+Here is a request yielding one PDF file in directory @file{pdf} for each
+type-@file{tnf} file whose name appears in @file{Doc.specs}.
+The @samp{+single} parameter means that the PDF file will be formatted for
+single-sided printing --- chapters are not forced to begin on odd pages:
+
+@example
+Doc.specs +single :pdf >pdf
+@end example
+
+Unfortunately, the names of the files in the @file{ps} directory will have
+the suffix @samp{.tnf.tnfps} and the files in the @samp{pdf} directory will
+have names ending in @samp{.tnf.tnfpdf}.
+These names can be changed by a simple Bourne shell script with commands
+like the following:
+
+@example
+for f in `ls *.tnfpdf`
+do mv $f `basename $f .tnf.tnfpdf`.pdf
+done
+@end example
+
+@node Indexes
+@chapter Including indexes in LaTeX documents
+
+The Odin tex package has been updated to support automatic index
+generation.
+You can now process LaTeX documents that contain @code{\index} commands, as
+described in Section 4.5 of the LaTeX User's Guide & Reference Manual.
+The index generated from these commands is printed by a @code{\printindex}
+command appearing in the LaTeX document.
+No additional commands or derivations are involved.
+
+Indexes are processed by @code{makeindex}, which is invoked automatically
+during a derivation to PostScript or PDF.
+The Odin @code{+index_flags} parameter can be used to provide command-line
+options to @code{makeindex} if desired.
+For example, the following derivation would supply the index style file
+@file{MyStyle.ist} to @code{makeindex} during the consgtruction of a PDF
+file from @file{Doc.tex}:
+
+@example
+Doc.tex +index_flags='-s' (MyStyle.ist) :pdf
+@end example
+
+See @code{makeindex} for a complete description of the available options.
+Note that in general the option list will contain both literal flags and
+file names.
+Any file names that do not specify a full path should be parenthesized.
+
+@node Unparsers
+@chapter New functionality for unparser generation
+
+Textual representations of tree-structured data objects can now be produced
+in five standard forms:
+a generic functional notation (as with Eli 4.3.x),
+@findex XML
+an XML description of the data object,
+@findex C++
+C++ code that will re-build the data object,
+@findex Java
+Java code that will re-build the data object,
+@findex daVinci
+and code describing the graph to the daVinci graph visualization tool
+(assumes daVinci 2.1, found at http://www.informatik.uni-bremen.de/daVinci/).
+It is also possible for the user to specify their own notation for
+describing tree-structured data objects
+(@pxref{treelng,,Languages describing tree structure,idem,
+Abstract Syntax Tree Unparsing}).
+
+Default output for terminal symbols has now been provided.
+The default assumes that the internal representation for the terminal symbol
+is a string table index.
+Token processors establish the internal representations for terminal
+symbols; @code{mkidn} and @code{mkstr} result in string table indices,
+whereas @code{mkint} does not.
+If you want to unparse a tree whose terminal symbols are not represented by
+string table indices, you need to override the default output
+(@pxref{Combine,,Overriding PTG patterns,idem,
+Abstract Syntax Tree Unparsing}).
+
+@node nomain
+@chapter Eli-generated code as a component
+
+When you request an executable program from Eli, it is normally supplied
+with a main program.
+If you want to use the generated code as a part of a larger system, then
+the main program should @emph{not} be supplied.
+@findex @code{+nomain}
+Generation of the main program is controlled by the @code{+nomain}
+parameter.
+This parameter is not new in Eli 4.4.0, but its documentation has been
+improved
+(@pxref{nomain,,nomain --- Omitting the main program,pp,
+Products and Parameters Reference}).
+
+@findex Mk functions
+@findex @code{+parser}
+@findex computed subtrees
+In some cases, the larger system containing the Eli-generated component
+has facilities for analyzing input, and the tree described by the LIDO
+specification is built directly by invoking Mk functions
+(@pxref{Computed Subtrees,,,lidoref,LIDO - Reference Manual}).
+That means it is necessary to specify that Eli should generate no parser
+by giving the parameter @code{+parser=none}
+(@pxref{parser,,parser --- Choose the parser generator,pp,
+Products and Parameters Reference}).
+
+@node CDeclarators
+@chapter Name analysis for declarators as in C
+
+@findex C
+@findex C declarator
+A defining occurrence of an identifer may be
+part of @emph{Declarator}, that is a larger construct which determines
+the type of the defined identifer, for example the definition of the array
+@code{a} in
+@example
+   int a[a+1];
+@end example
+@noindent
+Here @code{a[a+1]} is the @code{Declarator} and the first @code{a}
+is its defining occurrence.
+A pair of roles @code{NAMEDeclaratorWithId} and @code{NAMEIdInDeclarator}
+has been added to the module @code{CScope} to solve name analysis for such cases.
+
+@node ScopeProp
+@chapter Scope Properties without Ordering Restrictions
+
+@findex @code{ScopeProp}
+@findex @code{AlgScopeProp}
+@findex @code{CScopeProp}
+@findex @code{BuScopeProp}
+The name analysis modules which support scopes being properties of program
+entities have been reconsidered. (They are used for example to bind identifier
+occurrences in qualified names.) A new module @code{ScopeProp} has been added
+to the three existing ones 
+(@code{AlgScopeProp}, @code{CScopeProp}, @code{BuScopeProp}).
+@code{ScopeProp} fits to any of the basic scope rule modules,
+Alg-like, C-like, or bottom-up. It does @emph{not} impose any ordering 
+restriction that would require the definition of a member to occur before
+its qualified use. It is recommended to use this module instead of
+any of the other three. Even in case that such a restriction is intended,
+one can use this module and enforce that restriction by
+a check of the related positions. The three specific modules are kept
+in order not to invalidate existing specifications.
+
+@node OilNoOverload
+@chapter Better error reporting for known operators
+
+@findex @code{OilNoOverload}
+The Oil operator identification functions return an invalid operator if
+the specified operator indication is not associated with an operator
+matching the context specified.
+This results in a possibly misleading error report, effectively stating
+that there is no such operator.
+
+When an operator indication is associated with exactly one operator, it may
+be preferable to indicate specific mismatches between the requirements of
+the operator and the types produced by the context.
+This can be done by returning the only possible operator, which places
+appropriate constraints on the types of the operands and delivers a
+specific result type.
+
+@code{OilNoOverload} takes two arguments.
+The first is the operator indication being identified and the second is the
+result of a normal Oil operator identification function.
+The value of the second argument is returned if it is valid.
+If the second argument is invalid, @code{OilNoOverload} checks whether the
+first argument is associated with exactly one operator.
+If so, then @code{OilNoOverload} returns that operator; otherwise it
+returns the invalid operator yielded by the second argument.
+
+@example
+OilNoOverload( @samp{oi}, OilIdOpTS2( @samp{rt}, @samp{oi}, @samp{ats1}, @samp{ats2} ));
+@end example
+
+@noindent
+The arguments are:
+
+@table @samp
+@item oi
+The operator indication being identified.
+
+@item rt
+The required result type.
+
+@item ats1
+The set of possible first operand types.
+
+@item ats2
+The set of possible second operand types.
+@end table
+
+@node Has
+@chapter Additional property access function
+
+The access function @code{Has} has been added to the PDL library
+(@pxref{Library,,Predefined query and update operations,deftbl,Definition
+Table}).
+Here is the signature:
+
+@example
+int HasName(DefTableKey key)
+@end example
+@findex Has
+
+If @code{Has} is applied to a definition table key that has an
+associated @code{Name} property, then it yields 1; otherwise it yields 0.
+
+Since @code{NoKey} represents an invalid entity that has no properties,
+applying @code{Has} to @code{NoKey} yields 0.
+
+If a property is to be queried by @code{Has}, then @code{Has} must be added
+to that property's operation list.
+For example, suppose that we wantto be able to ask whether a definition
+table key has the @code{DefTableKey}-valued property @code{Proc}.
+Here is a declaration of the property:
+
+@example
+Proc: DefTableKey [Has];
+@end example
+
+Given that declaration, the following query could be made in LIDO:
+
+@example
+RULE: Expr ::= AppliedOccurrence '(' ArgList ')'
+COMPUTE
+  IF(NOT(HasProc(AppliedOccurrence.Key)),
+    message(ERROR,"Not a procedure identifier",0,COORDREF));
+END;
+@end example
+
+@node Conflicts
+@chapter New error reporting for parser conflicts
+
+We have a new default format for reporting parser conflicts:
+For each conflict, it provides an example of a derivation leading to each
+of the conflicting situations.
+Our hope is that it will be easier to determine the cause of the conflict
+with this information than with the simple printout of the state that was
+given previously.
+
+@menu
+* Example::	An example of the diagnostic output
+* Help::	How diagnostic information is provided by :help
+* Parsable::	Using :parsable to get the previous diagnostic format
+@end menu
+
+@node Example
+@section Example
+
+Here is a simple example
+(@pxref{Grammar,,Explanation of the grammar for word classification,novice,
+Guide for New Eli Users}):
+  
+@example
+text: set_defs .
+set_defs: set_def / set_defs set_def .
+set_def: set_name '@{' set_body '@}' .
+set_name: word .
+set_body: elements / .
+elements: set_element / elements set_element .
+set_element: word .
+@end example
+  
+Suppose that we make the grammar non-LALR by removing the brackets around
+set_body.  Here is the result of applying the default :parsable:
+
+@example
+Conflicting Derivations
+=======================
+
+************************************************************************
+   *** shift-reduce conflict on: word  
+
+text EOF 
+set_defs 
+set_defs set_def 
+|        set_name set_body 
+|        word 
+|
+set_def 
+set_name set_body 
+         .  [REDUCE] set_body ->  @{word@} ?
+
+text EOF 
+set_defs 
+set_def 
+set_name set_body 
+         elements 
+         set_element 
+         . word  [SHIFT] set_element -> word .  ?
+
+************************************************************************
+   *** shift-reduce conflict on: word  
+
+text EOF 
+set_defs 
+set_defs set_def 
+|        set_name set_body 
+|        word 
+|
+set_def 
+set_name set_body 
+         elements .  [REDUCE] set_body -> elements  @{word@} ?
+
+text EOF 
+set_defs 
+set_def 
+set_name set_body 
+         elements 
+         set_element 
+         . word  [SHIFT] set_element -> word .  ?
+
+************************************************************************
+@end example
+
+This output gives two examples in which the parser will be unable to decide
+what to do when it sees a @code{word}.
+Each example shows two conflicting derivations
+(a derivation is the reverse of the parser's reduction process,
+@pxref{Parsing,,How the generated parser determines phrase structure,
+syntax,Syntactic Analysis Manual}).
+
+Each derivation begins with @code{text EOF}.
+Succeeding lines are the result of rewriting a single nonterminal symbol by
+applying some production of the grammar.
+The result of a rewriting step is aligned with the symbol being
+rewritten.
+Thus we can rewrite @code{text} to @code{set_defs}, and then rewrite
+@code{set_defs} to @code{set_defs set_def}.
+
+The lines adjacent to the vertical bar show how the lookahead symbol can be
+derived: @code{set_def} is rewritten to @code{set_name set_body}, and then
+@code{set_name} is rewritten to @code{word}.
+
+Below the vertical bar, the main derivation continues by
+rewriting the symbol at the top of the bar.
+In this case, @code{set_defs} is rewritten as @code{set_def}, which is
+rewritten as @code{set_name set_body} in turn.
+The final line of the first derivation shows the action that the parser
+would take at that point: reducing an empty string to a @code{set_body} in
+the presence of the lookahead symbol @code{word}.
+
+This first derivation of the first example shows that the parser could
+recognize an empty set body and consider that the lookahead symbol
+@code{word} is the name of the next set.
+You should convince yourself that the second derivation of the first
+example shows how the parser could consider the lookahead symbol @code{word}
+in this context to be the first element of the first set.
+This ambiguity is clearly the result of omitting the opening brace.
+Without that delimiter, there is no way to make the decision.
+
+The second example also involves a @code{word} symbol.
+Here the question is whether the @code{word} is the name of the next set or
+whether it is the next element of the current set.
+This error is the result of omitting the closing brace.
+Again, without that delimiter, there is no way to make the decision.
+
+@node Help
+@section Help
+
+If you have conflicts in your grammar, the :help derivation will show you
+messages for a type-@file{pgsconflict} file.
+Each message specifies the type of conflict and the set of terminals
+causing the conflict.
+Clicking the help browser's @code{Edit} button while you are looking at
+the message screen will bring up your editor on the type-@file{pgsconflict}
+file, which contains the sample derivations that illustrate how the
+conflicts arise
+(@pxref{Example}).
+
+@node Parsable
+@section Parsable
+
+The :parsable derivation will give you the new diagnostics by default.
+You can still obtain the state printout by supplying a @code{+pgsOpt}
+parameter to the derivation:
+
+@example
+-> sets.specs +pgsOpt='S' :parsable <
+@end example
+
+Here the string @code{'S'} requests ``standard'' processing.
+
+@node Hashing
+@chapter Using anything to access information
+
+@findex Table
+A @code{Table} is a sparse memory with a 32-bit address space
+(@pxref{Table,,Mapping Arbitrary Values To Definition Table Keys,adt,
+Abstract data types to be used in specifications}).
+Each element of the memory contains a @code{DefTableKey} value.
+This memory is used to implement a mapping from values of some arbitrary
+type to definition table keys, allowing an arbitrary set of properties to
+be associated with each value.
+
+Any number of named tables can be instantiated, each with a specific type
+of value to be mapped.
+More than one table can map any given type of value.
+When a table is initialized, the user must provide two functions.
+One computes a 32-bit address from the value to be mapped, the other
+determines whether two values of the type to be mapped are identical.
+@findex Hash
+The first of these two functions often uses a general hashing operation
+(@pxref{Hash,,Computing a Hash Value,problems,
+Solutions of Common Problems}).
+
+@node StrArith
+@chapter Simplified arithmetic on strings
+
+The Eli library contains a general package called @code{strmath} for
+carrying out computations on numeric values represented by strings
+(@pxref{strmath,,Character String Arithmetic,lib,The Eli Library}).
+This package is difficult to use in the context of LIDO, partially because
+each computation overwrites the results of the previous computation.
+@findex StrArith
+@code{StrArith} is a wrapper for @code{strmath} that stores all results
+uniquely in the string table and associates error reports with the node in
+which they occur
+(@pxref{StrArith,,Character String Arithmetic,problems,
+Solutions of Common Problems}).
+
+@node Index
+@unnumbered Index
+@printindex fn
+@contents
+@bye

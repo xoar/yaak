@@ -1,0 +1,1012 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from novice.tnf on 5 December 2013 -->
+
+<TITLE>Guide for New Eli Users - How Eli Creates a Text Processing Program</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Guide for New Eli Users</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="novice_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="novice_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC1" HREF="novice_toc.html#SEC1">How Eli Creates a Text Processing Program</A></H1>
+<P>
+The program generated by Eli
+<A NAME="IDX1"></A>
+reads a file containing the text, examining it character-by-character.
+Character sequences are recognized as significant units or discarded, and
+relationships among the sequences are used to build a tree that
+reflects the structure of the text.
+Computations are then carried out over the tree, and the results of these
+computations determine the processor's output.
+Thus Eli assumes that the original text processing problem is decomposed into
+the problems of determining
+which character sequences are significant and which should be discarded,
+what tree structure should be imposed on significant sequences,
+what computations should be carried out over the resulting tree, and
+how the computed values should be encoded and output.
+<P>
+A user describes a particular text processing problem to Eli
+by specifying the characteristics of its subproblems.
+For example, the tree structure that should be imposed on significant
+character sequences is specified to Eli by providing a context-free
+grammar.
+Different subproblems are characterized in different ways, and they are
+specified by descriptions written in different languages.
+Those specifications are processed by a variety of tools,
+which verify their consistency and generate C-compatible C++ code
+to solve the specified subproblems.
+<P>
+Eli focuses the user's attention on specification by
+automating the process of tool invocation.
+It responds to a request for a piece of computed information, called a
+<DFN>derived object</DFN>, by invoking the minimum number of tools necessary to
+produce that information.
+Derived objects are automatically stored by Eli for later re-use,
+significantly improving the response time for subsequent requests.
+<P>
+This chapter provides
+an overview of the most important subproblems and how they can be described,
+summarizes the available descriptive mechanisms and explains the most
+common derived objects,
+and indicates how Eli is used to create and test programs.
+<P>
+<H2><A NAME="SEC2" HREF="novice_toc.html#SEC2">How to Decompose a Text Processing Problem</A></H2>
+<P>
+There is considerable variability in the specific decompositions
+<A NAME="IDX2"></A>
+for particular text processing problems.
+For example, one subproblem
+<A NAME="IDX3"></A>
+of the compilation problem for many programming
+languages is <EM>overload resolution</EM>:
+<A NAME="IDX4"></A>
+how to decide that (say) a
+particular <CODE>+</CODE> operator means integer addition instead of real addition.
+Overload resolution would probably not be a subproblem of the problem of
+creating a PostScript version of a musical score from a description of the
+desired notes.
+This section briefly reviews five major subproblems common to a wide range of
+problems:
+<P>
+<DL COMPACT>
+<DT>Syntactic analysis
+<DD>Determining the structure of an input text
+<P>
+<DT>Lexical analysis
+<DD>Recognizing character sequences
+<P>
+<DT>Attribution
+<DD>Computing values over trees
+<P>
+<DT>Property storage
+<DD>Maintaining information about entities
+<P>
+<DT>Text generation
+<DD>Producing structured output
+</DL>
+<P>
+<P>
+<DFN>Syntactic analysis</DFN>
+<A NAME="IDX5"></A>
+determines the <DFN>phrase structure</DFN>
+<A NAME="IDX6"></A>
+of the input text.
+The phrase structure is described to Eli by a <DFN>context-free grammar</DFN>.
+<A NAME="IDX7"></A>
+Here is a context-free grammar
+<A NAME="IDX8"></A>
+describing the structure of a geographical position
+(see  <A HREF="syntax_1.html#SEC1">Context-Free Grammars and Parsing of Syntactic Analysis</A>):
+<P>
+<PRE>
+Position: Latitude Longitude .
+Latitude: NS Coordinate .
+Longitude: EW Coordinate .
+NS: 'N' / 'S' .
+EW: 'E' / 'W' .
+Coordinate: Integer Float .
+</PRE>
+<P>
+This grammar has eight symbols
+<A NAME="IDX9"></A>
+(<CODE>Position</CODE>, <CODE>Latitude</CODE>, <CODE>Longitude</CODE>,
+<CODE>NS</CODE>, <CODE>EW</CODE>, <CODE>Coordinate</CODE> <CODE>Integer</CODE>
+and <CODE>Float</CODE>),
+four literals
+<A NAME="IDX10"></A>
+(<CODE>'N'</CODE>, <CODE>'S'</CODE>, <CODE>'E'</CODE> and <CODE>'W'</CODE>) and
+eight rules
+<A NAME="IDX12"></A>
+<A NAME="IDX11"></A>
+(<CODE>x: y / z .</CODE> is an abbreviation for the two rules
+<CODE>x: y .</CODE> and <CODE>x: z .</CODE>).
+Two of the symbols, <CODE>Integer</CODE> and <CODE>Float</CODE>, are not defined by the
+grammar.
+One of the symbols, <CODE>Position</CODE>, is not used in the definition of any
+other symbol.
+<P>
+Symbols that are not defined by the grammar are called
+<DFN>terminal</DFN> symbols;
+<A NAME="IDX14"></A>
+<A NAME="IDX13"></A>
+those defined by the grammar are called
+<DFN>nonterminal</DFN> symbols.
+<A NAME="IDX16"></A>
+<A NAME="IDX15"></A>
+The (unique) symbol not used in the definition of any other symbol is
+called the <DFN>axiom</DFN>
+<A NAME="IDX17"></A>
+of the grammar.
+<P>
+The entire input text is called a <DFN>sentence</DFN>,
+<A NAME="IDX18"></A>
+and corresponds to the axiom.
+Thus the input text <CODE>N41 58.8 W087 54.3</CODE> is a sentence corresponding
+to <CODE>Position</CODE>.
+A <DFN>phrase</DFN>
+<A NAME="IDX19"></A>
+is a portion of the sentence corresponding to a nonterminal symbol
+of the grammar.
+For example, <CODE>N41 58.8</CODE> is a phrase corresponding to <CODE>Latitude</CODE>,
+and <CODE>087 54.3</CODE> is a phrase corresponding to <CODE>Coordinate</CODE>.
+<CODE>54</CODE> and <CODE>58.8 W087</CODE> are <EM>not</EM> phrases
+because they do not correspond to any symbols.
+(<CODE>54</CODE> is a part of the phrase <CODE>087 54.3</CODE> corresponding to
+<CODE>Coordinate</CODE> and
+<CODE>58.8 W087</CODE> is made up of part of the phrase corresponding to
+<CODE>Latitude</CODE> and part of the phrase corresponding to <CODE>Longitude</CODE>.)
+<P>
+<P>
+<DFN>Lexical analysis</DFN>
+<A NAME="IDX20"></A>
+is the process that examines the source program text,
+retaining significant character sequences
+<A NAME="IDX22"></A>
+<A NAME="IDX21"></A>
+and discarding those that are not significant.
+A character sequence is significant if it corresponds to a literal in the
+grammar or to a terminal symbol.
+In the sentence <CODE>N41 58.8 W087 54.3</CODE>, the significant character sequences
+are <CODE>N</CODE>, <CODE>41</CODE>, <CODE>58.8</CODE>, <CODE>W</CODE>, <CODE>087</CODE> and <CODE>54.3</CODE>.
+The spaces separating the numbers of a <CODE>Coordinate</CODE>
+and preceding the <CODE>Longitude</CODE> are not significant.
+<P>
+Eli obtains information about character sequences that correspond to literals
+directly from the grammar.
+The user must, however, provide descriptions of the character sequences
+corresponding to each terminal symbol.
+Those descriptions determine the <EM>form</EM> of the character sequences,
+but not their <EM>content</EM>.
+For example, the character sequences corresponding to the terminal symbol
+<CODE>Integer</CODE> might be described as sequences of one or more decimal
+digits, and those corresponding to the terminal symbol <CODE>Float</CODE> might be
+described as pairs of such sequences separated by a dot
+(see  <A HREF="lex_1.html#SEC2">Regular Expressions of Lexical Analysis</A>):
+<P>
+<PRE>
+Integer:  $[0-9]+
+Float:    $[0-9]+"."[0-9]+
+</PRE>
+<P>
+<P>
+Computations
+<A NAME="IDX23"></A>
+may be specified over a tree that reflects the phrase structure of a sentence.
+That tree has one node
+<A NAME="IDX24"></A>
+corresponding to each phrase, with the root
+<A NAME="IDX25"></A>
+corresponding to the sentence.
+For example, the tree that reflects the structure of the sentence
+<CODE>N41 58.8 W087 54.3</CODE> has a node corresponding to the
+<CODE>Latitude</CODE> phrase <CODE>N41 58.8</CODE>.
+Children
+<A NAME="IDX26"></A>
+of a node correspond to the immediate component phrases of the
+phrase corresponding to that node.
+Thus the children of the the node corresponding to the
+<CODE>Latitude</CODE> phrase <CODE>N41 58.8</CODE>
+would correspond to the phrases <CODE>N</CODE> and <CODE>41 58.8</CODE>, because the
+immediate components of the <CODE>Latitude</CODE> phrase <CODE>N41 58.8</CODE> are an
+<CODE>NS</CODE> phrase (<CODE>N</CODE>) and a <CODE>Coordinate</CODE> phrase (<CODE>41 58.8</CODE>).
+<P>
+One or more values, called <DFN>attributes</DFN>,
+<A NAME="IDX27"></A>
+may be associated with each tree node.
+Computations over the tree may involve only attribute access,
+C constants,
+<A NAME="IDX28"></A>
+and function application.
+<A NAME="IDX29"></A>
+Here is an example:
+<P>
+<PRE>
+RULE DegMin: Coordinate ::= Integer Float
+COMPUTE
+  Coordinate.minutes=Minutes(Integer, Float);
+END;
+</PRE>
+<P>
+According to the rule <CODE>DegMin</CODE>, <CODE>Coordinate</CODE> has a <CODE>minutes</CODE>
+attribute attached to it.
+The <CODE>minutes</CODE> attribute of <CODE>Coordinate</CODE> is computed by applying
+the function <CODE>Minutes</CODE> to the values representing
+<CODE>Integer</CODE> and <CODE>Float</CODE>, but how are those values obtained?
+Clearly they must depend on the character sequences corresponding to these
+terminal symbols.
+<P>
+A single integer value can be used to represent any terminal symbol.
+That value is determined by a <DFN>token processor</DFN>
+<A NAME="IDX31"></A>
+<A NAME="IDX30"></A>
+whose name is attached to
+the definition of the character sequences corresponding to the symbol,
+enclosed in brackets (see  <A HREF="lex_1.html#SEC10">Token Processors of Lexical Analysis</A>):
+<P>
+<PRE>
+Integer:  $[0-9]+           [mkstr]
+Float:    $[0-9]+"."[0-9]+  [mkstr]
+</PRE>
+<P>
+The processor <CODE>mkstr</CODE>
+<A NAME="IDX32"></A>
+is a library routine that stores the character sequence in an array
+and yields the sequence's index.
+<CODE>Minutes</CODE> can then use the index values to obtain the stored strings,
+convert them to numbers, and perform the necessary computation.
+<P>
+<P>
+Often an input text describes some set of <DFN>entities</DFN>
+<A NAME="IDX33"></A>
+and the relationships
+<A NAME="IDX34"></A>
+among them.
+For example, a program in a conventional language may describe some set of
+constants, variables, types and procedures, and how these entities are
+related in the execution of an algorithm.
+Entities may be defined by one part of the input text and used by another.
+It is therefore necessary for computations over the tree representing the
+phrase structure of a sentence to be able to refer to entities and their
+properties at arbitrary points.
+Eli provides a <DFN>definition table</DFN>
+<A NAME="IDX35"></A>
+to meet this requirement
+(see  <A HREF="deftbl_2.html#SEC7">Definition Table Design Criteria of Definition Table</A>).
+<P>
+Each entity can be represented by a unique <DFN>definition table key</DFN>,
+<A NAME="IDX36"></A>
+which allows access to arbitrary information about that entity.
+The Eli user specifies the information that might be stored, and possibly a
+set of <DFN>query</DFN>
+<A NAME="IDX37"></A>
+and <DFN>update</DFN>
+<A NAME="IDX38"></A>
+operations for that information.
+(Eli provides a standard query operation and a standard update operation
+that suffice for most purposes.)
+<P>
+Library modules are available for associating unique definition table keys
+with identifiers
+<A NAME="IDX39"></A>
+according to the scope rules
+<A NAME="IDX41"></A>
+<A NAME="IDX40"></A>
+of the input text,
+and for maintaining various kinds of information about entities.
+Definition table keys themselves can be stored as attributes,
+compared for equality, passed to query and update routines,
+and accessed either directly or remotely.
+A distinguished value, <CODE>NoKey</CODE>,
+<A NAME="IDX42"></A>
+represents the absence of a definition table key.
+<P>
+<P>
+Output
+<A NAME="IDX43"></A>
+may be derived from arbitrary information in the input text.
+The elements of the output may be arranged in arbitrary ways based on
+computations over the tree representing the phrase structure of a sentence.
+It is therefore useful to be able to build up a complex output data
+structure piecemeal, combining components according to information gleaned
+from computation.
+<P>
+The program text generation
+<A NAME="IDX45"></A>
+<A NAME="IDX46"></A>
+<A NAME="IDX47"></A>
+<A NAME="IDX44"></A>
+facility allows the user to specify templates
+<A NAME="IDX48"></A>
+that describe output text fragments
+<A NAME="IDX49"></A>
+(see  <A HREF="ptg_2.html#SEC2">Pattern Specifications of PTG: Pattern-Based Text Generator</A>).
+"Holes" in these templates can be filled with text generated according to
+other templates.
+The result is a directed, acyclic graph in which each node represents a
+single template and the children of that node represent generated text
+fragments.
+Text at the leaves can be generated by arbitrary user-supplied routines.
+(A library module provides common leaf generation routines.)
+<P>
+Eli generates a set of functions,
+<A NAME="IDX51"></A>
+<A NAME="IDX50"></A>
+one per template, that are invoked during
+computations to build the directed, acyclic graph.
+These functions return values that can be stored as attributes,
+passed to text generation functions,
+and accessed either directly or remotely.
+A distinguished value, <CODE>PTGNULL</CODE>,
+<A NAME="IDX52"></A>
+represents the absence of a graph.
+<P>
+Printing functions
+<A NAME="IDX54"></A>
+<A NAME="IDX53"></A>
+are also provided by Eli to output the generated text on
+an arbitrary file (including the standard output unit).
+These functions accept a graph and perform a depth-first, left-to-right
+traversal.
+The text is output during the traversal, with text generated by a common
+subgraph being output once for each parent of that subgraph.
+<P>
+<H2><A NAME="SEC3" HREF="novice_toc.html#SEC3">Descriptive Mechanisms Known to Eli</A></H2>
+<P>
+The Eli user describes the subproblems
+<A NAME="IDX56"></A>
+<A NAME="IDX55"></A>
+of a particular text processing problem.
+Eli derives code fragments from these descriptions, and combines them into
+a complete program.
+Each description is given in a notation that is ideally suited to the
+subproblem being described.
+<P>
+Subproblem descriptions are placed into files,
+each of which has a <DFN>type</DFN>.
+<A NAME="IDX58"></A>
+<A NAME="IDX57"></A>
+The type is indicated by the file name extension: <TT>`foo.c'</TT> is a
+type-<TT>`c'</TT> file.
+Eli recognizes type-<TT>`c'</TT> and type-<TT>`h'</TT> files as C program text and
+include files respectively.
+Here is a list of the other file types recognized by Eli:
+<P>
+<DL COMPACT>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<DT><TT>`specs'</TT>
+<DD>A collection of object names, one per line.
+<P>
+<A NAME="IDX61"></A>
+<A NAME="IDX62"></A>
+<DT><TT>`con'</TT>
+<DD>A description of the phrase structure
+<A NAME="IDX63"></A>
+of the input text.
+Each phrase may be associated with a computation to be carried out when
+that phrase is recognized.
+Eli generates a parser from these specifications.
+See  <A HREF="syntax_toc.html">Syntactic Analysis</A>.
+<P>
+<A NAME="IDX64"></A>
+<A NAME="IDX65"></A>
+<DT><TT>`gla'</TT>
+<DD>A description of character sequences,
+<A NAME="IDX66"></A>
+whether they are meaningful or not,
+and what (if any) computation should be carried out when they are
+recognized in the input text.
+Eli generates a scanner from these specifications.
+See  <A HREF="lex_toc.html">Lexical Analysis</A>.
+<P>
+<A NAME="IDX67"></A>
+<A NAME="IDX68"></A>
+<DT><TT>`lido'</TT>
+<DD>A description of the structure of a tree and the computations
+<A NAME="IDX69"></A>
+to be carried out on that tree.
+Eli generates a tree-walking evaluator from these specifications.
+For a discussion on constructing computations in trees, see
+ <A HREF="comptrees_toc.html">LIDO - Computation in Trees</A>.
+For reference, see  <A HREF="lidoref_toc.html">LIDO - Reference Manual</A>.
+<P>
+<A NAME="IDX70"></A>
+<A NAME="IDX71"></A>
+<DT><TT>`ctl'</TT>
+<DD>Constraints on evaluator generation.
+Eli uses these specifications to modify its behavior when constructing the
+routine that carries out the computations.
+See  <A HREF="lcl_toc.html">LIGA Control Language Reference Manual</A>.
+<P>
+<A NAME="IDX72"></A>
+<A NAME="IDX73"></A>
+<DT><TT>`ptg'</TT>
+<DD>A description of structured output text.
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+<A NAME="IDX74"></A>
+Eli generates a set of output functions from these specifications.
+See  <A HREF="ptg_toc.html">Pattern-Based Text Generator</A>.
+<P>
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+<DT><TT>`pdl'</TT>
+<DD>A definition of entities and their associated properties.
+<A NAME="IDX80"></A>
+<A NAME="IDX79"></A>
+Eli generates a definition table module from these specifications.
+See  <A HREF="deftbl_toc.html">PDL Reference Manual</A>.
+<P>
+<A NAME="IDX81"></A>
+<A NAME="IDX82"></A>
+<DT><TT>`oil'</TT>
+<DD>A definition of possible tree node re-labeling.
+<A NAME="IDX83"></A>
+Eli generates a re-labeling module from these specifications.
+See  <A HREF="oil_toc.html">OIL Reference Manual</A>.
+<P>
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+<DT><TT>`clp'</TT>
+<DD>A description of the meanings of command line arguments.
+<A NAME="IDX86"></A>
+Eli generates a module that accesses command line arguments from these
+specifications.
+See  <A HREF="clp_toc.html">CLP Reference Manual</A>.
+<P>
+<A NAME="IDX87"></A>
+<DT><TT>`map'</TT>
+<DD>A description of the relationship between the phrase structure
+<A NAME="IDX88"></A>
+of the input text and the structure of the tree
+<A NAME="IDX89"></A>
+over which computations are to be made.
+Eli uses this specification to determine the tree building actions that
+must be attached to rules of the parsing grammar.
+See  <A HREF="syntax_2.html#SEC7">Mapping of Syntactic Analysis</A>.
+<P>
+<A NAME="IDX90"></A>
+<A NAME="IDX91"></A>
+<DT><TT>`sym'</TT>
+<DD>This is provided for backward compatibility with previous Eli releases
+for specifying symbolic equivalence classes.  It is superseded by
+type-<TT>`map'</TT> files.
+See  <A HREF="syntax_2.html#SEC14">Specifying symbolic equivalence classes of Syntactic Analysis</A>.
+<P>
+<A NAME="IDX92"></A>
+<A NAME="IDX93"></A>
+<DT><TT>`delit'</TT>
+<DD>Specifies literals
+<A NAME="IDX94"></A>
+appearing in a type-<TT>`con'</TT> file that are to be
+recognized by special routines.
+Each line of a type-<TT>`delit'</TT> file consists of a regular expression
+(see  <A HREF="lex_1.html#SEC2">Regular Expressions of Lexical Analysis</A>)
+optionally followed by an identifier.
+The regular expression defines the literal to be recognized specially.
+A <CODE>#define</CODE> directive making the identifier a synonym for that
+literal's syntax code is placed in the generated file <TT>`litcode.h'</TT>.
+<P>
+<A NAME="IDX95"></A>
+<A NAME="IDX96"></A>
+<DT><TT>`str'</TT>
+<DD>Specifies initial contents of the identifier table.
+<A NAME="IDX97"></A>
+Each line of a type-<TT>`str'</TT> file consists of two integers and a sequence
+of characters.
+The first integer is the syntax code to be returned by <CODE>mkidn</CODE>
+(see  <A HREF="lib_1.html#SEC8">Unique Identifier Management of Library Reference Manual</A>), and the second is the length of the character sequence.
+The integer representing the length is terminated by a single space.
+The character sequence begins immediately after this space, and consists of
+exactly the number of characters specified by the length.
+<P>
+<A NAME="IDX98"></A>
+<A NAME="IDX99"></A>
+<DT><TT>`gnrc'</TT>
+<DD>Defines a generic module.
+<A NAME="IDX100"></A>
+Generic modules can be instantiated to yield collections of specifications
+that solve specific problems.
+<P>
+<A NAME="IDX101"></A>
+<A NAME="IDX102"></A>
+<DT><TT>`fw'</TT>
+<DD>Combines a collection of strongly-coupled specifications with documentation
+describing their relationships.
+Eli splits these specifications according to their types and processes them
+individually.
+It can also create a printed document or on-line hypertext from a
+type-<TT>`fw'</TT> file.
+<P>
+<A NAME="IDX103"></A>
+<A NAME="IDX104"></A>
+<DT><TT>`phi'</TT>
+<DD>Material to be included
+<A NAME="IDX105"></A>
+in some part of the generated processor.
+Specification files of this type should have a name consisting of three parts:
+<CODE>foo.bar.phi</CODE>.
+All the files whose names end in <TT>`bar.phi'</TT> are concatenated together 
+in arbitrary order to form a file named <CODE>bar.h</CODE>.
+An <CODE>#include</CODE> directive can then be used to incorporate <TT>`bar.h'</TT>
+into any generated file.
+<P>
+<TT>`.phi'</TT>-file-parts may also be generated by different Eli-Tools. They may only
+be used in files of type <TT>`.h'</TT> and <TT>`.c'</TT>. They are automatically protected
+against multiple inclusion. 
+<P>
+<A NAME="IDX106"></A>
+<A NAME="IDX107"></A>
+<DT><TT>`eta'</TT>
+<DD>Material to be included
+<A NAME="IDX108"></A>
+in some part of the specifications. Specification files of this
+type should have a name consisting of three parts: <CODE>foo.bar.eta</CODE>.
+All the files whose names end in <TT>`bar.eta'</TT> are concatenated
+together in arbitrary order to form a file named <CODE>bar.eta.h</CODE>.  An
+<CODE>#include</CODE> directive can then be used to incorporate
+<TT>`bar.eta.h'</TT> in any specification file.
+<P>
+<TT>`.eta'</TT>-file-parts can be used in any specification file with the
+exception of <TT>`.specs'</TT> and <TT>`.fw'</TT>-files. The generated
+include-files are not protected against multiple inclusion.
+<P>
+</DL>
+<P>
+Any of these files can contain C-style comments
+<A NAME="IDX109"></A>
+and preprocessor directives
+such as <CODE>#include</CODE>,
+<A NAME="IDX110"></A>
+<CODE>#define</CODE>
+<A NAME="IDX111"></A>
+and <CODE>#ifdef</CODE>.
+<A NAME="IDX112"></A>
+The C preprocessor is applied to files of all types except type-<TT>`fw'</TT>
+<EM>before</EM> those files are examined.
+C-style comments and preprocessor directives appearing in type-<TT>`fw'</TT>
+files are passed unchanged to the files generated from the type-<TT>`fw'</TT>
+file.
+<P>
+Eli includes three pre-defined header files, which are usually generated
+from type-<TT>`phi'</TT> specifications, in specified places:
+<P>
+<DL COMPACT>
+<A NAME="IDX113"></A>
+<A NAME="IDX114"></A>
+<DT><TT>`HEAD.h'</TT>
+<DD>Included at the beginning of the main program, the tree constructor,
+and the attribute evaluator.
+This header file is used primarily to define abstract data types used in
+tree computation.
+<P>
+<A NAME="IDX115"></A>
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+<DT><TT>`INIT.h'</TT>
+<DD>Included at the beginning of the main program's executable code.
+<TT>`INIT.h'</TT> may contain declarations, but only if they appear at the
+beginning of compound statements that lie wholly within <TT>`INIT.h'</TT>.
+The content of <TT>`INIT.h'</TT> will be executed before any other code.
+Its primary purpose is to initialize abstract data types used in tree
+computation.
+<P>
+<A NAME="IDX118"></A>
+<A NAME="IDX119"></A>
+<A NAME="IDX120"></A>
+<DT><TT>`FINL.h'</TT>
+<DD>Included at the end of the main program's executable code.
+<TT>`FINL.h'</TT> may contain declarations, but only if they appear at the
+beginning of compound statements that lie wholly within <TT>`FINL.h'</TT>.
+The content of <TT>`FINL.h'</TT> will be executed after all other code.
+Its primary purpose is to finalize abstract data types used in tree
+computation.
+</DL>
+<P>
+<H2><A NAME="SEC4" HREF="novice_toc.html#SEC4">Common Derived Objects</A></H2>
+<P>
+Eli recognizes three kinds of object:
+a <DFN>file</DFN>, a <DFN>string</DFN> and a <DFN>list</DFN>.
+Examples of files are a specification file such as those mentioned in the
+previous section, an executable binary file, or an output file from a test
+run.
+A flag to a command is an example of a string.
+Lists are ordered sequences of objects, such as the arguments to a command
+or the Makefile, C files, and header files that implement a text processor.
+<P>
+<DFN>Source objects</DFN>
+<A NAME="IDX122"></A>
+<A NAME="IDX121"></A>
+can be created or modified directly by the user.
+They can be regular files, directories, or symbolic links.
+Source objects cannot be automatically recreated by Eli;
+they are the basic building blocks
+from which Eli creates all other objects.
+Every source object is given a type by Eli
+based on its host filename,
+and this type determines what derived objects can be produced from the
+source object.
+<P>
+The file type of a source file is the longest suffix of the file name that
+matches one of the source type suffixes listed in the last section.
+If no suffix match is found, the file type is empty.
+<P>
+<DFN>Derived objects</DFN>
+<A NAME="IDX124"></A>
+<A NAME="IDX123"></A>
+are objects that can be produced from source objects and other derived objects
+through the invocation of one or more tools.
+Tools are invoked only as needed to create a specified derived object.
+Eli automatically caches derived objects for re-use in future
+derivations.
+Derived objects are created and modified only by Eli itself,
+not by users.
+<P>
+A derived object is named by an <DFN>odin-expression</DFN>
+<A NAME="IDX126"></A>
+<A NAME="IDX125"></A>
+(see  <A HREF="ui_1.html#SEC1">Referring to Objects of User Interface</A>).
+Lexically, an odin-expression is composed of a sequence of
+<DFN>identifier</DFN>
+<A NAME="IDX127"></A>
+and <EM>operator</EM>
+<A NAME="IDX128"></A>
+tokens, and is terminated by a newline character.
+An odin-expression can be continued on multiple lines
+by escaping each newline character with a backslash.
+This backslash (but not the newline) is deleted
+before the expression is parsed.
+Multiple odin-expressions can be specified on the same line
+by separating them with semicolon operators.
+<P>
+An identifier token is just a sequence of characters.
+The following characters must be escaped to be included in an identifier:
+<P>
+<PRE>
+: + = ( ) / % ; ? $ &#60; &#62; ! # \ ' <KBD>space</KBD> <KBD>tab</KBD> <KBD>newline</KBD>
+</PRE>
+<P>
+A single character can be escaped by preceding it with a backslash
+(e.g. <CODE>lost\+found</CODE>).
+A sequence of characters can be escaped
+by enclosing them in single quote marks
+(e.g. <CODE>'lost+found'</CODE>).
+<P>
+Unescaped <DFN>white space</DFN>
+<A NAME="IDX129"></A>
+characters (spaces, tabs, and newlines)
+are ignored during parsing except when they separate adjacent identifiers.
+<P>
+Here are a number of odin-expressions that name common objects derived from
+the same collection of specifications (all of the spaces are redundant).
+The identifier following a colon (<KBD>:</KBD>) is an <DFN>object type</DFN> (or
+<DFN>product</DFN>) that characterizes the properties of the derived object,
+while the identifier following a plus (<KBD>+</KBD>) is a <DFN>parameter type</DFN>
+that modifies those properties without changing the nature of the derived
+object.
+(For the characteristics of all of the products and parameters defined by Eli,
+see  <A HREF="pp_toc.html">Top of Products and Parameters</A>.)
+<P>
+<DL COMPACT>
+<A NAME="IDX130"></A>
+<DT><CODE>sets.specs :exe</CODE>
+<DD>is the executable program generated by Eli from the specifications
+enumerated in <CODE>sets.specs</CODE>.
+It is a normal program for the machine on which it was generated,
+and is independent of Eli.
+<P>
+<A NAME="IDX131"></A>
+<DT><CODE>sets.specs :source</CODE>
+<DD>is a set of C files, a set of header files, and a Makefile.
+The result of running <CODE>make</CODE> with this information is the executable
+program generated by Eli from the specifications
+enumerated in <CODE>sets.specs</CODE>.
+<P>
+<A NAME="IDX132"></A>
+<DT><CODE>sets.specs :exe :help</CODE>
+<DD>is a browser session that helps to explain inconsistencies in the
+specifications enumerated in <CODE>sets.specs</CODE>.
+It provides cross-references to on-line documentation and allows you to
+invoke an editor on the proper files to make corrections.
+<P>
+<A NAME="IDX133"></A>
+<DT><CODE>. +cmd=(sets.specs :exe) (input) :run</CODE>
+<DD>is the result of running the program generated by Eli from the
+specifications enumerated in <CODE>sets.specs</CODE> as a command with the file
+<TT>`input'</TT> from the current directory as an argument.
+The name of the directory (in this case <CODE>.</CODE>, the name of the current
+directory) in which the program is to be executed precedes the parameter
+that defines the command to be executed.
+<P>
+<A NAME="IDX134"></A>
+<DT><CODE>sets.specs +monitor +arg=(input) :mon</CODE>
+<DD>is an interaction with the program generated by Eli from the specifications
+enumerated in <CODE>sets.specs</CODE>, as it processes the data file
+<TT>`input'</TT>.
+This interaction allows you to follow the execution at the level of your
+specifications, rather than at the level of the machine on which  the
+program is running.
+<P>
+<A NAME="IDX135"></A>
+<DT><CODE>sets.specs +debug :dbx</CODE>
+<DD>is an interaction with the program generated by Eli from the specifications
+enumerated in <CODE>sets.specs</CODE> using the symbolic debugger of the machine
+on which the program is running.
+It is useful when some of your specifications are written directly in C.
+(Replace <CODE>dbx</CODE> with <CODE>gdb</CODE> to use the GNU symbolic debugger.)
+<P>
+<A NAME="IDX136"></A>
+<A NAME="IDX137"></A>
+<DT><CODE>sets.specs :gencode :viewlist</CODE>
+<DD>is an interactive shell executing in a directory containing all text files
+generated by Eli from the specifications enumerated in <CODE>sets.specs</CODE>.
+This facility is sometimes useful in diagnosing compiler errors due to type
+mismatches.
+<P>
+<A NAME="IDX138"></A>
+<A NAME="IDX139"></A>
+<A NAME="IDX140"></A>
+<DT><CODE>sets.specs :exe :err &#62;</CODE>
+<DD>is the raw set of reports generated by inconsistencies in the specifications
+enumerated in <CODE>sets.specs</CODE>, written to the screen.
+(It would be sent to your editor if you replaced <KBD>&#62;</KBD> with <KBD>&#60;</KBD>.)
+This display is sometimes useful if the reports are garbled by the
+<CODE>help</CODE> derivation.
+<P>
+<A NAME="IDX141"></A>
+<DT><CODE>sets.specs :exe :warn &#62;</CODE>
+<DD>is the raw set of reports generated by anomalies in the specifications
+enumerated in <CODE>sets.specs</CODE>, written to the screen.
+(It would be sent to your editor if you replaced <KBD>&#62;</KBD> with <KBD>&#60;</KBD>.)
+This display is sometimes useful if the reports are garbled by the
+<CODE>help</CODE> derivation.
+</DL>
+<P>
+<H2><A NAME="SEC5" HREF="novice_toc.html#SEC5">How to Request Product Manufacture</A></H2>
+<P>
+Eli is invoked by giving the command <CODE>eli</CODE>.
+If you have never used Eli before, it will have to establish a <DFN>cache</DFN>
+(see  <A HREF="novice_3.html#SEC19">Hints on Cache Management</A>).
+This process is signaled by a long sequence of messages about installing
+packages, followed by a note that the packages have been compiled.
+<P>
+After printing an identifying banner, Eli writes the prompt <CODE>-&#62;</CODE> and
+waits for input.
+The interactive session can be terminated by responding to the <CODE>-&#62;</CODE>
+prompt with a <KBD>^D</KBD>, and you can browse the documentation by responding
+with a question mark.
+<P>
+Entering a derived object name in response to the <CODE>-&#62;</CODE> prompt
+constitutes a request to bring that derived object up to date with respect
+to all of the source objects on which it depends.
+Eli will carry out the minimum number of operations required to satisfy
+this request.
+When the next <CODE>-&#62;</CODE> prompt appears, the given object will be up to
+date.
+<P>
+Bringing an object up to date does not yield a copy of that object.
+To obtain a copy, you must add an output request.
+The precise form and effect of an output request depends on whether the
+object being output is a file object or a list object.
+All source objects are file objects; to find out the kind of a derived
+object, consult  <A HREF="pp_toc.html">Top of Products and Parameters</A>.
+<P>
+Here are some examples of common output requests:
+<P>
+<DL COMPACT>
+<A NAME="IDX142"></A>
+<DT><CODE>sets.specs :parsable &#62;</CODE>
+<DD>requests that the derived file object <CODE>sets.specs :parsable</CODE>
+be written to the standard output (normally the screen).
+Garbage will result if the derived object is not a text file.
+<P>
+<A NAME="IDX143"></A>
+<A NAME="IDX144"></A>
+<A NAME="IDX145"></A>
+<DT><CODE>sets.specs :exe &#62; trans</CODE>
+<DD>requests that the derived file object <CODE>sets.specs :exe</CODE>
+be written to file <TT>`trans'</TT>.
+The derived object must be a file object, but it need not be text.
+If the file <TT>`trans'</TT> does not exist, it will be created;
+if it does exist, it will be overwritten if its content differs from that
+of the derived object <CODE>sets.specs :exe</CODE>.
+If <TT>`trans'</TT> exists and is a directory, a file named
+<CODE>sets.specs.exe</CODE> will be written to that directory
+(see  <A HREF="ui_3.html#SEC9">Extracting and Editing Objects of User Interface</A>).
+<P>
+<A NAME="IDX146"></A>
+<A NAME="IDX147"></A>
+<DT><CODE>sets.specs :source &#62; src</CODE>
+<DD>requests that the derived list object <CODE>sets.specs :source</CODE>
+be written to directory <TT>`src'</TT>.
+The directory <TT>`src'</TT> must exist.
+A file in <TT>`src'</TT> before the request will be overwritten only if it has the
+same name as one of the file objects in the list <CODE>sets.specs :source</CODE>,
+but different content.
+(Normally, <TT>`src'</TT> would be either an empty directory or
+one that contains an earlier version of <CODE>sets.specs :source</CODE>.)
+<P>
+<A NAME="IDX148"></A>
+<A NAME="IDX149"></A>
+<DT><CODE>sets.con &#60;</CODE>
+<DD>requests that your current editor be invoked on the object <CODE>sets.con</CODE>
+</DL>
+<P>
+<H2><A NAME="SEC6" HREF="novice_toc.html#SEC6">How to Invoke Unix Commands</A></H2>
+<P>
+While one is interacting with Eli, there are a number of situations in
+which one wishes to execute normal operating system commands.
+These commands can be executed with or without derived objects as
+arguments.
+We have already seen the most general form, a derived object that is an
+execution of an arbitrary command in an arbitrary directory
+(see  <A HREF="novice_1.html#SEC4">Common Derived Objects</A>).
+Although this facility is general enough to handle <EM>any</EM> command
+execution, it is cumbersome for simple commands.
+<P>
+The <KBD>!</KBD> character introduces a host command line
+(see  <A HREF="ui_4.html#SEC12">Unix Commands of User Interface</A>).
+If the first non-white space character following the <KBD>!</KBD> is not
+<KBD>:</KBD>, <KBD>;</KBD> or <KBD>=</KBD> then the rest of the line is treated as a
+single, escaped sequence of characters.
+This avoids the confusion resulting from interactions between the escape
+conventions of host commands and odin-expressions.
+A leading <KBD>:</KBD>, <KBD>;</KBD>, <KBD>=</KBD> or whitespace can be included in the
+escaped sequence by preceding it with <KBD>\</KBD>.
+<P>
+If the name of a file object precedes the <KBD>!</KBD> character, that object is
+brought up to date and the name of a file containing it is appended to the
+host command line.
+<P>
+Here are examples of some typical command invocations using <KBD>!</KBD>:
+<P>
+<DL COMPACT>
+<DT><CODE>!ls</CODE>
+<DD>lists the files in the current directory.
+<P>
+<DT><CODE>!mkdir src</CODE>
+<DD>makes a new subdirectory of the current directory.
+<P>
+<DT><CODE>(sets.specs :exe) ! size</CODE>
+<DD>provides information about the space used by the processor generated from
+<CODE>sets.specs</CODE>.
+<P>
+<DT><CODE>input +cmd=(sets.specs:exe) :stdout ! diff desired</CODE>
+<DD>compares the file <TT>`desired'</TT> with the result of applying the processor
+generated from <CODE>sets.specs</CODE> to the file <TT>`input'</TT>.
+</DL>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="novice_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="novice_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

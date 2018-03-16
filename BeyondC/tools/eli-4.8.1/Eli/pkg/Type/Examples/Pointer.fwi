@@ -1,0 +1,231 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Pointer Types~>
+
+In this chapter we introduce pointer types to our language.
+The notation @code{t !} denotes a type for
+values that point to values of type @code{t}.
+
+A new @code{Variable} notation is introduced:
+In @code{v !} the dereferencing operator @code{!} is applied to 
+the variable @code{v}, which must have a pointer type. The result
+of the operation is the value that @code{v} points to. 
+
+A pointer value of type @code{t !} is created by execution of a 
+generator @code{new t}, where @code{t} is a type denotation.
+
+Here is an example program that uses these pointer constructs
+in different contexts:
+
+~O~<PointerExamp~>~{
+begin
+  var   int k;
+  var   int! pi, int! pj;
+  var   record int i, bool b, real! r end! rv;
+  type  record int x, t! next end t;
+  var   t l;
+  pi = new int;
+  pi! = 1;
+  pi = pj;
+  pi! = pj!;
+  rv!.b = true;
+  rv!.r! = 3.2;
+  l.next!.x = 1;
+  l.next = nil;
+end
+~}
+
+The following productions are added to the grammar:
+
+~$~<Abstract pointer syntax~>==~{
+RULE: TypeDenoter ::= PointerType END;
+RULE: PointerType ::= TypeDenoter '!' END;
+
+RULE: Variable    ::= Variable '!' END;
+RULE: Expression  ::= 'nil' END;
+RULE: Expression  ::= Generator END;
+RULE: Generator   ::= 'new' TypeDenoter END;
+~}
+
+There are two constructs which introduce a pointer type.
+The first one is a denoter for a pointer type. Two monadic 
+operators are created for each pointer type: 
+One is applied to a pointer and yields the value pointed to, 
+the other yields the reference of an entity instead of its 
+value. The dereferencing operators of all pointer types are
+overloaded on the indication @code{DerefOpr}, correspondingly
+all operators that prevent dereferencing are overloaded 
+on the indication @code{RefOpr}.
+We also introduce an artificial type for the @code{nil} symbol:
+~$~<Pointer operators~>==~{
+DerefOpr;
+RefOpr;
+NilOpr;
+nilType -> IsType = {1};
+~}
+
+Creating these pairs of operators for a pointer type establishes 
+the condition @code{PointerType.GotOper}, which is a precondition 
+for operator identification. Furthermore, we state that the type 
+of the @code{nil} symbol is coercible to each pointer type.
+
+~$~<Pointer type denotation~>==~{
+RULE: TypeDenoter ::= PointerType COMPUTE
+  TypeDenoter.Type = PointerType.Type;
+END;
+
+SYMBOL PointerType INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  PointerType.GotOper +=
+    ORDER 
+      (Coercible (NilOpr, nilType, PointerType.Type),
+       MonadicOperator
+         (DerefOpr, NewKey(), PointerType.Type, TypeDenoter.Type),
+       MonadicOperator
+         (RefOpr, NewKey(), TypeDenoter.Type, PointerType.Type));
+END;
+
+RULE: Expression  ::= 'nil' COMPUTE
+  PrimaryContext (Expression, nilType);
+END;
+~}
+
+
+A generator also introduces a pointer type. The
+@code{TypeDenoter} states which is the type pointed to.
+Generators may occur as operand in expressions:
+
+~$~<Generator~>==~{
+SYMBOL Generator INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  Generator.GotOper +=
+    ORDER (
+    MonadicOperator
+       (DerefOpr, NewKey(), Generator.Type, TypeDenoter.Type),
+    MonadicOperator
+       (RefOpr, NewKey(), TypeDenoter.Type, Generator.Type));
+END;
+
+RULE: Expression ::= Generator COMPUTE
+  PrimaryContext (Expression, Generator.Type);
+END;
+~}
+
+Types @code{t !}, @code{s !} and the types created by @code{new t} and 
+@code{new s} are all considered to be equivalent in our language, if the 
+types @code{s} and @code{t} are equivalent, with respect to renaming 
+and to equivalence rules for the particular type categories.
+
+We use the facilities of the @code{StructEquiv} module to specify
+such structural type equivalence for pointer types.
+In particular two conditions are specified for types @code{a} and
+@code{b} to be equivalent: Both have to be of the kind @code{PointerClass},
+and their sequences of component types have to be elementwise equivalent, 
+in this case the single type pointed to:
+~O~<EqualPtrTypes.lido~>~{
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  PointerType.GotType =
+    AddTypeToBlock
+      (PointerType.Type, PointerClass,
+       VResetComponentTypes 
+         (PointerType.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+  <- .moreTypeProperies;
+END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  Generator.GotType =
+    AddTypeToBlock
+      (Generator.Type, PointerClass,
+       VResetComponentTypes 
+         (Generator.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+  <- .moreTypeProperies;
+END;
+~}
+
+The @code{PointerClass} is a unique key used to distinguish
+this kind of types from other kinds, e.g. array types:
+
+~$~<Pointer type equality~>==~{
+PointerClass;
+~}
+
+Pointer types are to be treated especially when types are checked for
+equivalence: On the one hand, a type is allowed to be 
+recursively defined if the recursion goes through a pointer 
+component, for example in @code{type record int i, rec! p end rec;}.
+That is why we associate the property @code{AllowRecurType}
+to the pointer type, together with the properties defining the
+output for types. 
+
+~$~<Pointer types allow recursion~>==~{
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  .moreTypeProperies =
+    ORDER
+      (ResetTypeName (PointerType.Type, "pointer..."),
+       ResetTypeLine (PointerType.Type, LINE),
+       ResetAllowRecurType (PointerType.Type, 1));
+END;
+
+RULE: Generator ::= 'new' TypeDenoter COMPUTE
+  .moreTypeProperies =
+    ORDER
+      (ResetTypeName (Generator.Type, "pointer..."),
+       ResetTypeLine (Generator.Type, LINE),
+       ResetAllowRecurType (Generator.Type, 1));
+END;
+~}
+
+On the other hand, we have to check that pointer types are not
+defined directly recursively, or indirectly recursively s.t.
+only pointer types are involved:
+@example
+  type p1! p1;
+  type p2! p3;
+  type p3! p2;
+@end example
+In the example above all three type are pairwise equivalent.
+
+~$~<Recursion check for pointer types~>==~{
+RULE: PointerType ::= TypeDenoter '!' COMPUTE
+  IF (EQ (FinalType (PointerType.Type), FinalType (TypeDenoter.Type)),
+    message (ERROR, "Recursively defined pointer type", 
+             0, COORDREF))
+    <- INCLUDING Program.TypeIsSet;
+END;
+~}
+
+For the dereferencing operation applied to a @code{Variable} we 
+specify that in the following context a suitable operator that
+overloads the @code{DerefOpr} indication is applicable:
+
+~$~<Pointer variable~>==~{
+RULE: Variable ::= Variable '!' COMPUTE
+  MonadicContext (Variable[1], , Variable[2]);
+  Indication (DerefOpr);
+
+  IF(BadOperator,
+    message(ERROR,"Dereferencing not allowed", 0, COORDREF));
+END;
+~}
+
+~O~<Pointer.pdl~>~{
+~<Pointer type equality~>
+~<Pointer operators~>
+~}
+
+~O~<Pointer.lido~>~{
+~<Abstract pointer syntax~>
+~<Pointer type denotation~>
+~<Generator~>
+~<Pointer types allow recursion~>
+~<Recursion check for pointer types~>
+~<Pointer variable~>
+~}
+
+~O~<Pointer.con~>~{
+~<Concrete pointer syntax~>
+~}

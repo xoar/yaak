@@ -1,0 +1,33 @@
+# Source Types
+
+*.dg => :dg;
+
+
+# Input Object Types
+
+:dg 'Odin Derivation Graph'? => :FILE;
+
+
+# Output Object Types
+
+:c 'C source code'? => :FILE;
+
+:log 'log file'? => :FILE;
+
+:dg.log 'Derivation Graph log'? => :log;
+
+:dg.tab 'Derivation Graph tables'? => :FILE;
+
+:dg.env 'Derivation Graph environment variable definitions'? => :FILE;
+
+
+# Parameter Types
+
++pkg 'name of a package or a file containing package names'? => :cat;
+
+
+# Tools
+
+EXEC (dg_out.sh) (dg.exe) (:dg) (+pkg)
+   => (:dg.log) (:c) (:dg.tab) (:dg.env);
+

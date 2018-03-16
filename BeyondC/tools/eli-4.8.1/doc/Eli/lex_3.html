@@ -1,0 +1,337 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from lex.tnf on 5 December 2013 -->
+
+<TITLE>Lexical Analysis - Spaces, Tabs and Newlines</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Lexical Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC16" HREF="lex_toc.html#SEC16">Spaces, Tabs and Newlines</A></H1>
+<P>
+An Eli-generated processor examines its input text sequentially,
+recognizing character sequences in the order in which they appear.
+At each point it matches the longest possible sequence,
+classifies that sequence,
+and then begins anew with the next character.
+If the first character of a sequence is a space, tab or newline
+<A NAME="IDX147"></A>
+<A NAME="IDX148"></A>
+<A NAME="IDX149"></A>
+<A NAME="IDX150"></A>
+<A NAME="IDX146"></A>
+then the default behavior is to classify the sequence consisting of
+that character and all succeeding spaces, tabs and newlines as a comment.
+This behavior is consistent with the definitions of most programming
+languages, and is reasonable in a large fraction of text processing tasks.
+<P>
+Even though tabs and newlines are considered comments by default, some
+processing is needed to account for their effect on the source text
+position.
+Eli-generated processors define a two-dimensional coordinate system 
+(line number and column index), which they use to link error reports to the
+source text
+(see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of Library Reference Manual</A>).
+<P>
+White space may be significant in two situations:
+<P>
+<OL>
+<LI>
+Within a character sequence, such as spaces in a string
+<LI>
+On its own, such as line boundaries in a type-<TT>`gla'</TT> file
+</OL>
+<P>
+Appropriate white space may be specified as part of the description of a
+complete character sequence (provided that it is not at the beginning)
+without disrupting the default behavior.
+(Coordinate processing for tabs and newlines must be provided if they are
+allowed within the sequence.)
+The default behavior is overridden, however, by any specification of white
+space on its own or at the beginning of another character sequence.
+Overriding is specific to the white space character used:
+a specification of new behavior for a space overrides the default behavior
+for a space, but not the default behavior for a tab or newline.
+<P>
+The following sections explain how coordinate processing is provided for
+newlines and tabs, and how to re-establish default behavior of white space
+on its own when white space can occur at the beginning of another character
+sequence.
+<P>
+<H2><A NAME="SEC17" HREF="lex_toc.html#SEC17">Maintaining the Source Text Coordinates</A></H2>
+<P>
+The raw data for determining coordinates are two variables,
+<CODE>LineNum</CODE> (an integer variable exported by the error module,
+see  <A HREF="lib_1.html#SEC4">Source Text Coordinates and Error Reporting of Library Reference Manual</A>) and
+<CODE>StartLine</CODE> (a character pointer exported by the lexical analyzer).
+The following invariant must be maintained on these variables:
+<P>
+<A NAME="IDX151"></A>
+<A NAME="IDX152"></A>
+<PRE>
+LineNum=Cumulative index of the current line in the input text
+(Pointer to current character)-StartLine=index of the current character
+    in the current line
+</PRE>
+<P>
+This invariant must hold whenever
+the lexical analyzer begins to process a character sequence.
+It may be destroyed during the processing of that sequence, but must be
+re-established before processing of the next character sequence begins.
+<P>
+<CODE>LineNum</CODE> is initially 1, and must be incremented each time the
+lexical analyzer advances beyond a newline character in the input text.
+At the beginning of each line, <CODE>StartLine</CODE> must be set to point to the
+character position preceding the first character of that line.
+As the current character pointer is advanced, the condition on
+<CODE>StartLine</CODE> is maintained automatically unless the character pointer
+advances over a tab character.
+<P>
+A tab character in the input text represents one or more spaces, depending
+upon its position relative to the next tab stop, but it occupies only one
+character position.
+If the tab represents <VAR>n</VAR> spaces, <VAR>n-1</VAR> must be subtracted from
+<CODE>StartLine</CODE> to maintain the invariant.
+<P>
+Because the value of <VAR>n</VAR> depends upon the index of the current
+character and the settings of the tab stops in the line, Eli provides an
+operation <CODE>TABSIZE(i)</CODE> (defined in file <TT>`tabsize.h'</TT>)
+to compute it.
+The argument <CODE>i</CODE> is the index in the current line of the character
+position beyond that containing the tab, and the result is
+the number of spaces that must be added to reach the next tab stop.
+<P>
+Suppose that <CODE>p</CODE> is a pointer to the current input character.
+Here is a code sequence that maintains the condition on <CODE>StartLine</CODE>
+when a tab is encountered:
+<P>
+<PRE>
+#include "tabsize.h"
+...
+  if ((*p++) == '\t') StartLine -= TABSIZE(p - StartLine);
+...
+</PRE>
+<P>
+<CODE>TABSIZE</CODE> defines the positions of the tab stops.
+The default implementation provides tab stops every 8 character positions.
+A user changes this default by supplying a new version of the Eli library
+routine <CODE>TabSize</CODE>.
+The source code for the library version of this routine can be obtained by
+making the following request:
+<P>
+<PRE>
+-&#62; $elipkg/gla/tabsize.c &#62; MyTabSize.c
+</PRE>
+<P>
+After modifying the routine appropriately, add the name <CODE>MyTabSize.c</CODE>
+to your type-<TT>`specs'</TT> file.
+<P>
+The coordinate invariant is maintained automatically if no patterns
+matching tabs or newline characters are defined, and no auxiliary scanners
+that advance over tabs or newline characters are provided by the user.
+If such patterns or scanners are needed, then the user must define them in
+such a way that they maintain the coordinate invariant.
+<P>
+Three auxiliary scanners
+(<CODE>coordAdjust</CODE>, <CODE>auxTab</CODE> and <CODE>auxNewLine</CODE>)
+are available to maintain the coordinate invariant
+for a regular expression that matches tabs or newline characters
+(see  <A HREF="lex_1.html#SEC8">Available scanners</A>).
+While these auxiliary scanners could be invoked by user-defined auxiliary
+scanners that advance over tabs or newline characters, it is often
+simpler to include the appropriate code to maintain the coordinate
+invariant.
+<P>
+For an example of the use of code in an auxiliary scanner to maintain the
+coordinate invariant, see the library version of <CODE>auxNUL</CODE>.
+<P>
+<H2><A NAME="SEC18" HREF="lex_toc.html#SEC18">Restoring the Default Behavior for White Space</A></H2>
+<P>
+When a pattern beginning with a space, tab or newline character overrides
+the default behavior for that character, the character will only be
+accepted as part of an explicit pattern.
+The default behavior can be restored by using one of the canned
+descriptions <CODE>SPACES</CODE>, <CODE>TAB</CODE> or <CODE>NEW_LINE</CODE> respectively
+(see  <A HREF="lex_2.html#SEC14">Available Descriptions</A>):
+<P>
+<A NAME="IDX153"></A>
+<A NAME="IDX154"></A>
+<PRE>
+Define:  $\040+define
+         SPACES
+</PRE>
+<P>
+Here the pattern for <CODE>Define</CODE> overrides the default behavior for space
+characters.
+If this were the only specification, spaces in the input text
+would only be accepted if they occurred immediately before the character
+sequence <CODE>define</CODE>.
+By adding the canned description <CODE>SPACES</CODE>, and classifying the
+sequences it matches as comments, the default behavior is restored.
+<P>
+Note that this specification is ambiguous:
+A sequence of spaces followed by <CODE>define</CODE> could either match the
+<CODE>Define</CODE> pattern or the spaces alone could be classified as
+the comment specified by <CODE>SPACES</CODE>.
+The principle of the longest match guarantees that in this case the
+sequence will be classified as <CODE>Define</CODE>
+(see  <A HREF="lex_1.html#SEC6">What happens if the specification is ambiguous?</A>).
+<P>
+<H2><A NAME="SEC19" HREF="lex_toc.html#SEC19">Making White Space Illegal</A></H2>
+<P>
+When white space is illegal at the beginning of a pattern, the default
+treatment of white space must be overridden with an explicit comment
+pattern.
+Because the sequence is specified to be a comment, nothing will be returned
+to the parser.
+A token processor like <CODE>lexerr</CODE> can be used to report the error:
+<P>
+<A NAME="IDX155"></A>
+<A NAME="IDX156"></A>
+<A NAME="IDX157"></A>
+<PRE>
+	SPACES	[lexerr]
+</PRE>
+<P>
+The canned descriptions <CODE>SPACES</CODE>, <CODE>TAB</CODE> and <CODE>NEW_LINE</CODE>
+should be used as patterns in such specifications because they handle all
+of the coordinate updating
+(see  <A HREF="lex_3.html#SEC17">Maintaining the Source Text Coordinates</A>).
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lex_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

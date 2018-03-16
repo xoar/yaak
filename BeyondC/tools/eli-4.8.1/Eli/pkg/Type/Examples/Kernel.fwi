@@ -1,0 +1,303 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Kernel Language~>
+
+We start with a very simple kernel language where a @code{Program}
+is a @code{Block} consisting of @code{Declarations} for variables,
+assignment @code{Statements}, and trivial @code{Expressions}.
+Other forms of @code{Declarations}
+and @code{Expressions} are added to the grammar when the
+type analysis task is further refined.
+
+Here is a simple example program:
+
+~O~<SimpleExamp~>~{
+begin
+  var   int i, int j,
+        bool b, bool c,
+        int r, int s;
+  i = 1;
+  b = true;
+  r = 3;
+  j = i;
+  c = b;
+  s = r;
+end
+~}
+
+Structure and notation of the kernel language is specified here
+by its abstract syntax.
+
+~$~<Abstract Kernel syntax~>==~{
+RULE: Program      ::=    Block END;
+RULE: Block        ::=    'begin' Declarations Statements 'end' END;
+RULE: Declarations LISTOF Declaration END;
+RULE: Statements   LISTOF Statement END;
+
+RULE: Declaration  ::=    'var' ObjDecls ';' END;
+RULE: ObjDecls     LISTOF ObjDecl  END;
+RULE: ObjDecl      ::=    TypeDenoter DefIdent END;
+RULE: TypeDenoter  ::=    'int' END;
+RULE: TypeDenoter  ::=    'bool' END;
+RULE: TypeDenoter  ::=    'void' END;
+
+RULE: Statement    ::=    Variable '=' Expression ';' END;
+RULE: Statement    ::=    Expression ';' END;
+
+RULE: Expression   ::=    Variable END;
+RULE: Expression   ::=    IntNumber END;
+RULE: Expression   ::=    'true' END;
+RULE: Expression   ::=    'false' END;
+
+RULE: Variable     ::=    UseIdent END;
+
+RULE: DefIdent     ::=    Ident END;
+RULE: UseIdent     ::=    Ident END;
+~}
+Concrete syntax rules corresponding to the @code{LISTOF} constructs
+above, specifications of the notations of
+identifiers, literals, and comments are given in the appendix.
+
+~B~<Basic Scope Rules~>
+
+The basic task of name analysis is consistent renaming.
+For each identifier occurrence a @code{Key} attribute is computed such
+that it identifies a program entity uniquely. 
+@code{Key}s are used to associate properties
+to program entities and to retrieve those properties in different
+contexts. The symbols @code{DefIdent}, @code{UseIdent}
+distinguish defining and used identifier occurrences.
+
+The scope rules of a language determine how identifier occurrences
+are bound to program entities. We specify Algol-like scope rules
+for our language. The basic Algol-like scope rule reads:
+
+@quotation
+A definition of an identifier @code{a} is valid in the whole smallest
+range that encloses that definition, except inner ranges that
+contain another definition of @code{a}.
+@end quotation
+
+Hence, a definition in an outer range is hidden by a definition
+of the same identifier in an inner range for the whole inner range.
+Identifiers may be applied before they are defined.
+
+We instantiate a library module that provides computations
+according to this scope rule:
+
+~$~<Basic scope module~>==~{
+$/Name/AlgScope.gnrc:inst
+~}
+
+The use of that module requires that every identifier occurrence
+has the attribute @code{Sym} representing
+the identifier encoding. Hence we specify a computational role
+@code{IdentOcc} that provides that attribute, and will be inherited
+by any identifier occurrence.
+
+The computational roles @code{RangeScope},
+@code{IdDefScope}, and @code{IdUseEnv} are associated to the corresponding
+symbols of our grammar:
+
+~$~<Kernel scope rules~>==~{
+TERM Ident: int;
+ATTR Sym: int;
+CLASS SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+SYMBOL Block	INHERITS RangeScope END;
+SYMBOL DefIdent	INHERITS IdDefScope, IdentOcc END;
+SYMBOL UseIdent	INHERITS IdUseEnv, IdentOcc END;
+~}
+
+Erroneous programs may violate the scope rules in two different
+situations:
+
+@itemize @bullet
+@item
+A particular applied identifier occurrence has no valid defining
+identifier occurrence.
+
+@item
+There are more than one defining identifier occurrences for the same
+identifier in a range.
+@end itemize
+
+Such situations shall be indicated by error messages.
+Furthermore, we want every defining occurrence of a multiply
+defined identifier be marked by a message.
+
+For that purpose we use the following two library modules:
+
+~$~<Message support~>==~{
+$/Tech/Strings.specs
+$/Prop/OccCnt.gnrc:inst
+~}
+
+The @code{Strings} module provides a function that concatenates
+a string and an identifier, to be used for error messages
+related to identifiers.
+
+The @code{OccCnt} module provides computations that count how
+often an entity identified by a @code{Key} attribute occurs
+in certain contexts, in our case in a defining context.
+
+The check for existence of a definition is directly obtained from
+the module role @code{ChkIdUse}.
+For the second check we specify a computational role
+@code{ChkUnique} in order to reuse it for several grammar symbols.
+If an entity occurs more than once in the @code{ChkUnique}
+context it is multiply defined.
+
+~$~<Scope checks~>==~{
+SYMBOL UseIdent	INHERITS ChkIdUse END;
+SYMBOL DefIdent	INHERITS ChkUnique END;
+
+SYMBOL ChkUnique INHERITS Count, TotalCnt COMPUTE
+  IF (GT (THIS.TotalCnt, 1),
+  message (ERROR, 
+           CatStrInd ("identifier is multiply defined: ", 
+                      THIS.Sym),
+           0, COORDREF));
+END;
+~}
+
+
+~B~<Types in the Kernel Language~>
+
+We use the modules @code{Typing} to support type analysis.
+As we are going to specify structural equivalence for some
+kinds of type, we also instantiate the module @code{StructEquiv}.
+~$~<Type analysis module~>==~{
+$/Type/Typing.gnrc:inst
+$/Type/StructEquiv.fw
+~}
+So, we have to adopt the modules' strategy for representing types:
+
+Types are represented by @code{DefTableKey}s.
+Such a key is created for each program construct which
+denotes a particular type. The unknown type is represented
+by @code{NoKey}. 
+
+The kernel language has only language defined types:
+@code{int}, @code{bool}, and @code{void}.
+Each of them is represented by a known key. 
+Here we introduce only the key for the type @code{void}, as the other
+types occur in operator specification, and are introduced there:
+~$~<Language defined type keys~>==~{
+voidType -> IsType = {1};
+~}
+All type keys have a property @code{IsType}, which distinguishes 
+them from keys representing entities other than types. 
+Usually the property @code{IsType} is not set or accessed by user 
+specifications. Module roles ensure that they are properly used.
+
+The following computations set the @code{Type} attributes of the
+constructs that denote languge defined types:
+~$~<Language defined types~>==~{
+RULE: TypeDenoter ::= 'int'  COMPUTE TypeDenoter.Type = intType;  END;
+RULE: TypeDenoter ::= 'bool' COMPUTE TypeDenoter.Type = boolType; END;
+RULE: TypeDenoter ::= 'void' COMPUTE TypeDenoter.Type = voidType; END;
+~}
+Further forms of @code{TypeDenoter}s for user defined types are 
+specified in subsequent sections.
+
+We now consider a variable declaration as an example for
+a language construct that defines a typed entity.
+In our language a variable declaration may define several
+variables. An @code{ObjDecl} states the type and the name for
+each of them. 
+
+The pair of module roles @code{TypedDefinition} and @code{TypedDefId}
+supports the pattern of declaring typed entities:
+@code{ObjDecl} has the role @code{TypedDefinition}, i.e. a construct
+that specifies the types of all @code{TypedDefId}s in its subtree.
+The attribute @code{ObjDecl.Type} has to be set appropriately:
+
+~$~<Declarations~>==~{
+SYMBOL ObjDecl INHERITS TypedDefinition END;
+SYMBOL DefIdent INHERITS TypedDefId END;
+
+ATTR Type: DefTableKey;
+
+RULE: ObjDecl ::= TypeDenoter DefIdent COMPUTE
+  ObjDecl.Type = TypeDenoter.Type;
+END;
+~}
+
+The module roles @code{TypedUseId} classifies a used name of a typed 
+entity, and causes the attribute  @code{TypedUseId.Type}
+to be set to the type defined for that entity.
+The corresponding check role issues messages if that classification
+is violated:
+
+~$~<Typed identifiers~>==~{
+SYMBOL UseIdent INHERITS TypedUseId, ChkTypedUseId END;
+~}
+
+In order to report some results of the type analysis
+we associate two properties to every type key:
+a string value @code{TypeName} and the number of the
+line where the type is introduced. (The latter will become
+more significant when user defined types are defined for
+the language.)
+
+~$~<Output properties~>==~{
+TypeName: CharPtr; "Strings.h"
+TypeLine: int;
+
+intType ->  TypeName = {"int"};
+boolType -> TypeName = {"bool"};
+voidType -> TypeName = {"void"};
+
+intType ->  TypeLine = {0};
+boolType -> TypeLine = {0};
+voidType -> TypeLine = {0};
+~}
+
+For every used identifier the name and the defining line of its type 
+is printed:
+~$~<Kernel output~>==~{
+SYMBOL UseIdent INHERITS PrtType END;
+
+SYMBOL PrtType COMPUTE
+  printf ("line %d Type %s defined in line %d\n", LINE,
+	  GetTypeName (THIS.Type, "no type name"),
+          GetTypeLine (THIS.Type, 0))
+  <- INCLUDING  Program.TypeIsSet;
+END;
+~}
+
+~O~<Kernel.specs~>~{
+~<Basic scope module~>
+~<Message support~>
+~<Type analysis module~>
+~}
+
+~O~<Kernel.pdl~>~{
+~<Language defined type keys~>
+~<Output properties~>
+~}
+
+~O~<Kernel.lido~>~{
+~<Abstract Kernel syntax~>
+~<Kernel scope rules~>
+~<Scope checks~>
+~<Language defined types~>
+~<Declarations~>
+~<Typed identifiers~>
+~<Kernel output~>
+~}
+
+~O~<Kernel.gla~>~{
+~<Token notation~>
+~}
+
+~O~<Kernel.con~>~{
+~<Concrete Kernel syntax~>
+~}
+
+~O~<Oprand.sym~>~{
+~<Expression mapping~>
+~}

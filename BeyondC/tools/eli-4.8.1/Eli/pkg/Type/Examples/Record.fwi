@@ -1,0 +1,269 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Record Types~>
+
+We introduce record types to our language in order to
+demonstrate how composed user defined types are specified.
+A record type is described by a sequence of field declarations
+which have the same semantics as @code{ObjDecls} used in variable
+declarations. A notation for variables is added that allows to
+select a component from a variable.
+
+Here is an example program that defines and uses a record 
+variable named @code{rv}:
+
+~O~<RecordExamp~>~{
+begin
+  var   record int i, bool b, real r end rv;
+  var   int j, bool c, real s;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+end
+~}
+
+The following productions describe record types
+and component selections:
+
+~$~<Abstract record syntax~>==~{
+RULE: TypeDenoter ::= RecordType END;
+RULE: RecordType  ::='record' ObjDecls 'end' END;
+
+RULE: Variable    ::= Variable '.' SelectIdent END;
+RULE: SelectIdent ::= Ident END;
+~}
+
+An abstraction of a record type is the sequence of component
+definitions, each consisting of a type and a name.
+A @code{RecordType} describes such a type abstraction. 
+It inherits the module role @code{TypeDenotation}:
+
+~$~<Type denoter~>==~{
+SYMBOL RecordType INHERITS TypeDenotation END;
+
+RULE: TypeDenoter ::= RecordType COMPUTE
+  TypeDenoter.Type = RecordType.Type;
+END;
+
+RULE: RecordType ::= 'record' ObjDecls 'end' COMPUTE
+  .GotTypeProp =
+    ORDER (
+      ResetTypeName (RecordType.Type, "record..."),
+      ResetTypeLine (RecordType.Type, LINE));
+
+END;
+~}
+The last computation above sets the properties @code{TypeName} and
+@code{TypeLine} of the created type for the facility of printing 
+type information we have introduced above. 
+The attribute @code{GotTypeProp} represents that state. It
+is used in another instance of this RULE context below, where
+further properties are associated to the type.
+
+The construct for component selection, e.g. @code{rv.i}, demonstrate
+a typical situation where type ananlysis and name analysis depend
+on each other: The type of the variable @code{rv} has a property,
+which is a scope; it is used to lookup a binding for the selector 
+@code{i}.
+Hence we instantiate the name analysis module @code{ScopeProp},
+which supports scopes as properties. It is adapted to the needs
+of type analysis by the module @code{TypeDep}:
+~$~<Scope property module~>==~{
+$/Name/ScopeProp.gnrc:inst
+$/Type/TypeDep.gnrc:inst
+~}
+
+The role @code{ExportRange} of the @code{ScopeProp} module
+specifies the @code{RecordType} to be a range that may export
+its bindings to be lookedup outside of that range, e.g. in
+component selections.
+Its scope of component definitions
+is associated to the @code{ScopeKey}. The @code{ScopeKey}
+is specified to be the type key created by the role
+@code{TypeDenotation}:
+~$~<Range~>==~{
+SYMBOL RecordType INHERITS ExportRange COMPUTE
+  SYNT.ScopeKey = SYNT.Type;
+END;
+~}
+
+~B~<Type Equivalence~>
+
+As record types have non-trivial abstractions,
+the question arises under which circumstances two record types
+are the same. Consider the following examples:
+~O~<RecordEqual~>~{
+begin
+  var   record int i, bool b, real r end va;
+  var   record int i, bool b, real r end vc;
+  var   record int j, bool k, real l end vd;
+  va = vc;
+  va = vd;
+end
+~}
+Typing rules of the language have to state which of the variables
+@code{va}, @code{vc}, and @code{vd} have the same type,
+and which of the assignments are correct.
+Languages usually apply one of two different typing rules:
+
+The first rule states that every
+occurrence of a description of a record type
+(or of any other compound type) introduces a type
+different from all other types, even from those that are
+equally notated. Under this rule all three variables 
+have different types.
+This rule is called name equivalence, because every type
+description gets a name - explicitly or implicitly, as in
+this example -and types are distingushed by their names.
+
+The second rule states that two types are equal if their
+abstractions are equal; i.e. the sequences of components 
+coincide elementwise in the types and names of components.
+In the above example @code{va} and @code{vc}
+have the same types. This rule is called structural
+equivalence. 
+
+In case of structural equivalence the type rules of the language
+may define precisely, which type properties belong to the
+abstraction that is used to determine type equivalence.
+For example, the rule could state that the types of the
+record components belong to the abstraction, and the
+names of the components do not belong to it. In that case
+all four variables of the above example would have the same type.
+
+The type analysis library provides a module @code{StructEquiv} 
+that extends the @code{Typing} module, such that any of these
+these variants of equivalence rules can be supported:
+~$~<Struct equiv module~>==~{
+$/Type/StructEquiv.fw
+~}
+
+In this language stuctural equivalence is
+specified, such that for record types only the sequence of types, 
+but not the names of components are relevant for structural
+type equivalence.
+
+
+
+The following computation in the RULE context of a record
+type denotation specifies which properties of a record type
+are considered for the check whether two types are equivalent.
+Here we state two rules:
+
+First, a record type can only be equivalent to a type that is
+a record type, too. For that purpose we introduce a
+key @code{RecordClass} that identifies the category of record
+types:
+~$~<Type class~>==~{
+RecordClass;
+~}
+The rule computation @code{AddTypeToBlock} below associates every 
+record type to that initial set @code{RecordClass}. The equivalence
+check will then partition it as far as necessary into subsets
+of record types which are equivalent.
+
+Second, two record types @code{s} and @code{t} are equivalent if 
+the types of their fields are pairwise equivalent in the given
+order. For that purpose a list of component types is computed
+@code{ObjDecls.OpndTypeList} using roles of the @code{LidoList}
+module and given as the third argument of @code{AddTypeToBlock}.
+
+Beyond type equivalence, our language requires further checks
+on type structures. So, the list of component types is also
+associated as a property @code{ComponentTypes} to the type key 
+by a function @code{VResetComponentTypes} that yields the
+property value as its result:
+~$~<Component type property~>==~{
+ComponentTypes: DefTableKeyList [VReset]; "DefTableKeyList.h"
+~}
+~$~<PropLib module~>==~{
+$/Prop/PropLib.fw
+~}
+
+The attribute @code{RecordType.GotType} states that all properties
+of the record type are associated to its key. Hence, a dependence
+on the attribute @code{GotTypeProp} computed above is added here.
+~$~<Type equality computation~>==~{
+RULE: RecordType ::= 'record' ObjDecls 'end' COMPUTE
+  RecordType.GotType =
+      AddTypeToBlock
+         (RecordType.Type, RecordClass, 
+          VResetComponentTypes (RecordType.Type, ObjDecls.OpndTypeList))
+      <- .GotTypeProp;
+END;
+
+SYMBOL ObjDecls INHERITS OpndTypeListRoot END;
+SYMBOL ObjDecl INHERITS OpndTypeListElem END;
+
+SYMBOL ObjDecl COMPUTE
+  SYNT.DefTableKeyElem = SYNT.Type;
+END;
+~}
+
+
+~B~<Qualified Names~>
+
+A record component selection of the form @code{Variable.SelectIdent}
+is considered as a qualified name: The @code{SelectIdent} is an applied
+occurrence of an identifier that is qualified by the 
+@code{Variable} preceeding the dot. Its type is expected to have a
+scope property that has a binding for that identifier.
+
+@code{Variable.SelectIdent} is a leaf of an expression
+tree. Its type is determined by the type of @code{SelectIdent}, as
+specified using the @code{PrimaryContext} computation.
+~$~<Selection expression~>==~{
+RULE: Variable ::= Variable '.' SelectIdent COMPUTE
+  PrimaryContext (Variable[1], SelectIdent.Type);
+END;
+~}
+
+@code{SelectIdent} combines roles of name analysis and type analysis:
+It is a qualified identifier use (@code{QualIdUse}). The role requires
+that the attribute @code{SelectIdent.ScopeKey} is computed.
+A module computation accesses the (@code{Scope} property from it, 
+stores it in @code{SelectIdent.Scope} and searches a binding 
+for the identifier; the role @code{ChkQualIdUse} gives a message
+if the scope exists, but no binding is found.
+A user computation is required to check whether the type
+has a scope property.
+
+The roles @code{TypedUseId}, @code{ChkTypedUseId}, and @code{PrtType}
+determine, check, and output the type of the @code{SelectIdent}.
+
+~$~<Selection types~>==~{
+SYMBOL SelectIdent INHERITS 
+	QualIdUse, ChkQualIdUse, IdentOcc,
+	TypedUseId, ChkTypedUseId, PrtType
+END;
+
+RULE: Variable ::= Variable '.' SelectIdent COMPUTE
+  SelectIdent.ScopeKey = Variable[2].Type;
+
+  IF (EQ (SelectIdent.Scope, NoEnv),
+  message (ERROR, "selection applied to non record type", 
+	   0, COORDREF));
+END;
+~}
+
+~O~<Record.specs~>~{
+~<Scope property module~>
+~<Struct equiv module~>
+~<PropLib module~>
+~}
+
+~O~<Record.pdl~>~{
+~<Type class~>
+~<Component type property~>
+~}
+
+~O~<Record.lido~>~{
+~<Abstract record syntax~>
+~<Type denoter~>
+~<Range~>
+~<Type equality computation~>
+~<Selection expression~>
+~<Selection types~>
+~}

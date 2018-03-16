@@ -1,0 +1,14 @@
+If you are using Odin from Asgard,
+and invoke Odin from a non-Clearcase directory,
+then you need to explicitly set your working dir with a "dir =' command
+(or use absolute pathnames for requests).
+
+If a derived file has errors indicating you cannot read one of the
+inputs (that is a source file), you must either "touch" the source file
+or issue a >:redo on the derived file.
+This can happen if someone else that did not have read permission
+to the source file previously requested that derived file.
+This also can happen if you requested the file when you did not
+have read permission to the source file, and then did a "chmod"
+to give yourself read permission.
+

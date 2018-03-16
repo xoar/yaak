@@ -1,0 +1,203 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: PreDefOp.fw,v 1.1 2005/07/26 19:06:30 profw Exp $
+~!
+~! (C) Copyright 2004 The Regents of the University of Colorado.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@setchapternewpage odd
+@settitle Pre-defined Operator Specification
+@headings double
+
+@ifnotinfo
+~t title titlefont centre "Pre-defined Operator Specification"
+~t title smalltitlefont centre "Module Implementation"
+~t vskip 15 mm
+@end ifnotinfo
+
+This module defines operator indications and operators independent of a
+particular program.
+It is instantiated by:
+
+@example
+$/Type/PreDefOp.gnrc +referto=(Operator.d) :inst
+@end example
+@noindent
+The @code{referto} parameter specifies a file containing a sequence of
+calls on the @code{PreDefInd} and @code{PreDefOpr} macros exported by this
+module.
+
+An @dfn{operator indication} is a source-language symbol.
+It is associated with a set of possible @dfn{operators},
+one of which is selected on the basis of the types of the operands
+to which the indication is applied, and the type of result required
+by the context in which that application occurs.
+
+The module assumes standard representations for operator indications and
+operators, and provides mechanisms for creating them in common situations.
+Complex relationships among operator indications and operators can be
+specified in OIL
+(@pxref{language,,OIL's Specification Language,oil,OIL Reference Manual}).
+
+~A~<Indications~>
+
+An operator indication is a unique definition table key.
+Properties of the operator indication are stored as properties of that key.
+The module associates an @code{OilOp} property of type @code{tOilOp}
+with every operator indication.
+Users may attach additional properties to pre-defined operator indications
+by using PDL initialization
+(@pxref{Initializations,,How to specify the initial state,pdl,Definition
+Table}).
+
+@code{PreDefInd(@samp{tok},@samp{abs},@samp{ind})} marks
+a literal terminal symbol of the source language grammar as
+a concrete representation of an operator indication in the source program:
+
+@table @samp
+@item tok
+The literal terminal symbol representing the operator indication @samp{ind}.
+
+@item abs
+A nonterminal of the abstract grammar that inherits the
+@code{OperatorSymbol} role exported by the @code{Expression} module
+(@pxref{OperatorSymbol,,Symbols defining computations,type,Type analysis
+tasks}).
+An instance of @samp{tok} will appear in the tree as an @samp{abs} node.
+
+@item ind
+The known definition table key that is the operator indication
+represented by @samp{tok}.
+@end table
+
+@code{PreDefInd} creates an abstract syntax rule for each literal
+representing an operator indication:
+
+~O~<PreDefOp.lido~>~{
+#define PreDefInd(tok,abs,ind) \
+RULE: abs ::= tok COMPUTE\
+  abs._oilind=GetOilOp(ind,OilInvalidOp); END;
+#define PreDefOpr(ind,opr,sig)
+#define PreDefCvt(opr,sig)
+#include "|NAME|"
+#undef PreDefInd
+#undef PreDefOpr
+#undef PreDefCvt
+~}
+@noindent
+LIDO does not allow two computations for an attribute, even if they are the
+same.
+Thus two @code{PreDefInd} invocations with the same pair of @samp{tok} and
+@samp{abs} values will result in incorrect LIDO code.
+Associating the same indication with several literals, or associating
+the same or different indications with the same literal in different
+contexts (indicated by different values of @samp{abs}), is legal.
+
+@code{PreDefInd} also ensures that the definition table
+key for the indication is known:
+
+~O~<PreDefOp.pdl~>~{
+#define PreDefInd(tok,abs,ind) ind;
+#define PreDefOpr(ind,opr,sig)
+#define PreDefCvt(opr,sig)
+#include "|NAME|"
+#undef PreDefInd
+#undef PreDefOpr
+#undef PreDefCvt
+~}
+@noindent
+Multiple occurrences of the same indication as a known key are allowed by
+OIL, so this poses no additional restrictions on the use of
+@code{PreDefInd}.
+
+~A~<Operators~>
+
+An operator is a value of type @code{tOilOp} representing an action
+that can be applied to operands to yield a result.
+It has a @dfn{signature} that defines the types of the operands and the
+type of the result, and a @dfn{name} that is a definition table key.
+
+Properties of an operator are stored as properties of the key that is its
+name.
+The module does not require any properties for an operator name.
+Users may attach additional properties to pre-defined operators
+by using PDL initialization
+(@pxref{Initializations,,How to specify the initial state,pdl,Definition
+Table}).
+
+@code{PreDefOpr(@samp{ind},@samp{opr},@samp{sig})} specifies an operator
+and relates it to an operator indication.
+That operator indication may or may not be associated with a literal
+terminal symbol of the source grammar:
+
+@table @samp
+@item ind
+The known definition table key representing the operator indication.
+
+@item opr
+The known definition table key representing the name of an operator
+that can be identified by @samp{ind}.
+
+@item sig
+The signature of the specified operator.
+@end table
+
+@code{PreDefOpr} defines an OIL operator and associates it with an operator
+indication.
+
+A coercion is an operator that can be applied to a single value of a given
+type. 
+That application yields an ``equivalent'' value of another type.
+It can be applied arbitrarily during type analysis to correct mismatches
+between operand expressions and the contexts in which they occur.
+Thus a coercion operator is not normally associated with an operator
+indication.
+If such an association is required, it can be defined in Oil
+(@pxref{INDICATION,,Operator identification,oil,Oil Reference Manual}).
+
+@code{PreDefCvt(@samp{opr},@samp{sig})} specifies a coercion operator.
+
+@table @samp
+@item opr
+The known definition table key representing the name of a coercion
+operator.
+
+@item sig
+The signature of the specified operator.
+@end table
+
+@code{PreDefCvt} defines an OIL coercion.
+
+~O~<PreDefOp.oil~>~{
+#define PreDefInd(tok,abs,ind)
+#define PreDefOpr(ind,opr,sig) INDICATION ind: opr; OPER opr sig;
+#define PreDefCvt(opr,sig) COERCION opr sig;
+#include "|NAME|"
+#undef PreDefInd
+#undef PreDefOpr
+#undef PreDefCvt
+~}
+@noindent
+OIL does not allow two ~{OPER~} or ~{COERCION~} definitions
+with the same name, even if they specify the same signature.
+Thus any combination of ~{PreDefOpr~} and ~{PreDefCvt~} invocations
+with the same @samp{opr} values will result in incorrect OIL code.
+Associating several operators with the same indication is legal.

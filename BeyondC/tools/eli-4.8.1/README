@@ -1,0 +1,160 @@
+README
+
+This directory contains the complete source distribution of the Eli
+translator construction system.  The names of all of the directories
+along the full path to this directory should be made up of alphanumeric
+characters, underscores, hyphens and periods.
+
+For most machines and configurations, the following sequence of two
+commands will build an executable version (all commands should be given
+in the directory containing this README file):
+
+	./configure
+	make
+
+If you are running in an X window, make certain that the name of your
+X11 display has been assigned to the DISPLAY environment variable before
+executing these commands.
+
+The 'make' command must be run in a window that supports the 'curses'
+screen utility.  (It can't be run in an Emacs buffer, for example.)
+
+After the 'make' command has completed, the directory containing this
+README file will also contain a 'bin' subdirectory with a shell script
+named 'eli'.  Eli is invoked by running that script.  For convenience,
+you should either add the 'bin' subdirectory of the directory containing
+this README file to your path or move the 'eli' script to another
+directory that is already on your path.
+
+If you want to reduce the amount of space devoted to Eli, you may delete
+the entire directory containing this README file after installing the
+system elsewhere.  The default installation directory is your home
+directory, and the system can be installed there by giving the following
+command:
+
+	make install
+
+If you want to install the system in a directory other than your home
+directory, configure the system using the --prefix option:
+
+	./configure --prefix=DIR
+
+Here 'DIR' is the directory in which you want 'make install' to install
+the system.
+
+For a complete list of the configuration options available, use the --help
+option:
+
+	./configure --help
+
+-------------------------------------------------------------------------
+
+The following information is included in case something does not work as
+it should.  We have organized the material as FAQ, but the questions are
+invented...
+
+Q: Can I re-run configure and make?
+A: Yes.  configure and make can be run any number of times.
+
+Q: configure reports the following message:
+   ./configure: sh internal 2K buffer overflow
+A: We have seen this error on a number of different machines, but have not
+   detected any adverse effects.  It should be safe to ignore this
+   message.
+
+Q: configure reports weird errors.
+A: It is possible that configure had been executed before in a
+   different environment.  Remove the file config.cache, then rerun
+   configure.
+
+Q: configure reports that gorto would not be usable.
+A: don't care.  In most cases, you won't need gorto anyway.
+A: gorto is usable if configure was able to find the Athena Widgets
+   Libraries.  If you have them, but configure did not find them,
+   rerun configuration with the option '--with-Xaw=dir' where dir is
+   the name of a directory containing a subdirectory 'include' with
+   the XAW include files and a subdirectory 'lib' with the XAW
+   libraries. (You will need to delete the file config.cache before
+   rerunning configure)
+
+Q: configure reports that Tcl/Tk could not be found and the Tool :mon
+   will not be usable
+A: That's very probable, because there is no good method to find
+   Tcl/Tk automatically. If you have Tcl/Tk installed, but configure
+   did not find it, rerun configure (after deleting the file
+   config.cache) with the option '--with-tcltk=paths' where paths
+   should contain the names of the directories where the Tcl/Tk
+   configuration files 'lib/tclConfig.sh' and 'lib/tkConfig.sh' can be
+   found.
+
+   If you do not have Tcl/Tk configured, but want to do so, install
+   first TCL and then TK and configure them with '--prefix=$HOME'
+   or use '/usr' or '/usr/local' as the prefix. In the so installed 
+   libraries and include-files, Tcl/Tk will be found automatically by 
+   Eli after deleting config.cache and rerunning configure.
+
+Q: configure reports that xview could not be found.
+A: This is a backup to display a windows info-tool without using the
+   default Tcl/Tk version. Either ignore this warning or install 
+   Tcl/Tk.
+
+Q: configure aborts saying that it could not find the curses library.
+A: Eli needs curses to access it's online information.  You can install
+   curses or ncurses, as you wish.  Install it in a location that is
+   considered a default by the C compiler (usually /usr). 
+
+Q: I get the message "Symbols cannot be classified".
+A: Eli must be able to read an object file and classify its global
+   symbols according to whether they are defined in that object file
+   ("entry") or used there and defined elsewhere ("external").  This
+   message indicates that the classification program either can't be
+   compiled at your installation or doesn't understand the format of
+   an object file.  To fix the problem, you will need to make changes
+   in directory Eli/pkg/eli/ofiles.  More information can be found in
+   the file Eli/pkg/eli/ofiles/README.
+
+Q: I get the message "Cannot connect to Odin server"
+A: If this message occurs after some kind of abnormal termination,
+   simply resetting the cache by means of the command "eli -r" should
+   clear things up.
+
+   If it occurs on initial installation, it means that Odin cannot
+   establish TCP/IP communication with the computer on which it is
+   running.  This usually happens when that computer is on a local
+   network, and its host name is not an alias for the local IP address.
+   Suppose that the computer's host name is "pitt".  Then /etc/hosts
+   should contain the following line:
+
+   127.0.0.1       localhost       pitt
+
+   This line says that "localhost" and "pitt" are both aliases for the
+   local IP address 127.0.0.1.
+   
+   If /etc/hosts contains such a line and you still get the message,
+   you need to set the environment variable ODIN_LOCALIPC to 1 before
+   invoking Eli.  ODIN_LOCALIPC selects the kind of socket used to
+   communicate between the Odin client and the Odin server:
+
+     ODIN_LOCALIPC=0 selects unix network sockets
+     ODIN_LOCALIPC=1 selects unix domain sockets
+
+   For a full discussion of Odin's use of sockets, see the System
+   Administration Guide.
+
+Q: The build failed while running Eli tests, and when I try running
+   it again I get wierd errors.
+A: Try deleting Eli's cache by giving the following command in the
+   directory containing this README:
+	rm -rf Eli/CACHE
+   After the cache has been removed, run the build again.
+
+Q: When using the Noosa debugger (via the :mon or :mongdb product)
+   everything freezes until the mouse is moved.
+A: The exact cause of this problem is unknown.  It only seems to
+   happen on some systems.  Try upgrading your Tcl/Tk installation to
+   the latest available version.  For example, we have evidence that
+   Tcl/Tk version 8.2 fixes this problem on HPUX.
+   
+Q: Something else happened, something that is not covered in the other
+   questions.
+A: Send e-mail describing your problem to 'eli-project-users@sourceforge.net'.

@@ -1,0 +1,176 @@
+@p typesetter = texinfo
+@p maximum_input_line_length = infinity
+@! $Id: Separator.fw,v 1.4 1998/03/19 12:53:06 mjung Exp $
+@!
+@! (C) Copyright 1997 University of Paderborn.
+@! 
+@! This file is part of the Eli Module Library.
+@! 
+@! The Eli Module Library is free software; you can redistribute it and/or
+@! modify it under the terms of the GNU Library General Public License as
+@! published by the Free Software Foundation; either version 2 of the
+@! License, or (at your option) any later version.
+@! 
+@! The Eli Module Library is distributed in the hope that it will be
+@! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@! Library General Public License for more details.
+@! 
+@! You should have received a copy of the GNU Library General Public
+@! License along with the Eli Module Library; see the file COPYING.LIB.
+@! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@! Suite 330, Boston, MA 02111-1307, USA. 
+@!
+
+The point of this module is to insert separators into a PTG output stream
+that depend on the last string printed by PTG and the next string to be
+printed.  To use it, insert calls to the @{Separator@} function in PTG
+templates following pattern elements that should be separated from the
+following string.  Note that the string that follows doesn't have to occur
+in the same pattern.
+
+In addition to inserting calls to the @{Separator@} function, the user of
+this module must supply a function called @{Sep_Print@} that takes three
+arguments:  a file pointer to print to, a pointer to the last string printed,
+and a pointer to the string about to be printed.  It is the responsibility
+of the @{Sep_Print@} function to print an appropriate separator (if desired)
+to the output stream.
+
+This module is used in conjunction with the Idem processor to simplify
+pretty-printing of the output.  Idem inserts calls to @{Separator@} after
+every literal and terminal symbol in the templates corresponding to the
+grammar rules.  An example of a @{Sep_Print@} function that works well with
+a C-like language is given in file $/Output/C_Separator.fw.
+
+The module is implemented by overriding the @{PTG_OUTPUT_STRING@} macro
+provided by PTG.  The new version checks to see if the @{Separator@}
+function was called directly before the call to output the current string.
+If so, it first calls the user-defined @{Sep_Print@} function to print
+a separator.  It also saves the string being printed in a buffer for
+use in the next call to @{Sep_Print@}.  This means that the only
+responsibility of the @{Separator@} function is to set a flag that can
+be checked.
+
+@O@<Separator.specs@>==@{
+$/Output/PtgOutput.fw
+@}
+
+@O@<Separator.head@>==@{
+#include "Separator.h"
+@}
+
+@O@<Separator.h@>==@{
+#ifndef SEPARATOR_H
+#define SEPARATOR_H
+
+#include <stdio.h>
+#include "eliproto.h"
+#include "ptg_gen.h"
+#include "PtgOutput.h"
+
+#define SEP_OUTPUT_FILE(f)	(FILE *)((f)->destinfo)
+
+extern PTGNode Sep_Out ELI_ARG((PTGNode root));
+extern PTGNode Sep_OutFile ELI_ARG((const char *filename, PTGNode root));
+extern PTGNode Sep_OutFPtr ELI_ARG((FILE *fptr, PTGNode root));
+
+extern void Sep_OutputString ELI_ARG((PtgFilePtr file, const char *param));
+extern void Separator ELI_ARG((PtgFilePtr file));
+
+extern void Sep_Print ELI_ARG((PtgFilePtr file, const char *last, const char *next));
+
+#endif
+@}
+
+@O@<Separator.c@>==@{
+#include <stdlib.h>
+#include <string.h>
+#include "eliproto.h"
+#include "ptg_gen.h"
+#include "PtgOutput.h"
+#include "Separator.h"
+
+#define BUFSIZE 1024
+
+static int Sep_Marked = 0;
+static char LastString[BUFSIZE];
+
+void
+#ifdef PROTO_OK
+Sep_OutputString(PtgFilePtr file, const char *param)
+#else
+Sep_OutputString(file, param)
+PtgFilePtr file;
+char *param;
+#endif
+{
+  int len;
+
+  if (Sep_Marked) {
+    Sep_Print(file, LastString, param);
+    Sep_Marked = 0;
+  }
+
+  fputs(param, (FILE *)file->destinfo);
+  len = strlen(param);
+  if (len < BUFSIZE)
+    strcpy(LastString, param);
+  else
+    strcpy(LastString, &param[len-BUFSIZE+1]);
+}
+
+void
+#ifdef PROTO_OK
+Separator(PtgFilePtr file)
+#else
+Separator(file)
+PtgFilePtr file;
+#endif
+{
+  Sep_Marked = 1;
+}
+
+PTGNode
+#ifdef PROTO_OK
+Sep_OutFPtr(FILE *fptr, PTGNode root)
+#else
+Sep_OutFPtr(fptr, root)
+FILE *fptr; PTGNode root;
+#endif
+{
+  PtgFilePtr ptgfile = NewPtgFile(fptr, Sep_OutputString);
+  PTGProcess(ptgfile, root);
+  FreePtgFile(ptgfile);
+  return root;
+}
+
+PTGNode
+#ifdef PROTO_OK
+Sep_Out (PTGNode r)
+#else
+Sep_Out (r)
+PTGNode r;
+#endif
+{
+  return Sep_OutFPtr(stdout, r);
+}
+
+PTGNode
+#ifdef PROTO_OK
+Sep_OutFile (const char *filename, PTGNode root)
+#else
+Sep_OutFile (filename, root)
+char * filename; PTGNode root;
+#endif
+{
+  FILE *f = fopen(filename, "w");
+  if (!f) {
+    fprintf(stderr, "DEADLY: Sep_OutFile: output file '%s' can't be opened.\n",
+            filename);
+    exit(1);
+  }
+  Sep_OutFPtr(f, root);
+  fclose(f);
+  return root;
+}
+@}

@@ -1,0 +1,30 @@
+begin
+  val x = 0;
+  class m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+		n::a;
+	end;
+  class n
+	begin	val a = 1; 
+		val c = 3;
+		class p
+			begin	val a = 4;
+				a; c;
+				n::a;
+				m::a;
+			end;
+		c;
+		p::a;
+		m::b;
+	end;
+  class r : m : n
+	begin	val c = 4;
+		c; b; x;
+	end;
+  r::c; r::b;
+  x;
+  m::b;
+  n::p;
+end

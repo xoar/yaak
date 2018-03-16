@@ -1,0 +1,113 @@
+#!/bin/sh
+# $Id: mkfile.sh.in,v 2.5 2011/09/13 20:58:00 profw Exp $
+# Copyright, 2011, The Regents of the University of Colorado
+
+# EXEC (mkfile.sh) (+cc) (+cc_flags) (+debug) (+prof) (+define) (+monitor)
+#   (:label) (:sources +incl=(:includes) :map=:dep :cat)
+#   (:libsflags) (:library_flags) (:dotafiles :ls)
+#   => (:mkfile);
+
+ODIN_cc=$1;shift; ODIN_cc_flags=$1;shift; ODIN_debug=$1;shift;
+ODIN_prof=$1;shift; ODIN_define=$1;shift;
+ODIN_monitor=$1;shift; ODIN_label=$1;shift; ODIN_e50=$1;shift;
+ODIN_libsflags=$1;shift; ODIN_library_flags=$1;shift; ODIN_dotafiles=$1;shift;
+mkdir mkfile;
+
+SED=$ODINCACHE/PKGS/skeleton/sed.exe
+FMT=$ODINCACHE/PKGS/skeleton/fmt.exe
+
+if test "$ODIN_cc" != ""; then ELI_CC=$ODIN_cc; fi
+CCPROG=${ELI_CC-$ODIN_CC}
+
+cflags=''
+if test '' != "$ODIN_cc_flags"; then cflags="$cflags `cat $ODIN_cc_flags`"; fi
+if test '' != "$ODIN_debug"; then cflags="$cflags $ODIN_CC_DEBUGF"; fi
+if test '' != "$ODIN_prof";  then cflags="$cflags -pg"; fi
+
+if test '' != "$ODIN_define"
+then for def in `cat $ODIN_define`; do cflags="$cflags -D$def"; done
+fi
+
+if @SHMONITOR@
+then
+  if test '' != "$ODIN_monitor"
+  then cflags="$cflags -DMONITOR -DRIGHTCOORD"
+  fi
+fi
+
+libs="`cat $ODIN_dotafiles`"
+libs="$libs "`cat $ODIN_libsflags`
+libs="$libs "`cat $ODIN_library_flags`
+
+libpath=`echo $libs | sed -e '
+    s/.*/>&</
+    s/-L\([^ <]*\)/<\1>/g
+    s/>[^<]*</:/g
+    s/:\(.*\):/\1/
+    s/^://'`
+if test "$libpath" != ''
+then
+  if "$LD_LIBRARY_PATH" != ''
+  then LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$libpath
+  else LD_LIBRARY_PATH=$libpath
+  fi
+  export LD_LIBRARY_PATH
+fi
+
+echo 'SHELL   = /bin/sh' > mkfile/Makefile
+echo '' >> mkfile/Makefile
+
+echo $CCPROG | $FMT 60 \
+	| $SED -e 's/$/ \\/
+                1s/^/CC	= /
+                2,$s/^/	/
+                $s; \\$;;' \
+        >> mkfile/Makefile
+
+echo $cflags | $FMT 60 \
+	| $SED -e 's/$/ \\/
+                1s/^/CFLAGS	= /
+                2,$s/^/	/
+                $s; \\$;;' \
+        >> mkfile/Makefile
+
+echo $libs | $FMT 60 \
+	| $SED -e 's/$/ \\/
+                1s/^/LIBS	= /
+                2,$s/^/	/
+                $s; \\$;;' \
+        >> mkfile/Makefile
+
+echo '' >> mkfile/Makefile
+
+$SED -e '/:/'\!'d
+		s;:.*$;;' \
+			$ODIN_e50 \
+	| $FMT 60 \
+	| $SED -e 's/$/ \\/
+		1s/^/OBJS	= /
+		2,$s/^/	/
+		$s; \\$;;' \
+	>> mkfile/Makefile
+
+echo '' >> mkfile/Makefile
+
+echo 'EXE	= '`$SED -e 's/\..*$/.exe/' $ODIN_label` >> mkfile/Makefile
+echo '' >> mkfile/Makefile
+
+echo 'all:	$(EXE)' >> mkfile/Makefile
+echo '' >> mkfile/Makefile
+echo '$(EXE):	$(OBJS)' >> mkfile/Makefile
+echo '	$(CC) -o $(EXE) $(CFLAGS) $(OBJS) $(LIBS)' >> mkfile/Makefile
+echo '' >> mkfile/Makefile
+echo 'objects: $(OBJS)' >> mkfile/Makefile
+echo '' >> mkfile/Makefile
+echo 'clean:' >> mkfile/Makefile
+echo '	rm -f a.out *.o *.a *~ core ERRS $(EXE)' >> mkfile/Makefile
+echo '' >> mkfile/Makefile
+echo 'tidy:' >> mkfile/Makefile
+echo '	rm -f core a.out *.o *~ *.a ERRS' >> mkfile/Makefile
+
+echo '' >> mkfile/Makefile
+
+cat $ODIN_e50 >> mkfile/Makefile

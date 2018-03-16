@@ -1,0 +1,21 @@
+begin
+  class p
+	begin	var real d;
+		d;
+	end;
+  class m : p
+	begin	var int a;
+		var p c;
+		d; c.d;
+		p::d;
+	end;
+  var m x;
+  class n
+	begin	var bool b;
+		var m c;
+		c.a;
+		x.a;
+	end;
+  var n y;
+  y.b;
+end

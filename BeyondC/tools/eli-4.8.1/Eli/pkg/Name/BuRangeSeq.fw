@@ -1,0 +1,123 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: BuRangeSeq.fw,v 4.1 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module extends the BuScope module by a facility that allows
+join syntactically separated ranges into one range.
+
+Using this module requires that the module for the basic
+consistent renaming task, |NAME|BuScope is also used.
+Both modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+This module provides the following computational roles:
+
+~O~<|NAME|BuRangeSeq.lido~>~{
+~<|NAME|OpenSeqScope~>
+~<|NAME|OpenElemScope~>
+~<|NAME|RangeSequence~>
+~}
+
+|NAME|RangeSequence
+is to be inherited to a symbol that is the root of a subtree
+which contains all to be joined ranges.
+It provides all attributes provided by |NAME|RangeScope,
+but it is not a range in the sense of scope rules.
+
+Other range roles may not be inerited to |NAME|RangeSequence.
+
+_V_|NAME|CurrSeqEnv is the environment for every
+directly contained |NAME|RangeScope.
+
+_V_|NAME|NestSeqEnv is used to restore _V_|NAME|CurrSeqEnv in case of
+nested |NAME|RangeSequences.
+
+|NAME|RangeSequence may not occur between |NAME|OpenSeqScope and
+|NAME|OpenElemScope.
+
+~$~<|NAME|OpenSeqScope~>==~{
+CLASS SYMBOL |NAME|OpenSeqScope INHERITS |NAME|CreateNewScope COMPUTE
+  ORDER
+    (_|NAME|ASSIGN (_V_|NAME|NestSeqEnv, _V_|NAME|CurrSeqEnv),
+     _|NAME|ASSIGN (_V_|NAME|CurrSeqEnv, SYNT.|NAME|NewScope))
+  BOTTOMUP;
+END;
+~}
+
+~$~<|NAME|OpenElemScope~>==~{
+CLASS SYMBOL |NAME|OpenElemScope:
+	_|NAME|NestSeqEnv:	Environment SYNT;	/* local */
+
+CLASS SYMBOL |NAME|OpenElemScope COMPUTE
+  SYNT._|NAME|NestSeqEnv = _V_|NAME|NestSeqEnv;
+  _|NAME|ASSIGN (_V_|NAME|CurrEnv, _V_|NAME|CurrSeqEnv)
+	<- SYNT._|NAME|NestSeqEnv BOTTOMUP;
+END;
+~}
+
+~$~<|NAME|RangeSequence~>==~{
+CLASS SYMBOL |NAME|RangeSequence:
+	|NAME|Env:	Environment	SYNT,	/* provided */
+	|NAME|GotKeys:		VOID	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|RangeSequence COMPUTE
+  SYNT.|NAME|GotKeys = TAIL._C_|NAME|GotKeys;
+  SYNT.|NAME|Env = _V_|NAME|CurrSeqEnv
+	<- TAIL._C_|NAME|GotKeys;
+  THIS._C_|NAME|GotKeys =
+     _|NAME|ASSIGN
+	(_V_|NAME|CurrSeqEnv,
+	 CONSTITUENTS |NAME|OpenElemScope._|NAME|NestSeqEnv
+	 	SHIELD (|NAME|AnyScope, |NAME|RangeSequence)
+		WITH (Environment, _|NAME|LEFT, IDENTICAL, _|NAME|NullEnv))
+	<- SYNT.|NAME|Env BOTTOMUP;
+END;
+~}
+
+~O~<|NAME|BuRangeSeq.head~>~{
+#include "|NAME|BuRangeSeq.h"
+~}
+
+~O~<|NAME|BuRangeSeq.h~>~{
+#ifndef _|NAME|BURANGESEQ_H
+#define _|NAME|BURANGESEQ_H
+
+#include "envmod.h"
+
+extern Environment _V_|NAME|CurrSeqEnv;
+extern Environment _V_|NAME|NestSeqEnv;
+
+#define _|NAME|LEFT(l,r) ((l) == NoEnv ? (r) : (l))
+#define _|NAME|NullEnv() NoEnv
+
+#endif
+~}
+
+~O~<|NAME|BuRangeSeq.c~>~{
+#include "|NAME|BuRangeSeq.h"
+Environment _V_|NAME|CurrSeqEnv = NoEnv;
+Environment _V_|NAME|NestSeqEnv = NoEnv;
+~}
+

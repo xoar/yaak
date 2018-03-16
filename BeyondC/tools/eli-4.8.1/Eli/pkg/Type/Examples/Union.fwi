@@ -1,0 +1,223 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Union Types~>
+
+We introduce union types to our language in order to
+demonstrate how subtype relations and their coercions are specified.
+A union type is described by a sequence of type denotations, which
+constitute the subtypes of the specified union type.
+A value of one of the subtypes can be coerced to the union type.
+A value of a union type can be treated as a value of one of
+the subtypes using a cast operation or a case statement.
+
+Here is an example program that defines and uses a union
+variable named @code{rv}:
+
+~O~<UnionExamp~>~{
+begin
+  var   union int, bool end rv;
+  var   int j, bool c;
+  rv = 42; rv = true;
+  j = <int> rv;
+  case rv of
+    int t: j = t;
+    bool t: c = t;
+  end
+end
+~}
+In the @code{case} statement the @code{case} expression has a union
+type. Each case declares a variable of a subtype of that
+union type. The branch which corresponds to the current type 
+of the @code{case} expression is selected, its variable is
+initialized with the value of the @code{case} expression,
+and the statement is executed.
+
+The following productions describe union types, type casts,
+and @code{case} statements:
+~$~<Abstract union syntax~>==~{
+RULE: TypeDenoter ::= UnionType END;
+RULE: UnionType  ::= 'union' UnitedTypes 'end' END;
+RULE: UnitedTypes LISTOF UnitedType END;
+RULE: UnitedType ::= TypeDenoter END;
+
+RULE: Expression ::= '<' TypeDenoter '>' Expression END;
+
+RULE: Statement ::= CaseStmt END;
+RULE: CaseStmt ::= 'case' Expression 'of' Cases 'end' END;
+RULE: Cases LISTOF Case END;
+RULE: Case ::= ObjDecl ':' Statement END;
+~}
+
+The following computations introduce a type denoter for union types
+and associate properties for test output to it:
+In order to check whether a type is a union type, as required
+for example in a case statement, we introduce a property
+@code{IsUnionType}. 
+~$~<Is union type~>==~{
+IsUnionType: int;
+~}
+
+~$~<Union type denoter~>==~{
+SYMBOL UnionType INHERITS TypeDenotation END;
+
+RULE: UnionType ::= 'union' UnitedTypes 'end' COMPUTE
+  .GotTypeProp =
+      ORDER (
+        ResetIsUnionType (UnionType.Type, 1),
+        ResetTypeName (UnionType.Type, "union..."),
+        ResetTypeLine (UnionType.Type, LINE));
+END;
+
+RULE: TypeDenoter ::= UnionType COMPUTE
+  TypeDenoter.Type = UnionType.Type;
+END;
+~}
+
+
+For the comparison of union types stuctural equivalence is
+specified, such that the fact that it is a union type and
+the sequence of subtypes are relevant for type equality. 
+@code{UnionClass} is the the set 
+containing all union types for initialization of the 
+equivalence check.
+
+~$~<Union type class~>==~{
+UnionClass;
+~}
+
+The @code{UnionClass} and the sequence @code{UnitedTypes.OpndTypeList}
+are used as arguments of @code{AddTypeToBlock} to specify type
+equivalence of union types. Property @code{ComponentTypes} is
+set accordingly:
+
+~$~<Union type equality computation~>==~{
+RULE: UnionType ::= 'union' UnitedTypes 'end' COMPUTE
+  UnionType.GotType =
+      AddTypeToBlock 
+        (UnionType.Type, UnionClass, 
+         VResetComponentTypes (UnionType.Type, UnitedTypes.OpndTypeList))
+      <- .GotTypeProp;
+END;
+
+SYMBOL UnitedTypes INHERITS OpndTypeListRoot END;
+SYMBOL UnitedType  INHERITS OpndTypeListElem END;
+
+RULE: UnitedType ::= TypeDenoter COMPUTE
+  UnitedType.Type = TypeDenoter.Type;
+  UnitedType.DefTableKeyElem = UnitedType.Type;
+END;
+~}
+
+Note, that here the order of the subtypes in the type denoter
+is relevant for type equality. If that is not desired,
+one could for example sort the list of the component types
+in a canonical order before using it as an argument of
+@code{AddTypeToBlock}.
+
+For each union type we introduce two groups of conversion 
+operators: A widening coercion from each subtype type to the 
+union type, and a down cast from the union type to each subtype.
+For the latter an indication has to be introduced:
+~$~<Downcast indication~>==~{
+DownCast;
+UnionWiden;
+~}
+
+As a pair of operators has to be introduced for each subtype,
+the context of the subtype denoter is the right place
+to do it.
+The coercion operator is not created explicitly; 
+it is only stated that the subtype is @code{Coercible} to
+the union type. The down cast conversion is introduced
+as a @code{MonadicOperator}:
+
+~$~<Widening coercion computation~>==~{
+SYMBOL UnitedType INHERITS OperatorDefs COMPUTE
+  SYNT.GotOper =
+    ORDER
+      (Coercible (UnionWiden, THIS.Type, INCLUDING UnionType.Type),
+       MonadicOperator
+        (DownCast, NewKey(), 
+         INCLUDING UnionType.Type, THIS.Type));
+END;
+~}
+
+The context of the down cast construct imposes a requirement on the type of
+the operand expression.
+Any conversion operator of the @code{DownCast} indication can be applied to
+the operand expression, in addition to any coercions, to satisfy this
+requirement:
+
+~$~<Down cast~>==~{
+RULE: Expression ::= '<' TypeDenoter '>' Expression COMPUTE
+  CastContext (Expression[1], , Expression[2], TypeDenoter.Type);
+  Indication (DownCast);
+END;
+~}
+
+In a @code{case} statement it is required that the @code{case}
+expression has a union type:
+
+~$~<Union case statement~>==~{
+SYMBOL CaseStmt: Type: DefTableKey;
+
+RULE: CaseStmt ::= 'case' Expression 'of' Cases 'end' COMPUTE
+  CaseStmt.Type = Expression.Type;
+
+  IF (NOT (GetIsUnionType (Expression.Type, 0)),
+  message (ERROR, "Case expression must have a union type",
+           0,COORDREF))
+  <- INCLUDING Program.TypeIsSet;
+END;
+~}
+
+Each branch of a @code{case} statement forms a range for
+the declaration of the variable that gets the value of the
+@code{case} expression if that case is selected.
+It is required that the type of the variable is a subtype of
+the type of the case expression.
+We here require that it is coercible to the type of the
+@code{case} expression, although that is not quite exact.
+~$~<Union case~>==~{
+SYMBOL Case INHERITS RangeScope END;
+
+RULE: Case ::= ObjDecl ':' Statement COMPUTE
+  IF (NOT (IsCoercible 
+             (ObjDecl.Type, INCLUDING CaseStmt.Type)),
+  message (ERROR, "Must be a subtype of the case expression",
+           0, COORDREF))
+  <- INCLUDING Program.GotType;
+END;
+~}
+
+In other contexts @code{ObjDecl} occurs in a CHAIN.
+To avoid an error message on missing a chain start we apply the 
+role @code{OpndTypeListRoot} here, which has the CHAINSTART, although
+that role is not needed:
+
+~$~<Union CHAIN workaraound~>==~{
+SYMBOL Cases INHERITS OpndTypeListRoot END;
+~}
+
+~O~<Union.pdl~>~{
+~<Is union type~>
+~<Union type class~>
+~<Downcast indication~>
+~}
+
+~O~<Union.lido~>~{
+~<Abstract union syntax~>
+~<Union type denoter~>
+~<Union type equality computation~>
+~<Widening coercion computation~>
+~<Down cast~>
+~<Union case~>
+~<Union case statement~>
+~<Union CHAIN workaraound~>
+~}
+
+~O~<Union.con~>~{
+~<Concrete union syntax~>
+~}

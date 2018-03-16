@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>Pattern Based Text Generator Specifications</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Pattern Based Text Generator Specifications</h1>
+<hr>
+<p>
+The Pattern-Based Text Generator PTG supports
+translations into any kind of structured text. 
+<P>
+<b> Typical patterns:</b>
+
+<pre>
+    Pair: "(" $ "." $ ")"       /* ordinary pattern */
+    Decl: $2 ":" $1 ";"         /* indexed pattern */
+    Ident: $ string $ int       /* typed pattern */
+    CommaSeq: $1 {", "} $2      /* optional pattern */
+    IndText: [Indent $2 int] $1 /* function call pattern */     
+</pre>
+
+<b>Typical Error Situations</b>
+<p>
+<ul>
+<p>
+<li> Wrong number of parameters in PTG function application:
+
+<p>
+==> <tt>ERROR: prototype mismatch: 3 args passed, 2 expected</tt>
+
+<p>
+<li> Wrong type of parameters in PTG function application:
+
+<p>
+==> <tt>argument #3 is incompatible with prototype</tt>
+
+<p>
+<li> Correct PTG function signature but wrong parameter order:
+
+<p>
+==> Runtime surprise
+
+</ul>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

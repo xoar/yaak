@@ -1,0 +1,41 @@
+#!/bin/sh
+# $Id: dapOut.sh.in,v 1.6 2010/05/10 17:51:39 profw Exp $
+# Copyright 1994-1998 Anthony M. Sloane,
+#   2009 The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# EXEC (dapOut.sh) (:ext.dapto.cmpd :apply=:dapGen :ls) (+monitor)
+#      (dapto.reqmod) (dapto.dapto :dapGen)
+#   => (:dapOut);
+# 
+# :dapOut 'Support for execution monitoring' => :FILE;
+
+ODIN_cmpd=$1;shift; ODIN_monitor=$1;shift;
+ODIN_reqmod=$1;shift; ODIN_dapto=$1;shift;
+
+if @SHMONITOR@
+then
+  if test '' != "$ODIN_monitor"
+  then
+    echo $ODIN_reqmod > dapOut
+    echo $ODIN_dapto >> dapOut
+    cat  $ODIN_cmpd  >> dapOut
+  else cp /dev/null dapOut 
+  fi
+else cp /dev/null dapOut
+fi

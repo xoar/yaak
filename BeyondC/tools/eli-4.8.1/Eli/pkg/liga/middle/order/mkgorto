@@ -1,0 +1,9 @@
+# $Id: mkgorto,v 1.2 2002/05/27 13:11:51 peter Exp $
+
+$(G_OB_DIR):
+	-mkdir $(G_OB_DIR)
+
+.c.o:
+	$(CC)	$(GFLAGS) $(CFLAGS) -c $<
+	mv $@ $(G_OB_DIR)
+	$(CC)	$(CFLAGS) -c $<

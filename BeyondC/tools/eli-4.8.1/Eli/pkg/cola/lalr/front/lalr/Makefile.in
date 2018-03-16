@@ -1,0 +1,133 @@
+# $Id: Makefile.in,v 1.2 2002/05/08 15:00:49 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/lalr/front/lalr
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/lalr/front/lalr
+SRC	=
+C_FILES = 	absparser.c parserlib.c ctx.c lr0.c lalr.c lalr1tst.c \
+		mkiface.c printtbl.c purdom.c purdebug.c statistik.c \
+		privatlib.c grammarcomp.c first1.c digraph.c \
+		printst2ter.c
+O_FILES = 	absparser.o parserlib.o ctx.o lr0.o lalr.o lalr1tst.o \
+		mkiface.o printtbl.o purdom.o statistik.o \
+		privatlib.o grammarcomp.o first1.o digraph.o \
+		printst2ter.o
+H_FILES = 	absparser.h parserlib.h ctx.h lr0.h lalr.h lalr1tst.h \
+		mkiface.h printtbl.h lr0forpurdom.h purdom.h statistik.h \
+		privatlib.h grammarcomp.h first1.h digraph.h \
+		printst2ter.h
+COP	=	$(C_FILES) $(H_FILES) Makefile.in
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=
+EXE	=
+GEN	=	lalr.a
+GENINS	=	
+SRCDIR	=
+AUXDIR	=
+
+IDL   = ../../../idl
+LIB   = ../../../lib
+FMT   = ../../../trafos/fmt
+
+IHDRS = -I$(IDL) -I$(LIB) -I$(FMT)
+
+# -DDEBUG_PRS, -DDEBUG_LR0, -DDEBUG_LALR,
+# -DDEBUG_ABS, -DDEBUG_PUR: causes additional tests which can be helpful
+#			    to search bugs
+# -DDEBUG_FREEPOS: free positions are labeled with a connection
+# -DSTATISTIK: to get more statistical informations
+# ALLDEB =   -DDEBUG_PRS -DDEBUG_LR0 -DDEBUG_LALR -DDEBUG_ABS \
+# 	     -DDEBUG_PUR -DDEBUG_FREEPOS -DSTATISTIK
+
+CFLAGS  = $(ALLDEB) $(IHDRS)
+
+@toolmk_h@
+
+lalr.a: $(O_FILES)
+	rm -f $@
+	ar rcu $@ $(O_FILES)
+	@RANLIB@ $@
+
+absparser.o:	$(IDL)/comar.h $(IDL)/name.h $(LIB)/cmrlib.h privatlib.h \
+		grammarcomp.h absparser.h  \
+		mkiface.h $(IDL)/prsiface.h lr0.h lalr.h lalr1tst.h printtbl.h
+
+
+parserlib.o: 	privatlib.h $(LIB)/cmrlib.h $(LIB)/bitset.h \
+		$(IDL)/comar.h \
+	     	first1.h statistik.h parserlib.h
+
+
+ctx.o:  privatlib.h $(LIB)/cmrlib.h $(LIB)/bitset.h \
+	$(IDL)/comar.h statistik.h parserlib.h ctx.h
+
+
+lr0.o:  $(IDL)/comar.h $(LIB)/cmrlib.h privatlib.h  \
+	statistik.h parserlib.h lr0.h
+
+
+lalr.o: $(IDL)/comar.h $(IDL)/prsiface.h \
+	$(LIB)/cmrlib.h privatlib.h $(LIB)/bitset.h \
+	absparser.h first1.h statistik.h parserlib.h ctx.h lalr.h
+
+
+lalr1tst.o: $(IDL)/comar.h \
+	    $(LIB)/cmrlib.h privatlib.h $(LIB)/bitset.h $(IDL)/name.h \
+	    statistik.h parserlib.h lalr1tst.h
+
+
+mkiface.o: $(IDL)/comar.h \
+	   $(LIB)/cmrlib.h privatlib.h $(LIB)/bitset.h \
+	   statistik.h parserlib.h $(IDL)/prsiface.h mkiface.h
+
+
+printtbl.o:  $(IDL)/comar.h $(IDL)/name.h $(FMT)/format.h \
+	     privatlib.h $(LIB)/cmrlib.h $(LIB)/bitset.h \
+	     grammarcomp.h parserlib.h printtbl.h
+
+
+purdom.o:  $(IDL)/comar.h $(IDL)/comar_func.h \
+	   privatlib.h $(LIB)/cmrlib.h $(LIB)/bitset.h \
+	   statistik.h parserlib.h ctx.h lr0forpurdom.h purdebug.c purdom.h
+
+
+statistik.o:	$(IDL)/comar.h ctx.h parserlib.h statistik.h \
+		privatlib.h $(LIB)/cmrlib.h
+
+grammarcomp.o:	$(IDL)/comar.h $(IDL)/comar_func.h $(IDL)/name.h \
+	$(LIB)/cmrlib.h $(FMT)/format.h privatlib.h first1.h grammarcomp.h
+
+privatlib.o:  $(IDL)/comar.h $(LIB)/cmrlib.h privatlib.h
+
+first1.o:	$(IDL)/comar.h $(IDL)/name.h \
+		$(LIB)/cmrlib.h $(LIB)/cmrio.h $(LIB)/bitset.h \
+		privatlib.h first1.h
+
+digraph.o:	$(IDL)/global.h $(LIB)/bitset.h privatlib.h digraph.h
+
+printst2ter.o:	printst2ter.h privatlib.h $(LIB)/cmrlib.h \
+		$(IDL)/comar.h $(IDL)/comarMacros.h \
+		$(IDL)/prsiface.h $(IDL)/prsifaceM.h
+

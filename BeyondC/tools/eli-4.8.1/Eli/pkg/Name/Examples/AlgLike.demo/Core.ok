@@ -1,0 +1,17 @@
+begin
+  val a = 1, b = 2;
+  val c = 1, d = c;
+  val e =
+	begin val a = c, b = f;
+	      a; b; e;
+	end;
+  val f = 2;
+  begin val a = 5;
+        a; d;
+  end;
+  a; c; f;
+  join j begin val r = 1; s; a; end
+	 begin val s = 2; r; c; end
+  joined;
+  j;
+end

@@ -1,0 +1,189 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: PropLib.fw,v 3.5 2000/01/10 15:02:34 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module specifies a set of useful generic PDL patterns.
+The second part of this module defines a relation on coordinates.
+It should be removed from here as soon as that function is
+implemented in the error module.
+
+PDL patterns:
+
+SetGet:
+same as Set, but the associated value is returned as result of the call.
+
+SetOnce:
+the given value is only set if that property is not set;
+the associated value is returned as result of the call.
+
+KReset:
+same as Reset, but the key is returned as result of the call,
+allowing nested property association calls.
+
+VReset:
+same as Reset, but the value is returned as result of the call.
+
+Trans:
+for properties of type DefTableKey; the key at the end of the
+property chain is returned. The property chain must not be cyclic.
+
+SetDiff:
+if the property is not yet associated a value the second argument is set;
+if the property has a value that differs from the second argument,
+the third argument is set.
+
+Insert(k,i):
+inserts element @code{i} into the
+set stored for key @code{k}, and yields the new set as result.
+
+Union(k,s):
+adds the set @code{s} to the
+set stored for key @code{k}, stores the result and returns it.
+
+Intersect(k,s):
+intersects the set @code{s} with
+set stored for key @code{k}, stores the result and returns it.
+
+~O~<PropLib.pdl~>~{
+TYPE SetGet (DefTableKey key, TYPE init, TYPE reset)
+{ if (key == NoKey) return init;
+  if (ACCESS)	{VALUE = reset; return reset;}
+  else		{VALUE = init; return init;}
+}
+
+TYPE SetOnce (DefTableKey key, TYPE val)
+{ if (key == NoKey) return val;
+  if (!ACCESS) VALUE = val;
+  return VALUE;
+}
+
+DefTableKey KReset (DefTableKey key, TYPE val)
+{ if (key == NoKey) return NoKey;
+  ACCESS; VALUE = val; return key;
+}
+
+TYPE VReset (DefTableKey key, TYPE val)
+{ if (key != NoKey) 
+    { ACCESS; VALUE = val; }
+  return val;
+}
+
+DefTableKey Trans (DefTableKey key)
+{ if (key == NoKey) return NoKey;
+  while (PRESENT) key = VALUE;
+  return key;
+}
+
+void SetDiff (DefTableKey key, TYPE thistype, TYPE diff)
+{ if (key == NoKey) return;
+  if (!ACCESS)			VALUE = thistype;
+  else if (VALUE != thistype)	VALUE = diff;
+}
+
+TYPE Insert(DefTableKey key, int val)
+{ if (key == NoKey) return NULLIS;
+  if (val < 0 || val > 8*sizeof(TYPE))
+     message(DEADLY,"Invalid set element",0,NoPosition);
+  if (!ACCESS) VALUE = NULLIS;
+  VALUE |= (1<<val);
+  return VALUE;
+}
+
+TYPE Union(DefTableKey key, TYPE val)
+{ if (key == NoKey) return NULLIS;
+  if (!ACCESS) VALUE = val;
+  else VALUE |= val;
+  return VALUE;
+}
+
+TYPE Intersect(DefTableKey key, TYPE val)
+{ if (key == NoKey) return NULLIS;
+  if (!ACCESS) VALUE = val;
+  else VALUE &= val;
+  return VALUE;
+}
+~}
+
+~O~<PropLib.head~>~{
+#include "CoordCmp.h"
+~}
+
+~O~<CoordCmp.pdl~>~{
+"CoordCmp.h"
+~}
+
+~O~<CoordCmp.h~>~{
+#ifndef _COORDCMP_H
+#define _COORDCMP_H
+
+#include "err.h"
+
+extern CoordPtr FirstCoord;
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int CoordLess (CoordPtr coord1, CoordPtr coord2);
+#else
+extern int CoordLess ();
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int CoordLessEqual (CoordPtr coord1, CoordPtr coord2);
+#else
+extern int CoordLessEqual ();
+#endif
+
+#endif
+~}
+
+~O~<CoordCmp.c~>~{
+#include "CoordCmp.h"
+
+static POSITION _FirstCoord = {1, 1};
+CoordPtr FirstCoord = (CoordPtr)&_FirstCoord;
+
+#if defined(__cplusplus) || defined(__STDC__)
+int CoordLess (CoordPtr coord1, CoordPtr coord2)
+#else
+int CoordLess (coord1, coord2)
+	CoordPtr	coord1, coord2;
+#endif
+{
+return ((coord1->line == coord2->line)?
+		(coord1->col < coord2->col):
+		(coord1->line < coord2->line));
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+int CoordLessEqual (CoordPtr coord1, CoordPtr coord2)
+#else
+int CoordLessEqual (coord1, coord2)
+	CoordPtr	coord1, coord2;
+#endif
+{
+return ((coord1->line == coord2->line)?
+		(coord1->col <= coord2->col):
+		(coord1->line < coord2->line));
+}
+~}

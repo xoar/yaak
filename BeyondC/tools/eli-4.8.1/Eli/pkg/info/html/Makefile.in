@@ -1,0 +1,48 @@
+# $Id: Makefile.in,v 1.3 2010/12/12 18:08:10 profw Exp $
+
+# Makefile for html doc customisation
+
+DIR	= pkg/info/html
+AUX	= Makefile Makefile.in inshead.sed $(DOCS) FOOT.html HEAD.html \
+	  chain.fig graph1.fig graph2.fig mapcon.fig remote.fig
+GENGIF	= gifs/chain.gif gifs/graph1.gif gifs/graph2.gif \
+	  gifs/mapcon.gif gifs/remote.gif
+AUXDIR	= gifs
+
+DOCS	= index.html \
+	  AttributeDependenceToolGorto.html CDebbugging.html Chain.html \
+	  Constituents.html CyclicAttributeDependence.html \
+	  DirectCycles.html ee.html ElisErrorMessages.html err_con_map.html \
+	  err_gla.html err_h_c.html err_lido.html err_pdl.html err_ptg.html \
+	  expinfo.html ExtendedProtocolsFromEli.html \
+	  GenerationOfTestOutput.html gorto2.html gorto.html \
+	  Including.html InducedCycles.html InspectionByAuthorOthers.html \
+	  MissingComputations.html NoosaAbstree1.html NoosaAbstree2.html \
+	  Noosa.html NoosaPhrase.html NoosaStrings.html \
+	  NoosaTokenExample.html ordinfo.html PartitionedCycles.html \
+	  RemoteAccess.html showfe2.html showfe3.html showfe.html
+
+@toolmk_h@
+
+predist:	docs
+docs:	$(AUX) $(GENGIF)
+	@for f in $(DOCS);\
+	  do sed -n -f inshead.sed $$f > $(ELIDOC)/$$f; \
+	  done
+	rm -rf $(ELIDOC)/gifs
+	cp -rf gifs $(ELIDOC)
+
+gifs/chain.gif:	chain.fig
+	fig2dev -L gif $< $@
+
+gifs/graph1.gif:	graph1.fig
+	fig2dev -L gif $< $@
+
+gifs/graph2.gif:	graph2.fig
+	fig2dev -L gif $< $@
+
+gifs/mapcon.gif:	mapcon.fig
+	fig2dev -L gif $< $@
+
+gifs/remote.gif:	remote.fig
+	fig2dev -L gif $< $@

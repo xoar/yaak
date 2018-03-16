@@ -1,0 +1,188 @@
+@p maximum_input_line_length = infinity
+~! $Id: IntSet.fw,v 3.6 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@O@<|NAME|IntSet.specs@>@{
+$/Input/err.specs
+@}
+
+@O@<|NAME|IntSet.head@>@{
+#include "|NAME|IntSet.h"
+@}
+
+@O@<|NAME|IntSet.h@>@{
+#ifndef _|NAME|INTSET
+#define _|NAME|INTSET
+
+typedef unsigned |TYPE| |NAME|IntSet;
+
+#define	|NAME|NullIS()	((|NAME|IntSet)0)
+#define	|NAME|NULLIS		((|NAME|IntSet)0)
+#define |NAME|MaxElemIS	(8*sizeof(|NAME|IntSet)-1)
+
+#define |NAME|ConsIS(el,s)	((|NAME|IntSet)((0x1 << (el)) | (s)))
+#define |NAME|UniteIS(s1,s2)	((|NAME|IntSet)((s1) | (s2)))
+#define |NAME|InterIS(s1,s2)	((|NAME|IntSet)((s1) & (s2)))
+#define |NAME|SubIS(s1,s2)	((|NAME|IntSet)((s1) & ~(s2)))
+#define |NAME|DisjIS(s1,s2)	(|NAME|InterIS (s1, s2) == |NAME|NULLIS)
+#define |NAME|EmptyIS(s)	((s) == |NAME|NULLIS)
+#define |NAME|EqualIS(s1,s2)	((s1) == (s2))
+
+#if defined(__STDC__) || defined(__cplusplus)
+extern |NAME|IntSet	|NAME|SingleIS	(int el);
+extern |NAME|IntSet	|NAME|AddElIS	(int el, |NAME|IntSet s);
+extern int		|NAME|InIS	(int el, |NAME|IntSet s);
+extern int		|NAME|InclIS	(|NAME|IntSet s1, |NAME|IntSet s2);
+extern int		|NAME|CardIS	(|NAME|IntSet s);
+#else
+extern |NAME|IntSet	|NAME|SingleIS	();
+extern |NAME|IntSet	|NAME|AddElIS	();
+extern int		|NAME|InIS	();
+extern int		|NAME|InclIS	();
+extern int		|NAME|CardIS	();
+#endif
+
+#endif
+@}
+
+@O@<|NAME|IntSet.c@>@{
+#include "err.h"
+#include "|NAME|IntSet.h"
+
+#define noelem(el) ((el)<0 || (el>|NAME|MaxElemIS))
+
+static POSITION coord = {0, 0};
+
+#if defined(__STDC__) || defined(__cplusplus)
+|NAME|IntSet |NAME|SingleIS (int el)
+#else
+|NAME|IntSet |NAME|SingleIS (el) int el;
+#endif
+{
+if (noelem(el)) 
+	message (DEADLY,"|NAME|IntSet: SingleIS got wrong elem", el, &coord);
+return ((|NAME|IntSet)(0x1 << el));
+}/*SingleIS*/
+
+#if defined(__STDC__) || defined(__cplusplus)
+|NAME|IntSet |NAME|AddElIS (int el, |NAME|IntSet s)
+#else
+|NAME|IntSet |NAME|AddElIS (el, s) int el; |NAME|IntSet s;
+#endif
+{
+if (noelem(el)) 
+	message (DEADLY,"|NAME|IntSet: AddElIS got wrong elem", el, &coord);
+return (|NAME|UniteIS (|NAME|SingleIS (el), s));
+}/*AddElIS*/
+
+#if defined(__STDC__) || defined(__cplusplus)
+int |NAME|InIS (int el, |NAME|IntSet s)
+#else
+int |NAME|InIS (el, s) int el; |NAME|IntSet s;
+#endif
+{
+if (noelem(el)) 
+	message (DEADLY,"|NAME|IntSet: InIS got wrong elem", el, &coord);
+return ( ( ((|NAME|IntSet)(0x1 << el)) & s) != |NAME|NULLIS);
+}/*InIS*/
+
+#if defined(__STDC__) || defined(__cplusplus)
+int |NAME|InclIS (|NAME|IntSet s1, |NAME|IntSet s2)
+#else
+int |NAME|InclIS (s1, s2) |NAME|IntSet s1, s2;
+#endif
+{
+return (|NAME|InterIS (s1,s2) == s1);
+}/*InclIS*/
+
+#if defined(__STDC__) || defined(__cplusplus)
+int |NAME|CardIS (|NAME|IntSet s)
+#else
+int |NAME|CardIS (s) |NAME|IntSet s;
+#endif
+{	int	card = 0;
+while (s != |NAME|NULLIS) {
+	card += (s & (|NAME|IntSet)0x1);
+	s = (|NAME|IntSet)s >> 1;
+}
+return (card);
+}/*CardIS*/
+@}
+
+
+for testing only :
+
+#if defined(__STDC__) || defined(__cplusplus)
+void |NAME|printIS (|NAME|IntSet s)
+#else
+void |NAME|printIS (s) |NAME|IntSet s;
+#endif
+{	int	el = 0;
+printf ("|NAME|IntSet: ");
+while (s != |NAME|NULLIS) {
+	if (s & (|NAME|IntSet)0x1) printf (" %d", el);
+	el++;
+	s = (|NAME|IntSet)s >> 1;
+}
+printf ("\n");
+}
+
+void main () {
+|NAME|IntSet s1, s2, s3;
+int el1;
+
+s1=|NAME|NULLIS;
+|NAME|printIS (s1);
+for (el1=0; el1<=|NAME|MaxElemIS; el1++)
+	|NAME|printIS (s1 = |NAME|AddElIS (el1, s1));  
+
+|NAME|printIS (s1 = |NAME|AddElIS (3, |NAME|AddElIS (7, |NAME|AddElIS (15,
+|NAME|NULLIS))));
+printf ("card = %d\n", |NAME|CardIS (s1));
+
+|NAME|printIS (s2 = |NAME|AddElIS (0, |NAME|AddElIS (7, |NAME|AddElIS (10,
+|NAME|NULLIS))));
+printf ("card = %d\n", |NAME|CardIS (s2));
+|NAME|printIS (s3 = |NAME|UniteIS (s1, s2));
+
+|NAME|printIS (|NAME|InterIS (s1, s2));
+|NAME|printIS (|NAME|InterIS (s1, s3));
+|NAME|printIS (|NAME|InterIS (s1, |NAME|NULLIS));
+
+|NAME|printIS (|NAME|SubIS (s1, s2));
+|NAME|printIS (|NAME|SubIS (s2, s1));
+|NAME|printIS (|NAME|SubIS (s3, s1));
+
+if (|NAME|EmptyIS (|NAME|NULLIS)) printf ("yes\n");
+if (!|NAME|EmptyIS (s1)) printf ("yes\n");
+
+if (!|NAME|DisjIS (s1, s2)) printf ("yes\n");
+if (|NAME|DisjIS (s1, |NAME|NULLIS)) printf ("yes\n");
+
+|NAME|printIS (s1 = |NAME|AddElIS (-1, |NAME|NULLIS));
+|NAME|printIS (s1 = |NAME|AddElIS (16, |NAME|NULLIS));
+|NAME|printIS (s1 = |NAME|SingleIS (-1));
+|NAME|printIS (s1 = |NAME|SingleIS (127));
+|NAME|InIS (-1, |NAME|NULLIS);
+|NAME|InIS (16, |NAME|NULLIS);
+
+}

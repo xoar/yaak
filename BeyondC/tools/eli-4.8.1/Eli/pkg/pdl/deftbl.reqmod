@@ -1,0 +1,7 @@
+/* $Id: deftbl.reqmod,v 3.1.1.1 1999/08/05 16:11:43 mjung Exp $ */
+/* Copyright 1995, The Regents of the University of Colorado */
+
+deftbl.c
+deftbl.h
+$/Adt/obstack.reqmod
+$/Adt/obsave.reqmod

@@ -1,0 +1,70 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: Counter.fw,v 3.6 1999/08/13 13:51:44 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module counts all ocurrences of CLASS SYMBOLs |NAME|Count
+that occur in a |NAME|RootCount subtree. 
+|NAME|RootCount is inherited to the grammar root by default.
+
+Nested |NAME|RootCount subtrees are counted separately.
+
+The attribute |NAME|Count.|NAME|Count is the number of the
+|NAME|Count ocurrence (1 .. n) in left to right order.
+
+The attribute |NAME|RootCount.|NAME|CountResult is the total
+number of |NAME|Count ocurrences in the subtree.
+
+The start value for the counting can be modified by
+overriding the computation of |NAME|RootCount.|NAME|InitCount.
+It's default is 0 such that the counting starts from 1.
+
+The increment value is 1. It can be changed by overriding
+the computation of |NAME|Count.|NAME|Increment.
+
+~O~<|NAME|Count.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RootCount END;
+
+CLASS SYMBOL |NAME|RootCount:
+	|NAME|InitCount:	int SYNT,
+	|NAME|CountResult:	int SYNT;
+
+CLASS SYMBOL |NAME|Count:
+	|NAME|Increment:	int SYNT,
+	|NAME|Count:		int SYNT;
+
+CHAIN _c|NAME|Count:	int;
+
+CLASS SYMBOL |NAME|RootCount COMPUTE
+  SYNT.|NAME|InitCount = 0;
+  CHAINSTART HEAD._c|NAME|Count = SYNT.|NAME|InitCount;
+  SYNT.|NAME|CountResult = TAIL._c|NAME|Count;
+END;
+
+CLASS SYMBOL |NAME|Count COMPUTE
+  SYNT.|NAME|Increment = 1;
+  SYNT.|NAME|Count = ADD (THIS._c|NAME|Count, SYNT.|NAME|Increment);
+  THIS._c|NAME|Count = SYNT.|NAME|Count;
+END;
+~}

@@ -1,0 +1,13 @@
+# $Id: mkgortosym,v 1.1 2001/10/25 14:37:00 cogito Exp $
+
+G_OB_DIR=	gorto
+GORTOOBJ=	 $(G_OB_DIR)/reftab.o $(G_OB_DIR)/initdp.o \
+		 $(G_OB_DIR)/option.o \
+		 $(G_OB_DIR)/induce.o $(G_OB_DIR)/part.o \
+		 $(G_OB_DIR)/set.o $(G_OB_DIR)/visit.o \
+		 $(G_OB_DIR)/bottomup.o \
+		 $(G_OB_DIR)/depmod.o
+
+GORTOLIB=	gorto.a
+
+GEN	=	$(G_OB_DIR) $(OBJS) $(GORTOLIB)

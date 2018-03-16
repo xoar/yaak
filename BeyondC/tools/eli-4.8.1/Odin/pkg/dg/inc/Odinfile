@@ -1,0 +1,4 @@
+# ./Odin/pkg/dg/inc/Odinfile
+
+TokTyp_.h == ../drvgrf.ygi :tok.h
+NodTyp_.h == ../drvgrf.ygi :nod.h

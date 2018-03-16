@@ -1,0 +1,108 @@
+.TH ODIN 1 "Version 1.16"
+.nh
+.SH NAME
+odin \- software build and configuration management system
+.SH SYNOPSIS
+.B odin
+[\ -c\ cache\ ] [\ -r\ ] [\ -R\ ] [\ command\ ...\ ]
+.SH DESCRIPTION
+.LP
+.I odin
+satisfies requests for files produced by software tools by automatically
+invoking the minimum number of tools necessary to produce those files.
+When a build step fails,
+.I odin
+will continue with other build steps that do not depend on the output
+of the failed build step.
+If
+.I odin
+is invoked with no command arguments,
+.I odin
+commands are read from standard input.
+A simple emacs-like command history and editing facility is provided
+(see editline(3)).
+.LP
+A basic
+.I odin
+command consists of a source file name followed by a sequence of operations,
+where an operation is either a parameterization, a derivation, or a selection.
+A parameterization is specified as a plus sign, followed by a parameter type,
+optionally followed by a parameter value.
+If the parameter value is a file, it is placed in parentheses.
+A derivation is specified as a colon followed by a file type. 
+A selection is specified as a slash followed by a label (a symbol).
+A question-mark anywhere in an
+.I odin
+command will generate a help message
+indicating what could appear in the place of the question-mark.
+.LP
+All files computed by
+.I odin
+are stored under a directory called a
+.I cache.
+The location of the cache is the value of the
+.B \-c
+command line argument if specified;
+otherwise, it is the value of the shell variable
+.B ODIN
+if set; otherwise, it is the directory
+.B .ODIN
+in your home directory.
+If the cache does not exist, a cache is created with symbolic links to a
+set of tool packages.
+By default, tool packages from 
+.B /usr/local/lib/Odin
+are used.  Additional packages can be included by specifying
+a colon separated list of package directories in the
+.B ODINPATH
+shell variable.
+.SH OPTIONS
+.TP
+.B \-c cache
+Use the directory
+.B cache
+as the cache.
+.TP
+.B \-r
+Reset the cache.
+This deletes all computed files currently stored in the cache.
+.TP
+.B \-R
+Reset the packages.
+This resets the cache and installs the most recent version of each tool
+package.
+.SH EXAMPLES
+.TP
+test.c :exe
+is the executable produced from compiling and loading
+.B test.c.
+.TP
+test.c +? :exe
+would generate a list of the parameter types that are applicable to the
+computation of
+.B :exe
+from
+.B test.c.
+.TP
+test.c,v +version=1.2 +inc_sp=(../include) :exe
+is the executable produced from version 1.2 of
+.B test.c
+where include files are found in the directory
+.B ../include.
+.TP
+test.c :output/DATA
+is the output file named
+.B DATA
+produced when running the executable for
+.B test.c.
+.SH IDENTIFICATION
+Author: Geoffrey M. Clemm
+.break
+geoffrey.clemm@us.ibm.com
+.SH SEE ALSO
+The Odin System Reference Manual
+.br
+make(1)
+.br
+editline(3)
+.SH BUGS

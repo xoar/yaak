@@ -1,0 +1,35 @@
+switch( action ) {
+	case (OFFSET+1) : _nst[_nsp]=Mkrule_16(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+2) : _nst[_nsp]=Mkrule_17(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+3) : _nsp -= 1;_nst[_nsp]=Mkrule_12(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+4) : _incrnodestack();_nst[_nsp]=Mkrule_18(&curpos, MkIdentifier(&(T_POS(TokenStack(0))), T_ATTR(TokenStack(0)))); break;
+	case (OFFSET+5) : _incrnodestack();_nst[_nsp]=Mkrule_19(&curpos); break;
+	case (OFFSET+6) : _nsp -= 1;_nst[_nsp]=Mkrule_20(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+7) : _incrnodestack();_nst[_nsp]=Mkrule_21(&curpos); break;
+	case (OFFSET+8) : _nsp -= 1;_nst[_nsp]=Mkrule_22(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+9) : _nsp -= 1;_nst[_nsp]=Mkrule_23(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+10) : _nsp -= 1;_nst[_nsp]=Mkrule_24(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+11) : _nst[_nsp]=Mkrule_25(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+12) : _incrnodestack();_nst[_nsp]=Mkrule_26(&curpos); break;
+	case (OFFSET+13) : _nsp -= 1;_nst[_nsp]=Mkrule_27(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+14) : _incrnodestack();_nst[_nsp]=Mkrule_13(&curpos); break;
+	case (OFFSET+15) : _incrnodestack();_nst[_nsp]=Mkrule_14(&curpos, MkNumber(&(T_POS(TokenStack(0))), T_ATTR(TokenStack(0)))); break;
+	case (OFFSET+16) : _nsp -= 1;_nst[_nsp]=Mkrule_15(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+17) : _incrnodestack();_nst[_nsp]=Mkrule_9(&curpos, Mkrule_8(&(T_POS(TokenStack(0))), MkCString(&(T_POS(TokenStack(0))), T_ATTR(TokenStack(0))))); break;
+	case (OFFSET+18) : _nst[_nsp]=Mkrule_28(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+19) : _nst[_nsp]=Mkrule_29(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+20) : _nst[_nsp]=Mkrule_30(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+21) : _nst[_nsp]=Mkrule_31(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+22) : _incrnodestack();_nst[_nsp]=Mkrule_32(&curpos, MkIdentifier(&(T_POS(TokenStack(0))), T_ATTR(TokenStack(0)))); break;
+	case (OFFSET+23) : _nsp -= 1;_nst[_nsp]=Mkrule_10(&curpos, _nst[_nsp+0], _nst[_nsp+1]); break;
+	case (OFFSET+24) : _nst[_nsp]=Mkrule_33(&curpos, _nst[_nsp+0]); break;
+	case (OFFSET+25) : _incrnodestack();_nst[_nsp]=Mkrule_34(&curpos); break;
+	case (OFFSET+26) : _incrnodestack();_nst[_nsp]=Mkrule_3(&curpos); break;
+	case (OFFSET+27) : _incrnodestack();_nst[_nsp]=Mkrule_1(&curpos); break;
+	case (OFFSET+28) : _incrnodestack();_nst[_nsp]=Mkrule_2(&curpos); break;
+	case (OFFSET+29) : _incrnodestack();_nst[_nsp]=Mkrule_7(&curpos); break;
+	case (OFFSET+30) : _incrnodestack();_nst[_nsp]=Mkrule_5(&curpos); break;
+	case (OFFSET+31) : _incrnodestack();_nst[_nsp]=Mkrule_11(&curpos); break;
+	case (OFFSET+32) : _incrnodestack();_nst[_nsp]=Mkrule_4(&curpos); break;
+	case (OFFSET+33) : _incrnodestack();_nst[_nsp]=Mkrule_6(&curpos); break;
+}

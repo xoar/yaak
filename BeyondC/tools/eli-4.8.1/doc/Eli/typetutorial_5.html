@@ -1,0 +1,477 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Record Types</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC7" HREF="typetutorial_toc.html#SEC7">Record Types</A></H1>
+<P>
+We introduce record types to our language in order to
+demonstrate how composed user defined types are specified.
+A record type is described by a sequence of field declarations
+which have the same semantics as <CODE>ObjDecls</CODE> used in variable
+declarations. A notation for variables is added that allows to
+select a component from a variable.
+<P>
+Here is an example program that defines and uses a record 
+variable named <CODE>rv</CODE>:
+<P>
+<B>RecordExamp</B>[47]==
+<PRE>
+begin
+  var   record int i, bool b, real r end rv;
+  var   int j, bool c, real s;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+The following productions describe record types
+and component selections:
+<P>
+<I>Abstract record syntax</I>[48]==
+<PRE>
+RULE: TypeDenoter ::= RecordType END;
+RULE: RecordType  ::='record' ObjDecls 'end' END;
+
+RULE: Variable    ::= Variable '.' SelectIdent END;
+RULE: SelectIdent ::= Ident END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+An abstraction of a record type is the sequence of component
+definitions, each consisting of a type and a name.
+A <CODE>RecordType</CODE> describes such a type abstraction. 
+It inherits the module role <CODE>TypeDenotation</CODE>:
+<P>
+<I>Type denoter</I>[49]==
+<PRE>
+SYMBOL RecordType INHERITS TypeDenotation END;
+
+RULE: TypeDenoter ::= RecordType COMPUTE
+  TypeDenoter.Type = RecordType.Type;
+END;
+
+RULE: RecordType ::= 'record' ObjDecls 'end' COMPUTE
+  .GotTypeProp =
+    ORDER (
+      ResetTypeName (RecordType.Type, "record..."),
+      ResetTypeLine (RecordType.Type, LINE));
+
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+The last computation above sets the properties <CODE>TypeName</CODE> and
+<CODE>TypeLine</CODE> of the created type for the facility of printing 
+type information we have introduced above. 
+The attribute <CODE>GotTypeProp</CODE> represents that state. It
+is used in another instance of this RULE context below, where
+further properties are associated to the type.
+<P>
+The construct for component selection, e.g. <CODE>rv.i</CODE>, demonstrate
+a typical situation where type ananlysis and name analysis depend
+on each other: The type of the variable <CODE>rv</CODE> has a property,
+which is a scope; it is used to lookup a binding for the selector 
+<CODE>i</CODE>.
+Hence we instantiate the name analysis module <CODE>ScopeProp</CODE>,
+which supports scopes as properties. It is adapted to the needs
+of type analysis by the module <CODE>TypeDep</CODE>:
+<I>Scope property module</I>[50]==
+<PRE>
+$/Name/ScopeProp.gnrc:inst
+$/Type/TypeDep.gnrc:inst
+</PRE>
+<PRE>
+This macro is invoked in definition 60.
+</PRE>
+<P>
+The role <CODE>ExportRange</CODE> of the <CODE>ScopeProp</CODE> module
+specifies the <CODE>RecordType</CODE> to be a range that may export
+its bindings to be lookedup outside of that range, e.g. in
+component selections.
+Its scope of component definitions
+is associated to the <CODE>ScopeKey</CODE>. The <CODE>ScopeKey</CODE>
+is specified to be the type key created by the role
+<CODE>TypeDenotation</CODE>:
+<I>Range</I>[51]==
+<PRE>
+SYMBOL RecordType INHERITS ExportRange COMPUTE
+  SYNT.ScopeKey = SYNT.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+<H2><A NAME="SEC8" HREF="typetutorial_toc.html#SEC8">Type Equivalence</A></H2>
+<P>
+As record types have non-trivial abstractions,
+the question arises under which circumstances two record types
+are the same. Consider the following examples:
+<B>RecordEqual</B>[52]==
+<PRE>
+begin
+  var   record int i, bool b, real r end va;
+  var   record int i, bool b, real r end vc;
+  var   record int j, bool k, real l end vd;
+  va = vc;
+  va = vd;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+Typing rules of the language have to state which of the variables
+<CODE>va</CODE>, <CODE>vc</CODE>, and <CODE>vd</CODE> have the same type,
+and which of the assignments are correct.
+Languages usually apply one of two different typing rules:
+<P>
+The first rule states that every
+occurrence of a description of a record type
+(or of any other compound type) introduces a type
+different from all other types, even from those that are
+equally notated. Under this rule all three variables 
+have different types.
+This rule is called name equivalence, because every type
+description gets a name - explicitly or implicitly, as in
+this example -and types are distingushed by their names.
+<P>
+The second rule states that two types are equal if their
+abstractions are equal; i.e. the sequences of components 
+coincide elementwise in the types and names of components.
+In the above example <CODE>va</CODE> and <CODE>vc</CODE>
+have the same types. This rule is called structural
+equivalence. 
+<P>
+In case of structural equivalence the type rules of the language
+may define precisely, which type properties belong to the
+abstraction that is used to determine type equivalence.
+For example, the rule could state that the types of the
+record components belong to the abstraction, and the
+names of the components do not belong to it. In that case
+all four variables of the above example would have the same type.
+<P>
+The type analysis library provides a module <CODE>StructEquiv</CODE> 
+that extends the <CODE>Typing</CODE> module, such that any of these
+these variants of equivalence rules can be supported:
+<I>Struct equiv module</I>[53]==
+<PRE>
+$/Type/StructEquiv.fw
+</PRE>
+<PRE>
+This macro is invoked in definition 60.
+</PRE>
+<P>
+In this language stuctural equivalence is
+specified, such that for record types only the sequence of types, 
+but not the names of components are relevant for structural
+type equivalence.
+<P>
+The following computation in the RULE context of a record
+type denotation specifies which properties of a record type
+are considered for the check whether two types are equivalent.
+Here we state two rules:
+<P>
+First, a record type can only be equivalent to a type that is
+a record type, too. For that purpose we introduce a
+key <CODE>RecordClass</CODE> that identifies the category of record
+types:
+<I>Type class</I>[54]==
+<PRE>
+RecordClass;
+</PRE>
+<PRE>
+This macro is invoked in definition 61.
+</PRE>
+<P>
+The rule computation <CODE>AddTypeToBlock</CODE> below associates every 
+record type to that initial set <CODE>RecordClass</CODE>. The equivalence
+check will then partition it as far as necessary into subsets
+of record types which are equivalent.
+<P>
+Second, two record types <CODE>s</CODE> and <CODE>t</CODE> are equivalent if 
+the types of their fields are pairwise equivalent in the given
+order. For that purpose a list of component types is computed
+<CODE>ObjDecls.OpndTypeList</CODE> using roles of the <CODE>LidoList</CODE>
+module and given as the third argument of <CODE>AddTypeToBlock</CODE>.
+<P>
+Beyond type equivalence, our language requires further checks
+on type structures. So, the list of component types is also
+associated as a property <CODE>ComponentTypes</CODE> to the type key 
+by a function <CODE>VResetComponentTypes</CODE> that yields the
+property value as its result:
+<I>Component type property</I>[55]==
+<PRE>
+ComponentTypes: DefTableKeyList [VReset]; "DefTableKeyList.h"
+</PRE>
+<PRE>
+This macro is invoked in definition 61.
+</PRE>
+<P>
+<I>PropLib module</I>[56]==
+<PRE>
+$/Prop/PropLib.fw
+</PRE>
+<PRE>
+This macro is invoked in definition 60.
+</PRE>
+<P>
+The attribute <CODE>RecordType.GotType</CODE> states that all properties
+of the record type are associated to its key. Hence, a dependence
+on the attribute <CODE>GotTypeProp</CODE> computed above is added here.
+<I>Type equality computation</I>[57]==
+<PRE>
+RULE: RecordType ::= 'record' ObjDecls 'end' COMPUTE
+  RecordType.GotType =
+      AddTypeToBlock
+         (RecordType.Type, RecordClass, 
+          VResetComponentTypes (RecordType.Type, ObjDecls.OpndTypeList))
+      &#60;- .GotTypeProp;
+END;
+
+SYMBOL ObjDecls INHERITS OpndTypeListRoot END;
+SYMBOL ObjDecl INHERITS OpndTypeListElem END;
+
+SYMBOL ObjDecl COMPUTE
+  SYNT.DefTableKeyElem = SYNT.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+<H2><A NAME="SEC9" HREF="typetutorial_toc.html#SEC9">Qualified Names</A></H2>
+<P>
+A record component selection of the form <CODE>Variable.SelectIdent</CODE>
+is considered as a qualified name: The <CODE>SelectIdent</CODE> is an applied
+occurrence of an identifier that is qualified by the 
+<CODE>Variable</CODE> preceeding the dot. Its type is expected to have a
+scope property that has a binding for that identifier.
+<P>
+<CODE>Variable.SelectIdent</CODE> is a leaf of an expression
+tree. Its type is determined by the type of <CODE>SelectIdent</CODE>, as
+specified using the <CODE>PrimaryContext</CODE> computation.
+<I>Selection expression</I>[58]==
+<PRE>
+RULE: Variable ::= Variable '.' SelectIdent COMPUTE
+  PrimaryContext (Variable[1], SelectIdent.Type);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+<CODE>SelectIdent</CODE> combines roles of name analysis and type analysis:
+It is a qualified identifier use (<CODE>QualIdUse</CODE>). The role requires
+that the attribute <CODE>SelectIdent.ScopeKey</CODE> is computed.
+A module computation accesses the (<CODE>Scope</CODE> property from it, 
+stores it in <CODE>SelectIdent.Scope</CODE> and searches a binding 
+for the identifier; the role <CODE>ChkQualIdUse</CODE> gives a message
+if the scope exists, but no binding is found.
+A user computation is required to check whether the type
+has a scope property.
+<P>
+The roles <CODE>TypedUseId</CODE>, <CODE>ChkTypedUseId</CODE>, and <CODE>PrtType</CODE>
+determine, check, and output the type of the <CODE>SelectIdent</CODE>.
+<P>
+<I>Selection types</I>[59]==
+<PRE>
+SYMBOL SelectIdent INHERITS 
+        QualIdUse, ChkQualIdUse, IdentOcc,
+        TypedUseId, ChkTypedUseId, PrtType
+END;
+
+RULE: Variable ::= Variable '.' SelectIdent COMPUTE
+  SelectIdent.ScopeKey = Variable[2].Type;
+
+  IF (EQ (SelectIdent.Scope, NoEnv),
+  message (ERROR, "selection applied to non record type", 
+           0, COORDREF));
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 62.
+</PRE>
+<P>
+<B>Record.specs</B>[60]==
+<PRE>
+<I>Scope property module</I>[50]
+<I>Struct equiv module</I>[53]
+<I>PropLib module</I>[56]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Record.pdl</B>[61]==
+<PRE>
+<I>Type class</I>[54]
+<I>Component type property</I>[55]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Record.lido</B>[62]==
+<PRE>
+<I>Abstract record syntax</I>[48]
+<I>Type denoter</I>[49]
+<I>Range</I>[51]
+<I>Type equality computation</I>[57]
+<I>Selection expression</I>[58]
+<I>Selection types</I>[59]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

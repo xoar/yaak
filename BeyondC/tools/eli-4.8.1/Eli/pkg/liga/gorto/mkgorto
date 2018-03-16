@@ -1,0 +1,7 @@
+# $Id: mkgorto,v 1.2 2001/11/07 15:58:51 cogito Exp $
+
+$(EXE): $(GORTO_OBJS) $(ORDER)/gorto.a
+	$(CC) $(CFLAGS) $(GORTO_OBJS) $(LIBS) -o $(EXE)
+
+$(ORDER)/gorto.a:
+	cd ./$(ORDER); $(MAKE) CC='$(CC)' DESTDIR=$(DESTDIR)

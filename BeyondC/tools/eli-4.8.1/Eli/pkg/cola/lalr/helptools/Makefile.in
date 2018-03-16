@@ -1,0 +1,54 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:44:45 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/lalr/helptools
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/lalr/helptools
+SRC	=
+COP	=	cmrtool.h cmrsasx.c cmrtool.c Makefile.in
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=	
+EXE	=	../../colaConn.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=	
+
+LIB	=	../../lib
+IDL	=	../../idl
+BOTH	=	../back/both
+
+CFLAGS 	=	@DMONITOR@ -I$(IDL) -I$(BOTH) -I$(LIB)
+
+@toolmk_h@
+
+$(EXE):	cmrsasx.o cmrtool.o $(BOTH)/both.a $(LIB)/lib.a $(IDL)/IDL.a
+	$(CC) $(CFLAGS) cmrsasx.o cmrtool.o $(BOTH)/both.a $(LIB)/lib.a \
+		$(IDL)/IDL.a -o $(EXE)
+
+cmrsasx.o:	$(BOTH)/error.h $(IDL)/comar.h $(IDL)/global.h
+
+cmrtool.o:	cmrtool.c $(BOTH)/error.h $(LIB)/cmrlib.h \
+	$(IDL)/comar.h $(IDL)/global.h $(IDL)/name.h
+

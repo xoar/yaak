@@ -1,0 +1,219 @@
+# $Id: option.err,v 4.2 1997/08/29 13:58:49 mjung Exp $
+#
+# DEADLY
+#
+
+# (C) Copyright 1997 University of Paderborn
+#
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+/subtree .* must be a .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Memory overflow in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Negative length in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/NewKey: malloc failure/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/an .* node can not be generated /{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/find: malloc failure/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/node stack overflow\n/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+
+#
+# Error
+#
+
+/Accept not expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Illegal option for BACKEND/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Backend Options./
+	p
+	d
+}
+/Illegal option for EXPAND/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Expand Options./
+	p
+	d
+}
+/Illegal option for OPTIM/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+/Illegal option for ORDER/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+/Internal error #3 - please report/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/OPTIM OFF excludes other options for OPTIM/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Parse stack overflow/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Parsing resumed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/Symbol deleted/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/Symbol inserted/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/Wrong parse tables/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/char '.' (ascii:.*) is not a token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/char '.' (ascii:.*) not complete token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/error opening file/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/file ends in comment/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Introduction./
+	p
+	d
+}
+/mutually excluding options in BACKEND: ATSTACK_SIZE/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Backend Options./
+	p
+	d
+}
+/mutually excluding options in BACKEND: SPLIT_CASE/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Backend Options./
+	p
+	d
+}
+/mutually excluding options in BACKEND: to keep or not to keep the tree.../{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Backend Options./
+	p
+	d
+}
+/mutually excluding options in EXPAND: INCLUDING/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Expand Options./
+	p
+	d
+}
+/mutually excluding options in OPTIM: GROUPING/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+/mutually excluding options in OPTIM: NO_VARIABLES <-> NO_STACKS/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+/mutually excluding options in ORDER: ARRANGE/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+/mutually excluding options in ORDER: PARTITION/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+/mutually excluding options in ORDER: TOPOLOGICAL/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+/mutually excluding options in ORDER: TREE/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+/output abandoned/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+
+#
+# Fatal
+#
+
+/malloc fail: CaseTbl0/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/malloc fail: fallback/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./

@@ -1,0 +1,21 @@
+# $Id: Makefile.in,v 1.2 2010/02/26 17:50:58 profw Exp $
+# Property definition language translator
+# Copyright (c) 1989, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/pdl
+SRC	= pdl.dg pdl.err lib.pdl pdl.dapto pdl.tcl \
+	  keyarray.c keyarray.h keyarray.head keyarray.specs \
+	  deftbl.specs deftbl.c deftbl.h deftbl.head deftbl.reqmod \
+	  deftbl.save.eta
+AUX	= deftbl.tnf Makefile Makefile.in version
+CMD	= pdlOut.sh pdlGen.sh
+EXE	= pdl.exe
+AUXDIR	= derivedSrcs
+
+@toolmk_h@
+
+pdl.exe:	derivedSrcs/pdl.exe
+	@rm -f $@
+	@LINK@ $? $@

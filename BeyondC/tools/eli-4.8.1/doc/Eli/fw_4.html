@@ -1,0 +1,715 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from fw.tnf on 5 December 2013 -->
+
+<TITLE>FunnelWeb - Input Processing</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>FunnelWeb</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC24" HREF="fw_toc.html#SEC24">Input Processing</A></H1>
+<P>
+<H2><A NAME="SEC25" HREF="fw_toc.html#SEC25">Special Sequences</A></H2>
+<P>
+The scanner scans the input file from top to bottom, left to right,
+treating the input as ordinary text (to be handed directly to the parser
+as a text token) unless it encounters the <DFN>special character</DFN>
+<A NAME="IDX46"></A>
+which introduces a <DFN>special sequence</DFN>.
+<A NAME="IDX47"></A>
+Thus, the scanner partitions the input file into ordinary text and
+special sequences.  (The control character is often referred to as the
+<DFN>escape character</DFN> or the <DFN>control character</DFN> in other systems.
+However, as there is great potential to confuse these names with the
+<DFN>escape</DFN> character (ASCII 27) and ASCII <DFN>control</DFN> characters,
+the term <DFN>special</DFN> has been chosen instead.  This results in the
+terms <DFN>special character</DFN> and <DFN>special sequence</DFN>.)
+<P>
+<PRE>
+<VAR>input_file</VAR> ::= {<VAR>ordinary_text</VAR> / <VAR>special_sequence</VAR>} .
+</PRE>
+<P>
+Upon startup, the special character
+<A NAME="IDX48"></A>
+is <CODE>@</CODE>, but it can be changed using the
+&#60;special&#62;<CODE>=</CODE>&#60;new_special&#62; special sequence.  Rather than using
+&#60;special&#62; whenever the special character appears, this document uses the
+default special character <CODE>@</CODE> to represent the current special
+character.  More importantly, FunnelWeb's error messages all use the
+default special character in their error messages even if the special
+character has been changed.
+<P>
+An occurrence of the special character in the input file introduces a
+special sequence.  The kind of special sequence is determined by the
+character following the special character.  Only printable characters can
+follow the special character.
+<P>
+The following table gives all the possible characters that can follow
+the special character, and the legality of each sequence.  The item
+headings give the ASCII number of each ASCII character and the special
+sequence for that character.  The descriptions start with one of three
+characters: <CODE>-</CODE> means that the sequence is illegal.  <CODE>S</CODE>
+indicates that the sequence is a <DFN>simple sequence</DFN>
+<A NAME="IDX49"></A>
+(with no attributes or side effects) that appears exactly as shown and
+is converted directly into a token and fed to the parser.  Finally,
+<CODE>C</CODE> indicates that the special sequence is complex, possibly having
+a following syntax or producing funny side effects.
+<P>
+<DL COMPACT>
+<DT>000--008
+<DD>Unprintable characters and hence illegal. 
+<DT>009
+<DD>Tab.  Converted by Eli (not FunnelWeb) into the appropriate number of
+spaces.
+<DT>010--031
+<DD>Unprintable characters and hence illegal. 
+<DT>032  @
+<DD>- Illegal (space).
+<DT>033  @!
+<DD>C Comment.
+<DT>034  @"
+<DD>S Parameter delimiter.
+<DT>035  @#
+<DD>C Short name sequence.
+<DT>036  @$
+<DD>S Start of macro definition.
+<DT>037  @%
+<DD>- Illegal.
+<DT>038  @&#38;
+<DD>- Illegal.
+<DT>039  @'
+<DD>- Illegal.
+<DT>040  @(
+<DD>S Open parameter list.
+<DT>041  @)
+<DD>S Close parameter list.
+<DT>042  @*
+<DD>- Illegal.
+<DT>043  @+
+<DD>C Insert newline.
+<DT>044  @,
+<DD>S Parameter separator.
+<DT>045  @-
+<DD>C Suppress end of line marker.
+<DT>046  @.
+<DD>- Illegal.
+<DT>047  @/
+<DD>S Open or close emphasised text.
+<DT>048  @0
+<DD>- Illegal.
+<DT>049  @1
+<DD>S Formal parameter 1.
+<DT>050  @2
+<DD>S Formal parameter 2.
+<DT>051  @3
+<DD>S Formal parameter 3.
+<DT>052  @4
+<DD>S Formal parameter 4.
+<DT>053  @5
+<DD>S Formal parameter 5.
+<DT>054  @6
+<DD>S Formal parameter 6.
+<DT>055  @7
+<DD>S Formal parameter 7.
+<DT>056  @8
+<DD>S Formal parameter 8.
+<DT>057  @9
+<DD>S Formal parameter 9.
+<DT>058  @:
+<DD>- Illegal.
+<DT>059  @;
+<DD>- Illegal.
+<DT>060  @&#60;
+<DD>S Open macro name.
+<DT>061  @=
+<DD>C Set special character.
+<DT>062  @&#62;
+<DD>S Close macro name.
+<DT>063  @?
+<DD>- Illegal.  Reserved for future use.
+<DT>064  @@
+<DD>C Insert special character into text.
+<DT>065  @A
+<DD>S New section (level 1).
+<DT>066  @B
+<DD>S New section (level 2).
+<DT>067  @C
+<DD>S New section (level 3).
+<DT>068  @D
+<DD>S New section (level 4).
+<DT>069  @E
+<DD>S New section (level 5).
+<DT>070  @F
+<DD>- Illegal.
+<DT>071  @G
+<DD>- Illegal.
+<DT>072  @H
+<DD>- Illegal.
+<DT>073  @I
+<DD>C Include file.
+<DT>074  @J
+<DD>- Illegal.
+<DT>075  @K
+<DD>- Illegal.
+<DT>076  @L
+<DD>- Illegal.
+<DT>077  @M
+<DD>S Tag macro as being allowed to be called many times.
+<DT>078  @N
+<DD>- Illegal.
+<DT>079  @O
+<DD>S New macro attached to product file.  Has to be at start of line.
+<DT>080  @P
+<DD>C Pragma.
+<DT>081  @Q
+<DD>- Illegal.
+<DT>082  @R
+<DD>- Illegal.
+<DT>083  @S
+<DD>- Illegal.
+<DT>084  @T
+<DD>C Typesetter directive.
+<DT>085  @U
+<DD>- Illegal.
+<DT>086  @V
+<DD>- Illegal.
+<DT>087  @W
+<DD>- Illegal.
+<DT>088  @X
+<DD>- Illegal.
+<DT>089  @Y
+<DD>- Illegal.
+<DT>090  @Z
+<DD>S Tags macro as being allowed to be called zero times.
+<DT>091  @[
+<DD>- Illegal.  Reserved for future use.
+<DT>092  @\
+<DD>- Illegal.
+<DT>093  @]
+<DD>- Illegal.  Reserved for future use.
+<DT>094  @^
+<DD>C Insert control character into text
+<DT>095  @_
+<DD>- Illegal.
+<DT>096  @`
+<DD>- Illegal.
+<DT>097  @a--@z
+<DD>Identical to @A--@Z.
+<DT>123  @{
+<DD>S Open macro body/Open literal directive.
+<DT>124  @|
+<DD>- Illegal.
+<DT>125  @}
+<DD>S Close macro body/Close literal directive.
+<DT>126  @~
+<DD>- Illegal.
+<DT>127--255
+<DD>Not standard printable ASCII characters and are illegal.
+</DL>
+<P>
+The most important thing to remember about the scanner is that
+<EM>nothing happens unless the special character is seen.</EM> There are
+no funny sequences that will cause strange things to happen.  The best
+way to view a FunnelWeb document at the scanner level is as a body of
+text punctuated by special sequences that serve to structure the text at
+a higher level.
+<P>
+The remaining description of the scanner consists of a detailed description
+of the effect of each complex special sequence.
+<P>
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<H2><A NAME="SEC26" HREF="fw_toc.html#SEC26">Setting the Special Character</A></H2>
+<P>
+The special character can be set using the sequence
+&#60;special&#62;<CODE>=</CODE>&#60;newspecialchar&#62;.  For example, <CODE>@=#</CODE> would change
+the special character to a hash (<CODE>#</CODE>) character.  The special
+character may be set to any printable ASCII character except the blank
+character (ie. any character in the ASCII range 33--126).  In normal use,
+it should not be necessary to change the special character of FunnelWeb,
+and it is probably best to avoid changing the special character so as
+not to confuse FunnelWeb readers conditioned to the <CODE>@</CODE> character.
+However, the feature is very useful where the text being prepared
+contains many <CODE>@</CODE> characters (eg. a list of internet electronic
+mail addresses).
+<P>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+<H2><A NAME="SEC27" HREF="fw_toc.html#SEC27">Inserting the Special Character into the Text</A></H2>
+<P>
+The special sequence &#60;special&#62;<CODE>@</CODE> inserts the special character
+into the text as if it were not special at all.  The <CODE>@</CODE> of this
+sequence has nothing to do with the current special character.  If the
+current special character is <CODE>P</CODE> then the sequence <CODE>P@</CODE> will
+insert a <CODE>P</CODE> into the text.  Example: <CODE>@@#@=#@#@#=@@@</CODE>
+translates to <CODE>@#@#@</CODE>.
+<P>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+<A NAME="IDX57"></A>
+<H2><A NAME="SEC28" HREF="fw_toc.html#SEC28">Inserting Arbitrary Characters into the Text</A></H2>
+<P>
+While FunnelWeb does not tolerate unprintable characters in the input
+file (except for the end of line character and the tabs that Eli expands
+into spaces), it does allow the user to specify that unprintable
+characters appear in the product file.  The <CODE>@^</CODE> sequence inserts a
+single character of the user's choosing into the text.  The character
+can be specified by giving its ASCII number in one of four bases:
+binary, octal, decimal, and hexadecimal.  Here is the syntax:
+<P>
+<PRE>
+<VAR>control_sequence</VAR> ::= <SAMP>`@^'</SAMP> <VAR>char_spec</VAR> .
+
+<VAR>char_spec</VAR> ::= <VAR>binary</VAR> / <VAR>octal</VAR> / <VAR>decimal</VAR> / <VAR>hexadecimal</VAR> .
+
+<VAR>binary</VAR> ::= (<SAMP>`b'</SAMP> / <SAMP>`B'</SAMP>) <SAMP>`('</SAMP> {<VAR>binary_digit</VAR>}8 <SAMP>`)'</SAMP> .
+
+<VAR>octal</VAR> ::= (<SAMP>`o'</SAMP> / <SAMP>`O'</SAMP> / <SAMP>`q'</SAMP> / <SAMP>`Q'</SAMP>) <SAMP>`('</SAMP> {<VAR>octal_digit</VAR>}3 <SAMP>`)'</SAMP> .
+
+<VAR>decimal</VAR> ::= (<SAMP>`d'</SAMP> / <SAMP>`D'</SAMP>) <SAMP>`('</SAMP> {<VAR>decimal_digit</VAR>}3 <SAMP>`)'</SAMP> .
+
+<VAR>hexadecimal</VAR> ::= (<SAMP>`h'</SAMP> / <SAMP>`H'</SAMP> / <SAMP>`x'</SAMP> / <SAMP>`X'</SAMP>) <SAMP>`('</SAMP> {<VAR>hex_digit</VAR>}2 <SAMP>`)'</SAMP> .
+
+<VAR>binary_digit</VAR> ::= <SAMP>`0'</SAMP> / <SAMP>`1'</SAMP> .
+
+<VAR>octal_digit</VAR> ::= <VAR>binary_digit</VAR> / <SAMP>`2'</SAMP> / <SAMP>`3'</SAMP> / <SAMP>`4'</SAMP> / <SAMP>`5'</SAMP> / <SAMP>`6'</SAMP> / <SAMP>`7'</SAMP> .
+
+<VAR>decimal_digit</VAR> ::= <VAR>octal_digit</VAR> / <SAMP>`8'</SAMP> / <SAMP>`9'</SAMP> .
+
+<VAR>hex_digit</VAR> ::= <VAR>decimal_digit</VAR> / <SAMP>`A'</SAMP> / <SAMP>`B'</SAMP> / <SAMP>`C'</SAMP> / <SAMP>`D'</SAMP> / <SAMP>`E'</SAMP> / <SAMP>`F'</SAMP> /
+                       <SAMP>`a'</SAMP> / <SAMP>`b'</SAMP> / <SAMP>`c'</SAMP> / <SAMP>`d'</SAMP> / <SAMP>`e'</SAMP> / <SAMP>`f'</SAMP> .
+</PRE>
+<P>
+Example:
+<P>
+<PRE>
+@! Unix Make requires that productions commence with tab characters.
+@^D(009)prog.o &#60;- prog.c
+</PRE>
+<P>
+Note that the decimal <CODE>9</CODE> is expressed with leading zeros as
+<CODE>009</CODE>.  FunnelWeb requires a fixed number of digits for each base.
+Eight digits for base two, three digits for base ten, three digits for
+base eight and two digits for base sixteen.
+<P>
+FunnelWeb treats the character resulting from a <CODE>@^</CODE> sequence as
+ordinary text in every sense.  If your input file contains many
+instances of a particular control character, you can package it up in a
+macro like any other text.  In particular, quick names can be used to
+great effect:
+<P>
+<PRE>
+@! Unix "Make" requires that productions commence with tab characters.
+@! So we define a macro with a quick name as a tab character.
+@$@#T@{@^D(009)@}
+@! And use it in our productions.
+@#Tprog.o &#60;- prog.c
+@#Ta.out &#60;- prog.o
+</PRE>
+<P>
+Warning: If you insert a Unix
+<A NAME="IDX58"></A>
+newline character (decimal 10) into the text, FunnelWeb will treat this
+as an end of line sequence regardless of what the character sequence for
+end of line is on the machine upon which it is running.  Unix EOL is
+FunnelWeb's internal representation for end of line.  Thus, in the
+current version of FunnelWeb, inserting character 10 into the text is
+impossible unless this also happens to be the character used by the
+operating system to mark the end of line.
+<P>
+<A NAME="IDX59"></A>
+<H2><A NAME="SEC29" HREF="fw_toc.html#SEC29">Comments</A></H2>
+<P>
+When FunnelWeb encounters the <CODE>@!</CODE>
+<A NAME="IDX60"></A>
+sequence during its left-to-right scan of the line, it throws away the
+rest of the line (including the EOL) without analysing it further.
+Comments can appear in any line except <CODE>@i</CODE>, <CODE>@t</CODE>, and
+<CODE>@p</CODE> lines.
+<P>
+FunnelWeb comments can be used to insert comments into your input file
+that will neither appear in the product files nor in the documentation
+file, but will be solely for the benefit of those reading and editing
+the input file directly.  Example:
+<P>
+<PRE>
+@! I have used a quick macro for this definition as it will be used often.
+@$@#C@{--@}
+</PRE>
+<P>
+Because comments are defined to include the end-of-line marker, care
+must be taken when they are being added or removed within the text of
+macro bodies.  For example the text fragment
+<P>
+<PRE>
+for (i=0;i&#60;MAXVAL;i++)      @! Print out a[0..MAXVAL-1].
+   printf("%u\n",a[i]);
+</PRE>
+will expand to
+<P>
+<PRE>
+for (i=0;i&#60;MAXVAL;i++)         printf("%u\n",a[i]);
+</PRE>
+<P>
+This problem really has no solution; if FunnelWeb comments were defined
+to omit the end of line marker, the expanded text would contain trailing
+blanks!  As it is, FunnelWeb comments are designed to support single
+line comments which can be inserted and removed as a line without
+causing trouble.  For example:
+<P>
+<PRE>
+@! Print out a[0..MAXVAL-1].
+for (i=0;i&#60;MAXVAL;i++)
+   printf("%u\n",a[i]);
+</PRE>
+<P>
+If you want a comment construct that does not enclose the end of line
+marker, combine the insert end of line construct <CODE>@+</CODE> with the
+comment construct <CODE>@!</CODE> as in
+<P>
+<PRE>
+for (i=0;i&#60;MAXVAL;i++)      @+@! Print out a[0..MAXVAL-1].
+   printf("%u\n",a[i]);
+</PRE>
+<P>
+FunnelWeb comments should really only be used to comment the FunnelWeb
+constructs being used in the input file.  Comments on the target code are
+best placed in comments in the target language or in the documenting
+text surrounding the macro definitions.  In the example above, a C
+comment would have been more appropriate.
+<P>
+<A NAME="IDX61"></A>
+<A NAME="IDX62"></A>
+<H2><A NAME="SEC30" HREF="fw_toc.html#SEC30">Quick Names</A></H2>
+<P>
+FunnelWeb provides a <DFN>quick name</DFN> syntax as an alternative, for
+macros whose name consists of a single character, to the angle bracket
+syntax usually used (eg. <CODE>@&#60;Sloth@&#62;</CODE>).  A quick name sequence
+consists of <CODE>@#</CODE><VAR>x</VAR> where <VAR>x</VAR>, the name of the macro,
+can be any printable character except space.
+<P>
+<PRE>
+<VAR>quick_name</VAR> ::= <SAMP>`@#'</SAMP> <VAR>non_space_printable</VAR> .
+</PRE>
+<P>
+The result is identical to the
+equivalent ordinary name syntax, but is
+shorter.  For example, <CODE>@#X</CODE> is equivalent to <CODE>@&#60;X@&#62;</CODE>.
+This shorter way of writing one-character macro names is more convenient where
+a macro must be used very often.  For example, the macro calls in the
+following fragment of an Ada program are a little clumsy.
+<P>
+<PRE>
+@! Define @&#60;D@&#62; as "" to turn on debug code and "--" to turn it off.
+@$@&#60;D@&#62;@{--@}
+@&#60;D@&#62;assert(b&#62;3);
+@&#60;D@&#62;if x&#62;7 then write("error") end if
+</PRE>
+<P>
+The calls can be shortened using the alternative syntax.
+<P>
+<PRE>
+@! Define @#| as "" to turn on debug code and "--" to turn it off.
+@$@#|@{--@}
+@#|assert(b&#62;3);
+@#|if x&#62;7 then write("error") end if
+</PRE>
+<P>
+<A NAME="IDX63"></A>
+<A NAME="IDX64"></A>
+<H2><A NAME="SEC31" HREF="fw_toc.html#SEC31">Inserting End of Line Markers</A></H2>
+<P>
+An end of line marker/character can be inserted into the text using the
+<CODE>@+</CODE>
+<A NAME="IDX65"></A>
+sequence.  This is exactly equivalent to a real end of line in the text
+at the point where it occurs.  While this feature may sound rather
+useless, it is very useful for laying out the input file.  For example,
+the following input data for a database program
+<P>
+<PRE>
+Animal = Kangaroo
+Size   = Medium
+Speed  = Fast
+
+Animal = Sloth
+Size   = Medium
+Speed  = Slow
+
+Animal = Walrus
+Size   = Big
+Speed  = Medium
+</PRE>
+can be converted into
+<P>
+<PRE>
+Animal = Kangaroo  @+Size = Medium  @+Speed = Fast    @+
+Animal = Sloth     @+Size = Medium  @+Speed = Slow    @+
+Animal = Walrus    @+Size = Big     @+Speed = Medium  @+
+</PRE>
+which is easier to read, and more easily allows comparisons between
+records.
+<P>
+<A NAME="IDX66"></A>
+<A NAME="IDX67"></A>
+<H2><A NAME="SEC32" HREF="fw_toc.html#SEC32">Suppressing End of Line Markers</A></H2>
+<P>
+End of line markers can be suppressed by the <CODE>@-</CODE>
+<A NAME="IDX68"></A>
+sequence.  A single occurrence of a <CODE>@-</CODE> sequence serves to
+suppress only the end of line marker following it and must appear
+<EM>exactly</EM> before the end of line marker to be suppressed.  No trailing
+spaces, <CODE>@!</CODE> comments, or any other characters are permitted
+between a <CODE>@-</CODE> sequence and the end of line that it is supposed to
+suppress.  The <CODE>@-</CODE> sequence is useful for constructing long output
+lines without them having to appear in the input.  It can also be used
+in the same way as the <CODE>@+</CODE> was used in the previous section to
+assist in exposing the structure of output text without affecting the
+output text itself.  Finally, it is invaluable for suppressing the EOL
+after the opening macro text <CODE>@{</CODE> construct.  For example:
+<P>
+<PRE>
+@$@&#60;Walrus@&#62;@{@-
+I am the walrus!@}
+</PRE>
+is equivalent to
+<P>
+<PRE>
+@$@&#60;Walrus@&#62;@{I am the walrus!@}
+</PRE>
+<P>
+The comment construct (<CODE>@!</CODE>) can also be used to suppress end of
+lines.  However, the <CODE>@-</CODE> construct should be preferred for this
+purpose as it makes explicit the programmer's intent to suppress the end
+of line.
+<P>
+<A NAME="IDX69"></A>
+<H2><A NAME="SEC33" HREF="fw_toc.html#SEC33">Include Files</A></H2>
+<P>
+FunnelWeb provides an include file facility with a maximum depth of 10.
+When FunnelWeb sees a line of the form <CODE>@i &#60;filename&#62;</CODE>,
+<A NAME="IDX70"></A>
+it replaces the entire line (including the EOL) with the contents of the
+specified include file.  FunnelWeb's include file facility is intended to
+operate at the line level.  If the last line of the include file is not
+terminated by an EOL, FunnelWeb issues a warning and inserts one (in the
+copy in memory).  In Eli, an include file must have type <TT>`.fwi'</TT>.
+<A NAME="IDX71"></A>
+<P>
+The <CODE>@i</CODE> construct is illegal if it appears anywhere except at the
+start of a line.  The construct must be followed by a single blank.  The
+file name is defined to be everything between the blank and the end of
+the line (no comments (<CODE>@!</CODE>) please!).  Example: If the input file
+is
+<P>
+<PRE>
+"Uh Oh, It's the Fuzz.  We're busted!" said Baby Bear.
+@i mr_plod.txt
+"Quick! Flush the stash down the dunny and let's split." said Father Bear.
+</PRE>
+and there is a file called <TT>`mr_plod.txt'</TT> containing
+<P>
+<PRE>
+"'Ello, 'Ello, 'Ello! What's all this 'ere then?" Mr Plod exclaimed.
+</PRE>
+then the scanner translates the input file into
+<P>
+<PRE>
+"Uh Oh, It's the Fuzz.  We're busted!" said Baby Bear.
+"'Ello, 'Ello, 'Ello! What's all this 'ere then?" Mr Plod exclaimed.
+"Quick! Flush the stash down the dunny and let's split." said Father Bear.
+</PRE>
+<P>
+As a point of terminology, FunnelWeb calls the original input file the
+<DFN>input file</DFN> and calls include files and their included files
+<DFN>include files</DFN>.
+<P>
+The include file construct operates at a very low level.  An include line
+can appear anywhere in the input file regardless of the context of the
+surrounding lines.
+<P>
+FunnelWeb sets the special character to the default (<CODE>@</CODE>) at the
+start of each include file and restores it to its previous value at the
+end of the include file.  This allows macro libraries to be constructed
+and included that are independent of the prevailing special character at
+the point of inclusion.  The same goes for the input line length limit
+which is reset to the default value at the start of each include file
+and restored to its previous value afterwards.
+<P>
+<A NAME="IDX72"></A>
+<A NAME="IDX73"></A>
+<H2><A NAME="SEC34" HREF="fw_toc.html#SEC34">Maximum Input Line Length</A></H2>
+<P>
+FunnelWeb generates an error for each input line that exceeds a certain
+maximum number of characters.  At the start of the processing of each
+input file and each include file, this maximum is set to a default value
+of 80.  However, the maximum can be changed using a maximum input line
+length pragma.
+<P>
+<PRE>
+<VAR>pragma_mill</VAR> ::= <VAR>ps</VAR> <SAMP>`maximum_input_line_length'</SAMP> <VAR>s</VAR> <SAMP>`='</SAMP> <VAR>s</VAR> <VAR>numorinf</VAR> .
+
+<VAR>ps</VAR> ::= (<SAMP>`@p'</SAMP> / <SAMP>`@P'</SAMP>) <SAMP>` '</SAMP> .
+
+<VAR>number</VAR> ::= { <VAR>decimal_digit</VAR> }+ .
+
+<VAR>numorinf</VAR> ::= <VAR>number</VAR> / <SAMP>`infinity'</SAMP> .
+
+<VAR>s</VAR> ::= {<SAMP>` '</SAMP>}+ .
+
+</PRE>
+<P>
+The maximum input line length can be varied <EM>dynamically</EM>
+throughout the input file.  Each maximum input line length pragma's scope
+covers the line following the pragma through to and including the next
+maximum input line length pragma, but not covering any intervening
+include files.  At the start of an include file, FunnelWeb resets the
+maximum input line length to the default value.  It restores it to its
+previous value at the end of the include file.
+<P>
+This pragma is useful for detecting text that has strayed off the right
+side of the screen when editing.  If you use FunnelWeb, and set the
+maximum input line length to be the width of your editing window, you
+will never be caught by, for example, off-screen opening comment
+symbols.  You can also be sure that your source text can be printed raw,
+if necessary, without lines wrapping around.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="fw_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

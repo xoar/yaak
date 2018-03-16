@@ -1,0 +1,62 @@
+# $Id: skeleton.dg,v 2.12 2003/06/30 02:30:08 waite Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+EXEC (index.sh) (paste.exe) (:union :labels) (:union :names)
+  => (:index);
+:index 'Index to the elements of a compound file'? => :FILE;
+
+EXEC (err_map.sh) (.) (+hookvalue) (:c_srcs :list :ls)
+     (:c_srcs :list :labels) (:c_srcs)
+  NEEDS (err_map.exe) (cat-n.exe) (line_err.exe)
+  => (:err_map);
+:err_map 'Reports referred to full path names of files' => :FILE;
+
+:line_err 'Hooks that map errors in standard form' => :FILE;
+EXEC (no_map.sh) (+hookvalue) (:specs) no_map
+  => (:no_map);
+:no_map 'Identity map for errors in standard form' => :line_err;
+
+EXEC (err_filter.sh) (:FILE)
+  => (:filtered) (:errfiles);
+:filtered 'Reports referred to input files' => :FILE;
+:errfiles 'Input files to which reports are referred' => :FILE;
+
+EXEC (msgtext.sh) (sed.exe) (:filtered) (:errfiles :list :pasted)
+  => (:msgtext);
+:msgtext 'Text file of reports' => :FILE;
+
+CONCATENATE (:warn :expand_hooks :msgtext)
+  => (:warning);
+:warning 'Standard presentation of warning messages'? => :FILE;
+
+CONCATENATE (:err :expand_hooks :msgtext)
+  => (:error);
+:error 'Standard presentation of error messages'? => :FILE;
+
+EXEC (viewlist.sh) (sed.exe) (:LIST :dir_of :vir_dir) (doview)
+  NEEDS (:LIST)
+  => (:viewlist);
+:viewlist 'View of a compound object'? => :EXECUTABLE;
+
+EXEC (paste.sh) (paste.exe) (:LIST :ls) (:LIST :labels) pasted
+  => (:pasted);
+:pasted 'Result of pasting two lists' => :FILE;
+
+EXEC (paste.sh) (vtd.exe) (:LIST :labels) (:LIST :names) vtd
+  => (:vtd);

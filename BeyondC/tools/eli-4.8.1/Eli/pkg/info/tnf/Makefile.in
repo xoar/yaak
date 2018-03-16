@@ -1,0 +1,26 @@
+# $Id: Makefile.in,v 1.6 2009/08/03 19:16:19 profw Exp $
+# Copyright 1996, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/info/tnf
+SRC	= mqorg.tnf org.tnf padorg.tnf
+AUX	= EliRefCard.tnf info.tnf lib.tnf \
+          adt.tnf intro.tnf modlib.tnf oldmod.tnf problems.tnf type.tnf \
+	  input.tnf name.tnf output.tnf prop.tnf \
+          news.tnf nodoc.tnf novice.tnf pp.tnf sysadmin.tnf ui.tnf faq.tnf \
+	  Makefile.in Makefile Odinfile humans.specs hyprtxt.specs \
+	  news4.0.tnf news4.1.tnf news4.2.tnf news4.3.tnf news4.4.tnf \
+	  news4.5.tnf news4.6.tnf
+CMD	=
+EXE	=
+GEN	= nametutorial.tnf typetutorial.tnf gindex.tnf
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+nametutorial.tnf typetutorial.tnf gindex.tnf:	Odinfile
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '$@'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done

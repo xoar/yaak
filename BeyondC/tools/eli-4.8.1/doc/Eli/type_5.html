@@ -1,0 +1,692 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from type.tnf on 5 December 2013 -->
+
+<TITLE>Type Analysis - User-Defined Types</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC19" HREF="type_toc.html#SEC19">User-Defined Types</A></H1>
+<P>
+A language that permits user-defined types must provide constructs for the
+user to denote such types.
+These constructs are called <EM>type denotations</EM>.
+If a programmer writes two type denotations that look the same, it is
+natural to ask whether they represent the same type.
+There are two general answers to this question:
+<P>
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+<DL COMPACT>
+<DT><EM>Name equivalence</EM>
+<DD>Each type denotation that the programmer writes represents a distinct type.
+<A NAME="IDX86"></A>
+<A NAME="IDX87"></A>
+<P>
+<DT><EM>Structural equivalence</EM>
+<DD>Two type denotations represent the same type if they are constructed in the
+same way and if corresponding components are the same
+(see  <A HREF="type_6.html#SEC25">Structural Type Equivalence</A>).
+</DL>
+All of the techniques discussed in this document apply independently of the
+selection of name equivalence or structural equivalence among user-defined
+types.
+<P>
+A <EM>type identifier</EM> is a name used in a source language program to
+refer to a type.
+It is important to distinguish between the concept of a type and the concept
+of a type identifier, using different keys to implement them, because a
+particular type might have zero or more type identifiers referring to it.
+For example, consider the following snippet of C code:
+<P>
+<PRE>
+typedef float time;
+typedef float distance;
+typedef struct { time t; distance d; } leg;
+leg trip[100];
+</PRE>
+This snippet creates two user-defined types, a structure type and
+an array (or pointer) type.
+Moreover, it defines three type identifiers, <CODE>time</CODE>, <CODE>distance</CODE>,
+and <CODE>leg</CODE>.
+The first two refer to the language-defined float type, and the third
+refers to the structure type; the array type is <EM>anonymous</EM> -- no
+type identifier refers to it.
+Seven definition table keys are therefore associated with the types and
+type identifiers of this snippet; three more are associated with the typed
+entities <CODE>t</CODE>, <CODE>d</CODE>, and <CODE>trip</CODE>
+(see  <A HREF="type_3.html#SEC8">Typed Entities</A>).
+<P>
+The <CODE>Typing</CODE> module exports computational roles to
+implement the definition and use of user-defined types:
+<P>
+<A NAME="IDX88"></A>
+<DL COMPACT>
+<DT><CODE>TypeDenotation</CODE>
+<DD>The computational role inherited by a grammar symbol that represents a
+subtree denoting a type.
+<A NAME="IDX89"></A>
+<P>
+<DT><CODE>TypeDefDefId</CODE>
+<DD>The computational role inherited by a grammar symbol that represents a
+defining occurrence of a type identifier.
+<A NAME="IDX90"></A>
+<P>
+<DT><CODE>TypeDefUseId</CODE>
+<DD>The computational role inherited by a grammar symbol that represents an
+applied occurrence of a type identifier.
+</DL>
+<P>
+<H2><A NAME="SEC20" HREF="type_toc.html#SEC20">Type denotations</A></H2>
+<P>
+Type denotations are language constructs that describe user-defined types.
+The symbol on the left-hand side of a rule defining a type denotation
+characterizes the type denoted.
+It inherits the <CODE>TypeDenotation</CODE> role, which provides three attributes:
+<P>
+<DL COMPACT>
+<A NAME="IDX91"></A>
+<DT><CODE>Type</CODE>
+<DD>A <CODE>DefTableKey</CODE>-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that does not require properties of
+the type.
+<P>
+<A NAME="IDX92"></A>
+<DT><CODE>TypeKey</CODE>
+<DD>A <CODE>DefTableKey</CODE>-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+<P>
+<A NAME="IDX93"></A>
+<DT><CODE>GotType</CODE>
+<DD>A void attribute representing the fact that information characterizing a
+user-defined type has been stored as properties of the key
+<CODE>TypeDenotation.Type</CODE>.
+</DL>
+The information stored as properties of the definition table key
+<CODE>TypeDenotation.Type</CODE> cannot be dependent on the results of type analysis
+(see  <A HREF="type_8.html#SEC38">Dependences for typed entities</A>).
+<P>
+For example, some languages (e.g. Modula-3, Ada) allow a user to define
+a subrange type that is characterized by its bounds.
+The bound information may be needed in various contexts where the type is
+used, and therefore it is reasonable to store that information as
+properties of the subrange type's key.
+Suppose, therefore, that <CODE>Lower</CODE> and <CODE>Upper</CODE>
+are defined as integer-valued properties.
+Bound information is independent of any aspect of type analysis:
+<P>
+<A NAME="IDX94"></A>
+<A NAME="IDX95"></A>
+<PRE>
+SYMBOL SubrangeSpec INHERITS TypeDenotation END;
+RULE:  SubrangeSpec ::= '[' Number 'TO' Number ']' COMPUTE
+  SubrangeSpec.GotType=
+    ORDER(
+      ResetLower(SubrangeSpec.Type,atoi(StringTable(Number[1]))),
+      ResetUpper(SubrangeSpec.Type,atoi(StringTable(Number[2]))));
+END;
+</PRE>
+<P>
+Here <CODE>Number</CODE> is a non-literal terminal symbol whose value is
+the digit string appearing in the source text; <CODE>atoi</CODE> is the
+string-to-integer conversion routine from the C library.
+<P>
+<H2><A NAME="SEC21" HREF="type_toc.html#SEC21">Type identifiers</A></H2>
+<P>
+The computational role <CODE>TypeDefDefId</CODE> is inherited by
+a defining occurrence of a type identifier.
+It provides two attributes:
+<P>
+<DL COMPACT>
+<A NAME="IDX96"></A>
+<DT><CODE>Type</CODE>
+<DD>A <CODE>DefTableKey</CODE> value representing the type named by the type identifier.
+This attribute must be set by a user computation.
+It should be used in any computation that does not require properties of
+the type.
+<P>
+<A NAME="IDX97"></A>
+<DT><CODE>TypeKey</CODE>
+<DD>A <CODE>DefTableKey</CODE>-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+</DL>
+<P>
+The computational role <CODE>TypeDefUseId</CODE> is inherited by
+an applied occurrence of a type identifier.
+It provides two attributes:
+<P>
+<DL COMPACT>
+<A NAME="IDX98"></A>
+<DT><CODE>Type</CODE>
+<DD>A <CODE>DefTableKey</CODE> value representing the type named by the type identifier.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that does not require properties of
+the type.
+<P>
+<A NAME="IDX99"></A>
+<DT><CODE>TypeKey</CODE>
+<DD>A <CODE>DefTableKey</CODE>-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+</DL>
+<P>
+<H2><A NAME="SEC22" HREF="type_toc.html#SEC22">Referring to a type</A></H2>
+<P>
+A type might be referenced in program text in any of three
+different ways, each illustrated by a Java or C variable definition:
+<P>
+<OL>
+<LI>
+By writing a keyword, as in <CODE>int v;</CODE>
+<P>
+<LI>
+By writing a type identifier, as in <CODE>t v;</CODE>
+<P>
+<LI>
+By writing a type denotation, as in <CODE>struct {int i; float f;} v;</CODE>
+</OL>
+<P>
+Each of these representations of a type uses its own mechanism for encoding
+the type.
+In order to standardize the encoding, a type reference is normally
+represented in the tree by a distinct symbol having a
+<CODE>DefTableKey</CODE>-valued <CODE>Type</CODE> attribute
+(see  <A HREF="type_3.html#SEC9">Establishing the type of an entity</A>).
+For example, <CODE>Type</CODE> plays that role in this representation for
+a variable declaration:
+<P>
+<PRE>
+RULE: VrblDecl ::= Type VarIdDefs ';' COMPUTE
+  VrblDecl.Type=Type.Type;
+END;
+</PRE>
+<P>
+Here the value of <CODE>Type.Type</CODE> represents some type.
+That attribute must be defined by providing
+a rule establishing the type represented by a type identifier,
+a rule establishing each language-defined type represented by a keyword,
+and
+a rule establishing each user-defined type represented by a type
+denotation:
+<P>
+<A NAME="IDX100"></A>
+<A NAME="IDX101"></A>
+<PRE>
+SYMBOL TypIdUse INHERITS TypeDefUseId END;
+
+RULE: Type ::= TypIdUse COMPUTE
+  Type.Type=TypIdUse.Type;
+END;
+
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+
+RULE: Type ::= SubrangeSpec COMPUTE
+  Type.Type=SubrangeSpec.Type;
+END;
+</PRE>
+<P>
+The <CODE>Type</CODE> attributes discussed in this chapter generally do not give
+direct access to properties of the type they represent, because many of
+their values are intermediate in the type analysis computations
+(see  <A HREF="type_8.html#SEC35">Dependences among types and type identifiers</A>).
+If it is necessary to access properties of a type at a symbol
+inheriting <CODE>TypeDenotation</CODE>, <CODE>TypeDefDefId</CODE> or
+<CODE>TypeDefUseId</CODE>, use the <CODE>TypeKey</CODE> attribute.
+Values of the <CODE>Type</CODE> attribute of a symbol inheriting
+<CODE>ExpressionSymbol</CODE> or <CODE>TypedUseId</CODE> can be used directly to
+access type properties.
+<P>
+<H2><A NAME="SEC23" HREF="type_toc.html#SEC23">Operator, function, and method definitions</A></H2>
+<P>
+A user-defined type is often associated with one or more operators.
+For example, an array type requires an access operator
+(see  <A HREF="type_4.html#SEC16">Operators with explicit operands</A>).
+The <CODE>Expression</CODE> module provides computational roles and rule
+computations to define these operators:
+<P>
+<A NAME="IDX102"></A>
+<DL COMPACT>
+<DT><CODE>OperatorDefs</CODE>
+<DD>The computational role inherited by a grammar symbol that represents a
+context where operators are defined.
+<A NAME="IDX103"></A>
+<A NAME="IDX104"></A>
+<P>
+<DT><CODE>OpndTypeListRoot</CODE>
+<DD><DT><CODE>OpndTypeListElem</CODE>
+<DD>Computational roles inherited by grammar symbols that represent operand
+definition lists.
+<A NAME="IDX105"></A>
+<A NAME="IDX106"></A>
+<A NAME="IDX107"></A>
+<A NAME="IDX108"></A>
+<P>
+<DT><CODE>MonadicOperator</CODE>
+<DD><DT><CODE>DyadicOperator</CODE>
+<DD><DT><CODE>ListOperator</CODE>
+<DD><DT><CODE>Coercible</CODE>
+<DD>Rule computations implementing definition contexts.
+</DL>
+<P>
+All operators associated with user-defined types must be added to the
+database of valid operators before type analysis of expressions can begin.
+This dependence is made explicit by having the left-hand side symbol of any
+rule in which operators are defined inherit the <CODE>OperatorDefs</CODE> role.
+One attribute is used to express the dependence:
+<P>
+<DL COMPACT>
+<A NAME="IDX109"></A>
+<DT><CODE>GotOper</CODE>
+<DD>A void attribute indicating that <EM>all</EM> of the operator definitions in
+this rule have been carried out.
+It is set by a module computation that should be overridden by the user.
+</DL>
+<P>
+The <CODE>OpndTypeListRoot</CODE> role is inherited by a grammar symbol
+representing a list of operand types.
+It has one attribute:
+<P>
+<DL COMPACT>
+<A NAME="IDX110"></A>
+<DT><CODE>OpndTypeList</CODE>
+<DD>A synthesized attribute whose <CODE>DefTableKeyList</CODE> value is a list of the
+operand types in reverse order.
+It is set by a module computation that should not be overridden by the
+user.
+</DL>
+<P>
+The <CODE>OpndTypeListElem</CODE> role is inherited by a grammar symbol 
+representing a single operand type in a list.
+It must be a descendant of a node playing the <CODE>OpndTypeListRoot</CODE> role,
+and has one attribute:
+<P>
+<DL COMPACT>
+<A NAME="IDX111"></A>
+<DT><CODE>Type</CODE>
+<DD>A synthesized attribute whose <CODE>DefTableKey</CODE> value is set by user
+computation to represent the operand type.
+</DL>
+<P>
+Operators are actually defined by rule computations.
+Let <SAMP>`ind'</SAMP>, <SAMP>`opr'</SAMP>, <SAMP>`rand'</SAMP>, <SAMP>`rand1'</SAMP>, <SAMP>`rand2'</SAMP>, and
+<SAMP>`rslt'</SAMP> be definition table keys and <SAMP>`rands'</SAMP> be a
+list of definition table keys.
+<P>
+<A NAME="IDX112"></A>
+<DL COMPACT>
+<DT><CODE>MonadicOperator(<SAMP>`ind'</SAMP>,<SAMP>`opr'</SAMP>,<SAMP>`rand'</SAMP>,<SAMP>`rslt'</SAMP>)</CODE>
+<DD>Adds operator <CODE><SAMP>`opr'</SAMP>(<SAMP>`rand'</SAMP>):<SAMP>`rslt'</SAMP></CODE>
+to the set named by indication <SAMP>`ind'</SAMP>.
+<A NAME="IDX113"></A>
+<P>
+<DT><CODE>DyadicOperator(<SAMP>`ind'</SAMP>,<SAMP>`opr'</SAMP>,<SAMP>`rand1'</SAMP>,<SAMP>`rand2'</SAMP>,<SAMP>`rslt'</SAMP>)</CODE>
+<DD>Adds operator <CODE><SAMP>`opr'</SAMP>(<SAMP>`rand1'</SAMP>,<SAMP>`rand2'</SAMP>):<SAMP>`rslt'</SAMP></CODE>
+to the set named by indication <SAMP>`ind'</SAMP>.
+<A NAME="IDX114"></A>
+<P>
+<DT><CODE>ListOperator(<SAMP>`ind'</SAMP>,<SAMP>`opr'</SAMP>,<SAMP>`rands'</SAMP>,<SAMP>`rslt'</SAMP>)</CODE>
+<DD>Adds operator <CODE><SAMP>`opr'</SAMP>(t1,...,tn):<SAMP>`rslt'</SAMP></CODE>
+to the set named by indication <SAMP>`ind'</SAMP>.
+Here <CODE>t1,...,tn</CODE> are the values obtained from <SAMP>`rands'</SAMP>.
+<A NAME="IDX115"></A>
+<P>
+<DT><CODE>Coercible(<SAMP>`opr'</SAMP>,<SAMP>`rand'</SAMP>,<SAMP>`rslt'</SAMP>)</CODE>
+<DD>Adds coercion <CODE><SAMP>`opr'</SAMP>(<SAMP>`rand'</SAMP>):<SAMP>`rslt'</SAMP></CODE>
+to the coercions in the database.
+</DL>
+<P>
+The actual value of <SAMP>`opr'</SAMP> is often irrelevant in these computations,
+because the designer does not ask which operator was selected from the
+given indication.
+The <CODE>Expression</CODE> module provides the known key <CODE>NoOprName</CODE> for
+use in these situations.
+<P>
+Consider a type denotation for one-dimensional arrays.
+Assume that a subscript must be of the language-defined integer type,
+and that each new array type overloads the standard array indexing
+indication <CODE>indexInd</CODE> with the indexing operator for that array
+(see  <A HREF="type_4.html#SEC16">Operators with explicit operands</A>).
+The operator name is uninteresting:
+<P>
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+<A NAME="IDX118"></A>
+<A NAME="IDX119"></A>
+<PRE>
+SYMBOL ArraySpec INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: ArraySpec ::= Type '[' ']' COMPUTE
+  ArraySpec.GotOper=
+    DyadicOperator(
+      indexInd,
+      NoOprName,
+      ArraySpec.Type,
+      intType,Type.Type);
+END;
+</PRE>
+<P>
+Another approach defines the <CODE>Accessor</CODE> property of the array type
+to be an indication with a singleton operator set
+(see  <A HREF="type_4.html#SEC16">Operators with explicit operands</A>):
+<P>
+<A NAME="IDX120"></A>
+<A NAME="IDX121"></A>
+<A NAME="IDX122"></A>
+<A NAME="IDX123"></A>
+<A NAME="IDX124"></A>
+<A NAME="IDX125"></A>
+<PRE>
+ATTR Indic: DefTableKey;
+
+SYMBOL IndexTypes INHERITS OpndTypeListRoot END;
+
+RULE: ArraySpec ::= Type '[' IndexTypes ']' COMPUTE
+  .Indic=NewKey();
+  ArraySpec.GotType=ResetAccessor(ArraySpec.Type,.Indic);
+  ArraySpec.GotOper=
+    ListOperator(
+      .Indic,
+      NoOprName,
+      IndexTypes.OpndTypeList,
+      Type[1].Type);
+END;
+</PRE>
+<P>
+Functions and methods are simply operators with operand lists.
+These operators overload the indication that is the function or method
+name.
+In many cases, of course, a singleton operator set will be associated with
+a function or method name.
+The operator name may or may not be interesting, depending on how the
+designer chooses to interpret the results of type analysis.
+<P>
+Java method definitions overload the method identifier:
+<P>
+<A NAME="IDX126"></A>
+<A NAME="IDX127"></A>
+<A NAME="IDX128"></A>
+<A NAME="IDX129"></A>
+<A NAME="IDX130"></A>
+<A NAME="IDX131"></A>
+<PRE>
+SYMBOL MethodHeader INHERITS OperatorDefs     END;
+SYMBOL Formals      INHERITS OpndTypeListRoot END;
+
+RULE: MethodHeader ::= Type MethIdDef '(' Formals ')' COMPUTE
+  MethodHeader.GotOper=
+    ListOperator(
+      MethIdDef.Key,
+      NoOprName,
+      Formals.OpndTypeList,
+      Type.Type);
+END;
+</PRE>
+The corresponding method call uses the method identifier as the
+operator symbol in a list context.
+Its indication is its <CODE>Key</CODE> attribute, as in the declaration:
+<P>
+<A NAME="IDX132"></A>
+<A NAME="IDX133"></A>
+<A NAME="IDX134"></A>
+<PRE>
+SYMBOL MethIdUse INHERITS OperatorSymbol COMPUTE
+  SYNT.Indic=THIS.Key;
+END;
+SYMBOL Arguments INHERITS OpndExprListRoot END; 
+
+RULE: Expr ::= Expr '.' MethIdUse '(' Arguments ')' COMPUTE
+  ListContext(Expr[1],MethIdUse,Arguments);
+END;
+</PRE>
+<P>
+Every value in a C enumeration is coercible to an integer:
+<P>
+<A NAME="IDX135"></A>
+<A NAME="IDX136"></A>
+<A NAME="IDX137"></A>
+<A NAME="IDX138"></A>
+<PRE>
+SYMBOL enum_specifier INHERITS TypeDenotation, OperatorSymbol END;
+
+RULE: enum_specifier ::= 'enum' '{' enumerator_list '}'
+  enum_specifier.GotOper=
+    Coercible(NoOprName,enum_specifier.Type,intType);
+END;
+</PRE>
+<P>
+<H2><A NAME="SEC24" HREF="type_toc.html#SEC24">Reducing specification size</A></H2>
+<P>
+A user type definition often requires definition of a number of operators,
+based on the relationship between the new type and its components.
+Although all of those operations can be defined using the techniques of the
+previous section, it may be simpler to define a "template" for the
+particular type constructor and then instantiate that template at each
+corresponding type denotation.
+<A NAME="IDX139"></A>
+<A NAME="IDX140"></A>
+<A NAME="IDX141"></A>
+<A NAME="IDX142"></A>
+<A NAME="IDX143"></A>
+<A NAME="IDX144"></A>
+<A NAME="IDX145"></A>
+<A NAME="IDX146"></A>
+<P>
+The necessary information can be captured in an OIL class
+(see  <A HREF="oil_3.html#SEC16">Class definition of Oil Reference Manual</A>).
+For example, a set type in Pascal implies operators for union,
+intersection, membership, and comparison:
+<P>
+<PRE>
+CLASS setType(baseType) BEGIN
+  OPER
+    setop(setType,setType): setType;
+    setmember(baseType,setType): boolType;
+    setrel(setType,setType): boolType;
+  COERCION
+    (emptyType): setType;
+END;
+
+INDICATION
+  plus: setop;
+  minus: setop;
+  star: setop;
+  in: setmember;
+  equal: setrel;
+  lsgt: setrel;
+  lessequal: setrel;
+  greaterequal: setrel;
+</PRE>
+Within the class definition, the class name (<CODE>setType</CODE> in this
+example) represents the type being defined.
+The parameters of the class (e.g. <CODE>baseType</CODE>) represent the related
+types.
+Thus a set requires a set member operation that takes a value of the base
+type and a value of the set type, returning a Boolean.
+Notice that the designer chose to use the same operator for union,
+intersection, and difference because all of these operators have the same
+signature and distinguishing them is irrelevant for type analysis.
+<A NAME="IDX147"></A>
+<P>
+Let <SAMP>`cl'</SAMP> be an OIL class name, and <SAMP>`typ'</SAMP>, <SAMP>`arg1'</SAMP>,
+<SAMP>`arg2'</SAMP>, <SAMP>`arg3'</SAMP> be definition table keys representing types.
+Each of the following rule computations instantiates an OIL class with a
+specific number of parameters:
+<P>
+<A NAME="IDX148"></A>
+<DL COMPACT>
+<DT><CODE>InstClass0(c,typ)</CODE>
+<DD><DT><CODE>InstClass1(c,typ,arg1)</CODE>
+<DD><DT><CODE>InstClass2(c,typ,arg1,arg2)</CODE>
+<DD><DT><CODE>InstClass3(c,typ,arg1,arg2,arg3)</CODE>
+<DD>Create the operators defined by OIL class <SAMP>`cl'</SAMP> for type <SAMP>`typ'</SAMP>.
+Types <SAMP>`arg1'</SAMP>, <SAMP>`arg2'</SAMP>, and <SAMP>`arg3'</SAMP> are the parameters of the
+instantiation:
+</DL>
+<P>
+A class instantiation creates operators, so it should have the <CODE>GotOper</CODE>
+attribute as a postcondition:
+<P>
+<A NAME="IDX149"></A>
+<A NAME="IDX150"></A>
+<A NAME="IDX151"></A>
+<A NAME="IDX152"></A>
+<PRE>
+SYMBOL TypeDenoter INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: TypeDenoter ::= 'set' 'of' type COMPUTE
+  TypeDenoter.GotOper=InstClass1(setType,TypeDenoter.Type,type.Type);
+END;
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_4.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_6.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

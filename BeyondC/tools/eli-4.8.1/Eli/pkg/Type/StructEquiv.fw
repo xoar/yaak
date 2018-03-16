@@ -1,0 +1,787 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: StructEquiv.fw,v 2.3 2009/07/30 19:00:39 profw Exp $
+~!
+~! Copyright 2007 The Regents of the University of Colorado.
+~!
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@setchapternewpage odd
+@settitle Structural Type Equivalence
+@headings double
+
+@ifnotinfo
+~t title titlefont centre "Structural Type Equivalence"
+~t title smalltitlefont centre "Module Implementation"
+~t vskip 15 mm
+@end ifnotinfo
+
+Two types are structurally equivalent if they satisfy two conditions:
+
+@enumerate
+@item
+They @emph{might} be equivalent according to the language definition.
+
+@item
+Corresponding components have equivalent types.
+@end enumerate
+
+@noindent
+For example, consider the structure types in the following variable
+declarations:
+
+@example
+struct a @{ int f; struct a *g; @} x;
+struct b @{ int h; struct b *i; @} y;
+struct c @{ struct c *i; int h; @} z;
+@end example
+
+@noindent
+The first two have the same components in the same order, but the field
+names are different.
+The second and third have the same field names naming the same components,
+but the order of those components is different.
+Depending on the rules of the language, either pair could be equivalent or
+all three could be distinct.
+
+The ~{StructEquiv~} module implements a process for determining sets of
+structurally-equivalent types and selecting a single type from each
+equivalence class to represent all of the types in that class.
+It is instantiated by:
+
+@example
+   $/Type/StructEquiv.fw
+@end example
+@noindent
+
+A designer specifies possibly-equivalent types by assigning them to sets
+such that all of the types in a particular set @emph{might} be equivalent.
+Types assigned to different sets can never be equivalent, and a type that
+is not assigned to any set cannot be equivalent to any other type.
+An ordered (possibly empty) set of components is associated with each type
+assigned to a set.
+
+~$~<void AddTypeToBlock(DefTableKey t, DefTableKey s, DefTableKeyList c)~>==~{
+/* Classify a type as possibly equivalent to others
+ *   On entry-
+ *     t characterizes the type
+ *     s characterizes the set of types to which t might be equivalent
+ *     c is an ordered list of component types of t
+ *   On exit-
+ *     The ComponentTypes property of t has been set to c
+ *     t has been added to s
+ ***/
+{ ResetComponentTypes(t, c);
+  AddNodeToBlock(t, s);
+}
+~}
+
+The ~{ComponentTypes~} property is defined by the ~{Typing~} module;
+~{AddNodeToBlock~} is defined below
+(@pxref{Partition}).
+
+Suppose that the designer chose to assign every structure type to the same
+set (represented by a known key), and to list the field types in order of
+appearance.
+Then variables ~{x~} and ~{y~} would have the same type, but ~{z~}
+would have a different type.
+Another possibility would be to generate a unique definition table key
+on the basis of the sorted list of field identifiers, and then to list the
+field types in the order of their sorted identifiers.
+Variables ~{y~} and ~{z~} would then have the same type and ~{x~}
+would have a different type.
+
+~{AddTypeToBlock~} is independent of any results of type analysis.
+The component types listed in parameter ~{c~} may be represented by either
+type keys or type identifier keys.
+All invocations of ~{AddTypeToBlock~} must take place before the type
+structure is finalized.
+This can be guaranteed by making ~{TypeDenotation.GotType~} dependent on
+any invocation of ~{AddTypeToBlock~} associated with a tree node denoting a
+type, and by making ~{RootType.GotType~} dependent on any other invocation
+(e.g. an invocation within a C routine that creates types).
+
+A ~{RootType~} symbol computation provided by the module refines the
+initial sets created by ~{AddTypeToBlock~}:
+
+~$~<void FinalizeTypes(void)~>==~{
+/* Account for structural equivalence
+ *   On entry-
+ *     Possibly-equivalent types have been assigned to distinct sets
+ *     Component types have been specified
+ *   On exit-
+ *     One representative of each equivalence class has been chosen
+ *     Equivalent type denotations play the role of type identifiers
+ ***/
+{ DefTableKey block;
+
+  Refine();
+  while ((block = PopQueue(build))) {
+    DefTableKey rep = GetNextInBlock(block, NoKey);
+    DefTableKey mem;
+
+    for (mem = GetNextInBlock(rep, NoKey);
+         mem != NoKey;
+	 mem = GetNextInBlock(mem, NoKey)) {
+      ResetDefer(mem, rep); ResetIsType(mem, 0);
+    }
+  }
+}
+~}
+
+~A~<Partition~>
+
+~{S1,...,Sk~}, a collection of subsets of ~{S~}, is called a ~/partition~/
+if
+
+@itemize @bullet
+@item
+The subsets ~{Si~} are disjoint, and
+
+@item
+every element of ~{S~} is an element of some ~{Si~}.
+@end itemize
+
+@noindent
+The subsets ~{Si~} are called the ~/blocks~/ of the partition.
+
+~{AddNodeToBlock~} ensures that the sets characterized by the definition
+table keys supplied as second arguments partition a set of
+possibly-equivalent types.
+If a type being added to a block already belongs to another block, it is
+removed from that block before being added to the specified block.
+Thus the blocks always represent disjoint sets of types:
+
+~$~<void AddNodeToBlock(DefTableKey n, DefTableKey b)~>==~{
+/* Add a node to a block of a partition
+ *   On entry-
+ *     n represents the node to be added
+ *     b represents the partition block
+ *   On exit-
+ *     n has been removed from its current block (if any)
+ *       and added to block b
+ ***/
+{ DefTableKey oldFirst, oldBlock;
+
+  if ((oldBlock = GetPartitionBlock(n, NoKey)) != NoKey) {
+    DefTableKey oldPred, oldSucc;
+
+    if (oldBlock == b) return;
+    DropMemberCount(oldBlock);
+    oldPred = GetLastInBlock(n, NoKey);
+    oldSucc = GetNextInBlock(n, NoKey);
+    ResetNextInBlock(oldPred, oldSucc);
+    ResetLastInBlock(oldSucc, oldPred);
+  }
+  ResetPartitionBlock(n, b);
+  BumpMemberCount(b);
+  oldFirst = GetNextInBlock(b, NoKey);
+  ResetNextInBlock(n, oldFirst); ResetLastInBlock(n, b);
+  ResetNextInBlock(b, n); ResetLastInBlock(oldFirst, n);
+
+  if (GetMemberCount(b, 0) == 2) AddQueue(build, b);
+}
+~}
+
+The ~{build~} queue is a list of blocks containing types that may or
+may not be equivalent.
+These blocks need further processing.
+A block is added to the ~{build~} queue when a type is added to that block
+if and only if it now contains exactly two types.
+If a block contains only one type, that type has (as yet) no possible
+equivalents;
+if the type being added raises the member count beyond two,
+the block is already on the ~{build~} queue.
+
+~{AddNodeToBlock~} uses four properties internally:
+
+~$~<Properties and access functions~>+=~{
+MemberCount:              int [Bump, Drop];
+NextInBlock, LastInBlock: DefTableKey;
+PartitionBlock:           DefTableKey [TypEqu];
+
+void Bump(DefTableKey key)
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = 0;
+  VALUE++;
+}
+
+void Drop(DefTableKey key)
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = 0;
+  if (VALUE > 0) VALUE--;
+}
+
+DefTableKey TypEqu(DefTableKey key)
+{ if (key == NoKey) return NoKey;
+  if (!ACCESS) {
+    VALUE = NewKey();
+    AddNodeToBlock(key, VALUE);
+  }
+  return VALUE;
+}
+~}
+
+~A~<Refinement~>
+
+The initial partition is made on the basis of the type denotation appearing
+in the program.
+Usually, each block represents a particular ~/kind~/ of type (such as
+@samp{pointer} or @samp{record}).
+Our definition of equivalence also distinguishes two types of the same kind
+that have different numbers of components (e.g. two record types having
+different numbers of fields).
+We don't require that the initial partition make this distinction, however.
+Thus the first step in the refinement process is to split blocks of the
+original partition on the basis of the number of components.
+Since the refinement process does not change the number of components, this
+step need only be done once.
+
+Once we have a partition for which the types in each block have the same
+number of components, we can split blocks on the basis of component
+compatibility.
+This process must be carried out repeatedly until no blocks can be split.
+It is guaranteed to terminate, because in the worst case it will split
+until each block contains exactly one type.
+
+~$~<void Refine(void)~>==~{
+/* Refine the partition
+ *   On entry-
+ *     A partition on the type graph exists
+ *     build=queue of blocks containing more than 1 node
+ *   On exit-
+ *     The partition satisfies the constraints
+ *     build=queue of blocks containing more than 1 node
+ ***/
+{ int didSplit;
+  Queue tmp;
+  DefTableKey block;
+    
+  tmp = split; split = build; build = tmp;
+  while ((block = PopQueue(split))) SplitOnCount(block);
+
+  do {
+    tmp = split; split = build; build = tmp;
+    didSplit = 0;
+    while ((block = PopQueue(split))) {
+      didSplit |= Split(block);
+    }
+  } while (didSplit == 1);
+}
+~}
+
+~B
+
+~$~<void SplitOnCount(DefTableKey b)~>==~{
+/* Ensure that all types in a block have the same component count
+ *   On entry-
+ *     b is a block of "similar" types
+ *   If all type have the same component count then on exit-
+ *     b has been added to the build queue unchanged
+ *   Else on exit-
+ *     b has been split into n sub-blocks with equal counts
+ *     Sub-blocks with more than one member
+ *       have been added to the build queue
+ ***/
+{ int j, pieces,memberCount;
+  DefTableKey first, node;
+  struct frag {int cnt; DefTableKey blk; } *fragment;
+
+  memberCount = GetMemberCount(b, 0);
+  fragment =
+    (struct frag*)obstack_alloc(&temp,memberCount*sizeof(struct frag));
+  first = GetNextInBlock(b, NoKey);
+
+  fragment[0].cnt =
+    DefineTypeComponents(
+      first,
+      GetComponentTypes(first, NULLDefTableKeyList));
+  fragment[0].blk = b;
+  pieces = 1;
+
+  node = GetNextInBlock(first, NoKey);
+  while (node != NoKey) {
+    int count =
+      DefineTypeComponents(
+        node,
+	GetComponentTypes(node, NULLDefTableKeyList));
+    DefTableKey next = GetNextInBlock(node, NoKey);
+
+    for (j = 0; j < pieces && fragment[j].cnt != count; j++) ;
+    if (j == pieces) {
+	fragment[j].cnt = count; fragment[j].blk = NewKey();
+	pieces++;
+    }
+    AddNodeToBlock(node, fragment[j].blk);
+    node = next;
+  }
+
+  if (GetMemberCount(b, 0) > 1) AddQueue(build, b);
+  obstack_free(&temp, fragment);
+}
+~}
+
+~$~<Properties and access functions~>+=~{
+CompontTypeSeq: TypeSeq;
+ComponentCount: int;
+~}
+
+~$~<int DefineTypeComponents(DefTableKey t, DefTableKeyList c)~>==~{
+/* Relate a type to its components
+ *   On entry-
+ *     t represents the composite type
+ *     c represents the components
+ *     All defer chains are complete
+ *   On exit-
+ *     The component sequence has been constructed
+ *     DefineTypeComponents=Number of components
+ ***/
+{ int seqLength = 0;
+  DefTableKey node;
+
+  for (; c != NULLDefTableKeyList; c = TailDefTableKeyList(c)) {
+    node = TransDefer(HeadDefTableKeyList(c));
+    obstack_grow(&hold, &node, sizeof(DefTableKey));
+    seqLength++;
+  }
+  node = NoKey; obstack_grow(&hold, &node, sizeof(DefTableKey));
+
+  ResetCompontTypeSeq(t, (TypeSeq)obstack_finish(&hold));
+  ResetComponentCount(t, seqLength);
+
+  return seqLength;
+}
+~}
+
+~B
+
+Each block is represented by a list of type keys, and each type key
+specifies the block to which it belongs.
+To split a block, we first extract the type keys currently belonging to the
+block.
+We then examine all of those types, determining the block to which a
+particular component type belongs.
+If that component type belongs to a given block for all types in the
+current block, there is nothing to be done and we check the next component
+type of all types in the current block.
+
+If the component types belong to different blocks, we map the types in the
+current block to new blocks on the basis of those differences -- all of the
+types whose component types belong to a particular block are mapped to the
+same new block.
+After all of the types in the current block have been mapped, we move them
+to their new blocks and report that the block has been split.
+In this case, we do ~/not~/ examine further components.
+
+Regardless of whether block ~{b~} has been split, it must be examined again
+if it has more than one element.
+The reason is that splitting of some other block may mean that the types in
+~{b~} may become different.
+
+~$~<int Split(DefTableKey b)~>==~{
+/* Split a block if necessary
+ *   On entry-
+ *     b has more than one member
+ *   If corresponding components agree then on exit-
+ *     b has been added to the build queue unchanged
+ *     Split=false
+ *   Else on exit-
+ *     b has been split into n sub-blocks
+ *     Sub-blocks with more than one member
+ *       have been added to the build queue
+ *     Split=true
+ ***/
+{ int i, memberCount, seqLength, haveSplit = 0;
+  DefTableKey node;
+  struct map {DefTableKey typ, blk; } *element, *fragment;
+  TypeSeq typeSeq;
+
+  memberCount = GetMemberCount(b, 0);
+  element =
+    (struct map*)obstack_alloc(&temp,memberCount*sizeof(struct map));
+  fragment =
+    (struct map*)obstack_alloc(&temp,memberCount*sizeof(struct map));
+
+  ~<Obtain the elements of block b~>
+
+  ~<Check whether b must be split~>
+
+  ~<Split block b if necessary~>
+
+  obstack_free(&temp, fragment);
+  obstack_free(&temp, element);
+
+  if (GetMemberCount(b, 0) > 1) AddQueue(build, b);
+  return haveSplit;
+}
+~}
+
+When we extract the list of types in the current block, we verify that the
+member count agrees with the length of the type list.
+This is merely a precaution to avoid a crash in the event of some other
+error.
+
+~$~<Obtain the elements of block b~>==~{
+node = GetNextInBlock(b, NoKey); i = 0;
+
+/* Invariant:
+ *   element[0..i-1].typ contain the keys of types in b
+ *   node=key of the first type not in element[0..i-1].typ
+ **/
+while (node != NoKey) {
+  if (i == memberCount)
+    message(DEADLY, "Split: Incorrect memberCount", 1, NoPosition);
+  element[i++].typ = node;
+  node = GetNextInBlock(node, NoKey);
+}
+
+if (i != memberCount)
+  message(DEADLY, "Split: Incorrect memberCount", 2, NoPosition);
+~}
+
+We associate a block with each value of a particular component.
+The block associated with the component value for the first type in ~{b~}
+is always ~{b~} itself.
+For each component, we check every type in ~{b~}.
+If a particular component results in several fragments, then there is no
+point in checking later components in the sequence.
+
+~$~<Check whether b must be split~>==~{
+fragment[0].blk = b;
+
+typeSeq   = GetCompontTypeSeq(element[0].typ, (TypeSeq)0);
+seqLength = GetComponentCount(element[0].typ, 0);
+for (i = 0; i < seqLength && !haveSplit; i++) {
+  ~<Assign members of the current block to fragments~>
+}
+~}
+
+Block ~{b~} has been associated with the current component of the first
+type in block ~{b~}.
+We check the current component of each of the remaining types in ~{b~}, and
+if we find a new value we add it to the fragment list and relate it to a
+new block.
+The map for the current type is then updated to show the block to which it
+should belong.
+The variable ~{haveSplit~} is set unless all of the values of the current
+component are the same (and thus there is only one fragment).
+
+~$~<Assign members of the current block to fragments~>==~{
+int j, pieces;
+
+fragment[0].typ = TypEquPartitionBlock(typeSeq[i]);
+pieces = 1;
+
+/* Invariant:
+ *   fragment[0..pieces-1]=current set of distinct pairs
+ *     (component value, block representing that type)
+ **/
+
+for (j = 1; j < memberCount; j++) {
+  int k;
+  TypeSeq mySeq = GetCompontTypeSeq(element[j].typ, (TypeSeq)0);
+  DefTableKey block = TypEquPartitionBlock(mySeq[i]);
+
+  for (k = 0; k < pieces && fragment[k].typ != block; k++) ;
+  if (k == pieces) {
+    fragment[k].typ = block; fragment[k].blk = NewKey();
+    pieces++;
+    haveSplit = 1;
+  }
+  element[j].blk = fragment[k].blk;
+}
+~}
+
+If the block has been split, its types must be moved to the new blocks
+created during the analysis of the component.
+
+~$~<Split block b if necessary~>==~{
+if (haveSplit) {
+  for (i = 1; i < memberCount; i++)
+    AddNodeToBlock(element[i].typ,element[i].blk);
+}
+~}
+
+~A~<Execution Monitoring Interface~>
+
+Component sequences are represented internally as data of type ~{TypeSeq~}
+--- arrays of definition table keys that were created for type denotations.
+It is important to be able to examine component sequences when debugging
+type equivalence specifications.
+Thus we need to provide a Noosa monitoring interface for browsing a
+~{TypeSeq~}
+(@pxref{Non-standard types,,,mon,Execution Monitoring Reference}).
+
+Type sequences will be examined in the course of examining properties of
+definition table keys.
+There is no need to associate specific events with the creation of a type
+sequence, and therefore this monitoring interface only need provide
+an operation to obtain the elements of a type sequence that appears as a
+property:
+
+~O~<StructEquiv.dapto~>==~{
+aspect TypeSeq;
+
+"StructEquiv.h"
+
+operation get_type_seq
+    "Return the elements of a type sequence"
+    (TypeSeq seq "The relevant sequence") : str
+{
+    type_seq_str(seq);
+}
+
+end;
+~}
+
+This operation invokes ~{type_seq_str~}, a C function that steps over the
+array, passing each definition key in turn to Noosa:
+
+~$~<void type_seq_str(TypeSeq seq)~>==~{
+{ while (*seq != NoKey) {
+    DAPTO_RESULTDefTableKey(*seq++);
+  }
+}
+~}
+
+The macro ~{DAPTO_ARGTypeSeq~} defines how a ~{TypeSeq~} is passed to
+~{get_type_seq~}:
+
+~$~<Representation of component sequences~>==~{
+typedef DefTableKey *TypeSeq;
+#define DAPTO_ARGTypeSeq(k) DAPTO_ARG_PTR (k, TypeSeq)
+#define DAPTO_RESULTTypeSeq(k) DAPTO_RESULT_PTR (k)
+~}
+
+Tcl code is required to browse non-standard types like ~{TypeSeq~} with
+Noosa
+(@pxref{Browsing non-standard types,,,mon,Execution Monitoring Reference}).
+There are three components: a documentation string that shows at the bottom
+a the Noosa window when the cursor passes over a type sequence, a routine
+for displaying the address of a type sequence, and a routine for displaying
+the contents of a type sequence:
+
+~O~<StructEquiv.tcl~>==~{
+set n(TypeSeq,desc) "Ordered sequence of component types"
+
+proc n_TypeSeq_say {seq} {
+    n_say "TypeSeq:0x[n_dectohex $seq]"
+}
+
+proc n_TypeSeq_open {text seq} {
+    n_say "$text\n"
+    if {$seq == 0} {
+        n_say "  No sequence\n" 
+    } else {
+        set seq [n_hextodec $seq]
+        set p [n_send get_type_seq $seq]
+        if {[llength $p] == 0} {
+            n_say "  Empty sequence\n"
+        } else {
+            foreach {val} $p {
+                n_say "  "
+                n_say_val DefTableKey $val
+                n_say "\n"
+            }
+        }
+    }
+}
+~}
+
+~A~<Operational Specifications~>
+
+~O~<StructEquiv.pdl~>==~{
+"StructEquiv.h"
+~<Properties and access functions~>
+~}
+
+~O~<StructEquiv.head~>==~{
+#include "StructEquiv.h"
+~}
+
+~O~<StructEquiv.init~>==~{
+InitStructEqu();
+~}
+
+~O~<StructEquiv.h~>==~{
+#ifndef STRUCTEQUIV_H
+#define STRUCTEQUIV_H
+
+#include "eliproto.h"
+#include "deftbl.h"
+#include "DefTableKeyList.h"
+
+~<Representation of component sequences~>
+
+extern void AddTypeToBlock
+  ELI_ARG((DefTableKey,DefTableKey,DefTableKeyList));
+extern void StructEquiv    ELI_ARG((void));
+extern void InitStructEqu  ELI_ARG((void));
+extern void AddNodeToBlock ELI_ARG((DefTableKey,DefTableKey));
+
+#ifdef MONITOR
+extern void type_seq_str   ELI_ARG((TypeSeq seq));
+#endif
+
+#endif
+~}
+
+~O~<StructEquiv.c~>==~{
+#include "StructEquiv.h"
+#include "obstack.h"
+#include "pdl_gen.h"
+
+#ifdef MONITOR
+#include "dapto.h"
+#endif
+
+typedef struct queueElt {
+  DefTableKey data;
+  struct queueElt *next;
+} *QueueElt;
+
+typedef struct queue {
+  QueueElt In, Out;
+} *Queue;
+
+static struct obstack hold;     /* Storage not to be freed */
+static struct obstack temp;     /* Storage to be freed */
+static Queue build;		/* Partition blocks being constructed */
+static Queue split;		/* Partition blocks being split */
+
+static Queue
+#ifdef PROTO_OK
+NewQueue(void)
+#else
+NewQueue()
+#endif
+{ Queue Q;
+
+  Q = (Queue)obstack_alloc(&hold, sizeof(struct queue));
+  Q->In = Q->Out =
+    (QueueElt)obstack_alloc(&hold, sizeof(struct queueElt));
+  Q->In->next = Q->Out;
+  return Q;
+}
+
+static void
+#ifdef PROTO_OK
+AddQueue(Queue Q, DefTableKey data)
+#else
+AddQueue(Q, data) Queue Q; DefTableKey data;
+#endif
+{ if (Q->In->next == Q->Out) {
+    Q->In->next =
+      (QueueElt)obstack_alloc(&hold, sizeof(struct queueElt));
+    Q->In->next->next = Q->Out;
+  }
+  Q->In->data = data; Q->In = Q->In->next;
+}
+
+static DefTableKey
+#ifdef PROTO_OK
+PopQueue(Queue Q)
+#else
+PopQueue(Q) Queue Q;
+#endif
+{ DefTableKey data;
+  if (Q->In == Q->Out) return NoKey;
+  data = Q->Out->data; Q->Out = Q->Out->next;
+  return data;
+}
+
+static int
+#ifdef PROTO_OK
+DefineTypeComponents(DefTableKey t, DefTableKeyList c)
+#else
+DefineTypeComponents(t, c) DefTableKey t; DefTableKeyList c;
+#endif
+~<int DefineTypeComponents(DefTableKey t, DefTableKeyList c)~>
+
+void
+#ifdef PROTO_OK
+AddNodeToBlock(DefTableKey n, DefTableKey b)
+#else
+AddNodeToBlock(t, c) DefTableKey t, b;
+#endif
+~<void AddNodeToBlock(DefTableKey n, DefTableKey b)~>
+
+static void
+#ifdef PROTO_OK
+SplitOnCount(DefTableKey b)
+#else
+SplitOnCount(b) DefTableKey b;
+#endif
+~<void SplitOnCount(DefTableKey b)~>
+
+static int
+#ifdef PROTO_OK
+Split(DefTableKey b)
+#else
+Split(b) DefTableKey b;
+#endif
+~<int Split(DefTableKey b)~>
+
+static void
+#ifdef PROTO_OK
+Refine(void)
+#else
+Refine()
+#endif
+~<void Refine(void)~>
+
+void
+#ifdef PROTO_OK
+FinalizeTypes(void)
+#else
+FinalizeTypes()
+#endif
+~<void FinalizeTypes(void)~>
+
+#ifdef MONITOR
+void
+#ifdef PROTO_OK
+type_seq_str(TypeSeq seq)
+#else
+type_seq_str(seq) TypeSeq seq;
+#endif
+~<void type_seq_str(TypeSeq seq)~>
+#endif
+
+void
+#ifdef PROTO_OK
+AddTypeToBlock(DefTableKey t, DefTableKey s, DefTableKeyList c)
+#else
+AddTypeToBlock(t,s,c) DefTableKey t, s; DefTableKeyList c;
+#endif
+~<void AddTypeToBlock(DefTableKey t, DefTableKey s, DefTableKeyList c)~>
+
+void
+#ifdef PROTO_OK
+InitStructEqu(void)
+#else
+InitStructEqu()
+#endif
+{ obstack_init(&hold);
+  obstack_init(&temp);
+  build = NewQueue();
+  split = NewQueue();
+}
+~}

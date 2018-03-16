@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>Definition Table Specification and Usage</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Definition Table Specification and Usage</h1>
+<hr>
+<p>
+The definition table module embodies the concept of a set of
+distinguishable entities, each having some set of properties.
+
+<p>
+<b> Typical Specification (.pdl file)</b>
+
+<pre>
+    Name: Type;
+</pre>
+
+<p>
+generates the basic query operations:
+
+<p>
+<pre>
+   GetName(DefTableKey key, Type deflt)
+   void SetName(DefTableKey key, Type add, Type replace)
+   void ResetName(DefTableKey key, Type val)
+</pre>
+
+<p>
+<b>Typical Error Situations</b>
+
+<ul>
+<li> Accessing a property before it has been set:
+
+<p>
+==> wrong runtime behavior
+
+<p>
+<b>Typical Solution Pattern:</b>
+
+<pre>
+    RULE r_root: ... 
+               root.propset = CONSTITUENTS objects.propset;
+    RULE r_set: ...
+               x.propset = SetProp(xyz_key, v1, v2);
+    RULE r_get: ...
+               ... y.GetProp(y_key, defltval) 
+                            <- INCLUDING root.propset;
+</pre>
+</ul>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

@@ -1,0 +1,101 @@
+@p typesetter = texinfo
+@p maximum_input_line_length = infinity
+@! $Id: C_Separator.fw,v 1.5 1998/05/04 08:07:01 mjung Exp $
+@!
+@! (C) Copyright 1997 University of Paderborn.
+@! 
+@! This file is part of the Eli Module Library.
+@! 
+@! The Eli Module Library is free software; you can redistribute it and/or
+@! modify it under the terms of the GNU Library General Public License as
+@! published by the Free Software Foundation; either version 2 of the
+@! License, or (at your option) any later version.
+@! 
+@! The Eli Module Library is distributed in the hope that it will be
+@! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@! Library General Public License for more details.
+@! 
+@! You should have received a copy of the GNU Library General Public
+@! License along with the Eli Module Library; see the file COPYING.LIB.
+@! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@! Suite 330, Boston, MA 02111-1307, USA. 
+@!
+
+@A@<Sep_Print Suitable for C@>
+
+The @{Sep_Print@} function given here implements reasonable separator rules
+for a C-like language:
+
+@$@<Rules for placing separators@>@Z@{
+Newline added after any of ; { }
+No separator after any of ( [ . ++ --
+No separator before any of [ ] , . ; ++ --
+Space added in all other cases
+@}
+
+When a newline separator is added, it is followed by a sequence of spaces
+to indent the next line.
+The length of this sequence is initially 0.
+It is incremented by 2 when the character preceding the separator is a @{{@}
+and decremented by 2 when the character following the separator is a @{}@}.
+
+@{Sep_Print@} is invoked by the @{Separator@} function, so the
+@{Separator@} module is required.
+
+@O@<C_Separator.specs@>==@{
+$/Output/Separator.fw
+@}
+
+@O@<C_Separator.c@>==@{
+#include <stdio.h>
+#include <string.h>
+#include "eliproto.h"
+#include "Separator.h"
+
+void
+#ifdef PROTO_OK
+Sep_Print(PtgFilePtr file, const char *last, const char *next)
+#else
+Sep_Print(file, last, next)
+PtgFilePtr file;
+char *last, *next;
+#endif
+{
+  static int IndentSize = 0;
+  int i;
+  int NewLine = 0;
+  char lastch = *(last + strlen (last) - 1);
+  char nextch = *next;
+
+  if (lastch == ';') {
+    fputc('\n', SEP_OUTPUT_FILE(file));
+    NewLine = 1;
+  } else if (lastch == '{') {
+    fputc('\n', SEP_OUTPUT_FILE(file));
+    IndentSize += 2;
+    NewLine = 1;
+  } else if (lastch == '}') {
+    fputc('\n', SEP_OUTPUT_FILE(file));
+    NewLine = 1;
+  } else if (lastch != '(' && nextch != ')' &&
+             lastch != '[' && nextch != ']' && nextch != '[' &&
+             nextch != ',' && nextch != '.' &&
+             lastch != '.' && nextch != ';' &&
+             strcmp(last, "++") && strcmp(next, "++") &&
+             strcmp(last, "--") && strcmp(next, "--")) {
+    fputc(' ', SEP_OUTPUT_FILE(file));
+  }
+
+  if (nextch == '}') {
+    IndentSize -= 2;
+  }
+
+  if (NewLine) {
+    for (i = 0; i < IndentSize; ++i)
+      fputc(' ', SEP_OUTPUT_FILE(file));
+  }
+
+  return;
+}
+@}

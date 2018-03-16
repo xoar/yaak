@@ -1,0 +1,8 @@
+/* $Id: oil.specs,v 2.6 2010/05/14 20:36:22 profw Exp $ */
+/* Files required when operating stand-alone */
+
+oil.pdl
+oil.reqmod
+
+oil.tcl		/* Monitoring support */
+oil.dapto

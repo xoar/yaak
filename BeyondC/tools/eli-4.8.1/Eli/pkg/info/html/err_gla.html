@@ -1,0 +1,45 @@
+<html>
+<head>
+<title>Lexical analysis specifications</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Lexical analysis specifications</h1>
+<hr>
+<p>
+Specifiy the forms of comments and the
+forms of all basic symbols corresponding to
+non-literal terminal symbols of the grammar. 
+
+<P>
+
+<b>Typical Error Situations</b>
+<p>
+<ul>
+<li> Terminal name mismatch
+<p>
+<pre>
+    idnetifier: $[a-zA-Z][A-Za-z_0-9]* [mkidn]
+</pre>
+
+==> No GLA specification for identifier
+
+<p>
+<li> errors in complex regular expressions, especially with white space
+and quoting special characters
+
+<p>
+<pre>
+C_FLOAT    $((([0-9]+\.[0-9]*|\.[0-9]+)((e|E)(\+|-)?[0-9]+)?)|
+           ([0-9]+(e|E)(\+|-)?[0-9]+))[fFlL]? [mkstr]
+</pre>
+
+<p>
+<li> auxiliary scanners: errorprone low level character manipulation
+</ul>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

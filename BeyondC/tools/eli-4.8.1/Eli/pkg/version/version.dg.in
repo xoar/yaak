@@ -1,0 +1,3 @@
+# $Id: version.dg.in,v 1.1 2009/12/19 23:07:05 profw Exp $
+
+BANNER 'Eli Version @PACKAGE_VERSION@ (? for help, ^D to exit)';

@@ -1,0 +1,20 @@
+# $Id: Makefile.in,v 1.5 2010/04/21 17:53:05 profw Exp $
+# Copyright 1992-1998, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/parser
+SRC	= parser.dg dfltparse.c parser.h gsdescr.h dfltrepar.c noneInfo \
+	  reparatur.h perr.err mon_cprods.c parser.reqmod dfltparse.reqmod \
+	  Odinfile perr.fw
+GENINS	= parsops.h
+AUX	= syntax.tnf Makefile.in Makefile version
+CMD	= infoOut.sh parserOut.sh perrGen.sh perrOut.sh pgram.sh UserPgram.sh
+EXE	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+parsops.h:
+	echo "" > parsops.h

@@ -1,0 +1,28 @@
+# $Id: Makefile.in,v 1.5 2010/09/23 00:53:33 profw Exp $
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+CC	= @CC@
+
+DIR	=	pkg/Input
+SRC	=	CmdLineIncl.fw  \
+		CoordMap.fw  \
+		CurrTok.fw  \
+		err.specs err.c err.h err.dapto err.tcl err.reqmod \
+		Include.fw  \
+		source.specs source.c source.h source.reqmod \
+		cppline.fw
+COP	=	Makefile.in
+AUX	=	$(COP) Makefile version err.reqmod.in
+COM	=	CmdLineIncl.gnrc CoordMap.gnrc CurrTok.gnrc Include.gnrc
+CMD	=	$(COM)
+RCS	=	$(SRC)
+EXE	=	
+GEN	=
+GENINS	=	Input.dg
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+Input.dg:
+	cp /dev/null $@

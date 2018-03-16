@@ -1,0 +1,427 @@
+@p typesetter = latex2html
+
+@A@<Create the Output Files@>
+
+The Oil compiler creates three output files, @{OilDecls.c@}, @{OilDecls.h@},
+and @{OilDecls.pdl@}.
+@{OilDecls.c@} contains a dump of the initialized Oil data base.
+@{OilDecls.h@} contains @{extern@} definitions for all of the named
+entities appearing in the Oil specification.
+@{OilDecls.pdl@} contains known key declarations for all of the named
+entities appearing in the Oil specification, initializing the appropriate
+one of the @{OilType@}, @{OilOp@} or @{OilClass@} properties.
+
+In constructing output, the symbols @{OpDef@} and @{IndDef@} behave
+identically.
+Therefore the compiler uses a single symbol, @{OperatorId@}, to represent
+them:
+
+@$@<Operator identifiers@>==@{
+SYMBOL OperatorId INHERITS OperFirstOcc, IdPtg END;
+SYMBOL OpDef INHERITS OperatorId END;
+SYMBOL IndDef INHERITS OperatorId END;
+@}
+
+The symbols @{TypeIdentifier@} and @{ClassTypeIdentifier@} also behave
+identically under certain circumstances.
+The compiler uses a single symbol, @{TypeId@}, to represent those
+situations:
+
+@$@<Type identifiers@>==@{
+SYMBOL TypeId INHERITS FirstOcc, IdPtg END;
+SYMBOL TypeIdentifier INHERITS TypeId END;
+SYMBOL ClassTypeIdentifier INHERITS TypeId END;
+@}
+
+@B@<OilDecls.c@>
+
+The initialized Oil data base is output by a module exporting routines that
+traverse the structure and create initialized structure declarations.
+That module exports an initialization operation, @{OilDumpInit@}, and
+one dump operation for each kind of Oil entity.
+@{OilDumpInit@} takes a symbolic file name as its argument and
+returns a @{FILE@} pointer as its result.
+Since there is nothing but the data structure declarations in
+@{OilDecls.c@}, there is no need to retain the returned value.
+However, it is important to ensure that the initialization operation has
+been invoked before any of the other operations of the module.
+The @{VOID@} attribute @{OIL.DumpInit@} can be used to enforce this
+dependence.
+
+@$@<Oil data base@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.DumpInit=OilDumpInit("OilDecls.c") DEPENDS_ON THIS.DataBaseBuilt;
+END;
+@}
+
+Once @{OilDumpInit@} has been invoked, the dump routines for the different
+kinds of entities can be invoked in any order.
+Moreover, the module guarantees that no entity will be output more than
+once even if additional dumps are requested.
+
+@$@<Dump individual elements@>==@{
+SYMBOL TypeIdentifier COMPUTE
+  SYNT.dumped=
+    IF(THIS.DoType, OilDumpType(THIS.type)
+    DEPENDS_ON INCLUDING OIL.DumpInit);
+END;
+
+SYMBOL OperatorId COMPUTE
+  SYNT.dumped=
+    IF(THIS.IsFirstOcc, DumpOps(THIS.Key)
+    DEPENDS_ON INCLUDING OIL.DumpInit);
+END;
+
+SYMBOL ClassName COMPUTE
+  SYNT.dumped=
+    IF(THIS.IsFirstOcc, OilDumpClass(THIS.class)
+    DEPENDS_ON INCLUDING OIL.DumpInit);
+END;
+@}
+
+Notice that there are no invocations of signature dump routines.
+None are necessary, because all signatures will be dumped as they are
+encountered while dumping operators.
+
+@$@<Dump identically-named operators@>==@{
+void
+#ifdef PROTO_OK
+DumpOps(DefTableKey OpName)
+#else
+DumpOps(OpName) DefTableKey OpName;
+#endif
+{ tOilOpList ops;
+
+  for (ops = GetOperator(OpName, NULLtOilOpList);
+       ops != NULLtOilOpList;
+       ops = TailtOilOpList(ops))
+   OilDumpOp(HeadtOilOpList(ops));
+}
+@}
+
+The names for Oil entities are known keys, and the dump routines require an
+operation to print those known keys:
+
+@$@<Deliver the string for an Oil name@>==@{
+char *
+#ifdef PROTO_OK
+RepName(char *buffer, DefTableKey name)
+#else
+RepName(buffer, name) char *buffer; DefTableKey name;
+#endif
+{ return strcpy(buffer, StringTable(GetIndex(name, 0))); }
+@}
+
+Each entity is also given a C name by the dump module.
+The name is always constructed by combining a string with the @{sID@} field
+of the Oil entity.
+It must also be possible to construct that name when building the mapping
+information, so the tree computations need an access function for the
+@{sID@} field:
+
+@$@<sID field access@>==@{
+#define ID(of) ((of)->sID)
+@}
+
+@B
+
+@{OilDecls.pdl@} defines known keys for all of the named entities
+used in the specification, and initializes the appropriate property.
+
+@$@<OilDecls.pdl@>==@{
+CHAIN KnownKeys: PTGNode;
+
+SYMBOL OIL COMPUTE
+  CHAINSTART HEAD.KnownKeys=PTGNULL DEPENDS_ON THIS.DataBaseBuilt;
+  PTGOutFile("OilDecls.pdl",PTGPDL(TAIL.KnownKeys));
+END;
+@}
+
+The PDL file must declare the properties and the initializers must refer to
+the appropriate external symbols in the Oil data base:
+
+@$@<PDL file format@>==@{
+PDL:
+  "\"OilDecls.h\"\n"
+  "IsType: int;\n"
+  "OilType: tOilType;\n"
+  "OilOp: tOilOp;\n"
+  "OilClass: tOilClass;\n"
+  $	/* Known keys */
+@}
+
+@C
+
+Oil type structures in the dump all have names of the form @{Oil_t@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Type properties@>==@{
+TypeProperty:
+  $2 " -> IsType={1}, OilType={(tOilType)&Oil_t" $1 "};\n"
+@}
+
+@$@<Construct a known key initialization for a type@>==@{
+SYMBOL TypeId COMPUTE
+  THIS.KnownKeys=
+    IF(THIS.DoType,
+      PTGSeq(
+        THIS.KnownKeys,
+        PTGTypeProperty(PTGNumb(ID(THIS.type)),THIS.Ptg)),
+      THIS.KnownKeys);
+END;
+@}
+
+@C
+
+Oil operator structures in the dump all have names of the form @{Oil_o@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Operator properties@>==@{
+OperatorProperty:
+  $2 " -> OilOp={(tOilOp)&Oil_o" $1 "};\n"
+
+MultOperator:
+  $ ";\n"
+@}
+
+@$@<Construct a known key initialization for an operator@>==@{
+SYMBOL OperatorId COMPUTE
+  THIS.KnownKeys=
+    IF(THIS.IsOperFirstOcc,
+      PTGSeq(
+        THIS.KnownKeys,
+        IF(OneOperator(THIS.Key),
+          PTGOperatorProperty(PTGNumb(ID(Operator(THIS.Key))),THIS.Ptg),
+          PTGMultOperator(THIS.Ptg))),
+      THIS.KnownKeys);
+END;
+@}
+
+If the operator's signature contains set identifiers, the Oil operator
+corresponding to the name will not be unique.
+We only have two choices here: to use an arbitrary operator from the list,
+or to omit the name from the map entirely.
+Either solution will work if the user does not refer to the operator
+symbolically in any computation using the generated module.
+If the operator @/is@/ referred to symbolically, the first choice will
+result in some arbitrary behavior and the second will result in an error
+report from the C compiler.
+The second choice was made by the previous Oil compiler, and this
+specification makes the same choice for compatibility.
+
+@$@<Obtain the first operator from the list@>==@{
+#define Operator(k) \
+  (HeadtOilOpList(GetOperator((k),NULLtOilOpList)))
+#define OneOperator(k) \
+  (TailtOilOpList( \
+    GetOperator((k),NULLtOilOpList))==NULLtOilOpList)
+@}
+
+@C
+
+Oil class structures in the dump all have names of the form @{Oil_c@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Class properties@>==@{
+ClassProperty:
+  $2 " -> OilClass={(tOilClass)&Oil_c" $1 "};\n"
+@}
+
+@$@<Construct a known key initialization for a class@>==@{
+SYMBOL ClassName INHERITS IdPtg COMPUTE
+  THIS.KnownKeys=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.KnownKeys,
+        PTGClassProperty(PTGNumb(ID(THIS.class)),THIS.Ptg)),
+      THIS.KnownKeys);
+END;
+@}
+
+@C@<Class operators@>
+
+Whenever a class is instantiated, a new operator is created for each of the
+class operators.
+The created operator is given the class operator as its name, and this
+means that a class operator name is associated with many dofferent
+operators (one for each instantiation of the class).
+Thus the class operator has no properties.
+
+@$@<Construct a known key for a class operator@>==@{
+SYMBOL ClassOpDef INHERITS IdPtg COMPUTE
+  THIS.KnownKeys=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(THIS.KnownKeys,PTGMultOperator(THIS.Ptg)),
+      THIS.KnownKeys);
+END;
+@}
+
+@B
+
+@{OilDecls.h@} provides external declarations for all of the named
+entities used in the specification.
+
+@$@<OilDecls.h@>==@{
+CHAIN OilExterns: PTGNode;
+
+SYMBOL OIL COMPUTE
+  CHAINSTART HEAD.OilExterns=PTGNULL DEPENDS_ON THIS.DataBaseBuilt;
+  PTGOutFile("OilDecls.h",PTGHeader(TAIL.OilExterns));
+END;
+@}
+
+The header file must protect itself against multiple inclusion, and the
+external declarations need type information from the Oil abstract data
+type:
+
+@$@<Header file format@>==@{
+Header:
+  "#ifndef OILDECLS_H\n"
+  "#define OILDECLS_H\n"
+  "#include \"oiladt2.h\"\n"
+  $	/* extern declarations */
+  "#endif\n"
+@}
+
+@C
+
+Oil type structures in the dump all have names of the form @{Oil_t@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Type symbols@>==@{
+TypeSymbol:
+  "extern struct Stype Oil_t" $1 ";\t/* " $2 " */\n"
+  "#define OilType" $2 " (&Oil_t" $1 ")\n"
+@}
+
+@$@<Construct an external definition for a type@>==@{
+SYMBOL TypeId COMPUTE
+  THIS.OilExterns=
+    IF(THIS.DoType,
+      PTGSeq(
+        THIS.OilExterns,
+        PTGTypeSymbol(PTGNumb(ID(THIS.type)),THIS.Ptg)),
+      THIS.OilExterns);
+END;
+@}
+
+@C
+
+Oil operator structures in the dump all have names of the form @{Oil_o@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Operator symbols@>==@{
+OperatorSymbol:
+  "extern struct Sop Oil_o" $1 ";\t/* " $2 " */\n"
+  "#define OilOp" $2 " (&Oil_o" $1 ")\n"
+@}
+
+@$@<Construct an external definition for an operator@>==@{
+SYMBOL OperatorId COMPUTE
+  THIS.OilExterns=
+    IF(AND(THIS.IsOperFirstOcc,OneOperator(THIS.Key)),
+      PTGSeq(
+        THIS.OilExterns,
+        PTGOperatorSymbol(PTGNumb(ID(Operator(THIS.Key))),THIS.Ptg)),
+      THIS.OilExterns);
+END;
+@}
+
+@C
+
+Oil class structures in the dump all have names of the form @{Oil_c@}@/n@/,
+where @/n@/ is an integer:
+
+@$@<Class symbols@>==@{
+ClassSymbol:
+  "extern struct Sclass Oil_c" $1 ";\t/* " $2 " */\n"
+  "#define OilClass" $2 " (&Oil_c" $1 ")\n"
+@}
+
+@$@<Construct an external definition for a class@>==@{
+SYMBOL ClassName INHERITS IdPtg COMPUTE
+  THIS.OilExterns=
+    IF(THIS.IsFirstOcc,
+      PTGSeq(
+        THIS.OilExterns,
+        PTGClassSymbol(PTGNumb(ID(THIS.class)),THIS.Ptg)),
+      THIS.OilExterns);
+END;
+@}
+
+@B@<Specification files@>
+
+@C
+
+@O@<Code.lido@>@{
+@<Operator identifiers@>
+@<Type identifiers@>
+@<Oil data base@>
+@<Dump individual elements@>
+
+@<OilDecls.pdl@>
+@<Construct a known key initialization for a type@>
+@<Construct a known key initialization for an operator@>
+@<Construct a known key initialization for a class@>
+@<Construct a known key for a class operator@>
+
+@<OilDecls.h@>
+@<Construct an external definition for a type@>
+@<Construct an external definition for an operator@>
+@<Construct an external definition for a class@>
+@}
+
+@C
+
+@O@<Code.ptg@>@{
+@<PDL file format@>
+@<Type properties@>
+@<Operator properties@>
+@<Class properties@>
+
+@<Header file format@>
+@<Type symbols@>
+@<Operator symbols@>
+@<Class symbols@>
+@}
+
+@C
+
+@O@<Code.c@>@{
+#include <string.h>
+#include "csm.h"
+#include "pdl_gen.h"
+#include "oiladt2b.h"
+#include "eliproto.h"
+
+@<Dump identically-named operators@>
+@<Deliver the string for an Oil name@>
+@}
+
+@O@<Code.h@>@{
+#ifndef CODE_H
+#define CODE_H
+
+#include "eliproto.h"
+
+extern void DumpOps ELI_ARG((DefTableKey));
+
+#endif
+@}
+
+@C
+
+@O@<Code.head@>@{
+#include "Code.h"
+
+@<sID field access@>
+@<Obtain the first operator from the list@>
+@}
+
+@C
+
+@O@<Code.specs@>@{
+$/oil/oiladt2b.h
+$/Output/LeafPtg.gnrc :inst
+$/Prop/FirstOcc.gnrc +instance=Oper :inst
+@}

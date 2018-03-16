@@ -1,0 +1,551 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename problems
+@setchapternewpage odd
+@settitle Solutions of common problems
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: problems.tnf,v 1.11 2008/06/19 08:06:55 peter Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Solutions of common problems}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.11 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@comment  node-name,  next,  previous,  up
+@top
+@ifinfo
+@chapheading Specification Module Library
+@chapheading Solutions of Common Problems
+@end ifinfo
+
+@findex Solutions of Common Problems
+@findex Library @code{Tech}
+@ifclear html
+This library contains the following modules:
+@end ifclear
+@menu
+* Message::    Error Reports (module deleted)
+* Strings::    String Concatenation
+* Counter::    Counting Symbol Occurrences
+* MakeName::   Generating Identifiers
+* Hash::       Computing a Hash Value
+* Sort::       Sorting Elements of an Array
+* StrArith::   Character String Arithmetic
+* Index::      Index
+@end menu
+@iftex
+@ifclear html
+@table @code
+@item Message
+Error Reports (module deleted)
+@item Strings
+String Concatenation
+@item Counter
+Counting Symbol Occurrences
+@item MakeName
+Generating Optional Identifiers
+@item Sort
+Sorting Elements of an Array
+@item StrArith
+Character String Arithmetic
+@end table
+@end ifclear
+@end iftex
+
+@comment =====================================
+@node Message
+@chapter Error Reports
+@findex Module @code{Message}
+@findex messages
+@findex error messages
+@findex CatStrStr
+@findex CatStrInd
+
+This module is NOT supported anymore.
+
+Uses of the two macros @code{Message} and @code{MessageId} 
+that were provided by this module have to be rewritten, since LIGA
+does NOT allow to hide accesses of @code{COORDREF}.
+
+A macro call @code{Message(s, t)} can be rewritten
+@code{message(s, t, 0, COORDREF)}.
+
+A macro call @code{MessageId(s, t, sym)} can be rewritten
+@example
+   message(s, CatStrInd(t, sym), 0, COORDREF)
+@end example
+
+where @code{CatStrInd} is a macro that stores the concatenation
+of two strings. It is provided by the module (@pxref{Strings}):
+@example
+   $/Tech/Strings.specs
+@end example
+
+@comment =====================================
+@node Strings
+@chapter String Concatenation
+@findex CatStrStr
+@findex CatStrInd
+@findex IndCatStrStr
+@findex Strings
+@findex CharPtr
+@findex message
+
+This module provides functions for concatenation of strings,
+and the name @code{CharPtr} for the type @code{char  *}.
+
+The module is instantiated by
+@example
+   $/Tech/Strings.specs
+@end example
+@noindent
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{Strings.h} is imported there.
+
+The module defines the type name @code{CharPtr} for
+@code{char *}, especially to be used in LIDO specifications.
+
+The module exports the functions
+@table @code
+@item CharPtr CatStrStr (CharPtr s1, CharPtr s2)
+The strings @code{s1, s2} are concatenated. The resulting string is stored
+in the string memory of the @code{csm} module, and the pointer to it
+is returned.
+
+@item int IndCatStrStr (CharPtr s1, CharPtr s2)
+The strings @code{s1, s2} are concatenated. The resulting string is stored
+in the string memory of the @code{csm} module, and its @code{StringTable}
+index is returned.
+@end table
+
+A macro @code{CatStrInd(s,i)} is exported it obtains the second 
+of the concatenated strings
+by the index @code{i} into the @code{StringTable}.
+This macro is used to simplify composition of @code{message} texts.
+
+@comment =====================================
+@node Counter
+@chapter Counting Symbol Occurrences
+@findex Module @code{Counter}
+
+This module provides @code{.lido} computations that count all 
+ocurrences of certain symbols within a certain subtree.
+
+The module is instantiated by
+@example
+   $/Tech/Counter.gnrc +instance=NAME :inst
+@end example
+@noindent
+The optional generic instance parameter @code{NAME}
+identifies the particular instance.
+
+The module provides the following computational roles:
+
+@findex Count
+@findex attribute Count
+@code{NAMECount}
+is associated to the grammar symbols that shall be counted.
+@code{NAMECount.NAMECount} yields the occurrence number in
+the tree.
+
+@findex RootCount
+@findex attribute @code{CountResult}
+@code{NAMERootCount}
+specifies the subtree containing the @code{NAMECount}
+occurrences. The number of occurrences found in the
+subtree can be obtained by the attribute 
+@code{NAMERootCount.NAMECountResult}.
+
+@findex attribute @code{InitCount}
+@findex attribute @code{Increment}
+The default is that counting starts from 1 and is incremented by 1.
+The start value can be adjusted by
+overriding the computation @code{NAMERootCount.NAMEInitCount = 0;}
+with a computation of a suitable value.
+The increment can be adjusted by overriding the computation of
+@code{NAMECount.NAMEIncrement}.
+
+|NAME|RootCount is inherited by the grammar root by default.
+
+@code{NAMERootCount} can be associated to recursive grammar
+symbols. Any symbol that has @code{NAMECount} associated
+must belong to a subtree such that @code{NAMERootCount} is 
+associated to its root.
+
+@comment =====================================
+@node MakeName
+@chapter Generating Optional Identifiers
+@findex Module @code{MakeName}
+
+This C module implements functions that turn their arguments
+into strings which then play the role of identifiers as if
+they occurred in the input, i.e. they are entered in the identifier
+table, and their symbol code is returned.
+
+The module is instantiated by
+@example
+   $/Tech/MakeName.gnrc +instance=IDENT :inst
+@end example
+@noindent
+The generic instance parameter @code{IDENT} has to be
+set to the terminal symbol used for identifiers.
+
+The module can also be used to generate and store identifiers
+in processors that do not have a scanner and a parser. In this case 
+the @code{+instance} parameter has to be omitted.
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules
+if the interface file @code{MakeName.h} is imported there.
+
+The module exports the following functions:
+
+@findex MakeName
+@findex GenerateName
+@findex IdnNumb
+@findex PreIdnPost
+@table @code
+@item int MakeName (char *c)
+@code{c} is a character string that may coincide with an 
+already existing name. The result the is the encoding of the name
+@code{c}.
+@item int GenerateName (char *c)
+@code{c} is a character string.
+The name is generated by appending a number to the prefix @code{c} 
+such that the 
+name is different from all others encountered so far (on input and
+generated).
+@item int IdnNumb (int id, int num)
+@code{id} is the encoding of an existing identifier; @code{num} is 
+a nonnegative number. The new name is formed by appending the number to
+the identifier string. It may coincide with an already existing name.
+This function may be used to derive arbitrary names from existing 
+ones.
+@item int PreIdnPost (char *pre, int id, char *post)
+@code{id} is the encoding of an existing identifier, 
+@code{pre} and @code{post} are arbitrary character strings. 
+The generated name is formed 
+by catenation of @code{pre}, the identifier string and @code{post}. 
+It may coincide with an already existing name.
+This function may be used to derive different names (e. g. for different 
+target objects) from an existing name.
+@end table
+
+@comment =====================================
+@node Hash
+@chapter Computing a Hash Value
+@findex Module @code{Hash}
+
+This C module computes a 32-bit hash of the contents of specified memory.
+Every bit of the memory contents affects every bit of the hash.
+The probability that the same hash will be computed for different memory
+contents is very low.
+
+The module is instantiated by
+@example
+   $/Tech/Hash.specs
+@end example
+@noindent
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, and @code{.finl}.
+They can also be used in C modules if the interface file @code{hash.h}
+is imported there.
+
+The module exports the following entities:
+
+@findex ub1
+@findex ub4
+@findex hash
+@table @code
+@item ub1
+A typedef identifier defining an unsigned byte.
+The memory over which a hash is to be computed is made up of a set of
+contiguous blocks of @code{ub1} values.
+@item ub4
+A typedef identifier defining an unsigned 32-bit value.
+The hash computed is a single @code{ub4} value.
+@item ub4 hash(ub1 *block, size_t length, ub4 previous)
+A function computing a hash value.
+The @samp{block} argument is a pointer to a contiguous sequence of
+@samp{length} unsigned bytes;
+@samp{previous} is the hash computed from other contiguous
+sequences in the specified memory area.
+(If @samp{block} is the first sequence of the area, @samp{previous} should be
+@samp{0}.)
+The result of @code{hash} is a hash of all of the contiguous sequences
+considered so far.
+@end table
+
+In the simplest case, we need to compute a hash for the contents of a
+single contiguous block of memory.
+For example, here is a call to compute a hash of a single string pointed
+to by @samp{str}:
+
+@example
+hash(str, strlen(str), 0)
+@end example
+
+A more complex situation is when there are several related areas of memory,
+and we need to compute a single hash for all of them.
+Suppose that there was a pair of strings, pointed to by @samp{str1} and
+@samp{str2}, which constituted a conceptual unit.
+Here are two ways to compute a single hash for the pair:
+
+@example
+hash(str1, strlen(str1), hash(str2, strlen(str2), 0))
+hash(str2, strlen(str2), hash(str1, strlen(str1), 0))
+@end example
+@noindent
+Either of these sequences would be perfectly satisfactory,
+but the resulting values would differ.
+
+When computing the hash of an array or structure, it is important to
+realize that there may be padding with unknown content involved.
+Consider the following variable declaration:
+
+@example
+struct@{ char c; int i; @} foo, bar;
+@end example
+@noindent
+On some machines, the compiler may insert three bytes of padding between
+the end of field @samp{c} and the beginning of field @samp{i}.
+There is no guarantee that these three bytes will be initialized in a
+particular way.
+Thus @samp{hash(foo, sizeof(foo), 0)} and @samp{hash(bar, sizeof(bar), 0)}
+may not yield the same result when @samp{foo} and @samp{bar} have identical
+field values; the hash also depends on the contents of the padding.
+Unless you know that there is no padding present, or that padding is always
+intialized in the same way, the only safe approach is to hash the fields as
+separate memory areas:
+
+@example
+hash (foo.c, sizeof(foo.c), hash(foo.i, sizeof(foo.i), 0))
+@end example
+
+@comment =====================================
+@node Sort
+@chapter Sorting Elements of an Array
+@findex Module @code{Sort}
+ 
+This C module implements a function that sorts the elements of an array in
+place.
+It uses the O(n log n) Heapsort algorithm.
+ 
+The module is instantiated by
+@example
+   $/Tech/Sort.gnrc +instance=TYPE +referto=HDR :inst
+@end example
+@noindent
+where @code{TYPE} is the name of the array element type and @code{HDR.h}
+is a file that defines the array element type, e.g.@:
+@example
+   $/Adt/Sort.gnrc+instance=DefTableKey +referto=deftbl :inst
+@end example
+@noindent
+If the element type is predefined in C the @code{referto} parameter
+is omitted, e.g.@:
+@example
+   $/Adt/Sort.gnrc+instance=int :inst
+@end example
+ 
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{SortTYPE.h} is imported there.
+ 
+The module exports the following function:
+ 
+@findex SortTYPE
+@table @code
+@item void SortTYPE (TYPE *arr, size_t n, TYPECmpFctType cmp)
+@code{arr} points to the array to be sorted, which contains @code{n}
+elements.
+@code{cmp} is the function that defines the collating sequence for the
+elements.
+It's signature is @code{TYPE, TYPE -> int}; it yields
+-1 if the left argument should precede the right in the sorted array,
++1 if the left argument should follow the right in the sorted array,
+and 0 if the order of the elements in the sorted array is immaterial.
+@end table
+
+@comment =====================================
+@node StrArith
+@chapter Character String Arithmetic
+
+@findex character string arithmetic
+@findex Module @code{StrArith}
+@findex arithmetic on character strings
+@findex strings as numbers
+StrArith is a wrapper for the @code{strmath} library routines
+(@pxref{strmath,,Character String Arithmetic,lib,Library Reference Manual}).
+It is instantiated by
+
+@example
+   $/Tech/StrArith.gnrc +instance=NAME +referto=BASE :inst
+@end example
+@noindent
+where @code{NAME} is a prefix for the operator names and @code{BASE} is the
+radix of the numbers to be manipulated.
+If the @code{instance} parameter is omitted then the operator names have an
+empty prefix; if the @code{referto} parameter is omitted then the radix is
+10.
+
+All operations exported by this module can be used in specifications of
+type `.lido', `.init', and `.finl'.  They can also be used in C
+modules if the interface file `NAMEStrArith.h' is imported there.
+
+Strings representing numbers are all stored in the string table.
+Their form is common in programming languages:
+
+@example
+[+/-][d*][.][d*][e[+/-]d*]
+@end example
+@noindent
+Here @code{[]} indicate optional parts,
+@code{+/-} indicates that a sign may be present,
+@code{d} indicates digits in the chosen radix,
+and @code{*} indicates repetition.
+The optional dot separates the integer and fractional parts of a number,
+and @code{e} stands for an exponent marker.
+The actual characters used to represent digits, signs,
+fractional separators and exponent symbols are determined by default or by
+settings established by the @code{strmath} operation
+(@pxref{strmath,,Character String Arithmetic,lib,Library Reference
+Manual}).
+
+An instantiation of @code{StrArith} with instance parameter @code{NAME}
+provides the following operations:
+
+@table @code
+@item int NAMEStrAdd(int left, int right)
+@itemx int NAMEStrSub(int left, int right)
+@itemx int NAMEStrMul(int left, int right)
+@itemx int NAMEStrDiv(int left, int right)
+@itemx int NAMEStrQuo(int left, int right)
+@itemx int NAMEStrRem(int left, int right)
+@itemx int NAMEStrExp(int left, int right)
+Dyadic arithmetic operations.
+The two arguments are string table indices representing the left and right
+operands.
+The result is the string table index of a string representing the result.
+
+@code{NAMEStrDiv} is a real division, possibly yielding a result with a
+fractional part.
+@code{NAMEStrQuo} yields the integer quotient from the division and
+@code{NAMEStrRem} yields the integer remainder from the division.
+@code{NAMEStrExp} raises the first operand to the power given by the second
+operand.
+
+@item int NAMEStrNeg(int opnd)
+@itemx int NAMEStrSqrt(int opnd)
+Monadic arithmetic operations.
+The argument is a string table index representing the operand.
+The result is the string table index of a string representing the result.
+
+@item int NAMEStrNorm(int opnd, int oldradix, int newradix, char *symbs)
+Normalizes a value, performing radix conversion if necessary.
+The first argument is a string table index representing the operand.
+The second and third arguments are the radix values for the conversion.
+The result is the string table index of a string representing the result.
+Its format depends on the content of the fourth argument:
+
+@table @code
+@item symbs=0
+Whole number and fraction parts separated by the defined
+fractional separator unless the result can be expressed as an
+integral value, exponent marker and exponent if the length would
+exceed @code{integer_size} digits.
+
+@item symbs=""
+Sequence of digits if the length does not exceed @code{integer_size} digits,
+otherwise the empty string (which is represented by string table index 0).
+
+@item symbs=non-empty quoted string
+A fractional separator is guaranteed to appear in the result. 
+The first character of the string is taken as the exponent marker. 
+If there are additional characters in the string, then they will
+be taken as the fractional separator, the minus sign, and the plus
+sign respectively.
+(The characters normally defined for these purposes will be used
+if the corresponding character does not appear in the string.)
+@end table
+@end table
+
+Here is a fragment of a specification for a calculator that uses
+@code{StrArith} to implement the arithmetic:
+
+@example
+ATTR val: int;
+
+RULE: Program ::= Expr COMPUTE
+  printf("%s\n", StringTable(Expr.val));
+END;
+
+RULE: Expr ::= Expr '+' Expr COMPUTE
+  Expr[1].val=StrAdd(Expr[2].val,Expr[3].val);
+END;
+
+...
+
+RULE: Expr ::= '-' Expr COMPUTE
+  Expr[1].val=StrNeg(Expr[2].val);
+END;
+
+RULE: Expr ::= 'sqrt' '(' Expr ')' COMPUTE
+  Expr[1].val=StrSqrt(Expr[2].val);
+END;
+
+RULE: Expr ::= Constant COMPUTE
+  Expr.val=Constant;
+END;
+@end example
+
+@code{StrArith} was instantiated without parameters for this example:
+
+@example
+$/Tech/StrArith.gnrc :inst
+@end example
+
+@node Index
+@unnumbered Index
+@printindex fn
+@contents
+@bye

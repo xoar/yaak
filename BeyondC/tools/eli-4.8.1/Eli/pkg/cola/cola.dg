@@ -1,0 +1,71 @@
+# $Id: cola.dg,v 2.7 1999/02/15 10:33:02 mjung Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+
+
+EXEC (colaFe.sh) (:Pgram) (:BuPgram) NEEDS (colaPgs2cm.exe) 
+  => (:colaCmrIn) (:colaCmrBuIn);
+	:colaCmrIn 'EBNF-COMAR data structure without bottomup constraints'
+	  => :FILE;
+	:colaCmrBuIn 'EBNF-COMAR data structure with bottomup constraints'
+	  => :FILE;
+
+EXEC (colaLalr.sh) (:colaCmrIn) (:colaCmrBuIn) (:colaLalrOpt) NEEDS (colaAbsprs.exe)
+  => (:colaCmr) (:colaAbs) (:colaErrTerms) (:colaInfo);
+	:colaCmr 'The COMAR datastructure of the abstract parser' => :FILE;
+	:colaAbs 'The state table of the abstract parser' => :FILE;
+	:colaErrTerms 'C code for producing (... expected)-messages' => :FILE;
+	:colaInfo 'result of LALR(1)-analysis, conflict states/all states'? => :FILE;
+
+EXEC (colaBe.sh) (.) (:colaCmr) (:colaAbs) (:colaBackOpt) (:colaErrOff) (:colaErrTerms) 
+	(+monitor) NEEDS (Frames/cola.dapto) (Frames/parser.c) 
+	($ODINCACHE/PKGS/parser/mon_cprods.c) ($ODINCACHE/PKGS/parser/parser.h) 
+	(colaConn.exe) (colaTbl.exe) 
+  => (:colaBe);
+	:colaBe 'Generation of the concrete parser' => :DERIVED-DIRECTORY;
+
+EXEC (colaOpt.sh) (.) (:cola.cmpd :cpp) NEEDS (colaOption.exe) (Info/mess_sort) 
+  => (:colaLalrOpt) (:colaBackOpt) (:colaErrOff);
+	:colaLalrOpt 'cola analyzer options' => :FILE;
+	:colaBackOpt 'cola backend options' => :FILE;
+	:colaErrOff 'macro to stop the table driven parser after the first syntax error' => :FILE;
+
+*.cola => :cola;
+	:cola 'Options for the parser generator cola'? => :FILE;
+	:cola.cmpd 'Set of cola specification fragments' => :LIST;
+
+COLLECT  (:cola)
+  => (:one.cola.cmpd);
+	:one.cola.cmpd 'Singleton cola specification' => :cola.cmpd;
+
+COLLECT  (:LIST :extract=:cola)
+  => (:ext.cola.cmpd);
+	:ext.cola.cmpd 'Extracted cola specification fragments' => :cola.cmpd;
+
+EXEC (colaOut.sh) (:colaBe :name) (:colaInfo :name) (+parser)
+  => (:colaOut) (:colaData);
+:colaOut 'Selected COLA-generated parser' => :FILE;
+:colaData 'Selected COLA-generated information' => :FILE;
+
+COLLECT (:colaOut :list)
+  => (:parser*parserGen);
+
+COLLECT (:colaData :list)
+  => (:parser*parserInfo);

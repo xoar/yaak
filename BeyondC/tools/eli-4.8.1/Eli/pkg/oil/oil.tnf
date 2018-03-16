@@ -1,0 +1,1770 @@
+\input texinfo @c -*-texinfo-*-
+@comment %**start of header
+@setfilename oil
+@settitle Oil Reference Manual
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Oil Reference Manual}
+@sp 1
+@center $Revision: 1.22 $
+@include org.tnf
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@node    top,           , (dir)   , (dir)
+@comment node-name, next, previous, up
+
+@ifinfo
+$Revision: 1.22 $
+@end ifinfo
+
+@comment chapter Abstract
+
+This a reference manual for OIL (Eli's operator identification
+specification facility.)  OIL is a specification
+language and a set of library functions used in the specification and
+implementation of operator identification within a compiler.
+
+The specification language is the means for describing the operator
+identification for a compiler's source language and a mapping
+into the compiler's target language.  The support library is
+the means for using the relationships described in the user's
+specification to implement the desired operator identification in the
+context of an attribute grammar.  The relationship between a user's
+specification and calls on the library functions are elaborated by means
+of some examples.
+@menu
+* introduction::	Brief set of definitions and examples reviewing
+				the concepts used in operator identification.
+* example::             An overview of a simple example oil specification.
+* language::            Oil's specification language.
+* library::             Oil's support library.
+* interrelationship::   The interrelationship of a spec and library
+				function calls.
+* design hints::	Guidelines for effective use of OIL.
+* index::		Index to this manual.
+@end menu
+
+@node     Introduction, Example, Top,    Top    
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+OIL deals with three primary concepts: operators, types and indications.
+The operators which OIL refers to are strongly typed functions.
+The types which are named in an OIL specification are referred to as
+`primitive types' but there are also `constructed types' which are
+created at compile time.
+Indications are a name given to a list of operators which may be
+identified by an appearance of an indication in an expression.
+
+@iftex
+Although operators, types and indications are primary terms in
+discussing OIL and operator identification,
+the rest of this chapter is devoted to explanations of:
+@table @code
+@item Operator identification::
+A review of operator identification by example.
+@item Coercions::
+Coercions allow the compiler to use a value of one type where another
+is specified. 
+@item Sets of possible types::
+The set of all the types  which an expression might return.
+@item Classes::
+A set of operators and coercions which can be instantiated for a newly
+created constructed type.
+@item Names::
+An enumeration associated with each operator, type and class identifier.
+@end table
+@end iftex
+
+@menu
+* operator identification::  A review of operator identification by example.
+* coercions::		     Coercions allow the compiler to use a value
+				of one type where another is specified.
+* sets of possible types::   The set of all the types  which an
+				expression might return.
+* classes::		     A set of operators and coercions which can
+				be instantiated for a newly created
+				constructed type.
+* names::		     An enumeration associated with each
+				operator, type and class identifier.
+@end menu
+
+@node Operator identification, Coercions, Introduction, Introduction    
+@comment  node-name,  next,  previous,  up
+@section Operator identification
+
+Anyone familiar with compiler construction is familiar with operator
+identification but may not necessarily know it by that name.  Thus operator
+identification is introduced by an example. 
+
+In Pascal the
+expression @code{x+y} can have a number of meanings or it may be
+invalid.  For it to be valid @code{x} and @code{y} must refer to type
+values which allow the identification of a well typed operator
+associated with @code{+}.  The operator identified might be @emph{integer
+addition}, @emph{real addition} or @emph{set union}.  The operator
+identified is determined by the types associated with @code{x} and
+@code{y} and be formulated like:
+
+@itemize @bullet
+@item
+@code{x} and @code{y} are both integer then @emph{integer addition}
+
+@item
+@code{x} and @code{y} are @emph{set}s with the same element type then
+@emph{set union}
+
+@item
+one of @code{x} and @code{y} is @emph{real} and the other is @emph{real}
+         or @emph{integer} then @emph{real addition}
+
+@item
+otherwise @code{x+y} is undefined or an error
+
+@end itemize
+
+The @code{+} in @code{x+y} is called the indication and @code{x} and
+@code{y} are the operands.  The process of operator identification
+chooses a strongly typed operator associated with the indication and has
+a type signature which matches the types of the operands.  This is a
+simplification but it does capture the essentials of operator
+identification.
+
+The operation of `matching' the operand type with the type signature is
+really the relation `is coercible to', @pxref{Coercions,Coercions}.
+
+@node Coercions, Sets of possible types, Operator identification, Introduction    
+@comment  node-name,  next,  previous,  up
+@section Coercions
+
+A coercion is a distinguished operator which the compiler may insert in
+an expression to make operator identification possible.  In the previous
+section the Pascal expression @code{x+y} could identify a real
+expression if @code{x}'s type was real but @code{y}'s type was integer.
+OIL allows this to be specified using a coercion from integer to real.
+Thus whenever an integer is supplied but a real is required the compiler
+may apply the coercion to the integer argument and thus have only real
+arguments to identify real addition with.
+
+If there is a coercion from type @emph{A} to type @emph{B} then type
+@emph{A} is said to be `coercible to' type @emph{B}.
+
+A coercion sequence is any number of coercions applied in sequence.  In
+OIL a coercion sequence is used as if it were a single coercion.  Thus
+if type @emph{A} is coercible to type @emph{B} and type @emph{B} is
+coercible to type @emph{C} then there is a coercion sequence from type
+@emph{A} to type @emph{C}.  The elements in the sequence are the coercion
+operators in the order they need to be applied to satisfy the type
+constraint.  Thus using a coercion sequence type @emph{A} may match and
+argument of type @emph{C}.
+
+Coercion sequences lead to a revised definition of `coercible to'.
+If there is a coercion sequence from type @emph{A} to type @emph{B} then type
+@emph{A} is said to be `coercible to' type @emph{B}.  Note that since a
+coercion sequence may be empty every type is coercible to itself.
+
+
+@node Sets of possible types, Classes, Coercions, Introduction
+@comment  node-name,  next,  previous,  up
+@section Sets of possible types
+
+Each type has an associated @emph{set of possible types}.  A type @emph{B}
+is in the set of possible types for type @emph{A} if @emph{A} is coercible
+to @emph{B}.
+
+Likewise an expression may have a set of possible types. Take @code{x+y}
+as an example.  The set of possible types associated with the expression
+would include the result type of any operator which can be identified by
+@code{+} and an element from the set of possible types for @code{x} and
+an element from the set of possible types for @code{y}.
+
+Note that the set of possible types is a transitive closure of the
+relation `is coercible to'.  When a new coercion is created then the
+transitive closure of every type may need to be updated.  But in
+practice this is not the case and most coercions have no impact on the
+set of possible types for most types.
+
+
+@node Classes, Names, Sets of possible types, Introduction    
+@comment  node-name,  next,  previous,  up
+@section Classes
+
+Formally OIL's classes are parametric abstract types.  But they may be
+most easily comprehended as a procedure which takes some types as an
+argument and creates a new type and adds a set of operators and
+coercions into an existing type schema.  The net effect being that the
+new operators may now be identified and the set of possible types for
+some types may be increased.
+
+Consider the subrange type constructor in Pascal.
+It creates a coercion from the subrange to the base type.
+
+@node Names, , Classes, Introduction
+@comment  node-name,  next,  previous,  up
+@section Names for operators, types and classes
+@findex names
+
+You will want associate semantics to the identifiers in your OIL
+specification.  @emph{Names} allow a convenient way of doing that.  All
+types, classes and operators have names associated with them.  The name is
+represented as a definition table key
+(@pxref{Keys, , The Definition Table Module, deftbl, Definition Table})
+and can be referenced in your attribute grammar
+by the identifier used in the OIL specification.
+
+The name associated with an ADT type, class or operator is accessed by
+using the unary functions: @code{OilTypeName}, @code{OilClassName} and
+@code{OilOpName}.
+
+@node    Example,   Language, Introduction,      Top
+@comment node-name, next,     previous, up
+@chapter A review of an example OIL Specification
+
+The following is a complete OIL specification
+which we will analyze more completely later (@pxref{Interrelationship}.)
+But we will briefly review it here to give an intuitive feel for
+both the syntax and the semantics of the language.
+
+@findex overloaded operators
+@findex PASCAL
+@findex coercion
+
+In our example below is a specification
+of Pascal's overloaded operator (@samp{+}.)
+It can be identified with either integer addition (@dfn{iAdd}),
+real addition (@dfn{rAdd}) or set union (@dfn{sUnion}.)
+And we define a coercion operator (@dfn{Float}) to allow integer values
+to be used where real values may appear.
+ 
+@example
+OPER iAdd( int_t, int_t ): int_t;     /* the usual '+' operators for Pascal
+*/
+OPER rAdd( real_t, real_t ): real_t;
+OPER sUnion( set_t, set_t ): set_t;
+
+INDICATION Plus: iAdd, rAdd, sUnion;  /* will be identified together */
+
+COERCION Float( int_t ): real_t;    /* usual Pascal coercion from int to real
+*/
+@end example
+
+An OIL specification defines the identifiers for use in calls to the library
+functions.  The above specification defines these identifiers:
+
+@findex identifier
+
+@itemize @bullet
+@item
+@code{int_t}, @code{real_t}, @code{set_t} to be type denotations.
+@findex type denotation
+
+@item
+@code{iAdd}, @code{rAdd}, @code{sUnion}
+to be typed binary operator denotations with the expected functional signatures.
+@findex operator denotation
+
+@item
+@code{Plus} to be an operator indication which may be identified with
+@code{iAdd}, @code{rAdd} and @code{sUnion}.
+@findex operator indication
+
+@item
+@code{Float} is defined to be a coercion from @code{int_t} to @code{real_t}.
+@end itemize
+
+For a more in-depth examination of this specification @pxref{Simple Example}.
+
+@page
+@node    Language,  Library, Example, Top
+@comment node-name, next,    previous, up
+@chapter OIL's Specification Language
+
+@findex OIL specification
+@findex OIL statements
+
+An OIL specification is composed of a list of statements.  The statements
+describe relationships among identifiers which the library functions
+will interpret as describing an operator identification scheme.
+
+@menu
+* Identifiers::		Form and use of identifiers.
+* Comments::		Form of comments.
+* Statements::	Form of statements.
+@end menu
+
+With the specification language a compiler writer defines four sets of 
+mutually exclusive identifiers:
+
+@itemize @bullet
+@item
+@code{Operators} represent both indications and denotations.  That is an
+operator can be used as an indication and also have a type signature.
+@findex operators
+
+@item
+@code{Types} represent primitive types.  Unlike the types which are
+instantiations of classes.
+@findex types
+
+@item
+@code{Classes} represent parameterized sets of operators. A new version
+of each operator is constructed for each instantiation of the class.
+Likewise each instantiation of a class creates a new type which is not
+primitive. 
+@findex classes
+
+@item
+@code{Type Sets} represent a set of primitive types which can be used to
+construct multiple instances of an operator; one for each element in the
+type set. 
+@findex type set
+@end itemize
+
+The rest of this chapter of the manual describes the syntax
+of the specification language by covering the three main
+lexical and syntactic constructs:
+@code{Identifiers}, @code{Statements} and @code{Comments}.
+
+
+@node    Identifiers, Comments, Language, Language
+@comment node-name  , next           , previous, up
+@section Identifiers
+@findex OIL identifiers
+
+An @code{identifier} in an OIL specification is a sequence of characters which:
+
+@itemize @bullet
+@item
+begins with an alphabetic character: A-Z, a-z
+
+@item
+continues with an alphanumeric or underscore character: A-Z, a-z, 0-9, _.
+@end itemize
+
+Examples:
+@example
+iAdd, Fmul2
+@end example
+
+Identifiers are defined both explicitly and implicitly.  OPER and
+COERCION statements explicitly define operators.  CLASS statements
+explicitly define classes. SET statements explicitly define sets.
+Types are all implicitly defined; if an identifier appears only in a
+function signature or as a type element in a type set expression then it
+is a type.  If the indication in an INDICATION statement has no defining
+OPER statement it is implicitly defined as an operator.
+
+An identifier can only be in one of the sets:
+@code{operator}, @code{type}, @code{class} or @code{type set}.
+
+
+Constraints:
+An identifier can denote a @code{type} or an @code{operator} but not both.
+
+An @code{identifier list} is a sequence of identifiers separated by commas.
+
+Since OIL produces names to be used in your attribute grammar, you must
+not use a reserved word of your attribute grammar as an identifier in an
+OIL specification.
+
+Examples:
+@example
+iAdd,iMul  or  Fmul, Fadd, Fdiv
+@end example
+
+
+@node    Comments, Statements, Identifiers, Language
+@comment node-name, next, previous       , up
+@section Comments
+@findex OIL comments
+
+C-style comments, beginning with @code{/*} and ending with @code{*/}, are
+allowed in an OIL specification.
+A comment may appear anywhere that white space might be appropriate.
+
+
+
+@node    Statements, , Comments, Language
+@comment node-name      , next    , previous   , up
+@section Statement types
+@findex OIL statements
+
+There are five types of statements in OIL:
+@menu
+* OPER::	Operator definition.
+* COERCION::	Coercion definition.
+* INDICATION::	Operator identification.
+* CLASS::	Class definition.
+* SET::		Type set definition.
+@end menu
+
+@itemize @bullet
+@item
+@code{Operator definition} which defines the functional type signature of
+one or more operator denotations.
+@findex operator definition
+
+@item
+@code{Coercion operator definition} which defines a coercion operator and
+the ability for the source type of the coercion operator 
+to be acceptable in place of the destination type of the 
+coercion operator when performing operator identification.
+@findex coercion operator definition
+
+@item
+@code{Operator identification} which defines an operator indication and
+a set of operator denotations which the indication may identify.
+@findex operator identification
+
+@item
+@code{Class definition} which defines a set of operators to be
+constructed when a parameterized type is instantiated.
+@findex class definition
+
+@item
+@code{Type set definition} which defines an identifier to represent a
+set of types and allows explicit multiple operator definitions when used
+in an operator definition.
+@findex type set
+
+@end itemize
+
+
+@node     OPER, COERCION, Statements, Statements
+@comment  node-name,  next,  previous,  up
+@subsection Operator definition
+
+@findex operator definition
+
+The basic form of an operator definition is:
+@example
+`OPER' <Op-name> `(' <arg-list> `)' `:' <result-id> `;'
+@end example
+where: 
+@display
+@code{<Op-name>} is an operator identifier.
+@code{<arg-list>} is a list of identifiers separated with commas which
+describes the argument signature of the operator.
+@code{<result-id>} is an identifier which determines the result type of
+the operator.
+@end display
+
+The @code{<result-id>} and each identifier in the @code{<arg-list>} may
+be either a primitive type name, a SET name or if in a CLASS definition
+then they may refer to the CLASS name being defined or one of the
+parameters to the CLASS definition. @pxref{Function Signature}
+
+Constraints: 
+Any given @code{<Op-name>} can appear only once in all definition statements.
+
+An example is:
+@example
+OPER iAdd( int_t, int_t ): int_t;
+@end example
+
+In the example operator definition statement above, `iAdd' is
+defined to be an operator and `int_t' to be an operand type.
+
+@findex multiple operator definition
+
+The multiple form of an operator definition is: 
+@example
+`OPER' <Op-name-list> `(' <arg-list> `)' `:' <result-id> `;'
+@end example
+where: 
+@display
+@code{<Op-name-list>} is a list of operators separated by commas.
+@code{<arg-list>} and @code{<result-id>} are as before.
+@end display
+
+All the operators appearing in @code{<Op-name-list>} are given the same
+functional signature.
+@findex signature
+
+Constraints:
+Each operator in @code{<Op-name-list>} must appear only once
+in any operator definition.
+
+An example is:
+@example
+OPER rAdd, rSub, rMul, rDiv ( real_t, real_t ): real_t;
+@end example
+
+
+@node Function Signature,, OPER, OPER
+@comment  node-name,  next,  previous,  up
+@subsubsection Function Signatures
+
+How many and what kind of operator is being defined can vary a great
+deal depending on the definition of the identifiers which appear in the
+function signature.  There are essentially three different kinds of
+function signatures:
+@itemize
+@item
+Simple signature which only references primitive types.
+@item
+Class signature which references a class  or parameter name, though it
+may also refer to primitive types. 
+@item
+Set signature which references a set name in its signature, though it may
+also refer to primitive types.
+@end itemize
+
+A simple signature only defines a single operator.
+
+A class signature defines a pattern of a single operator to be created
+when the class is instantiated.  The actual signature constructed has
+the class name replaced by the created type and the parameter names are
+replaced with the corresponding positional argument which is used in
+instantiating the class.
+
+A set signature defines one operator for each element in the value of
+the referenced set.  Consider the example:
+@example
+SET s=[a,b];
+sop(s):c;
+@end example
+
+There are two operators with the name @code{sop} defined, with the
+signatures: 
+@example
+sop(a):c;
+sop(b):c;
+@end example
+
+If a set name is referenced more than once in the
+signature the same value appears in the corresponding position in the
+signature.   For example consider the specification:
+@example
+SET s=[a,b];
+SET r=[c,d];
+OPER sop(s,r):s;
+@end example
+
+Four operators with the name @code{sop} are created. With the four
+signatures:
+@example
+sop(a,c):a;
+sop(b,c):b;
+sop(a,d):a;
+sop(b,d):b;
+@end example
+
+The signature is duplicated once for each value in a unique set name.
+The set name is replaced with each value in turn reguardless of how many
+times the set name is referenced in the signature.
+
+Constraints:
+
+  If an identifier in a function signature is a CLASS name or a
+parameter to a CLASS then the operator definition must be in the body of
+the CLASS definition.
+
+  No reference to a SET name may be used in a CLASS operator definition.
+@node COERCION, INDICATION, OPER, Statements
+@comment  node-name,  next,  previous,  up
+@subsection Coercion operator definition
+@findex coercion operator definition
+@findex coercion
+
+The basic form of a coercion operator definition is: 
+@example
+`COERCION' <Cop-name> `(' <source-id> `)' `:' <result-id> `;'
+@end example
+where: 
+@display
+@code{<Cop-name>} is a coercion operator identifier.
+@code{<source-id>} is an identifier which determines the source type of
+the coercion.
+@code{<result-id>} is an identifier which determines the result type of
+the coercion.
+@end display
+
+The @code{<source-id>} and @code{<result-id>} may be either a primitive
+type name, a SET name or if in a CLASS definition then they may refer to
+the CLASS name being defined or one of the parameters to the CLASS
+definition. 
+
+An example is:
+@example
+COERCION cFloat( int_t ): real_t;
+@end example
+
+In the example coercion operator definition statement above, `cFloat'
+is defined to be an operator and, `int_t' and `real_t'
+are defined to be a operand types.
+
+Constraints: 
+@code{<Cop-name>} can appear in only one definition statement.
+
+
+@node INDICATION, CLASS, COERCION, Statements    
+@comment  node-name,  next,  previous,  up
+@subsection Operator identification
+@findex operator identification
+
+The basic form of an operator identification is: 
+@example
+`INDICATION' <Op-name> `:' <Op-name-list> `;'
+@end example
+where: 
+@display
+@code{<Op-name>} is an operator identifier.
+@code{<Op-name-list>} is list of operator denotations separated by commas.
+@end display
+
+The order of appearance from left to right of the operators in
+the @code{<Op-name-list>} determines a search order for the identification process.
+When an operator identification operation is performed on @code{<Op-name>} then
+each operator in @code{<Op-name-list>} is tried from left to right.
+
+Constraints: 
+@itemize @bullet
+@item
+All the operator denotations referenced 
+must have signatures of the same length.  (i.e. If the first 
+operator denotation has two arguments all the rest of the operators
+referenced must also have two arguments.)
+@findex signature
+
+@item
+All operator denotations must have appeared in an operator
+definition statement. 
+
+@item
+@code{<Op-name>} must not appear in any other operator identification
+statements. All potential operators to be identified by
+@code{<Op-name>} must appear in one operator identification statement.
+@end itemize
+
+An example is:
+@example
+INDICATION Plus: iAdd, rAdd, sUnion;
+@end example
+
+In the example operator identification statement above, `Plus' is
+defined to be an operator and,  `iAdd', `rAdd' and `sUnion' are
+defined to be operators.
+
+The example defines that `iAdd' will be the first operator tested for
+identification of `Plus' and `sUnion' would 
+be the last operator tested for identification.
+
+
+@node CLASS, SET, INDICATION, Statements    
+@comment  node-name,  next,  previous,  up
+@subsection Class definition
+@findex class definition
+
+The form of a class definition is:
+@example
+`CLASS' <Class-name>`(' <Param-name-list> `)' `BEGIN' <simple-stmts> `END' `;'
+@end example
+where:
+@display
+@code{<Class-name>} is a class identifier.
+@code{<Param-name-list>} is a list of parameter identifiers separated by
+commas.
+@code{<simple-stmts>} is a set of operator, coercion and indication statements
+that will be created by an instantiation of this class.
+@end display
+
+The declarations in the @code{<simple-stmts>} do not define operators
+and coercions but patterns for the creation of such operators.  When a
+class is instantiated then the patterns for that class are used to
+define the operators and coercions from the patterns.
+
+The type identifiers referenced in the declarations in
+@code{<simple-stmts>} may refer to the class name(@code{<Class-name>}),
+a specific primitive type or a parameter name(from
+@code{<Param-name-list>}.)  When a class is instantiated a type
+corresponding to each identifier is used to create an operator of
+coercion from the patterns in @code{<simple-stmts>}.
+
+@node SET, , CLASS, Statements    
+@comment  node-name,  next,  previous,  up
+@subsection Type set definition
+@findex type set definition
+
+The form of set definition is:
+@example
+`SET' <Set-name>`=' <set-expression> `;'
+@end example
+where:
+@display
+@code{<Set-name>} is a set identifier.
+@code{<set-expression>} is a expression which defines the types which
+are members of the set. 
+@end display
+
+A set expression may be composed of any of the following
+constructs(where s1,s2... are set expressions):
+@itemize @bullet
+@item
+@code{[ <Type-name-list> ]} where @code{<Type-name-list>} is a list of
+one or more primitive type names. 
+@item
+@code{<Set-name>} which identifies a previously defined type set and
+yields its value.
+@item
+@code{s1 + s2} which yields the union of the two type sets.
+@item
+@code{s1 * s2} which yields the intersection of the two type sets.
+@item
+@code{s1 - s2} which yields the difference of the two type sets.
+@end itemize
+
+
+@node    Library, Interrelationship, Language, Top
+@comment node-name, next     , previous, up
+@chapter OIL's Support Library
+@findex library functions
+@findex support library
+@findex OIL library
+
+The library functions are grouped according to classes of functions.  
+Within each class a C definition of the function is 
+presented, followed by a brief description of the semantics of the function.
+
+@menu
+* Library Types::	Description of the types used by the library.
+* Possible Types::	Operator Identification using Set of Possible Types.
+* Validation::		Validating Operator Identification.
+* Simplification::	Simpler Operator Identification.
+* Signature::		Looking at an operator's type signature.
+* Coercion Sequences::  Operations on Coercion Sequences.
+* Instantiate Classes:: Creating instances of specified classes.
+* Name Functions::	Names are an enumeration of the identifiers in
+				the specification for easy comparisons.
+* Compile Time::	Construction of types, operators, identifications
+				and classes by the generated compiler.
+@end menu
+
+@iftex
+The next section describes the five C types used and defined by the
+library. These types are defined entirely by the functions in OIL's
+library.
+
+The follow-on section describes operator identification using
+@emph{set of possible types} which is the most general identification
+method supported by OIL.
+
+Should a call to an OIL function for operator identification or coercion
+sequence construction fail, special values are returned.
+Functions are supplied to test for these special values allowing
+production of error messages for these error cases.
+
+Besides operator identification using set of possible types, there is
+also a simpler identification algorithm which is strictly bottom up.  It
+is useful when the full power of OIL is not necessary and the efficiency
+of a one pass algorithm can be utilized.
+
+Looking at an operator's type signature is fundamental to propagating
+the constraints of an operator's type signature out from the node it
+labels. OIL supplies a function to examine any given operator's
+function signature,
+
+Coercion sequences are fundamental to most uses of OIL and constructing
+and examining coercion sequences is critical to examining them for code
+generation purposes.
+
+Creating instances of specified classes.
+OIL's @emph{CLASS} construct allows for easy support of most type
+constructors.  OIL allows a type constructor to be specified and then
+instantiated to create a type which conforms to the specification of the
+@emph{CLASS}. 
+
+Names are an enumeration of the identifiers in the specification for
+easy comparisons.  When a class is instantiated all its operators have
+new unique signatures based on the created type, but the names of
+corresponding operators are the same as those used in the specification
+of the class operator.
+
+Construction of types, operators, identifications and classes can be
+performed by the library functions.  Thus should a particular
+application need to build and define a unique class, coercion or any OIL
+object it can be done during the compilation using these functions.
+@end iftex
+
+@node     Library Types, Possible Types, Library, Library    
+@comment  node-name,  next,  previous,  up
+@section Library Types
+The semantics of the functions are described in terms of the basic types
+understood by OIL.
+@table @code
+@item tOilType
+This type is associated with the 
+identifiers defined as (@emph{type}) in the OIL specification and
+represents type denotations. It is used to define function signatures
+for operators and thus the coercion graph.
+
+@item tOilOp
+This type is associated with 
+the identifiers defined as (@emph{operator}) in the OIL specification.
+An element of this type can have associated with it either a function
+signature or a list of identifiable operators.  All coercions are
+operators. 
+
+@item tOilTypeSet
+Is a private type of the OIL library functions which 
+represents a set of type denotations and represents the @emph{set of
+possible types} concept.
+@findex set of types
+@findex type set
+
+@item tOilClass
+This type is associated with identifiers defined as (@emph{class}) in
+the OIL specification and identifies the set of operators and coercions
+defined for that class.  It is used as the handle for instantiating a
+class.  The instantiation operation creates a new object of type:
+@code{tOilType} and adds new instances of the operators and coercions
+defined for the class.
+
+@item tOilCoercionSeq
+This type 
+represents a sequence of coercion operators which will transform 
+a value of one type into a desired type.  The coercions sequence may be
+empty or of an arbitrary length.  Each element in a coercion sequence is
+a coercion operator.
+@findex coercion sequence
+@end table
+
+There is one other type which is important for use of the ADT and that
+is the @emph{name} of a class, type or operator.  A @emph{name} is
+represented as a definition table key
+(@pxref{Keys, , The Definition Table Module, deftbl, Definition Table})
+and each identifier in the OIL specification
+has a unique @emph{name} associated with it.  This allows a class
+operator to be treated the same regardless of its arguments.  But since
+the argument signature of an instantiated class operator will refer to
+the types used to instantiate the class, the type specific information
+can be referenced as needed.
+
+@node    Possible Types, Validation, Library Types , Library
+@comment node-name     , next      , previous, up
+@section Set of Possible Types
+
+@findex possible result types
+@findex operator indication
+@findex set of types
+The functions @code{OilIdResultTS*} 
+identify the set of possible result types given the operator
+indication (@emph{oi})
+and the set of possible result types (@emph{ats*}) for each operand.
+
+The set of types (@emph{tOilTypeSet}) returned describes the the union of the
+result types of any of the operators which can be identified by (@emph{oi})
+with any combination of argument types selected by the argument type sets,
+(@emph{at*}.)
+Also in this set are types which can be reached from identified operators by 
+means of a coercion sequence.
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+@findex OilIdResultTS1
+@findex OilIdResultTS2
+@findex OilIdResultTS3
+tOilTypeSet OilIdResultTS1( oi:tOilOp, ats:tOilTypeSet ); 
+tOilTypeSet OilIdResultTS2( oi:tOilOp, ats1,ats2:tOilTypeSet ); 
+tOilTypeSet OilIdResultTS3( oi:tOilOp, ats1,ats2,ats3:tOilTypeSet ); 
+@end example
+
+The functions @code{OilIdOpTS*} identify an operator given 
+the operator indication (@emph{oi}), 
+the result type (@emph{rt}) and
+the sets of possible argument types (@emph{ats*}.)
+@findex result type
+@findex argument type
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+@findex OilIdOpTS1
+@findex OilIdOpTS2
+@findex OilIdOpTS3
+tOilOp OilIdOpTS1( rt:tOilType, oi:tOilOp, ats:tOilTypeSet ); 
+tOilOp OilIdOpTS2( rt:tOilType, oi:tOilOp, ats1,ats2:tOilTypeSet ); 
+tOilOp OilIdOpTS3( rt:tOilType, oi:tOilOp, ats1,ats2,ats3:tOilTypeSet ); 
+@end example
+
+Suppose that an operator indication can identify only a single operator,
+but it is used in an inappropriate context for that operator.
+Functions @code{OilIdOpTS*} will return an invalid operator in that case.
+In many situations, however, it is preferable to return the one possible
+operator and report errors in the context.
+The function @code{OilNoOverload} is used in these situations.
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+@findex OilNoOverload
+tOilOp OilNoOverload( oi:tOilOp, OilIdOpTS*( ... ));
+@end example
+
+The function @code{OilTypeToSet} 
+constructs a set of types from a given type denotation.
+@findex type denotation
+The set of types returned contains @emph{t} and
+all the type denotations which  can be reached from @emph{t}
+by any sequence of coercion operators.
+@findex coercion operator
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+tOilTypeSet OilTypeToSet( t:tOilType ); 
+@end example
+@findex OilTypeToSet
+
+The function @code{OilSelectTypeFromTS}
+selects a type from a given set of types.  The type selected
+is the type which is both in the set @emph{ts} and can be coerced to all the 
+types in the set.
+@findex coercion
+@findex selected type
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+tOilType OilSelectTypeFromTS( ts:tOilTypeSet ); 
+@end example
+@findex OilSelectTypeFromTS
+
+The following equation is true for any type @code{t}:
+@example
+OilSelectTypeFromTS( OilTypeToSet( t ) ) = t
+@end example
+
+The function @code{OilBalance}
+selects a type which can be coerced to all the elements
+which sets @emph{ts1} and @emph{ts2}  have in common.  This operation
+corresponds with function of type balancing in typed expression analysis
+from compiler and programming language theory.
+@findex balancing
+@findex type balancing
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+tOilType OilBalance( ts1,ts2:tOilTypeSet ); 
+@end example
+@findex OilBalance
+The following is true for all type sets @code{ts1} and @code{ts2}:
+@example
+OilBalance( ts1,ts2 ) = OilSelectTypeFromTS( ts1 AND ts2 )
+@end example
+
+One other important operation on sets is a test for set membership.
+This operation is performed on a type set by the function
+@code{OilSetIncludes}, which returns true if the set @code{s} includes
+the type @code{t}.
+@example
+int OilSetIncludes( s:tOilTypeSet, t:tOilType );
+@end example
+@findex OilSetIncludes
+
+@code{OilSetIncludes} will be the usual mechanism for testing if a
+expression can be coerced to a particular type.  The expression's set of
+possible types is calculated and @code{OilSetIncludes} is used to check
+if the type in question is in the set of possible types.
+
+
+
+@node    Validation, Simplification, Possible Types, Library
+@comment node-name , next          , previous      , up
+@section Validating operator identification
+@findex validating operator identification
+
+The function @code{OilIsValidOp} validates that a given value denotes
+a valid operator.  
+@findex valid operator
+Since any operator identification operation will return some
+operator indication, we need to validate that the operator identified
+was not the catchall @emph{illegal operator}.
+@findex illegal operator
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+int OilIsValidOp( op: tOilOp ); 
+@end example
+@findex OilIsValidOp
+
+@node    Simplification, Signature, Validation, Library
+@comment node-name     , next     , previous  , up
+@section Simpler operator identification
+
+The function @code{OilIdOp*} can 
+identify the operator associated with the indication (@emph{oi})
+which has an argument type to which (@emph{at}) can be coerced.
+In general these are less powerful than the `set of result type'
+operators,
+but for simple languages they are both faster and easier to use.  You can
+probably use these if you can identify the correct operator from the
+the types of the operands alone without regard to the  context.
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+@findex OilIdOp1
+@findex OilIdOp2
+@findex OilIdOp3
+tOilOp OilIdOp1( oi: tOilOp, at: tOilType ); 
+tOilOp OilIdOp2( oi: tOilOp, at1,at2: tOilType ); 
+tOilOp OilIdOp3( oi: tOilOp, at1,at2,at3: tOilType ); 
+@end example
+
+@node    Signature, Coercion Sequences, Simplification, Library
+@comment node-name, next              , previous      , up
+@section Looking at an operator's type signature
+The function @code{OilGetArgType} allows us to get the type of the
+n'th argument (@emph{arg}) of an operator(@emph{op}.)  The 0'th argument
+returns the result type from the function signature.
+@findex signature
+@findex type signature
+@findex argument type
+@findex expected argument type
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+tOilType OilGetArgType( op:tOilOp, arg:int ); 
+@end example
+@findex OilGetArgType
+
+
+@node    Coercion Sequences, Instantiate Classes, Signature, Library
+@comment node-name         , next, previous , up
+@section Coercion sequences
+@findex coercion sequence
+@findex sequence of coercions
+
+The function @code{OilCoerce}
+allows us to construct a sequence of coercion operators
+from type @emph{t1} to @emph{t2}.  
+The first operator in the sequence (see @code{OilHeadCS} below)
+will have a result type of @emph{t2}.  The last operator in the 
+sequence will have a source type of @emph{t1}. 
+@findex source type
+@findex result type
+@code{OilCoerce} will always return a coercion sequence. But if there is no
+valid coercion sequence between the types then the catchall 
+@emph{error coercion sequence} is produced.
+@findex error coercion sequence
+@findex coercion sequence, error
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+tOilCoercionSeq OilCoerce(  t1,t2:tOilType ); 
+@findex OilCoerce
+
+@end example
+
+These operations on coercion sequences (@code{tOilCoercionSeq}) allow us to
+step through a coercion sequence and perform an action for each
+operator in the sequence.
+
+The function @code{OilEmptyCS} will test a coercion sequence to see if it
+is empty.  The result will be true is the argument is empty and false otherwise.
+@findex empty coercion sequence
+@findex coercion sequence, empty
+
+The function @code{OilHeadCS} returns the first operator in the sequence.
+The operator returned by @code{OilHeadCS} will have been defined by a 
+coercion statement. Or it will be the error operator in the case of an
+@emph{error coercion sequence}.
+@findex coercion sequence, head of
+@findex head of coercion sequence
+
+The function @code{OilTailCS} returns the rest of the sequence once the first
+operator in the sequence is removed. 
+@findex coercion sequence, tail of
+@findex tail of coercion sequence
+
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+@findex OilEmptyCS
+@findex OilHeadCS
+@findex OilTailCS
+int OilEmptyCS( cs: tOilCoercionSeq ); 
+tOilOp OilHeadCS( cs: tOilCoercionSeq ); 
+tOilCoercionSeq OilTailCS( cs: tOilCoercionSeq ); 
+@end example
+
+The function @code{OilIsValidCS}
+allows us to validate a coercion sequence.  It is crucial
+to detect invalid typing for a subexpression since every call to 
+@code{OilCoerce} will return a coercion sequence and we need to know if
+the sequence returned was the catchall @dfn{error coercion}.
+@findex validating a coercion sequence
+@findex error coercion
+
+@iftex
+@sp 1
+@end iftex
+
+@example
+int OilIsValidCS( cs: tOilCoercionSeq ); 
+@end example
+@findex OilIsValidCS
+
+
+@node     Instantiate Classes, Name Functions, Coercion Sequences, Library    
+@comment  node-name,  next,  previous,  up
+@section  Instantiate Classes
+
+When a class is instantiated a new type is created and the set of
+operators and coercions defined for that class are created using the
+created class and the types indicated by the parameters to build the
+actual function signatures for the created operators.  The `is coercible
+to' relation is enhanced by all the coercions defined by the
+instantiation. 
+
+Classes can be instantiated by calling one of the functions:
+
+@example
+@findex OilClassInst0
+@findex OilClassInst1
+@findex OilClassInst2
+tOilType OilClassInst0( c:tOilClass, n:DefTableKey ); 
+tOilType OilClassInst1( c:tOilClass, n:DefTableKey, at:tOilType ); 
+tOilType OilClassInst2( c:tOilClass, n:DefTableKey, at1,at2:tOilType ); 
+@end example
+
+Constraints:
+
+The number of parameters defined for the class must match the number of
+types supplied as arguments.
+
+@node     Name Functions,  Compile Time,   Instantiate Classes, Library    
+@comment  node-name,  next,  previous,  up
+@section Name Functions
+
+@findex names
+Each type, operator and class has a @emph{name} associated with it.
+There is a function for retrieving the name associated with a specific
+type during attribution:
+
+@example
+@findex OilTypeName
+@findex OilOpName
+@findex OilClassName
+DefTableKey OilTypeName( t:tOilType );
+DefTableKey OilOpName( op:tOilOp );
+DefTableKey OilClassName( c:tOilClass );
+@end example
+
+If the identifier @code{MyType} is a type in a specification then the
+C symbol @code{MyType} will have the value of
+@code{OilTypeName(MyType)}.
+
+@findex creating new names
+
+@node	 Compile Time, , Name Functions, Library
+@comment  node-name,  next,  previous,  up
+@section Compile Time
+
+The OIL library has all of the necessary functions for the construction
+of OIL entities during the execution of the generated compiler.  This
+capability allows the changing of the OIL schema in more detailed ways
+than simply instantiating an already specified class.  The different
+capabilities for modifying the schema are:
+@menu
+* Type Constructor::		A new type may be constructed without using
+				Classes.  
+* Operator Constructor::	A new operator may be explicitly constructed
+				with a given signature (remember operators are
+				use to represent indications also).
+* Signature Constructor::	An argument signature for an operator can be
+				constructed from types.
+* Coercion Constructor::	A properly constructed operator can be declared
+				to be a coercion.
+* Identification Constructor::	Any operator can be defined to `indicate' any
+				other operator. 
+* Class Constructor::		A class can be built from class operators and
+				coercions. 
+@end menu
+@iftex
+@table @strong
+@item Type Constructor
+	A new type may be constructed without using Classes.
+@item Operator Constructor
+	A new operator may be explicitly constructed with a given
+signature(remember operators are use to represent indications also.)
+@item Signature Constructor
+	An argument signature for an operator can be constructed from
+types.
+@item Coercion Constructor
+	A properly constructed operator can be declared to be a
+coercion.
+@item Identification Constructor
+	Any operator can be defined to `indicate' any other operator.
+@item Class Constructor
+	Can be built from class operators and coercions.
+@end table
+@end iftex
+
+@node Type Constructor, Operator Constructor, Compile Time, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Types
+In addition to class instantiation, a new type may be constructed with the
+function @code{OilNewType}.  Its only argument is the name to be associated
+with the new type.
+@example
+tOilType OilNewType( id:DefTableKey );
+@end example
+@findex OilNewType
+
+@node Operator Constructor, Signature Constructor,Type Constructor, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Operators
+Constructing a new operator is a two step process, first a new argument
+signature must be constructed and then a new operator with that signature
+can be constructed using the function @code{OilNewOp}.  Besides the
+argument signature, @code{OilNewOp} requires the name of the new
+operator(@code{id}), and the cost of the new operator(@code{cost}.)
+@example
+tOilOp OilNewOp(id:DefTableKey,sig:tOilArgSig,cost:int);
+@end example
+@findex OilNewOp
+
+
+@node Signature Constructor, Coercion Constructor, Operator Constructor, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Argument Signatures
+Argument signatures are built in two steps: an empty signature is
+constructed with @code{OilNewArgSig} and then a type is pushed onto the
+front of the signature using @code{OilAddArgSig}.
+@example
+@findex OilNewArgSig
+@findex tOilArgSig
+@findex OilAddArgSig
+tOilArgSig OilNewArgSig(dummy:int);
+tOilArgSig OilAddArgSig( arg:tOilType, sig:tOilArgSig );
+@end example
+Note that by convention, the last type pushed onto the signature is the
+result type of the created operator.
+
+@node Coercion Constructor, Identification Constructor, Signature Constructor, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Coercions
+Any operator with an argument signature of length 2 can be a coercion by
+simply applying @code{OilAddCoercion} on it.
+@example
+int OilAddCoercion( op:tOilOp );
+@end example
+@findex OilAddCoercion
+
+Constraints
+
+A check is not made that the signature is of length 2.
+
+
+@node Identification Constructor, Class Constructor, Coercion Constructor, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Identifications
+A relationship between an operator indication (@code{ind}) and an operator
+(@code{op}) is established by simply
+supplying them to the @code{OilAddIdentification} function.
+@code{OilAddIdentification} returns the value of @code{op}.
+@example
+tOilOp OilAddIdentification( ind, op:tOilOp );
+@end example
+@findex  OilAddIdentification
+
+Constraints
+
+A check is not made regarding the redundancy of the new identification
+with respect to the existing schema.  You can have ambiguity of which
+operator is identified by any given indication and operand signature.
+OIL will choose the most recently declared, least cost identification.
+
+@node Class Constructor, , Identification Constructor, Compile Time
+@comment  node-name,  next,  previous,  up
+@subsection Classes
+Classes are very complex entities and are constructed in stages.  First an
+empty class in created using @code{OilNewClass}.  The argument @code{id}
+specifies the name of the class and the argument @code{argNum} specifies
+how many parameters the class has.
+@example
+tOilClass OilNewClass(id:DefTableKey,argNum:int);
+@end example
+@findex OilNewClass
+
+To an existing class(@code{c}) we can add an operator with a given class
+signature(@code{sig}) and given cost(@code{cost}) with the function
+@code{OilAddClassOp}.
+@example
+tOilClassOp OilAddClassOp(id:DefTableKey,sig:tOilClassArgSig,cost:int, c:tOilClass);
+@end example
+@findex OilAddClassOp
+
+With a class operator we can create an identification of an instantiated
+class operator(@code{op}) by an existing operator(@code{ind}) with the
+function @code{OilAddClassOpId}.
+@example
+int OilAddClassOpId(ind:tOilOp,op:tOilClassOp);
+@end example
+@findex OilAddClassOpId
+
+The function @code{OilAddClassCoercion} is used to 
+define an existing class operator(@code{op}) to be a coercion.
+@example
+int OilAddClassCoercion(op:tOilClassOp);
+@end example
+@findex OilAddClassCoercion
+
+Building a class argument signature is similar to constructing a simple
+argument signature but it is complicated by the fact that a class argument needs
+to be described in terms of a parameter binding. A class argument's
+parameter binding determines the value of the parameter when the class
+is instantiated. Like simple signatures we first build an empty class
+signature and then push arguments onto it.  An empty class signature is
+created with @code{OilNewClassSigArg} and an argument description is added
+with @code{OilAddClassSigArg}. 
+@example
+tOilClassArgSig OilNewClassSigArg(dummy:int);
+@end example
+@findex OilNewClassSigArg
+@example
+tOilClassArgSig OilAddClassSigArg(
+			    td:tOilClassSigArgDesc,
+			    st:tOilType,
+			    pi:int,
+			    cs:tOilClassArgSig
+			  );
+@end example
+@findex OilAddClassSigArg
+The extra arguments to @code{OilAddClassSigArg} describe the possible
+bindings which will instantiate the class signature.
+@table @code
+@item td
+Can be @code{eClassRef} to indicate that a reference to the created type
+replaces this argument, @code{eParamRef} to indicate that one of the
+parameters to the class instantiation will replace this argument or
+@code{eSpecTypeRef} to indicate 
+that a specific type will replace this argument.
+@item st
+Specifies which explicit type will replace this argument.
+@item pi
+Selects which parameter of the class instantiation will replace this
+argument. 
+@end table
+
+@page
+
+@node    Interrelationship, Design Hints, Library , Top
+@comment node-name, next         , previous, up
+@chapter Relating an OIL specification to library function calls
+
+To explain the relationship between the specification and the abstract
+data type we will examine different extractions from some possible
+specifications and review the behavior of some of the related functions in
+the abstract data type.
+@findex abstract data type
+
+@menu
+* Using Names::		Basic mapping of specification identifiers to
+				C identifiers.
+* Simple Example::	An example of a simple OIL specification.
+* Complex Example::	A more complex example using Possible ResultTypes.
+* Using Classes::	An example of using classes.
+@end menu
+
+
+@node Using Names, Simple Example, Interrelationship, Interrelationship    
+@comment  node-name,  next,  previous,  up
+@section Using Names
+@findex names
+
+Each entity defined in an OIL specification is represented by a definition
+table key.
+The OIL value is accessible as a property of that definition table key.
+For example, suppose that @code{iAdd} was defined by an @code{OPER}
+statement in OIL.
+This would result in a known key
+(@pxref{Initializations, , How to specify the initial state, deftbl,
+Definition Table})
+@code{iAdd}.
+@code{iAdd} would also have an @code{OilOp} property whose value was the
+actual OIL operator (of type @code{tOilOp}).
+Thus the actual OIL operator corresponding to @code{iAdd} could be obtained
+by the function call @code{GetOilOp(iAdd,OilInvalidOp)}
+(@pxref{Query, , Behavior of the basic query operations, deftbl,
+Definition Table}).
+
+In order to avoid the overhead of querying a property for constant
+information, OIL also defines an identifier as the actual OIL operator.
+This identifier is constructed by prefixing the OIL identifier with
+@code{OilOp}.
+Thus the identifier @code{OilOpiAdd} denotes the value that would be
+obtained from the function call @code{GetOilOp(iAdd,OilInvalidOp)}.
+
+Similar conventions are used for OIL types and OIL classes:
+The OIL identifier denotes a known key, and the actual OIL entity (of type
+@code{tOilType} or @code{tOilClass} respectively) is denoted by prefixing
+either @code{OilType} or @code{OilClass} to that identifier.
+A known key denoting an OIL type also has an @code{OilType} property,
+and a known key denoting an OIL class has an @code{OilClass} property.
+
+@node    Simple Example, Complex Example, Using Names, Interrelationship
+@comment node-name     , next           , previous , up
+@section A simple example
+
+Let us consider the following OIL specification:
+
+@example
+iAdd ( int_t, int_t ): int_t;     /* the usual '+' operators for Pascal */
+rAdd ( real_t, real_t ): real_t;
+sUnion ( set_t, set_t ): set;
+
+Plus: iAdd, rAdd, sUnion;  /* will be identified together */
+
+COERCION Float( int_t ): real_t;    /* usual Pascal coercion from int to real */
+@end example
+@findex PASCAL
+ 
+ 
+ 
+@subsection Definitions from the specification
+ 
+All of the identifiers in this specification will denote values to the
+library functions.  The functions in the library will be applied to values
+constructed from these identifiers and will return values represented by
+these identifiers.
+ 
+@subsection Operator Identification
+@findex operator identification
+ 
+The most basic operation is that of operator identification so we will
+start there.  When semantically analyzing a binary expression formed with a
+plus sign (+), the compiler would use the function @code{OilIdOp2} applied to
+the value denoted by @emph{Plus} (which indicates the syntactic operator) and
+the types of the operands to the plus sign.
+ 
+The invocation @code{OilIdOp2( Plus, int_t, real_t )} would return the operator
+@emph{rAdd} because @emph{int_t} was coercible to @emph{real_t}.  Similarly :
+
+@display
+@code{OilIdOp2( Plus, set_t, set_t )} would return @code{sUnion}
+
+@code{OilIdOp2( Plus, int_t, int_t )} would return @code{iAdd}
+
+@code{OilIdOp2( Plus, real_t, real_t )} would return @code{rAdd}
+
+@end display
+ 
+Any combination of operand types like @emph{real_t} and @emph{set_t}
+would return a value denoting an erroneous operator.
+Example: @code{OilIsValidOp( OilIdOp2( Plus, real_t, set_t ) )}
+would return an integer value of 0.
+ 
+@subsection Operator Signatures
+@findex operator signature
+@findex signature
+Once we have identified an operator will need to know its type signature
+so that we may return the type of the subexpression computed by the
+operator and so we may determine the types required by the operator from
+its respective operands.  The function @code{OilGetArg} gives us that facility.
+ 
+The expression @code{OilGetArg( iAdd, 0 )} would return @emph{int_t}
+as the type of the result of the operator @emph{iAdd}.  
+Likewise @code{OilGetArg( sUnion, 1 )} would
+return @emph{set_t} as the required type of the first operand to the `sUnion'
+operator.
+@findex OilGetArg
+ 
+@subsection Coercion sequence
+@findex coercion sequence
+@findex sequence of coercions
+ 
+Once we have the type returned by an operator and know the type required
+of this sub-expression (from the parent context) we may need to apply a
+sequence of coercions on the result of the operator to satisfy the requirements
+of the parent context.  The function @code{OilCoerce} supplies the necessary
+function.
+@findex coercion
+ 
+In the case of our example we might require a @emph{real_t} result from an
+@emph{iAdd} operator (which returns @emph{int_t}.)
+The expression @code{OilCoerce( int_t, real_t )}
+would return a coercion sequence which represented the coercion of
+an @emph{int_t} type 
+value to a @emph{real_t} type value.  This coercion sequence (call it
+@emph{cs}) would then be analyzed with the functions: OilEmptyCS, OilHeadCS
+and OilTailCS.  The expression @code{OilHeadCS( cs )} would
+evaluate to @emph{Float} and
+@code{OilEmptyCS( OilTailCS( cs ) )} would evaluate to true.  These expressions
+describe the fact that only the coercion operator @emph{Float} was necessary to
+transform @emph{int_t} to @emph{real_t}.
+ 
+If no coercions were necessary then @code{OilEmptyCS( cs )} would have yielded
+the value true.  Likewise to detect an impossible coercion, the function
+@code{OilIsValidCS} would be used.
+@findex impossible coercion
+The expression @code{OilIsValidCS( OilCoerce( real_t, set_t ) )}
+would yield the value false to indicate that such a coercion
+was not possible.
+ 
+@node    Complex Example, Using Classes, Simple Example, Interrelationship
+@comment node-name      , next, previous      , up
+@section A more complex example
+ 
+Not all operator identification schemes can be implemented with the
+simple bottom-up type evaluation shown in the previous section.  Sometimes
+the desired result type will affect which operator denotation is 
+identified with a given operator indication.  OIL supplies this capability
+with the @strong{set of types} operations.
+@findex operator denotation
+@findex operator indication
+@findex set of types
+
+Below is an example OIL specification which is designed
+to use @strong{set of types.}
+The specification shows that there are two multiplication
+operators(@code{sMulS sMulD}) on type @code{single}.
+One multiplication operator returns a double length result
+(@code{double}) the other returns a single length
+ result(@code{single}.)  These declarations have a natural correspondence
+with many machine architectures.  The operator indication @code{Mul} is defined
+to identify either @code{sMulS} or @code{sMulD}.
+@findex double
+@findex single
+
+@example
+sMulS ( single, single ): single;
+sMulD ( single, single ): double; 
+dMulD ( double, double ): double;
+
+COERCION iCvtStoD ( single ): double;
+
+Mul: dMulD, sMulD, sMulS
+
+@end example
+ 
+@subsection Using type sets
+@findex type set
+
+To use @emph{type set} functions we must begin with constructing the
+@emph{possible result type set} of a terminal.  For this we use the function
+@code{OilTypeToSet}.  Like so:
+
+@display
+@code{OilTypeToSet( single ) }yields @code{ [ single, double ]}
+
+@code{OilTypeToSet( double ) }yields @code{ [ double ]}
+@end display
+
+For the rest of this example we will use the identifiers @code{ss} and
+@code{ds} to represent the type sets for single and double,
+respectively.
+
+To analyze an entire expression with @emph{type sets} we must 
+also be able to determine the set of types associated with
+an operator indication and its set of operands.  For this we use the 
+@code{OilIdResultTS*} functions.  Like so:
+
+@display
+@code{OilIdResultTS2( Mul, ss, ss) }yields @code{ [ single, double ]}
+
+@code{OilIdResultTS2( Mul, ds, ss) }yields @code{ [ double ]}
+
+@code{OilIdResultTS2( Mul, ds, ds) }yields @code{ [ double ]}
+@end display
+
+When we get to the root of an expression (like in an assignment) we would
+then use a desired type determined from the context of the root of the
+expression (like the destination type of the assignment)
+to determine which operator we wanted to
+select.  For this we use the @code{OilIdOpTS*} functions.  Like so:
+
+@display
+@code{OilIdOpTS2( single, Mul, ss, ss) }yields @code{ sMulS}
+
+@code{OilIdOpTS2( double, Mul, ss, ss) }yields @code{ sMulD}
+
+@code{OilIdOpTS2( double, Mul, ds, ss) }yields @code{ dMulD}
+@end display
+
+By using @emph{type sets}, the operator indication @emph{Mul} with
+@emph{single} operands can identify @emph{sMulD},
+thus directly producing a double result;
+whereas with the simple scheme used previously (@pxref{Simple Example}.)
+an additional coercion would be needed to return a double result.
+
+
+@node Using Classes, , Complex Example, Interrelationship
+@comment node-name      , next, previous      , up
+@section Using Classes
+
+There are three steps to using classes: (1)specifying them with OIL,
+(2)instantiating them using the @code{OilClassInst*} functions and
+(3)identifying the enriched indication mappings with enriched coercion
+graph. 
+
+The following OILspecification allows us to define any number of
+@code{Set}s during compilation.  And we specify the overloading of the
+`+'(@code{loPlus}) operator to allow set union.
+@example
+CLASS Set( element ) BEGIN
+  COERCION coElemToSet(element):Set;
+  OPER soUnion(Set,Set):Set;
+END;
+
+OPER soIadd(tInt,tInt):tInt;
+OPER soRadd(tReal,tReal):tReal;
+
+INDICATION loPlus: soIadd, soRadd, soUnion;
+@end example
+We can then construct a simple binary expression compiler which uses a
+constant set for one of its possible operand types.
+@example
+NONTERM Expr: op:tOilOp, st:tOilType;
+
+RULE Dyadic: Expr::= Term Ind Term
+STATIC
+  Expr.st:= OilClassInst1( Set, Set_name, tInt );
+  Expr.op:= OilIdOp2( Ind.op, Term[1].type, Term[2].type )
+END;
+
+NONTERM Term: type:tOilType;
+
+RULE Set: Term::= 's'
+STATIC Term.type:= INCLUDING Expr.st END;
+
+RULE Integer: Term::= 'i'
+STATIC Term.type:= tInt END;
+
+RULE Real: Term::= 'r'
+STATIC Term.type:= tReal END;
+
+NONTERM Ind: op:tOilOp;
+
+RULE Plus: Ind::= '+'
+STATIC Ind.op:= loPlus END;
+@end example
+We use the following request to construct the compiler:
+@example
+test3.specs :exe>test3.exe
+@end example
+
+@node	 Design Hints, Index, Interrelationship, Top
+@comment node-name     , next, previous     , up
+@chapter Design Hints
+Some `usual' problems in operator identification are presented with some
+suggested work-arounds using OIL(along
+with general guidelines for effective use of OIL.)
+
+@section Incremental Design and Implementation
+@findex incremental design
+It is relatively easy to design and implement with OIL in incremental
+steps.  One can work with the atomic/primitive types of your schema
+first and get the desired behavior with only
+identification.  You can then add coercion sequence construction.  And
+then work on the class specifications.  Last of all one should work on
+compile time entity definition.  These guide lines can be easily ignored
+but I would suggest that you find replacements for these rules rather
+than not do incremental design and implementation.
+
+@section Identifying Operands
+For some problems it is easier to identify the operand types and
+associated coercion sequences independently of the operator.  When using
+OIL to select addressing modes for assembly language this is often the
+case as the instruction set is factored into operation and operand
+address.  Operations can be factored into classes which support
+different operand address mode signatures.  The classes can be defined
+as an indication and the different patterns of address modes are the
+strongly typed data flow operators for the instruction.
+
+If we didn't use this method of `instruction classes' then we would have
+to duplicate the address mode patterns for each instruction in the
+class.  This would be time consuming, redundant, and a strain on our
+name generation faculties.  And such a multiplicity of names would cause
+its own confusion, reducing the  benefit of using OIL.
+
+
+@section Error Handling
+There are two ways to handle errors with OIL:
+use your own error type and 
+use OIL's.
+Each has its own advantages.
+
+OIL's error type is @code{OilInvalidType} and is by definition coercible
+to and from any type.  Thus once an expression is assigned this value it
+will make an end-run on OIL's strong typing and match any operator which
+satisfies the other argument constraints.  In the degenerate case where
+all operands are @code{OilInvalidType} then any identifiable operator will
+be chosen.
+
+If your own type is used(say @code{ErrorType}) you must define an
+operator with it in its signature(the only way to define a type other
+than class instantiation.)
+By not having any type coercible to it no operator will be identified
+and thus no valid operator will be returned and the function
+@code{OilIsValidOp} will return false allowing easy error detection.
+
+The error operator(@code{OilInvalidOp}) has a type signature of all
+@code{OilInvalidType}. Thus if it is identified, which in the error case
+it is, no type errors will be propagated up or down the tree.
+
+
+@section Modeling OIL's function
+If you need to model OIL in your compiler design, one of the most
+convenient ways is to consider the set of declarations which the OIL
+library manages as a database.  This data base is initialized by the OIL
+specification and modified and accessed via the library functions.
+
+
+@section Schema Restrictions
+OIL has a very simple schema model. All of the library routines only add
+declarations to an OIL schema.  There is no way to remove a declaration
+from an OIL schema once it has been added.  This can have two impacts
+on your use of OIL.  Every added declaration increases the cost of an
+identification which it @emph{may} impact.  Once an identification is added to
+the schema it may satisfy an identification request, the @emph{only} way to
+prevent it is to control what kinds of requests are made.
+
+
+@section Identification Algorithm
+OIL has a two level search strategy: minimum cost identification and if
+costs are equal the most recent identification added to the schema.
+
+@node    Index,     , Design Hints, Top
+@comment node-name     , next, previous     , up
+@unnumbered Index
+@printindex fn
+
+@contents
+@bye

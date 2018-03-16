@@ -1,0 +1,20 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:49:00 waite Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/tp
+SRC	= tp.dg tpnode.h tp.err tp.INIT.phi tp.dapto tp.tcl
+AUX	= tp.tnf Makefile Makefile.in version
+CMD	= tpGen.sh tpOut.sh
+EXE	= tp.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= specs
+
+@toolmk_h@
+
+tp.exe:	specs/tp.exe
+	@rm -f $@
+	@LINK@ $? $@

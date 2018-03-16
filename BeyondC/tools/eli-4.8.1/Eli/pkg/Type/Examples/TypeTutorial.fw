@@ -1,0 +1,121 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+~! $Id: TypeTutorial.fw,v 2.2 2009/01/19 09:35:47 pfahler Exp $ 
+~!
+~! (C) Copyright 1999 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@settitle Tutorial on Type Analysis
+@setchapternewpage odd
+@paragraphindent 0
+
+
+@titlepage
+@center @titlefont{Tutorial on Type Analysis}
+@sp 4
+@center Compiler and Programming Language Group
+@center University of Paderborn
+@center Faculty for Electrical Engineering, Computer Science and Mathematics
+@center Department of Computer Science
+@center 33098 Paderborn, Germany
+@sp 4
+@center Copyright, 2008 University of Paderborn
+@end titlepage
+
+@ifinfo
+@chapheading Tutorial on Type Analysis
+
+$Revision: 2.2 $
+
+@end ifinfo
+
+@iftex
+@ifclear html
+@chapheading Overview
+@end ifclear
+@end iftex
+
+This tutorial is an introduction to the solution of the type analysis
+task required for programming language implementation. 
+It demonstrates many aspects of that task which may occur in 
+programming languages or in special purpose languages. 
+The tutorial demonstrates how the components of Eli's type analysis
+library are used to solve that task.
+The tutorial proceeds from basic aspects, such as declarations,
+typed entities, and overloaded operators, up to more complex 
+aspects, such as type definitions and function types.
+
+This tutorial may be used for a practical introduction to the
+specification techniques for type analysis, or as a source of
+examples that show how to solve certain problems, or it may give
+hints for language design.
+
+This file is an executable specification. An analyzer for an
+artificial language can be generated from it. The language is
+kept small by restricting it to those constructs necessary to
+demonstrate type analysis tasks, not regarding its usability
+for programming.
+The generated analyzer produces output that reports the result of
+type analysis, i.e. the type property of program entities, and error
+reports where examples violate specified language properties.
+
+The explanations in this tutorial assume that the reader is familiar
+with the use of the Eli system, with the use of its module library,
+and knows the general description of the type analysis task
+in the documentation of the module library.
+Furthermore, the reader should be familiar with basic concepts of
+the name analysis task. Its solution is a precondition for
+type analysis. It is described only briefly in this text.
+There is a separate tutorial for name analysis, see 
+@ref{Top, , Overview, nametutorial, Tutorial on Name Analysis}.
+
+Chapter 1 specifies a small language kernel and solves the
+name analysis and the type analysis task for it. 
+The focus of the following chapters is on
+type analysis only. The topics are arranged in an order such that
+no forward references are needed. Readers may stop reading at
+any section after section 7. They then have a complete description
+of the type analysis task for a language that has the constructs
+and concepts introduced so far. (It should even be possible to
+drop the rest of the specification and generate an analyzer
+for the language specified so far. This feature has not yet been
+tried.)
+For that purpose the example language is presented such that
+from section 5 on each section augments the language by some
+new constructs and concepts that demonstrate the aspect of
+concern. Readers are asked for some patience until they see
+what the whole language is.
+
+~i Kernel.fwi
+~i Expression.fwi
+~i Operator.fwi
+~i Conversion.fwi
+~i Record.fwi
+~i Array.fwi
+~i Union.fwi
+~i Function.fwi
+~i TypeDef.fwi
+~i Pointer.fwi
+~i FctType.fwi
+~i Syntax.fwi
+
+@contents
+

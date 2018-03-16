@@ -1,0 +1,5 @@
+TokTyp_.h == ../fsys.ygi,c :tok.h
+
+NodTyp_.h == ../fsys.ygi,c :nod.h
+
+OC_NodTyp_.h == ../client.ygi,c +yaccid=oc :nod.h

@@ -1,0 +1,61 @@
+# $Id: Makefile.in,v 1.5 2009/08/03 19:16:19 profw Exp $
+# 
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+# 
+
+CC      =       @CC@
+DIR	=	pkg/Name/Examples
+SRC	=	AlgLike.fw BuCLike.fw CLike.fw Odinfile \
+		AlgLike.demo BuCLike.demo CLike.demo \
+		AlgLike.savedmessages CLike.savedmessages \
+		BuCLike.savedmessages
+COP	=	Makefile.in 
+AUX	=	$(COP) Makefile
+COM	=	
+CMD	=	$(COM)
+RCS	=	
+EXE	=	
+GEN	=	
+GENINS	=
+SRCDIR	=	
+AUXDIR	=
+
+@toolmk_h@
+
+CLEAN =       $(EXE) $(GENINS) \
+		AlgLike.fw.exe AlgLike.messages AlgLike.diff AlgLike.warn \
+		CLike.fw.exe CLike.messages CLike.diff CLike.warn\
+		BuCLike.fw.exe BuCLike.messages BuCLike.diff BuCLike.warn
+
+AlgLike:
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '%AlgLike.test'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done
+
+CLike:
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '%CLike.test'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done
+
+BuCLike:
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '%BuCLike.test'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done
+
+testall:
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE '%test'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done

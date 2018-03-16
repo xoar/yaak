@@ -1,0 +1,157 @@
+@p typesetter = texinfo
+@p maximum_input_line_length = infinity
+@! $Id: cppline.fw,v 2.2 2004/08/01 01:44:24 profw Exp $
+@! cppline.fw  -- first edit Mon Sep 23 1996
+@!             -- by Karl Prott for POET Software GmbH
+@!
+@! (C) Copyright 1997 University of Paderborn.
+@! 
+@! This file is part of the Eli Module Library.
+@! 
+@! The Eli Module Library is free software; you can redistribute it and/or
+@! modify it under the terms of the GNU Library General Public License as
+@! published by the Free Software Foundation; either version 2 of the
+@! License, or (at your option) any later version.
+@! 
+@! The Eli Module Library is distributed in the hope that it will be
+@! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@! Library General Public License for more details.
+@! 
+@! You should have received a copy of the GNU Library General Public
+@! License along with the Eli Module Library; see the file COPYING.LIB.
+@! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@! Suite 330, Boston, MA 02111-1307, USA. 
+
+@T new_page
+@A@<Support of Cpp Line Information@>
+
+This module can be used to analyse cpp line information. It requires an
+instantiation of @{CoordMap.fw@}, which supports an alternate version of
+module @{err.[ch]@}. Using this module calls of function @{message()@} print
+coordinates (filename, line, column) accordingly cpp line information.
+
+To use this module, simply place it's name @{$/Input/cppline.fw@} in a
+@{.specs@}-file and include a pattern like the following into a @{.gla@}-file.
+If none of your gla-patterns starts with a '#'-sign, you can also use 
+@{$/Input/cppline.fw :fwGen/cppline.gla@} instead in a @{.specs@}-file.
+
+@N@<cppline.gla@>@{@-
+/* Searched pattern is `# LineNum FileName Flags'. Flags is not analyzed.
+ * Space is `\040'. Must be before AWK_COMMENT!
+ */
+$"#\040"[0-9]+ (auxEOL) [cpp_line]
+
+/* To skip further cpp directives */
+AWK_COMMENT
+@}
+
+Awk comments are included here to skip cpp directives -- except line
+information. Line information needs the specialized token processor
+@{cpp_line()@} implemented below in @{cppline.[ch]@}.
+
+
+@O@<cppline.h@>@{@-
+#ifndef CPPLINE_H
+#define CPPLINE_H
+
+/* Process cpp line directives to store line information for later use
+ *   On entry-
+ *     str points to `# LineNum FileName Flags'
+ *     l   length of c including '\n'
+ *     t,s are not used and not set
+ */
+#include "eliproto.h"
+
+extern void cpp_line ELI_ARG((char *str, int l, int *t, int *s));
+
+#endif
+@}
+
+@O@<cppline.c@>@{@-
+#include <stdio.h>
+
+#include "eliproto.h"       /* Prototype-Support */
+#include "CoordMap.h"       /* AddBreak(), alternative version of err.[ch] */
+#include "csm.h"            /* StringTable() */
+#include "err.h"
+#include "cppline.h"
+
+/* Headers missing for functions in $/Scan/int.c and $/Scan/CchStr.c */
+extern void c_mkstr ELI_ARG((char *, int, int *, int *));
+extern void mkint ELI_ARG((char *, int, int *, int *));
+
+void
+#ifdef PROTO_OK
+cpp_line(char *str, int l, int *t, int *s)
+#else
+cpp_line(str, l, t, s)
+char *str;
+int l, *t, *s;
+#endif
+/* Process cpp line directives to store line information for later use
+ *  when producing messages using err.[ch]
+ *   On entry-
+ *     str points to `# LineNum FileName Flags'
+ *     l   length of c including '\n'
+ *     t,s are not used
+ */
+{
+  char  *start;
+  int notused,
+         line,              /* cpp line information */
+         file;              /* cpp filename information: string table index */
+
+#ifdef DEBUG
+  {
+    int i;
+    for (i=0; i<l; i++)
+      fputc(str[i], stderr);
+  }
+#endif
+
+  str++;                            /* Skip '#' */
+  while( *str == ' ' )
+    str++;                          /* Skip spaces */
+
+  /* Determine LineNum */
+  start = str;
+  while( *str >= '0'  &&  *str <= '9' )
+    str++;
+  if ( str - start == 0 )
+    message(DEADLY, "internal error in cpp_line(): no LineNum", 0, NoPosition);
+  mkint(start, str - start, &notused, &line);
+
+  while( *str == ' ' )
+    str++;                          /* Skip spaces */
+
+  /* Determine FileName */
+  if (*str != '"')
+    message(DEADLY, "internal error in cpp_line(): no FileName", 0,NoPosition);
+  start = str++;                /* Skip '"' */
+  while( *str != '"' )
+  {
+    if (*str == '\\')           /* BACKSLASH */
+      str++;                    /* skip '\x' */
+    else if (*str == '\n'  ||  *str == '\r'  ||  *str == '\0')
+      message(DEADLY, "internal error in cpp_line(): '\\n' or '\\0' in FileName", 0,NoPosition);
+    str++;                      /* next char */
+  }
+  str++;                        /* Skip '"' */
+  c_mkstr(start, str - start, &notused, &file);
+
+  /* Store line/filename information for producing messages */
+  AddBreak(StringTable(file), line);
+  return;
+}
+@}
+
+@O@<cppline.specs@>@{@-
+cppline.reqmod
+$/Input/CoordMap.fw
+@}
+
+@O@<cppline.reqmod@>@{@-
+$/Scan/int.c                    /* required for mkint() */
+$/Scan/CchStr.c                 /* required for c_mkstr() */
+@}

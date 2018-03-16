@@ -1,0 +1,32 @@
+# Source Types
+
+*.ygi => :ygi;
+
+
+# Input Object Types
+
+:ygi 'input grammar for the Tregrm tree-building parser generator'? => :FILE;
+
+
+# Output Object Types
+
+:y 'YACC input'? => :FILE;
+
+:nod.h 'parser node types' => :h;
+
+:tok.h 'parser token types' => :h;
+
+:ygi.log 'Tregrm listing' => :log;
+
+:log 'log file'? => :FILE;
+
+
+# Parameter Types
+
++yaccid 'entry point for yacc parser'? => :first;
+
+
+# Tools
+
+EXEC (ygt.sh) (:ygi) (+yaccid) (tregrm.exe)
+   => (:y) (:nod.h) (:tok.h) (:ygi.log);

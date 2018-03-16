@@ -1,0 +1,175 @@
+Redesign of Bottom-up Computations in Liga
+==========================================
+
+A. Lido
+
+Any plain or attribute computation in RULE or SYMBOL context may be marked
+BOTTOMUP. It specifies that this computation is to be executed after the tree
+has been constructed in bottom-up order upto the RULE node of the context, say
+r, to which the computation belongs, and before tree construction advances to
+the right and up (i. e. before input reading advances further right).
+
+The use of this facility is indicated if the computation in question provides
+some feedback to the scanning or parsing phase (e. g. input file switching, or
+output to a user who incrementally provides the input). This facility should
+not be used to enforce a certain evaluation order for purposes that are not
+related to input processing. The BOTTOMUP facility is more powerful than
+inserting actions into the concrete grammar (see below).
+
+A BOTTOMUP computation may depend on other computations. These dependencies
+should be specified in the usual way, i. e. stating only required preconditions
+without having a particular evaluation order in mind. Such precondition
+computations should not be marked BOTTOMUP, unless they themselves are to be
+related to input processing.
+
+Liga checks if a BOTTOMUP computation and its precondition computations can be
+scheduled for execution as early as required. Some natural restrictions must
+hold:
+
+a. Precondition computations may not belong to not yet existent tree parts to
+the right of the current context.
+
+b. If a precondition computation needs code to be executed, i. e. it is not
+just a VOID dependency, it may not belong to a context above the current one.
+This especially holds for values propagated down via INH attributes.
+
+c. A BOTTOMUP computation or its precondition computation may not belong to a
+context that can occur in a subtree which is created by computations 
+(see Generated Trees).
+We recommend to state the preconditions of a BOTTOMUP computation without
+overspecifying them and to let Liga check whether the above restrictions hold.
+
+
+B. Liga Implementation
+
+1. Goals
+
+Processing of BOTTOMUP computations has been redesigned for the following
+goals:
+
+a. Only those computations are scheduled in the bottom-up phase which are
+needed for computations marked BOTTOMUP (in contrast to the previous strategy
+that schedules eager to the bottom-up phase).
+
+b. The BOTTOMUP mode is only switched on if there is a computation marked
+BOTTOMUP.
+
+c. The restriction on implicit creation of chain nodes is drastically relaxed
+to those chain productions which could violate visit-sequence assumptions if
+they were created implicitly from above. Liga produces a list of these
+productions to be used by maptool.
+
+d. Free sizes should be reduces due to the strategy of (a). Unnecessary
+computations in the bottom-up phase cause additional attributes to reside in
+tree nodes.
+
+e. Cleanup of several implementation details met on the way.
+
+
+
+2. Interfaces between Liga phases
+
+a. Frontend-Middle
+
+Any computations marked BOTTOMUP in Lido have the form
+
+	  ASSIGNFCT (Attr, BOTTMUPECT (expr))
+
+The frontend turns plains computations into this form by creating a new
+attributes of type VOID_LIST.
+
+The meaning of type VOID_LIST has been changed to: The attribute is computed in
+only one RULE context.
+LIGA Pragma does not occur in the output anymore.
+
+b. Expand-Optim
+Optimization requests are suppressed for VOID and VOID_LIST attributes. (not
+related to bottom-up)
+
+c. Option-Order
+The tree evaluation options are ignored. Only the existence of a BOTTOMUP
+computation switches TREE-BOTTOM_UP on.
+(TREE_COMPLETE must still be checked until the maptool obeys LIGAs requests on
+chain rules).
+
+d. Middle-Backend
+If the first type entry has the name $BOTTOMUP the backend has to produce code
+for bottom-up visit-sequences.
+
+
+3. Frontend
+
+a. A plain computation marked BOTTOMUP is turned into an attribute assign, see
+2.a.
+
+b. A computation marked BOTTOMUP is transformed as described in 2.a.
+
+c. There are no predefined attributes BottomUpAttr created anymore.
+
+d. Old style LIGA Pragmas are still accepted in Lido input. But they are
+removed from the interal representation.
+
+
+4. Expand
+see 2.b.
+
+
+5. Order
+
+a. Overall concept:
+
+A bottom-up visit-sequence has the form
+      virtual BUphase, real BUphase LEAVE rest
+The virtual BUphase represents all computations executed so far until this node
+is created. It consists of a sequence of first visits of subtrees from left to
+right, and some computations of INH VOID attributes which do not require code.
+(The backend completely skips the virtual phase.) The real BUphase is executed
+when the node is constructed. It may contain computations of INH subtree
+attributes, and further visits of subtrees. It must contain computations of
+attributes in the left-hand-side's first SYNT partition.
+
+Every symbol (execept the root) has an additional pair of (INH, SYNT)
+partitions representing its bottom-up phase. Careful analysis tries to schedule
+only those attributes in these phases which are needed for BOTTOMUP
+computations:
+Attributes are classified "bottomup" if they must belong to these partitions.
+That property ist propagated backwards along dependencies starting from
+computations marked BOTTOMUP. Note: A computation in the real BUphase may
+depend on right-hand-side attributes which are not bottomup, because visits in
+the real BUphase can initiate their computation. Hence those dependencies do
+not propagate the bottomup property.
+
+b. Computational steps for bottom-up
+
+b1. When the direct dependencies are extracted from the computations, a
+BOTTOMUP mark causes the computed attribute to be "direct bottomup".
+
+b2. After the induced dependencies have been computed, the bottomup property is
+propagated backwards as described above. Additional dependencies are inserted
+to ensure the left-to-right order in the virtaul BUphase. Those dependencies
+are induced troughout the grammar. The whole step is repeeted one (why?).
+
+b3. A rough portitionierung is performed:
+Partitions 0 and 1 for bottomup attributes and partition 2 for the others.
+Those partition dependencies are propagated by another induce step.
+
+b4. The complete partitioning is performed by the late strategy. It schedules
+only non bottomup attributes and leaves the bottomups attributes in partitions
+0 and 1. General changes: The early procedure ist not used anymore to determine
+the number of partitions for the late case. Instead, the late procedure
+determins large relative partition numbers, and scales then down when the total
+number is known.
+The temporary copy of the symbol dependency matrix ist substituted by an array
+of dependency counters for attributes.
+
+b5. The visit-sequence are computed as described above. It is checked whether
+code computations would have to be executed in the virtual BUphase.
+
+b6. All chain productions are checked whether they have code computations
+or visits in their (real) BUphase and if their
+left-hand-side symbol occurs in a context with a right brother.
+If both is true for a production r, then its name r is output to a file
+which should be send to the maptool.
+
+(Temporarily this information goes into the protocol file only.
+This has to be changed when the maptool is ready to accept that information.)

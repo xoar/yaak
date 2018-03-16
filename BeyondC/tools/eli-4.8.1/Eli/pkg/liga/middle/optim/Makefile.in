@@ -1,0 +1,91 @@
+# $Id: Makefile.in,v 1.1 2001/10/25 14:35:43 cogito Exp $
+# Makefile for pkg/liga/optim
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+CC	=	@CC@
+
+DIR	=	pkg/liga/middle/optim
+SRC	=
+COP	=       Makefile.in OPTIM.c optbuildstr.c optfct.c optgroup.c \
+		optidl.c optlifet.c optout.c optvar.c \
+		chkbu.c optcycle.c do_optim.c OPTIM.h OPTIMMacros.h \
+		optglobal.h optfct.h optidl.h optdid.h do_optim.h \
+		chkbu.h optcycle.h termtrafo.c termtrafo.h \
+                optlifet.h optgroup.h optvar.h optout.h optbuildstr.h 
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=	$(COM)
+RCS	=	$(COP) $(COM) $(SRC)
+EXE	=
+OBJ	= 	OPTIM.o optbuildstr.o optidl.o \
+		optfct.o optvar.o optgroup.o optout.o optlifet.o \
+		chkbu.o optcycle.o do_optim.o termtrafo.o
+GEN	=	$(OBJ)
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+IDL	=	../../idl
+OPTION	= 	../../option
+SCEL	= 	../../ligascel
+EXPAND	= 	../expand
+MIDDLE  =       ..
+IDLHDRS	=	$(IDL)/LIGA.h $(IDL)/LIGAMacros.h $(IDL)/lookup_idl.h
+
+DEBUG	=
+# DEBUG	=	-DDEBUG -DLIFETIME
+
+CFLAGS	= 	-I$(IDL) -I$(OPTION) -I$(SCEL) -I$(MIDDLE) -I$(EXPAND) $(DEBUG)
+
+LIBS	= 	$(SCEL)/err.o $(SCEL)/source.o $(OPTION)/opt_input.o \
+		$(IDL)/IDL.a
+
+HEADER = 	OPTIM.h OPTIMMacros.h optglobal.h optfct.h optidl.h optdid.h \
+		$(SCEL)/printerr.h do_optim.h chkbu.h optcycle.h \
+		$(SCEL)/ligaconsts.h $(SCEL)/eliproto.h\
+                optlifet.h optgroup.h optvar.h optout.h optbuildstr.h
+
+@toolmk_h@
+
+OPTIM.o:	$(HEADER) $(IDL)/writer.h $(IDL)/reader.h $(IDL)/global.h
+
+optbuildstr.o:	$(HEADER) $(IDLLOOK) $(IDL)/global.h
+
+optidl.o:	$(HEADER)
+
+optfct.o:	$(HEADER)
+
+optsivi.o:	$(HEADER)
+
+optvar.o:	$(HEADER)
+
+optgroup.o:	$(HEADER)
+
+optout.o:	$(HEADER)
+
+optlifet.o:	$(HEADER)
+
+chkbu.o:	$(HEADER)
+
+optcycle.o:	$(HEADER)
+
+termtrafo.o: $(IDL)/LIGA.h $(IDL)/LIGAMacros.h $(IDL)/liga_func.h \
+		$(IDL)/lookup_idl.h $(SCEL)/ligaconsts.h
+
+do_optim.o:	$(HEADER) termtrafo.h

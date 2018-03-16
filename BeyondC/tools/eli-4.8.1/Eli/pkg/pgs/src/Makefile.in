@@ -1,0 +1,49 @@
+# $Id: Makefile.in,v 1.4 2005/05/13 20:21:06 profw Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado
+
+CC	= @CC@
+
+ACC	= $(CC)
+
+DIR	= Tool/pgs/src
+SRC	=
+AUX	= eingabe.c analyse.c pgs_optim.c buildtab.c parameter.h \
+	  analyse.h options.c options.h showEx.c showEx.h \
+	  p2c.h p2clib.c Makefile.in Makefile
+CMD	=
+EXE	= eingabe.exe analyse.exe pgs_optim.exe buildtab.exe
+GEN	= p2c.a
+SRCDIR	=
+AUXDIR	=
+
+CFLAGS	= @DMONITOR@
+
+@toolmk_h@
+@Adtmk_h@
+
+.c.o:
+	$(ACC) -c $(CFLAGS) $(ADTINCL) $<
+
+options.o:	options.c options.h p2c.h
+showEx.o:	showEx.c analyse.h parameter.h p2c.h
+eingabe.o:	eingabe.c parameter.h options.h $(ADTLIB)/obstack.h p2c.h
+analyse.o:	analyse.c analyse.h parameter.h options.h showEx.h \
+		$(ADTLIB)/obstack.h p2c.h
+pgs_optim.o:	pgs_optim.c parameter.h options.h $(ADTLIB)/obstack.h p2c.h
+
+eingabe.exe:	eingabe.o obstack.o options.o p2c.a
+	$(ACC) $(CFLAGS) -o $@ eingabe.o options.o obstack.o p2c.a
+
+analyse.exe:	analyse.o obstack.o options.o showEx.o p2c.a
+	$(ACC) $(CFLAGS) -o $@ analyse.o options.o showEx.o \
+	obstack.o p2c.a
+
+pgs_optim.exe:	pgs_optim.o obstack.o options.o p2c.a
+	$(ACC) $(CFLAGS) -o $@ pgs_optim.o options.o obstack.o p2c.a
+
+buildtab.exe:	buildtab.c p2c.a
+	$(ACC) $(CFLAGS) -o $@ buildtab.c p2c.a
+
+p2c.a:	p2clib.o
+	ar rcu $@ p2clib.o
+	@RANLIB@ $@

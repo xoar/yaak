@@ -1,0 +1,33 @@
+# $Id: Makefile.in,v 1.4 2010/02/26 19:56:15 profw Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado 
+
+CC	= @CC@
+
+DIR	= pkg/gla
+SRC	= gla.dg gla.dapto gla.dg gla.err gla.h gla.reqsym glahead.c \
+	  tabsize.c tabsize.h separator gla.specs gla.reqmod \
+	  dfltscan.reqmod specs_ref reqmod_ref
+GENINS	= scanops.h
+AUX	= lex.tnf gla_be.sh.cpp Makefile Makefile.in version
+CMD	= dflt_codes.sh flex_out.sh gla_be.sh gla_fe.sh gla_out.sh \
+	  scan_spec.sh glaFeErr.sh
+EXE	= gla_fe.exe gla_be.exe flex.exe
+SRCDIR	=
+AUXDIR	= nflex frontend backend
+
+@toolmk_h@
+
+scanops.h:
+	echo "" > scanops.h
+
+gla_fe.exe:	frontend/glafe.exe
+	rm -f $@
+	@LINK@ $? $@
+
+gla_be.exe:	backend/gla_be.exe
+	rm -f $@
+	@LINK@ $? $@
+
+flex.exe:	nflex/flex.exe
+	rm -f $@
+	@LINK@ $? $@

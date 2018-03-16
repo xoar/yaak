@@ -1,0 +1,43 @@
+#!/bin/sh
+# $Id: INSTALL,v 1.8 2001/11/07 15:40:35 waite Exp $
+# Install the Eli system
+
+if test $# -ne 1
+then
+   echo 'Usage: INSTALL destination_directory'
+   exit 1
+fi
+
+if test ! -d $1
+then
+   echo "Directory $1 must be created before running INSTALL"
+   exit 1
+fi
+
+if test -f $1/LIBVER
+then
+   num=`cat $1/LIBVER | sed 's/PKGVER.//'`
+   libver=PKGVER.`expr $num + 1`
+else
+   libver=PKGVER.1
+fi
+echo $libver > $1/LIBVER
+
+cp pkg/PKGLST $1; chmod +w $1/PKGLST
+for pkg in `cat pkg/PKGLST`
+do
+   if test ! -d $1/$pkg; then mkdir $1/$pkg || exit 1; fi
+   if test -f pkg/$pkg/version
+   then
+      ver=`cat pkg/$pkg/version`
+      echo $ver > $1/$pkg/$libver
+      echo $ver > $1/$pkg/PKGVER
+      destpkg=$1/$pkg/$ver
+      if test ! -d $destpkg; then mkdir $destpkg || exit 1; fi
+      echo "$pkg-$ver package created."
+      (cd ./pkg/$pkg; make install DESTDIR=$destpkg)
+   else
+      echo "$pkg package created."
+      (cd ./pkg/$pkg; make install DESTDIR=$1/$pkg)
+   fi
+done

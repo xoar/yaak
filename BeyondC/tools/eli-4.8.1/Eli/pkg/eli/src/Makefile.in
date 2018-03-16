@@ -1,0 +1,61 @@
+# $Id: Makefile.in,v 1.3 2002/04/25 17:33:37 waite Exp $
+# Copyright (c) 1991, The Regents of the University of Colorado
+
+CC	= @CC@
+LIBS	= @LIBS@
+LDFLAGS	= @LDFLAGS@
+
+DIR	= pkg/eli/src
+SRC	=
+AUX	= loaded.c prop.c prop.h symbinfo.c \
+	  cpp_specs.c envmod.c envmod.h BitSet.c BitSet.h \
+	  specs.tnf Makefile Makefile.in
+CMD	=
+EXE	= loaded.exe cpp_specs.exe
+
+OFILES	= ../ofiles
+
+@toolmk_h@
+@Adtmk_h@
+@Inputmk_h@
+@pdlmk_h@
+@Scanmk_h@
+
+CFLAGS	= -DNORESTORE -I. @CPPFLAGS@
+
+LOADED	= deftbl.o envmod.o BitSet.o err.o loaded.o obstack.o prop.o \
+	symbinfo.o idn.o csm.o source.o $(OFILES)/rdsymb.o
+
+loaded.exe:	$(LOADED)
+	$(CC) $(CFLAGS) -o $@ $(LOADED) $(LDFLAGS) $(LIBS)
+
+CPP_SPECS	= cpp_specs.o source.o
+
+cpp_specs.exe:	$(CPP_SPECS)
+	$(CC) $(CFLAGS) -o $@ $(CPP_SPECS) $(LDFLAGS) $(LIBS)
+
+cpp_specs.o:	cpp_specs.c $(INPLIB)/source.h
+	$(CC) $(CFLAGS) $(INPINCL) -c cpp_specs.c
+
+ENVDEPS	= envmod.c envmod.h BitSet.h $(INPLIB)/err.h $(PDLLIB)/deftbl.h \
+	  $(ADTLIB)/obstack.h
+envmod.o:	$(ENVDEPS)
+	$(CC) $(CFLAGS) $(INPINCL) $(PDLINCL) $(ADTINCL) -c envmod.c
+
+BitSet.o:	BitSet.c BitSet.h $(ADTLIB)/obstack.h $(INPLIB)/err.h
+	$(CC) $(CFLAGS) $(INPINCL) $(ADTINCL) -c BitSet.c
+
+loaded.o:	loaded.c $(OFILES)/symbinfo.h $(ADTLIB)/obstack.h
+loaded.o:	$(INPLIB)/err.h
+	$(CC) $(CFLAGS) $(INPINCL) $(ADTINCL) -I$(OFILES) -c loaded.c
+
+symbinfo.o:	symbinfo.c $(OFILES)/symbinfo.h prop.h envmod.h
+symbinfo.o:	$(PDLLIB)/deftbl.h $(ADTLIB)/csm.h $(ADTLIB)/obstack.h
+symbinfo.o:	$(SCNLIB)/idn.h $(OFILES)/rdsymb.h
+	$(CC) $(CFLAGS) $(SCNINCL) $(ADTINCL) $(PDLINCL) -I$(OFILES) -c symbinfo.c
+
+prop.o:		prop.c $(PDLLIB)/deftbl.h $(ADTLIB)/obstack.h prop.h
+	$(CC) $(CFLAGS) $(PDLINCL) $(ADTINCL) -c prop.c
+
+csm.o:		$(ADTLIB)/csmtbl.h
+idn.o:		$(SCNLIB)/idntbl.h

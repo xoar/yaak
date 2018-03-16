@@ -1,0 +1,1133 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename adt
+@setchapternewpage odd
+@settitle Abstract data types to be used in specifications
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: adt.tnf,v 1.15 2008/06/17 09:12:43 peter Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Abstract data types to be used in specifications}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.15 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node Top
+@top
+@ifinfo
+@comment  node-name,  next,  previous,  up
+@chapheading Specification Module Library
+@chapheading Abstract data types to be used in specifications
+@end ifinfo
+@findex Abstract Data Types
+@findex Library @code{Adt}
+
+This library provides implementations of abstract data types
+for linear lists, stacks, sets, and mappings by C modules.
+The functions exported by these modules can be used in @code{.lido}
+specifications or in C modules supplied by users.
+
+@ifclear html
+This library contains the following modules:
+@end ifclear
+@menu
+* LidoList::       Lists in LIDO Specifications
+* List::           Linear Lists of Any Type
+* BitSet::         Bit Sets of Arbitrary Length
+* IntSet::         Bit Sets of Integer Size
+* Stack::          Stacks of Any Type
+* Map::            Mapping of Integers to Any Type
+* Table::          Mapping Arbitrary Values To Definition Table Keys
+* DynSpace::       Dynamic Storage Allocation
+* Index::          Index
+@end menu
+
+@iftex
+@ifclear html
+@table @code
+@item LidoList
+Lists in LIDO Specifications
+@item List
+Linear Lists of Any Type
+@item BitSet
+Bit Sets of Arbitrary Length
+@item IntSet
+Bit Sets of Integer Size
+@item Stack
+Stacks of Any Type
+@item Map
+Mapping of Integers to Any Type
+@item Table
+Mapping Arbitrary Values To Definition Table Keys
+@item DynSpace
+Dynamic Storage Allocation
+@end table
+@end ifclear
+@end iftex
+
+The module @code{LidoList} supports construction and access of linear
+lists in @code{.lido} specifications. The module @code{DynSpace}
+supports efficient dynamic storage allocation. It provides a simplified
+and restricted interface to the @code{obstack} module which is
+recommended to be used for dynamic allocation of arbitrary sized
+storage entities. The other modules are implementations of abstract data types.
+
+The functions exported by each of these modules may be used in
+@code{.lido} computations as well as in C modules. In the latter case
+the interface file of the module has to be included into the
+C module.
+
+@comment =====================================
+@node LidoList
+@chapter Lists in LIDO Specifications
+@findex Module @code{LidoList}
+@findex linear lists
+@findex function type
+@findex parameter type
+
+Several language implementation tasks are solved using linear lists
+constructed of data elements which are computed at certain tree nodes,
+e.g.@: a the list of parameter types that is part of the type of a function.
+Such lists reflect a left-to-right depth-first order of the
+corresponding tree nodes. Similarly such lists are decomposed in
+other contexts, e.g.@: to check the types of the arguments of a function
+call. This module provides @code{.lido} specifications for such
+patterns of linear list usage. The module uses functions of
+the linear list module @code{List}. Any assignable C type may be chosen
+as type of the list elements.
+
+This module is instantiated by
+
+@example
+   $/Adt/LidoList.gnrc+instance=TYPE +referto=HDR :inst
+@end example
+@noindent
+where @code{TYPE} is the name of the element type and @code{HDR.h}
+is a file that defines the element type, e.g.@:
+@example
+   $/Adt/LidoList.gnrc+instance=DefTableKey +referto=deftbl :inst
+@end example
+@noindent
+If the element type is predefined in C the @code{referto} parameter
+is omitted, e.g.@:
+@example
+   $/Adt/LidoList.gnrc+instance=int :inst
+@end example
+
+@findex ListRoot
+@findex PreListElem
+@findex PostListElem
+@findex ListElem
+@findex DeListRoot
+@findex PreDeListElem
+@findex PostDeListElem
+@findex DeListElem
+The module provides two groups of computational roles,
+@code{TYPEListRoot}, @code{PreTYPEListElem}, @code{PostTYPEListElem}, 
+@code{TYPEListElem}, for construction of a list from attribute values
+at tree nodes, and
+@code{TYPEDeListRoot}, @code{PreTYPEDeListElem}, @code{PostTYPEDeListElem},
+@code{TYPEDeListElem} for distribution of a list over attributes of tree
+nodes. For each of the two cases there is one role that characterizes the
+root of the subtree where the list construction or distribution
+is applied, and three roles for nodes that are related to list elements.
+These three roles affect the order of list elements differently in cases
+where the related tree nodes may occur recursively (see below).
+
+@findex attribute @code{List}
+@findex attribute @code{Elem}
+For construction of a list
+@code{TYPEListRoot} is associated to a grammar symbol that contains
+all occurrences of the roles for its list elements in its
+subtree. If @code{TYPEListRoot} occurs recursively in the tree,
+its lists are collected separately.
+The resulting list of type @code{TYPEList} is obtained by the
+attribute @code{TYPEListRoot.TYPEList}.
+
+A user's computation has to provide the list element values
+of type @code{TYPE} by attributes named @code{TYPEElem} at the
+symbols which have one of the three element roles.
+One of the three roles should be chosen depending on the
+desired order of the elements in cases where the list element 
+symbol occurs recursively in the tree:
+
+If the role @code{PreTYPEListElem} is used the elements are taken 
+in pre-order;
+i.e.@: the attribute value of a node occurs in the list prior to those
+of nodes in its subtrees.
+
+If the role @code{PostTYPEListElem} is used the elements are taken 
+in post-order;
+i.e.@: the attribute value of a node occurs in the list after those
+of nodes in its subtrees.
+
+If the role @code{TYPEListElem} is used no elements are taken 
+from subtrees of an element node.
+
+@findex attribute @code{TakeIt}
+There are situations where not all tree nodes that have the role
+@code{TYPEListElem} shall contribute an element to the list.
+A condition attribute @code{TYPEListElem.TYPETakeIt} of type
+@code{int} can be computed such that it is false (@code{0})
+if this tree node shall not contribute to the list.
+The value of the attribute @code{TYPEListElem.TYPEElem}
+is irrelevant in that case.
+If the condition attribute @code{TYPEListElem.TYPETakeIt}
+is true the value of the attribute @code{TYPEListElem.TYPEElem}
+is taken as an element of the list.
+A default computation sets @code{TakeIt} to true (@code{1}).
+It becomes effective if it is not overridden as described above.
+
+@findex FilterListElem
+@findex Filter
+@findex function Filter
+@code{TYPEFilterListElem} is outdated. Its task should be achieved
+using the attribute @code{TYPETakeIt}. 
+@code{TYPEFilterListElem} may be used instead of @code{TYPEListElem}.
+Then the value @code{TYPEFilterListElem.TYPEElem} will only be inserted into
+the list if a call of the function @code{TYPEFilter} yields non-null
+when given @code{TYPEFilterListElem.TYPEElem} as argument.
+The function @code{TYPEFilter} has to be defined if the role
+@code{TYPEFilterListElem} is used.
+
+@findex attribute @code{ListTail}
+For decomposition of a list
+@code{TYPEDeListRoot} is associated to a grammar symbol,
+and a computation has to be provided such that the attribute
+@code{TYPEDeListRoot.TYPEList} gets a list value.
+That list value is decomposed such that each 
+occurrence of grammar symbols having one of the element roles
+for decomposition (see below)
+get a list element value. The list element values are obtained
+by attributes named @code{TYPEElem}.
+If the list is shorter than the number of the element nodes
+in the subtree the attributes of the remaining nodes
+get the value @code{NoTYPE}.
+@code{TYPEDeListRoot.TYPEListTail} is the
+list of remaining elements which are not associated to 
+element nodes in the subtree, if any.
+
+One of the three element roles for list decomposition should be 
+chosen depending on the
+desired order of the elements in cases where the list element 
+symbol occurs recursively in the tree:
+
+If the role @code{PreTYPEDeListElem} is used the list elements
+are associated to @code{TYPEElem} attributes of nodes in pre-order,
+i.e.@: the attribute of a node gets an element of the list which
+occurs before those elements in the list that are
+distributed at the subtrees of the node.
+
+If the role @code{PostTYPEDeListElem} is used the list elements
+are associated to @code{TYPEElem} attributes of nodes in post-order,
+i.e.@: the attribute of a node gets an element of the list which
+occurs after those elements in the list that are
+distributed at the subtrees of the node.
+
+If the role @code{TYPEDeListElem} is used no elements are distributed
+to subtrees of an element node.
+
+@findex attribute @code{TakeIt}
+A condition attribute @code{TYPETakeIt} of type
+@code{int} is computed to true (@code{1}) by default. 
+It determines whether an
+element of the list is taken at this node. That computation may be 
+overridden by a nontrivial computation if such a condition
+is desired.
+
+If list decomposition is used the name @code{NoTYPE} has to be 
+defined suitably in a user's specification,
+e.g.@: in @code{HDR.h}. 
+
+Both @code{TYPEListRoot} and @code{TYPEDeListRoot} may be
+recursively nested without affecting each other.
+
+An example for the use of this module in type analysis is given in
+(@pxref{FunctionType, , Function Types, type, Type analysis tasks}): 
+In the context of a function declaration
+the list of parameter types is composed and associated as a
+property of the function type. In the context of a function
+call that property is accessed, the list is decomposed, and
+its elements - the formal parameter types - are compared with
+the types of the arguments.
+
+@comment =====================================
+@node List
+@chapter Linear Lists of Any Type
+@findex Module @code{List}
+@findex linear lists
+@findex list functions
+
+This module implements linear lists whose elements are of an arbitrary
+type that is specified by a generic instantiation parameter.
+Any assignable type can be chosen.
+
+Storage for lists is allocated when needed.
+The module implementation uses efficient dynamic storage allocation
+of the @code{obstack} module.
+The module does not implement automatic garbage collection.
+Storage used by one instance of this module can be deallocated completely.
+
+One subset of the functions provided by this module is strictly functional,
+i.e.@: list values are not modified.
+Another subset of functions modifies existing list values, e.g.@:
+inserts elements into a list. It is explicitly mentioned
+which functions may cause such side-effects on their arguments.
+
+The module is instantiated by
+@example
+   $/Adt/List.gnrc +instance=TYPE +referto=HDR :inst
+@end example
+@noindent
+where @code{TYPE} is the name of the element type and @code{HDR.h}
+is a file that defines the element type, e.g.@:
+@example
+   $/Adt/List.gnrc+instance=DefTableKey +referto=deftbl :inst
+@end example
+@noindent
+If the element type is predefined in C the @code{referto} parameter
+is omitted, e.g.@:
+@example
+   $/Adt/List.gnrc+instance=int :inst
+@end example
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{TYPEList.h} is imported there.
+
+@findex PtrList
+@findex Module PtrList
+@findex VoidPtr
+A module @code{PtrList} is available. It produces list implementations
+with the same interface as the @code{List} module does.
+@code{PtrList} is only applicable if the element type @code{TYPE}
+is a pointer type. An instantiation of @code{PtrList} implements
+the lists by lists of @code{VoidPtr} (@code{void*}) using an
+instantiation of the @code{List} module. Hence, several instances
+of @code{PtrList} use one single implementation. The created
+interface files @code{TYPEList.h} provide macros for casting the
+element type to and from @code{VoidPtr}.
+The module @code{PtrList} is instantiated in the same way as
+the @code{List} module is:
+@example
+   $/Adt/PtrList.gnrc +instance=TYPE +referto=HDR :inst
+@end example
+
+The modules export the following type names and macros:
+
+@table @code
+@item TYPEList
+A pointer type representing lists.
+@findex List
+
+@item TYPEListPtr
+A pointer type pointing to TYPEList objects.
+@findex ListPtr
+
+@item TYPEMapFct
+A function type for mapping: @code{TYPE -> TYPE}.
+@findex MapFct
+@findex function MapFct
+
+@item TYPECmpFctType
+A function type for comparison: @code{TYPE, TYPE -> int}
+Function of this type have to yield 0 if the two values
+are equal, 1 if the left argument is greater than the right,
+-1 if the left argument is less than the right.
+@findex CmpFctType
+
+@item TYPESumFct
+A function type for combining elements: @code{TYPE, TYPE -> TYPE}
+@findex SumFct
+@findex function SumFct
+
+@item NULLTYPEList
+Denotes the empty list.
+@findex NULLTYPEList
+
+@item NullTYPEList ()
+Denotes the empty list.
+@findex NullTYPEList
+
+@item SingleTYPEList(e)
+Creates a list containing only the element @code{e}.
+@findex Single
+@findex function Single
+@end table
+
+The following list processing functions are supplied by the module:
+
+@table @code
+@item void FinlTYPEList (void)
+Deallocates all TYPELists (for @emph{all} possible values of TYPE). 
+@findex Finl
+@findex function Finl
+
+@item TYPEList ConsTYPEList (TYPE e, TYPEList l)
+Constructs a TYPEList of an element @code{e} and a given tail @code{l}.
+@code{e} is the first element of the list.
+@findex Cons
+@findex function Cons
+
+@item TYPE HeadTYPEList (TYPEList l)
+Returns the first element of the list @code{l}.
+The list @code{l} must not be empty.
+@findex Head
+@findex function Head
+
+@item TYPEList TailTYPEList (TYPEList l)
+Returns the tail of the list @code{l}.
+If @code{l} is empty, an empty list is returned.
+@findex Tail
+@findex function Tail
+
+@item int LengthTYPEList (TYPEList l)
+Returns the number of elements in the list @code{l}.
+@findex Length
+@findex function Length
+
+@item TYPE IthElemTYPEList (TYPEList l, int i);
+Returns the @code{i}-th element of the List @code{l}. The head of @code{l}
+is referred to as 1. If the value of
+i is greater than the length of the list, an error
+is reported and the program exits.
+@findex IthElem
+@findex function IthElem
+
+@item TYPEList CopyTYPEList (TYPEList l, TYPEMapFct cp)
+Copies the list @code{l}. Elements are copied by calls of @code{cp}.
+@findex Copy
+@findex function Copy
+
+@item TYPEList AppTYPEList (TYPEList l1, TYPEList l2)
+Concatenates two lists @code{l1} and @code{l2}. 
+The resulting list contains @code{l2} at
+the end of a copy of list @code{l1}. Hence, no argument
+is modified.
+@findex App
+@findex function App
+
+@item TYPEList AppElTYPEList (TYPEList l, TYPE e)
+Appends an element @code{e} to the list @code{l}.
+The list @code{l} is not copied, it is modified as a side-effect
+of this function.
+@findex AppEl
+@findex function AppEl
+
+@item void InsertAfterTYPEList (TYPEList l, TYPE e)
+This function requires a non-empty list @code{l}. 
+The element @code{e} is inserted
+just after the first element of @code{l}.
+The list @code{l} is modified as a side-effect of this function.
+@findex InsertAfter
+@findex function InsertAfter
+
+@item TYPEList OrderedInsertTYPEList (TYPEList l, TYPE e, TYPECmpFctType fcmp)
+Inserts the element @code{e} into the list @code{l} maintaining @code{l} in
+ascending order with respect to the compare @code{fcmp}.
+The updated list is returned.
+The list @code{l} may be modified as a side-effect of this function.
+@findex OrderedInsert
+@findex function OrderedInsert
+
+@item TYPEListPtr RefEndConsTYPEList (TYPEListPtr addr, TYPE e);
+Appends an element @code{e} to the end of a list given by its 
+address @code{addr}.
+The address where the next element may be appended is returned.
+The list is modified as a side-effect of this function.
+@findex RefEndCons
+@findex function RefEndCons
+
+@item TYPEListPtr RefEndAppTYPEList (TYPEListPtr addr, TYPEList l);
+Appends a list @code{l} to the end of a list given by 
+its address @code{addr}.
+The address where the next element may be appended is returned.
+The list is modified as a side-effect of this function.
+@findex RefEndApp
+@findex function RefEndApp
+
+@item int ElemInTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct);
+This function returns 1 iff the element @code{e} is in the list @code{l}.
+List elements are compared by the function @code{cmpfct}.
+@findex ElemIn
+@findex function ElemIn
+
+@item TYPEList AddToSetTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct)
+If @code{l} contains @code{e} then @code{l} is returned.
+Otherwise a list is returned that contains @code{e} and the
+elements of @code{l}. The comparison function @code{cmpfct}
+is used to check whether @code{l} already contains @code{e}.
+The list @code{l} is not modified.
+@findex AddToSet
+@findex function AddToSet
+
+@item TYPEList AddToOrderedSetTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct)
+If @code{l} contains @code{e} then @code{l} is returned.
+Otherwise a list is returned that contains @code{e} and the
+elements of @code{l}. The comparison function @code{cmpfct}
+is used to check whether @code{l} already contains @code{e}.
+@code{l} is assumed to be ordered increasingly in the sense of @code{cmpfct}.
+The list @code{l} may be modified as a side-effect of this function.
+@findex AddToOrderedSet
+@findex function AddToOrderedSet
+
+@item TYPEList MapTYPEList (TYPEList l, TYPEMapFct f);
+Returns a new list obtained by applying @code{f} to each 
+element of @code{l}.
+@findex Map
+@findex function Map
+
+@item int CompTYPEList (TYPEList l1, TYPEList l2, TYPECmpFctType f);
+Compares the lists @code{l1} and @code{l2} lexicographically 
+by applying @code{f}
+to the corresponding elements.
+@findex Comp
+@findex function Comp
+
+@item TYPE SumTYPEList (TYPEList l, TYPESumFct f, TYPE a);
+Applies the binary function @code{f} to the elements of the list:
+@code{f( f(... f(a, e1), e2, ...), en)}
+If @code{l} is empty @code{a} is returned.
+@findex Sum
+@findex function Sum
+@end table
+
+It should be pointed out that
+the functions @code{AppElTYPEList}, @code{InsertAfterTYPEList}, 
+@code{OrderedInsertTYPEList}, @code{RefEndConsTYPEList},
+@code{RefEndAppTYPEList}, @code{AddToOrderedSetTYPEList}
+modify existing lists and hence cause side-effects.
+If the non modified original list values are still to be used they
+have to be copied (@code{CopyTYPEList}) before they are modified.
+The other functions can be used in a strictly functional style.
+
+@comment =====================================
+@node BitSet
+@chapter Bit Sets of Arbitrary Length
+
+@findex Module @code{BitSet}
+This module implements operations on sets over elements which are
+nonnegative numbers. The range of each set value is dynamically
+adapted as required by the operations.
+
+Storage for set values is allocated when needed.
+The module implementation uses efficient dynamic storage allocation
+of the @code{obstack}.
+The module does not implement automatic garbage collection.
+Storage used by one instance of this module can be deallocated completely,
+or for each single set value.
+
+Some set operations are provided in two versions:
+The functional version allocates a new result value and leaves
+its operands unchanged.
+The imperative version modifies one of its operands to represent
+the result of the operation. 
+Note: In the imperative case, too, the result of the function call
+rather than the operand
+has to be used for subsequent accesses to the modified set value,
+e. g. @code{s = AddElemToBitSet (x, s);} where s is a @code{BitSet}
+variable.
+
+The module does not have generic parameters.
+It is used by writing
+@example
+   $/Adt/BitSet.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{BitSet.h} is imported there.
+
+The module exports the following type names and macros:
+
+@findex type @code{BitSet}
+@findex NullBitSet
+@table @code
+@item BitSet
+   A pointer type representing sets.
+
+@item NullBitSet
+   The 0 pointer representing an empty set.
+   Note: The empty set can be represented in different ways.
+   Hence, the function @code{EmptyBitSet} must be used to check
+   for a set being empty.
+
+@end table
+
+The following set processing functions are supplied by the module:
+
+@findex function @code{FreeBitSet}
+@findex function @code{FreeMemBitSet}
+@findex function @code{NewBitSet}
+@findex function @code{EqualBitSet}
+@findex function @code{EmptyBitSet}
+@findex function @code{EmptyIntersectBitSet}
+@findex function @code{ElemInBitSet}
+@findex function @code{CardOfBitSet}
+@findex function @code{AddElemToBitSet}
+@findex function @code{ElemToBitSet}
+@findex function @code{AddRangeToBitSet}
+@findex function @code{SubElemFromBitSet}
+@findex function @code{UnionToBitSet}
+@findex function @code{IntersectToBitSet}
+@findex function @code{SubtractFromBitSet}
+@findex function @code{ComplToBitSet}
+@findex function @code{UniteBitSet}
+@findex function @code{IntersectBitSet}
+@findex function @code{SubtractBitSet}
+@findex function @code{ComplBitSet}
+@findex function @code{NextElemInBitSet}
+@findex function @code{ApplyToBitSet}
+@findex function @code{PrintBitSet}
+@findex function @code{PrintElemsBitSet}
+@table @code
+@item void FreeBitSet (BitSet s)
+Deallocates the set @code{s}.
+
+@item void FreeMemBitSet (void)
+Deallocates all memory allocated for sets.
+
+@item BitSet NewBitSet (void)
+Allocates an empty set.
+
+@item int EqualBitSet (BitSet s1, BitSet s2)
+Yields 1 if @code{s1} and @code{s2} contain the same elements; otherwise 0.
+
+@item int EmptyBitSet (BitSet s)
+Yields 1 if @code{s} is empty; otherwise 0.
+
+@item int EmptyIntersectBitSet (BitSet s1, BitSet s2)
+Yields 1 if the intersection of @code{s1} and @code{s2} is empty; 
+otherwise 0.
+
+@item int ElemInBitSet (int el, BitSet s)
+Yields 1 if @code{el} is an element of @code{s}; otherwise 0.
+
+@item int CardOfBitSet (BitSet s)
+Yields the number of elements in @code{s}.
+
+@item BitSet AddElemToBitSet (int el, BitSet s)
+Imperative: Adds element @code{el} to set @code{s}.
+
+@item BitSet ElemToBitSet (int el)
+Returns a set consisting only of element @code{el}. This function
+can be used as the third (function) parameter in an application of
+the @code{CONSTITUENTS} construct.
+
+@item BitSet AddRangeToBitSet (int el1, int el2, BitSet s)
+Imperative: All elements in the range from @code{el1} to @code{el2} 
+are added to the set @code{s}.
+
+@item BitSet SubElemFromBitSet (int el, BitSet s)
+Imperative: Subtracts element @code{el} from set @code{s}.
+
+@item BitSet UnionToBitSet (BitSet s1, BitSet s2)
+Imperative: @code{s1} is set to the union of @code{s1} and @code{s2}
+
+@item BitSet IntersectToBitSet (BitSet s1, BitSet s2)
+Imperative: @code{s1} is set to the intersection of @code{s1} and @code{s2}.
+
+@item BitSet SubtractFromBitSet (BitSet s1, BitSet s2)
+Imperative: @code{s2} is subtracted from @code{s1}.
+
+@item BitSet ComplToBitSet (int upb, BitSet s)
+Imperative: @code{s} is complemented with respect to the
+range 0 .. @code{upb};
+no assumption can be made on elements larger than @code{upb} in @code{s}
+
+@item BitSet UniteBitSet (BitSet s1, BitSet s2)
+Functional: Yields the union of @code{s1} and @code{s2}
+
+@item BitSet IntersectBitSet (BitSet s1, BitSet s2)
+Functional: Yields the intersection of @code{s1} and @code{s2}
+
+@item BitSet SubtractBitSet (BitSet s1, BitSet s2)
+Functional: Yields @code{s1} minus @code{s2}.
+
+@item BitSet ComplBitSet (int upb, BitSet s)
+Functional: Yields the complement of @code{s} with respect to the
+range 0 .. @code{upb};
+no assumption can be made on elements larger than @code{upb} in the result.
+
+@item int NextElemInBitSet (int elem, BitSet s)
+Yields the smallest element of @code{s} that is larger than @code{elem},
+if any; -1 otherwise.
+
+@item void ApplyToBitSet (BitSet s, void func(int))
+Applies the function @code{func} to each element of @code{s}
+
+@item void PrintBitSet (BitSet s)
+Prints @code{s} as a string of 0 and 1 to @code{stdout}.
+
+@item void PrintElemsBitSet (BitSet s)
+Prints @code{s} as a comma separated sequence of its 
+elements to @code{stdout}.
+@end table
+
+@comment =====================================
+@node IntSet
+@chapter Bit Sets of Integer Size
+
+@findex Module @code{IntSet}
+This C module implements sets of small
+nonnegative integral values by values of an @code{unsigned} type
+that is determined on instantiation of the module.
+The maximal element value depends on the number of bits used for the
+representation of the chosen @code{unsigned} type.
+The operations provided by this module may be 
+used for computations on kind set values (or any other
+suitable application). In the following description of the set 
+operations we assume that @code{el} stands for an expression that 
+yields an integer being a set element, and @code{s, s1, s2} stand
+for expressions yielding sets.
+
+The module is instantiated by
+@example
+   $/Adt/IntSet.gnrc +instance=NAME +referto=TYPE :inst
+@end example
+@noindent
+where @code{NAME} identifies the @code{IntSet} instance and @code{TYPE}
+specifies the type used for representing set values.
+If the @code{referto} parameter is specified to be @code{TYPE}, then
+@code{unsigned TYPE} has to be a valid integral C type.
+Examples for the @code{referto} parameter are @code{short}, @code{int},
+or @code{'long int'}. If the @code{referto} parameter is omitted
+@code{int} is assumed. The @code{instance} parameter may be omitted
+if there is only one instance of this module.
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{NAMEIntSet.h} is imported there.
+
+The module exports the following type names and macros
+(all names are prefixed by the value @code{NAME} of the @code{instance}
+parameter):
+
+@findex NULLIS
+@findex function @code{NullIS}
+@findex type @code{IntSet}
+@table @code
+@item NAMEIntSet
+the type representing sets.
+
+@item NAMENULLIS
+the unique value for an empty set.
+@item NAMENullIS()
+a macro with no arguments for the unique value for an empty set,
+to be used where a functional notation is required as in @code{WITH}
+clauses of @code{CONSTITUENTS}.
+@end table
+
+The following operations for set processing are supplied by the module.
+It is indicated whether an operation is implemented by a function
+or by a macro. The macros do not evaluate any argument repeatedly.
+
+@findex function @code{SingleIS}
+@findex function @code{AddElIS}
+@findex function @code{InIS}
+@findex function @code{UniteIS}
+@findex function @code{SubIS}
+@findex function @code{InterIS}
+@findex function @code{DisjIS}
+@findex function @code{InclIS}
+@findex function @code{EqualIS}
+@findex function @code{EmptyIS}
+@findex function @code{CardIS}
+@findex function @code{ConsIS}
+@table @code
+@item NAMEIntSet NAMESingleIS (int el)
+   Yields a singleton set containing @code{el};
+   a message is issued if @code{el} is not a valid element.
+   (function)
+@item NAMEIntSet NAMEAddElIS (int el, NAMEIntSet s)
+   Yields the union of @code{NAMESingleIS(el)} and @code{s};
+   a message is issued if @code{el} is not a valid element.
+   (function)
+@item NAMEIntSet NAMEConsIS (int el, NAMEIntSet s)
+   Yields the union of @code{NAMESingleIS(el)} and @code{s};
+   validity of @code{el} is not checked.
+   (macro)
+@item int NAMEInIS (int el, NAMEIntSet s)
+   Yields 1 iff @code{el} is in @code{s};
+   a message is issued if @code{el} is not a valid element.
+   (function)
+@item NAMEIntSet NAMEUniteIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields the union of @code{s1} and @code{s2}.
+   (macro)
+@item NAMEIntSet NAMESubIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields @code{s1} minus @code{s2}.
+   (macro)
+@item NAMEIntSet NAMEInterIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields the intersection of @code{s1} and @code{s2}.
+   (macro)
+@item int NAMEDisjIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields 1 iff @code{s1} and @code{s2} are disjoint.
+   (macro)
+@item int NAMEInclIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields 1 iff @code{s1} is a subset of @code{s2}.
+   (function)
+@item int NAMEEqualIS (NAMEIntSet s1, NAMEIntSet s2)
+   Yields 1 iff @code{s1} is equal to @code{s2}.
+   (macro)
+@item int NAMEEmptyIS (NAMEIntSet s)
+   Yields 1 iff @code{s} is empty.
+   (macro)
+@item int NAMECardIS (NAMEIntSet s)
+   Yields the number of elements in @code{s}.
+   (function)
+@end table
+
+@comment =====================================
+@node Stack
+@chapter Stacks of Any Type
+
+@findex Module @code{Stack}
+This module implements a stack named @code{NAMEStack},
+whose elements are of type @code{TYPE}.
+Values of this type can be pushed onto the stack and popped off of it in
+the usual way, and in addition each element of the stack can be indexed
+directly and its value obtained.
+All of the operations exported by this module are implemented as macros,
+using the facilities of the obstack module
+(@pxref{obstack, , Memory Object Management, lib, Library Reference Manual}).
+
+The module is instantiated by
+@example
+   $/Adt/Stack.gnrc +instance=NAME +referto=TYPE :inst
+@end example
+@noindent
+where @code{NAME} identifies the @code{Stack} instance and @code{TYPE}
+is the element type.
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules
+if the interface file @code{NAMEStack.h} is imported there.
+
+The following macros are supplied by the module:
+
+@table @code
+@item int NAMEStackEmpty
+@findex StackEmpty
+   Yields the value 1 if the stack has no elements, 0 otherwise.
+
+   This operation must appear in an expression context.
+
+@item size_t NAMEStackSize
+@findex StackSize
+   Yields the number of elements in the stack.
+
+   This operation must appear in an expression context.
+
+@item void NAMEStackPush(TYPE v)
+@findex StackPush
+   Push an element onto the stack.
+   The parameter @code{v} must be an expression that yields a value of type
+   @code{TYPE}. That value becomes the new top element of the stack.
+   The previous top element becomes the new second element, and so on.
+
+   This operation must appear in a statement context.
+
+@item TYPE NAMEStackPop
+@findex StackPop
+   Remove the top element of the stack.
+   The previous second element becomes the new top element, and so on.
+
+   This operation must appear in an expression context, and yields the value
+   (of type @code{TYPE}).
+
+@item TYPE NAMEStackTop
+@findex StackTop
+   Obtain the contents (of type @code{TYPE})
+   of the top element of the stack without changing the state of the stack.
+
+   This operation must appear in an expression context.
+
+@item TYPE NAMEStackElement (i)
+@findex StackElement
+   Obtain the contents (of type @code{TYPE}) of a specific element of the stack
+   without changing the stack.  The argument gives the distance of the desired
+   element from the top of the stack (0 for the newest element, 1 for the next
+   newest, and so on).
+   There is no check on the validity of the value of @code{i}.
+
+   This operation must appear in an expression context.
+
+@item TYPE NAMEStackArray (i)
+@findex StackArray
+   Obtain the contents (of type @code{TYPE})
+   of a specific element of the stack without changing the state of the stack.
+   For the purpose of this operation, the stack is considered to be an array.
+   Element 0 is the oldest value on the stack, element 1 is the next oldest,
+   and so on.
+   There is no check on the validity of the value of @code{i}.
+
+   This operation must appear in an expression context.
+
+@item void ForEachNAMEStackElementDown (i)
+@findex ForEachStackElementDown
+   Cycle through the elements of the stack, from the most recent to the oldest.
+   The parameter @code{i} must be declared as an lvalue of type
+   @code{TYPE*} and will point, in turn, to each element of the stack.
+
+   This operation must appear in a context where 
+   @code{for (i=...; i>=...;i--)} is allowed.
+
+@item void ForEachNAMEStackElementUp (i)
+@findex ForEachStackElementUp
+   Cycle through the elements of the stack, from the oldest to the most
+   recent.
+   The parameter @code{i} must be declared as an lvalue of type
+   @code{TYPE*} and will point, in turn, to each element of the stack.
+
+   This operation must appear in a context where 
+   @code{for (i=...; i<...;i++)} is allowed.
+@end table
+
+@comment =====================================
+@node Map
+@chapter Mapping Integral Values To Other Types
+@findex Module @code{Map}
+
+This module implements mappings from non-negative integers
+to an arbitrary type that is specified by a generic instantiation parameter.
+Any assignable type can be chosen.
+
+The map is implemented by a dynamically allocated array using 
+the @code{obstack} module via the @code{DynSpace} interface.
+The mapping storage can be deallocated.
+
+The size of the mapping has to to be stated on initialization.
+
+The module is instantiated by
+@example
+   $/Adt/Map.gnrc +instance=NAME +referto=TYPE :inst
+@end example
+@noindent
+where @code{NAME} identifies the @code{Map} instance and @code{TYPE}
+is the target type of the mapping.
+
+Note: The target type of the mapping @code{TYPE} must be either a
+type that is predefined in C, or its definition must be made
+available by some @code{.head} specification.
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{NAMEMap.h} is imported there.
+
+The following functions are supplied by the module:
+
+@findex function @code{InitMap}
+@findex function @code{FinlMap}
+@findex function @code{SetMap}
+@findex function @code{GetMap}
+@findex function @code{InitMapValues}
+@table @code
+@item void NAMEInitMap (int max_n)
+   Initializes the mapping for value between 0 and @code{max_n}.
+
+@item void NAMEFinlMap (void)
+   Deallocates the mapping.
+
+@item void NAMEInitMapValues (TYPE v)
+   Initializes all mappings in the range 0 to @code{max_n}  to the
+   value @code{v}.
+
+@item void NAMESetMap (int n, TYPE v)
+   Maps @code{n} to the value @code{v}.
+   It may override a previously set value.
+
+@item TYPE NAMEGetMap (int n)
+   Yields the @code{TYPE} value set for
+   @code{n} by the most recent call of @code{NAMESetMap} or
+   @code{InitMapValues}, if any;
+   otherwise the result is undefined.
+@end table
+
+@comment =====================================
+@node Table
+@chapter Mapping Arbitrary Values To Definition Table Keys
+@findex Module @code{Table}
+
+This module implements mappings from values of an arbitrary type
+(specified by a generic instantiation parameter) to unique definition table
+keys.
+It is instantiated by
+
+@example
+   $/Adt/Table.gnrc +instance=NAME +referto=TYPE :inst
+@end example
+@noindent
+where @code{NAME} identifies the table instance and @code{TYPE}
+is the type of the values being mapped to definition table keys.
+
+Note: if @code{TYPE} is not a type that is predefined in C then its
+definition must be made available by some @code{.head} specification.
+
+Each table is implemented by a dynamically allocated memory with a 32-bit
+address space.
+The user must supply a hash function to compute a 32-bit value that
+characterizes a given @code{TYPE} value.
+If @code{TYPE} is representable in 32 bits, then this function is simply an
+identity function that casts the given value to type @code{ub4}
+(representing an unsigned 32-bit value).
+Otherwise the general hash function available in the Eli library can
+compute an appropriate value
+(@pxref{Hash,,Computing a Hash Value,problems,
+Solutions of common problems}).
+
+Each element of the memory may hold more than one table entry; the user
+must supply a comparison function to verify that a particular table entry
+is the one sought.
+If @code{TYPE} values are ordered, this function should return an integer
+less than, equal to, or greater than zero when its first @code{TYPE}
+argument is less than, equal to, or greater than its second.
+Otherwise, the function must return zero if its @code{TYPE} arguments are
+equal, and an integer greater than zero if they are unequal.
+
+The following functions are supplied by the module:
+
+@table @code
+@item void NAMEInitTable (ub4 (*hash)(TYPE), int (*cmp)(TYPE, TYPE))
+@findex function @code{InitTable}
+Initializes the table.
+@code{hash} is the hash function on @code{TYPE} values,
+and @code{cmp} is the comparison function on @code{TYPE} values.
+
+@item DefTableKey NAMEKeyInTable (TYPE v)
+@findex function @code{KeyInTable}
+Yields the definition table key associated with the value @code{v}.
+If there is no definition table key associated with the value @code{v}
+then @code{NAMEKeyInTable} yields @code{NoKey}.
+
+@item DefTableKey NAMEDefInTable (TYPE v)
+@findex function @code{DefInTable}
+Yields the definition table key associated with the value @code{v}.
+If there is no definition table key associated with the value @code{v}
+then @code{NAMEDefInTable} associates the value @code{v} with a new
+definition table key and yields that key.
+@end table
+@noindent
+These functions can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in @code{.pdl} specifications or in C modules 
+if the interface file @code{NAMETable.h} is imported there.
+
+@comment =====================================
+@node DynSpace
+@chapter Dynamic Storage Allocation
+@findex Module @code{DynSpace}
+@findex Dynamic Storage Allocation
+@findex obstack
+
+This module provides functions for dynamic storage allocation. 
+Its operations are
+significantly faster than the C function @code{malloc}, 
+since storage is allocated 
+within larger chunks which are less frequently requested from the system. The 
+module is implemented on top of a more general storage allocation module
+@code{obstack}, which may be used directly if more elaborate allocation 
+mechanisms are needed.
+
+The use of the module requires an initializing call of the function
+@code{InitDynSpace}.
+
+@table @code
+@item void* InitDynSpace ()
+initializes a storage area for subsequent allocations. The result should be 
+assigned to a variable used in subsequent allocation calls.
+@end table
+
+The module does not have generic parameters.
+It is used by writing 
+@example
+   $/Adt/DynSpace.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+All entities exported by this module can be used in specifications
+of type @code{.lido}, @code{.init}, @code{.finl}, and @code{.con}.
+They can also be used in C modules if the interface file
+@code{DynSpace.h} is imported there.
+
+The module exports the following functions:
+
+@findex function @code{InitDynSpace}
+@findex function @code{DynAlloc}
+@findex function @code{DynClear}
+@table @code
+@item void* InitDynSpace (void)
+   Initializes a dynamic storage area and returns a pointer to it.
+   it has to be used in any subsequent call of @code{DynAlloc}.
+
+@item void* DynAlloc (void *space, int size)
+   Allocates storage of the given @code{size} in the area 
+   pointed to by @code{space}.
+
+@item void DynClear (void *space)
+   Deallocates the complete storage area pointed to by @code{space}.
+@end table
+
+The functions can be used in a C module in the following way:
+
+@example
+   #include "DynSpace.h"
+   void *MySpace;
+   /* ... */
+   MySpace = InitDynSpace ();
+   /* ... */
+   p = (TypeX*) DynAlloc (MySpace, sizeof (TypeX));
+   /* ... */
+   DynClear (MySpace);
+   /* ... */
+@end example
+
+Note: Neither the cast nor the call of sizeof can be part of a LIDO 
+computation, since type identifiers are not allowed in computations.
+Hence the calls of this module must reside in a C module 
+(that implements the type of the allocated objects).
+
+@node Index
+@unnumbered Index
+@printindex fn
+@contents
+@bye

@@ -1,0 +1,658 @@
+# (C) Copyright 1997 University of Paderborn
+#
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+/Attribute class in conflict/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/Different attribute types specified/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/Internal error: AttrDefs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Internal error: AttrDefs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Internal error: AttrDefs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Predefined name GENTREE is not allowed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/Attribute name clashes with CHAIN name/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/Internal error: AttrDefs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Internal error: AttrDefs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Different attribute classes/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/No scope for definition/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/More than one intrinsic attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref) Outdated Constructs./
+	p
+	d
+}
+/Old style TERM transformed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref) Outdated Constructs./
+	p
+	d
+}
+/SYNT or INH has to be specified for this attribute/{
+        s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoshort)Symbol Specifications./
+        p
+        d
+}
+
+/LIGAPragma is outdated, see manual/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Missing name of LIGAPragma/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Missing name of LIGAPragma/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Missing attribute name of LIGAPragma RhsAttrs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Too many arguments of LIGAPragma RhsAttrs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Missing attribute name of LIGAPragma RhsAttrs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/missing arguments of LIGAPragma BottomUp/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/unknown LIGAPragma/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Missing argument of RuleFct/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/First argument of RuleFct must be a string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/First argument of RuleFct must be a string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/Missing argument of TermFct/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/First argument of TermFct must be a string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/First argument of TermFct must be a string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/TermFct in assign must stand for exactly one terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/RHS.attr in assign must stand for exactly one attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Missing computation of iteration attribute in this context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Iterations./
+	p
+	d
+}
+/Internal error: loop attribute expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/misused TermFct/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/misused RHS.attr/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/TERM not allowed in upper computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Terminal Access./
+	p
+	d
+}
+/Old style terminal accessed by TERM/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/TERM accesses old style terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Access to missing terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Terminal Access./
+	p
+	d
+}
+/Terminal missing in target context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Terminal Access./
+	p
+	d
+}
+/CHAIN can not go through a terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/CHAIN can not go through a terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/INCLUDING yields empty remote list in some context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)INCLUDING./
+	p
+	d
+}
+/Inherits INCLUDING computation with empty remote list/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)INCLUDING./
+	p
+	d
+}
+/GENTREE computation must not be inherited to here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/GENTREE computation is inherited to wrong position/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/Inherited to a symbol that does not define this attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Inheritance of Computations./
+	p
+	d
+}
+/Inherits an undefined attribute use/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Inheritance of Computations./
+	p
+	d
+}
+/Multiple symbol computations for this CHAIN/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/Multiple symbol computations for this CHAIN/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/Inheritance to itself/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Inheritance of Computations./
+	p
+	d
+}
+/Cyclic inheritance/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Inheritance of Computations./
+	p
+	d
+}
+/Remote access to two attributes of one symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Remote Attribute Access./
+	p
+	d
+}
+/Referenced symbol must be in production/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Symbol must be indexed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Referenced symbol must be in production/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/InitMapDidToIsVoid: no space/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/system error wrong CONSTITUENT(S) structure/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CONSTITUENT(S)./
+	p
+	d
+}
+/WITH clause not needed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CONSTITUENT(S)./
+	p
+	d
+}
+/WITH clause needed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CONSTITUENT(S)./
+	p
+	d
+}
+/CONSTITUENT yields empty remote list/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CONSTITUENT(S)./
+	p
+	d
+}
+/VOID attribute not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/VOID attribute not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/VOID attribute not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/VOID attribute not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/Less than 2 arguments for IF/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/Else part of IF required in value context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/More than 3 arguments for IF/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/Iteration does not yield a value/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Iterations./
+	p
+	d
+}
+/Attribute name GENTREE not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/CHAIN attributes not allowed as remote or rule attributes/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/CHAIN can not go through a terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/HEAD or TAIL must access a CHAIN attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/HEAD of chain may only be defined/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/GENTREE may only be used for computed tree symbols/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/TAIL of chain must not be defined/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/CHAIN definition not allowed for upper computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/GENTREE may only be used for computed tree symbols/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/No rule attribute in symbol computations/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/No rule attribute in symbol computations/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/CHAIN attribute not allowed as rule attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/Predefined attribute name GENTREE not allowed as rule attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/Predefined identifier not allowed in remote attribute access/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Remote Attribute Access./
+	p
+	d
+}
+/Iteration on CHAIN attributes not allowed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Iterations./
+	p
+	d
+}
+/Must be computation of a chain attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/Multiple symbol computations for this attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/Defined both as CHAIN and ATTR/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/Must be SYNT or INH/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attribute Names and Classes./
+	p
+	d
+}
+/Terminal may not be root of computed tree/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/Empty literal not allowed in production/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/GENTREE computation missing/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computed Subtrees./
+	p
+	d
+}
+/Type identifier clashes with other identifier/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/Rule identifier clashes with other identifier/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Rule Specifications./
+	p
+	d
+}
+/Predefined identifier not allowed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Symbol identifier clashes with other identifier/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Symbol identifier clashes with other identifier/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Symbol does neither occur in syntax nor in symbol attribution/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Predefined identifier not allowed in symbol specification/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Symbol identifier clashes with other identifier/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/An iteration may not be marked BOTTOMUP/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Iterations./
+	p
+	d
+}
+/An iteration may not be marked BOTTOMUP/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Iterations./
+	p
+	d
+}
+/Negative integer literals not supported/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Simple Expressions./
+	p
+	d
+}
+/There is no such remote symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Remote Attribute Access./
+	p
+	d
+}
+/List element symbol is missing/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Terminal may not be LISTOF element/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/No root symbol found/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/INHERITS from a TREE symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/This TREE symbol is also a CLASS symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Can not be both a CLASS and a TREE symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Symbol class is in conflict with grammar/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Same name for different productions/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Rule Specifications./
+	p
+	d
+}
+/This is one of the roots/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Not allowed in symbol computation./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Not allowed in rule computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Must denote terminal symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Terminal Access./
+	p
+	d
+}
+/HEAD or TAIL does not refer to a nonterminal in the production/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/May not be indexed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Symbol index must be > 0/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/Symbol may not be indexed in symbol computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/There is a LISTOF production for the same symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/There is another production for defined list root/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Productions./
+	p
+	d
+}
+/Must be TERM specification/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Conflicting TERM type specification/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Symbol Specifications./
+	p
+	d
+}
+/Old style TERM specification/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Old style TERM attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Old style TERM attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/Old style TERM attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/New style terminal access to old style terminal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Outdated Constructs./
+	p
+	d
+}
+/TERM not allowed in rule computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Terminal Access./
+	p
+	d
+}

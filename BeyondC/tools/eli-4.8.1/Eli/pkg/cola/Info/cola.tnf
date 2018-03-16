@@ -1,0 +1,366 @@
+\input texinfo     @c -*-texinfo-*-
+@setfilename cola
+@settitle Cola Option Tool
+@setchapternewpage odd
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment /* This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+@comment 
+@titlepage
+@sp 6
+@center @titlefont{Cola Option Tool}
+@sp 4
+@center M.T. Jung
+@center K.J. Prott
+@center U. Kastens
+@sp 4
+@center University of Paderborn
+@center D-4790 Paderborn
+@center F.R.G
+@sp 10
+@center $Revision: 1.13 $
+@comment $Id: cola.tnf,v 1.13 1998/08/31 08:33:31 mjung Exp $
+@page
+@comment Pagebreak needed for correct double-sided output!!
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@ifinfo
+@node Top, , ,(dir)
+@unnumbered Cola Option Tool
+
+$Revision: 1.13 $
+
+@menu
+* Introduction::   Selection of parser and option file specification.
+* Options::        Describes usable options for Cola.
+* Index::                                         
+@end menu
+@end ifinfo
+
+@node Introduction, Options, Top, Top
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+In ELI you can use different parser generators, namely COLA or PGS. 
+By default ELI uses the PGS parser generator. In order to specify the 
+COLA parser, add an option after the @samp{.specs}-filename in the 
+ELI derivation command. For example, you
+can write
+@findex @samp{+parser}
+
+@example
+   myfile.specs +parser='cola' :source > src
+@end example
+
+@findex @samp{.cola}
+@noindent if you want to use the COLA-Parser-Generator. If you use 
+COLA as your parser generator, you can
+modify the behavior of COLA by specifing options in a @samp{.cola}-file.
+Seperate the options with white space. (e.g. put every option in one
+line by itself.)  You can add comments using C-style-comments or
+AWK-Comments. Add this filename to your @samp{.specs}-file. That's all.
+
+In the next section all the options that can be used
+in that file will be described. 
+
+@node Options, Index, Introduction, Top
+@comment  node-name,  next,  previous,  up
+@chapter Options
+
+@noindent @b{INFO ON/OFF}
+
+@findex @samp{INFO}
+@findex @samp{parsable}
+A derivation of @samp{:parsable} will produce the complete
+state tables. Default is, that COLA generates only information whether the
+grammar is LALR(1) or not. If it is not, COLA will print the conflict states.
+Switching this option on will get you information on all the
+states with all productions and symbols of the grammar.
+
+@noindent @b{FREE POS ON/OFF}
+
+@findex connections
+Switching on this option gives you additional information about free
+positions in the grammar. This information can be used for parse time
+evaluation. Free positions in a grammer can be filled with connections 
+without destroying the LALR(1)-property.
+
+For the current installation of Cola this option has no effect.
+
+@noindent @b{ERROR AUTOMATIC ON/OFF}
+
+@findex @samp{ERROR AUTOMATIC}
+@findex Syntax Errors
+With this option you can specify if the parser should continue or stop after
+a syntax error. This option is turned on by default. (meaning that the parser
+should continue after a syntax error)
+
+@noindent @b{OPT INFO ON/OFF}
+
+@findex @samp{OPT INFO}
+@findex @samp{colaOptInfo}
+If you enable this option, a derivation of @samp{:colaOptInfo} in ELI will
+contain the optimisation results from the COLA backend. By default, this
+option is switched off.
+ 
+@noindent @b{TTAB <mode>}
+
+This option has effect on the optimisation of the parser tables. Please refer
+to  @dfn{Optimization of Parser Tables for Portable Compilers},
+P.Denker, K.Duerre and J.Heuft, TOPLAS 6(4), Page 564-572, 1984. @samp{mode} 
+can be one of the following:
+
+@table @samp
+@item GCSA
+@item GCSB
+Graph Coloring Scheme
+@item LESA
+@item LESB
+Line Elemination Scheme
+@item RCSA
+@item RCSB
+Row Column Scheme
+@item SDS
+Significant Distance Scheme
+@item RDS
+Row Displacement Scheme
+@end table
+
+@noindent @b{NTAB <mode>}
+
+Analoguous to the terminal table this option effects the nonterminal table.
+@samp{mode} can have the same values as above.
+
+@c @node Options for directly executable parser, Index, Options for table driven parser, Top
+@c @chapter Options for directly executable parser
+
+@c With the options specified here you can influence the generated executable 
+@c parser in many ways. The options available here can be splitted in three
+@c categories: Options that influence the parser stack, the ones that influence
+@c code generation and others that are for error handling.
+
+@c @section Stack Options
+
+@c @noindent @b{STACK SIZE <int>}
+
+@c With this option you can set the size of the parser stack. The default is set
+@c to 100.
+
+@c @noindent @b{STACK FIRST ON/OFF}
+
+@c This option deals with stack optimisation. Switching it on or off changes the
+@c order of optimisations on the stack. The option is switched on by default.
+
+@c @noindent @b{STACK GOTO ON/OFF}
+
+@c This option turns on the direct goto determination. It is switched on by
+@c default.
+
+@c @noindent @b{STACK MIN PUSH ON/OFF}
+
+@c This option turns on the minimal push strategy for the parser stack. It
+@c is switched on by default.
+
+@c @noindent @b{STACK CHAIN ON/OFF}
+
+@c This option handles the chain rule elemination. It is switched on by default
+@c meaning that chain rules would be eleminated.
+
+@c @page
+@c @noindent @b{STACK OVERFLOW <int>}
+
+@c This option handles stack overflow tests. A value of @samp{1} will enable
+@c the depth first search strategy for stack overflow tests. A value of @samp{2}
+@c will enable stack overflow tests in nodes that refer to strong connected 
+@c components. All other values will be ignored. The default for this option
+@c is set to @samp{2}.
+
+@c @section Code Options
+
+@c @noindent @b{CODE IF}
+
+@c Long chains of comparisons can be implemented in three different ways. This
+@c option will enable the generation using a chain of if-statements.
+
+@c @noindent @b{CODE BIN IF}
+
+@c One other way to implement comparisons is using a binary tree of
+@c if-statements. This treatment is switched on with this option.
+
+@c @noindent @b{CODE SWITCH}
+
+@c The third way to implement long chains of comparisons is using a big
+@c switch-statement. This third handling is activated with this option. Only
+@c one of the options @samp{CODE IF}, @samp{CODE BIN IF} and @samp{CODE SWITCH}
+@c can be used. The default is set to ???
+
+@c @noindent @b{CODE EQUAL ROWS ON/OFF}
+
+@c This option switches on some lower optimisations that are implemented
+@c searching for equal rows in the parser automata. It is switched on by default.
+
+@c @noindent @b{CODE SUB ROWS <int>}
+
+@c With this option you can set a number of actions that have to be common in
+@c two nodes of the parser automata for some optimisations to be executed.
+@c The number should not be lower than @samp{7}.
+
+@c @noindent @b{CODE SIMILAR ROWS <int>}
+
+@c This option sets another minimal number of similar actions for enabling some
+@c optimisations. The number should not be lower than @samp{10}.
+
+@c @noindent @b{CODE DEFAULT ON/OFF}
+
+@c This option turns on the code compression optimisations. It is switched on
+@c by default.
+
+@c @noindent @b{CODE GOTO ON/OFF}
+
+@c This option turns on the chain goto elemination. It is turned on by default.
+
+@c @noindent @b{CODE EQUAL NT ROWS ON/OFF}
+
+@c This option turns on the detection of equal reduce code. If two reduce-actions
+@c are identical, one of the actions would be eleminated. The option is turned
+@c on by default.
+
+@c @noindent @b{CODE INDIVIDUAL REDUCE ON/OFF}
+
+@c This option enables the generation of individual labels for each reduction
+@c generated. Is is switched on by default.
+
+@c @noindent @b{CODE CONNECTION ON/OFF}
+
+@c This option handles the manner in which grammer connections are implemented.
+@c If this option is switched off, every connection is generated only once in
+@c a procedure into a big switch-statement. In the generated executable parser
+@c there is generated only the call of this procedure.
+
+@c If this option is switched on, the connection code is generated directly into
+@c the parser source. This can be more efficient, but produces also much more
+@c code. Therefore this option is switched off by default.
+
+@c @page
+@c @section Error Options
+
+@c @noindent @b{ERROR SIZE <int>}
+
+@c With this option you can change the size of the queue needed to
+@c process inserted symbols according to insertions made by the parser. The
+@c default size is 50.
+
+@c @noindent @b{ERROR IF}
+
+@c On the return of the error processing the parser state must be calculated.
+@c This can be done using if-statements or a switch-statement. With this option
+@c set if-statements will be used.
+
+@c @noindent @b{ERROR SWITCH}
+
+@c The parser state on the return of error processing is calculated using a
+@c switch-statement. This is the default. Only one of the options @samp{ERROR IF}
+@c and @samp{ERROR SWITCH} may be used.
+
+@c @node Summary, Index, Options for directly executable parser, Top
+@c @chapter Summary
+@c 
+@c @noindent General options:
+@c 
+@c @table @samp
+@c @item INFO ON/OFF
+@c enables generation of complete state tables.
+@c @item FREE POS ON/OFF
+@c gives additional information about free positions.
+@c @item ERROR AUTOMATIC ON/OFF
+@c enables or disables automatic syntax error handling.
+@c @end table
+@c 
+@c @noindent Options for table driven parser:
+@c @table @samp
+@c @item OPT INFO ON/OFF
+@c enables generation of optimisation results.
+@c @item TTAB <mode>
+@c selects terminal table mode.
+@c @item NTAB <mode>
+@c selectes nonterminal table mode.
+@c @end table
+@c 
+@c @noindent Options for directly executable parser:
+@c @table @samp
+@c @item STACK SIZE <int>
+@c sets size of parser stack. Default is 100.
+@c @item STACK FIRST ON/OFF
+@c changes the order of optimisations. Switched on by default.
+@c @item STACK GOTO ON/OFF
+@c enables/disables direct goto determination. Switched on by default.
+@c @item STACK MIN PUSH ON/OFF
+@c enables/disables minimal push strategy. Switched on by default.
+@c @item STACK CHAIN ON/OFF
+@c enables/disables chain rule elemination. Switched on by default.
+@c @item STACK OVERFLOW <int>
+@c sets stack overflow test implementation. @samp{1} means depth first
+@c search strategy, @samp{2} means strong connected cycles strategy. 
+@c @samp{1} is default.
+@c @item CODE IF
+@c Comparisons implemented with if-statements.
+@c @item CODE BIN IF
+@c Comparisons implemented with binary if-statements.
+@c @item CODE SWITCH
+@c Comparisons implemented with switch-statements.
+@c @item CODE EQUAL ROWS ON/OFF
+@c enables/disables equal row detection. Switched on by default.
+@c @item CODE SUB ROWS <int>
+@c sets minimal number of equal sub-rows for optimisation. Not lower 
+@c than @samp{7}.
+@c @item CODE SIMILAR ROWS <int>
+@c sets minimal number of similar rows for optimisation. Not lower than
+@c @samp{10}.
+@c @item CODE DEFAULT ON/OFF
+@c enables/disables code compression. Switched on by default.
+@c @item CODE GOTO ON/OFF
+@c enables/disables elemination of chain goto's. Switched on by default.
+@c @item CODE EQUAL NT ROWS ON/OFF
+@c enables/disables detection of same reduce-code. Switched on by default.
+@c @item CODE INDIVIDUAL REDUCE ON/OFF
+@c enables/disables generation of individual labels for reduce-operations.
+@c Switched on by default.
+@c @item CODE CONNECTION ON/OFF
+@c enables/disables connection code generation direcly into executable parser.
+@c Switched off by default.
+@c @item ERROR SIZE <int>
+@c Sets the size of the error symbol queue. Default is 50.
+@c @item ERROR IF
+@c Calculate parser state on the return of error processing using if-statements.
+@c @item ERROR SWITCH
+@c Calculate parser state on the return of error processing using 
+@c switch-statements. This is default.
+@c @end table
+
+@node Index, , Options, Top
+@chapter Index
+
+@printindex fn
+
+@contents
+
+@bye

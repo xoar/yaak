@@ -1,0 +1,41 @@
+This directory contains the Odin software build system.  Users upgrading
+from older Odin versions should consult the file "etc/CHANGES".
+
+For most machines and configurations, the following sequence of two
+commands will build an executable version (both commands should be given
+in the directory containing this README file):
+
+        ./configure 
+	./INSTALL install_dir
+
+"install_dir", if it is present, must be an absolute path name to
+an existing directory.	If the "install_dir" argument is omitted, it
+defaults to "$HOME".
+
+The INSTALL command will copy the Odin command script to the
+file "install_dir/bin/odin", copy the Odin man page to the file
+"install_dir/man/man1/odin.1", and install the default packages into
+the directory "install_dir/lib/Odin".
+
+None of the installed files or directories should be modified, except
+for the file "install_dir/lib/Odin/ODINPATH".  This file can contain a
+colon separated list of tool package libraries that will be appended to
+every Odin user's $ODINPATH environment variable.
+
+The following command deletes derived files produced during INSTALL of the
+Odin system; it does not disturb files created by the configure step:
+
+	./CLEAN
+
+Odin is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 1, or (at your option) any later
+version (see the file COPYING).
+
+Odin is distributed WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+Mail comments and questions to:
+
+	odin-build-users@lists.sourceforge.net

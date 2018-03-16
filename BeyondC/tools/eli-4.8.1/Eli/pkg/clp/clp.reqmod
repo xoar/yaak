@@ -1,0 +1,9 @@
+/* $Id: clp.reqmod,v 2.6 2010/05/14 20:36:21 profw Exp $ */
+
+$/clp/lib/clpintf.c
+$/clp/lib/clpintf.h
+$/clp/lib/clplib.c
+$/clp/lib/clplib.h
+$/Input/source.reqmod
+$/pdl/deftbl.reqmod
+$/Adt/PtrList.gnrc +instance=DefTableKey +referto=deftbl :inst

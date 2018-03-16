@@ -1,0 +1,42 @@
+# $Id: lib.dg,v 2.5 2003/06/30 04:11:43 waite Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.gnrc => :gnrc;
+:gnrc 'Generic module specification'? => :FILE;
+EXEC (instFiles.sh) (.) (:gnrc) instFiles
+  => (:instFiles);
+:instFiles 'Files associated with the generic module' => :FILE;
+COLLECT (:instFiles :list)
+  => (:instNeeds);
+:instNeeds 'Files needed when instantiating the generic module' => :LIST;
++instance 'Name of a generic module instantiation'? => :first;
++referto 'Name of a referenced generic module instantiation'? => :first;
+EXEC (instGen.sh) (.) (:gnrc) (+instance) (+referto)
+  NEEDS (:instNeeds)
+  => (:instGen);
+:instGen 'Files generated from generic specification' => :DERIVED-DIRECTORY;
+EXEC (instSpec.sh) (.) (:gnrc)
+  => (:instSpec);
+:instSpec 'Specifications associated with the generic module' => :FILE;
+COLLECT  (:instSpec :list :map=:level_0_specs) (:instGen :list)
+  => (:inst174);
+:inst174 'Intermediate for union' => :LIST;
+UNION (:inst174)
+  => (:inst);
+:inst 'Module generated from generic specification'? => :LIST;

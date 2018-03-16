@@ -1,0 +1,5 @@
+#if defined(__cplusplus) || defined(__STDC__)
+extern void show(int);
+#else
+extern void show();
+#endif

@@ -1,0 +1,20 @@
+# $Id: Makefile.in,v 1.2 2003/06/30 02:19:05 waite Exp $
+# Copyright (c) 1993, The Regents of the University of Colorado
+# Copyright (c) 1994, 1995 Anthony M. Sloane
+
+CC	= @CC@
+
+DIR	= pkg/lint
+SRC	=
+AUX	= Makefile.in Makefile version
+CMD	=
+EXE	=
+GEN	=
+GENINS	= lint.dg
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+lint.dg:
+	cp /dev/null $@

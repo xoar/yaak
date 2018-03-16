@@ -1,0 +1,144 @@
+
+
+:tex 'TeX formatter input'? => :FILE;
+*.tex => :tex;
+
+:bib 'Bibliographic data file'? => :FILE;
+*.bib => :bib;
+
+:sty 'Formatting style file'? => :FILE;
+*.sty => :sty;
+
+:cls 'Formatting style file'? => :FILE;
+*.cls => :cls;
+
+:bst 'Bibliographic style file'? => :FILE;
+*.bst => :bst;
+
+:ps 'Postscript file'? => :FILE;
+*.ps => :ps;
+
+:pdf 'Portable Document Format file'? => :FILE;
+*.pdf => :pdf;
+
+
++tex         'Use plain TeX'?                    => :first;
++latex       'Use LaTeX'?                        => :first;
++texroot     'Name of the TeX document root'?    => :first;
++texsearch   'Directories to be searched first'? => :ls;
++dvips_flags 'Options for dvips'?                => :ls;
++index_flags 'Options for makeindex'?            => :ls;
+
+
+
+:tex.vtd 'Basis of a TeX formatted document'? => :vtd;
+*.tex.vtd => :tex.vtd;
+
+
+:rootName 'Base name (no .tex suffix) of the root file' => :FILE;
+:rootFileName 'Simple name of the TeX file to be used as the root' => :texnames;
+
+
+:texsp 'Search path for the document basis' => :FILE;
+
+
++texsppt 'Parameter type for search path information' => :first;
+
+
+:texnames 'Text file containing local file names' => :FILE;
+
+
+:dvi       'Device independent format file'           => :FILE;
+:texpdf    'PDF created from TeX or LaTeX'            => :FILE;
+:tex.log   'TeX log file'?                            => :FILE;
+:citations 'Citation and bibliographic data commands' => :FILE;
+:indexntry '\indexentry commands with page numbers'   => :FILE;
+
+
+:texauxout 'Auxiliary files potentially modified by TeX' => :DERIVED-DIRECTORY;
+
+:texauxin.vtd 'Auxiliary files input to the formatting step' => :vtd;
+
+
+:texps 'PostScript created from TeX or LaTeX' => :ps;
+
+
+:pdf  'Portable data format file'? => :FILE;
+*.pdf => :pdf;
+
+
+
+EXEC (oneTex.sh) (:tex) (:label) => (:one_tex_vtd);
+
+
+:one_tex_vtd 'Singleton set of TeX formatter inputs' => :tex.vtd;
+
+
+EXEC (root.sh) (:tex.vtd) (+texroot)
+  NEEDS (:tex.vtd :vir_tgt.list)
+  => (:rootName) (:rootFileName);
+
+
+EXEC (texsp.sh) (:tex.vtd :vir_dir)@ (:dir)@ (+texsearch)
+  => (:texsp);
+
+
+COLLECT (:texfiles) (:texfiles :extract=:tex :map=:texclose) => (:texclose);
+:texclose 'Names of all files transitively referenced' => :LIST;
+
+
+COLLECT (:rootFileName +texsppt=(:texsp) :texclose) => (:texbasis);
+:texbasis 'Document basis' => :LIST;
+
+
+EXEC (tex_view.sh) (:texnames) (+texsppt) => (:tex.view_desc);
+:tex.view_desc 'View descriptor for basis files' => :FILE;
+
+
+
+EXEC (texscan.sh) (texscan.c :exe) (:tex) => (:texnames);
+
+
+COLLECT (:tex.view_desc :view) => (:texfiles);
+:texfiles 'Accessible files referenced' => :LIST;
+
+
+EXEC (fmtcmd.sh) (:rootFileName +texsppt=(:texsp) :texfiles :ls) (+tex) (+latex)
+     (+usepdf)
+   => (:fmtcmd);
+:fmtcmd 'Formatting command' => :FILE;
+
+
+EXEC (tex.sh) (:fmtcmd) (:rootName) (:texsp) (:tex.vtd :texauxin.vtd :vir_dir)&
+   NEEDS (:texbasis :extract=:tex) (:texbasis :extract=:sty)
+     (:texbasis :extract=:cls)
+     (:tex.vtd :texauxin.vtd :vir_tgt.list)&
+   => (:dvi) (:texpdf) (:tex.log) (:citations) (:indexntry) (:texauxout);
+
+
+EXEC (bibtex.sh) (:citations)& (:texsp)
+   NEEDS (:texbasis :extract=:bib) (:texbasis :extract=:bst)
+   => (:tex.bbl);
+:tex.bbl 'TeX bibliographic reference file' => :FILE;
+
+
+EXEC (makeindex.sh) (:indexntry)& (+index_flags)
+  => (:tex.ind) (:tex.ilg);
+:tex.ind 'TeX index file' => :FILE;
+:tex.ilg 'Messages from makeindex'? => :FILE;
+
+
+EXEC (texauxin.sh) (:rootName) (:texauxout)& (:tex.bbl) (:tex.ind)
+  => (:texauxin.vtd);
+
+
+EXEC (dvips.sh) (:dvi) (:texsp) (+dvips_flags)
+   NEEDS (:texbasis :extract=:ps)
+   => (:texps);
+
+
++usepdf 'Produce PDF code' => :first;
+
+COLLECT (:tex.vtd +usepdf :texpdf) => (:refpdf);
+:refpdf 'Reference to a PDF file' => :REFERENCE :pdf;
+

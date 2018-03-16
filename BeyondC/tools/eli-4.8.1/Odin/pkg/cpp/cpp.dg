@@ -1,0 +1,43 @@
+# Source Types
+
+*,c => :cpp_in;
+
+
+# Environment Variables
+
+$ODIN_CPP 'name of the C preprocessor' = 'cpp';
+
+$ODIN_CPP_FLAGS 'cpp flags' = '';
+
+
+# Input Object Types
+
+:cpp_in 'cpp input'? => :FILE;
+
+
+# Output Object Types
+
+:cpp 'output from cpp pre-processor' => :PIPE;
+
+:gnc.cpp 'output from cpp pre-processor' => :GENERIC;
+
+
+# Parameter Types
+
++define 'macro definition'? => :cat;
+
++inc_sp 'name of a directory in an include search path'? => :ls;
+
++home 'home directory for relative pathnames' => :first;
+
+
+# Tools
+
+EXEC (cpp.sh) cpp (:FILE) (:FILE :dir)@ (+inc_sp) (+define)
+ NEEDS (:FILE +home=(:FILE :dir) :lookup=:all_c_inc)
+   => (:cpp);
+
+EXEC (cpp.sh) gnc.cpp (:cpp_in) (:cpp_in :dir)@ (+inc_sp) (+define)
+ NEEDS (:cpp_in +home=(:cpp_in :dir) :lookup=:all_c_inc)
+   => (:gnc.cpp);
+

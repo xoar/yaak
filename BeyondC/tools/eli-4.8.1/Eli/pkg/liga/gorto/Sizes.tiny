@@ -1,0 +1,51 @@
+/*======================================================================*
+ *									*
+ *	FILE:		app-defaults/Sizes.tiny				*
+ *									*
+ *	CONTENTS:	Sizing part of application defaults for Gorto	*
+ *			(Tiny version)					*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+/* This file is part of the Eli translator construction system.
+
+Eli is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Eli; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+
+!			FONTS
+
+Gorto*Font:				-*-new ce*-medium-r-*-*-*-80-*
+Gorto*Text*Font:			-*-fixed-*-r-*-*-8-*
+Gorto*Label.Font:			-*-*-demibold-i-*-*-*-100-*
+Gorto.criticalFont:			-*-*-bold-i-*-*-*-80-*
+Gorto.boldFont:				-*-*-bold-i-*-*-*-120-*
+Gorto*SimpleMenu*Font:			-*-new cent*-medium-r-*-*-11-*
+Gorto*SimpleMenu*menuLabel.Font:	-*-new cent*-bold-r-*-*-14-*
+
+
+!			DEPENDENCY GRAPH LAYOUT
+
+Gorto.textPadding:			1
+Gorto.synthesizedIndent:		10
+Gorto.symbolvPadding:			5
+Gorto.symbolhPadding:			3
+Gorto.arrowWidth:			3
+Gorto.arrowHeight:			7
+Gorto.arrowLength:			20
+Gorto.depColumnWidth:			3
+Gorto.depFaseLength:			4
+
+Gorto.selectWidth:			3

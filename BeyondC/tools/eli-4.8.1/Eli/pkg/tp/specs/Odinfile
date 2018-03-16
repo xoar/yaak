@@ -1,0 +1,17 @@
+tp.exe == tp.fw :exe
+
+%pdf == tp.fw :pdf
+
+%current == tp.fw+monitor+debug+cc=gcc
+%data == arg.tp
+
+%a    == %current:abstree
+%c    == %current:consyntax
+%d  ! == %current:gdb
+%g  ! == %current:gencode:viewlist
+%h  ! == %current:exe:help
+%m  ! == %current+arg=(%data):mon
+%tm ! == %current+arg=(input):mon
+%p    == %current:parsable
+%r  ! == .+cmd=(%current:exe) (%data):run
+%t  ! == .+cmd=(%current:exe) (input):run

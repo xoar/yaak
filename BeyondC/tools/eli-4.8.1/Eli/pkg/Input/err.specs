@@ -1,0 +1,5 @@
+/* $Id: err.specs,v 1.7 2010/02/26 17:50:56 profw Exp $ */
+/* Error reporting module and coordinate system */
+
+err.reqmod
+err.dapto

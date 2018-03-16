@@ -1,0 +1,364 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename oldmod
+@setchapternewpage odd
+@settitle Migration of Old Library Module Usage
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: oldmod.tnf,v 1.6 2002/05/28 07:29:54 peter Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Migration of Old Library Module Usage}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.6 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@chapheading Specification Module Library
+@chapheading Migration of Old Library Module Usage
+@end ifinfo
+
+This section helps to migrate applications of previous module
+library version to the current one.
+
+Users who want to continue to use library modules of a previous Eli version,
+please contact your Eli system manager.
+
+@menu
+* ModLib3_8::   Migration of Eli Version 3.8 modules
+* ModLib3_6::	Migration of Eli Version 3.6 modules
+* Index::       Index
+@end menu
+@iftex
+@ifclear html
+@table @code
+@item ModLib3_8
+Migration of Eli Version 3.8 modules
+@item ModLib3_6
+Migration of Eli Version 3.6 modules
+@end table
+@end ifclear
+@end iftex
+
+@comment =====================================
+@node ModLib3_8, ModLib3_6, , top
+@chapter Migration of Eli Version 3.8 modules
+
+This section gives a quick reference to modifications that have been made
+in library modules of Eli version 3.8.
+Users who are still using modules of Eli version 3.6 first see
+@ref{ModLib3_6}.
+
+@findex CLASS SYMBOL
+In all library modules that provide LIDO specifications the symbol roles
+are now specified to be @code{CLASS SYMBOL}s.
+This classification avoids accidental name coincidences between
+grammar symbols and roles provided by modules.
+
+As a consequence such a symbol
+may not occur as a name of a tree grammar symbol. It rather has to be
+inherited by a tree grammar symbol:
+@example
+  RULE: Program ::= Source END;
+  SYMBOL Program INHERITS RootScope END;
+@end example
+Constructs like
+@example
+  RULE: RootScope ::= Source END;
+@end example
+will cause error messages. Hence, the grammar symbols have to be renamed
+consistently in such cases.
+
+We assume that some names like @code{IdDef} or @code{IdUse} have been
+used in this now illegal way. In order to simplify migration those
+module roles are now renamed @code{IdDefScope} and @code{IdUseEnv}.
+Hence, specifications which use @code{IdDef} or @code{IdUse} as
+grammar symbols may continue to do so. Only
+@example
+  SYMBOL IdDef INHERITS IdDefScope END;
+  SYMBOL IdUse INHERITS IdUseEnv END;
+@end example
+@noindent
+is to be added.
+
+The following table contains a list symbol roles that are provided by modules
+of Eli version 3.8 and have been changed in the current version.
+All these adaptions refer to modules of the @code{Name} library.
+
+The following library modules have been modified:
+
+@findex Module DynSpace
+@findex Module BitSet
+@findex Module PropLib
+@findex Module List
+@findex Module LeafPtg
+@findex Module @code{Type}
+@findex Module @code{CType}
+@findex Module @code{BuType}
+@findex Modules for Name Analysis
+@table @code
+@item @code{BitSet}
+Use @code{$/Adt/BitSet.fw} instead of instantiation.
+(@pxref{BitSet, , Bit Sets of Arbitrary Length, adt, Abstract data types to be used in specifications})
+
+@item @code{DynSpace}
+Use @code{$/Adt/DynSpace.fw} instead of instantiation.
+(@pxref{DynSpace, , Dynamic Storage Allocation, adt, Abstract data types to be used in specifications})
+
+@item @code{LeafPtg}
+Use @code{$/Output/LeafPtg.fw} instead of instantiation.
+(@pxref{LeafPtg, , PTG Output for Leaf Nodes, output, Tasks related to generating output})
+
+@item @code{Indent}
+Use @code{$/Output/Indent.fw} instead of instantiation.
+(@pxref{Indent, , Indentation, output, Tasks related to generating output})
+
+@item @code{List}
+The module uses @code{obstack} directly instead of using
+module @code{DynSpace}.
+
+@item @code{OutStr}
+Use @code{$/Output/OutStr.fw} instead of instantiation.
+(@pxref{OutStr, , Output String Conversion, output, Tasks related to generating output})
+
+@item Name Analysis
+There are minor modifications in all name analysis modules.
+See table of entity modifications below, and
+(@pxref{Basic Scope Rules, , Basic Scope Rules, name, Name analysis according to scope rules})
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rules})
+(@pxref{Inheritance of Scopes, , Inheritance of Scopes, name, Name analysis according to scope rules})
+
+@item @code{PreDefId}
+Instead of instantiating the module @code{PreDefId} once for each
+predefined identifier,
+all predefined identifiers are be described in one file.
+Its name is supplied as @code{referto} parameter.
+(@pxref{Predefined Identifiers, , Predefined Identifiers, name, Name analysis according to scope rules})
+
+@item @code{PropLib}
+Use @code{$/Prop/PropLib.fw} instead of instantiation.
+(@pxref{PropLib, , Some Useful PDL Specifications, prop, Association of properties to definitions})
+
+@item @code{Type} @code{CType} @code{BuType}
+These modules are still usable. But they are not maintained anymore.
+It is recommended to use the module @code{Typing}
+(@xref{BasicType, , Typed Entities, type, Type Analysis Reference Manual},) instead.
+The functionality of @code{CType} and @code{BuType}, where the C-like
+name analysis scheme is also imposed upon type analysis is not
+supported by @code{Typing}. Modules having corresponding facilities
+are not yet available.
+@end table
+
+The following entities of library modules have been modified:
+
+@findex Type
+@findex CType
+@findex BuType
+@findex RangeScopeProp
+@findex IdDefScopeProp
+@findex IdDef
+@findex IdUse
+@findex IdUseScope
+@findex IdGetScopeProp
+@findex IdDefScopeProp
+@findex RangeScopeProp
+@findex GotScopes
+@findex GotScopesDefs
+@findex InheritScopeProp
+@table @code
+@item @code{AnyScope.GotScopes}
+Replaced: use @code{RootScope.GotScopeProp}
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rules})
+
+@item @code{AnyScope.GotScopesDefs}
+Replaced: use @code{RootScope.GotScopeProp}
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rules})
+
+@item IdDef
+Renamed to @code{IdDefScope}. (@pxref{Basic Scope Rules, , Basic Scope Rules, name, Name analysis according to scope rules})
+
+@item @code{IdDefScopeProp}
+Deleted: The scope property is now associated to a key in the
+context of the role @code{RangeScopeProp}.
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rules})
+
+@item @code{IdGetScopeProp}
+Deleted: Use the @code{GetScope} function explicitly if necessary.
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rules})
+
+@item IdUse
+Renamed to @code{IdUseEnv}. (@pxref{Basic Scope Rules, , Basic Scope Rules, name, Name analysis according to scope rule})
+
+@item IdUseScope
+modified: The default scope to be used can not be changed
+(@pxref{Basic Scope Rules, , Basic Scope Rules, name, Name analysis according to scope rule}); use @code{IdUseScopeProp} if necessary
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rule}).
+
+@item @code{InheritScopeProp}
+Renamed and modified: use @code{InheritScope}.
+(@pxref{Inheritance of Scopes, , Inheritance of Scopes, name, Name analysis according to scope rule})
+
+@item @code{RangeScopeProp}
+Modified: A computation of @code{THIS.ScopeKey} for
+the key to which the scope is to be associated
+has to be provided, instead of @code{THIS.Scope}.
+(@pxref{Scope Properties, , Scopes Being Properties of Objects, name, Name analysis according to scope rule})
+
+@end table
+
+@comment =====================================
+@node ModLib3_6, , ModLib3_8, top
+@findex AdaptOil
+@findex Message
+@findex Nest 
+@findex Chain 
+@findex GChain 
+@findex NoKeyMsg 
+@findex DefPt 
+@findex Field
+@findex Fwd
+@findex PreDef 
+@findex Unique 
+@findex IntSet
+@findex KindSet
+@findex OccCnt
+@findex Once
+@findex Bool
+@findex InclLido
+@findex Include
+@findex CmdLineIncl
+@findex CoordMap
+@findex CurrTok
+@findex DynSpace
+@findex LeafPtg
+@findex ChainPtg
+@findex Indent
+@findex OutStr
+@findex GenName
+@findex IntToKey
+@findex IntToPtr
+@findex List
+@findex PtrList
+@findex Stack
+@chapter Migration of Eli Version 3.6 modules
+
+The following table is a quick reference for migration of 
+module usage from module library upto Eli version 3.6 to
+modules of this library. For each module name of the old
+library a reference to the documentation of the corresponding
+module of this library is given. In many cases it is sufficient
+to modify the instantiation command. Others require modifications
+of identifiers in @code{.lido} specifications, or in the way
+they are used. 
+
+Note: The modules of the library of Eli version 3.6 which are
+mentioned below are no longer contained in the Eli distribution.
+Users who want to continue to use them,
+please contact your Eli system manager.
+
+@comment @xref produces a 'see' just in front of the actual reference.
+@table @code
+@item AdaptOil
+use @ref{Operator, , Operator Identification, type, Type analysis task},
+@item Bool
+removed
+@item Chain 
+use @ref{CScope, , C-like Basic Scope Rules, name, Name analysis according to scope rule},
+@item ChainPtg
+removed, see PTG documentation
+@item CmdLineIncl
+now in @ref{top, , Input Processing, input, Tasks related to input processing}, library, @xref{CmdLineIncl, , Command Line Arguments for Included File, input, Tasks related to input processing}.
+@item CoordMap
+now in @ref{top, , Input Processing, input, Tasks related to input processing}, library, @xref{CmdLineIncl, , Command Line Arguments for Included File, input, Tasks related to input processing}.
+@item CurrTok
+now in @ref{top, , Input Processing, input, Tasks related to input processing}, library, @xref{CurrTok, , Accessing the Current Token, input, Tasks related to input processing}.
+@item DefPt 
+use @ref{SetFirst, , Set a Property at the First Object Occurrence, prop, Association of properties to definitions}, in @ref{top, , Property Library, prop, Association of properties to definitions}, library
+@item DynSpace
+now in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library, @xref{DynSpace, , Dynamic Storage Allocation, adt, Abstract data types to be used in specifications}.
+@item Field
+use @ref{AlgScopeProp, , Scope Properties Algol-like, name, Name analysis according to scope rules}, or @ref{CScopeProp, , Scope Properties C-like, name, Name analysis according to scope rules}.
+@item Fwd
+use @ref{Kind, , Associate Kinds to Objects, prop, Association of properties to definitions}, or @ref{KindSet, , Associate Sets of Kinds to Objects, prop, Association of properties to definitions}, in @ref{top, , Property Library, prop, Association of properties to definitions}, library
+@item GenName
+use @ref{MakeName, , Generating Optional Identifiers, problems, Solutions of common problems}.
+@item GChain 
+use @ref{BuScope, , C-like Basic Scope Rules Computed Bottom-Up, name, Name analysis according to scope rules}.
+@item InclLido
+use @ref{Include, , Insert a File into the Input Stream, input, Tasks related to input processing}, in @ref{top, , Input Processing, input, Tasks related to input processing}, library
+@item Include
+use @ref{Include, , Insert a File into the Input Stream, input, Tasks related to input processing}, in @ref{top, , Input Processing, input, Tasks related to input processing}, library
+@item Indent
+now in @ref{top, , Generating Output, output, Tasks related to generating output}, library, @xref{Indent, , Indentation, output, Tasks related to input processing}.
+@item IntSet
+@item IntToKey
+use @ref{Map, , Mapping Integral Values To Other Types, adt, Abstract data types to be used in specifications}, in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library
+@item IntToPtr
+use @ref{Map, , Mapping Integral Values To Other Types, adt, Abstract data types to be used in specifications}, in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library
+now in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library, @xref{IntSet, , Bit Sets of Integer Size, adt, Abstract data types to be used in specifications}.
+@item KindSet
+unchanged, @xref{KindSet, , Associate Sets of Kinds to Objects, prop, Association of properties to definitions}.
+@item LeafPtg
+now in @ref{top, , Generating Output, output, Tasks related to generating outpu}, library, @xref{LeafPtg, , PTG Output for Leaf Nodes, output, Tasks related to generating output}.
+@item List
+use @ref{LidoList, , Lists in LIDO Specifications, adt, Abstract data types to be used in specifications}, in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library
+@item Message
+use @ref{Strings, , String Concatenation, problems, Solutions of common problems}, to compose message texts and call the @code{message}.
+function directly, as described in @ref{Message, , Error Reports, problems, Solutions of common problems}.
+@item Nest 
+use @ref{AlgScope, , Algol-like Basic Scope Rules, name, Name analysis according to scope rules}.
+@item NoKeyMsg 
+removed, @xref{Basic Scope Rules, , Basic Scope Rules, name, Name analysis according to scope rules}.
+@item OccCnt
+unchanged, @xref{OccCnt, , Count Occurrences of Objects, prop,  Association of properties to definitions}.
+@item Once
+use @ref{FirstOcc, , Determine First Object Occurrence, prop,  Association of properties to definitions}.
+@item OutStr
+now in @ref{top, , Generating Output, output, Tasks related to generating output}, library, @xref{OutStr, , Output String Conversion, output, Tasks related to generating output}.
+@item PreDef 
+use @code{PreDefine} and @code{PreDefId}, @xref{Predefined Identifiers, , Predefined Identifiers, name, Name analysis according to scope rules}.
+@item PtrList
+use @ref{List, , Linear Lists of Any Type, adt, Abstract data types to be used in specifications}, in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library
+@item Stack
+now in @ref{top, , Abstract Data Types, adt, Abstract data types to be used in specifications}, library, @xref{Stack, , Stacks of Any Type, adt, Abstract data types to be used in specifications}.
+@item Unique 
+now in @ref{top, , Property Library, prop, Association of properties to definitions}, library, @xref{Unique, , Check for Unique Object Occurrences, prop, Association of properties to definitions}.
+@end table
+
+@node Index, , , top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

@@ -1,0 +1,26 @@
+# $Id: Makefile.in,v 1.2 2001/11/23 23:32:16 waite Exp $
+# Maptool Makefile
+# Copyright (c) 1994, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/maptool
+SRC	= maptool.dg lex_code.sed maptool.err treedef.h \
+	  treestack.c treestack.h ebnf.err
+AUX	= Makefile Makefile.in version
+CMD	= SymToMap.sh mapBnf.sh mapGen.sh mapOut.sh mapBuGen.sh mapBuOut.sh
+EXE	= maptool.exe ebnf.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	= complete ebnf
+
+@toolmk_h@
+
+maptool.exe:	complete/maptool.exe
+	@rm -f $@
+	@LINK@ $? $@
+
+ebnf.exe:	ebnf/ebnf.exe
+	@rm -f $@
+	@LINK@ $? $@

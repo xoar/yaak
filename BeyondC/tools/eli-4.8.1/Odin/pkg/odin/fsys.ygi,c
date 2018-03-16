@@ -1,0 +1,79 @@
+/*	Copyright (c) 1991 Geoffrey M. Clemm */
+/*	geoff@boulder.colorado.edu */
+
+#include "scan.h"
+
+NODES
+   "NSTDEF" "FILDEF" "SEGDEF" "EXEDEF" "TEXDEF" "ETXDEF" "DRVFLS"
+
+   "DRVFIL" "EMPFIL" "ARTFIL" "ABSFIL"
+   "PRMOPR" "APLOPR" "DRVOPR" "HODOPR" "ELMOPR" "DIROPR" "SEGOPR"
+   "OPRTNS" "PRMVLS" "STRING" "HOSTWD" "WORD"   "OBJTID"
+
+RULES
+
+Parser
+   -> Definition
+   -> OdinExprNull // ';'		=> "DRVFLS"?;
+
+Definition
+   -> '=' '=' OdinExpr			=> "NSTDEF"
+   -> DefHeader				=> "FILDEF"
+   -> '%' DefHeader			=> "SEGDEF";
+
+DefHeader
+   -> "Word" ExecDef? '=' '=' Value;
+
+ExecDef
+   -> '!'				=> "EXEDEF";
+
+Value
+   -> OdinExpr
+   ->  '<' '<' "Word"?			=> "TEXDEF"
+   ->  '!' '<' '<' "Word"?		=> "ETXDEF";
+
+OdinExprNull
+   -> OdinExpr
+   -> ();
+
+OdinExpr
+   -> OdinExpr1				=> "DRVFIL";
+   
+OdinExpr1
+   -> Root
+   -> OdinExpr1 Operation
+   -> '(' OdinExpr1 ')';
+
+Root
+   -> '(' ')'				=> "EMPFIL"
+   -> "Word"
+   -> "ObjectID"
+   -> '/'				=> "ARTFIL"
+   -> '/' "Word"			=> "ABSFIL"
+   -> ':' FileType			=> "DRVOPR"
+   -> '%' "Word"			=> "SEGOPR"
+   -> '=' "Word"			=> "STRING" ;
+
+Operation
+   -> '+' PrmType PrmVals?		=> "PRMOPR"
+   -> '+' '(' OdinExpr ')'		=> "APLOPR"
+   -> ':' FileType			=> "DRVOPR"
+   -> ':' FileType '=' ':' FileType	=> "HODOPR"
+   -> '/' "Word"			=> "ELMOPR"
+   -> '/'				=> "DIROPR"
+   -> '%' "Word"			=> "SEGOPR";
+
+
+PrmVals
+   ->  '=' PrmVal+			=> "PRMVLS";
+
+PrmVal
+   -> "Word"
+   -> '(' OdinExpr ')';
+
+FileType
+   -> "Word";
+
+PrmType
+   -> "Word";
+

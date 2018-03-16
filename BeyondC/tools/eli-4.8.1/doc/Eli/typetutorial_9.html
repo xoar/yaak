@@ -1,0 +1,501 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Type Definitions</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_8.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_10.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC13" HREF="typetutorial_toc.html#SEC13">Type Definitions</A></H1>
+<P>
+This chapter introduces type definitions to the language.
+A name can be defined for any <CODE>TypeDenoter</CODE> and can be
+used to denote that type.
+<P>
+Here is an example program with type definitions. It makes
+use of the facility that identifiers may be defined after
+their uses:
+<P>
+<B>TypedefExamp</B>[102]==
+<PRE>
+begin
+  var   tt rv;
+  type  t tt;
+  type  record int i, bool b, real r end t;
+  var   int j, bool c, real s;
+  var   t rt;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+  rt = rv;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+The following productions are added to the grammar:
+<P>
+<I>Abstract type declaration syntax</I>[103]==
+<PRE>
+RULE: Declaration  ::= 'type' TypeDenoter TypeDefIdent ';' END;
+RULE: TypeDefIdent ::= Ident END;
+
+RULE: TypeDenoter  ::= TypeUseIdent END;
+RULE: TypeUseIdent ::= Ident END;
+</PRE>
+<PRE>
+This macro is invoked in definition 113.
+</PRE>
+<P>
+A type definition introduces a new name for a type given
+by the <CODE>TypeDenoter</CODE>. We distinguish between defining occurrences
+<CODE>TypeDefIdent</CODE> used occurrences <CODE>TypeUseIdent</CODE> of type names.
+<P>
+In our language we specify that
+a type definition does not introduce a new type, rather it introduces
+another name for a type. Hence, there may be many different
+names for the same type. Furthermore, even two <CODE>TypeDenoter</CODE>
+that differ in certain aspects may denote the same type.
+This view can be supported by the roles of the <CODE>StructEquiv</CODE> module:
+For each kind of types it is stated which of its properties
+distinguish two types of that kind (see record types or array types).
+<P>
+Hence, in the following specification we only have to characterize
+a defining occurrence of a type identifier by the corresponding
+roles of the name analysis module and those for a defining
+occurrence of a type identifier (<CODE>TypeDefDefId</CODE>,
+<CODE>ChkTypeDefDefId</CODE>). In the <CODE>Declaration</CODE> context
+the <CODE>Type</CODE> attribute is just passed from the <CODE>TypeDenoter</CODE>
+to the <CODE>TypeDefIdent</CODE>.
+<P>
+<I>Type declaration computation</I>[104]==
+<PRE>
+SYMBOL TypeDefIdent INHERITS 
+        ChkUnique, IdDefScope, IdentOcc,
+        TypeDefDefId, ChkTypeDefDefId
+END;
+
+RULE: Declaration ::= 'type' TypeDenoter TypeDefIdent ';' COMPUTE
+  TypeDefIdent.Type = TypeDenoter.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 113.
+</PRE>
+<P>
+Used occurrences of type identifiers are characterized by the module
+roles <CODE>TypeDefUseId</CODE> and <CODE>ChkTypeDefUseId</CODE>, and by the
+roles that characterize used indentifier occurrences of any kind:
+<P>
+<I>Used type identifiers</I>[105]==
+<PRE>
+SYMBOL TypeUseIdent INHERITS 
+   IdUseEnv, IdentOcc, ChkIdUse,
+   TypeDefUseId, ChkTypeDefUseId END;
+
+RULE: TypeDenoter ::= TypeUseIdent COMPUTE
+  TypeDenoter.Type = TypeUseIdent.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 113.
+</PRE>
+<P>
+A language that has facilities to define names for types and allows
+identifier uses before their definitions, opens the possibility
+to define types recursively, e.g.
+<PRE>
+  type record int i, rt x end rt;
+</PRE>
+In many languages such a type <CODE>rt</CODE> would be disallowed,
+because a value of type <CODE>rt</CODE> may not contain another value
+of the same type. However, if the type of the component <CODE>x</CODE>
+was defined to be <CODE>pointer to rt</CODE> instead of <CODE>rt</CODE>,
+then a useful list type would be defined. 
+<P>
+This example illustrates that the existence of type definitions
+may cause the need to specify  which recursive
+type definitions are considered legal for a certain language.
+In our language, as defined so far, any recursion in a type
+definition is considered to be disallowed.
+However, the situation changes when there are types, like
+pointer types, such that that recursion is allowed when it
+passes through such a type.
+<P>
+Hence, we introduce three properties:
+<CODE>IsRecursiveType</CODE>, <CODE>IsNotRecursiveType</CODE> 
+indicates whether a type is illegally recursive.
+<CODE>AllowRecurType</CODE> indicates that recursion through such a type
+is allowed. The latter will be set when such types are introduced,
+i.e. in the chapter on pointer types:
+<I>Check recursive types properties</I>[106]==
+<PRE>
+IsRecursiveType: int;
+IsNotRecursiveType: int;
+AllowRecurType: int;
+</PRE>
+<PRE>
+This macro is invoked in definition 112.
+</PRE>
+<P>
+Such a check is performed by a function <CODE>ChkRecursiveType</CODE>
+which is applied to
+a type <CODE>t</CODE> and recursively walks through the component 
+types of <CODE>t</CODE>. If it reaches <CODE>t</CODE> again (without having 
+passed through a type that allows recursion), the type is indicated
+to be illegally recursive.
+<P>
+<I>Check for recursive types</I>[107]==
+<PRE>
+SYMBOL TypeDefIdent COMPUTE
+  IF (ChkRecursiveType (THIS.Type),
+    message (ERROR, CatStrInd ("Recursively defined type: ", 
+                               THIS.Sym),
+             0, COORDREF))
+    &#60;- INCLUDING Program.GotAllTypes;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 113.
+</PRE>
+<P>
+The implementation of the type walk algorithm uses a property
+that indicates whether a type is currently visited by the algorithm:
+<I>Visiting property</I>[108]==
+<PRE>
+Visiting: int;
+</PRE>
+<PRE>
+This macro is invoked in definition 112.
+</PRE>
+<P>
+The following C module implements an algorithm that walks recursively
+through the components of a type to check whether the type is
+defined illegally recursively.
+<P>
+<B>RecTypeChk.head</B>[109]==
+<PRE>
+#include "RecTypeChk.h"
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>RecTypeChk.h</B>[110]==
+<PRE>
+#include "deftbl.h"
+extern int ChkRecursiveType (DefTableKey tp);
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>RecTypeChk.c</B>[111]==
+<PRE>
+#include "pdl_gen.h"
+#include "StructEquiv.h"
+#include "Typing.h"
+
+#ifdef TEST
+#define TEST 1
+#include &#60;stdio.h&#62;
+#endif
+
+static DefTableKey origType;
+
+
+int VisitCompOfType (DefTableKey node, DefTableKey component)
+/* This is the function used by the type walk that checks
+   for recursive types. It is called for every visit from a type node
+   to one of its components. 5 cases are distinguished, as explained below:
+*/
+{ 
+#ifdef TEST
+  printf ("visit at %s (%d) component %s (%d)\n", 
+      GetTypeName (node, "no name"),
+      GetTypeLine (node, 0),
+      GetTypeName (component, "no name"),
+      GetTypeLine (component, 0));
+#endif
+  if (GetAllowRecurType (component, 0))
+     /* do not visit a component type that allows recursion */
+     return 1; 
+  else {
+     if (FinalType (component) == FinalType (origType)) {
+       /* the type under investigation contains itself on a path
+          that does not lead through a type which allows for
+          recursion
+       */
+       ResetIsRecursiveType (origType, 1);
+       ResetIsRecursiveType (component, 1);
+       return 2; /* terminate walk */
+     }
+     if (GetIsRecursiveType (component, 0)) {
+     /* The component type of the node is already
+        recognized to be recursive 
+     */
+        ResetIsRecursiveType (origType, 1);
+        return 2; /* terminate walk */
+     }
+     if (GetVisiting (component, 0)) {
+       /* This component lies on a non-pointer cycle 
+          not involving the original type under investigation 
+       */
+       ResetIsRecursiveType (origType, 1);
+       ResetIsRecursiveType (component, 1);
+       return 2; /* terminate walk */
+     }
+  }
+  return 0; /* visit this component */
+}
+
+int RecWalkType (DefTableKey currType)
+/* 
+     Every direct or indirect component type of tp is visited, unless
+     the call VisitCompOfType (curr, comp) shortcuts the walk. 
+     If it returns
+       0: comp is visited
+       1: comp is skipped
+       2: the walk is terminated
+*/
+{ DefTableKeyList compseq;
+  DefTableKey compType;
+  int visitRes;
+  currType = FinalType (currType);
+
+  /* Do not visit a node, that is currently visited: */
+  if (GetVisiting (currType, 0)) return 1;
+  ResetVisiting (currType, 1);
+
+  /* consider all component types: */
+  for (compseq = GetComponentTypes (currType, NULLDefTableKeyList);
+       compseq != NULLDefTableKeyList;
+       compseq = TailDefTableKeyList (compseq)) {
+     compType = FinalType (HeadDefTableKeyList (compseq));
+
+     /* Skip non-type: */
+     if (compType == NoKey) continue;
+
+     /* Visit this component: */
+     visitRes = VisitCompOfType (currType, compType);
+
+     /* The component visit indicates how to continue: */
+     switch (visitRes) {
+       case 0:            /* dive into the component */
+          if (RecWalkType (compType)) {
+             /* the type walk is to be terminated */
+             visitRes = 2;
+             goto ret;
+          };
+          break;
+       case 1:            /* do not dive into the component */
+          break;
+       case 2:            /* terminate the walk */
+          visitRes = 2;
+          goto ret;
+       default:;
+       }
+       /* iteration of components continues */
+     }
+     visitRes = 0; /* components elaborated */
+ret:
+  ResetVisiting (currType, 0);
+  return visitRes;
+}
+
+
+int ChkRecursiveType (DefTableKey tp)
+/* on entry:
+     The results of the type equivalence analysis must be computed and
+     stored in the type data base.
+     tp represents a type.
+   method:
+     A walk through the type structure of tp is initiated,
+     and then executed.
+     VisitCompOfType (curr, comp) is called whenever
+     a direct component comp of the type curr is visited.
+     origType stores the type for which the recursion check is initiated.
+     Every type that is found to be illegally recursive is marked by 
+     the property IsRecursiveType. It is also used to shortcut
+     the walk through the type structure.
+   on exit:
+     1 is returned if the type tp directly or indirectly
+     has tp as a component type, and the path to it is not
+     legal for recursion
+     0 is returned otherwise.
+*/
+{ 
+  tp = FinalType (tp);
+  origType = tp;
+  if (GetIsRecursiveType (tp, 0)) return 1;
+  if (GetIsNotRecursiveType (tp, 0)) return 0;
+
+  /* the result is not yet known: */
+  RecWalkType (tp);
+
+  return GetIsRecursiveType (tp, 0);
+}
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>TypeDef.pdl</B>[112]==
+<PRE>
+<I>Check recursive types properties</I>[106]
+<I>Visiting property</I>[108]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>TypeDef.lido</B>[113]==
+<PRE>
+<I>Abstract type declaration syntax</I>[103]
+<I>Type declaration computation</I>[104]
+<I>Used type identifiers</I>[105]
+<I>Check for recursive types</I>[107]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_8.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_10.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

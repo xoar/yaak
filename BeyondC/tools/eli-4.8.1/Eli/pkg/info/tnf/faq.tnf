@@ -1,0 +1,738 @@
+\input texinfo
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename faq
+@setchapternewpage odd
+@settitle Frequently Asked Questions and Answers
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment
+@comment This file contains sections valid locally for the installation
+@comment in Boulder and in Paderborn. They can be activated by setting
+@comment the flag-variables 'pb' or 'bo' respectively.
+
+@set pb
+
+@titlepage
+@sp 6
+@center @titlefont{FAQ: Frequently Asked Questions and Answers}
+@sp 4
+@center Eli Maintenance Team
+@sp 4
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 10
+@center $Revision: 3.4 $
+@comment $Id: faq.tnf,v 3.4 2009/10/16 18:55:33 profw Exp $
+@end titlepage
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node top, Accessing Eli, (dir), (dir)
+@findex FAQ
+This document answers frequently asked questions about Eli.
+The first chapter refers to the Eli Installation available locally;
+the others are cover more general concerns.
+
+The document will be updated periodically as questions arise and are answered.
+
+@menu
+* Accessing Eli::	How to Interact with Eli
+* Configuring::		Problems Reported by Implementors
+* Spec upgrade::	Using Specifications Developed with Earlier Versions
+* Support::		How to solve common problems in Eli
+* Index::
+
+ --- The Detailed Node Listing ---
+
+How to Interact with Eli
+
+* CacheSize::		Why is my cache so big?
+* Upgrading::		How do I get new or improved components?
+* Odinrc::		Is the file @file{.odinrc} still read?
+* ChangingFiles::	Eli didn't notice that I changed my input file!
+
+Problems Reported by Implementors
+
+* IPC::			Eli reports @code{Remote IPC not available on this host}
+* Connect::		Eli reports @code{Cannot connect to Odin server}
+* Requirements::	Requirements of Eli
+* License::		What restrictions are placed on the Usage of Eli?
+* Configure for X::	Configuration does not find the X-Window-System.
+
+Using Specifications Developed with Earlier Versions
+
+* IncludeFiles::	Eli doesn't find module include files any more
+* IdPtg::		Migrating the usage of Module @code{IdPtg}
+* C_STRING_LIT::	Why does @code{C_STRING_LIT} not use @code{c_mkstr}?
+
+How to solve common problems in Eli
+
+* Intermediate Code::	Is there Support for Intermediate Code in Eli?
+* CPlusPlus::		Is there an available processor for C++?
+* delimiters::		How does recognition of delimiters work in Eli?
+* External Libraries::	How can I use external libraries with Eli?
+@end menu
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Accessing Eli, Configuring, top, top
+@comment  node-name,  next,  previous,  up
+@chapter How to Interact with Eli
+
+@menu
+* CacheSize::                   Why is my cache so big?
+* Upgrading::                   How do I get new or improved components?
+* Odinrc::                      Is the file @file{.odinrc} still read?
+* ChangingFiles::               Eli didn't notice that I changed my input file!
+@end menu
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node CacheSize, Upgrading, Accessing Eli, Accessing Eli
+@section Why is my cache so big?
+
+@findex cache size
+An Eli cache contains all of the intermediate information needed to build
+the products you have requested since that cache was created or reset.
+If you continually request the same product, based on the same set of
+specifications, perhaps changing some of the specification content
+between requests, the cache size will first grow and then stabilize.
+
+When you switch to another set of specifications, the old set and the
+intermediate information based upon them remains in the cache.
+Thus as you do a sequence of different projects, the cache grows because it
+retains all of the information for earlier projects in addition to the
+information needed for the current project.
+
+All of the information held in the cache was derived by Eli from something
+that you provided.
+Thus deleting that information will not affect the correctness of future
+derivations; it will only increase the time required because the
+information must be re-derived.
+
+@findex -r
+@findex r parameter of the eli command
+@findex parameters of the eli command 'r'
+The command @code{eli -r} clears the cache of information before
+invoking Eli. If you use this command on the first invocation of Eli for
+a new project, information belonging to old projects will be deleted and
+the cache will subsequently contain only information derived in
+connection with this project.
+
+In the case of a shared machine where disk space is limited, we recommend
+that you clear the cache when you terminate your session and do not expect
+to start another session soon.
+This can be done via the command @code{eli -r ''}, which clears the cache
+and then invokes Eli to do nothing.
+Eli will terminate immediately.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Upgrading, Odinrc, CacheSize, Accessing Eli
+@section How do I get new or improved components?
+@findex upgrading
+
+From time to time there will be upgrades to Eli components.
+These upgrades do not affect existing caches, which continue to use the
+version of the component that was in effect at the time they were created
+or last upgraded.
+
+@findex -R
+@findex R parameter of the eli command
+@findex parameters of the eli command 'R'
+The command @code{eli -R} clears the cache of information and upgrades to
+the latest set of components before invoking Eli.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Odinrc, ChangingFiles, Upgrading, Accessing Eli
+@section Is the file @file{.odinrc} still read?
+@findex @code{.odinrc}
+
+@display
+> I can't find any description of this file in the help system.
+> How can I now tell Eli which editor I want to use?
+@end display
+
+@findex @code{EDITOR}
+Eli doesn't read the file @file{.odinrc} any more.
+The information that was previously obtained from @file{.odinrc} is now
+provided by environment variables.
+The @code{EDITOR} environment variable specifies the editor Eli should use
+in response to the @code{<} command.
+
+@findex variables
+@findex Odin variables
+Each of the other Odin variables listed by the Eli @code{?=} request is
+associated with an environment variable whose name is @code{ODIN} followed
+by the upper-case name of the Odin variable.
+For example, the default value of the Odin variable @code{LogLevel} will be
+the value of the environment variable @code{ODINLOGLEVEL} (if that
+environment variable is defined).
+
+For additional information about Odin variables, see
+@ref{Variables, , Variables, ui, User Interface Manual}.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node ChangingFiles,  , Odinrc, Accessing Eli
+@section Eli didn't notice that I changed my input file!
+@findex alterations
+
+@findex @code{VerifyLevel}
+If you alter a file in an editor session started by the @code{<} command,
+Eli will check whether the file on which the request was made was changed
+during that session.
+Other checks are controlled by the Odin variable @code{VerifyLevel}:
+
+@example
+-> VerifyLevel=?
+0: No source file change verification.
+1: Check for changes to source files at the beginning of each session.
+2: Check for changes to source files before each interactive command.
+@end example
+
+@findex @code{ODINVERIFYLEVEL}
+The default value of @code{VerifyLevel} is 2, but if the environment
+variable @code{ODINVERIFYLEVEL} is defined then that value will be used as the
+default.
+You can check the current value of @code{VerifyLevel} by querying it
+explicitly, and you can also set it interactively.
+For more details, see
+@ref{Variables, , Variables, ui, User Interface Manual}.
+
+@findex @code{test}-utility
+If @code{VerifyLevel} is not 2, you can inform Eli that a specific file
+@file{foo.fw} has changed by requesting the @code{:test} utility:
+
+@example
+-> foo.fw !:test
+@end example
+
+If you omit the file name, Eli will check all files for changes.
+(This is equivalent to having @code{VerifyLevel} set to 2.)
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Configuring, Spec upgrade, Accessing Eli, top
+@chapter Problems Reported by Implementors
+
+@menu
+* IPC::                         Eli reports @code{Remote IPC not available on this host}
+* Connect::			Eli reports @code{Cannot connect to Odin server}
+* Requirements::                Requirements of Eli
+* License::                     What restrictions are placed on the Usage of Eli?
+* Configure for X::             Configuration does not find the X-Window-System.
+@end menu
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node IPC, Connect, Configuring, Configuring
+@section Eli reports @code{Remote IPC not available on this host}
+@findex IPC not available
+
+@findex @code{ODIN_LOCALIPC}
+This error report indicates that Eli was unable to use the inter-process
+communication mechanism effectively.
+It is usually seen on Linux systems that are not connected to a network.
+
+Eli's default inter-process communication mechanism is TCP/IP.
+If TCP/IP is not available, the environment variable @code{ODIN_LOCALIPC}
+can be set and Unix domain sockets will be used instead.
+Setting @code{ODIN_LOCALIPC} to 1 usually avoids the error report.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Connect, Requirements, IPC, Configuring
+@section Eli reports @code{Cannot connect to Odin server}
+@findex Cannot connect to Odin server
+
+This means that there is a problem with TCP/IP socket communication.
+It can occur in two situations: on initial installation of Eli and
+after some kind of abnormal termination.
+If it occurs on initial installation, you need to set the environment
+variable ODIN_LOCALIPC to 1 before invoking Eli.
+If it occurs after an abnormal termination, simply resetting the cache
+by means of the command "eli -r" should clear things up.
+
+@node Requirements, License, Connect, Configuring
+@section Requirements of Eli
+
+@display 
+> Does Eli require an installed gcc?
+> Does Eli require an installed Tcl/Tk?
+> Does Eli require an installed TeX?
+> Does Eli require an installed Funnelweb?
+> Does Eli require an installed Odin?
+> Eli is only available on Unix machines!
+@end display
+
+Eli doesn't really require support tools beyond standard utilities you'll find
+on any Unix machine.  Tcl/Tk isn't strictly required, but you miss out on a
+few features if you don't have it (the simplest info browser is implemented
+using Tcl/Tk as well as Eli's execution monitoring/debugging facilities).
+Most everything else is included in the distribution (including FunnelWeb
+and Odin).  TeX is only required if you want to be able to format FunnelWeb
+documents using TeX.  Eli doesn't rely on gcc at all.  It uses whatever
+C compiler you have on your system.
+
+While Eli itself has not been ported to systems other than Unix, the code that
+Eli generates is highly portable C code that can be compiled anywhere.  (The
+generated C code can be compiled by a number of C++ compilers as well.)  We
+have reports of people successfully compiling Eli generated code on Windows
+platforms.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node License, Configure for X, Requirements, Configuring
+@section What restrictions are placed on the Usage of Eli?
+
+@display
+> Is professional support available and what is the licence agreement?
+@end display
+
+Eli is distributed under the terms of the GNU Public License.  Code
+generated from Eli can for the most part be used without restriction.
+
+We do not sell support, although we try to answer questions from users
+rapidly. 
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Configure for X,  , License, Configuring
+@section Configuration does not find the X-Window-System.
+
+@display
+> Running ./configure on Slackware Linux 2.0.30 in XTerm (with DISPLAY=0:0)
+> results in "checking for X... no", although X works ok for other
+> applications.
+@end display
+
+The problem is not in running X applications, but in being able to compile X
+applications.  You need the appropriate development include files and
+libraries.
+
+If your X includes and libraries don't reside in the normal places, you
+may have to give configure some help.  For example, you could invoke
+configure like this:
+
+@example
+% ./configure --x-includes=/@samp{somedir}/include --x-libraries=/@samp{somedir}/lib
+@end example
+@noindent
+where @samp{somedir} was the directory of your X installation.
+
+If you believe your X installation is in a normal place, you could test out
+the following.  To test the autoconf detection mechanism in isolation, you can
+do the following if you have autoconf installed:
+
+@enumerate
+@item 
+Go to some temporary directory and create a file called configure.in with
+the following contents:
+@example
+   AC_INIT(configure.in)
+   AC_PATH_X
+   AC_OUTPUT()
+@end example
+@item
+Run the command "autoconf".  This will create a configure script in the
+directory.
+@item
+Run configure and see if it finds the X includes and libraries.
+@end enumerate
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Spec upgrade, Support, Configuring, top
+@chapter Using Specifications Developed with Earlier Versions
+
+@menu
+* IncludeFiles::                Eli doesn't find module include files any more
+* IdPtg::                       Migrating the usage of Module @code{IdPtg}
+* C_STRING_LIT::                Why does @code{C_STRING_LIT} not use @code{c_mkstr}?
+@end menu
+
+Further hints for updates of specifications can be found in 
+@ref{top,,,news, New Features of Eli Version 4.1}, and in 
+@ref{top,,,news4.0, New Features of Eli Version 4.0}.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node IncludeFiles, IdPtg, Spec upgrade, Spec upgrade
+@section Eli doesn't find module include files any more
+@findex Library
+@findex Module
+
+@example
+    4 |#include "envmod.h"
+(test.c) cannot find include file: "envmod.h"
+@end example
+
+Eli no longer automatically extracts all modules that are mentioned
+somewhere in @code{#include} files.
+For example, in order to add the @code{envmod} module to a specification,
+some @code{.specs} file must contain the line @code{$/Name/envmod.specs}.
+(@code{$} in this context is a shorthand for the package directory in the
+cache currently being used.)
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node IdPtg, C_STRING_LIT, IncludeFiles, Spec upgrade
+@section Migrating the usage of Module @code{IdPtg}
+
+@display
+> Am I correct in noting that the link between the key table and the
+> string table containing non-literal strings was possible via the
+> following (in Eli3)
+@end display
+
+@example
+> ATTR Key:  DefTableKey;
+> SYMBOL xName INHERITS IdDefNest END;
+> SYMBOL xIdent INHERITS IdPtg END;
+> 
+> RULE Name: xName ::=  xIdent
+> COMPUTE
+>         xName.Ptg = xIdent.Ptg;
+>         xName.Sym = xIdent.Sym;
+> END;
+@end example
+
+There are two different tasks:
+
+@itemize
+@item
+Consistent renaming for name analysis (that's what Key's are for)
+@item
+Output text generation with Ptg (based on the string representation)
+@end itemize
+
+There is Module Library support for both tasks.
+In your example you use
+
+@itemize
+@item
+@code{IdDefNest} for name analysis
+@item
+@code{IdPtg} for output text generation for identifiers
+@end itemize
+
+@code{IdPtg} computes an inherited attribute @code{Ptg}
+containing the PTG representation of the identifier to which @code{IdPtg}
+is inherited.
+@code{IdPtg} could be inherited to terminals (as you do above) in earlier
+Eli versions.
+The precondition for the application of @code{IdPtg} is that the symbol
+to which @code{IdPtg} is inherited provides an attribute named @code{Sym}
+containing the string table index of the associated identifier.
+
+Since Eli Version 4.x, inheritance to terminals is no longer possible.
+That is the only difference for your application.
+So you simply have to move your PTG computation one level up to the symbol
+@code{xName}.
+This should give you:
+
+@example
+   SYMBOL xName INHERITS IdPtg END;
+ 
+   RULE Name: xName ::=  xIdent
+   COMPUTE
+        xName.Sym = xIdent.Sym;
+   END;
+@end example
+
+which even looks a bit simpler than the 3.8 solution.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node C_STRING_LIT,  , IdPtg, Spec upgrade
+@section Why does @code{C_STRING_LIT} not use @code{c_mkstr}?
+@findex @code{C_STRING_LIT}
+@findex @code{mkstr}
+@findex @code{c_mkstr}
+
+@display
+> I'm surprised that C_STRING_LIT now uses mkstr instead of c_mkstr.
+> What's the reason?
+@end display
+
+@code{c_mkstr} had the problem that if the string in the source text
+contained a null character, that string was silently truncated:
+
+@example
+        "abc\0def" became "abc"
+@end example
+
+This is a consequence of the string storage module implementation, and
+could only be avoided by placing a high cost on @emph{all} string operations.
+To avoid the problem, @code{c_mkstr} was changed to report an error
+if it found @code{"\0"} in a string.
+The changed @code{c_mkstr} no longer implements C strings, so it
+could not be used as the processor for @code{C_STRING_LIT}. 
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Support, Index, Spec upgrade, top
+@chapter How to solve common problems in Eli
+
+@menu
+* Intermediate Code::	Is there Support for Intermediate Code in Eli?
+* CPlusPlus::		Is there an available processor for C++?
+* delimiters::		How does recognition of delimiters work in Eli?
+* External Libraries::	How can I use external libraries with Eli?
+@end menu
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Intermediate Code, CPlusPlus, Support, Support
+@section Is there Support for Intermediate Code in Eli?
+
+@display
+> Does Eli support the generation of intermediate code and if so, what
+> type of code and in which way?
+@end display
+
+In general, Eli supports generation of intermediate code in the same
+way that it supports the generation of any kind of code:  You write a PTG
+specification of the language to be output and invoke the routines to
+build up your output.
+
+If you want to specify the intermediate language as a tree and perform
+some attribute computation over it without writing it out and reading it
+back in, then you can specify the tree in LIDO.  Eli produces Mk
+functions from a LIDO specification much the same way as it produces PTG
+functions from a specification.
+You invoke the Mk functions to build your tree and then
+paste it into the original tree built by the parser. @xref{Computed
+Subtrees,, Computed Subtrees, lidoref, LIDO - Reference Manual}, for
+details.  You can see an example using an intermediate language
+appropriate to the Spim simulator for the MIPS at
+@ifset html
+@ifhtml
+<A HREF="http://ece-www.colorado.edu/~ecen4553/HW/ctgt.html">http://ece-www.colorado.edu/~ecen4553/HW/ctgt.html</A>.
+@end ifhtml
+@end ifset
+@ifclear html
+@file{http://ece-www.colorado.edu/~ecen4553/HW/ctgt.html}.
+@end ifclear
+
+If you want to target an existing intermediate representation that is
+implemented as a class library (like
+@ifset html
+@ifhtml
+<A HREF="http://suif.stanford.edu/suif/suif.html">Suif</A>,
+@end ifhtml
+@end ifset
+@ifclear html
+ Suif, @file{http://suif.stanford.edu/suif/suif.html}, 
+@end ifclear
+for example), then you make the
+class library available as a part of your specification (usually via a .a
+file) and invoke its methods directly from your translation specification
+just like you would invoke PTG or Mk functions.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node CPlusPlus, delimiters, Intermediate Code, Support
+@section C++
+
+@display
+>   Is there an ELI-generated compiler available for C++?
+@end display
+
+There is none that I know of.  One reason is that C++ seems to be defined
+not by a standard but by a collection of front ends.  Particular users are
+partial to particular front ends, and are not interested in a compiler that
+actually conforms to either the ARM or the draft ANSI standard.  This
+situation might change, but in the interim there seems to be little point
+in building an Eli specification.
+
+Compounding the problem is the fact that C++ has a number of essential
+ambiguities that make it very difficult to specify formally.  For example,
+if something looks like both a declaration and an expression then it's a
+declaration.  How do you express that formally?
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node delimiters, External Libraries, CPlusPlus, Support
+@section How does recognition of delimiters work in Eli?
+
+@display
+> I want to use ':=' in the grammar to represent three notations
+> ':=', '=', and ':-'.
+@end display
+
+This could be done as follows
+(for an explanation of all of the relevant constructs,
+@pxref{Literal Symbols,, Literal Symbols, lex, Lexical Analysis}):
+
+@example
+@@O@@<foo.con@@>==@@@{
+S: 'A' ':=' 'B' .
+@@@}
+
+@@O@@<foo.delit@@>==@@@{
+$:=     ColonEqual
+@@@}
+
+@@O@@<foo.gla@@>==@@@{
+        $:=     [mkassign]
+        $=      [mkassign]
+        $:-     [mkassign]
+@@@}
+
+@@O@@<foo.c@@>==@@@{
+#include "litcode.h"
+#include "eliproto.h"
+
+void
+#if PROTO_OK
+mkassign(char *c, int l, int *t, int *s)
+#else
+mkassign(c, l, t, s) char *c; int l, *t; int *s;
+#endif
+@{ *t = ColonEqual; @}
+@@@}
+@end example
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@display
+> For Pascal, @code{:kwd} has to be applied to the file that contains
+> nothing else than the specification of @code{Name: PASCAL_IDENTIFIER}
+> Is that the only possible application of @code{:kwd}?
+@end display
+
+The @code{:kwd} derivation is used to specify sets of literal terminals
+appearing in a grammar that should be recognized by looking them up in the
+identifier table rather than by incorporating them into the scanner's
+finite state machine.
+Mixed-case keywords are the most common use of @code{:kwd}, but it can also
+be used simply to cut down the size of the scanner tables at some cost in
+execution time.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node External Libraries, , delimiters, Support
+@section How can I use external libraries with Eli?
+
+Use @code{+lib='mylib'} to add the @samp{-lmylib}' option to the link. @code{+lib_sp}
+can be used to supply a directory for the library (the @code{-L} option in
+the link).
+
+You can also use the mechanism used by Eli internally, although it
+isn't really pretty.  You can add a @file{.libs} file to your specification
+that has something of the form:
+
+@example
+   / +lib_sp=(libdir) +lib='libname' :library_flags
+@end example
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+> Is there also a way to tell Eli an include path for
+> header files?
+
+There is a parameter called +cc_flags with which you can provide
+the @code{-I} option to the compilation.
+
+@ifset html
+@ifhtml
+<hr>
+@end ifhtml
+@end ifset
+
+@node Index,  , Support, top
+@chapter Index
+@printindex fn
+
+@bye

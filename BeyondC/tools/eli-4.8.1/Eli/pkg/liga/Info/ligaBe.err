@@ -1,0 +1,351 @@
+# $Id: ligaBe.err,v 4.3 1997/08/29 13:58:49 mjung Exp $
+#
+# Deadly Fehler
+#
+
+# (C) Copyright 1997 University of Paderborn
+#
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+/Can't create protocol file/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Can't read input file/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Can't read option file/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Failure storing string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Max number of strings exceeded/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Memory overflow in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Negative length in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/String table overflow/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/argument(s) missing/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+/INITCYCLE must be in attribute computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/WHILE must be in VOID context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/2nd argument of WHILE must be an attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+
+#
+# Fatale Fehler
+/internal error: VOID in value context/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/too many arguments/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Predefined Entities./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+
+###############################################################################
+#
+# Deadly Errors
+#
+/NewEnv: malloc failed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/subtree .* must be a .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/AddIdn: Too many identifiers/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/DefineIdn: Too many identifiers/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/KeyInEnv: Too many identifiers/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Memory overflow in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Negative length in mkidn/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/NewKey: malloc failure/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/NewStkElt: malloc failed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/an .* node can not be generated /{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/find: malloc failure/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/node stack overflow\n/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/idl_mkstr: string too long/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+
+#
+# Errors
+#
+
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Symbol inserted/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Symbol deleted/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Parsing resumed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Wrong parse tables/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Parse stack overflow/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Accept not expected/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/HeadPL: empty list/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/InserAfterPL: null list/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/IthElemPl: no such element/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/RefEndAppPL: no PtrList ref/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/RefEndConsPL: no PtrList ref/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/\\x used with no following hex digits/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/char '.' (ascii:.*) is not a token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/char '.' (ascii:.*) not complete token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/file ends in comment/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/illegal newline in string literal/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/illformed char quote/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/newline in char quote/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/newline or EOF in char quote/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/newline or EOF in string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/quote in char quote/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/file ends in literal string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/idl_mkstr: unknown escape sequence: ~ followed by char/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/malformed character constant/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/more than one intrinsic attribute/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/unknown escape sequence: `\\' followed by char/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+
+#
+# Fatals
+#
+/No mem for auxCString/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/auxCString + c_mkstr must be used as a pair/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/malloc fail: CaseTbl0/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/malloc fail: fallback/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/multi-line string too long/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/out of mem for multi-line string/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+
+#
+# Notes
+#
+/unknown escape sequence/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./

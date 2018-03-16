@@ -1,0 +1,122 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Type Checking in Expressions~>
+
+Expressions consist of typed names and literals and of operators
+that are applied to operands of certain types and yield a result
+of a certain type. Determining the types of expressions and 
+checking the related type rules of the language is a significant
+subtask of type analysis. The type rules of languages are usually
+formulated in terms of concepts like "type of program constructs 
+and entities", "signature of operators", "operator overloading", 
+"type conversion". They have common and well-understood meaning
+for type analysis in general. Of course, the type rules established 
+for a particular language instantiate these concepts in a specific
+way, e.g. define a specific set of operators with their signature
+and state which conversions may be applied to resolve overloading.
+
+Eli's type analysis module @code{Expression} provides reusable 
+roles and computations to formulate the language specific 
+instantiation of the concepts mentioned above. The type analysis
+for expressions is generated from such a specification.
+
+~$~<Expression module~>==~{
+$/Type/Expression.gnrc:inst
+~}
+
+This module carries out type analysis on expression trees, 
+which are subtrees made up of connected expression nodes. 
+An expression node is a node representing a program construct
+that yields a value of a certain type.
+The module provides the role @code{ExpressionSymbol} to be inherited by
+symbols that are expression symbols in that sense:
+
+~$~<Expression symbols~>==~{
+SYMBOL Expression INHERITS ExpressionSymbol END;
+SYMBOL Variable INHERITS ExpressionSymbol END;
+~}
+
+The type of each expression node is characterized by two attributes: 
+@code{ExpressionSymbol.Type} describes the type of the values this
+expression may yield. @code{ExpressionSymbol.Required} may be used to
+specify that the upper context requires the expression to yield 
+a value of a particular type. As @code{ExpressionSymbol.Required} is
+used to compute @code{ExpressionSymbol.Type}, it may not depend
+on the @code{Type} attribute.
+
+Expression symbols may occur in different contexts with respect to
+the structure of the expression trees: root contexts, leaf contexts, and
+inner contexts. The module provides different computational roles
+for those contexts. In leaf contexts the type of the leaf expression
+must be stated using the computational role @code{PrimaryContext}.
+Note that in the third role below the expression node is a leaf
+with respect to the expression tree, although the context has one
+subtree, that is not an expression node:
+
+~$~<Leaf nodes~>==~{
+RULE: Expression ::= IntNumber COMPUTE
+  PrimaryContext (Expression, intType);
+END;
+
+RULE: Expression ::= 'true' COMPUTE
+  PrimaryContext (Expression, boolType);
+END;
+
+RULE: Expression ::= 'false' COMPUTE
+  PrimaryContext (Expression, boolType);
+END;
+
+RULE: Variable ::= UseIdent COMPUTE
+  PrimaryContext (Variable, UseIdent.Type);
+END;
+~}
+
+The computational role @code{TransferContext} is used for contexts
+that have an expression node on the left-hand side and one on the
+right-hand side, and both have the same type properties:
+
+~$~<Transfer nodes~>==~{
+RULE: Expression ::= Variable COMPUTE
+  TransferContext (Expression, Variable);
+END;
+~}
+
+The node representing an assignment statement has two children.
+Both are considered as roots of expression trees.
+For the @code{Variable} the assignment context does not impose
+any restriction on its type; hence, nothing is specified for
+that node:
+
+~$~<Assignment~>==~{
+RULE: Statement ::= Variable '=' Expression ';' COMPUTE
+  RootContext (Variable.Type, , Expression);
+  Indication (assignOpr);
+END;
+~}
+@code{explain the purpose of assignOpr??}
+
+The @code{Expression} on the right-hand side of the assignment
+is required to yield a value of the type of the @code{Variable}.
+
+An expression in the role of a statement is another example for
+a root context. On execution the value of the expression   will
+just be discarded. Hence, there is no requirement on its type
+to be stated or checked:
+~$~<Expression statement~>==~{
+RULE: Statement ::=  Expression ';' END;
+~}
+
+~O~<Expression.specs~>~{
+~<Expression module~>
+~}
+
+
+~O~<Expression.lido~>~{
+~<Expression symbols~>
+~<Leaf nodes~>
+~<Transfer nodes~>
+~<Assignment~>
+~<Expression statement~>
+~}

@@ -1,0 +1,54 @@
+<html>
+<head>
+<title>Inspection by author/others</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Inspection by author/others</h1>
+
+<hr>
+<p>
+Reading and rethinking own specification parts.
+Explaining specifications to others.
+
+<p>
+Supported by well structured, documented specifications.
+
+<p>
+Similar to programming style guidelines for software development
+teams, "specification style guides" are helpful:
+
+<ul>
+<li> Naming conventions
+<li> Text formatting
+<li> Individual style guides for different specification types
+<li> ...
+</ul>
+
+<p>
+<b> Eli tools supporting specification inspection</b>
+<p>
+<ul>
+<li><tt>foo.specs : allspecs : viewlist </tt>
+<br>
+Opens default shell in a generated directory containing (links to)
+all of your specification parts.
+
+<p>
+<li><tt>foo.fw : fwGen > .</tt>
+<br>
+creates directory <foo.fw.fwGen>
+containing all specification parts extracted from <tt>foo.fw</tt>.
+
+<p>
+<li><tt>foo.specs : ligaResults : viewlist </tt>
+<br>
+Opens default shell in a generated directory containing (links to)
+the source of the generated attribute evaluator. Useful for inspecting
+the tree computations (<tt>visitprocs.c</tt>).
+</ul>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

@@ -1,0 +1,442 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Functions</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_7.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_9.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC12" HREF="typetutorial_toc.html#SEC12">Functions</A></H1>
+<P>
+This chapter introduces definitions and calls of parameterized
+functions. Type analysis has to check that the signature of a 
+function call matches the signature of the called function,
+and that functions return a value of the specified type.
+<P>
+Here is an example program that defines some functions.
+The grammar for function calls and return statements is
+given below.
+<P>
+<B>FunctionExamp</B>[90]==
+<PRE>
+begin
+  var   int i, int j,
+        bool b, bool c,
+        real r, real s;
+
+  fun f (int x, real y) real
+  begin r = x * y; return r;end;
+
+  fun g (real z) void
+  begin r = z; return; end;
+
+  s = f (i+1, 3.4);
+  g (f (j, s));
+  return;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+We first extend the grammar by productions for 
+function declarations:
+<I>Abstract function syntax</I>[91]==
+<PRE>
+RULE: Declaration ::=  FunctionDecl END;
+RULE: FunctionDecl ::= 'fun' DefIdent Function ';' END;
+RULE: Function ::=     FunctionHead Block END;
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter END;
+RULE: Parameters LISTOF Parameter END;
+RULE: Parameter ::= TypeDenoter DefIdent END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+A function type is characterized by its signature, i.e.
+the sequence of the types of its parameters and the result type.
+(Note: If we had more than one mode of parameter passing,
+the abstraction of a parameter in the function signature
+would be a pair: parameter passing mode and parameter type.)
+<P>
+We first consider the name analysis aspect of a function
+declaration: The <CODE>Function</CODE> subtree is a range where the
+parameter definitions are valid. The function <CODE>Block</CODE> is
+nested in that range. Since the <CODE>DefIdent</CODE>s of parameters
+are already completely specified for name analysis, we need
+only:
+<P>
+<I>Function range</I>[92]==
+<PRE>
+SYMBOL Function INHERITS RangeScope END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+Now we consider a function declaration as a definition
+of a typed entity, and apply the same specification pattern
+as used for variable declarations.
+Furthermore, each <CODE>Parameter</CODE> is also a <CODE>TypedDefinition</CODE>.
+There is no problem in nesting definitions of typed entities
+this way.
+<P>
+<I>Function declaration types</I>[93]==
+<PRE>
+SYMBOL FunctionDecl INHERITS TypedDefinition END;
+
+RULE: FunctionDecl ::= 'fun' DefIdent Function ';' COMPUTE
+  FunctionDecl.Type = Function.Type;
+END;
+
+RULE: Function ::= FunctionHead Block COMPUTE
+  Function.Type = FunctionHead.Type;
+END;
+
+SYMBOL Parameter INHERITS TypedDefinition END;
+
+RULE: Parameter ::= TypeDenoter DefIdent COMPUTE
+  Parameter.Type = TypeDenoter.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+Next, we specify how the type of a function is composed.
+The <CODE>FunctionHead</CODE>, which contains the signature,
+is treated as a <CODE>TypeDenotation</CODE> for a function type.
+<P>
+<I>Function type</I>[94]==
+<PRE>
+SYMBOL FunctionHead INHERITS TypeDenotation, OperatorDefs END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+Furthermore, a function declaration introduces an operator.
+This is indicated by the role <CODE>OperatorDefs</CODE>.
+The computation <CODE>ListOperator</CODE> creates a new operator,
+identified by <CODE>FunctionHead.Type</CODE>.
+The types of the parameters together with the result type
+<CODE>TypeDenoter.Type</CODE> form its signature.
+<P>
+<I>Function signature</I>[95]==
+<PRE>
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter COMPUTE
+  FunctionHead.GotOper +=
+     ListOperator (
+       FunctionHead.Type,
+       FunctionHead.Type,
+       Parameters.OpndTypeList,
+       TypeDenoter.Type);
+END;
+
+SYMBOL Parameters INHERITS OpndTypeListRoot END;
+SYMBOL Parameter INHERITS OpndTypeListElem END;
+
+RULE: Parameter ::= TypeDenoter DefIdent COMPUTE
+  Parameter.DefTableKeyElem = TypeDenoter.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+Function calls are integrated in the expression syntax of
+our language. We chose a very general form of an <CODE>Expression</CODE>
+to denote the function to be called. That allows us to later expand the
+language by expressions which yield a function.
+That feature does not create additional problems for type analysis.
+<P>
+We also introduce return statements into our language:
+<P>
+<I>Abstract call syntax</I>[96]==
+<PRE>
+RULE: Expression ::=    Expression '(' Arguments ')' END;
+RULE: Arguments  LISTOF Argument END;
+RULE: Argument   ::=    Expression END;
+
+RULE: Statement  ::=    'return' ';' END;
+RULE: Statement  ::=    'return' Expression ';' END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+Type analysis for a function call is straight-forward:
+A call is treated as an operation which takes the arguments
+as operands. <CODE>Expression[2]</CODE> yields the function to be
+called. Its type provides the operator indication, which may be 
+overloaded with several operations, as stated in the context
+of the function definition.
+The precoined computation <CODE>ListContext</CODE> connects the
+expression subtree of the arguments with <CODE>Expression[1]</CODE>
+representing the result.
+<P>
+<I>Call types</I>[97]==
+<PRE>
+SYMBOL Arguments INHERITS OpndExprListRoot END;
+SYMBOL Argument INHERITS OpndExprListElem END;
+
+RULE: Expression ::= Expression '(' Arguments ')' COMPUTE
+  ListContext (Expression[1], , Arguments);
+  Indication (Expression[2].Type);
+
+  IF(BadOperator,
+    message
+      (ERROR,
+       "Call does not match the functions' signatures",
+       0, COORDREF));
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+The following context connects the <CODE>Argument</CODE> node
+with the expression subtree forming the actual parameter.
+If they had the same type properties, we would have used
+a <CODE>TransferContext</CODE> computation. However, in our language
+we want to allow that the type of the <CODE>Expression</CODE> need not 
+match exactly the type required for the <CODE>Argument</CODE> as
+specified in the signature of the function. As in assignments
+it shall be allowed that the expression yields a value
+of type <CODE>real</CODE> which then is converted to an <CODE>int</CODE>
+value if required by the function signature, e.g. in 
+<CODE>f(3.4)</CODE>.
+<P>
+Hence, we use a <CODE>ConversionContext</CODE> which allowes to
+connect the <CODE>Argument</CODE> via an operator with the 
+<CODE>Expression</CODE> node. The indication <CODE>assignOpr</CODE>
+is specified for this context. It states that the same 
+conversion operators as in assignments (i.e. <CODE>rToi</CODE>)
+and all coercion operators (i.e. <CODE>iTor</CODE>) may be used to
+convert the result of the <CODE>Expression</CODE> to the type of the
+<CODE>Argument</CODE>, if necessary:
+<P>
+<I>Arguments</I>[98]==
+<PRE>
+RULE: Argument ::= Expression COMPUTE
+  ConversionContext (Argument, , Expression);
+  Indication (assignOpr);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+A return statement refers to the immediately enclosing function
+declaration. It has to be checked that a value of a type is returned
+that is compatible to the result type, if the latter is not <CODE>void</CODE>.
+A return from the outermost program level is considered as if
+the program was a <CODE>void</CODE> function.
+Conversions that are additionally applicable are specified in the same 
+way as in the <CODE>Argument</CODE> context above.
+<P>
+The attribute value <CODE>Function.ResultType</CODE> stems from the context of
+a type denotation. Hence, its value may not be used directly in a 
+compare with a type key as <CODE>voidType</CODE>. The function <CODE>FinalType</CODE>
+has to access the related type key, and the precondition
+<CODE>INCLUDING Program.TypeIsSet</CODE> has to be stated.
+<P>
+<I>Return statements</I>[99]==
+<PRE>
+ATTR ResultType: DefTableKey;
+
+RULE: Statement ::= 'return' Expression ';' COMPUTE
+  RootContext (
+    INCLUDING (Function.ResultType, Program.ResultType), , Expression);
+  Indication (assignOpr);
+END;
+
+RULE: Statement ::= 'return' ';' COMPUTE
+  IF (NOT (EQ (voidType,
+               FinalType (
+                  INCLUDING (Function.ResultType, 
+                             Program.ResultType)))),
+  message (ERROR, "return value required", 0, COORDREF))
+  &#60;- INCLUDING Program.TypeIsSet;
+END;
+
+SYMBOL Program COMPUTE 
+  SYNT.ResultType = voidType;
+END;
+
+RULE: Function ::= FunctionHead Block COMPUTE
+  Function.ResultType = FunctionHead.ResultType;
+END;
+
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter COMPUTE
+  FunctionHead.ResultType = TypeDenoter.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 100.
+</PRE>
+<P>
+<B>Function.lido</B>[100]==
+<PRE>
+<I>Abstract function syntax</I>[91]
+<I>Abstract call syntax</I>[96]
+<I>Function declaration types</I>[93]
+<I>Function range</I>[92]
+<I>Function type</I>[94]
+<I>Function signature</I>[95]
+<I>Call types</I>[97]
+<I>Arguments</I>[98]
+<I>Return statements</I>[99]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Function.con</B>[101]==
+<PRE>
+<I>Function declaration syntax</I>[140]
+<I>Call syntax</I>[141]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_7.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_9.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

@@ -1,0 +1,1716 @@
+\input texinfo
+@setchapternewpage odd
+@setfilename ptg
+@node Top, , , (dir),
+
+
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename ptg
+@setchapternewpage odd
+@settitle Pattern-based Text Generator
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+@comment %**end of header (This is for running Texinfo on a region.)
+
+@titlepage
+@sp 6
+@center @titlefont{PTG: Pattern-based Text Generator}
+@sp 4
+@center U. Kastens
+@sp 4
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 10
+@center $Revision: 1.1 $
+@comment $Id: ptg.fw,v 1.1 2005/10/25 15:24:20 peter Exp $
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@comment ############################################################
+@comment Top, , , (dir)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@unnumbered Pattern-Based Text Generator
+@end ifinfo
+@comment ############################################################
+
+@findex Pattern-Based Text Generator
+@findex PTG
+@ifinfo 
+$Revision: 1.1 $
+@end ifinfo
+
+The Pattern-Based Text Generator PTG supports translations into any kind 
+of structured text.
+The structure of the target text is described by a set of patterns.
+PTG generates a set of functions for them. They are called
+to compose an instance of the target structure which is then
+output.
+
+PTG is suitable to produce any kind of target language, e. g. programs
+of any programming language, special purpose languages like TeX or
+PostScript, or just structured data or tables in textual form.
+
+PTG is typically applied for tasks of a language processor's translation
+phase. The calls of the patterns functions are then used in LIDO
+specifications to describe the translation of certain tree contexts.
+PTG may as well be used in C functions or in stand-alone C programs that 
+translate some data structure into an output text.
+
+@iftex
+Reading the documentation online
+@end iftex
+@ifinfo
+Going into the node @code{Example}
+@end ifinfo
+one can use the documentation browser's @code{Run} command to obtain a 
+copy of the complete specification for the example described in this manual.
+
+@menu
+* Introduction::       Introduction to PTG
+* Patterns::           Pattern Specifications
+*    Indexed::         Indexed Insertion Points
+*    Typed::           Typed Insertion Points
+*    Calls::           Function Call Insertion
+*    Optional::        Marking Patterns as optional
+* Output::             Output Functions
+* Techniques::         Some Useful Techniques
+*    Data::            Output of Data Items
+*    Identifiers::     Generating Identifiers
+*    Sequences::       Output of Sequences
+* Example::            A Complete Example
+*    Structure::       Source Language Structure
+*    Frame::           Program Frame
+*    Expressions::     Expressions
+*    CHAIN::           Using LIDO CHAINs
+*    CONSTITUENTS::    Using LIDO CONSTITUENTS
+* Predefined::         Predefined Entities
+* Macros::             Influencing PTG Output
+*    Postprocessing::  Changing Default-Output for Limited Line Length
+* Outdated::           Outdated Constructs
+* Syntax::             Syntax of PTG Specifications
+
+* Index::         Index of this manual
+@end menu
+
+@comment ############################################################
+@node Introduction, Patterns, Top, Top    
+@comment  node-name,  next,  previous,  up
+@chapter Introduction to PTG
+@comment ############################################################
+
+@findex Introduction
+A PTG specification is a set of named patterns describing the structure
+and textual components of an output text. They are contained
+in files of type @code{.ptg}. PTG generates a C module
+@findex ptg_gen.c
+@findex ptg_gen.h
+@findex interface file
+@findex C module
+@code{ptg_gen.[ch]} that has one function for each pattern specified.
+Calls of these functions apply the patterns in order to compose
+an instance of the target text, which can be output by a call
+of PTG's output functions.
+Those functions may be used in LIDO specifications or in C modules
+which import the interface file of the generated module @code{ptg_gen.h}.
+
+Consider the following simple example: Assume we want to produce
+parenthesized representations of binary trees like S-expressions
+in LISP:
+
+@example
+     ((1.nil).(2.(3.nil))
+@end example
+@noindent
+We specify three named patterns, one for the parenthesized structure,
+one for the literal @code{nil}, and one for numbers:
+
+@example
+     Pair:   "(" $ "." $ ")"
+     Nil:    "nil"
+     Numb:   $ int
+@end example
+
+For each of these patterns PTG generates a function which yields
+an internal representation of a pattern application.
+The following nested calls produce the above output text:
+
+@example
+   PTGOut (
+     PTGPair (
+        PTGPair(PTGNumb(1), PTGNil()),
+                PTGPair(PTGNumb(2), PTGPair(PTGNumb(3), PTGNil()))
+        ));
+@end example
+@noindent
+Of course one may store intermediate results of pattern applications
+and defer output until the target text is completely composed:
+
+@example
+   n1 = PTGPair (PTGNumb (1), PTGNil ());
+   n2 = PTGPair(PTGNumb(2), PTGPair(PTGNumb(3), PTGNil()));
+   PTGOut (PTGPair (n1, n2));
+@end example
+
+@findex printf
+The benefits of using PTG can best be described by a comparison
+with using C @code{printf} functions directly.
+For the above example a C program would contain statements like
+
+@example
+   printf ("( %s. %s)", a, b);
+@end example
+@noindent
+where @code{a} and @code{b} are pointers to the strings to be inserted. 
+
+Such a statement implements @code{what} text to be generated by the 
+format string and the arguments, 
+@code{when} it is to be output by the placement of the
+statement within the program, 
+and @code{how} the text is produced
+by format strings and output functions.
+
+PTG separates the issues @code{what} and @code{when} by the
+pattern specifications (@code{what}) and the function calls
+(@code{when}). The calls produce an internal structure with all information
+necessary to output the text, rather than immediately outputting
+it. PTG automatically and efficiently implements the @code{how}.
+
+@comment ############################################################
+@node Patterns, Output, Introduction, Top    
+@comment  node-name,  next,  previous,  up
+@chapter Pattern Specifications
+@comment ############################################################
+
+@findex Pattern Specifications
+@findex pattern
+@findex insertion point
+A pattern is specified by a named sequence of C string literals and
+@code{$} tokens that denote insertion points, e.g.
+
+@example
+   Pair: "(" $ "." $ ")" /* S-expression */
+@end example
+
+@findex comments
+C style comments may be inserted anywhere in a PTG specification.
+
+The pattern describes an output text that consists of the specified sequence of
+strings with the results of pattern applications being inserted
+at each insertion point.
+
+A pattern is applied by calling a PTG generated function that has the
+name of the pattern preceded by @code{PTG}, @code{PTGPair} in this
+case. The result of such a call yields a pointer of type @code{PTGNode}
+which represents that pattern application.
+
+@findex pattern function
+@findex function signature 
+@findex PTGNode
+The pattern function takes as many arguments of type @code{PTGNode}
+as the pattern has insertion points. The arguments are obtained
+from other calls of pattern functions. Their order corresponds to
+that of the insertion points in the pattern.
+(Alternative forms of are described in @xref{Indexed} and @xref{Typed}.)
+
+The pattern function for the example above has the following signature:
+
+@example
+   PTGNode PTGPair (PTGNode a, PTGNode b)
+@end example
+@noindent
+Examples for applications of this pattern are:
+
+@example
+   x = PTGPair (PTGNil(), PTGNil());
+   y = PTGPair (x, x);
+@end example
+
+@subsubheading Restrictions:
+
+@findex unique pattern names
+For every two patterns in all @code{.ptg} specifications, the following condition
+must hold: If any two patterns are not equal, their names must be different.
+Additionally, the names of the patterns must not collide with identifiers
+predefined for PTG.
+
+@findex white space
+PTG does not insert any additional white space before or after
+elements of the pattern sequence. Token separation and new line
+characters (especially at the end of a file) have to be specified
+explicitly.
+
+@menu
+*    Indexed::       Indexed Insertion Points
+*    Typed::         Typed Insertion Points
+*    Calls::         Function Call Insertion
+*    Optional::      Marking Patterns as optional
+@end menu
+
+@comment ############################################################
+@node Indexed, Typed, Patterns, Patterns
+@comment  node-name,  next,  previous,  up
+@section Indexed Insertion Points
+@comment ############################################################
+
+@findex Indexed Insertion Points
+@findex insertion point
+The insertion points of a pattern may be identified by numbers, e.g.
+@code{$1}, @code{$2}. This facility allows to insert an argument
+of a pattern function call at several positions in the pattern,
+and it allows to modify patterns without the need to change their
+application calls.
+
+In the following example the first argument (the module name)
+is inserted at two positions:
+
+@example
+   Module: "module " $1 "\nbegin" $2 "end " $1 ";\n" 
+@end example
+@noindent
+The pattern function is called with two arguments.
+
+The correspondence between insertion points and function parameters
+is specified by the numbers of the insertion points, i.e. the first
+argument is inserted at the insertion points @code{$1}.
+
+This facility also makes the calls of pattern functions more independent
+of pattern modifications. For example, the following pattern
+describing declarations
+
+@example
+   Decl: $1 /* type */ " " $2 /* identifiers */ ";\n"
+@end example
+@noindent
+would be applied by a call @code{PTGDecl (tp, ids)}, with the first argument
+inserting the type and the second inserting the identifiers.
+Those calls are invariant against changing the pattern to
+Pascal-like declaration style:
+
+@example
+   Decl: $2 ":" $1 ";"
+@end example
+@noindent
+In the same way one variant of a pattern may omit an argument specified 
+in an other variant.
+
+In general a pattern may contain several occurrences of any of the
+insertion point markers @code{$}@i{i}. There is practically no upper bound for 
+@code{$}@i{i}. The generated function has @i{n} parameters, where @i{n} is 
+the maximal @i{i} occurring in a @code{$}@i{i} of the pattern. The 
+@i{i}-th function argument is substituted at each occurrence of @code{$}@i{i}
+in the pattern.
+
+If a pattern does not mention all @code{$}@i{i} between @code{$1}
+and the maximum @code{$}@i{n}, e.g. @code{$1} and @code{$3} but not @code{$2},
+the function has @i{n} parameters, but some are not used.
+
+@subsubheading Restrictions:
+
+Indexed and non-indexed insertion points
+must not be mixed in a single pattern. 
+
+@comment ############################################################
+@node Typed, Calls, Indexed, Patterns   
+@comment  node-name,  next,  previous,  up
+@section Typed Insertion Points
+@comment ############################################################
+
+@findex Typed Insertion Points
+@findex insertion point
+@findex int
+@findex string
+@findex long
+@findex short
+@findex char
+@findex float
+@findex double
+Data items can be inserted into the output text by specifying
+insertion points to have one of the types
+@code{int}, @code{string}, @code{long}, @code{short}, @code{char},
+@code{float} or @code{double}, e.g.
+
+@findex function signature 
+@findex PTGNode
+@example
+   Matrix:  "float " $1 "[" $2 int "][" $3 int "];\n"
+@end example
+@noindent
+The generated pattern function has the following signature:
+
+@example
+   PTGNode PTGMatrix (PTGNode a, int b, int c)
+@end example
+Function calls must supply arguments of corresponding types.
+They are output in a standard output representation.
+
+@findex identifiers
+Another typical application of typed insertion point is
+generating identifiers:
+
+@example
+   Ident: $ string $ int
+@end example
+@noindent
+This pattern may be used to compose identifiers from a string and a
+number, e.g. a call @code{PTGIdent ("abc", 5)} producing @code{abc5}.
+The string item is often taken from the input of the language processor,
+and the number is used to guarantee uniqueness of identifiers in the
+output.
+(This construct also substitutes the outdated leaf patterns, @xref{Outdated}.)
+
+A typical example for composition of output text
+fragments from data of basic types is given by a pattern
+that produces German car identifications:
+
+@example
+   CarId: $ string $ string $int
+@end example
+@noindent
+which is applied for example by @code{PTGCarId ("PB-", "AB-", 127)}.
+
+@subsubheading Restrictions:
+
+If an indexed insertion point occurs multiply in a pattern
+its type must be the same for all occurrences.
+
+@comment ############################################################
+@node Calls, Optional, Typed, Patterns
+@comment  node-name,  next,  previous,  up
+@section Function Call Insertion
+@comment ############################################################
+
+@findex Function Call Insertion
+@findex user supplied function
+@findex indentation
+There are situations where it is inconvenient or impossible to
+specify an output component by a pattern. In such cases calls
+of user defined functions can be specified instead of
+insertion points in a pattern.
+
+Assume as an example that indentation shall be specified for the
+output of a block structured language:
+
+@example
+   Block:   [NewLine] "@{" [Indent] $1   /* declarations */
+                                   $2   /* statements */
+                          [Exdent]
+            [NewLine] "@}"
+@end example
+@noindent
+This pattern for producing a block has two ordinary insertion points,
+one for the declarations of the block and one for its statements. The
+pattern function is called as usual with two corresponding arguments.
+When the output text is produced the user defined functions
+@code{NewLine}, @code{Indent}, and @code{Exdent} are called
+in order to insert text at the specified pattern positions.
+
+@findex function signature 
+In this case the functions must have exactly one parameter
+that is a @code{PTG_OUTPUT_FILE}:
+
+@example
+   extern void NewLine (PTG_OUTPUT_FILE f);
+   extern void Indent (PTG_OUTPUT_FILE f);
+   extern void Exdent (PTG_OUTPUT_FILE f);
+@end example
+@noindent
+The type @code{PTG_OUTPUT_FILE} can be supplied by the user. 
+If it is not, a default is supplied by the generated file 
+@code{ptg_gen.h}. The function has to be implemented such 
+that a call outputs the desired text to the file pointed to by @code{f} by
+using some provided output macros, @xref{Macros}.
+
+Note: These function calls are executed when the output text is produced.
+The functions are not yet called when the patterns are applied.
+PTG guarantees that those calls occur in left-to-right order
+of the produced output text. Hence, the above triple of functions
+may use global variables to keep track of the indentation level.
+
+Functions, that support indentation ready to use in a PTG specification 
+can be found in the module library, 
+@xref{Indent, ,Indentation , output, Specification Module Library: Creating Output}.
+
+@findex passed through arguments
+Such function calls may also take arguments which are passed
+through from the call of the pattern function. They are specified
+by occurrences of insertion points within the call specification:
+
+@example
+   Block:   [NewLine] "@{" [Indent $3 int] $1   /* declarations */
+                                          $2   /* statements */
+                          [Exdent $3 int]
+            [NewLine] "@}"
+@end example
+@noindent
+In this case the indentation depth is determined individually
+for each application of the @code{Block} pattern which is called
+for example by @code{PTGBlock (d, s, 3)}. The last argument is
+passed through to the calls of @code{Indent} and @code{Exdent}
+which now must have the signatures
+
+@example
+   extern void Indent (PTG_OUTPUT_FILE f, int i);
+   extern void Exdent (PTG_OUTPUT_FILE f, int i);
+@end example
+
+Note: The arguments supplied with a pattern application are
+stored until the functions are called when the output is produced.
+
+In general several arguments may be specified to be passed through
+to a function call. They may be typed by one of the types
+@code{int}, @code{string}, @code{long}, @code{short}, @code{char}, 
+@code{float}, @code{double} or @code{pointer}.
+In case of type @code{pointer} the supplied argument of the
+pattern function call must have a pointer type that is defined
+for the corresponding parameter of the user function.
+If no type is specified an argument of type @code{PTGNode}
+is passed through.
+
+@findex pointer
+Arguments specified of type @code{pointer} are typically used
+if the translation of certain data structures by user specified
+functions is to be inserted into pattern driven translations.
+
+@comment ############################################################
+@node Optional,, Calls, Patterns
+@comment  node-name,  next,  previous,  up
+@section Optional Parts in Patterns
+@comment ############################################################
+
+@findex optional output patterns
+Parts of a pattern can be marked as optional by surrounding them with
+braces. Using this notation, the optional parts will only be printed in
+the output, if all other insertions of the pattern (insertions not 
+marked optional by being included in a brace) produce output.
+This can be applied to simplify the construction of lists considerably. 
+
+@example
+   CommaSeq:    $1 @{", "@} $2
+@end example
+
+A call of the pattern function @code{PTGCommaSeq(a,b)} produces the separator
+only if neither @code{a} nor @code{b} is empty; otherwise @code{a} and @code{b} 
+are just concatenated, leaving out the optional part. This facility is especially 
+useful if such separated lists are composed by pattern function calls that occur in
+loops or in separated contexts. @xref{Example}, for a more sophisticated example.
+
+Note: The result of a pattern call is the unique value @code{PTGNULL} if the empty
+output string is produced. (There is no way to further inspect the intermediate
+results of pattern applications.) Certain pattern constructs do not yield 
+@code{PTGNULL} 
+even if they may represent empty strings:
+@itemize
+@item
+Typed insertions and function call insertions,
+@item 
+empty strings and empty literals.
+@end itemize
+are considered not to be empty.
+
+Another example for optional parts in patterns is the following:
+@example
+   Paren:       @{"("@} $ @{")"@}
+@end example
+The pattern function @code{PTGParen(a)} will produce parentheses around @code{a}
+if @code{a} is not empty. Otherwise, @code{PTGParen(a)} will be empty.
+
+@subsubheading Restrictions:
+
+An optional pattern is printed, if all non-optional insertions in
+the node are not @code{PTGNULL}. However, if there are no non-optional 
+insertions, the braces are ignored and a warning is issued.
+
+It is possible to include more than one pattern in braces. Multiple optional
+parts can be included in one Rule. However, the braces marking an optional
+pattern cannot be used recursively inside an optional pattern.
+
+@comment ############################################################
+@node Output, Techniques, Patterns, Top    
+@comment  node-name,  next,  previous,  up
+@chapter Output Functions
+@comment ############################################################
+
+PTG separates the composition of a target text from outputting it:
+A target text is composed by calls of pattern functions.
+They yield results of type @code{PTGNode} representing the
+target text or fragments thereof.
+
+@findex PTGOut
+@findex PTGOutFile
+@findex PTGOutFPtr
+@findex Output Functions
+@findex PTGNode
+There are three predefined PTG functions that can be applied to
+@code{PTGNode} values in order to output the text. They have the
+following signatures:
+
+@example
+   PTGNode PTGOut(PTGNode r)
+   PTGNode PTGOutFile(char *f, PTGNode r)
+   PTGNode PTGOutFPtr(FILE *f, PTGNode r)
+@end example
+
+A call @code{PTGOut (x)} writes the text represented by @code{x} to stdout.
+
+The function @code{PTGOutFile} takes the name of the output file as an 
+additional 
+parameter. A call @code{PTGOutFile (n, x)} opens the file named @code{n}
+for writing, writes the text represented by @code{x} to it, and
+closes the file before returning.
+
+The function @code{PTGOutFPtr} takes the file pointer to an already open
+file as additional parameter. A call @code{PTGOutFPtr (f, x)} 
+writes the text represented by @code{x} to @code{f},
+and leaves The function @code{PTGOutFPtr} takes open upon exit.
+
+Each of the functions yields its @code{PTGNode} argument as result.
+Hence, nested calls of output functions may produce parts of the
+complete target text on separate files, e.g.
+
+@example
+   PTGOutFile ("f1",
+      PTGModule (
+         PTGOutFile ("f2", PTGInterface ( ...... )),
+         PTGBody ( .... )))
+@end example
+@noindent
+In the above example a @code{Module} is composed by two text fragments 
+@code{Interface}
+and @code{Body}. The whole text is written to the file @code{f1}. The 
+@code{Interface} fragment is also written to the file @code{f2}. 
+
+Of course nested calls like the 
+above can be decomposed by storing intermediate @code{PTGNode} values. 
+Nested calls of @code{PTGOutFile} 
+to the same file would destroy the results of the former calls.
+Nested calls of @code{PTGOutFPtr} to the same file would append the results of
+each call to the end of the file.
+
+@findex newline
+Note: Be aware that the output functions do not add a newline character
+to the end of an output text. It has to be explicitly specified by a pattern.
+This behavior has been changed compared to previous versions of PTG.
+Adding a newline character to a text is simply specified by a pattern like
+
+@example
+     NewLine:    $ "\n"
+@end example
+
+
+
+
+@comment ############################################################
+@node Techniques, Example, Output, Top
+@comment  node-name,  next,  previous,  up
+@chapter Some Useful Techniques
+@comment ############################################################
+
+This chapter describes some techniques that solve common tasks
+in PTG applications.
+
+@menu
+* Data::         Output of Data Items
+* Identifiers::  Generating Identifiers
+* Sequences::    Output of Sequences
+@end menu
+
+@comment ############################################################
+@node Data, Identifiers, , Techniques
+@comment  node-name,  next,  previous,  up
+@section Output of Data Items
+@comment ############################################################
+
+@findex Output of Data Items
+Usually data items like numbers, identifiers, or strings which
+are computed by the translation process or taken from the input
+are to be inserted into the output text at certain positions.
+This is best achieved by using typed insertion points as
+described in @xref{Typed}.
+
+@findex numbers
+@findex string
+@findex int
+It is often necessary to convert single data items into a @code{PTGNode}
+pointer to be used in pattern applications.
+This can be achieved by defining patterns for single data items:
+@example
+   Number:    $ int
+   String:    $ string
+   StringLit: "\"" $ string "\""
+@end example
+@noindent
+Such patterns are applied by calls like @code{PTGNumber(5)}, 
+@code{PTGString("+")}, @code{PTGStringLit("Hello!")} 
+producing the text items @code{5}, @code{+}, and @code{"Hello!"} respectively.
+
+@findex identifiers
+@findex floating point numbers
+Predefined patterns for the conversion of single data items to @code{PTGNode}
+pointers can also be found in a module of the specification library, see also
+@pxref{PtgCommon,,Commonly used Output patterns for PTG,output,Tasks related to generating output}.
+
+This module also solves the problem of generating a @code{PTGNode} that
+generates a data item of the input text, e.g. identifiers or floating point 
+numbers, on output.
+
+@comment ############################################################
+@node Identifiers, Sequences, Data, Techniques
+@comment  node-name,  next,  previous,  up
+@section Generating Identifiers
+@comment ############################################################
+
+@findex Generating Identifiers
+@findex identifier
+Common techniques for producing identifiers are recommended
+especially for translation into programming languages.
+In the simplest case identifiers are just reproduced from
+the input as shown above. The following set of patterns
+allow to add prefixes or postfixes to the original
+identifiers (see @xref{Typed}):
+
+@example
+   PointerId: "PTR_" $ string
+   ValueId:   "VAL_" $ string
+   UniqueId:  $ string $ int
+@end example
+@noindent
+Patterns like the first two may be used to generate different output
+identifiers from one input identifier.
+The last pattern allows to attach a number to an identifier,
+e.g. to guarantee uniqueness in the output in cases where
+the source and the target language have different scope rules.
+
+@findex white space
+Note: PTG does not add any white space between pattern items.
+Hence, patterns where identifiers or numbers may be inserted
+have to ensure that the component tokens are separated, e.g.
+
+@example
+   Decl: $ /* Type */ " " $ /* Ident */
+@end example
+
+@comment ############################################################
+@node Sequences, , Identifiers, Techniques
+@comment  node-name,  next,  previous,  up
+@section Output of Sequences
+@comment ############################################################
+
+@findex Output of Sequences
+@findex sequence
+@findex list
+The construction of output text often requires to compose arbitrary
+long sequences of items, e.g tokens, statements, or procedures. 
+Some simple techniques for those tasks are described here.
+The examples can easily be generalized for similar applications.
+
+A generally applicable pattern for constructing sequences is
+
+@example
+   Seq: $ $
+@end example
+@noindent
+An application
+
+@example
+   PTGSeq (PTGString("."), PTGSeq (PTGString("."), PTGString(".")))
+@end example
+@noindent
+produces a sequence of 3 dots, assuming pattern @code{String} is
+suitably defined.
+
+The following C loop computes a sequence of @code{n} dots:
+
+@example
+   PTGNode dots = PTGNULL; int i;
+   for (i=0; i<n; i++) dots = PTGSeq (dots, PTGString("."));
+@end example
+
+@findex separator
+Sequences where the items are separated by a certain string,
+e.g. a comma or a space character can be specified by
+
+@example
+   CommaSeq: $ @{", "@} $
+@end example
+@noindent
+An application 
+
+@example
+   PTGCommaSeq (PTGNumber (1), PTGNumber (2))
+@end example
+@noindent
+produces @code{1, 2}, assuming pattern @code{Number} be
+suitably defined.
+
+The following C loop computes a comma separated sequence of the
+numbers 1 to @code{n}:
+
+@example
+   PTGNode numseq = PTGNULL; int i;
+   for (i=1; i<=n; i++)
+     numseq = PTGCommaSeq (numseq, PTGNumber (i));
+@end example
+
+
+
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+@comment ############################################################
+@node Example, Predefined, Techniques, Top, Run
+@comment  node-name,  next,  previous,  up
+@chapter A Complete Example
+@comment ############################################################
+
+@findex A Complete Example
+@findex example
+@findex LIDO
+In this chapter we demonstrate the use of PTG for translating a
+simple assignment language into C code.
+This example shows PTG techniques in the context of a complete
+translator specification. It especially demonstrates how
+PTG patterns are applied in LIDO specifications.
+
+When this manual is read online, the browser's @code{Run} 
+command can be used to obtain a copy of the complete specification 
+for further experiments.
+You will get a Funnelweb file @code{PtgEx.fw}
+containing the content of this chapter (@pxref{top,,,fw, FunnelWeb}). 
+It can be used for example to derive the specified processor by
+
+@example
+PtgEx.fw :exe >.
+@end example
+
+@noindent
+or to derive the set of files described below:
+
+@example
+PtgEx.fw :fwGen >.
+@end example
+
+@menu
+* Structure::    Source Language Structure
+* Frame::        Program Frame
+* Expressions::  Expressions
+* CHAIN::        Using LIDO CHAINs
+* CONSTITUENTS:: Using LIDO CONSTITUENTS
+@end menu
+
+@ifinfo
+@egfiles ptg
+@end egfiles
+
+@run
+echo "Obtaining specifications and sample input"
+cp $ODINCACHE/PKGS/ptg/sample/PtgEx.fw PtgEx.fw
+echo 'Copy complete, see file PtgEx.fw, hit return to continue'
+read answer
+@end run
+@end ifinfo
+
+@comment ############################################################
+@node Structure, Frame, , Example
+@comment  node-name,  next,  previous,  up
+@section Source Language Structure
+@comment ############################################################
+
+@findex Source Language Structure
+@findex example language
+Programs of this example language are sequences of assignments,
+input statements, and output statements, like
+
+@b{simple}[1]==
+@example
+   input a;
+   output a;
+   x := a + 1;
+   y := x - 5;
+   output x;
+   output y + x;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The values of variables and expressions are integral numbers.
+There are only the binary operators @code{+} and @code{-}.
+The above program is to be translated into the following C program:
+
+@b{simple.out}[2]==
+@example
+   #include <stdio.h>
+
+   int a = 0, x = 0, y = 0;
+
+   int main (void) @{
+
+   scanf ("%d", &(a));
+   printf ("%d\n",a);
+   x = a+1;
+   y = x-5;
+   printf ("%d\n",x);
+   printf ("%d\n",y+x);
+
+   exit (0);
+   @}
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The structure of the source programs is specified by the following
+concrete grammar:
+
+@b{Program.con}[3]==
+@example
+   Program:     Statement*.
+
+   Statement:   Variable ':=' Expression ';'.
+   Statement:   'input' Variable ';'.
+   Statement:   'output' Expression ';'.
+
+   Expression:  Expression Operator Operand / Operand.
+
+   Operator:    '+' / '-'.
+
+   Operand:     Variable.
+   Operand:     IntLit.
+   Variable:    Ident.
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+In the tree grammar @code{Expression}s and @code{Operand}s are
+represented both by @code{Expression} nodes, as specified by
+the type @code{.sym} rule:
+
+@b{Expr.sym}[4]==
+@example
+   Expression ::= Operand .
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+Identifier tokens, number literals, and comments are denoted as
+in Pascal, as stated by the following type @code{.gla} specification:
+
+@b{Mini.gla}[5]==
+@example
+   Ident:   PASCAL_IDENTIFIER
+   IntLit:  PASCAL_INTEGER
+            PASCAL_COMMENT
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+@comment ############################################################
+@node Frame, Expressions, Structure, Example
+@comment  node-name,  next,  previous,  up
+@section Program Frame
+@comment ############################################################
+
+@findex Program Frame
+@findex output function
+In this section the overall structure of the target programs is
+specified, the name of the output file is determined, and
+its contents is produced by a PTG output function.
+We first specify a pattern for target program frame:
+
+@b{Frame.ptg}[6]==
+@example
+   Frame:
+      "#include <stdio.h>\n\n"
+
+      $1 /* declarations */
+
+      "\nint main (void) @{\n\n"
+
+      $2 /* statements */
+
+      "\nexit (0);\n@}\n"
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+It has two insertion points, one for variable declarations
+and one for the statement sequence.
+The text to be inserted is obtained from the attributes
+@code{Program.DeclPtg} and @code{Program.StmtPtg} of type @code{PTGNode}
+It is shown below how they are computed.
+Here they are used as arguments of the @code{Frame} pattern application:
+
+@findex file name
+@findex SRCFILE
+@b{TransProg.lido}[7]==
+@example
+   ATTR DeclPtg, StmtPtg: PTGNode;
+
+   SYMBOL Program COMPUTE
+     PTGOutFile (CatStrStr(SRCFILE, ".c"),
+                 PTGFrame (THIS.DeclPtg, THIS.StmtPtg));
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The above call of the output function @code{PTGOutFile} (see
+@pxref{Output}) writes to a file which name is derived from the file
+name of the source program by appending @code{".c"}. The concatenation
+function is imported from the specification module library. See
+@ref{Strings, , String Concatenation, problems, Specification Module
+Library: Common Problems}, for further details on the @code{Strings} module.
+
+@b{TransProg.specs}[8]==
+@example
+$/Tech/Strings.specs
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The macro @code{SRCFILE} is obtained from the source program module, 
+see @ref{source, , Text Input, lib, Library Reference Manual}.
+That module is included automatically into every Eli specification. So, only
+it's interface has to be made known by the attribute evaluator:
+
+@b{TransProg.head}[9]==
+@example
+#include "source.h"
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+@comment ############################################################
+@node Expressions, CHAIN, Frame, Example
+@comment  node-name,  next,  previous,  up
+@section Expressions
+@comment ############################################################
+
+@findex LIDO
+@findex Expressions
+In this section we specify the translation of expressions.
+Target expressions are composed by applications of patterns
+that construct the text in a bottom-up way, i.e. from the
+leaves up to the complete expression.
+
+In our simple example this translation is one-to-one as
+specified by the three patterns:
+
+@b{TransExpr.ptg}[10]==
+@example
+   BinOperation: $ $ $
+   Number:       $ int
+   String:       $ string
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The @code{BinOperation} pattern composes a left operand,
+an operator, and a right operand. 
+The @code{Number} pattern just converts an integral number into
+text.
+The @code{String} pattern reproduces its argument.
+It is used here for output of operators and of identifiers.
+
+These patterns are applied in computations of @code{Expression}
+contexts. Attributes @code{Ptg} of type @code{PTGNode} are used
+for the intermediate results:
+
+@b{TransExpr.lido}[11]==
+@example
+   ATTR Ptg: PTGNode;
+
+   RULE: Expression ::= Expression Operator Expression COMPUTE
+      Expression[1].Ptg = 
+         PTGBinOperation (
+            Expression[2].Ptg, Operator.Ptg, Expression[3].Ptg);
+   END;
+
+   RULE: Operator ::= '+' COMPUTE
+      Operator.Ptg = PTGString ("+");
+   END;
+
+   RULE: Operator ::= '-' COMPUTE
+      Operator.Ptg = PTGString ("-");
+   END;
+
+   RULE: Expression ::= Variable COMPUTE
+      Expression.Ptg = Variable.Ptg;
+   END;
+
+   RULE: Expression ::= IntLit COMPUTE
+      Expression.Ptg = PTGNumber (IntLit);
+   END;
+
+   RULE: Variable ::= Ident COMPUTE
+      Variable.Ptg = PTGString (StringTable (Ident)); 
+   END;
+
+   ATTR Sym: int;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The last two computations use values obtained from named terminal
+symbols: @code{IntLit}
+supplies an integer value to the @code{Number} pattern,
+the token code of @code{Ident} is used
+to access the identifier string from the @code{StringTable}.
+The @code{String} pattern then reproduces the identifier.
+@findex StringTable
+
+@comment ############################################################
+@node CHAIN, CONSTITUENTS, Expressions, Example
+@comment  node-name,  next,  previous,  up
+@section Using LIDO CHAINs
+@comment ############################################################
+
+@findex Using LIDO CHAINs
+@findex LIDO
+@findex CHAIN
+@findex statements
+@findex sequences
+In this sections the translation of statement sequences is shown.
+The LIDO @code{CHAIN} construct is used to compose a sequence
+of translated statements in left-to-right order.
+
+Assignments, input statements, and output statements are translated
+by the following patterns:
+
+@b{TransStmt.ptg}[12]==
+@example
+   AssignStmt:  $1 /* lhs */ " = " $2 /* rhs */ ";\n"
+   InputStmt:   "scanf (\"%d\", &(" $1 /* variable */ "));\n"
+   OutPutStmt:  "printf (\"%d\\n\","  $1 /* expression */ ");\n"
+
+   Seq:         $  $
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The last pattern is used to combine two text components
+(statement sequences in this case) into one (see @xref{Sequences}).
+
+A @code{CHAIN} named @code{StmtChn} is defined to compose
+@code{PTGNode}s in left-to-right order through the tree.
+The @code{CHAIN} starts in the root context with an empty text.
+The result is obtained at the end of the @code{CHAIN} by
+@code{TAIL.StmtChn}:
+
+@b{TransStChn.lido}[13]==
+@example
+   CHAIN StmtChn: PTGNode;
+
+   SYMBOL Program COMPUTE
+      CHAINSTART HEAD.StmtChn = PTGNULL;
+      SYNT.StmtPtg = TAIL.StmtChn;
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+In each of the three statement contexts the translation
+is produced by application of the corresponding pattern
+and appended to the end of the @code{CHAIN} using the @code{Seq}
+pattern:
+
+@b{TransStmt.lido}[14]==
+@example
+   RULE: Statement ::= Variable ':=' Expression ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGAssignStmt (Variable.Ptg, Expression.Ptg));
+   END;
+
+   RULE: Statement ::= 'input' Variable ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGInputStmt (Variable.Ptg));
+   END;
+
+   RULE: Statement ::= 'output' Expression ';' COMPUTE
+      Statement.StmtChn = PTGSeq (Statement.StmtChn,
+         PTGOutPutStmt (Expression.Ptg));
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+@comment ############################################################
+@node CONSTITUENTS, , CHAIN, Example
+@comment  node-name,  next,  previous,  up
+@section Using LIDO CONSTITUENTS
+@comment ############################################################
+
+@findex Using LIDO CONSTITUENTS
+@findex CONSTITUENTS
+@findex LIDO
+@findex declarations
+@findex sequences
+In this section the construction of a declarator sequence is
+described using the LIDO @code{CONSTITUENTS} construct.
+It is also shown how a list with separators is produced,
+and how text is generated only once for each identifier
+that occurs in the program.
+
+The source language does not have declarations; variables
+are introduced by just using them. 
+Hence, we have to generate declarations in the target program,
+one for each variable that occurs in the source.
+
+A variable may occur several times, but its declaration
+must be generated only once.
+For that purpose each variable is identified by a key
+which is associated to every occurrence of the variable.
+
+This task is an instance of a name analysis task. We
+can use the @code{AlgScope} module of the module library
+to solve it:
+
+@b{ScopeLib.specs}[15]==
+@example
+   $/Name/AlgScope.gnrc:inst
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The computational role @code{IdDefScope} 
+provided by that module is associated to the grammar
+symbol @code{Variable}:
+
+@b{Scope.lido}[16]==
+@example
+   SYMBOL Variable INHERITS IdDefScope COMPUTE 
+      SYNT.Sym = TERM;
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The computations of that module yield an attribute @code{Variable.Key}.
+It has the same value for each occurrence of a variable identifier.
+
+We now associate a property @code{IsDeclared} to variables by a type
+@code{.pdl} specification:
+
+@b{Decl.pdl}[17]==
+@example
+   IsDeclared: int;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+It describes a state of that variable with respect to the
+translation process: A declaration is only produced if
+@code{IsDeclared} is not yet set, and then @code{IsDeclared} is set.
+The attribute @code{Variable.DeclPtg} takes the result, 
+either the generated target declaration or @code{PTGNULL}.
+
+@b{VarDecl.lido}[18]==
+@example
+   RULE: Variable ::= Ident COMPUTE
+      Variable.DeclPtg =
+         IF (GetIsDeclared (Variable.Key, 0),
+             PTGNULL,
+             ORDER (ResetIsDeclared (Variable.Key, 1),
+                    PTGDeclVariable (StringTable (Ident))));
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The pattern @code{DeclVariable} is used here to reproduce
+the variable name from the @code{StringTable} and to add
+the initialization to it:
+A single variable declarator is specified by the pattern
+
+@b{Decl.ptg}[19]==
+@example
+   DeclVariable:  $ string " = 0"
+   Declaration:   "int " $ ";\n"
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+@noindent
+The second pattern constitutes a complete declaration where
+the declarator list is inserted.
+
+@findex WITH functions
+The declarator list is collected in the @code{Program} context
+using a @code{CONSTITUENTS} construct. 
+It combines the @code{PTGNode}
+values of all @code{Variable.DeclPtg} attributes of the tree:
+
+@b{ProgDecl.lido}[20]==
+@example
+   SYMBOL Program COMPUTE
+      SYNT.DeclPtg = 
+         PTGDeclaration (
+            CONSTITUENTS Variable.DeclPtg
+            WITH (PTGNode, PTGCommaSeq, IDENTICAL, PTGNull));
+   END;
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The @code{WITH} clause of the @code{CONSTITUENTS} construct
+specifies the type of the combined values, @code{PTGNode},
+and three functions which are applied to obtain the resulting
+value:
+@code{PTGNull} is the nullary predefined function producing no text.
+@code{IDENTICAL} is a unary function predefined in LIDO; it is applied to each
+@code{Variable.DeclPtg} attributes reproducing its value.
+@code{PTGCommaSeq} is a pattern function that combines two
+PTG texts, and separates them by a comma  if none of them is empty.
+That pattern is specified using PTG's optional clause
+(see @xref{Sequences}):
+@findex separator
+
+@b{Comma.ptg}[21]==
+@example
+   CommaSeq:  $ @{", "@} $
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+
+
+
+@comment ############################################################
+@node Predefined, Macros, Example, Top
+@comment  node-name,  next,  previous,  up
+@chapter Predefined Entities
+@comment ############################################################
+
+@findex Predefined Entities
+@findex interface file
+@findex ptg_gen.h
+@findex exported identifiers
+@findex PTGNode
+@findex PTGNULL
+@findex PTGNull
+@findex PTGOut
+@findex PTGOutFile
+@findex PTGOutFPtr
+@findex PTGProcess
+@findex PTGFree
+PTG generates a C module consisting of an interface file @code{ptg_gen.h}
+and an implementation file @code{ptg_gen.c}. 
+The interface file exports definitions for the following identifiers:
+@table @code
+@item PTGNode
+the pointer type for internal representations of pattern applications;
+@item PTGNULL
+a pointer of type @code{PTGNode} representing no text;
+Note: There are many ways to represent no text;
+comparing a @code{PTGNode} to @code{PTGNULL} is only a pointer
+comparison;
+@item PTGNull()
+a macro without parameters that yields @code{PTGNULL}, to be used
+where a function notation is needed, as in 
+@code{WITH} clauses
+of LIDO's @code{CONSTITUENTS} construct;
+@item void PTGFree (void)
+a call of this function deallocates all data generated by
+pattern applications; to be used for reduction of dynamic
+memory usage in cases where output is produced in several phases.
+@end table
+
+The following functions can be used to process the contents of a @code{PTGNode}
+and it's insertions recursively into an output file. These functions are only
+available, under certain preconditions, @xref{Macros}.
+
+@table @code
+@item PTGNode PTGOut (PTGNode root)
+a function that outputs the text represented by the parameter @code{root}
+to standard output
+@item PTGNode PTGOutFile (char *filename, PTGNode root)
+a function that opens a file with the name given by 
+the parameter @code{filename},
+outputs the text represented by the parameter @code{root},
+and closes the file
+@item PTGNode PTGOutFPtr (FILE *output, PTGNode root)
+a function that expects the parameter @code{output} to be a file
+which is open for writing,
+outputs the text represented by the parameter @code{root} to the file,
+and leaves the file open
+@item PTGNode PTGProcess (PTG_OUTPUT_FILE file, PTGNode root)
+a function that expects the parameter @code{file} to be of a
+type that is provided by the user, @xref{Macros}. 
+If the default definition of @code{PTG_OUTPUT_FILE} is overriding,
+only @code{PTGProcess} can be used as output function;
+the other three output functions are not available in that case.
+@end table
+
+The user should ensure that these predefined identifiers do not clash 
+with other definitions in the application importing the interface file.
+In particular, the pattern names should be chosen such that prefixing
+them with @code{PTG} does not yield a predefined name, e.g. a pattern
+name @code{Free} would be a bad choice.
+
+The implementation file contains external references to any user defined
+function mentioned in the particular specification. 
+
+@comment ############################################################
+@node Macros, Outdated, Predefined, Top
+@comment  node-name,  next,  previous,  up
+@chapter Influencing PTG Output
+@comment ############################################################
+
+The usage of PTG Patterns functions is a very flexible way to construct
+the output of a program. However, some 
+desirable effects can not be achieved using
+pattern functions only: 
+@table @strong
+@item Pretty Printing
+A pattern function does not have access to the current
+column position. Therefore, it cannot know where to insert line breaks to
+get the output formatted properly.
+@item Output destination
+It can be desirable to write the output of PTG patterns to a destination 
+other than a file,
+for example to redirect the output into a
+string buffer or to postprocess the output through a filter.
+@end table
+
+To solve such tasks, PTG does not write its output directly into a
+file. Instead, a set of macros is defined that can be adjusted to change
+the behavior of PTG. If these macros are not defined, PTG supports default
+definitions that process the contents of a @code{PTGNode} into a named file or a 
+given file pointer. In the following, those macros are
+explained and small examples are given:
+
+@table @code
+@item PTG_OUTPUT_FILE
+This macro defines the type name of the @code{file} parameter of the
+other macros, the output functions defined in @ref{Output}, and the function
+call insertions. If no definition is supplied, its value is defined to be
+@code{FILE *}. Its value must be assignable by the C-operator 
+@code{=}. If the definition of @code{PTG_OUTPUT_FILE} is changed, 
+a suitable definition for @code{PTG_OUTPUT_STRING}
+must also be provided.
+
+@item PTG_OUTPUT_STRING(file,param)
+This macro is called to write a string value into an output file. 
+It is used by default for every text written by PTG. 
+Hence, redefining this macro suffices to change the default
+behavior of PTG, for instance to support pretty printing.
+This macro has to be redefined if 
+@code{PTG_OUTPUT_FILE} is redefined.
+
+@item PTG_OUTPUT_INT(file,param)
+@item PTG_OUTPUT_SHORT(file,param)
+@item PTG_OUTPUT_LONG(file,param)
+@item PTG_OUTPUT_CHAR(file,param)
+@item PTG_OUTPUT_FLOAT(file,param)
+@item PTG_OUTPUT_DOUBLE(file,param)
+These macros are used to write typed insertions into 
+an output file. By default, they are set up in a way that they convert
+their second argument into a string and call @code{PTG_OUTPUT_STRING}
+to process the output. So, when redefining @code{PTG_OUTPUT_FILE}, 
+you need not to supply a definition for these macros.
+
+Of course, there may be more efficient ways to output values of the various 
+data types other than to convert them into strings and send the result
+to the string handling function. If you want to supply such an alternative 
+for writing characters, for example, redefine the default behavior of
+@code{PTG_OUTPUT_CHAR} to print the character directly. These macros are
+provided for efficiency purposes only.
+@end table
+
+To override the default implementations for these macros, implement a
+substitution function in a type @code{.c} file. Include the file
+@code{ptg_gen.h} to supply your new function with definitions for the other
+macros, especially @code{PTG_OUTPUT_FILE}. Write cpp directives
+that define the desired macro(s) into a type @code{.ptg.phi} file and include
+it in your specification. Eli will then concatenate all those definitions
+and supply it as a header file @code{ptg.h} to your processor.
+
+As an application of these macros, the following section shows a
+simple and easy way to implement pretty printing of the output generated
+by PTG.
+
+@menu
+* Postprocessing::      Changing Default Output for Limited Line Length
+@end menu
+
+@comment ############################################################
+@node Postprocessing, , Macros, Macros, Run
+@comment  node-name,  next,  previous,  up
+@section Changing Default Output for Limited Line Length
+@comment ############################################################
+
+Sometimes it is necessary to postprocess PTG generated output. For example,
+the length of the generated output lines may be limited by an upper bound, 
+so that certain restricted tools can process the output. 
+Without postprocessing of the output, there is no way to determine the 
+current position in a line for a PTG structure being written.
+Hence, we adapt the definitions of the output macros to solve that task.
+
+As all output is finally handled by the macro
+@code{PTG_OUTPUT_STRING}, it is sufficient to modify it such that
+it controls the current position in the line. With some more effort, it
+would be possible do complete line breaking by buffering one line of output 
+and looking for suitable break points when the end of the line is encountered.
+
+The following code keeps track of the current column position and implements 
+a function, that conditionally inserts a line break if the line is longer
+than 65 chars.
+
+@b{linepos.c}[22]==
+@example
+#include <string.h>
+#include "ptg_gen.h"
+        
+static col = 0;
+
+void InitCol(void)
+@{
+   col = 0;
+@}
+
+void OutputLine(FILE *f, char *s)
+@{
+   int l;
+   char *nl;
+
+   if (!s) return;
+
+   l = strlen(s);
+   nl = strrchr(s, '\n');
+
+   if (!nl)
+      col += l;
+   else
+      col = (l - 1 - (nl - s)); 
+   fputs(s, f);
+@}
+
+void CondNl(FILE *f)
+@{
+   if (col > 65)
+      OutputLine(f, "\n");
+@}
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+The function @code{InitCol} serves as initialization, if more than one
+output file should be generated.  The function @code{CondNl} inserts a
+line break, if the current line is longer than 65 characters.  The
+function @code{OutputLine} overrides the default implementation of
+@code{PTG_OUTPUT_STRING}.
+
+@b{linepos.ptg.phi}[23]==
+@example
+#define PTG_OUTPUT_STRING(file,param) OutputLine(file,param)
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+This can be used for example in the following PTG specification:
+
+@b{linepos.ptg}[24]==
+@example
+CommaSeq:       $ ", " [CondNl] $
+@end example
+@smalldisplay
+This macro is attached to a product file.
+@end smalldisplay
+
+
+Now, in a large iteration of calls to @code{PTGCommaSeq()}, a line break
+is inserted automatically, if a line exceeds 65 characters.
+
+@iftex
+Using the online documentation, one can obtain a copy of the attached files.
+@end iftex
+@ifinfo
+To obtain a copy of the attached files in the current directory, press
+the Run button.
+@end ifinfo
+
+@ifinfo
+@egfiles ptg
+@end egfiles
+
+@run
+echo "Copying linepos-specification"
+if test -f linepos.c -o -f linepos.ptg.phi -o -f linepos.ptg 
+then echo "*** Destination files already exist. Press return to continue"
+else cp $ODINCACHE/PKGS/ptg/sample/linepos.* .
+     echo "Ready. Press return to continue"
+fi
+read answer
+@end run
+@end ifinfo
+
+@comment ############################################################
+@node Outdated, Syntax, Macros, Top
+@comment  node-name,  next,  previous,  up
+@chapter Outdated Constructs
+@comment ############################################################
+
+@findex Outdated Constructs
+@findex Leaf Pattern
+
+The present version of PTG does not contain any outdated constructs.
+The leaf pattern facility which was marked as outdated in previous
+versions of Eli has been deimplemented.
+
+@comment ############################################################
+@node Syntax, Index, Outdated, Top
+@comment  node-name,  next,  previous,  up
+@chapter Syntax of PTG Specifications
+@comment ############################################################
+
+@findex Syntax of PTG Specifications
+@example
+PTGSpec:        PatternSpec+
+
+PatternSpec:    PatternName ':' (Item | Optional)* 
+
+PatternName:    Identifier
+
+Item:           CString | Insertion | FunctionCall
+
+Insertion:      '$' [ Number ] [ Type ]
+
+FunctionCall:   '[' Identifier Arguments ']'
+
+Arguments:      Insertion*
+
+Type:           'int' | 'string' | 'pointer' | 'long' | 'short'
+                | 'char' | 'float' | 'double' 
+
+Optional:       '@{' Item+ '@}'
+
+@end example
+
+@findex tokens
+@findex identifiers
+@findex string
+@findex comments
+@findex newline
+@code{Identifier} and @code{CString} tokens are denoted as in C.
+@code{Number} tokens consist of decimal digits.
+Comments are written in C style.
+Line comments starting with @code{#} are also accepted.
+
+Note: A @code{CString} token may only extend over several lines
+if all but the last line end with a backslash character.
+An error message like @code{illegal newline in string literal}
+indicates a violation of that rule.
+
+The following additional alternative for @code{PatternSpec}
+defines leaf patterns. This construct is outdated and is no longer
+accepted by PTG:
+
+@example
+PatternSpec:    PatternName ':' Type+ '[' [ Identifier ] ']'
+@end example
+@noindent
+If you have old specifications that use this pattern style, rewrite
+them by pattern specifications as describe above, e.g.
+
+@example
+   MyLeaf:   int string []
+   YourLeaf: int string [YourFct]
+@end example
+@noindent
+should be rewritten into
+
+@example
+   MyLeaf:   $ int $ string
+   YourLeaf: [YourFct $ int $ string]
+@end example
+
+@comment ############################################################
+@node Index, , Syntax, Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Index
+@comment ############################################################
+
+@printindex fn
+@contents
+@bye
+@bye

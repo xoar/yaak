@@ -1,0 +1,6 @@
+/* $Id: c--lint.specs,v 1.2 1995/08/28 06:11:08 kadhim Exp $ */
+/* Lint processor for C-- */
+
+c--lint.fw	/* Title page and includes for the lint description */
+cminus.fwi	/* Definition of the language and its compiler */
+$/Name/envmod.specs		/* Contour model environment module */

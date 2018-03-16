@@ -1,0 +1,150 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: PreDefId.fw,v 3.7 1999/10/15 08:47:34 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module predefines the entities described in the file |FILE|.
+They are described by macro calls as explained below.
+The contents of |FILE| is embedded in several files,
+where different definitions of the macros achieve the
+intended effect. In .h and .c files a copy of |FILE| named
+|NAME|PreDefId.d.h is used. |FILE| is only used in a .pdl
+specification.
+
+PreDefSym ("xxx", s) introduces the variable s. Its value is the
+symbol encoding of "xxx".
+
+PreDefKey ("xxx", k) introduces the known key k; it is bound to the
+symbol "xxx" in the environment |NAME|RootEnv.
+
+PreDefSymKey ("xxx", s, k) introduces both s and k and binds
+k to s in the environment |NAME|RootEnv.
+
+PreDefBind ("xxx", b) introduces the Binding variable b.
+A Binding of "xxx" to a key in the environment |NAME|RootEnv
+is established.
+
+PreDefKeyBind ("xxx", k, b) introduces the known key k
+and the Binding variable b. k is bound to the
+symbol "xxx" in the environment |NAME|RootEnv.
+That binding is assigned to b.
+
+PreDefSymKeyBind ("xxx", s, k, b) introduces s, k, and b.
+The binding of k to s in the environment |NAME|RootEnv
+is set to b.
+
+~O~<|NAME|PreDefId.h~>~{
+#ifndef _|NAME|PreDefId_h
+#define _|NAME|PreDefId_h
+
+extern void |NAME|InitPreDef ();
+#include "deftbl.h"
+#include "envmod.h"
+
+#define PreDefSym(_str,_sym) extern int _sym;
+#define PreDefKey(_str,_key) 
+#define PreDefSymKey(_str,_sym,_key) extern int _sym;
+#define PreDefBind(_str,_bnd) extern Binding _bnd;
+#define PreDefKeyBind(_str,_key,_bnd) Binding _bnd;
+#define PreDefSymKeyBind(_str,_sym,_key,_bnd) extern int _sym; Binding _bnd;
+#include "|NAME|PreDefId.d.h"
+#undef PreDefSym
+#undef PreDefKey
+#undef PreDefSymKey
+#undef PreDefBind
+#undef PreDefKeyBind
+#undef PreDefSymKeyBind
+
+#endif
+~}
+
+~O~<|NAME|PreDefId.c~>~{
+#include "|NAME|IdentTerm.h"
+#include "PreDefMod.h"
+#include "|NAME|PreDefId.h"
+#include "pdl_gen.h"
+
+extern Environment |NAME|RootEnv; /* provided by a scope module */
+
+#define PreDefSym(_str,_sym) int _sym;
+#define PreDefKey(_str,_key) 
+#define PreDefSymKey(_str,_sym,_key) int _sym;
+#define PreDefBind(_str,_bnd) Binding _bnd;
+#define PreDefKeyBind(_str,_key,_bnd) Binding _bnd;
+#define PreDefSymKeyBind(_str,_sym,_key,_bnd) int _sym; Binding _bnd;
+#include "|NAME|PreDefId.d.h"
+#undef PreDefSym
+#undef PreDefKey
+#undef PreDefSymKey
+#undef PreDefBind
+#undef PreDefKeyBind
+#undef PreDefSymKeyBind
+
+void |NAME|InitPreDef ()
+{ int _dummysym; Binding _dummybnd;
+  if (|NAME|RootEnv == NoEnv) |NAME|RootEnv = NewEnv ();
+#define PreDefSym(_str,_sym) \
+	PreDefineSym (_str, _|NAME|IdentTerm, &_sym);
+#define PreDefKey(_str,_key) \
+	PreDefine(_str,_|NAME|IdentTerm,&_dummysym,|NAME|RootEnv,_key,&_dummybnd);
+#define PreDefSymKey(_str,_sym,_key) \
+	PreDefine(_str,_|NAME|IdentTerm,&_sym,|NAME|RootEnv,_key,&_dummybnd);
+#define PreDefBind(_str,_bnd) \
+	PreDefine (_str,_|NAME|IdentTerm,&_dummysym,|NAME|RootEnv,NewKey(),&_bnd);
+#define PreDefKeyBind(_str,_key,_bnd) \
+	PreDefine (_str,_|NAME|IdentTerm,&_dummysym,|NAME|RootEnv,_key,&_bnd);
+#define PreDefSymKeyBind(_str,_sym,_key,_bnd) \
+	PreDefine (_str,_|NAME|IdentTerm,|NAME|RootEnv,&_sym,_key,&_bnd);
+#include "|NAME|PreDefId.d.h"
+#undef PreDefSym
+#undef PreDefKey
+#undef PreDefSymKey
+#undef PreDefBind
+#undef PreDefKeyBind
+#undef PreDefSymKeyBind
+}
+~}
+
+~O~<|NAME|PreDefId.head~>~{
+#include "|NAME|PreDefId.h"
+~}
+
+~O~<|NAME|PreDefId.init~>~{
+|NAME|InitPreDef ();
+~}
+
+~O~<|NAME|PreDefId.pdl~>~{
+#define PreDefSym(_str,_sym) 
+#define PreDefKey(_str,_key) _key;
+#define PreDefSymKey(_str,_sym,_key) _key;
+#define PreDefBind(_str,_bnd) 
+#define PreDefKeyBind(_str,_key,_bnd) _key;
+#define PreDefSymKeyBind(_str,_sym,_key,_bnd) _key;
+#include "|FILE|"
+#undef PreDefBind
+#undef PreDefKeyBind
+#undef PreDefSymKeyBind
+#undef PreDefSym
+#undef PreDefKey
+#undef PreDefSymKey
+~}

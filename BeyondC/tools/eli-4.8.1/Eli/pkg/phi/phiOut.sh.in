@@ -1,0 +1,103 @@
+#!/bin/sh
+# $Id: phiOut.sh.in,v 1.2 2002/05/08 15:01:05 waite Exp $
+# Copyright, 1990, The Regents of the University of Colorado
+# 
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+ODIN_RUNDIR=`pwd`;
+HEAD=$1;shift; INIT=$1;shift; FINL=$1;shift; PHI=$1;shift
+GEN=phiOut;
+mkdir $GEN;
+
+# EXEC (phiOut.sh) (:LIST :extract=:head :ls) (:LIST :extract=:init :ls) 
+#                  (:LIST :extract=:finl :ls) (:LIST :extract=:phi :ls)
+#    NEEDS (:LIST :extract=:head) (:LIST :extract=:init) 
+#          (:LIST :extract=:finl) (:LIST :extract=:phi)
+#  => (:phi_out);
+#    :phiOut 'Include files for module intitiation/termination' => :DERIVED-DIRECTORY;
+
+SED=$ODINCACHE/PKGS/skeleton/sed.exe
+
+cat $HEAD > HEAD.h
+cat $INIT > INIT.h
+cat $FINL > FINL.h
+
+# compose files from phi specifications:
+# -------------------------------------
+
+if test -s "$PHI"
+then
+	# translate list of phi spec file names to list of cat commands:
+
+	$SED -e '#n
+h
+/phi\..*phi$/{
+	s,^.*\.\([^\.]*\)\.phi\..*$,\1,
+	b weiter
+}
+s,^.*\.\([^\.]*\)\.phi$,\1,
+:weiter
+x
+G
+s,^\(.*\)\n\(.*\)$,\1 \2,' $PHI | \
+	@AWK@ ' { fn=$2".h" ; print $1 >> fn } '
+fi
+
+for genfile in `ls *.h`
+do
+	name=`echo $genfile|$SED 'y/abcdefghijklmnopqrstuvwxyz./ABCDEFGHIJKLMNOPQRSTUVWXYZ_/'`
+	counter=1
+	destlines=0
+	for f in `cat $genfile`
+	do
+		echo '#ifndef '$name$counter >> $GEN/$genfile
+		echo '#define '$name$counter >> $GEN/$genfile
+		cat $f >> $GEN/$genfile
+		echo '#endif' >> $GEN/$genfile
+		echo '' >> $GEN/$genfile
+		counter=`expr $counter + 1`
+
+		lines=`$SED -n -e '$=' $f`
+		lines=`expr $lines + 5`
+		echo $genfile `expr $destlines + 3` 0 `expr $destlines + $lines` 0 $f 1 1 0 >> phiMap
+		destlines=`expr $destlines + $lines - 1`
+	done
+done
+
+if test ! -s phiMap
+then
+	cp /dev/null phiMap
+fi
+
+# Support for outdated specification files.
+
+if test ! -s $GEN/HEAD.h
+then
+	echo "/* HEAD.h: header include file */" >$GEN/HEAD.h
+fi
+
+if test ! -s $GEN/INIT.h
+then
+	echo "/* INIT.h: initialization include file */" > $GEN/INIT.h
+fi
+
+if test ! -s $GEN/FINL.h
+then
+	echo "/* FINL.h: finalization include file */" > $GEN/FINL.h
+fi
+
+exit 0

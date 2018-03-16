@@ -1,0 +1,868 @@
+\input texinfo
+@setchapternewpage odd
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename gorto
+@setchapternewpage odd
+@settitle GORTO - Graphical Order Tool 
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id $
+
+@titlepage
+@sp 2
+@center @titlefont{GORTO}
+@sp 2
+@center @titlefont{Graphical Dependency Analyzer}
+@sp 1
+@center @titlefont{User Manual}
+@sp 4
+@center V. Niepel
+@center K.J. Prott
+@center U. Kastens
+@sp 2
+@center University of Paderborn
+@center D-4790 Paderborn
+@center F.R.G
+@sp 4
+@center $Revision: 4.5 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , ,(dir)
+@ifinfo
+@center GORTO - Graphical Dependency Analyzer
+@center User Manual
+@sp 1
+@center V. Niepel
+@center K.J. Prott
+@center U. Kastens
+@sp 2
+@menu
+* Introduction::
+* Using GORTO within ELI::
+* Usage::
+* Layout Adaptation::
+
+* Index::
+@end menu
+@end ifinfo
+
+@c ============================================================================
+@node Introduction, Using GORTO within ELI, top, top    
+@comment  node-name,  next,  previous,  up
+@chapter Introduction
+
+This is a user manual for the tool GORTO. GORTO is
+a graphical tool for analysis and modification of dependencies in attribute
+grammars. It is part of the LIGA system.
+The graphical representation requires execution under the X-Window system. 
+GORTO offers the following support for attribute grammar development.
+
+@itemize
+@item  
+   Graphical representation and analysis of the dependency graphs for productions and symbols.
+@item  
+   Graphical representation and modification of partitions.
+@item  
+   Graphical representation and modification of visit-sequences.
+@end itemize
+
+GORTO has a graphical user interface in which the mentioned information
+is represented. Interactive modification by the user are possible. The layout
+of the presentation can be influenced by the user.
+
+After a short description of the user interface, we first describe the usage
+of the tool. the description is related to the standard
+configuration. Afterwards we discuss the possibilities of modifying the user
+interface for individual partiality.
+
+@c ============================================================================
+@node Using GORTO within ELI, Usage, Introduction, top    
+@comment  node-name,  next,  previous,  up
+@chapter Using GORTO within ELI
+
+@findex CYCLE IN INDUCED GRAPHS
+@findex CYCLE IN PARTITIONED GRAPHS
+@findex GORTO.ctl
+It is recommended to use GORTO in order to trace cyclic attribute
+dependencies which are indicated by the ORDER pass of LIGA
+(message "CYCLE IN INDUCED GRAPHS"). Also in the case that ORDER
+fails to compute an evaluation order (message "CYCLE IN PARTITIONED GRAPHS")
+GORTO can be used to analyze the reason and to arrange the
+dependencies differently. The results of such modifications are
+described by ARRANGE options and made available in a file GORTO.ctl.
+GORTO may be called for a correct attribute
+grammar as well, in order to study the dependencies.
+If the attribute grammar is incomplete,
+GORTO does not produce any information additional to that given by ORDER.
+
+GORTO is started by the following derivation
+@example
+   <file>.specs:gorto
+@end example
+After completion of the interactive GORTO session, the results
+(if any) are stored in the file GORTO.ctl in the current working
+directory of the user. If there already exists a file with that
+@findex GORTO.bak
+name, it is saved with the name GORTO.bak.
+If GORTO.ctl is not yet part of the specifications, its name
+should be added in a .specs file in order to use the results
+of the GORTO session. Eli recognizes if GORTO.ctl has been modified
+by a GORTO session, and restarts the necessary derivation steps.
+GORTO itself can be restarted even if no specification has been
+modified. .ctl options for ORDER are recognized by GORTO too.
+They are passed on into GORTO.ctl.
+
+@findex X-Windows (X11)
+@findex DISPLAY
+An interactive GORTO session requires that Eli is started under
+X-Windows (X11). The environment variable DISPLAY must be set.
+
+@c ==========================================================================
+@node Usage, Layout Adaptation, Using GORTO within ELI, top    
+@comment  node-name,  next,  previous,  up
+@chapter Usage
+
+@menu
+* The windows of GORTO::
+* The Main Window::
+* Description of Symbols and Dependencies::
+* Productions::
+* Symbols::
+* Visit-sequences::
+@end menu
+
+@c @section{Starting the Tool} 
+@c 
+@c When running GORTO it accepts a relatively large number of options which can
+@c be divided into two classes: GORTO-specific options and standard-options of
+@c the X Toolkit. The standard options of the X Toolkit include for example -rv,
+@c -background, -foreground, -borderwidth, -display and -xrm. These are
+@c described in the documentation of X Toolkit.  Additionally the following
+@c specific options exist:
+@c 
+@c @table @code
+@c @item -input file
+@c    Name of the IDL-input file. This has to be the Eli derivation exp_idl.
+@c @item -output file 
+@c    Name of the IDL-output file. This output file is equivalent to the Eli
+@c    derivation ord_idl.
+@c @item -lido file 
+@c    Name of the LIDO-sourcetext. It is only possible to declarate one single 
+@c    file. Distribution in several separate LIDO-files is not supported yet.
+@c @item -lcl file 
+@c    Name of the LCL-output file. When leaving the tool the active 
+@c    arrange-options are written to this file in form of LCL. The old contents 
+@c    of this file will be deleted.
+@c @end table
+@c 
+
+
+@node The windows of GORTO, The main window, Usage, Usage    
+@comment  node-name,  next,  previous,  up
+@section The windows of GORTO
+
+@iftex
+@ifclear html
+@sp 1 
+@center @image{struktur,432 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/struktur.gif" ALT="" WIDTH=508 HEIGHT=356>
+@end ifhtml
+@end ifset
+
+@noindent
+Figure 1: The Graphical User Interface
+
+The user interface of GORTO is composed of several distinct windows, which
+can be manipulated in the same manner as any other window. A view over the
+different windows is given in Figure 1. (While reading this documentation we
+suggest to call GORTO under ELI to practice what is described in the
+following.) The following types of windows are offered:
+
+@table @r
+@item Main window
+   The main window of GORTO is divided in several parts and includes the 
+   possibility of activating several menus and opening symbol and production
+   windows. The actual status of the tool is announced in the main window.
+@item Symbols  
+   Each Symbol-window contains the dependency graphs for one symbol. The 
+   dependencies between attributes are described by arrows and the partitions 
+   are implicitly described by the graphical layout arrangement of the 
+   attributes
+@item Productions  
+   Production windows contain the dependency graph for one production each. The 
+   dependencies between attributes are also described by arrows.
+@item Visit-Sequences  
+   Visit-Sequence windows include the visit-sequence for one production 
+   each. In one visit-sequence the lifetime of those attribute 
+   instances are described which appear defining in the corresponding
+   production.
+
+@end table
+
+LIDO-Source text The source text in LIDO for this AG. 
+
+@node The Main Window, Description of Symbols and Dependencies, The windows of GORTO, Usage    
+@comment  node-name,  next,  previous,  up
+@section The Main Window
+
+@findex Main Window
+The main window is horizontally divided in several parts and allows mainly the
+opening of production and symbol windows. Furthermore different menus can be
+activated in the main window.
+
+@noindent @strong{Main Menu and Status Display}
+
+@findex Main Menu
+@findex Status Display
+The upper part of the main window contains the
+main menu and an overall status indication. Depending on the situation the
+status indication informs either about the actual state of a running 
+dependency analysis or about the success of the last dependency analysis. 
+The main menu allows the following operations:
+
+`@b{Lido window}' Opening and closing source text windows.
+
+`@b{Close all windows}' Close all opened windows.
+
+`@b{New computation}' Start a new dependency analysis.
+
+`@b{Hide attribute}' Hiding attributes.
+
+`@b{Unhide attribute}' Show hidden attributes.
+
+`@b{Show Partitioned Dependencies}' Show partitioned dependencies.
+
+`@b{Leave GORTO}' Leaving GORTO.
+
+@noindent @strong{Selection of Productions and Symbols}
+
+Another part of the main window allows the selection of productions and
+symbols. Gorto indicates two lists of the names of
+productions and of symbols. The selection of a name by pressing the mouse-button
+opens the according window. The amount of listed productions and symbols can
+be influenced with the switchboard arranged above. The switches have the
+following significance:
+
+@table @b
+@item Cyclic
+   Productions or symbols with cyclic dependency graphs.
+@item Arranged
+   Productions or symbols with dependencies added manually.
+@item Changed
+   Productions and symbols changed after the last computation.
+@item Visit-Sequence
+   Productions a visit sequence has been computed for.
+@item Partitioned
+   Symbols for which a partition has been computed
+@end table
+
+The total list of productions and symbols is determined as a union of
+all groups activated with the switches.
+
+@noindent @strong{Strategy Menus}
+
+@findex Strategy Menus
+For computation of visit-sequences and partitions Order offers different
+strategies, which can be activated with the according menu in the main window.
+Therefore two menus exist:
+
+
+@table @b
+@item Topological Strategy
+   Strategy to compute visit sequences.
+@item Partition Strategy
+   Strategy to compute partitions.
+@end table
+
+The menu-points allow the selection of a specific strategy. After selecting
+such a menu-point GORTO starts automatically a new dependency analysis.
+
+@noindent @strong{Hiding of attributes}
+
+@findex Hiding of attributes
+It is possible to hide several attributes in the representation of production
+graphs via the main menu. Hidden attributes are not visable any more in the
+production graphs to save space on the screen and get a better overview.
+They still are considered in all internal computations.
+
+After selection of the menu point '@b{Hide attribute}' a dialog window
+appears, in which the desired attribute name has to be entered. Regular terms
+can be used in the defining form of regexp(3). The input can be confirmed with
+'@b{Confirm}' or canceled with '@b{Cancel}'. When confirming all selected
+attributes are hidden no matter to which symbol they belong. Additionally with
+the commands '@b{Including, Constituent}' and '@b{Chain}' it is possible to
+hide the attributes generated by LIGA when expanding the corresponding LIDO
+notations.
+
+With the menu point '@b{Unhide attribute}' attributes can be reinserted with the
+same regulations. The structure of the dialog window to insert attributes is
+the same as it is for hiding attributes.
+
+@node Description of Symbols and Dependencies, Productions, The Main Window, Usage      
+@comment  node-name,  next,  previous,  up
+@section Description of Symbols and Dependencies
+
+First the general concepts of descriptions of symbols and dependencies shall be
+explained.
+
+@noindent @strong{Description of symbols}
+
+Symbols are described by their names and their attributes. The
+attributes are arranged under the symbol name and sorted in the sequence of
+the computed partitions. Additionally the synthesized attributes are moved
+right with respect to the inherited attributes, so that the layout of all
+attributes implicitly describe the computed partition.
+
+If in case of cyclic dependencies no partitions can be computed, the sequence
+of the description of course does not represent a partition. In this case the inherited
+attributes are located before the synthesized attributes.
+
+@sp 2
+@noindent @strong{Description of dependencies}
+
+Dependencies are described by an arrow, which is located between both
+involved attributes pointing the dependent attribute. To mark
+different origins of dependencies the following different lines are used:
+
+@table @b
+@item straight line
+   direct dependency
+@item dashed line
+   caused by induction of dependencies
+@item doted line
+   caused by partitioning
+@end table
+
+@node Productions, Symbols, Description of Symbols and Dependencies, Usage     
+@comment  node-name,  next,  previous,  up
+@section Productions
+
+A production window shows the dependency graph for a production as well as
+the information concerning the status of the production. The described
+dependencies can be traced interactively.
+
+@noindent @strong{Status indication}
+
+The upper part of the production window contains information about the actual
+status of this production. Every single entry has the same meaning as the
+corresponding button in the main window.
+
+@noindent @strong{Layout of symbols and dependencies}
+
+Additionally to the different types of lines described above the different
+types of dependencies are furthermore distinguished by their graphical
+location. The dependency arrows are located either outside at a single symbol
+or inside between the symbols. The meaning of this layout is as follows:
+
+@table @b
+@item Outside
+   Dependencies which originate from another context
+@item Inside
+   Dependencies which originate from this production
+@end table
+
+@page
+@noindent @strong{Tracing Dependencies}
+
+@iftex
+@ifclear html
+@sp 1 
+@center @image{verfolgung,432 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/verfolgung.gif" ALT="" WIDTH=508 HEIGHT=356>
+@end ifhtml
+@end ifset
+
+@noindent
+Figure 2: Tracing Dependencies
+
+@findex Tracing Dependencies
+The origin of the shown dependencies can be traced interactively 
+by selecting an arrow with the mouse-button. The origin of
+this dependency is shown as a directed path or it is shown directly in the
+source-text. In case of the directed path a new window will be opened in which
+the dependencies are marked on their path with thick lines. The selected
+dependency is then marked thick and 
+dashed. Both ways of indication are described in Figure 2. There are three
+variants of starting a dependency trace which are described in the
+following with the corresponding mouse-buttons in brackets:
+
+@table @b
+@item FOLLOW <Shift-Button1>
+   The selected dependency is traced without consideration of dependencies 
+   which might be marked.
+@item FOLLOW-MARKED (Button 1)
+   If the dependency had been marked by a previous trace, the selected
+   dependency will be traced now. The trace of non-marked
+   dependencies is therefore omitted.
+@item FOLLOW-AND-CLOSE (Ctrl-Button 1) 
+   The selected dependency will be traced in any case as with the
+   variant FOLLOW. Additionally all windows are automatically closed which are
+   not involved in this trace.
+@end table
+
+@noindent @strong{The Production Menu}
+
+@findex Production Menu
+The production menu can  be activated by  pressing Button3  and allows the
+following operations:
+
+@table @b
+@item Close this production
+   Close this production window
+@item Close all productions
+   Close all production windows
+@item Follow all marks
+   Automatic tracing of marked dependencies
+@item Show visit-sequence 
+   Open the corresponding visit sequence window
+@end table
+
+@node Symbols, Visit-sequences, Productions, Usage    
+@comment  node-name,  next,  previous,  up
+@section Symbols
+
+A symbol-window shows the dependency graph of a symbol together with the
+affiliated status information. The shown dependency graphs can be
+traced and the computed partition of the symbol can be modified.
+
+@noindent @strong{Status Notification}
+
+The upper part of a symbol-window contains information about the actual status
+of the symbol. The entries have the same meaning as the
+corresponding buttons in the main window.
+
+@noindent @strong{Trace of Dependencies}
+
+@findex Trace of Dependencies
+The dependencies can be trace in symbol-windows in the same way as in
+production-windows. Again there are the three variants FOLLOW, FOLLOW-MARKED
+and FOLLOW-AND-CLOSE, which show the derivation of the selected dependencies
+as a directed path and open a new window, if necessary.
+
+@noindent @strong{Modification of Partitions}
+
+@findex Modification of Partitions
+@findex critical attributes
+GORTO divides the attributes of a symbol into two different classes: critical
+and non-critical attributes. Critical attributes are those attributes, which
+can't be moved to another partition without increasing the total number of
+partitions. Non-critical attributes can be moved, up to a certain extend,
+within the actual partitioning. The critical attributes are displayed in bold
+and italic, the non-critical attributes described in a normal font. GORTO
+offers three possibilities to modify a partition:
+
+@table @r
+@item Moving of a non-critical attribute   
+   First a non-critical attribute has to be selected with the mouse-button.
+   This attribute can be moved by selecting another partition of attributes of
+   the same class with button2. The attribute is then automatically fixed 
+   to the desired partition by insert onof two dependencies to 
+   critical attributes in the adjacent partitions.
+@item Adding a new partition 
+   Before or after the actual partitions a new partition can be added which
+   contains a selected attribute. Again the attribute has to be selected with
+   the mouse button. Afterwards the new partition can be added before or after
+   all of the the existing partitions by selecting an attribute of the first 
+   or the last partition with the Shift-Button2. The selected attribute will 
+   be used to produce a new dependency, which forces the computation of a 
+   new partition with the attribute selected first.
+@item Segmentation of existing partitions
+   An existing partition can be segmented into several partitions by `squeezing'
+   an attribute of another partition between the two attributes of the the
+   original partition. To do that, click on the attribute which has to be
+   `squeezed' in. Within the partition which shall be segmented both surrounding
+   attributes have to be selected. Both attributes are selected one by one by
+   pressing the Ctrl-Button2, first the attribute which shall proceed,
+   then the attribute which follows the new partition. If the respective
+   partition contains only two attributes, then it is not necessary to select
+   the second one. GORTO identifies it automatically.
+@end table
+
+A modification of the partition doesn't lead automatically to a completely new
+computation of all dependency graphs. The changes will be made only locally
+within the effected graphs. A completely new computation must be started
+manually using the main menu.
+
+@noindent @strong{The Symbol Menu}
+
+@findex Symbol Menu
+The symbol-menu can be activated by pressing the Button3 and allows the
+following operations:
+
+
+@table @r
+@item Close this symbol
+   Close the symbol window
+@item CLose all symbols
+   CLose all symbol windows
+@item Remove arranged dependencies
+   Remove all the added dependencies
+@item Force partition
+   Freeze the partition
+@item Select production
+   Select production
+@item Show last BnNF use
+@end table
+
+@node Visit-sequences, , Symbols, Usage    
+@comment  node-name,  next,  previous,  up
+@section Visit-sequences
+
+@findex visit-sequence
+A visit-sequence window can be activated by an operation of the
+production menu.
+shows the visit-sequences of a production together
+with the lifetimes of the attribute instances within this production.
+The visit-sequence can be modified within the frame of the certain restrictions.
+
+
+@page
+@noindent @strong{Description visit-sequences}
+
+A visit-sequence will be described by a sequence of operations which are
+located one below the other. The operations are described by a short text
+which contains several informations depending on the type of the operation. In
+case of more than one leave from root-symbol of the production
+each single visit is separated and terminated with a
+leave-operation.
+
+The lifetime of all attribute instances which are computed in the described
+visit-sequence is shown in form of a dependency. This dependency starts with
+the computation and ends with the last use of the attribute value.
+
+@noindent @strong{Modification of visit-sequences}
+
+As mentioned earlier the described visit-sequence can be modified within the
+frame of the remaining freedom. 
+@findex Modification visit-sequences
+When selecting an operation by pressing the mouse-button, the area in which
+this operation can be moved without any conflicts is shown. The operation can
+be moved by pressing Button2 at the new position (similar to moving in
+partitions). Operations which can't be moved are printed in bold and italic,
+like the critical attributes in dependency graphs.
+
+@noindent @strong{The Visit-sequence Menu}
+
+@findex Visit-sequence Menu
+The visit-sequence-menu can be activated by pressing Button3 and allows the
+following operations:
+
+
+@table @b
+@item Close this visit-sequence
+@item Close all visit sequences
+@item Don't show last attribute use
+@item Fix position of this element
+@item Remove arranged dependencies
+@end table
+
+@c ==========================================================================
+@node Layout Adaptation, Index, Usage, top    
+@comment  node-name,  next,  previous,  up
+@chapter Layout Adaptation
+
+The following describes the possibilities of adaptation of GORTO to personal
+preferennces. The adaptation of GORTO is done by the resource mechanism of the
+X-Window-System, which can't be explained in detail here. In this paper only
+specific details of the implementation of GORTO is considered. For common
+explanations of resources see the original literature.
+
+@menu
+* Resources of GORTO::
+* Internal Interface Structure::
+* Graph Widget::
+
+@end menu
+
+@node Resources of GORTO, Internal Interface Structure, Layout Adaptation, Layout Adaptation    
+@comment  node-name,  next,  previous,  up
+@section Resources of GORTO
+
+GORTO uses several resources which are not related to any special widget. They
+rather have the status of globally used resources and are specified in the form
+of Gorto.Name. These are the following resources:
+
+@noindent @strong{Common adjustments}
+
+@example
+Name              Class         Default    Meaning
+----------------------------------------------------------------------------
+
+sortProdList      SortList       False     sorting production lists 
+sortSymbolList    SortList       False     sorting symbol lists 
+leftSymbol        LeftSymbol     False     imaging symbol graphs 
+showPartDeps      ShowPartDeps   False     showing partitioned dependencies 
+makeTitleBars     MakeTitleBars  False     producing titelspaces 
+wmPushDown        WmPushDown     0         Pushdown of Window Manager 
+@end example
+
+@noindent @strong{Filenames}
+
+@example
+Name        Class         Meaning
+-------------------------------------------------
+lidoFile    LidoFile      LIDO-Input-File 
+inputFile   InputFile     exp_idl-Input-File
+outputFile  OutputFile    ord_idl-Output-File 
+lclFile     LCLFile       LCL-Output-File 
+@end example
+
+@page
+@noindent @strong{Layout of dependency graphs}
+
+@example
+Name               Class      Default   Meaning
+-----------------------------------------------------------------------
+boldFont           Font         fixed   font for symbol names 
+attributeFont      Font         fixed   font for non-critical attributes 
+criticalFont       Font         fixed   font for critical attributes 
+textPadding        Padding          2   free pixel around strings 
+synthesizedIndent  Indent          15   indentation of synthesized attributes 
+symbolvPadding     Padding         10   vertical space between symbols 
+symbolhPadding     Padding          5   horizontal space between symbols 
+arrowWidth         ArrowWidth       3   width of arrows 
+arrowHeight        ArrowHeight      9   hight of arrows 
+arrowLength        ArrowLength     30   minimal length of arrows 
+depColumnWidth     DepColumnWidth   3   width of column of dependencies 
+depFaseLength      DepFaseLength    5   length of bends in dependencies 
+selectWidth        SelectWidth      3   selection width of dependencies 
+@end example
+
+@noindent @strong{Colours}
+
+@example
+Name                        Used for
+---------------------------------------------------------
+directDepColor              direct dependencies 
+inducedDepColor             induced dependencies 
+arrangedDepColor            added dependencies 
+arrangedInducedDepColor     induced added dependencies 
+partitionedDepColor          partitioned dependencies 
+inducedPartitionedDepColor   induced partitioned dependencies 
+attrColor                    attributes 
+includingAttrColor           attributes produced by INCLUDING 
+constituentAttrColor         attributes produced by CONSTITUENT(S) 
+chainAttrColor               attribute produced by CHAIN 
+symbolColor                  symbol names 
+visitColor                   VISIT-Operations 
+conditionColor               CONDITION-Operations 
+lineColor                    frame resp. cutlines 
+@end example
+
+@page
+@noindent @strong{Strings}
+
+@example
+Name                Default 
+----------------------------------------------
+emptyListString     (empty) 
+directRuleState     direct rules 
+directSymbolState   direct symbols 
+optionState         order options 
+transitiveState     transitive graphs 
+inducedState        induced graphs 
+arrangeOptionState  arrange option 
+arrangedState       arranged graphs 
+partitionState      partitions 
+partitionedState    partitioned graphs 
+visitSeqState       visit sequences 
+lifetimeState       lifetimes 
+infoState           display information 
+hideState           hide attribute 
+unhideState         unhide attribute 
+directDisplay       direct display 
+transitiveDisplay   transitive display 
+inducedDisplay      induced display 
+arrangedDisplay     arranged display 
+partDisplay         partition display 
+visitSeqDisplay     visit sequence display 
+constructIDLState   idl structure 
+ouputState          output files 
+noRecomputeString   not necessary 
+ruleString          rule 
+symbolString        symbol 
+transferString      transfer dependency 
+includingString     including dependency 
+constituentString   constituent dependency 
+chainString         chain dependency 
+unknownDepString    unknown dependency 
+cyclicString        cyclic 
+arrangedString      arranged 
+changedString       changed 
+partitionedString   partitioned 
+visitSeqString      visit-sequence 
+forcedString        forced 
+cycleMessage        would yield cycle 
+noBmNFMessage       no BmNF occurrence 
+@end example
+
+@page
+@c -------------------------------------------------------------------------
+@node Internal Interface Structure, Graph Widget, Resources of GORTO, Layout Adaptation    
+@comment  node-name,  next,  previous,  up
+@section Internal Interface Structure
+
+To allow sensible specification of resources the following internal interface
+structure of GORTO is given. The widgets used by GORTO are Athena widgets of
+the X Version 11, Release 4. The main window of GORTO shows the following
+widget structure:
+
+@ifinfo
+(Due to info limitations
+the figures had to be left out. See the printed form (but not ascii print)
+of this manual.)
+@end ifinfo
+
+@iftex
+@ifclear html
+@center @image{hierarchy,432 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/hierarchy.gif" ALT="[Hierarchy]" WIDTH=574 HEIGHT=271>
+@end ifhtml
+@end ifset
+
+Structure of Rule- and Symbol windows:
+
+@iftex
+@ifclear html
+@center @image{rule,100 pt,,} @image{symbol,100 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/rule.gif" ALT="[Rule]">
+<IMG SRC="gifs/symbol.gif" ALT="[Symbol]">
+@end ifhtml
+@end ifset
+
+Structure of the window to select the according rules in symbol
+windows:
+
+@iftex
+@ifclear html
+@center @image{symbol-rule,200 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/symbol-rule.gif" ALT="[Window structure]">
+@end ifhtml
+@end ifset
+
+Structure of the dialogue window to hide attributes:
+
+@iftex
+@ifclear html
+@center @image{hide,300 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/hide.gif" ALT="[hide attributes]" WIDTH=404 HEIGHT=180>
+@end ifhtml
+@end ifset
+
+Structure of visit-sequences, Lido-source-text and announcements:
+
+@iftex
+@ifclear html
+@center @image{visitseq,50 pt,,} @image{lidow,50 pt,,} @image{message,50 pt,,}
+@end ifclear
+@end iftex
+@ifset html
+@ifhtml
+<IMG SRC="gifs/visitseq.gif" ALT="[visit sequences]">
+<IMG SRC="gifs/lidow.gif" ALT="[Lido Source-text]">
+<IMG SRC="gifs/message.gif" ALT="[Announcement]">
+@end ifhtml
+@end ifset
+
+@node Graph Widget, , Internal Interface Structure, Layout Adaptation    
+@comment  node-name,  next,  previous,  up
+@section Graph Widget
+
+The graph widget is a widget adapted to GORTO. It is used to describe
+different dependency graphs. It uses the widget class Core and doesn't provide
+new resources for the adaptation of the graph widget. The adaptation of graph
+widgets is done by certain actions at certain events. This binding up is done
+with the so called binding translations. For their description see the
+original literature.
+
+Two actions are available: menu-popup() and select(). The action menu-popup()
+is used to call the menus within the dependency graphs and expects the
+internal name of a menu as a parameter. The action select() is used for
+adaptation of mouse and keyboard handling within dependency graphs. It accepts
+the following parameters which stand for user-commands described above:
+
+@example
+Name              Objects              possible contexts 
+-------------------------------------------------------------
+FOLLOW            dependencies         symbol, rules 
+FOLLOW-AND-CLOSE  dependencies         symbol, rules 
+FOLLOW-MARKED     dependencies         symbol, rules 
+REMOVE            added  dependencies  symbol, rules 
+HIDE              attributes           symbols, rules, visit-sequences 
+UNHIDE            attribute            symbols, visit-sequences 
+MOVE              attribute            symbols, visit-sequences 
+SPLIT-PARTITION   attributes           symbols 
+APPEND-PARTITION  attributes           symbols 
+@end example
+
+The action select() is normally bound to the use of the mouse. Up to three
+parameters can be called to state the action to be executed depending to the
+selected object. If more than one parameter is given for the same object, only
+the last action will be executed the others are ignored. The default paramters
+for the graph-widget is the following:
+
+@example
+<Btn3Down>: menu-popup(mainMenu) \n\
+<BtnDown>:  select(FOLLOW) \n
+@end example
+
+@comment *********************************************************************
+
+
+
+@node Index, , Layout Adaptation, top
+@unnumbered Index
+
+@printindex fn
+
+@contents
+@bye
+
+@bye

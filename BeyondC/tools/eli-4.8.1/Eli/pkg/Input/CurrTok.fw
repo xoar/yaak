@@ -1,0 +1,31 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<CurrTok.head@>@{
+#include "CurrTok.h"
+@}
+
+@O@<CurrTok.h@>@{
+#ifndef CURRTOK_H
+#define CURRTOK_H
+
+extern char *GetCurrTok ();
+
+#endif
+@}
+
+@O@<CurrTok.c@>@{
+#include "source.h"
+#include "csm.h"
+#include "gla.h"
+#include "obstack.h"
+#include "CurrTok.h"
+
+extern char *GetCurrTok ();
+char *GetCurrTok ()
+{       char *tmp;
+tmp = obstack_copy0(Csm_obstk, TokenStart, TokenEnd-TokenStart);
+/* no deallocation ??? */
+return tmp;
+}
+@}

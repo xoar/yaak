@@ -1,0 +1,26 @@
+/In CaseTbl, char .*(.*) is not a token/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Parse stack overflow/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+/Syntax error/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (clp)grammar./
+	p
+	d
+}
+/Parsing resumed here/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (clp)grammar./
+	p
+	d
+}
+/Too many ERRORs + FATALs/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./

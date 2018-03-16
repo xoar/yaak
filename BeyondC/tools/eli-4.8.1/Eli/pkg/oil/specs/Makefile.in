@@ -1,0 +1,20 @@
+# $Id: Makefile.in,v 1.4 2009/08/03 19:16:19 profw Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/oil/specs
+SRC	=
+AUX	= Makefile Makefile.in Odinfile Build.fw Code.fw Language.fw
+CMD	=
+EXE	= oil.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+oil.exe:	Odinfile Build.fw Code.fw Language.fw
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE 'oil.exe'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done

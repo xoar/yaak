@@ -1,0 +1,12 @@
+/*
+ * $Id: idn.specs,v 1.5 2010/02/26 17:50:56 profw Exp $
+ * Identifier module.
+ * Copyright (c) 1991, The Regents of the University of Colorado
+ */
+
+idn.save.eta
+idn.reqmod
+$/Input/err.specs
+$/Adt/csm.specs
+$/Adt/obstack.specs
+$/Adt/obsave.specs

@@ -1,0 +1,940 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename output
+@setchapternewpage odd
+@settitle Tasks related to generating output
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: output.tnf,v 1.7 2002/05/28 07:29:54 peter Exp peter $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Tasks related to generating output}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.7 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@chapheading Specification Module Library
+@chapheading Generating Output
+@end ifinfo
+
+@findex Generating Output
+@findex Library @code{Output}
+@ifclear html
+This library contains the following modules:
+@end ifclear
+@menu 
+* LeafPtg::     PTG Output for Leaf Nodes
+* PtgCommon::   Commonly used Output patterns for PTG
+* Indent::      Indentation for PTG Output
+* OutStr::      Output String Conversion
+* PrettyPrint:: Pretty Printing for PTG Output
+* BlockPrint::  Typesetting for Block-Structured Output
+* StringOut::   Process PTG-Output into string buffers
+* Separator::   Introducing Separators in PTG Output
+* Index::       Index
+@end menu
+@iftex
+@ifclear html
+@table @code
+@item LeafPtg
+PTG Output for Leaf Nodes
+@item PtgCommon
+Commonly used Output patterns for PTG
+@item Indent
+Indentation for PTG Output
+@item OutStr
+Output String Conversion
+@item PrettyPrint
+PrettyPrinting for PTG Output
+@item BlockPrint
+Typesetting for Block-Structured Output
+@item StringOut
+Process PTG-Output into string buffers
+@item Separator
+Introducing Separators in PTG Output
+@end table
+@end ifclear
+@end iftex
+
+@comment =====================================
+@node LeafPtg, PtgCommon, , top
+@findex Module @code{LeafPtg}
+@findex attribute @code{Sym}
+@chapter PTG Output for Leaf Nodes
+
+The module @code{LeafPtg} provides some standard translations of terminal
+input strings into output strings. 
+They may be attached to nonterminal
+symbols having an @code{int} valued attribute @code{Sym} which represents a
+string, an identifier or a number. That symbol usually derives to a
+terminal symbol which is used to compute the value of the 
+@code{Sym} attribute.
+
+The module does not have generic parameters.
+It is used by writing
+@example
+   $/Output/LeafPtg.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+The computations of this module yield an attribute @code{Ptg}
+of type @code{PTGNode} representing the desired output string. 
+It may be used to compose more complex output structures.
+
+The required computation of the @code{Sym} attribute can be
+specified by (if not already done for other purposes):
+@example
+   ATTR Sym: int;
+   SYMBOL T COMPUTE SYNT.Sym = TERM; END;
+@end example
+@noindent
+
+There are the following symbol roles for different output representations:
+
+@example
+   SYMBOL T INHERITS  IdPtg  END;
+@end example
+@noindent 
+@code{T.Sym} must refer to an identifier or a string then @code{T.Ptg}
+represents the same identifier or character sequence of the string in
+the output.
+
+@example
+   SYMBOL T INHERITS  CStringPtg  END;
+@end example
+@noindent 
+@code{T.Sym} must refer to a string, then @code{T.Ptg} represents its
+value as a C string literal.
+
+@example
+   SYMBOL T INHERITS  PStringPtg  END;
+@end example
+@noindent 
+@code{T.Sym} must refer to a string, then @code{T.Ptg} represents its
+value as a Pascal string literal.
+
+@example
+   SYMBOL T INHERITS  NumPtg  END;
+@end example
+@noindent 
+@code{T.Sym} must represent an integral number, then @code{T.Ptg}
+represents that number.
+
+The module uses some PTG patterns from the module @code{PtgCommon}.
+
+Please note that this module may become outdated in future Eli-Versions.
+In new specifications use the module @code{PtgCommon} directly to create
+PTG representations for terminal symbols. The module @code{PtgCommon} is
+described in the next section.
+
+@comment =====================================
+@node PtgCommon, Indent, LeafPtg, top
+@findex Module @code{PtgCommon}
+@chapter Commonly used Output patterns for PTG
+
+The module @code{PtgCommon} provides definitions for frequently used
+PTG patterns.  These patterns fall into two categories:
+The first one supports different types of output leaves; the
+second contains frequently used patterns for building sequences.
+
+The module does not have generic parameters.
+It is used by including
+@example
+   $/Output/PtgCommon.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+The module introduces PTG specifications for patterns named @code{Id,
+AsIs, CString, PString, CChar, Numb, Seq, CommaSeq}. When using
+@code{PtgCommon.fw} these names must
+not be specified in any other PTG specification.
+
+The functions provided by this module 
+may be used in @file{.lido} specifications or in
+@file{.c} files. To introduce prototypes for the defined functions, use
+the header file @code{PtgCommon.h}. 
+
+@menu
+* Frequently Used Patterns::    Frequently Used Patterns.
+* Useful Embedded Functions::   Useful Embedded Functions.
+* PtgCommon Examples::          Using PtgCommon-Patterns in Lido-Code.
+* Reproducing String Literals:: Special Situation when Using C String Literals.
+@end menu
+
+@node Frequently Used Patterns, Useful Embedded Functions, PtgCommon, PtgCommon
+@subsubheading Frequently Used Patterns
+
+@findex @code{PTGId()}
+The module @code{PtgCommon} provides useful and 
+commonly used PTG patterns, especially for the output of
+non-literal terminal symbols.
+They are documented
+both by showing their PTG pattern definitions and the signature of
+the resulting pattern functions:
+
+@table @code
+@findex Ptg-Pattern @code{Id}
+@findex @code{Id}, Ptg Pattern
+@item Pattern:            @code{Id: [PtgOutId $ int]}
+@itemx Resulting Function: @code{PTGNode PTGId(int id)}
+The argument @code{id} must refer to an identifier or a string stored in
+the character storage module of Eli, see @ref{storage,, Character Storage
+Module, lib, Library Reference Manual}. The PTG pattern produces the
+same identifier or character string in the output.
+
+@findex @code{PTGAsIs()}
+@findex Ptg-Pattern @code{AsIs}
+@findex @code{AsIs}, Ptg-Pattern
+@item Pattern:            @code{AsIs: $ string}
+@itemx Resulting Function: @code{PTGNode PTGAsIs(char *string)}
+The PTG pattern produces the specified argument @code{string} in the output.
+The character string is not copied, only the pointer is.
+
+@findex @code{PTGNumb()}
+@findex Ptg-Pattern @code{Numb}
+@findex @code{Numb}, Ptg-Pattern
+@item Pattern:            @code{Numb: $ int}
+@itemx Resulting Function: @code{PTGNode PTGNumb(int numb)}
+The PTG pattern produces the given integral number.
+
+@findex @code{PTGCString()}
+@findex @code{PTGCStringId}
+@findex Ptg-Pattern @code{CString}
+@findex @code{CString}, Ptg-Pattern
+@item Pattern:            @code{CString: [CPtgOutstr $ string]}
+@itemx Resulting Function: @code{PTGNode PTGCString(char *string)}
+@itemx and                 @code{PTGNode PTGCStringId(int id)}
+The argument is a string.
+The PTG pattern function produces the same character string 
+quoted according to the rules of the C language.
+@code{PTGCStringId} is macro based on @code{PTGCString}.
+It takes an index into the character storage module of
+Eli, see 
+@ref{storage,, Character Storage Module, lib, Library Reference Manual}.
+It produces the string stored there 
+quoted according to the rules of the C language..
+
+
+@findex @code{PTGPString()}
+@findex @code{PTGPStringId}
+@findex Ptg-Pattern @code{PString}
+@findex @code{PString}, Ptg-Pattern
+@item Pattern:            @code{PString: [PPtgOutstr $ string]}
+@itemx Resulting Function: @code{PTGNode PTGPString(char *string)}
+@itemx and                 @code{PTGNode PTGPStringId(int id)}
+The argument is a string.
+The PTG pattern function produces the same character string 
+quoted according to the rules of the Pascal language.
+@code{PTGPStringId} is macro based on @code{PTGPString}.
+It takes an index into the character storage module of
+Eli, see @ref{storage,, Character Storage Module, lib, Library Reference
+Manual}. It produces the string stored there 
+quoted according to the rules of the Pascal language..
+
+@findex @code{PTGCChar()}
+@findex Ptg-Pattern @code{CChar}
+@findex @code{CChar}, Ptg-Pattern
+@item  Pattern:            @code{CChar: [CPtgOutchar $ int]}
+@itemx Resulting Function: @code{PTGNode PTGCChar(int c)}
+The PTG pattern produces the specified value as C character literal.
+
+@findex Ptg-Pattern @code{Seq}
+@findex @code{Seq}, Ptg-Pattern
+@item  Pattern:            @code{Seq: $ $}
+@itemx Resulting Function: @code{PTGNode PTGPSeq(PTGNode, PTGNode)}
+Takes two arguments and yields a new node that prints the concatenation
+of the given patterns.
+
+@findex Ptg-Pattern @code{CommaSeq}
+@findex @code{CommaSeq}, Ptg-Pattern.
+@item Pattern:            @code{CommaSeq: $ @{ ", " @} $}
+@itemx Resulting Function: @code{PTGNode PTGPCommaSeq(PTGNode, PTGNode)}
+Takes two arguments and yields their concatenation
+separated by a comma. By enclosing the separator
+with braces, it is assured that a comma will be printed, only if none of the
+arguments refers to the predefined value @code{PTGNULL} that
+yields an empty output. This makes the pattern well suited to be used
+in conjunction with the @code{CONSTITUENTS} construct. 
+@xref{Optional,, Optional Parts in Patterns,ptg, Pattern-based text generator}, for details.
+
+@findex Ptg-Pattern @code{Eol}
+@findex @code{Eol}, Ptg-Pattern.
+@item Pattern:            @code{Eol: $ "\n"}
+@itemx Resulting Function: @code{PTGNode PTGEol(PTGNode)}
+This pattern attaches a newline at the end of the given text. 
+Note that the 
+PTG output functions do not automatically put a newline at the end of the output.
+@end table
+
+@node Useful Embedded Functions, PtgCommon Examples, Frequently Used Patterns, PtgCommon
+@subsubheading Useful Embedded Functions
+
+The functions embedded in the PTG patterns defined in
+@code{PTGCommon.fw} (@xref{Frequently Used Patterns}) might also be useful
+in user defined patterns. These functions are:
+
+@table @code
+@findex @code{PtgOutId}
+@item @code{void PtgOutId (PTG_OUTPUT_FILE fs, int c);}
+takes an index into the character storage module of
+Eli, see @ref{storage,, Character Storage Module, lib, Library Reference
+Manual}. It outputs the string stored there.
+
+@findex @code{CPtgOutstr}
+@item @code{void CPtgOutstr (PTG_OUTPUT_FILE fs, char *s);}
+takes a string argument and outputs the same string quoted according
+to the rules of the C language.
+
+@findex @code{CPtgOutchar}
+@item @code{void CPtgOutchar (PTG_OUTPUT_FILE fs, int c);}
+takes an integer character code and outputs the character.
+
+@findex @code{PPtgOutstr}
+@item @code{void PPtgOutstr (PTG_OUTPUT_FILE fs, int c);}
+takes a string argument and outputs the same string quoted according
+to the rules of the Pascal language.
+
+
+@end table
+
+
+
+@node PtgCommon Examples, Reproducing String Literals, Useful Embedded Functions, PtgCommon
+@subsubheading Examples
+
+The first example will use a PTG pattern that prints an identifier or a
+floating point number. This is done by defining the symbol role
+@code{PtgLeaf} that computes a @code{ptg} attribute. It generates the
+source text of the identifier when processed through a ptg processing
+function. This role can be inherited by a tree symbol that appears
+directly above a terminal, that was processed through the @code{mkidn}
+gla processor.
+
+@example
+   CLASS SYMBOL PtgLeaf: ptg: PTGNode;
+ 
+   CLASS SYMBOL PtgLeaf COMPUTE
+      THIS.ptg = PTGId(TERM);
+   END;
+@end example
+
+@noindent 
+In this example, the class symbol @code{PtgLeaf} can be used
+later to denote all the different grammar symbols that compute ptg leaf
+patterns. This is done for example in the second example, that computes
+a PTG pattern that prints all occurrences of @code{PtgLeaf} in a comma 
+separated list.
+
+@example
+   CLASS SYMBOL LeafCommaList: ptg: PTGNode;
+   CLASS SYMBOL LeafCommaList COMPUTE
+      THIS.ptg = 
+        CONSTITUENTS PtgLeaf.ptg 
+        WITH (PTGNode, PTGCommaSeq, IDENTICAL, PTGNull);
+   END;
+@end example
+
+Please refer to @ref{Symbol Specifications,, Symbol Specifications, lidoref,
+Lido Reference Manual}, for an explanation of symbol computations,
+see @ref{CONSTITUENT(S),, CONSTITUENT(S), lidoref, Lido Reference Manual},
+for an explanation of the @code{CONSTITUENT(S)}-construct and
+read @ref{Predefined Entities,, Predefined Entities, lidoref, Lido Reference
+Manual}, for an explanation of the predefined @code{IDENTICAL}-function. 
+
+@findex String Literals
+@node Reproducing String Literals,  , PtgCommon Examples, PtgCommon
+@subsubheading Special Situation when Using C String Literals
+
+A special situation occurs, if C string literals are input tokens and 
+are to be reproduced identically. 
+Two different token processors can be used to store the string:
+If the @code{c_mkstr} processor is specified in a @file{.gla} file,
+@example
+   CStringLit: $\" (auxCString) [c_mkstr]
+@end example
+@noindent
+the string is interpreted and the result is stored.
+Such a string can be processed with the
+pattern functions @code{PTGCStringId()} and @code{PTGPStringId()} 
+to yield C or Pascal string literals on output.
+However, as strings are null terminated in Eli, the first occurrence of
+an embedded zero-character terminates the string, and the result is
+truncated. A solution for this would be to not interpret the control
+sequences and to store the string verbatim as it is provided on input. 
+That is achieved by the token processor @code{mkstr}:
+@example
+   CStringLit: $\" (auxCString) [mkstr]
+@end example
+@noindent
+@findex @code{C_STRING_LIT}
+As control sequences are not interpreted by @code{mkstr},
+@code{PTGPString} and @code{PTGCString} can not be used to
+produce an identical output string. Instead, the pattern function
+@code{PTGAsIs} is to be used. Since the latter token processor can handle
+embedded zero characters, it is used in the 
+canned description @code{C_STRING_LIT} for C string literals.
+@xref{Canned Descriptions, , Canned Descriptions, lex, Lexical Analysis}.
+
+@comment =====================================
+@node Indent, OutStr, PtgCommon, top
+@findex Module @code{Indent}
+@findex indentation
+@chapter Indentation
+
+The module @code{Indent} supplies a C module that implements some
+functions helpful for indenting text produced by PTG functions. The
+function names @code{IndentIncr}, @code{IndentDecr}, @code{IndentNewLine} 
+can be inserted into the user's PTG specification, like
+
+@example
+   Block: "@{" [IndentIncr] $ [IndentDecr] [IndentNewLine] "@}"
+   Stmt:  [IndentNewLine] $ ";"
+@end example
+@noindent 
+Those PTG specifications should not contain strings with the new line
+character, but should have the @code{[IndentNewLine]} call instead.
+
+Use the function @code{IndentNewLine} to put a linefeed into
+the output and indent the next line. @code{IndentIncr} increments and
+@code{IndentDecr} decrements the indentation level.
+The width of a single indentation step may be set to @code{n} spaces by the
+call @code{IndentSetStep (n)} executed prior to initiating output
+(e.g. by PTGOut).
+
+The module does not have generic parameters.
+It is used by writing
+@example
+  $/Output/Indent.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+
+@comment =====================================
+@node OutStr, PrettyPrint, Indent, top
+@findex Module @code{OutStr}
+@chapter Output String Conversion
+
+This module provides a set of functions that transform character
+values and character string values into C or Pascal literals.
+
+The module does not have generic parameters.
+It is used by writing
+@example
+   $/Output/OutStr.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+The module exports the following functions:
+
+@findex function @code{C_outstr}
+@findex function @code{C_outchar}
+@findex function @code{P_outstr}
+@findex function @code{outstr}
+@table @code
+@item void C_outstr (FILE *fs, char *s)
+   Translates @code{s} into a C string literal 
+   and outputs it on file @code{fs}.
+@item void C_outchar (FILE *fs, char *s)
+   Translates @code{s} into a C character literal 
+   and outputs it on file @code{fs}.
+@item void P_outstr(FILE *fs, char *s)
+   Translates @code{s} into a Pascal string literal 
+   and outputs it on file @code{fs}.
+@item void outstr (FILE *fs, char *s)
+   Outputs @code{s} without translation on file @code{fs}.
+@end table
+
+@comment =====================================
+@node PrettyPrint, BlockPrint , OutStr, top
+@findex pretty printing
+@comment  node-name,  next,  previous,  up
+@chapter Pretty Printing
+
+
+The module @samp{PrettyPrint} supplies C functions that can be inserted in
+PTG patterns to handle line breaks properly. The functions try
+to break the current line at the last possible position that precedes the
+maximum line width. Furthermore, regions of text can be indented.
+
+Functions exist to mark line breaks and the begin and end of an
+indentation region. These functions can be included into
+PTG pattern definitions. 
+
+@ftable @code
+@item PP_BreakLine
+Specifies, that a line break can be inserted at this point. A line will
+only be broken at these points.
+
+@item PP_Indent
+@item PP_Exdent
+@code{PP_Indent} marks the beginning of an indented region. Line feeds
+following this function call will not only begin a new line but also indent
+the next line by an indentation step, 
+the width of indentation can be adjusted with a function
+discussed later. Indented regions can be nested and are terminated by a call
+to the @code{PP_Exdent}-pattern function.
+
+@item PP_Newline
+Forces a line feed thereby inserting the newline sequence. The next line
+will be indented properly. The newline character @samp{"\n"} in a
+PTG pattern is a shortcut for a call to this output function.
+@end ftable
+
+@subsubheading Examples
+
+The following PTG patterns can be used to yield different styles of
+indenting for blocks. 
+Here @code{@{} and @code{@}} are the symbols that denote the
+beginning and end of a block, @code{$} is the insertion point for the
+indented block. The first example sets those symbols in a
+new line at the indentation level of the outer block:
+
+@example
+   Block:  "\n@{" [PP_Indent] 
+               "\n" $ [PP_Exdent] 
+           "\n@}"
+   Stmt:   [PP_BreakLine] $ 
+@end example
+
+The next example also specifies an indented region. Here, the opening
+brace is set as last token outside the block, separated with whitespace
+instead of a newline:
+
+@example
+   Block:  " " [PP_BreakLine] "@{" [PP_Indent] 
+              "\n" $ [PP_Exdent] 
+           "\n@}"
+@end example
+
+The third example uses the indentation style commonly known as the
+GNU indentation style. Here, the braces are set on a new line, indented
+two positions. The indented region then follows indented four positions. To
+use this, set the indentation width to two by one of the function calls
+discussed later. Then use the following pattern:
+
+@example
+   Block:  [PP_Indent] "\n@{" [PP_Indent] 
+               "\n" $ [PP_Exdent] 
+           "\n@}" [PP_Exdent]
+@end example
+
+@subsubheading Additional functions
+
+Additional functions exist to influence the behavior of the module.
+
+@ftable @code
+@findex line width
+@item PP_SetLineWidth(int width)
+Sets the linewidth to the specified value. The default is 80.
+
+@item PP_SetSoftBreakShortcut(char)
+Assigns a character that should behave like a call to
+@code{PP_LineBreak}. A good choice for this would be the tab
+character. The default is set to the null character what disables
+substitution.
+
+@findex indentation
+@item PP_SetIndentationWidth(int width)
+Sets the amount to indent in one indentation level. Indentation is
+normally done by spaces. If a negative value is used, a tab character
+will be used for one indentation step (counting as 8 character
+positions).
+
+@item PP_SetEndline(char *endline)
+Assigns the given string to be used as end-of-line sequence. Default for
+this is @samp{"\n"}. Another good choice would be @samp{"\r\n"}.
+@end ftable
+
+@noindent 
+All these functions need to be called prior to the start of the output with
+one of the following functions. They replace the PTG generated ones, if
+PrettyPrinting should be used.
+
+@ftable @code
+@findex output functions
+@item PP_OutFPtr(FILE *f, PTGNode n)
+Outputs the given @samp{PTGNode} to the given file that must 
+have been opened for output.
+
+@item PP_OutFile(char *filename, PTGNode n)
+Outputs the given @samp{PTGNode} to the named file.
+
+@item PP_Out(PTGNode n)
+Outputs the given @samp{PTGNode} to the standard output.
+@end ftable
+
+@subsubheading Usage of Module
+
+To use the pretty printing module, simply include it's name in one of the 
+@code{.specs} files:
+
+@example
+   $/Output/PrettyPrint.fw
+@end example
+
+@subsubheading Restrictions
+
+In two cases it is possible that an output line exceeds the given maximal
+length: 
+@itemize
+@item 
+A sequence of characters longer than the specified linewidth is
+output without intermediate call to @code{PP_LineBreak}.
+@item 
+A PTG Pattern contains tab characters that will be counted to have a
+width of 1 which of course is not always true.
+@end itemize
+
+Additional information about this module and it's implementation can be
+obtained by the derivation
+@example
+   $elipkg/Output/PrettyPrint.fw :fwTexinfo :display
+@end example
+
+@comment =====================================
+@findex block-structure
+@node BlockPrint, StringOut, PrettyPrint, top
+@comment  node-name,  next,  previous,  up
+@chapter Typesetting for Block Structured Output
+
+
+The module @samp{BlockPrint} supplies C functions that can be inserted in
+PTG patterns for block formatting. It is the aim of this module
+to print all the text between the block marks into one line. If that does
+not succeed, all embedded line breaks of the block are converted into newlines.
+Additionally, blocks can be nested and blocking can be combined with indentation.
+
+There are functions to mark line breaks and the beginning and end of a
+block. These functions can be included into
+PTG Pattern definitions. 
+
+@ftable @code
+@item BP_BreakLine
+Specifies, that a LineBreak can be inserted at this point. A line will
+only be broken at these points.
+
+@item BP_BeginBlock
+@item BP_EndBlock
+Marks the beginning and end of a Block. If the text until the call to 
+@code{BP_BlockEnd} has room in the current line, all line breaks will be 
+discarded. Else, all embedded line breaks will be converted into newlines.
+
+@item BP_BeginBlockI
+@item BP_EndBlockI
+Same as the above. The block created by this
+pair of functions will additionally be indented by one indentation step.
+
+@item BP_Newline
+Forces a linefeed thereby inserting the newline sequence. 
+Note that with the presence of
+this pattern function, the enclosing block is automatically tagged as 'too long' 
+and all the remaining Line breaks in the current block are also converted to newlines.
+The next line will be indented properly. The newline character @samp{"\n"} in a
+PTG pattern is a shortcut for a call to this output function.
+@end ftable
+
+@subsubheading Examples
+
+The following PTG patterns can be used to print nested C scopes with intermediate
+function calls. The statements in one block will be indented properly and always be 
+separated by newlines. The arguments of a function call will be set into one line, 
+if there is enough room. If not, newlines will be inserted between the arguments.
+
+@example
+   FCall:          "\n" $ string "(" [BP_BeginBlockI] $ [BP_EndBlockI] ");"
+   Arg:            $ @{ "," [BP_BreakLine] @} $
+   Block:          "\n@{" [BP_BeginBlockI]
+                       $ [BP_EndBlockI]
+                   "\n@}"
+@end example
+
+@subsubheading Additional functions
+
+@ftable @code
+@findex line width
+@item BP_SetLineWidth(int width)
+   Sets the linewidth to the specified value. The default is 80.
+@item BP_SetSoftBreakShortcut(char)
+   Assings a character that should behave like a call to
+   @code{BP_LineBreak}. A good choice for this would be the
+   tab character. The default is set to the null character 
+   what disables substitution.
+@findex indentation
+@item BP_SetIndentationWidth(int width)
+   Sets the amount to indent in one indentation level. Indentation is
+   normally done by spaces. If a negative value is used, a tab character
+   will be used for one indentation step (counting as 8 character
+   positions).
+@item BP_SetEndline(char *endline)
+   Assigns the given string to be used as end-of-line sequence. Default for
+   this is @code{"\n"}. Another good choice would be @code{"\r\n"}.
+@end ftable
+
+@noindent 
+All these functions need to be called prior to start output with
+one of the following functions. They replace the PTG generated ones, if
+block printing is used.
+
+@ftable @code
+@findex output functions
+@item BP_OutFPtr(FILE *f, PTGNode n)
+Output the given @samp{PTGNode} to the given file that must have been opened for
+output.
+
+@item BP_OutFile(char *filename, PTGNode n)
+Output the given PTGNode to the named file.
+
+@item BP_Out(PTGNode n)
+Output the given PTGNode to the standard output.
+@end ftable
+
+@subsubheading Usage of Module
+
+To use the block printing module, simply include it's name in one of the 
+@code{.specs} files:
+
+@example
+   $/Output/BlockPrint.fw
+@end example
+
+@subsubheading Restrictions
+
+In two cases it is possible that an output line exceeds the given maximal
+length: 
+@itemize
+@item 
+A sequence of characters longer than the specified linewidth is
+output without intermediate call to @code{BP_BreakLine}.
+@item 
+A PTG Pattern contains tab characters that will be counted to have a
+width of 1 which of course is not always true.
+@end itemize
+
+Additional information about this module and it's implementation can be
+obtained by the derivation
+@example
+   $elipkg/Output/BlockPrint.fw :fwTexinfo :display
+@end example
+
+@comment =================================
+@node StringOut, Separator, BlockPrint, top
+@findex PTG Output
+@findex String Buffer
+@comment  node-name,  next,  previous,  up
+@chapter Processing Ptg-Output into String Buffers
+
+The module @code{StringOut} provides a possibility of processing the output 
+associated to a PTG node structure recursively into a string buffer. The buffer is 
+maintained by calls to @code{Obstack}-module-functions. The module @code{PtgOutput} is used
+to coordinate overrides of the PTG output functions.
+
+@noindent
+This module supplies two C functions:
+@table @code
+@item char *PTG_StringOut(PTGNode root);
+Takes the root to a PTG node structure as argument. Invokes the PTG printing functions and
+processes the output into an automatically allocated and growing string buffer. 
+Upon termination, a pointer to to the start of this buffer is returned.
+@item void FreeStringOut();
+Invocations of the @code{PTG_StringOut()} function can consume quite a lot of memory. It 
+is possible, that at some time, the string buffers created by this functions are no longer
+needed. The memory consumed by this buffers can be returned to the system by an invocation
+of the @code{FreeStringOut()} function. Please note, that this function frees the space used
+by all invocations of @code{PTG_StringOut()} together.
+@end table
+
+Additional information about this module and it's implementation can be
+obtained by the derivation
+@example
+   $elipkg/Output/StringOut.fw :fwTexinfo :display
+@end example
+
+@subsubheading Usage of Module
+
+To include this module into your specification, simply add the following line to one of 
+your @file{.specs}-files:
+@example
+   $/Output/StringOut.fw
+@end example
+
+@subsubheading Restrictions
+
+This module can be included to a specification together with other 
+applications of the
+@code{PtgOutput} module functions, 
+e.g. @code{PrettyPrint} and @code{BlockPrint}. By doing 
+so, it is possible to pretty print a PTG node structure into a file or to 
+process it into a string buffer. 
+A combination, for example to pretty print a PTG node 
+structure into character buffer, is not possible.
+
+@comment =================================
+@node Separator, , StringOut, top
+@findex Separator
+@comment  node-name,  next,  previous,  up
+@chapter Introducing Separators in PTG Output
+
+
+The @samp{Separator} module supplies functions to insert 
+separator characters into the generated output in a context dependent 
+fashion.
+
+It provides the function @code{Separator} which is meant to be
+embedded in PTG patterns, e.g.
+
+@example
+     loop: "while" [Separator] $1 [Separator] $2 [Separator]
+@end example
+
+The insertions of @code{Separator} mark the positions in the
+generated output texts, where separator characters might be placed.
+
+The decision whether a separator is needed must be made by 
+the user-supplied function @code{Sep_Print}:
+
+@example
+     Sep_Print(PtgFilePtr file, const char *last, const char *next)
+     /* On entry-
+      *   file points to the output file
+      *   last points to the last string printed
+      *   next points to the string about to be printed
+      * On exit-
+      *   An appropriate separator has been added to the output file
+      ***/
+@end example
+
+
+Based on the textual context
+@code{Sep_Print} should decide whether a separator character is required
+and, if so, must insert an appropriate separator into the
+output stream.
+Note that @code{Sep_Print} is not allowed to modify either the last string
+printed or the string about to be printed.
+
+The @samp{Separator} module provides the following output functions
+which must be used instead of the corresponding PTG functions
+(@pxref{Output,,Output Functions,ptg,PTG: Pattern-based Text Generator}):
+
+@findex @code{Sep_Out}
+@example
+PTGNode Sep_Out(PTGNode root);
+PTGNode Sep_OutFile(char *filename, PTGNode root);
+PTGNode Sep_OutFPtr(FILE *fptr, PTGNode root);
+@end example
+
+
+The @samp{Separator} module is used in conjunction with the Unparser Generator
+@samp{Idem} (@pxref{idemsep,,Abstract Syntax Tree Unparsing,idem,Abstract Syntax Tree Unparsing})
+to simplify
+pretty-printing of the output.  Idem inserts calls to @code{Separator} after
+every literal and terminal symbol in the templates corresponding to the
+grammar rules.  
+
+@subsubheading Usage
+
+To include this module into your 
+specification simply add the following line to one of 
+your @file{.specs}-files:
+
+@example
+   $/Output/Separator.fw
+@end example
+
+An example of a @code{Sep_Print} function that works well with
+a C-like language is provided as @samp{C_Separator.fw}:
+a newline is added after any of @kbd{;} @kbd{@{} @kbd{@}},
+no separator is added after any of @kbd{(} @kbd{[} @kbd{.} @kbd{++}
+@kbd{--},
+no separator is added before any of @kbd{[} @kbd{]} @kbd{,} @kbd{.} @kbd{;}
+@kbd{++} @kbd{--},
+and a single space added in all other cases.
+
+@samp{C_Separator.fw} can be included in your specifications by putting
+
+@example
+   $/Output/C_Separator.fw
+@end example
+
+into a @file{.specs}-file.
+ 
+@samp{C_Separator.fw} is also useful as an example how to 
+develop your own @code{Sep_Print} functions
+if none of the available modules is satisfactory.
+The simplest approach is to modify @samp{C_Separator.fw}.
+Here is a sequence of Eli requests that will extract
+@samp{C_Separator.fw} as file @samp{My_Separator.fw}, 
+make @samp{My_Separator.fw}
+writable, and initiate an editor session on it:
+
+@example  
+       -> $elipkg/Output/C_Separator.fw > My_Separator.fw
+       -> My_Separator.fw !chmod +w
+       -> My_Separator.fw <
+@end example
+
+In order to change the decision about what (if any) separator is to
+be inserted in a given context, you need to change
+@samp{Sep_Print} function, as described above.
+
+@subsubheading Restrictions
+
+Since the @samp{Separator} module uses its own PTG output functions
+
+@example
+   Sep_Out
+   Sep_OutFile
+   Sep_OutFPtr
+@end example
+
+as explained above, it cannot be combined with specifications that influence PTG
+output by redefining the PTG output macros
+(@pxref{Macros,,Influencing PTG Output,ptg,PTG: Pattern-based Text Generation}).
+
+The memory for storing the last string printed for the @samp{Sep_Print}
+function is restricted to 1024 characters. If the last string printed
+exceeds 1024 characters, only its last 1024 characters are stored and
+passed to @samp{Sep_Print}.
+
+
+@node Index, , , top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

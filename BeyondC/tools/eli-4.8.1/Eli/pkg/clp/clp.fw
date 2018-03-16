@@ -1,0 +1,658 @@
+@! Copyright (c) 1991, The Regents of the University of Colorado
+@! Copyright (c) 1994-2007 Anthony M. Sloane
+
+@O@<clp.gla@>==@{
+lit:   $\" (auxCString) [mkstr_nodelims]
+ident: C_IDENTIFIER
+       C_COMMENT
+       $% (auxEOL)
+@}
+
+@O@<clp.specs@>==@{
+$/Adt/csm.specs
+$/Scan/str.c
+@}
+
+@O@<clp.con@>==@{
+spec     : params.
+params   : /* empty */ / params param ';'.
+param    : 'terminator' lit
+	 / tparam
+	 / name 'positional' doc
+	 / name 'positionals' doc
+	 / name 'input' doc
+	 / 'usage' lit
+	 / 'open' 'error' 'format' lit
+	 / 'open' 'error' 'usage'.
+tparam   : name literals join type doc.
+literals : literal / literals literal.
+literal	 : lit.
+join	 : /* empty */
+	 / 'joinedto'
+	 / 'with'.
+type	 : 'boolean'
+	 / 'booleans'
+	 / 'int'
+	 / 'ints'
+	 / 'string'
+	 / 'strings'.
+name     : ident.
+doc	 : /* empty */
+	 / lit.
+@}
+
+@O@<clp.lido@>==@{
+ATTR len, maxstrlen, id, nameid, docid, joined, spaced, rep : int;
+ATTR desc, joinedstr : cstr;
+ATTR opt, usage : PTGNode;
+
+CHAIN decls, opts, params, externs, ousages, pusages : PTGNode;
+CHAIN errmsg : PTGNode;
+CHAIN numopts, usageerrmsg, inputs : int;
+
+RULE:
+    spec ::= params
+COMPUTE
+    CHAINSTART params.errmsg = PTGcstr ("%p cannot open %f: %t");
+    CHAINSTART params.usageerrmsg = 0;
+    CHAINSTART params.inputs = 0;
+
+    spec.maxstrlen = CONSTITUENTS literal.len
+                     SHIELD (doc) WITH (int, MAX, IDENTICAL, ZERO);
+
+    CHAINSTART params.decls = PTGNULL;
+    CHAINSTART params.numopts = 0;
+    CHAINSTART params.opts = PTGNULL;
+
+    CHAINSTART params.params = PTGNULL;
+    CHAINSTART params.ousages = PTGNULL;
+    CHAINSTART params.pusages = PTGNULL;
+    CHAINSTART params.externs = PTGNULL;
+
+    PTGOutFile ("clp.c", PTGfile (params.decls, params.numopts, params.opts,
+                                  params.ousages, params.pusages,
+                                  params.errmsg, params.usageerrmsg,
+                                  params.params));
+    PTGOutFile ("clp.h", PTGheader (params.externs));
+END;
+
+SYMBOL param
+COMPUTE
+    SYNT.maxstrlen = INCLUDING spec.maxstrlen;
+END;
+
+RULE:
+    param ::= 'terminator' lit
+COMPUTE
+    param.numopts = ADD (param.numopts, 1);
+    param.opts = PTGseq (param.opts, PTGtopt (lit));
+    param.ousages = PTGseq (param.ousages,
+                            PTGtuse (PTGpstr (lit, param.maxstrlen)));
+END;
+
+RULE:
+    tparam ::= name literals join type doc
+COMPUTE
+    tparam.docid = doc.id;
+    tparam.nameid = name.id;
+    tparam.opt = type.opt;
+    tparam.joined = join.joined;
+    tparam.joinedstr = join.joinedstr;
+    tparam.spaced = join.spaced;
+    tparam.desc = type.desc;
+    tparam.usage = PTGmsg (doc.id, IF (type.rep, "*", ""));
+END;
+
+SYMBOL type
+COMPUTE
+    SYNT.nameid = INCLUDING tparam.nameid;
+    SYNT.docid = INCLUDING tparam.docid;
+    SYNT.joinedstr = INCLUDING tparam.joinedstr;
+    SYNT.rep = 0;
+END;
+
+RULE:
+    type ::= 'boolean'
+COMPUTE 
+    type.desc = "";
+    type.decls = PTGseq (type.decls, PTGbdecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGiextern (type.nameid));
+    type.opt = PTGopt ("BOOL", "", PTGvar (type.nameid), PTGnone (),
+		       PTGnone ());
+END;
+
+RULE:
+    type ::= 'booleans'
+COMPUTE
+    type.desc = "";
+    type.decls = PTGseq (type.decls, PTGbdecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGiextern (type.nameid));
+    type.opt = PTGopt ("BOOL | PLURAL", "", PTGvar (type.nameid), PTGnone (),
+			PTGnone ());
+    type.rep = 1;
+END;
+
+RULE:
+    type ::= 'int'
+COMPUTE
+    type.desc = "int";
+    type.decls = PTGseq3 (type.decls, PTGkdecl (type.nameid),
+			  PTGidecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGkextern (type.nameid));
+    type.opt = PTGopt ("INTVAL", type.joinedstr, PTGcount (type.nameid),
+			PTGvar (type.nameid), PTGnone ());
+END;
+
+RULE:
+    type ::= 'ints'
+COMPUTE
+    type.desc = "int";
+    type.decls = PTGseq (type.decls, PTGkkdecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGkkextern (type.nameid));
+    type.opt = PTGopt ("INTVAL | PLURAL", type.joinedstr, PTGnone (),
+			PTGnone (), PTGvar (type.nameid));
+    type.rep = 1;
+END;
+
+RULE:
+    type ::= 'string'
+COMPUTE
+    type.desc = "string";
+    type.decls = PTGseq3 (type.decls, PTGkdecl (type.nameid),
+                          PTGidecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGkextern (type.nameid));
+    type.opt = PTGopt ("STRVAL", type.joinedstr, PTGcount (type.nameid),
+                       PTGvar (type.nameid), PTGnone ());
+END;
+
+RULE:
+    type ::= 'strings'
+COMPUTE
+    type.desc = "string";
+    type.decls = PTGseq (type.decls, PTGkkdecl (type.nameid));
+    type.externs = PTGseq (type.externs, PTGkkextern (type.nameid));
+    type.opt = PTGopt ("STRVAL | PLURAL", type.joinedstr, PTGnone (),
+		       PTGnone (), PTGvar (type.nameid));
+    type.rep = 1;
+END;
+
+RULE:
+    join ::=           
+COMPUTE
+    join.joined = 0;
+    join.spaced = 1;
+    join.joinedstr = "| SPACED";
+END;
+
+RULE:
+    join ::= 'joinedto'
+COMPUTE
+    join.joined = 1;
+    join.spaced = 0;
+    join.joinedstr = "| JOINED";
+END;
+
+RULE:
+    join ::= 'with'
+COMPUTE
+    join.joined = 1;
+    join.spaced = 1;
+    join.joinedstr = "| SPACED | JOINED";
+END;
+
+RULE:
+    param ::= name 'positional' doc
+COMPUTE
+    param.decls = PTGseq (param.decls, PTGkdecl (name.id));
+    param.params = PTGseq (param.params, PTGparam (name.id));
+    param.externs = PTGseq (param.externs, PTGkextern (name.id));
+    param.pusages = PTGseq (param.pusages,
+                            PTGuse (PTGpstr (name.id, param.maxstrlen),
+                                    doc.id));
+END;
+
+RULE:
+    param ::= name 'positionals' doc
+COMPUTE
+    param.decls = PTGseq (param.decls, PTGkkdecl (name.id));
+    param.params = PTGseq (param.params, PTGmparam (name.id));
+    param.externs = PTGseq (param.externs, PTGkkextern (name.id));
+    param.pusages = PTGseq (param.pusages,
+                            PTGuses (PTGpstr (name.id, param.maxstrlen),
+                                     doc.id));
+END;
+
+RULE:
+    param ::= name 'input' doc
+COMPUTE
+    param.decls = PTGseq (param.decls, PTGkdecl (name.id));
+    param.params = PTGseq (param.params, PTGinput (name.id));
+    param.externs = PTGseq (param.externs, PTGkextern (name.id));
+    param.pusages = PTGseq (param.pusages,
+                            PTGuse (PTGpstr (name.id, param.maxstrlen),
+                                    doc.id));
+    param.inputs = ADD (param.inputs, 1);
+    IF (NE (param.inputs, 0),
+        message (ERROR, "can't have more than one input parameter", 0,
+                 COORDREF));
+END;
+
+RULE:
+    param ::= 'usage' lit
+COMPUTE
+    param.numopts = ADD (param.numopts, 1);
+    param.opts = PTGseq (param.opts,
+			 PTGseq (PTGlit (lit),
+				 PTGopt ("USAGE", "", PTGnone (), PTGnone (),
+					 PTGnone ())));
+    param.ousages = PTGseq (param.ousages,
+                            PTGuuse (PTGpstr (lit, param.maxstrlen)));
+END;
+
+RULE:
+    param ::= 'open' 'error' 'format' lit
+COMPUTE
+    param.errmsg = PTGstr (lit) <- param.errmsg;
+END;
+
+RULE:
+    param ::= 'open' 'error' 'usage'
+COMPUTE
+    param.usageerrmsg = 1 <- param.usageerrmsg;
+END;
+
+SYMBOL literal
+COMPUTE
+    SYNT.numopts = ADD (THIS.numopts, 1);
+    SYNT.opts = PTGseq (THIS.opts,
+			PTGseq (PTGlit (TERM), INCLUDING tparam.opt));
+    SYNT.usage = PTGseq (IF (INCLUDING tparam.spaced,
+			     PTGvuse (TERM, " ", INCLUDING tparam.desc,
+				      INCLUDING spec.maxstrlen,
+				      INCLUDING tparam.usage),
+			     PTGNULL),
+			 IF (INCLUDING tparam.joined,
+			     PTGvuse (TERM, "", INCLUDING tparam.desc,
+				      INCLUDING spec.maxstrlen,
+				      INCLUDING tparam.usage),
+			     PTGNULL));
+    SYNT.ousages = PTGseq (THIS.ousages, THIS.usage);
+    SYNT.len = ADD (string_length (TERM), strlen (INCLUDING tparam.desc));
+END;
+
+RULE: name ::= ident COMPUTE name.id = ident; END;
+RULE: doc  ::=       COMPUTE doc.id = NoStrIndex; END;
+RULE: doc  ::= lit   COMPUTE doc.id = lit; END;
+@}
+
+@O@<clp.ptg@>==@{
+file:   "#include <stdio.h>\n"
+        "#include <stdlib.h>\n"
+        "#include <string.h>\n"
+        "#include \"clp.h\"\n"
+        "#include \"clpintf.h\"\n"
+        "#include \"pdl_gen.h\"\n"
+        "#include \"csm.h\"\n"
+        "#include \"eliproto.h\"\n"
+        "\n"
+        "#define TYPE_MASK      0x001F\n"
+        "#define BOOL           0x0001\n"
+        "#define INTVAL         0x0002\n"
+        "#define STRVAL         0x0004\n"
+        "#define USAGE          0x0008\n"
+        "#define TERM           0x0010\n"
+        "\n"
+        "#define JOINED         0x0100\n"
+        "#define SPACED         0x0200\n"
+        "#define PLURAL         0x0400\n"
+        "\n"
+        "typedef struct opt opt;\n"
+        "struct opt {\n"
+        "    CONST char *str;\n"
+        "    int flags;\n"
+        "    int *count;\n"
+        "    DefTableKey *key;\n"
+        "    DefTableKeyList *list;\n"
+        "};\n"
+        "\n"
+        "DefTableKey CLP_InputFile = NoKey;\n"
+        $ /* decls */
+        "static int error_count = 0;\n"
+        "\n"
+        "#define NUMOPTS " $ int "\n"
+        "\n"
+        "static opt opts[] = {\n"
+        $ /* opts */
+	"    { \"dummy\", 0, NULL, NULL, NULL }\n"
+        "};\n"
+        "\n"
+
+        "static void\n"
+        "#ifdef PROTO_OK\n"
+        "clp_error (const char *str, const char *msg)\n"
+        "#else\n"
+        "clp_error (str, msg)\n"
+        "char *str, *msg;\n"
+        "#endif\n"
+        "{\n"
+        "  if (str == (char *) NULL)\n"
+        "    fprintf (stderr, \"%s\\n\", msg);\n"
+        "  else\n"
+        "    fprintf (stderr, \"%s %s\\n\", str, msg);\n"
+        "  error_count++;\n"
+        "}\n"
+        "\n"    
+
+        "static int\n"
+        "#ifdef PROTO_OK\n"
+        "clp_atos (char *str)\n"
+        "#else\n"
+        "clp_atos (str)\n"
+        "char *str;\n"
+        "#endif\n"
+        "{\n"
+        "  return stostr (str, strlen(str));\n"
+        "}\n"
+        "\n"
+
+        "void\n"
+        "#ifdef PROTO_OK\n"
+        "clp_usage (char *prog)\n"
+        "#else\n"
+        "clp_usage (prog)\n"
+        "  char *prog;\n"
+        "#endif\n"
+        "{\n"
+        "  fprintf (stderr, \"Usage: %s [options] parameters\\n\", prog);\n"
+        "  fprintf (stderr, \"  Items marked with * may be repeated.\\n\");\n"
+        "  fprintf (stderr, \"  Options:\\n\");\n"
+        $ /* option uses */
+        "  fprintf (stderr, \"  Parameters:\\n\");\n"
+        $ /* parameter uses */
+        "    exit (1);\n"
+        "}\n"
+        "\n"
+
+        "void\n"
+        "#ifdef PROTO_OK\n"
+        "clp_init (int argc, char *argv[])\n"
+        "#else\n"
+        "clp_init (argc, argv)\n"
+        "int argc;\n"
+        "char *argv[];\n"
+        "#endif\n"
+        "{\n"
+        "  int i, j, p, t;\n"
+        "  DefTableKey k;\n"
+        "  opt *o;\n"
+        "  char *s;\n"
+        "\n"
+        "  SetFileErr (\"" $ "\", " $ int ");\n"
+        "  for (i = 1; i < argc; i++) {\n"
+        "    for (j = 0, o = opts; j < NUMOPTS; j++, o++)\n"
+        "      if (strncmp (o->str, argv[i], strlen (o->str)) == 0)\n"
+        "        break;\n"
+        "    if (j == NUMOPTS)\n"
+        "      break;\n"
+        "    s = argv[i] + strlen (o->str);\n"
+        "    if (o->flags & USAGE) {\n"
+        "      if (*s != '\\0')\n"
+        "        clp_error (o->str, \"must not have a value\");\n"
+        "      clp_usage (argv[0]);\n"
+        "    } else if (o->flags & TERM) {\n"
+        "      if (*s != '\\0')\n"
+        "        clp_error (o->str, \"must not have a value\");\n"
+        "      i++;\n"
+        "      break;\n"
+        "    } else {\n"
+        "      if (o->count != (int *) NULL)\n"
+        "        (*o->count)++;\n"
+        "      p = o->flags & PLURAL;\n"
+        "      if ((!p) && (*o->count > 1))\n"
+        "        clp_error (o->str, \"can only be given once\");\n"
+        "      t = o->flags & TYPE_MASK;\n"
+        "      switch (t) {\n"
+        "        case BOOL:\n"
+        "          if (*s != '\\0')\n"
+        "            clp_error (o->str, \"must not have a value\");\n"
+        "          break;\n"
+        "        case INTVAL:\n"
+        "        case STRVAL: {\n"
+        "          if (o->flags & JOINED) {\n"
+        "            if (*s == '\\0') {\n"
+        "              if (o->flags & SPACED) {\n"
+        "                if (i == argc - 1) {\n"
+        "                  clp_error (o->str, \"must have a value\");\n"
+        "                  continue;\n"
+        "                } else {\n"
+        "                  i++;\n"
+        "                  s = argv[i];\n"
+        "                }\n"
+        "              } else {\n"
+        "                clp_error (o->str, \"must have a joined value\");\n"
+        "                continue;\n"
+        "              }\n"
+        "            }\n"
+        "          } else if (o->flags & SPACED) {\n"
+        "            if (*s != '\\0') {\n"
+        "              clp_error (o->str, \"must not have a joined value\");\n"
+        "              continue;\n"     
+        "            }\n"
+        "            if (i == argc - 1) {\n"
+        "              clp_error (o->str, \"must have a value\");\n"
+        "              continue;\n"
+        "            } else {\n"
+        "              i++;\n"
+        "              s = argv[i];\n"
+        "            }\n"
+        "          }\n"
+        "          if (p) {\n"
+        "            DefTableKey k = NewKey ();\n"
+        "            switch (t) {\n"
+        "              case INTVAL:\n"
+        "                SetClpValue (k, atoi (s), 0);\n"
+        "                break;\n"
+        "              case STRVAL:\n"
+        "                SetClpValue (k, clp_atos (s), 0);\n"
+        "                break;\n"
+        "            }\n"
+        "            *o->list = AppElDefTableKeyList (*o->list, k);\n"
+        "          } else {\n"
+        "            *o->key = NewKey ();\n"
+        "            switch (t) {\n"
+        "              case INTVAL:\n"
+        "                SetClpValue (*o->key, atoi (s), 0);\n"
+        "                break;\n"
+        "              case STRVAL:\n"
+        "                SetClpValue (*o->key, clp_atos (s), 0);\n"
+        "                break;\n"
+        "            }\n"
+        "          }\n"
+        "        }\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        $ /* params, mparam */
+        "  if ((i < argc) || (error_count > 0))\n"
+        "    clp_usage (argv[0]);\n"
+        "}\n"
+
+kdecl:  "DefTableKey " [OutStr $1 int] " = NoKey;\n"
+kkdecl: "DefTableKeyList " [OutStr $1 int] " = NULLDefTableKeyList;\n"
+bdecl:  "int " [OutStr $1 int] " = 0;\n"
+idecl:  "static int " [OutStr $1 int] "_count = 0;\n"
+
+topt:   "    { \"" [OutStr $1 int] "\", TERM, NULL, NULL, NULL },\n"
+lit:	"    { \"" [OutStr $1 int] "\", "
+opt:    $1 string " " $2 string ", " $3 ", " $4 ", " $5 " },\n"
+
+count:  "&" [OutStr $1 int] "_count"
+var:    "&" [OutStr $1 int] 
+none:   "NULL"
+
+param:  "  if (i < argc) {\n"
+        "    " [OutStr $1 int] " = NewKey ();\n"
+        "    SetClpValue (" [OutStr $1 int] ", clp_string (argv[i++]), 0);\n"
+        "  }\n"
+
+mparam: "  for (; i < argc; i++) {\n"
+        "    k = NewKey ();\n"
+        "    SetClpValue (k, clp_string (argv[i]), 0);\n"
+        "    " [OutStr $1 int] " = AppElDefTableKeyList ("
+           [OutStr $1 int] ", k);\n"
+        "  }\n"
+
+input:  "  if (i < argc) {\n"
+        "    " [OutStr $1 int] " = NewKey ();\n"
+        "    SetClpValue (" [OutStr $1 int] ", clp_string (argv[i++]), 0);\n"
+        "    CLP_InputFile = " [OutStr $1 int] ";\n"
+        "  }\n"
+
+use:    "  fprintf (stderr, \"    " $1 " " [OutStr $2 int] "\\n\");\n"
+uses:   "  fprintf (stderr, \"    " $1 " " [OutStr $2 int] "*\\n\");\n"
+tuse:   "  fprintf (stderr, \"    " $1 " Terminate options\\n\");\n"
+vuse:	"  fprintf (stderr, \"    "
+            [OutPSStr $1 int $2 string $3 string $4 int] " " $5 ");\n"
+uuse:   "  fprintf (stderr, \"    " $1 " Display this usage message\\n\");\n"
+msg:	[OutStr $1 int] $2 string "\\n\""
+
+header: "#ifndef CLP_H\n"
+        "\n"
+        "#define CLP_H\n"
+        "#include \"clplib.h\"\n"
+        "#include \"pdl_gen.h\"\n"
+        "#include \"DefTableKeyList.h\"\n"
+        "\n"
+        "extern DefTableKey CLP_InputFile;\n"
+        "#ifdef PROTO_OK\n"
+        "extern void clp_usage (char *);\n"
+        "#else\n"
+        "extern void clp_usage ();\n"
+        "#endif\n"
+        "\n"
+        $ /* kextern or iextern */
+        "\n"
+        "#endif\n"
+
+kextern:  "extern DefTableKey " [OutStr $ int] ";\n"
+kkextern: "extern DefTableKeyList " [OutStr $ int] ";\n"
+iextern:  "extern int " [OutStr $ int] ";\n"
+
+seq:    $ $
+seq3:   $ $ $ 
+
+cstr:   $1 string
+str:    [OutStr $1 int]
+pstr:   [OutPStr $1 int $2 int]
+@}
+
+@O@<clp.head@>==@{
+#include "csm.h"
+#include "newaux.h"
+@}
+
+@O@<newaux.h@>==@{
+#ifndef NEWAUX_H
+#define NEWAUX_H
+
+#include <stdio.h>
+#include <string.h>
+#include "eliproto.h"
+
+#ifdef PROTO_OK
+#define _ANSI_ARGS_(x) x
+#else
+#define _ANSI_ARGS_(x) ()
+#endif
+
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
+typedef char *cstr;
+
+/*
+ * string_length
+ * Return the length of a string table string.
+ */
+
+extern int string_length _ANSI_ARGS_((int str));
+
+/*
+ * OutStr
+ * Output a string table string (for PTG).
+ */
+
+extern void OutStr _ANSI_ARGS_((FILE *fp, int str));
+
+/*
+ * OutPStr
+ * Output a string table string with a particular padding (for PTG).
+ */
+
+extern void OutPStr _ANSI_ARGS_((FILE *fp, int str, int pad));
+
+/*
+ * OutPSStr
+ * Output a string table string with tail with a particular padding (for PTG).
+ */
+
+extern void OutPSStr _ANSI_ARGS_((FILE *fp, int str, CONST char *space,
+                                  CONST char *tail, int pad));
+
+/*
+ * mkstr_nodelims
+ * Like mkstr except doesn't save the delimiters.
+ */
+
+extern void mkstr_nodelims _ANSI_ARGS_((char *c, int l, int *t, char *p));
+
+#endif
+@}
+
+@O@<newaux.c@>==@{
+#include <stdio.h>
+#include "csm.h"
+
+int
+string_length (str)
+    int str;
+{
+    return strlen (StringTable (str));
+}
+
+void
+OutStr (fp, str)
+    FILE *fp;
+    int str;
+{
+    fprintf (fp, "%s", StringTable (str));
+}
+
+void
+OutPStr (fp, str, pad)
+    FILE *fp;
+    int str, pad;
+{
+    fprintf (fp, "%-*s", pad, StringTable (str));
+}
+
+void
+OutPSStr (fp, str, space, tail, pad)
+    FILE *fp;
+    int str, pad;
+    char *space, *tail;
+{
+    char buf[BUFSIZ];
+
+    sprintf (buf, "%s%s%s", StringTable (str), space, tail);
+    fprintf (fp, "%-*s", pad, buf);
+}
+
+void
+mkstr_nodelims (c, l, t, p)
+    char *c;
+    int l, *t;
+    char *p;
+{
+    *(int *)p = stostr (c+1, l-2);
+}
+@}

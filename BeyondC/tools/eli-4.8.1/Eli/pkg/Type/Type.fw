@@ -1,0 +1,126 @@
+@=~
+~p maximum_input_line_length = infinity
+~! $Id: Type.fw,v 3.5 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+~O~<|NAME|Type.pdl~>~{
+|NAME|TypeOf:	DefTableKey;
+|NAME|DefType:	DefTableKey [Trans];
+~}
+
+~O~<|NAME|Type.specs~>~{
+$/Prop/PropLib.fw
+~}
+
+~O~<|NAME|Type.lido~>~{
+ATTR |NAME|Type: DefTableKey;
+
+CLASS SYMBOL |NAME|AnyRangeType END;
+
+CLASS SYMBOL |NAME|RootType INHERITS |NAME|AnyRangeType COMPUTE
+  SYNT.|NAME|GotType = 
+	CONSTITUENTS (|NAME|SetType.|NAME|GotType,
+			|NAME|DefType.|NAME|GotType)
+	SHIELD |NAME|AnyRangeType;
+END;
+
+CLASS SYMBOL |NAME|RangeType INHERITS |NAME|AnyRangeType COMPUTE
+  SYNT.|NAME|GotType = 
+	CONSTITUENTS (|NAME|SetType.|NAME|GotType,
+			|NAME|DefType.|NAME|GotType)
+	SHIELD |NAME|AnyRangeType
+	DEPENDS_ON INCLUDING |NAME|AnyRangeType.|NAME|GotType;
+END;
+
+CLASS SYMBOL |NAME|SetType COMPUTE
+  SYNT.|NAME|GotType =
+	Reset|NAME|TypeOf (THIS.|KEY|Key, THIS.|NAME|Type);
+END;
+
+CLASS SYMBOL |NAME|DefType:	|NAME|DefTypeOk: int;
+
+CLASS SYMBOL |NAME|DefType COMPUTE
+  INH.|NAME|DefTypeOk = 
+	NOT (|NAME|RecursiveDefType (THIS.|KEY|Key, THIS.|NAME|Type));
+  SYNT.|NAME|GotType = 
+	IF (INH.|NAME|DefTypeOk,
+	Reset|NAME|DefType (THIS.|KEY|Key, THIS.|NAME|Type));
+END;
+
+CLASS SYMBOL |NAME|GetType COMPUTE
+  SYNT.|NAME|Type = 
+	Trans|NAME|DefType (Get|NAME|TypeOf (THIS.|KEY|Key, NoKey))
+	DEPENDS_ON INCLUDING |NAME|AnyRangeType.|NAME|GotType;
+END;
+~}
+
+~O~<|NAME|Type.head~>~{
+#include "|NAME|Type.h"
+~}
+
+~O~<|NAME|Type.h~>~{
+#include "deftbl.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|RecursiveDefType (DefTableKey t1, DefTableKey t2);
+#else
+extern int |NAME|RecursiveDefType ();
+#endif
+/* On exit
+ *    returns 1 if t1 is t2 or the DefType relation applied to t2
+ *    directly or indirectly leads to t1; otherwise 0 is returned.
+ */
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|SameType (DefTableKey t1, DefTableKey t2);
+#else
+extern int |NAME|SameType ();
+#endif
+~}
+
+~O~<|NAME|Type.c~>~{
+#include "pdl_gen.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern int |NAME|RecursiveDefType (DefTableKey t1, DefTableKey t2)
+#else
+extern int |NAME|RecursiveDefType (t1, t2) DefTableKey t1, t2;
+#endif
+{
+  if (t1 == NoKey) return 0;
+  while (t2 != NoKey)
+	if (t1 == t2)
+		return 1;
+	else	t2 = GetDefType (t2, NoKey);
+  return 0;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+int |NAME|SameType (DefTableKey t1, DefTableKey t2)
+#else
+int |NAME|SameType (t1, t2) DefTableKey t1, t2;
+#endif
+{
+t1 = Trans|NAME|DefType (t1); t2 = Trans|NAME|DefType (t2);
+return ((t1==NoKey) || (t2==NoKey) || (t1==t2));
+}
+~}

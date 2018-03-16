@@ -1,0 +1,119 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: Reflex.fw,v 3.4 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module defines a pair of properties |NAME|To and |NAME|From.
+The values of both properties are of type DefTableKey.
+The properties are established by
+Reflex|NAME|To (kf) yielding a key kt
+or Reflex|NAME|From (kt) yielding a key kf.
+
+After any number of these calls
+Get|NAME|To (kf, NoKey) == kf and
+Get|NAME|From (kt, NoKey) == kf
+hold.
+
+~O~<|NAME|Reflex.specs~>~{
+$/Prop/PropLib.fw
+~}
+
+~O~<|NAME|Reflex.pdl~>~{
+|NAME|To:	DefTableKey;
+|NAME|From:	DefTableKey;
+~}
+
+~O~<|NAME|Reflex.head~>~{  
+#include "|NAME|Reflex.h"
+~}
+
+~O~<|NAME|Reflex.h~>~{
+#ifndef |NAME|REFLEX_H
+#define |NAME|REFLEX_H
+
+#include "deftbl.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern DefTableKey Reflex|NAME|To (DefTableKey key);
+#else
+extern DefTableKey Reflex|NAME|To ();
+#endif
+/* On exit
+ *	the result is the key res such that
+ *	Get|NAME|To (key, NoKey) == res and
+ *	Get|NAME|From (res, NoKey) == key
+ *	res is a new key if those relations have not been
+ *	previously established.
+ */
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern DefTableKey Reflex|NAME|From (DefTableKey key);
+#else
+extern DefTableKey Reflex|NAME|From ();
+#endif
+/* On exit
+ *	the result is the key res such that
+ *	Get|NAME|From (key, NoKey) == res and
+ *	Get|NAME|To (res, NoKey) == key
+ *	res is a new key if those relations have not been
+ *	previously established.
+ */
+
+#endif
+~}
+
+~O~<|NAME|Reflex.c~>~{
+#include "|NAME|Reflex.h"
+#include "pdl_gen.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey Reflex|NAME|To (DefTableKey key)
+#else
+DefTableKey Reflex|NAME|To (key) DefTableKey key;
+#endif
+{ DefTableKey res;
+  res = Get|NAME|To (key, NoKey);
+  if (res == NoKey) {
+	res = NewKey ();
+	Reset|NAME|To (key, res);
+	Reset|NAME|From (res, key);
+  }
+  return res;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey Reflex|NAME|From (DefTableKey key)
+#else
+DefTableKey Reflex|NAME|From (key) DefTableKey key;
+#endif
+{ DefTableKey res;
+  res = Get|NAME|From (key, NoKey);
+  if (res == NoKey) {
+	res = NewKey ();
+	Reset|NAME|From (key, res);
+	Reset|NAME|To (res, key);
+  }
+  return res;
+}
+~}

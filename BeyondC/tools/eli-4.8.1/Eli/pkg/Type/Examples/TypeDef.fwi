@@ -1,0 +1,310 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Type Definitions~>
+
+This chapter introduces type definitions to the language.
+A name can be defined for any @code{TypeDenoter} and can be
+used to denote that type.
+
+Here is an example program with type definitions. It makes
+use of the facility that identifiers may be defined after
+their uses:
+
+~O~<TypedefExamp~>~{
+begin
+  var   tt rv;
+  type  t tt;
+  type  record int i, bool b, real r end t;
+  var   int j, bool c, real s;
+  var   t rt;
+  j = rv.i;
+  c = rv.b;
+  s = rv.r;
+  rt = rv;
+end
+~}
+
+The following productions are added to the grammar:
+
+~$~<Abstract type declaration syntax~>==~{
+RULE: Declaration  ::= 'type' TypeDenoter TypeDefIdent ';' END;
+RULE: TypeDefIdent ::= Ident END;
+
+RULE: TypeDenoter  ::= TypeUseIdent END;
+RULE: TypeUseIdent ::= Ident END;
+~}
+A type definition introduces a new name for a type given
+by the @code{TypeDenoter}. We distinguish between defining occurrences
+@code{TypeDefIdent} used occurrences @code{TypeUseIdent} of type names.
+
+In our language we specify that
+a type definition does not introduce a new type, rather it introduces
+another name for a type. Hence, there may be many different
+names for the same type. Furthermore, even two @code{TypeDenoter}
+that differ in certain aspects may denote the same type.
+This view can be supported by the roles of the @code{StructEquiv} module:
+For each kind of types it is stated which of its properties
+distinguish two types of that kind (see record types or array types).
+
+Hence, in the following specification we only have to characterize
+a defining occurrence of a type identifier by the corresponding
+roles of the name analysis module and those for a defining
+occurrence of a type identifier (@code{TypeDefDefId},
+@code{ChkTypeDefDefId}). In the @code{Declaration} context
+the @code{Type} attribute is just passed from the @code{TypeDenoter}
+to the @code{TypeDefIdent}.
+
+~$~<Type declaration computation~>==~{
+SYMBOL TypeDefIdent INHERITS 
+	ChkUnique, IdDefScope, IdentOcc,
+	TypeDefDefId, ChkTypeDefDefId
+END;
+
+RULE: Declaration ::= 'type' TypeDenoter TypeDefIdent ';' COMPUTE
+  TypeDefIdent.Type = TypeDenoter.Type;
+END;
+~}
+
+Used occurrences of type identifiers are characterized by the module
+roles @code{TypeDefUseId} and @code{ChkTypeDefUseId}, and by the
+roles that characterize used indentifier occurrences of any kind:
+
+~$~<Used type identifiers~>==~{
+SYMBOL TypeUseIdent INHERITS 
+   IdUseEnv, IdentOcc, ChkIdUse,
+   TypeDefUseId, ChkTypeDefUseId END;
+
+RULE: TypeDenoter ::= TypeUseIdent COMPUTE
+  TypeDenoter.Type = TypeUseIdent.Type;
+END;
+~}
+
+
+A language that has facilities to define names for types and allows
+identifier uses before their definitions, opens the possibility
+to define types recursively, e.g.
+@example
+  type record int i, rt x end rt;
+@end example
+In many languages such a type @code{rt} would be disallowed,
+because a value of type @code{rt} may not contain another value
+of the same type. However, if the type of the component @code{x}
+was defined to be @code{pointer to rt} instead of @code{rt},
+then a useful list type would be defined. 
+
+This example illustrates that the existence of type definitions
+may cause the need to specify  which recursive
+type definitions are considered legal for a certain language.
+In our language, as defined so far, any recursion in a type
+definition is considered to be disallowed.
+However, the situation changes when there are types, like
+pointer types, such that that recursion is allowed when it
+passes through such a type.
+
+Hence, we introduce three properties:
+@code{IsRecursiveType}, @code{IsNotRecursiveType} 
+indicates whether a type is illegally recursive.
+@code{AllowRecurType} indicates that recursion through such a type
+is allowed. The latter will be set when such types are introduced,
+i.e. in the chapter on pointer types:
+~$~<Check recursive types properties~>==~{
+IsRecursiveType: int;
+IsNotRecursiveType: int;
+AllowRecurType: int;
+~}
+
+Such a check is performed by a function @code{ChkRecursiveType}
+which is applied to
+a type @code{t} and recursively walks through the component 
+types of @code{t}. If it reaches @code{t} again (without having 
+passed through a type that allows recursion), the type is indicated
+to be illegally recursive.
+
+~$~<Check for recursive types~>==~{
+SYMBOL TypeDefIdent COMPUTE
+  IF (ChkRecursiveType (THIS.Type),
+    message (ERROR, CatStrInd ("Recursively defined type: ", 
+                               THIS.Sym),
+             0, COORDREF))
+    <- INCLUDING Program.GotAllTypes;
+END;
+~}
+
+The implementation of the type walk algorithm uses a property
+that indicates whether a type is currently visited by the algorithm:
+~$~<Visiting property~>==~{
+Visiting: int;
+~}
+
+The following C module implements an algorithm that walks recursively
+through the components of a type to check whether the type is
+defined illegally recursively.
+
+~O~<RecTypeChk.head~>~{
+#include "RecTypeChk.h"
+~}
+
+~O~<RecTypeChk.h~>~{
+#include "deftbl.h"
+extern int ChkRecursiveType (DefTableKey tp);
+~}
+
+~O~<RecTypeChk.c~>~{
+#include "pdl_gen.h"
+#include "StructEquiv.h"
+#include "Typing.h"
+
+#ifdef TEST
+#define TEST 1
+#include <stdio.h>
+#endif
+
+static DefTableKey origType;
+
+
+int VisitCompOfType (DefTableKey node, DefTableKey component)
+/* This is the function used by the type walk that checks
+   for recursive types. It is called for every visit from a type node
+   to one of its components. 5 cases are distinguished, as explained below:
+*/
+{ 
+#ifdef TEST
+  printf ("visit at %s (%d) component %s (%d)\n", 
+      GetTypeName (node, "no name"),
+      GetTypeLine (node, 0),
+      GetTypeName (component, "no name"),
+      GetTypeLine (component, 0));
+#endif
+  if (GetAllowRecurType (component, 0))
+     /* do not visit a component type that allows recursion */
+     return 1; 
+  else {
+     if (FinalType (component) == FinalType (origType)) {
+       /* the type under investigation contains itself on a path
+          that does not lead through a type which allows for
+          recursion
+       */
+       ResetIsRecursiveType (origType, 1);
+       ResetIsRecursiveType (component, 1);
+       return 2; /* terminate walk */
+     }
+     if (GetIsRecursiveType (component, 0)) {
+     /* The component type of the node is already
+        recognized to be recursive 
+     */
+        ResetIsRecursiveType (origType, 1);
+        return 2; /* terminate walk */
+     }
+     if (GetVisiting (component, 0)) {
+       /* This component lies on a non-pointer cycle 
+          not involving the original type under investigation 
+       */
+       ResetIsRecursiveType (origType, 1);
+       ResetIsRecursiveType (component, 1);
+       return 2; /* terminate walk */
+     }
+  }
+  return 0; /* visit this component */
+}
+
+int RecWalkType (DefTableKey currType)
+/* 
+     Every direct or indirect component type of tp is visited, unless
+     the call VisitCompOfType (curr, comp) shortcuts the walk. 
+     If it returns
+       0: comp is visited
+       1: comp is skipped
+       2: the walk is terminated
+*/
+{ DefTableKeyList compseq;
+  DefTableKey compType;
+  int visitRes;
+  currType = FinalType (currType);
+
+  /* Do not visit a node, that is currently visited: */
+  if (GetVisiting (currType, 0)) return 1;
+  ResetVisiting (currType, 1);
+
+  /* consider all component types: */
+  for (compseq = GetComponentTypes (currType, NULLDefTableKeyList);
+       compseq != NULLDefTableKeyList;
+       compseq = TailDefTableKeyList (compseq)) {
+     compType = FinalType (HeadDefTableKeyList (compseq));
+
+     /* Skip non-type: */
+     if (compType == NoKey) continue;
+
+     /* Visit this component: */
+     visitRes = VisitCompOfType (currType, compType);
+
+     /* The component visit indicates how to continue: */
+     switch (visitRes) {
+       case 0:            /* dive into the component */
+          if (RecWalkType (compType)) {
+             /* the type walk is to be terminated */
+             visitRes = 2;
+             goto ret;
+          };
+          break;
+       case 1:            /* do not dive into the component */
+          break;
+       case 2:            /* terminate the walk */
+          visitRes = 2;
+          goto ret;
+       default:;
+       }
+       /* iteration of components continues */
+     }
+     visitRes = 0; /* components elaborated */
+ret:
+  ResetVisiting (currType, 0);
+  return visitRes;
+}
+
+
+int ChkRecursiveType (DefTableKey tp)
+/* on entry:
+     The results of the type equivalence analysis must be computed and
+     stored in the type data base.
+     tp represents a type.
+   method:
+     A walk through the type structure of tp is initiated,
+     and then executed.
+     VisitCompOfType (curr, comp) is called whenever
+     a direct component comp of the type curr is visited.
+     origType stores the type for which the recursion check is initiated.
+     Every type that is found to be illegally recursive is marked by 
+     the property IsRecursiveType. It is also used to shortcut
+     the walk through the type structure.
+   on exit:
+     1 is returned if the type tp directly or indirectly
+     has tp as a component type, and the path to it is not
+     legal for recursion
+     0 is returned otherwise.
+*/
+{ 
+  tp = FinalType (tp);
+  origType = tp;
+  if (GetIsRecursiveType (tp, 0)) return 1;
+  if (GetIsNotRecursiveType (tp, 0)) return 0;
+
+  /* the result is not yet known: */
+  RecWalkType (tp);
+
+  return GetIsRecursiveType (tp, 0);
+}
+~}
+
+~O~<TypeDef.pdl~>~{
+~<Check recursive types properties~>
+~<Visiting property~>
+~}
+
+~O~<TypeDef.lido~>~{
+~<Abstract type declaration syntax~>
+~<Type declaration computation~>
+~<Used type identifiers~>
+~<Check for recursive types~>
+~}

@@ -1,0 +1,533 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright, 1999, University of Paderborn
+@comment Copyright, 1999 Anthony M. Sloane
+@comment %**start of header
+@setfilename news4.3
+@settitle New Features of Eli Version 4.3
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{New Features of Eli Version 4.3}
+@sp 4
+@center Uwe Kastens
+@sp 1
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 2
+@center A. M. Sloane
+@sp 1
+@center Department of Computing
+@center Division of Information and Communication Sciences
+@center Macquarie University
+@center Sydney, NSW 2109 
+@center Australia
+@sp 2
+@center W. M. Waite
+@sp 1
+@center Department of Electrical and Computer Engineering
+@center University of Colorado
+@center Boulder, CO  80309-0425
+@center USA
+@sp 4
+@center $Revision: 3.7 $
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node top, Modlib, (dir), (dir)
+@ifinfo
+@comment  node-name,  next,  previous,  up
+@unnumbered New Features of Eli Version 4.3
+
+$Revision: 3.7 $
+@end ifinfo
+
+This document gives information about new facilities available in Eli
+version 4.3 and those modifications made since the previous distributed
+Eli version 4.2 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here. They shall just help users to solve their problem without taking
+notice of Eli's mechanism.
+
+@menu
+* Modlib::                      New functionality in the Module Library.
+* Lexical analysis::		Additional lexical analyzer support
+* Definition table::            A new operation to clone keys.
+* Oil::				A module to process argument lists
+* Tree parser::			Change in naming conventions
+* FunnelWeb::                   Maximum lines in input file increased.
+* Monitoring::                  Many changes to the Noosa monitoring system.
+
+* Index::                       
+@end menu
+
+@node Modlib, Lexical analysis, top, top
+@chapter Specification Module Library
+
+@menu
+* Name::                        Predefined Identifiers and Environment Module.
+* Adt::                         List Module Changes, CONSTITUENTS-Support for BitSets.
+* Prop::                        Mapping Objects to Integers.
+* Tech::                        Counting Objects.
+@end menu
+
+@node Name, Adt, Modlib, Modlib
+@section Name Analysis Library
+
+@subheading Predefined Identifiers
+
+@findex @code{PreDefine}
+@findex @code{PreDefId}
+@findex @code{Bind}
+@findex @code{PreDefSymKeyBind}
+@findex @code{PreDefKeyBind}
+@findex @code{PreDefBind}
+@findex Environment Module
+The name analysis modules establish bindings of
+type @code{Bind}, which are triples of an identifier code,
+a definition table key, and an environment.
+The modules used for predefinitions @code{PreDefine} and
+@code{PreDefId} now provide three additional macros
+which allow to introduce and initialize @code{Bind} variables
+for predefined entities:
+@code{PreDefSymKeyBind}, @code{PreDefKeyBind}, and @code{PreDefBind}.
+
+@findex PreDefMod
+@findex PreDefineSym
+@findex PreDefine
+A C module @code{PreDefMod} is separated from the two predefinition
+modules. It provides the two function @code{PreDefine} and
+@code{PreDefineSym}. They now can be used directly
+e.g. in order to predefine entities in other
+environments than the outermost one.
+In that case @code{PreDefMod.specs} is used instead
+of instances of the modules @code{Predefine} and @code{PreDefId}.
+Existing uses of the @code{Predefine} and @code{PreDefId} are
+not affected by this modification.
+
+@subheading Environment Module
+
+Most of the macros that access components of structured values
+via pointers, e.g.@: @code{IdnOf}, @code{KeyOf}, @code{EnvOf}, 
+are changed into functions to avoid
+multiple execution of side-effects caused by arguments of the
+macro calls.
+
+@node Adt, Prop, Name, Modlib
+@section Abstract Data Types
+
+@subheading Lists in LIDO Specifications
+
+@findex @code{LidoList}
+In the module @code{LidoList} three alternative symbol roles 
+are provided for tree nodes
+that carry list elements in construction or distribution
+of lists. They have different effects in cases where the
+element node can occur recursively in the tree.
+They handle the association between list elements and
+attribute of tree nodes in pre-order, post-order, or
+ignore recursive occurrences.
+
+A condition attribute is introduced which decides at an
+element node whether it is considered for the list.
+By overriding its computation skipping of list elements
+can be controlled by non-trivial conditions.
+
+Hence, the existing symbol role for that purpose,
+@code{FilterListElem}, is now outdated.
+It may be removed in a future version.
+
+@subheading Linear Lists of Any Type
+
+@findex AddToOrderedSet
+A function @code{AddToOrderedSet} has been added to be used
+for ordered lists without duplicates, which may implement sets.
+
+@findex SingleList
+A macro @code{SingleList} has been added especially to
+be used as the unary function of a CONSTITUENTS WITH clause.
+
+@findex @code{List}
+@findex @code{PtrList}
+The above facilities are added to both modules
+@code{List} and @code{PtrList}
+
+@subheading Bit Sets of Arbitrary Length
+
+@findex @code{ElemToBitSet}
+A macro @code{ElemToBitSet} has been added especially to
+be used as the unary function of a CONSTITUENTS WITH clause.
+
+@node Prop, Tech, Adt, Modlib
+@section Property Library
+
+@subheading Map Objects to Integers
+
+@findex @code{ObjCnt}
+In the module @code{ObjCnt} the start value and the increment of
+the mapping can be modified by overriding of attributes.
+
+@node Tech,  , Prop, Modlib
+@section Solutions of Common Problems
+
+@subheading Counting Symbol Occurrences
+
+@findex @code{Counter}
+In the module @code{Counter} the start value and the increment of
+the mapping can be modified by overriding of attributes.
+
+@node Lexical analysis, Definition table, Modlib, top
+@chapter Lexical analysis
+
+There have been several additions involving auxiliary scanners and token
+processors:
+a new auxiliary scanner for reporting token errors,
+a header file defining the built-in auxiliary scanners and token
+processors,
+and a consolidation of NUL character processing.
+
+@menu
+* lexerr::	Detecting lexical errors explicitly
+* auxNoEOL::	Scanning to, but not including, a newline
+* ScanProc::	Auxiliary scanner and token processor definitions
+* auxNUL::	Processing NUL characters during lexical analysis
+@end menu
+
+@node lexerr, auxNoEOL, Lexical analysis, Lexical analysis
+@section Detecting lexical errors explicitly
+
+Normally the scanner reports a lexical error when an input character cannot
+be the first character of any basic symbol.
+In other words, an error is signalled when the processor knows nothing
+about an input character.
+Sometimes, however, it is appropriate to recognize a specifc sequence of
+input characters as an invalid token.
+
+@findex @code{lexerr}
+A new auxiliary scanner called @code{lexerr} handles this situation.
+It reports that the scanned character sequence is not a token.
+It does not alter the initial classification, and does not compute a value.
+There is no source file for this token processor; it is a component of the
+scanner itself, but its interface is exported so that it can be used by
+other modules.
+
+@node auxNoEOL, ScanProc, lexerr,  Lexical analysis
+@section Scanning to, but not including, a newline
+
+@findex @code{auxNoEOL}
+The auxiliary scanner @code{auxNoEOL} extends the character sequence matched
+by the associated pattern to the end of the current line, but does not
+include the terminating newline.
+It is useful in situations where a token must begin at the beginning of a
+line, and therefore has a regular expression whose first character is the
+newline.
+A token preceding token using @code{auxEol} to extend to the end of a line
+would absorb the newline, thus making it impossible to recognize the token
+beginning at the beginning of the next line.
+
+@node ScanProc, auxNUL, auxNoEOL, Lexical analysis
+@section Auxiliary scanner and token processor definitions
+
+@findex @file{$elipkg/Scan/ScanProc.h}
+The header file @file{$elipkg/Scan/ScanProc.h}, containing definitions of
+all of the auxiliary scanners available in the library, has been added.
+It should be included by any C program that uses auxiliary scanners from
+the library.
+
+@node auxNUL, , ScanProc, Lexical analysis
+@section Processing NUL characters during lexical analysis
+
+@findex @code{auxNUL}
+All of the auxiliary scanners that scan over a newline now invoke
+@code{auxNUL} when they detect an ASCII NUL just beyond that newline.
+An ASCII NUL just beyond a newline character signals the end of the current
+source buffer, and an operation is needed to refill the buffer.
+By invoking @code{auxNUL} whenever this condition arises, we have
+centralized the operation of refilling the buffer at one point.
+This means that if a specification requires some special action whenever
+the buffer is refilled, it can override @code{auxNUL}.
+
+We strongly recommend that users adhere to this convention when they must
+write an auxiliary scanner that must scan over a newline.
+Here is a typical code sequence for such a scanner.
+The variable @code{p} is the scan pointer and
+@code{start} points to the beginning of the current token:
+
+@example
+if (*p == '\0') @{
+  int current = p - start;
+  TokenStart = start = auxNUL(start, current);
+  p = start + current;
+  StartLine = p - 1;
+  if (*p == '\0') @{
+    /* Code to deal appropriately with end-of-file.
+     * Some of the possibilities are:
+     *   1. Output an error report and return p
+     *   2. Simply return p
+     *   3. Move to another file and continue
+     ***/
+  @}
+@}
+@end example
+
+@node Definition table, Oil, Lexical analysis, top
+@chapter Definition table
+
+@findex CloneKey
+A new operation called CloneKey is provided.  It takes a single
+definition table key argument and returns a new key whose properties are
+initialised to the same values as the key argument.  Property values are
+shallow-copied.
+
+@node Oil, Tree parser, Definition table, top
+@chapter Oil
+
+The OilList module provides computations that implement parameter lists and
+argument lists for operator identification of function calls.
+The elements are arranged in left-to-right order as they occur in the tree.
+
+OilList is instantiated simply by mentioning its name:
+
+@example
+$/oil/OilList.fw
+@end example
+
+@noindent
+It provides the computational roles ParameterListRoot,
+ParameterListElem, ArgumentListRoot, and
+ArgumentListElem to support type analysis, the the roles
+ArgumentDeListRoot and ArgumentDeListElem to support code
+generation.
+
+@findex ParameterListElem
+The CLASS SYMBOL ParameterListElem is to be inherited by those
+SYMBOLs that contribute parameter types to the parameter list.
+The value of the attribute ParameterListElem.GivenType
+(of type tOilType) must be set by the user.
+
+@findex ParameterListRoot
+The CLASS SYMBOL ParameterListRoot is to be inherited by a
+SYMBOL that has all of the parameter SYMBOLs in its subtrees.
+The result of the computation is the attribute
+ParameterListRoot.ParameterList of type tOilArgSig, which specifies all of
+the parameter types.
+In order to obtain a complete signature for the function, the result type
+(ResType, for example) must be added:
+OilAddArgSig(ResType, ParameterListRoot.ParameterList)
+
+@findex ArgumentListElem
+The CLASS SYMBOL ArgumentListElem is to be inherited by those
+SYMBOLs that contribute arguments to the argument list.
+The value of the attribute ArgumentListElem.GivenType
+(of type tOilType) must be set by the user.
+
+@findex ArgumentListRoot
+The CLASS SYMBOL ArgumentListRoot is to be inherited by a
+SYMBOL that has all of the argument SYMBOLs in its subtrees.
+The result of the computation is the attribute
+ArgumentListRoot.ArgumentList
+of type tOilSetSig, which specifies all of the argument types.
+It can be used in a call to OilIdOpTSn to identify a function whose
+parameter types could be the result of coercing the argument types.
+
+@findex ArgumentDeListElem
+The CLASS SYMBOL ArgumentDeListElem is to be inherited by those
+SYMBOLs that contribute arguments to the argument list.
+The result of the computation is the attribute ArgumentDeListElem.RequiredType
+of type tOilType, which specifies the type required by the function for
+that argument.
+
+@findex ArgumentDeListRoot
+The CLASS SYMBOL ArgumentDeListRoot is to be inherited by a
+SYMBOL that has all of the argument SYMBOLs in its subtrees.
+The value of the attribute ArgumentDeListRoot.Operator (of type tOilOp)
+must be set by the user.
+
+Please note that it is not sensible to try to test the value of
+ArgumentDeListElem.RequiredType against the a priori type of the argument
+expression for the purpose of error reporting.
+The reason is that if ArgumentDeListRoot.Operator is a valid operator
+then there is no error, and if ArgumentDeListRoot.Operator is an invalid
+operator then there is no information about the required types of the
+arguments.
+
+@node Tree parser, FunnelWeb, Oil, top
+@chapter Change in tree parser naming conventions
+
+The conventions for naming types and routines created by the tree parser
+@code{tp} have been changed to avoid confusion with other Eli components
+and to shorten some names:
+
+@enumerate
+@item
+The type name @code{NODEPTR-TYPE} has been replaced by @code{TPNode}
+
+@item
+The prefix for all function names is now @code{TP_} rather than
+@code{burm_}.
+
+@item
+The name of the header file defining the prototypes of the generated
+functions is not @file{tp_gen.h} rather than @file{xform.h}.
+@end enumerate
+
+@node FunnelWeb, Monitoring, Tree parser, top
+@chapter FunnelWeb
+
+@findex FunnelWeb
+@findex Lines in a FunnelWeb file
+The maximum number of lines in a FunnelWeb specification was increased
+to 65000.
+
+@node Monitoring, Index, FunnelWeb, top
+@chapter Monitoring
+@findex Monitoring
+@findex Noosa
+
+The Noosa system (invoked using the @code{:mon} product has undergone
+many changes since the last release of Eli.  Some relatively minor
+alterations have been made to the user interface.  Numerous internal
+changes were also made, many aimed at improving the speed of Noosa.
+
+The following section summarise the major user visible changes.  See the
+@xref{top,,,mon,Execution Monitoring Reference}, or the Noosa online
+help for more details.
+
+@menu
+* Monitoring products::            mondbx gone, :mongdb working.
+* Main window command changes::    Token names, search, save and more.
+* Trees::                          Tree display enhancements.
+* Attributes::                     Monitoring and browsing attribute values.
+* File and handlers windows::      Editing files and specifying handlers.
+* Monitoring user-defined types::  Tcl specifications.
+* Configuring Noosa::              X resources.
+@end menu
+
+@node Monitoring products, Main window command changes, Monitoring, Monitoring
+@section Monitoring products
+
+@findex @code{mondbx} is no longer supported
+The @code{:mondbx} product for using Noosa in conjunction with Sun's dbx
+debugger is no longer supported.  It was too hard to maintain and most
+users do not have access to this debugger anyway.
+
+@findex @code{mongdb} is now working
+@findex @code{mongdb} and @code{+arg}
+@findex @code{+arg} and @code{mongdb}
+The @code{:mongdb} product for debugging with GNU's GDB is now fully
+supported and is working (in contrast with the situation at the Eli 4.2
+release).  Also, the @code{:mongdb} product now supports the @code{+arg} 
+parameter for specifying the arguments to the program being debugged.
+
+@findex Multiple @code{+arg} parameters
+The monitoring derivations now allow more than one @code{+arg}
+parameter. 
+
+@node Main window command changes, Trees, Monitoring products, Monitoring
+@section Main window command changes
+
+@findex Token names in Noosa
+The Token command now also displays the names of non-literal tokens. 
+
+@findex Noosa tearoff menus
+@findex Noosa keyboard accelerators
+Many Noosa menus can now be "torn off" so that they stay on the screen.
+Also, the Run, Continue and Kill commands now have keyboard accelerators
+Alt-r, Alt-c and Alt-k, respectively.
+
+@findex Noosa searching and saving
+@findex Searching and saving Noosa text
+The main Noosa text windows (input and transcript) can now be searched
+and saved to files via the Noosa menu.  The transcript can also be
+cleared.  
+
+@findex Event tracing dialog box
+The command to set event tracing filter regular expression now uses a
+popup dialog box.
+
+@node Trees, Attributes, Main window command changes, Monitoring
+@section Trees
+
+@findex Noosa tree displays
+The Noosa tree displays now come in four varieties: "just source"
+showing only the source tree, "separated computed" where each computed
+tree is shown in a separate window, "source and computed" where the
+source tree and computed trees are shown in the same window, and
+"incremental" where all trees are displayed together in a style which
+allows selective viewing.
+
+@findex Node command
+All forms of tree display now support the Node command that allows you
+to go to the "most relevant" node for a selected coordinate in the input
+text window.  Note that this command might not always produce expected
+results in the presence of computed trees where the coordinate ranges of 
+non-related nodes can overlap.
+
+@findex Postscript output from tree displays
+The tree displays now have commands that allow their contents (either
+whole or visible) to be saved as PostScript.
+
+@node Attributes, File and handlers windows, Trees, Monitoring
+@section Attributes
+@findex Attribute monitoring and browsing
+
+The tree displays now support two kinds of pop-up menu on the right
+mouse button.  On symbol names the menu gives the attributes of the
+symbol.  On rule names the menu gives attributes of the rule and
+terminal values that occur in that rule.  In each case you can express
+an interest in seeing the value of the attribute or terminal, with the
+option of stopping execution when it is available.
+
+Symbols and rules for which you have expressed an interest in one of
+their attributes are highlighted by underlining rather than by the extra
+graphic that was previously used.
+
+Many values of complex types can now be browsed once they have been
+displayed in the transcript, including definition table keys,
+environments, PTG nodes, OIL types and typesets, and syntax tree nodes
+(NODEPTRs).
+
+@node File and handlers windows, Monitoring user-defined types, Attributes, Monitoring
+@section File and handlers windows
+
+@findex Editing files in Noosa
+The Windows menu contains a File command that can be used to create
+windows in which you can edit arbitrary files.
+
+@findex Noosa handlers
+The Handlers window in Noosa lets you set Tcl handlers for event types.
+There have been many improvements including the ability to rename
+handlers, to disable/enable them without deleting and to save them to
+files.  Saved handlers can also be autoloaded.
+
+@node Monitoring user-defined types, Configuring Noosa, File and handlers windows, Monitoring
+@section Monitoring user-defined types
+
+@findex Tcl specifications
+Eli now supports specifications of type @file{tcl} containing Tcl code.
+If any of these files are present in the user's specifications they are
+concatenated in an undefined order and loaded by Noosa on startup.
+Files supplied in this way can be used to provide extra monitoring
+support.  The most likely situation where this will be useful is to
+enable Noosa to browse values of user-defined types.  See the
+@xref{top,,,mon,Execution Monitoring Reference}, for full details on how
+to do this.
+
+@node Configuring Noosa,  , Monitoring user-defined types, Monitoring
+@section Configuring Noosa
+
+@findex Noosa X resources
+@findex X resources for Noosa
+Many things such as the sizes of Noosa's windows and the colours used to
+highlight browsable values and selected tree nodes can now be configured
+using X resources.
+
+@node Index,  , Monitoring, top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

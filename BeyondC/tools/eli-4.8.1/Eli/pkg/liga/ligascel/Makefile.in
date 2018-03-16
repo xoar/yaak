@@ -1,0 +1,65 @@
+# $Id: Makefile.in,v 1.1 2001/10/25 14:35:04 cogito Exp $
+# Makefile for pkg/liga/ligascel
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+CC	=	@CC@
+
+IDL	=	../idl
+OPTION	=	../option
+
+DIR	=	pkg/liga/ligascel
+SRC	=
+COP	=       Makefile.in ligascel.c err.c source.c OutStr.c ligaconsts.h \
+		ligascel.h err.h source.h OutStr.h printerr.c printerr.h \
+		eliproto.h
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=	$(COM)
+RCS	=
+
+OBJ	=	ligascel.o err.o source.o OutStr.o printerr.o
+
+# 	The EXE is not used in this moment. If it is, insert it's Name here.
+#	and remove the Comments to get it made.
+
+EXE	=	
+
+GEN	=       $(OBJ)
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+EXTINCL	=	$(OPTION)/opt_input.h $(OPTION)/option_enums.h \
+		$(OPTION)/option_types.h
+
+EXTOBJ	=	$(IDL)/IDL.a $(OPTION)/opt_input.o
+
+CFLAGS	=	-I$(IDL) -I$(OPTION)
+
+@toolmk_h@
+
+ligascel.o: ligascel.c ligaconsts.h ligascel.h $(EXTINCL) err.h
+
+printerr.o : err.h printerr.c
+
+err.o:  err.c err.h source.h
+
+source.o: source.c source.h
+
+OutStr.o: OutStr.c OutStr.h

@@ -1,0 +1,8 @@
+/* $Id: gla.specs,v 2.1 2010/02/26 17:50:57 profw Exp $
+ * Files defining the generated lexical analyzer
+ */
+
+gla.dapto
+gla.reqmod
+gla.reqsym
+$/Input/err.specs

@@ -1,0 +1,2709 @@
+\documentstyle{report}
+\topmargin -0.25in
+\textheight 8.75in
+\oddsidemargin 0.0in
+\textwidth 6.5in
+\addtocounter{tocdepth}{1}
+\addtocounter{secnumdepth}{1}
+\newcommand{\ex}{\tt}   % font to use for in-line examples
+\title{
+        THE ODIN SYSTEM\\ \vspace{.5in}
+        REFERENCE MANUAL
+        }
+\author{Geoffrey M. Clemm}
+\date{
+*** Odin Version 1.17 ***\\
+The Odin System is a simpler, more powerful, and more reliable
+replacement for Make.  It computes complete dependency information
+automatically, making the build scripts shorter and easier to manage.
+Odin gains efficiency by parallel builds on remote machines,
+by eliminating most of the file system status queries required
+by Make, and by sharing from a cache of previously computed derived files.
+}
+
+\begin{document}
+
+\maketitle
+
+\pagenumbering{roman}
+\tableofcontents
+
+
+\chapter{Introduction}
+\label{intro}
+\pagenumbering{arabic}
+
+
+\section{Derived Object Managers}
+
+A software environment can be simplified if the
+user's attention is focused on the information provided by the environment
+rather than the tools that create this information.
+A {\em derived object manager} provides this focus
+by automating the process of tool invocation.
+A derived object manager responds to a request for a piece of computed
+information,
+or {\em derived object}, by invoking the minimal number of tools
+necessary to produce that object.
+If previously computed objects are automatically stored by the object manager
+for later re-use, significant improvements in response time can be achieved.
+
+In an extensible environment, the kinds of information potentially
+provided are extended by adding
+new tools that manipulate and generate new kinds of information.
+A few examples of the kind of information in a software environment
+are program source text, test data, modification histories,
+attributed syntax trees, compiled object code, data flow analysis,
+and results of symbolic execution.
+
+A derived object manager must provide
+a language with which a user or a tool can name any desired object,
+and a specification language for describing the kinds of objects to be managed
+and the tools that produce them.
+In the Odin system,
+derived objects are named by {\em odin-expressions},
+and the specification language is an extended production system
+called a {\em derivation graph}
+in which each tool is described by a single declaration.
+
+\section{Odin Objects}
+
+Each Odin object is either
+a {\em file}, a {\em string}, or a {\em list} (an ordered sequence of objects).
+An example of a file is a file containing source code,
+an executable binary file,
+or an output file from a test run.
+An example of a string is a command flag.
+An example of a list is the source files of a program
+or the arguments to a command.
+
+\subsection{Source and Derived Objects}
+
+Source objects are files that can be created or modified directly by the user.
+They can be regular files, directories, or symbolic links.
+Source objects cannot be automatically recreated by the Odin system,
+but are the basic building blocks
+from which the Odin system creates all other objects.
+Every source object is given a type by the Odin system
+based on its host filename,
+and this type determines what derived objects can be produced from the
+source object.
+
+Derived objects are objects that can be produced
+from source objects and other derived objects
+through the invocation of one or more tools.
+Tools are invoked only as needed to create a specified derived object.
+The Odin system automatically saves objects from previous requests,
+so a given object might already exist and therefore be available immediately.
+Derived objects are created and modified only by the Odin system itself,
+not by users.
+Examples of objects that can be derived from source code are
+a cross reference listing, executable binary code, or the list of files
+referenced by {\ex \#include} statements.
+
+
+\subsection{The Derived Object Cache}
+\label{cache}
+
+In the Odin system, all derived objects are stored in a directory
+called the {\em derived object cache}, or simply the {\em cache}.
+The cache also contains the database that stores the
+{\em depends} relationship between the output and input files of a tool run,
+and the {\em contains} relationship between a list and its elements.
+
+All host files other than those in the cache are source objects.
+A derived object can be copied from the cache into a source directory,
+but this does {\em not} make the file in the source directory a derived
+object -- it just creates a source object that happens to have the
+same contents as the derived object.
+
+The default location for the cache is a directory named {\ex .ODIN}
+in the user's home directory.
+A non-default cache location can be specified
+in the {\ex \$ODIN} environment variable,
+or with the {\ex -c} option to the {\ex odin} host-command.
+The main reasons for specifying a non-default location for
+the cache are to share a common cache with other users,
+or to locate the cache on a local disk for more efficient access
+to derived files.
+
+The default name for a file in the cache is {\ex label.id.type},
+where {\ex label} and {\ex id} are the results of {\ex :label}
+and {\ex :id} derivations (see Section~\ref{builtindrv}),
+and where {\ex type} is the type of the file.
+If this filename is too long for your operating system,
+set the environment variable {\$ODIN\_SHORTNAMES} and a file
+in the cache will be named simply {\ex id.type}.
+
+The default inter-process communication mechanism 
+for the odin cache manager process is TCP/IP.  
+If TCP/IP is not available,
+set the environment variable {\$ODIN\_LOCALIPC}
+and Unix domain sockets will be used instead.
+
+
+\section{Why Not Just Use Make?}
+
+The most ubiquitous build manager is Stu Feldman's Make program\cite{Make},
+with its many descendents\cite{Build}\cite{GNUMake}\cite{Mk}\cite{NMake}.
+Although ideal for small projects, Make has two major problems when used
+for large or complex projects: inaccurate dependency information and poor
+support for variant builds (such as builds for different architectures
+or builds with different levels of compiler optimization).
+Inaccurate dependency information leads to
+inefficient builds when unnecessary recomputations are performed and,
+more seriously, incorrect builds when necessary recomputations are not
+performed.
+Poor support for variant builds consists primarily of problems
+with specifying the variants
+and with storing the intermediate files for the variants.
+An indication of the difficulty of specifying a complex build variant
+is that often the only way to find out what a given build
+description means is to run Make and see what kind of commands it executes.
+
+\subsection{Dependency Information}
+
+Inaccurate dependency information results from a variety of causes.
+If the user maintains the dependency information by hand,
+it is virtually guaranteed to be incorrect.
+A ``make-depend'' tool can automate the production of dependency information,
+but because of the expense of running such a tool on an entire system,
+it is usually not automatically invoked before each build,
+again leading to builds based on incorrect dependency information.
+If a separate dependency file is created for each source file
+to allow incremental dependency computation,
+it becomes feasible to automatically compute dependency information
+before each build.
+Unfortunately, the source directories then become cluttered with
+dependency information files,
+and the overhead of opening and reading all the dependency information
+files becomes excessive.
+
+In Odin, tools that automatically gather dependency information are
+as easy to describe as standard tools like compilers,
+and Odin takes care of running them incrementally when they are needed.
+The results of these tools are stored in a persistent database
+rather than in the user's Makefiles,
+so that this information can be retrieved efficiently and does
+not clutter up source directories.
+
+Other dependency problems stem from Make's use of file modification time
+ordering to determine whether a file is up-to-date.
+Network clock inconsistencies and the use of tools
+that restore files with their original modification dates
+can result in changed sources files whose modification dates are less
+than those of derived files that depend on them.
+In Odin, this problem is avoided by storing 
+the date stamps of the inputs to a build step in the dependency database,
+so that any change to the modification time of a file (either earlier or later)
+triggers a re-build.
+
+The use of file modification time ordering
+can also result in inefficient builds
+when a change to a source file does not result in a corresponding change
+to an intermediate derived file.
+For example, adding a comment to a source file will usually not change
+the result of compiling that file,
+which means that there is no reason to relink the unchanged object code
+to form a new executable.
+Odin avoids this inefficiency by re-running a tool only if the
+{\em value} of one of its inputs has changed.
+In particular, this allows Odin to build directly from an RCS {\ex xxx,v}
+or an SCCS {\ex s.xxx} file,
+without first checking out a version into a source directory
+(the check-out operation is just a tool like any other tool).
+This is not feasible in Make because every time a new version is
+added to the version control file,
+it would assume everything derived from {\em any} version of that file
+must be recomputed.
+
+\subsection{Specifying Build Variants}
+
+In Make, a derived file variant is specified by changing the values
+of the appropriate Make variables.
+For example, the {\ex CC} variable can be changed to build with
+a different C compiler,
+and the {\ex CCFLAGS} variable can be changed to build with different
+C compiler flags.
+Unfortunately, the scope of a variable is the entire Makefile,
+while a build variant often involves different variable values
+for different intermediate files (for example, most of the files are
+to be compiled with debugging on, except for certain files containing
+time critical routines which are to be compiled with optimization on).
+To work around this problem, in Make you have to introduce a special build
+rule for each intermediate file build variant.
+
+In Odin, a filename can be extended by an arbitrary number of build
+{\em parameters}, that are then used by Odin to customize the way
+that file is processed in any build step that refers to it.
+For example,
+\begin{verbatim}
+   prog.c +debug
+\end{verbatim}
+indicates that the debug flag should be set whenever {\ex prog.c}
+is used in a build step, while
+\begin{verbatim}
+   io.c +optimize=2
+\end{verbatim}
+indicates that optimization level 2 should be set whenever {\ex io.c}
+is used in a build step.
+If the parameterized filename refers to a list of other files,
+the parameters are inherited by each of the referenced files.
+Because of the controlled scoping provided by Odin parameters
+and the expressive power of Odin implicit build rules,
+explicit build rules are hardly ever needed in an Odinfile.
+
+\subsection{Storing Derived File Variants}
+
+Make usually stores a derived file in the directory containing the source
+file from which it is derived,
+since this allows other builds that reference the source file
+to reuse that derived file.
+The main disadvantage of this approach is that only
+one variant of a given derived file can exist at a given time.
+The build manager can easily mistake which version is
+currently in the directory, leading to an incorrect build.
+Other disadvantages are that a user must have write permission
+to the source directories in order to re-build derived files,
+a user can mistakenly delete a source file thinking it is a derived file,
+and a user can mistakenly edit a derived file thinking it is a source file.
+
+The usual approach to this problem is to have the user explicitly
+allocate different directories to contain the results of
+different variant builds.
+Unfortunately, this makes it difficult for build sharing to take place,
+and unless the version of Make has been extended to write out
+the variable values used for the builds in a given directory,
+it is easy to get incorrect builds if different variable values are
+used for builds in the same directory.
+
+Another approach to this problem used in
+ClearMake\cite{ClearCase} consists of introducing a
+a proprietary {\em multi-version file system}.
+Every file opened for reading during the build and every variable value
+is tracked by the system, and if the same set of files with the same
+variables are present in a later build request,
+the previously computed results of the build are re-used.
+Even this approach, though,
+requires that the user explicitly manage variant derived file locations
+if concurrent variant builds of files local to a view are desired.
+
+The alternative approach used by Odin
+that does not require replacing the native Unix file system
+is to use a derived file cache.
+In effect, the file namespace is extended to provide names for
+every derived file variant.
+For example,
+\begin{verbatim}
+   /usr/src/prog.c :exe
+\end{verbatim}
+is the executable computed by compiling and linking {\ex /usr/src/prog.c},
+\begin{verbatim}
+   /usr/src/prog.c +debug :exe
+\end{verbatim}
+is the executable with debugging information, and
+\begin{verbatim}
+   /usr/src/prog.c +optimize=2 :exe
+\end{verbatim}
+is the executable compiled with level-2 optimization.
+These extended names are parsed by the Odin interpreter,
+which either maps the name to a source file
+or to the correct derived file in the derived file cache.
+
+\subsection{Parallel Builds}
+Odin provides concurrent parallel builds on local and remote hosts.
+You just specify a list of build hosts and the maximum number of parallel
+builds.
+
+\subsection{Help}
+Odin provides a powerful help system that uses its knowledge of the
+currently installed set of implicit rules (including those added by
+the local site administrator and an individual user).
+In particular, it can tell you what kinds of
+file extensions are currently recognized,
+what kinds of files can be derived from a specific type of file,
+and what parameters can be specified to produce a variant of a
+given derived file.
+
+\subsection{Errors}
+Odin maintains a persistent database of all error and warning messages
+associated with each build step.
+You can request a summary report of all errors and/or warnings
+associated with all the build steps of a particular derived object.
+For derived object variants,
+any valid error information from other variants is reused from the
+database rather than recomputed.
+
+\subsection{Operations on Lists}
+Enhanced versions of Make each provide their own idiosyncratic
+set of operations for manipulating filenames and lists of filenames.
+In Odin, these operations are performed by arbitrary Unix tools --
+this is feasible because Odin caches the results of these tools in
+the dependency database.
+
+\subsection{Editing while Building}
+You can edit files that are currently being used for one or more builds,
+and Odin will automatically recognize the changes and redo the parts of
+the builds that are affected by the changes,
+before letting the builds complete.
+
+\subsection{Recursive Implicit Rules}
+Odin allows you to recursively chain implicit rules,
+so for example, you can specify that the files included by
+a file are the files directly included by the file
+plus the files included by the files included by the file.
+Even enhanced versions of Make that do support chaining
+of implicit rules do not allow recursive chaining.
+
+\subsection{Circular Dependencies}
+Odin allows a file to depend on itself.
+This may seem unreasonable until you start writing tools that generate code,
+and you find that it would be very useful to have the tool generate part
+of itself.
+In this situation,
+Odin will terminate the computation when the tool produces a file that
+is identical to the one used as input to the computation
+(i.e., when the computation reaches a {\em fixed-point}).
+
+\subsection{Efficient Dependency Computation}
+In very large systems, even when a desired derived file is up-to-date,
+simply {\ex fstat()}'ing all the source files upon which it depends
+can take Make several minutes.
+Since Odin can broadcast file change information in its
+dependency database,
+dependency computation can be made proportional to the number of
+file dependencies that have {\em changed} rather than the total number
+of file dependencies.
+
+\subsection{Tool Dependencies}
+Build steps automatically depend on the tools and scripts that produce them,
+so if you change a tool, Odin will recompute anything produced by that
+tool the next time you request a build.
+If the tool change did not affect a particular run of that tool,
+the recomputation is short-circuited,
+and the rest of the derived files 
+that depend on that output of the tool are marked as still being valid.
+
+\subsection{Availability}
+Finally, Odin is portable, free, and available in source form.
+It can be retrieved via anonymous ftp
+from the compressed tar formatted file {\ex distribs/odin/odin.tar.Z}
+at {\ex ftp.cs.colorado.edu (128.138.243.151)}.
+
+
+\chapter{The Odinfile}
+\label{odinfile}
+
+
+\section{Targets}
+\label{target}
+
+A build {\em target} in a directory is
+a source file whose value is computed by the derived object manager.
+Just as Make uses a file named {\ex Makefile} to specify targets
+for a directory, Odin uses a file named {\ex Odinfile}.
+When the host-command:
+\begin{verbatim}
+   odin prog
+\end{verbatim}
+is executed, Odin checks to see if {\ex prog} is a target
+in {\ex ./Odinfile}.
+If it is a target, but is not up-to-date,
+Odin invokes whatever tools are necessary to bring it up-to-date.
+Odin automatically looks in all directories that
+contain the input files for these tools,
+and if there is an {\ex Odinfile}
+that contains a target for an input file,
+Odin ensures that the input file is up-to-date before using it.
+
+A target definition in an {\ex Odinfile} consists of a filename
+followed by two equal-signs and an {\em odin-expression}.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+   prog == prog.c +debug :exe
+\end{verbatim}
+declares that the value of the source file {\ex prog}
+should always be equal to the value
+of the file specified by the odin-expression {\ex prog.c+debug:exe}.
+
+\section{Odin-Expressions}
+\label{odinexpr}
+
+Just as any source file can be named with a source filename,
+any derived file can be named with an {\em odin-expression}.
+An odin-expression is just like a source filename,
+except that in addition to the slash operator used in source filenames
+for selecting elements of directories,
+there is a plus-sign operator for adding parameters to an object
+and a colon operator for selecting a derivation from an object.
+For example, in the odin-expression:
+\begin{verbatim}
+   src/prog.c+debug:exe
+\end{verbatim}
+{\ex prog.c} is selected from the {\ex src} directory,
+the parameter {\ex +debug} is associated with {\ex src/prog.c},
+and the {\ex :exe} (i.e. executable binary) derivation 
+is selected from {\ex src/prog.c+debug}.
+
+\subsection{Lexical Conventions}
+
+Lexically, an odin-expression is composed of a sequence of 
+{\em identifier} and {\em operator} tokens,
+and is terminated by a new-line character.
+An odin-expression can be continued on multiple lines
+by escaping each new-line character with a backslash.
+This backslash (but not the new-line) is deleted
+before the expression is parsed.
+Multiple odin-expressions can be specified on the same line
+by separating them with semi-colon operators.
+
+An identifier token is just a sequence of characters.
+The following characters:
+\begin{verbatim}
+   : + = ( ) / % ; ? $ < > ! <space> <tab> <new-line> # \ ' 
+\end{verbatim}
+must be escaped to be included in an identifier.
+A single character can be escaped by preceding it with a backslash
+(e.g. {\ex lost\verb.\.+found}).
+A sequence of characters can be escaped
+by enclosing them in single quote marks (e.g. {\ex 'lost+found'}).
+
+Unescaped {\em whitespace} characters (spaces, tabs, and new-lines)
+are ignored during parsing except when they separate adjacent identifiers.
+A comment is indicated by
+a sharp and is terminated by a new-line character.
+For example, the odin-expression:
+\begin{verbatim}
+   # this is a comment
+\end{verbatim}
+is a comment and is equivalent to whitespace.
+
+An odin-expression can be surrounded by parentheses.
+Parentheses are required for nested odin-expressions
+(such as values of parameters) or for the empty expression
+{\ex ()} which represents an immutable empty file.
+
+\subsection{Selection Expressions}
+\label{selection}
+
+A selection expression, indicated by the slash operator,
+selects a file from a directory.
+The argument to the slash operator is the {\em key} of the desired file.
+For example, the odin-expression:
+\begin{verbatim}
+   src/prog.c
+\end{verbatim}
+selects {\ex prog.c} from the directory {\ex src}.
+(The careful reader will note that an odin-expression composed entirely
+of selection expressions bears an uncanny resemblance to a standard
+Unix filename.)
+Any special character in the key must be escaped.
+For example, {\ex prog.c++} 
+must be escaped, as in {\ex prog.c\verb.\.+\verb.\.+} or {\ex 'prog.c++'}.
+
+Odin splits each key into two parts: a {\em root} and a {\em type-name}.
+The type-name is the longest prefix of the key
+that matches one of the declared source types prefixes
+(see Section~\ref{sourcedecl}).
+If no prefix match is found, the type-name is the longest suffix of the
+key that matches one of the declared source type suffixes.
+If no suffix match is found, the type-name is the empty string.
+
+Assuming that {\ex s.} is the only declared source type prefix and
+{\ex .c} is the only declared source type suffix, then the following
+relationships hold:
+\begin{verbatim}
+   FILENAME        KEY         ROOT     TYPE-NAME
+   src/prog.c      prog.c      prog     .c
+   src/s.prog.c    s.prog.c    prog.c   s.
+   src/prog        prog        prog 
+\end{verbatim}
+The type-name is used to determine the object type of the file
+(see Section~\ref{sourcedecl}),
+and the root is used to determine the object type of generic
+objects derived from the file (see Section~\ref{builtin}).
+
+\subsection{Derivation Expressions}
+
+A derivation expression, indicated by the colon operator,
+is used to specify a derived object.
+The argument to the colon operator is an {\em object type}
+that has been declared in one of the tool packages
+(see Section~\ref{objecttype}).
+For example, the odin-expression:
+\begin{verbatim}
+   prog.c :fmt
+\end{verbatim}
+names a formatted version of {\ex prog.c}, and the odin-expression:
+\begin{verbatim}
+   prog.c :fmt :exe
+\end{verbatim} 
+names the result of compiling and linking
+the formatted version of {\ex prog.c}.
+
+A derived object can be a directory,
+in which case it is called a {\em derived directory}.
+Elements of a derived directory are selected with the
+same slash operator used to select elements of source directories.
+For example, if {\ex src/prog.c:output} is a derived directory
+containing the output files from a test run of {\ex prog.c},
+and this directory contains three files named
+{\ex DATA}, {\ex source.listing}, and {\ex source.errors},
+then these three files are named by the odin-expressions:
+\begin{verbatim}
+   src/prog.c:output/DATA
+   src/prog.c:output/source.listing
+   src/prog.c:output/source.errors
+\end{verbatim}
+An element of a derived directory cannot be another directory,
+although it can be a symbolic link to another directory.
+
+\subsection{Parameterization Expressions}
+
+A parameterization expression, indicated by the plus-sign operator,
+extends an object with additional information
+that affects the derived objects produced from that object.
+The argument to the plus-sign operator is a {\em parameter type}
+(see Section~\ref{parametertype}),
+optionally followed by an equal-sign operator and a sequence of 
+one or more identifiers and parenthesized object-expressions.
+The identifiers specify string objects.
+For example, in the odin-expression:
+\begin{verbatim}
+   prog.c +lib=(support.c.sm +debug :a) +lib=termcap
+\end{verbatim}
+the value of the first {\ex +lib} parameter
+is the object {\ex support.c.sm+debug:a}
+and the value of the second {\ex +lib} parameter
+is the string {\ex termcap}.
+An example of an odin-expression with a parameter value that is a sequence is:
+\begin{verbatim}
+   prog.c +lib=dbm (support.c.sm +debug :a) socket
+\end{verbatim}
+which specifies that the {\ex +lib} parameter has a value that is
+a sequence consisting of the string {\ex dbm},
+the object {\ex support.c.sm+debug:a} and the string {\ex socket}.
+
+If the parameter value is omitted,
+it is equivalent to specifying the identifier consisting of a single space
+{\ex ' '} as the value.
+For example, the following two odin-expressions:
+\begin{verbatim}
+   prog.c +debug
+   prog.c +debug=' '
+\end{verbatim}
+are equivalent.
+
+The parameter values of a given parameter type in an odin-expression
+form an ordered set,
+where the order of the values is the order specified in the odin-expression.
+Therefore, the odin-expressions:
+\begin{verbatim}
+   prog.c +lib=dbm +lib=socket :exe
+   prog.c +lib=socket +lib=dbm :exe
+\end{verbatim}
+are not equivalent.
+If multiple copies of the same parameter value appear, only the first
+of the multiple copies is kept.
+For example, the odin-expressions:
+\begin{verbatim}
+   prog.c +lib=socket +lib=dbm +lib=socket :exe
+   prog.c +lib=socket +lib=dbm :exe
+\end{verbatim}
+are equivalent.
+If a parameter has a value that is a sequence,
+that value is only considered the same as another identical sequence.
+For example, the odin-expressions:
+\begin{verbatim}
+   prog.c +lib=socket dbm +lib=socket :exe
+   prog.c +lib=socket +lib=dbm :exe
+\end{verbatim}
+are not equivalent, while the odin-expressions:
+\begin{verbatim}
+   prog.c +lib=socket dbm +lib=socket +lib=socket dbm :exe
+   prog.c +lib=socket dbm +lib=socket :exe
+\end{verbatim}
+are equivalent.
+
+The parameter value lists of each parameter type are disjoint,
+therefore, the order of parameters of different types is not significant.
+For example, the odin-expressions:
+\begin{verbatim}
+   prog.c +debug +profile :exe
+   prog.c +profile +debug :exe
+\end{verbatim}
+are equivalent.
+
+Parameters of a list object are inherited by all the elements of the list.
+For example, if the odin-expression:
+\begin{verbatim}
+   prog.c.sm :list
+\end{verbatim}
+named a list whose elements were {\ex main.c} and {\ex subrs.c},
+then the odin-expression:
+\begin{verbatim}
+   prog.c.sm :list +debug
+\end{verbatim}
+associates the {\ex +debug} parameter with {\ex main.c} and {\ex subrs.c}.
+
+Parameters are not inherited forward or backward through derivations.
+Therefore, in the odin-expression:
+\begin{verbatim}
+   prog.c +debug :o +optimize=2 :exe
+\end{verbatim}
+the {\ex :o} derivation has debugging, but no optimization,
+while the {\ex :exe} derivation has optimization, but no debugging.
+
+Frequently, several odin-expressions share a common set of parameters.
+To support this kind of sharing,
+a parameterization expression can take the form of
+a plus-sign followed by a parenthesized object-expression.
+The common set of parameters are then stored in the file
+named by the object-expression.
+For example, if the file {\ex my.prms} contained the text:
+\begin{verbatim}
+   +debug +lib_sp=(/local/lib) +lib=socket +lib=dbm +gnu
+\end{verbatim}
+then the odin-expressions:
+\begin{verbatim}
+   prog.c +(my.prms) :exe
+   prog.c +debug +lib_sp=(/local/lib) +lib=socket +lib=dbm +gnu :exe
+\end{verbatim}
+would be equivalent.
+
+\subsection{String Expressions}
+
+A string expression, indicated by the equal-sign operator
+followed by an identifier,
+is used to specify arguments to tools that are not filenames.
+For example, the odin-expression:
+\begin{verbatim}
+   =cxv
+\end{verbatim}
+names the string {\ex cxv}.
+
+
+\section{Virtual Targets}
+\label{virtualtarget}
+
+In addition to targets,
+an {\ex Odinfile} can contain {\em virtual targets}
+that define a set of {\em virtual files}.
+A virtual target is like a target,
+except that the value is not copied into a host file,
+but is simply associated with the specified virtual filename.
+Virtual files provide a mechanism for specifying aliases
+for complicated odin-expressions,
+and a mechanism for specifying build-support files without cluttering
+host directories.
+
+A virtual target definition is the same as a target definition
+(see Section~\ref{target}),
+except that the filename begins with an unescaped percent-sign.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+   %prog == prog.c +debug :exe
+\end{verbatim}
+binds the odin-expression {\ex prog.c+debug:exe}
+to the virtual filename {\ex prog}.
+
+The syntax for selecting a virtual file from an {\ex Odinfile} is
+identical to that for selecting a file from a directory,
+except that a percent-sign is used instead of a slash.
+For example, the odin-expression:
+\begin{verbatim}
+   src/Odinfile%prog
+\end{verbatim}
+selects the virtual file {\ex prog} from {\ex src/Odinfile}.
+
+If the directory name preceding the percent-sign is omitted,
+the virtual file is selected from the {\ex Odinfile} in
+the current working directory.  For example, the odin-expressions:
+\begin{verbatim}
+   %prog
+   ./Odinfile%prog
+\end{verbatim}
+are equivalent.
+
+Although only a file named {\ex Odinfile} can specify targets,
+any file can contain virtual targets.
+For example, if {\ex src/models} were a host file containing the text:
+\begin{verbatim}
+   %fastprog == prog.c +optimize=2 :exe
+\end{verbatim}
+then the odin-expression:
+\begin{verbatim}
+   src/models%fastprog
+\end{verbatim}
+obtains the virtual target for {\ex \%fastprog} from {\ex src/models}.
+
+
+\section{Text Targets}
+\label{texttarget}
+
+The value of a target can be specified directly as lines of text
+(a {\em here document}), instead of as an odin-expression.
+In this case, the value declaration consists of
+two left-angle-brackets optionally followed by an arbitrary tag identifier.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+prog.c.sm == << END
+    main.c
+    routines.c
+END
+\end{verbatim}
+declares {\ex prog.c.sm} to be a text target.
+The value of {\ex prog.c.sm} is then a file containing the text:
+\begin{verbatim}
+    main.c
+    routines.c
+\end{verbatim}
+
+If the tag identifier is omitted, the text value ends at the first line
+containing only whitespace characters.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+prog.c.sm == <<
+    main.c
+    routines.c
+\end{verbatim}
+is equivalent to the previous definition.
+
+If the tag identifier begins with a new-line character,
+the terminating tag identifier does not contain the leading
+new-line character,
+and the last new-line character in the text value is ignored.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+vowels == << \\
+TAG
+aeiou
+TAG
+\end{verbatim}
+defines the contents of the file {\ex vowels} to be the
+five characters: "{\ex aeiou}".
+
+\subsection{Executable Text Targets}
+\label{executabletarget}
+
+Execute permission can be set for a text target by specifying
+it to be an {\em executable text target}.
+A text target is an executable text target
+if an exclamation-point is specified immediately before the {\ex <<}.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+   %backup == !<<
+      backup_name=$1.back
+      mv $1 $backup_name
+      cp $backup_name $1
+\end{verbatim}
+specifies {\ex \%backup} to be an executable text target.
+
+
+\section{Command Targets}
+\label{commandtarget}
+
+A target is a {\em command target}
+if an exclamation-point is specified following the filename.
+For example, the {\ex Odinfile} entry:
+\begin{verbatim}
+   prog ! == prog.c.sm +debug :exe
+\end{verbatim}
+specifies {\ex prog} to be a command target.
+
+Normally, when a filename is specified as an argument
+to the {\ex odin} host-command,
+Odin simply ensures that the value of the filename is up-to-date.
+If the filename is a command target,
+Odin also executes the file after it is made up-to-date.
+For example, with the preceding target definition for {\ex prog},
+the host-command:
+\begin{verbatim}
+   odin prog
+\end{verbatim}
+makes sure {\ex prog} is up-to-date with respect to
+{\ex prog.c.sm+debug:exe}, and then executes it.
+
+
+\section{Nested Target Definitions}
+\label{nestedtarget}
+
+A file containing additional target definitions can be specified in a
+{\em nested target definition}.
+A nested target definition consists of two equal-signs followed by an
+odin-expression.
+A common use of nested target definitions is to pre-process the text
+of the target definitions.
+For example, the {\ex Odinfile} entries:
+\begin{verbatim}
+   == %nested :cpp
+
+   %nested == << EOF
+   #ifdef linux
+      prog == prog.c +gnu +debug :exe
+   #else
+      prog == prog.c +debug :exe
+   #endif
+   EOF
+\end{verbatim}
+specify that the {\ex +gnu} parameter should be used
+on the {\ex linux} platform.
+
+
+\chapter{Getting Started}
+
+
+To get started using Odin,
+go to a directory containing your favorite "hello world" program.
+\begin{verbatim}
+   1% cd /u/fred
+   2% cat hello.c
+
+   main()
+   { printf("Hello World.\n"); return 0; }
+\end{verbatim}
+Then create an {\ex Odinfile} containing the line {\ex hello==hello.c:exe}.
+\begin{verbatim}
+   3% ls
+   Odinfile   hello.c
+   4% cat Odinfile
+
+   hello == hello.c :exe
+\end{verbatim}
+You are now ready to build {\ex hello}.  Just say:
+\begin{verbatim}
+   5% odin hello
+\end{verbatim}
+By default, Odin issues a message every time it invokes a tool, for example:
+\begin{verbatim}
+   scan_for_includes hello.c
+   cc -c hello.c
+   cc hello.o
+   ** Copying up-to-date value into /u/fred/hello
+\end{verbatim}
+The first tool scanned the source file for includes; the second generated
+object code; the third generated an executable; and the fourth copied the
+executable into the file named {\ex /u/fred/hello}.
+
+You have now built your first executable with Odin.  Now to test it:
+\begin{verbatim}
+   %6 hello
+   Hello World.
+\end{verbatim}
+
+
+\section{Systems with Several Files}
+
+Interesting systems will usually consist of more than one file.
+In Odin, you list the source files that make up the system in a
+file called a {\em system model}.
+The files named in {\ex \#include} statements
+should not be listed in the system model --
+Odin will discover them by running a tool
+that scans the source files looking for {\ex \#include} statements.
+
+Modify {\ex hello.c} so that it calls a {\ex print()}
+routine in the file {\ex print.c}.
+\begin{verbatim}
+   7% ls
+   Odinfile   hello    hello.c   print.c
+   8% cat hello.c
+
+   main()
+     { print("Hello "); print("World.\n"); return 0; }
+
+   9% cat print.c
+
+   print(s) char *s;
+     { printf(s); }
+\end{verbatim}
+Now you need to create a system model, {\ex hello.c.sm},
+for the new {\ex hello} system.
+The system model can be a regular file,
+but it can equally well be specifed as a {\em virtual file}
+in the {\ex Odinfile}.
+\begin{verbatim}
+   10% cat Odinfile
+
+   hello == %hello.c.sm :exe
+
+   %hello.c.sm == << EOF
+      hello.c; print.c
+   EOF
+\end{verbatim}
+The new version of {\ex hello} can now be built:
+\begin{verbatim}
+   11% odin hello
+\end{verbatim}
+You will notice although the file {\ex hello} has changed,
+no new files have appeared in the source directory.
+\begin{verbatim}
+   12% ls
+   Odinfile   hello   hello.c   print.c
+\end{verbatim}
+This is because all derived files are stored in the derived file cache
+directory ({\ex \$HOME/.ODIN} by default -- a non-default location can be
+specified in the {\ex \$ODIN} environment variable).
+
+But the derived files are available for re-use.  For example, if you
+to add a comment to the {\ex print()} routine:
+\begin{verbatim}
+   13% cat print.c
+
+   /* print the character sequence s to standard output */
+   print(s) char *s;
+     { printf(s); }
+\end{verbatim}
+and then ask Odin for {\ex hello} again:
+\begin{verbatim}
+   14% odin hello
+\end{verbatim}
+you will notice a couple of things.
+First, the previous results of scanning {\ex hello.c} for includes
+and compiling it are both re-used, as you would expect.
+Somewhat more surprising may be that Odin notices that the compilation of
+the modified {\ex print.c} produced the same object code.
+Odin then skips the link
+phase since the old executable is still valid.
+
+
+\section{Files in Other Directories}
+
+The files in a system model can be in any directory, using either
+absolute or relative pathnames.  Odin knows that {\ex /u/fred/print.c} is
+potentially different from {\ex /u/jane/print.c} so will not be confused if
+you switch from one to the other in your system model.
+\begin{verbatim}
+   15% cat ../jane/print.c
+
+   print(s) char *s;
+     { printf("*%s*", s); }
+
+   %16 cat Odinfile
+
+   hello == %hello.c.sm :exe
+
+   %hello.c.sm == << EOF
+      hello.c; ../jane/print.c
+   EOF
+
+   %17 odin hello
+\end{verbatim}
+
+
+\section {Recursive Odin Calls}
+
+Suppose that {\ex /u/jane/print.c} is modified to include a {\ex y.tab.h}
+file generated by the {\ex yacc} tool from a file named {\ex print.y}.
+The fact that {\ex y.tab.h} is generated from {\ex print.y} is indicated
+in {\ex /u/jane/Odinfile}.
+\begin{verbatim}
+   18% ls ../jane
+   Odinfile   print.c     print.y
+   19% cat ../jane/print.c
+
+   #include "y.tab.h"
+   print(s) char *s;
+     { printf("*%s*", s); }
+
+   20% cat ../jane/Odinfile
+
+   y.tab.h == print.y :h
+\end{verbatim}
+If you were using {\ex make}, you would have to somehow get {\ex make ../jane}
+invoked before you tried to {\ex make hello}.  In Odin, all these dependencies
+are computed for you, so a simple {\ex odin hello} is sufficient.
+\begin{verbatim}
+   21% odin hello
+\end{verbatim}
+
+
+\section{Debugging Your Program}
+
+Odin uses parameters instead of tool flags to modify the behavior of tools.
+In particular, {\ex +debug} adds debugging information.
+Either the entry for {\ex hello} in the {\ex Odinfile} can be modified,
+or as is done below, a second entry such as {\ex test-hello} can be added.
+\begin{verbatim}
+   22% cat Odinfile
+
+   hello == %hello.c.sm :exe
+
+   test-hello == %hello.c.sm +debug :exe
+
+   %hello.c.sm == << EOF
+      hello.c; print.c
+   EOF
+\end{verbatim}
+At this point, you can build {\ex test-hello} and run the debugger.
+\begin{verbatim}
+   23% odin test-hello
+
+   24% dbx test-hello
+\end{verbatim}
+These two steps can be combined by adding an executable {\ex \%dbx} entry
+into the {\ex Odinfile}.
+\begin{verbatim}
+   25% cat Odinfile
+
+   hello == %hello.c.sm :exe
+
+   test-hello == %hello.c.sm +debug :exe
+
+   %dbx ! == %hello.c.sm +debug :dbx
+
+   %hello.c.sm == << EOF
+      hello.c; print.c
+   EOF
+\end{verbatim}
+Then the host-command:
+\begin{verbatim}
+   26% odin %dbx
+\end{verbatim}
+would build an up-to-date executable from {\ex \%hello.c.sm},
+build a script for executing dbx on this executable,
+and then because {\ex \%dbx} is an executable target, execute the script.
+
+
+\chapter{Odin-Commands}
+\label{command}
+
+
+In addition to being used as a means for making source files up-to-date,
+the Odin system can also be used as a command interpreter for
+{\em odin-commands}.
+Odin-commands are either given as arguments to the {\ex odin} host-command,
+or, if the {\ex odin} host-command is invoked with no arguments, 
+odin-commands are read interactively from standard input.
+
+When Odin is used as an interactive command interpreter,
+it first prints out a banner indicating the version of Odin you are using,
+and then an arrow indicating it is ready to accept input.
+You exit the Odin interpreter by typing an end-of-file,
+commonly the control-D character.
+\begin{verbatim}
+   1% odin
+   Odin Version 1.17
+   -> ^D
+   2%
+\end{verbatim}
+
+There are four kinds of odin-commands: {\em query odin-commands},
+{\em copy odin-commands}, {\em execute odin-commands},
+and {\em variable assignment odin-commands}.
+If the Odin interpreter encounters a question-mark in an odin-command,
+it generates a help message describing what could have been
+typed at the location of the question-mark.
+
+
+\section{Query Odin-Commands}
+\label{query}
+
+A {\em query odin-command} consists simply of an odin-expression.
+A query odin-command causes the Odin object named by the odin-expression
+to be brought up to date,
+and reports information concerning the status of the object
+(such as error and warning messages produced by tool steps that were run
+to produce the object).
+\begin{verbatim}
+   -> print.c:exe
+   --- </u/fred/print.c :exe> generated errors ---
+   ld: Undefined symbol 
+      _main 
+   cc failed
+   ->
+\end{verbatim}
+The level of detail of this information is controlled by the value of the
+{\ex ErrLevel} and {\ex WarnLevel} variables (see Section~\ref{errlevel}).
+
+\subsection{Status of Odin Objects}
+
+Associated with each Odin object is a status level,
+where the status level is one of {\ex OK}, {\ex WARNING}, {\ex ERROR},
+{\ex CIRCULAR}, {\ex NOFILE}, and {\ex ABORT}.
+{\ex OK} is the maximum status level and {\ex ABORT} the minimum.
+
+The status of a given derived object depends on
+the results of the tools that produced that object.
+If any tool generated warning messages,
+the status level of the given object is at most {\ex WARNING}.
+If any tool generated error messages,
+the status level of the given object is at most {\ex ERROR}.
+If an object that was needed to create the
+given object is the object itself,
+the status level of the given object is at most {\ex CIRCULAR}.
+If any object that was needed to generate the given object did not exist,
+the status level of the given object is at most {\ex NOFILE}.
+If any object that was needed to
+generate the given object had status level {\ex ERROR} or less,
+then the status level of the given object is set to be {\ex ABORT}.
+
+The status of a source object is {\ex NOFILE}
+if the host file does not exist,
+the status of the value of its target value (see Section~\ref{target})
+if it is a target, and otherwise {\ex OK}.
+
+\subsection{Error and Warning Messages}
+
+The warning or error messages produced by all tool invocations
+are saved by the Odin system.
+The difference between an error and a warning is that
+an error prevents the tool from generating its output,
+while a warning indicates that although output was generated,
+it might be faulty.
+An example of an error message from a loader is:
+\begin{verbatim}
+   Unsatisfied external reference: "proc1".
+\end{verbatim}
+An example of a warning message from a loader is:
+\begin{verbatim}
+   Multiply defined external: "proc2", first copy loaded.
+\end{verbatim}
+
+A text file containing a summary of all error messages for an object
+can be obtained by applying the {\ex :err} derivation to the object.
+For example, the file named by the odin-expression:
+\begin{verbatim}
+   prog.c :exe :err
+\end{verbatim}
+contains a summary of all error messages 
+produced by any tool used in the generation of the {\ex prog.c:exe} object.
+The {\ex :warn} derivation produces a text file containing both
+warning and error messages for an object.
+
+
+\section{Copy Odin-Commands}
+\label{copy}
+
+A {\em copy odin-command} copies the contents of a specified Odin object
+into another object (the destination object).
+The copy is performed only if the status level
+of the specified object is no lower than {\ex WARNING}.
+The destination object must be a source object
+since only source objects can be directly modified by a user.
+
+There are two forms of the copy odin-command:
+{\em copy-to}, indicated by a right-angle-bracket, and
+{\em copy-from}, indicated by a left-angle-bracket.
+Examples of these two odin-commands are:
+\begin{verbatim}
+   -> prog.c +debug :exe > prog
+   -> prog < prog.c +debug :exe
+\end{verbatim}
+
+If the destination object is a directory,
+the {\em label} of the specified object is used to name the new copy.
+The label of a source file is
+the last component of the pathname of the source file.
+The label of a derived object is {\em source-label.type-name}
+where {\em type-name} is the name of the output type
+of the tool that produced it (see Section~\ref{execdecl}).
+and where {\em source-label} is the label of the source file
+from which it is derived.
+For example, the label of {\ex /usr/src/prog.c} is {\ex prog.c} and
+the label of {\ex /usr/src/prog.c:exe} is {\ex prog.c.exe}.
+
+If a list is copied into a directory,
+each element of the list is copied individually into the directory.
+
+\subsection{Copying to Standard Output}
+
+If the destination object is omitted from a copy-to odin-command,
+the specified object is displayed on the current standard output device.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c >
+\end{verbatim}
+displays the file named {\ex prog.c}.
+
+\subsection{Editing with the Copy Odin-Command}
+
+If only the destination object is specified in a copy-from odin-command,
+the specified object is given to the host-system editor
+indicated by the {\ex \$EDITOR} environment variable,
+with the {\ex vi} editor the default.
+For example, if the value of the {\ex \$EDITOR} variable is {\ex emacs},
+then the odin-command:
+\begin{verbatim}
+   -> prog.c <
+\end{verbatim}
+invokes the {\ex emacs} editor on the file {\ex prog.c}.
+
+
+\section{Execute Odin-Commands}
+\label{execute}
+
+An {\em execute odin-command} consists of an odin-expression followed by
+an exclamation-point and a host-command line,
+where either the odin-expression or the host-command can be omitted.
+Examples of execute odin-commands (with output omitted) are:
+\begin{verbatim}
+   -> prog.c +debug :stdout !more -s
+   -> ! ls *.c
+   -> prog.c :exe !
+\end{verbatim}
+The result of the execute odin-command is to make the Odin object up-to-date,
+append its filename to the host-command line,
+and give the resulting extended host-command line
+to the host system for execution.
+
+The exclamation-point has the special lexical property that if the
+first non-whitespace character following it
+is not a colon, a semi-colon, or an equal-sign,
+then the rest of the line is treated as a single escaped sequence of
+characters.
+This avoids the confusion resulting from interactions between host-command
+and Odin character escape conventions.
+A leading colon, equal-sign, or whitespace character can be
+included in the escaped sequence of characters by preceding it
+with a backslash.
+
+If the host-command is omitted, the Odin object itself is executed.
+If execute permission is set for the Odin object,
+it is given to the host operating system for execution;
+otherwise, the Odin object is assumed to contain odin-commands that are 
+to be executed by the Odin interpreter.
+
+
+\section{Variable Assignment Odin-Commands}
+\label{variable}
+
+The behavior of the Odin interpreter can be modified by changing the value
+of an {\em Odin variable}.
+The functions affected by Odin variables are
+the current working directory,
+the distributed parallel build facility,
+the help facility, the error and log facility,
+the file change notification facility, and
+the maximum total file system space used by derived objects.
+
+A variable assignment odin-command consists of the name of an Odin variable
+followed by an equal-sign operator and an odin-expression.
+For example, the odin-commands:
+\begin{verbatim}
+   -> dir = ../src
+   -> warnlevel = 4
+\end{verbatim}
+assign the value {\ex ../src} to the {\ex Dir} variable
+and the value {\ex 4} to the {\ex WarnLevel} variable
+(Odin variable names are case-insensitive).
+
+If the value is omitted from a variable assignment odin-command,
+Odin displays the current value of the specified variable.
+For example, after the preceding odin-commands, the odin-command:
+\begin{verbatim}
+   -> warnlevel =
+   4
+\end{verbatim}
+can be used to find out the current value of {\ex WarnLevel}.
+
+The Odin variables and their default values are:
+\begin{verbatim}
+   Dir ........... odin_invocation_directory
+   MaxBuilds ..... 2
+   BuildHosts .... LOCAL : LOCAL
+   Size .......... 0
+   KeepGoing ..... yes
+   History ....... yes
+   LogLevel ...... 2
+   ErrLevel ...... 3
+   WarnLevel ..... 2
+   HelpLevel ..... 1
+   VerifyLevel ... 2
+\end{verbatim}
+
+An initial value for an Odin variable can be
+specified in an environment variable whose name is the
+the Odin variable name in capital letters preceded by the
+string {\ex ODIN}.  For example, the initial value for {\ex MaxBuilds}
+is specified in the {\ex ODINMAXBUILDS} environment variable.
+
+\subsection{Dir}
+
+The current working directory can be changed by assigning a new value
+to the {\ex Dir} variable.
+The value of the current working directory is especially significant for Odin,
+since Odin identifies source objects by their absolute pathname,
+and the current working directory provides the absolute pathname
+for all relative names given to the Odin interpreter.
+
+\subsection{BuildHosts, MaxBuilds}
+
+The {\ex BuildHosts} variable specifies the list of hosts that are used to
+execute the tools that generate the derived objects.
+A tool is executed on the first entry in the {\ex BuildHosts}
+list that does not have a currently executing tool.
+The name {\ex LOCAL} refers to the local host.
+The {\ex MaxBuilds} variable specifies the maximum number of tools
+to execute in parallel.
+
+The hosts in {\ex BuildHosts} must have
+the same machine architecture and file namespace as the local host.
+If builds on non-equivalent machines are desired,
+this can be achieved by extending the tool packages
+(see Section~\ref{package}).
+
+\subsection{KeepGoing}
+\label{keepgoing}
+
+When a build step reports errors, Odin will continue with build
+steps that do not depend on the failed build step.
+Setting the value of the {\ex KeepGoing} variable to {\ex no}
+will cause Odin to terminate the build when any build step
+reports an error (similar to the default behavior of Make).
+
+\subsection{History}
+\label{history}
+
+The {\ex History} variable specifies whether emacs-like 
+history and command line editing is supported by Odin
+when it is used as an interactive command interpreter.
+
+\subsection{ErrLevel, WarnLevel, LogLevel}
+\label{errlevel}
+
+When an odin-command is executed, Odin indicates any errors or
+warnings associated with the odin-expressions specified in that odin-command.
+The {\ex ErrLevel} and {\ex WarnLevel} variables specify
+how detailed this report is.
+In particular, the user can choose whether
+to see final status information,
+to see messages incrementally as they are produced by tools steps,
+or to see a summary of all relevant messages (including those from
+previously cached tool steps).
+
+Odin can also produce a variety of information about the activities
+it is performing, such as a brief description of each tool that is
+invoked to satisfy a given request.
+The {\ex LogLevel} variable specifies how detailed these messages are.
+
+\subsection{HelpLevel}
+\label{helplevel}
+
+The {\ex HelpLevel} variable specifies what degree of detail
+is provided when the user asks for a list of possible
+file or parameter types (see Section~\ref{help}).
+Normally, only commonly used types are described, but the {\ex HelpLevel}
+can be increased to have all possible types described.
+
+\subsection{VerifyLevel}
+\label{verifylevel}
+
+By default, Odin checks the modification dates of all relevant source files
+at the beginning of an Odin session and before each interactive odin-command.
+If all file modifications during the session are performed through
+copy odin-commands or through an editor that has been upgraded
+to send a {\ex filename!:test} odin-command to Odin whenever {\ex filename}
+is modified,
+the {\ex VerifyLevel} variable can be set to {\ex 1} and only the check
+at the beginning of the session is performed.
+If all file modifications since the last session have been performed
+in the above manner,
+{\ex VerifyLevel} can be set to {\ex 0} and the initial check
+is avoided as well.
+
+\subsection{Size}
+
+The value of the {\ex Size} variable indicates how much disk space
+(in kilobytes) is currently being used by derived files.
+
+\subsection{Environment Variables}
+\label{envvar}
+
+Environment variables can be used in odin-commands.
+For example, if the environment variable {\ex \$HOME} has the value
+{\ex /u/geoff}, then the two odin-commands:
+\begin{verbatim}
+   -> $HOME/prog.c :exe
+   -> /u/geoff/prog.c :exe
+\end{verbatim}
+are equivalent.
+The value of an environment variable can be quoted by immediately 
+preceding it with a quoted identifier.
+For example, if the value of {\ex \$PATH} is {\ex /bin:/usr/bin},
+then the two odin-commands:
+\begin{verbatim}
+   -> prog.c +path='/etc:'$PATH
+   -> prog.c +path='/etc:/bin:/usr/bin'
+\end{verbatim}
+are equivalent.
+
+The environment variable {\ex \$ODINCACHE} is set by Odin to be the location
+of the cache directory (see Section~\ref{cache}).
+
+An environment variable is given a new value
+with a variable assignment odin-command of the form:
+\begin{verbatim}
+   Variable = !Value
+\end{verbatim}
+For example, the odin-command:
+\begin{verbatim}
+   -> HOME = !/u/clemm
+\end{verbatim}
+sets the value of the environment variable {\ex \$HOME} to be {\ex /u/clemm}.
+
+Although any environment variable can be used in odin-commands,
+only environment variables declared in a tool package 
+(see Section~\ref{envvardecl}) can be used in
+{\ex Odinfile} target definitions (see Section~\ref{target})
+The value of a declared environment variable is obtained from the
+environment at the time the current cache was created or reset.
+If the variable was not set in that environment,
+the default value specified in the derivation graph declaration
+of the variable is used.
+
+The expressions {\ex \~\,} and {\ex \~\,name} are treated as if they were
+environment variables, bound respectively to the login directory of the current
+user and the login directory of the user with login {\ex name}.
+
+
+\section{Help}
+\label{help}
+
+A simple context-sensitive help facility is provided
+to describe the syntax of odin-commands
+and the currently available object types and parameter types.
+If a user types a question-mark anywhere in an odin-command,
+Odin provides a description of what could appear at that location
+in the odin-command.
+For example, the following odin-command provides a syntax summary:
+\begin{verbatim}
+   -> ?
+   Control-D
+   OdinExpr
+      HostFile
+         + ParameterType
+         + ParameterType = Identifier
+         + ParameterType = (OdinExpr)
+         : FileType
+         / Key
+         % Key
+   OdinExpr > OdinExpr
+   OdinExpr >
+   OdinExpr < OdinExpr
+   OdinExpr <
+   OdinExpr !HostCommand
+   OdinExpr !
+   OdinExpr !:test
+   !HostCommand
+   !:test
+   Variable =
+   Variable = Value
+   Variable = !Value
+\end{verbatim}
+
+\subsection{Source Type Help}
+
+If a list of the declared source object type-names is desired,
+a question-mark can be put in place of the extension for a file.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog?
+   Possible Base Types :
+   .c ............. C source code
+   .f ............. Fortran77 source code
+   .c.sm .......... C system model containing a list of filenames
+   ,v ............. RCS version control file
+\end{verbatim}
+describes the currently recognized type suffixes,
+where the message contents is derived from the installed tool packages
+(see Section~\ref{sourcedecl}).
+
+\subsection{Derivation Help}
+
+If a list of possible derivations is desired,
+a question-mark can be put in place of the derivation name,
+and the Odin system responds with a list of the
+possible object types that can appear at that position.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c :fmt : ?
+   Possible Derivations from an Object of Type "fmt":
+   o .......... object code
+   exe ........ executable binary
+   fmt ........ formatted version
+   xref ....... cross reference listing
+\end{verbatim}
+states that all of the following are acceptable odin-expressions:
+\begin{verbatim}
+   prog.c :fmt :o
+   prog.c :fmt :exe
+   prog.c :fmt :fmt
+   prog.c :fmt :xref
+\end{verbatim}
+
+\subsection{Parameterization Help}
+
+If a list of the possible parameter types is desired,
+a question-mark can be put in place of the parameter,
+and the Odin system responds with a list of the possible
+parameter types that can appear at that position.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c :fmt + ?
+   Possible Parameters:
+   lib ........ object code library
+   debug ...... flag to generate debugging information
+\end{verbatim}
+states that any of the following are acceptable odin-expressions:
+\begin{verbatim}
+   prog.c :fmt +lib=(/usr/lib/network.a)
+   prog.c :fmt +debug
+   prog.c :fmt +debug +lib=(/usr/lib/network.a)
+\end{verbatim}
+
+A more exact form of parameter help can be specified by indicating
+which derivation you intend to apply to the parameterized object.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c :fmt + ? :o
+   Possible Parameters:
+   debug ...... flag to generate debugging information
+\end{verbatim}
+states that the following is an acceptable odin-expression:
+\begin{verbatim}
+   prog.c :fmt +debug :o
+\end{verbatim}
+Since the {\ex +lib} parameter is not relevant to the derivation
+from {\ex :fmt} to {\ex :o}, it is not listed.
+
+\subsection{Variable Help}
+
+A list of the available variable names is generated in response
+to the odin-command,
+\begin{verbatim}
+   -> ? =
+   Dir MaxBuilds BuildHosts Size KeepGoing History
+   LogLevel ErrLevel WarnLevel HelpLevel VerifyLevel
+\end{verbatim}
+A description of the possible values that can be assigned to a
+given variable is generated in response to the odin-command:
+\begin{verbatim}
+   Variable = ?
+\end{verbatim}
+For example, the odin-command:
+\begin{verbatim}
+   -> LogLevel = ?
+   0: No log information is generated.
+   1: Build commands are echoed.
+   2: And Odin commands.
+   3: And names of objects with errors.
+   4: And names of objects generated by tool scripts.
+   5: And names of objects generated by internal tools.
+   6: And names of objects deleted.
+   7: And names of objects touched by broadcast.
+\end{verbatim}
+describes the possible values of the {\ex LogLevel} variable.
+
+
+\appendix
+
+
+\chapter{Dependency Database Utilities}
+
+Odin provides the following utilities for browsing and
+modifying the dependency database:
+{\ex :test}, {\ex :redo}, {\ex :inputs}, {\ex :outputs},
+{\ex :elements}, {\ex :element-of}, and {\ex :dpath}.
+These utilities are specified
+following the exclamation point of an execute odin-command.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c :o ! :redo
+\end{verbatim}
+would invoke the {\ex :redo} utility with {\ex prog.c:o}
+as its argument.
+
+Unlike objects named in all other kinds of odin-commands,
+the object specified as an argument to a database utility
+is {\em not} made up-to-date before the database utility is executed.
+If you wish the database utility to be executed on an up-to-date object,
+first give the object as an argument to a query odin-command.
+For example:
+\begin{verbatim}
+   -> prog.c :o
+   -> prog.c :o ! :redo
+\end{verbatim}
+
+\section{Testing Host Files for Changes}
+
+Normally Odin checks all host files for changes
+at the beginning of an Odin session and before each interactive
+odin-command (Odin actually performs these checks lazily,
+and will {\ex fstat()} a file only when it is needed
+as input to a tool).
+It also checks a particular host file for changes after
+it is used as the destination of a copy odin-command.
+
+Odin's runtime efficiency can be significantly improved by setting
+the Odin {\ex VerifyLevel} variable to {\ex 1}
+(see Section~\ref{verifylevel}).
+In this mode, the user (or a tool such as the user's editor)
+must notify Odin with the {\ex :test} utility
+whenever a file changes other than through a copy odin-command.
+
+For example, the odin-command:
+\begin{verbatim}
+   -> /usr/src/prog.c ! :test
+\end{verbatim}
+causes Odin to check to see if {\ex /usr/src/prog.c} has changed,
+to determine whether objects derived from this file must be recomputed.
+If no source is specified for the {\ex :test} utility,
+i.e. the odin-command is just:
+\begin{verbatim}
+   -> ! :test
+\end{verbatim}
+then all source files known to Odin are checked.
+
+The Odin distribution includes an {\ex odin.el} file
+that extends the gnu-emacs editor to issue the appropriate
+{\em filename}{\ex!:test} message whenever a file is saved.
+
+\section{Redoing a Particular Derivation Step}
+
+The {\ex :redo} utility allows the user to tell Odin that
+a particular step in a derivation should be recomputed
+when it is next requested,
+even if that step has already been computed and
+inputs to that step have not changed.
+For example, the odin-commands:
+\begin{verbatim}
+   -> prog.c +debug :o ! :redo
+   -> prog.c +debug :o
+\end{verbatim}
+causes Odin to redo the {\ex prog.c+debug:o} step.
+This utility is useful when a transient error in a derivation step occurs,
+but the tool that implements the derivation step did not recognize it as
+a transient error.
+
+\section{Browsing the Dependency Database}
+
+The {\ex :inputs} utility displays the direct inputs to the
+specified derived object.
+The {\ex :outputs} utility displays the direct outputs of the
+specified object.
+The {\ex :elements} utility displays the elements of the
+specified list.
+The {\ex :element-of} utility displays the lists that contain
+the specified object as an element.
+For example, the odin-command:
+\begin{verbatim}
+   -> prog.c +debug :exe !: inputs
+\end{verbatim}
+displays the input objects used to compute the derived object
+{\ex prog.c+debug:exe}.
+
+The {\ex :dpath} utility displays the dependency path from one object
+to another (if there is one).
+Normally, {\ex :dpath} is applied to an object with a trailing
+{\ex +depend} parameter.  For example:
+\begin{verbatim}
+   prog.c :exe +depend=(/usr/include/stdio.h) ! :dpath
+\end{verbatim}
+would display the dependency path from {\ex /usr/include/stdio.h} to
+{\ex prog.c:exe}.
+
+When browsing the dependency database, you may encounter certain internal
+object types that you have not explicitly declared.  For example, if you have
+declared a tool with multiple outputs, there will be an object whose
+type ends with {\ex *composite} which represents the set of output
+objects from a single tool run.  Another example is a {\ex :abstract}
+object which is created for each {\ex :PIPE} and {\ex :GENERIC} object.
+
+
+\chapter{Tool Package Libraries}
+\label{library}
+
+
+In the Odin system, all information about tools, object types,
+and parameter types
+is specified in special directories called {\em tool package libraries}.
+When a cache (see Section~\ref{cache}) is created,
+{\em tool packages} from the tool package libraries
+are installed in the cache.
+A tool package is just a sub-directory of a tool package library,
+where the name of the package is the name of the sub-directory.
+The list of tool packages and the order in which they should be loaded
+is specified in a file named {\ex PKGLST} (one package name per line)
+in the tool package library directory.
+
+A default tool package library that is provided with the Odin distribution
+is installed into every cache.
+This default library is commonly located in {\ex /usr/local/lib/Odin}.
+Do not add, delete, or modify packages from this library.
+This ensures that installation of newer versions of Odin will not
+delete or overwrite any local modifications.
+
+A user can have the packages from additional libraries installed
+by specifying these libraries (separated by colons)
+in the {\ex \$ODINPATH} environment variable.
+For example, if a user sets the {\ex \$ODINPATH} variable to have the value
+{\ex /project/lib/Odin:/home/geoff/my-pkg-lib},
+then the packages from {\ex /project/lib/Odin},
+from {\ex /home/geoff/my-pkg-lib}, and from the default library
+are installed into every cache the user creates.
+If a package with a given name occurs in several package libraries,
+the package from the library that occurs earliest in {\ex \$ODINPATH} is used.
+
+The entries in {\ex \$ODINPATH} can also be individual tool packages
+rather than tool package libraries,
+in which case those packages are added to the list of packages to be
+installed into the cache.
+
+
+\section{Tool Packages}
+\label{package}
+
+A tool package is a directory that contains a {\em derivation graph} file
+and any support files that implement the tools
+declared in the derivation graph.
+If {\ex pkgx} is the name of the tool package,
+then {\ex pkgx.dg} is the name of the derivation graph file.
+
+The derivation graph is the mechanism for declaring
+object types, parameter types, environment varables,
+and tools for the tool package.
+It is described in detail in Section~\ref{derivationgraph}.
+
+\subsection{Versioned Tool Packages}
+
+By default, a tool package is symbolically linked into each cache
+in which it is installed.
+Since the Odin system maintains the dependency of each build step
+on the package scripts used by that build step,
+a change to a build script will cause the recomputation of all
+build steps that use that script.
+In case the script change is an enhancement rather than a bug fix,
+it is often preferable to allow each user to decide when to upgrade
+his cache to use the new packages.
+
+To provide this functionality,
+a tool package library can contain a file named {\ex LIBVER}
+in addition to the tool package subdirectories.
+The {\ex LIBVER} file contains text of the form {\ex PKGVER.i},
+where {\ex i} is an integer.
+Each tool package then contains a file named {\ex PKGVER.i}
+and a set of sub-directories,
+with one sub-directory for each version of the tool package.
+If changes to a package are made in the form of a new version,
+these changes are not seen by a user until he resets his cache
+with the {\ex -R} option to the {\ex odin} host-command.
+
+The tool package version installed into a cache is
+the one specifed by the {\ex PKGVER.i} file.
+For example, if {\ex LIBVER} contained the text {\ex PKGVER.7},
+and if a tool package directory named {\ex pkgx}
+contains three tool version directories named {\ex pkgx/1.0},
+{\ex pkgx/1.1-beta}, and {\ex pkgx/1.2},
+and if the contents of the {\ex pkgx/PKGVER.7} file
+is the text {\ex 1.1-beta},
+then any new cache that installs {\ex pkgx} 
+installs the {\ex 1.1-beta} version of {\ex pkgx}.
+
+When a new version of the library is installed,
+the {\ex i} in {\ex PKGVER.i} is incremented, e.g. to {\ex PKGVER.8},
+and a {\ex PKGVER.8} file is created in each of the package subdirectories.
+The library can be reverted back to an earlier version of the packages
+by editing the {\ex LIBVER} file.
+
+
+\section{Derivation Graphs}
+\label{derivationgraph}
+
+A derivation graph consists of a sequence of
+source, object type, parameter type, environment variable,
+and tool declarations.
+A source declaration associates a filename pattern with an object type.
+An object type declaration associates an object type with a set of
+supertypes.
+A parameter type declaration associates a parameter type with an object type
+for the parameter values.
+An environment variable declaration specifies a default value
+for an environment variable.
+A tool declaration specifies the inputs and outputs of the tool,
+where the inputs are object types, parameter types, odin-expressions,
+and identifiers, and where the outputs are object types.
+
+In the derivation graph, the following characters are special:
+\begin{verbatim}
+   <whitespace> # \ ' : + = ( ) / % ; ? * < > @ & $
+\end{verbatim}
+The quoting and commenting conventions for the derivation graph are the same
+as those for odin-expressions (see Section~\ref{odinexpr}).
+
+
+\section{Source Declarations}
+\label{sourcedecl}
+
+A source declaration specifies the type for a host file
+based on the filename of the host file.
+It consists of a {\em filename expression},
+a right arrow (composed from an equal-sign and a right-angle-bracket),
+and the name of a declared object type.
+A filename expression consists either of an identifier followed by an asterisk
+(i.e. all filenames that begin with that identifier),
+an asterisk followed by an identifier
+(i.e. all filenames that end with that identifier),
+or just an asterisk (i.e. all filenames).
+For example, the derivation graph entries:
+\begin{verbatim}
+   *.c   => :c;
+   *.c.c => :cplusplus;
+   s.*   => :sccs;
+   *     => :FILE;
+\end{verbatim}
+declare that the object type of a filename ending with {\ex .c} is {\ex :c},
+the object type of a filename ending with {\ex .c.c} is {\ex :cplusplus},
+the object type of a filename beginning with {\ex s.} is {\ex :sccs},
+and the object type of any filename is {\ex :FILE}.
+
+The following disambiguation rules are used to ensure
+that every host file has a single object type:
+if a host filename matches both a prefix filename expression
+and a suffix filename expression, then the host file is an instance
+of the prefix filename expression;
+if a host filename matches two different prefix filename expressions
+or two different suffix filename expressions,
+then the host file is an instance of the longer filename expression.
+For example, with the previous source declarations,
+the following object types would be assigned:
+\begin{verbatim}
+   FILENAME           OBJECT-TYPE
+   src/test.c         c
+   src/test.c.c       cplusplus
+   src/s.test.c.c     sccs
+   src/test           FILE
+\end{verbatim}
+
+
+\section{Object Type Declarations}
+\label{objecttype}
+
+An object type declaration consists of
+the object type being declared,
+a {\em help identifier},
+a right arrow, and the {\em direct supertypes} of the type being declared.
+For example, the derivation graph entries:
+\begin{verbatim}
+   :c 'C source code'? => :source;
+   :source 'source code' => :FILE;
+   :fmt 'formatted source code' => :FILE;
+\end{verbatim}
+declare that
+the direct supertype of {\ex :c} is {\ex :source},
+the direct supertype of {\ex :source} is {\ex :FILE}, and
+the direct supertype of {\ex :fmt} is {\ex :FILE}.
+
+The {\em help identifier} is used by the Odin help system to generate
+messages about the installed types (see Section~\ref{help}).
+The help identifier is followed by a question-mark to indicate that
+it should be displayed in help messages.
+The user can explictly request to see all help identifiers
+by increasing the value of the Odin {\ex HelpLevel} variable
+(see Section~\ref{helplevel}).
+
+An object type can be declared with multiple direct supertypes,
+either in a single declaration or in separate declarations.
+For example, the derivation graph entries:
+\begin{verbatim}
+   :fmt.c 'formatted version of C code' => :c;
+   :fmt.c 'formatted version of C code' => :fmt;
+\end{verbatim}
+and
+\begin{verbatim}
+   :fmt.c 'formatted version of C code' => :c :fmt;
+\end{verbatim}
+are equivalent.
+
+The {\em supertypes} of an object type are
+the transitive closure of the direct supertypes
+(i.e. the supertypes are the direct supertypes
+and all supertypes of the direct supertypes).
+For example, from the preceding object type declarations,
+the supertypes of {\ex :fmt.c} are {\ex :c}, {\ex :fmt},
+{\ex :source}, and {\ex :FILE}.
+
+The supertypes of an object type help determine what objects
+can be derived from an object of that type.
+In particular, if the type of the object {\ex obj} is {\ex :o},
+then the odin-expression {\ex obj:deriv} is valid
+if {\ex :deriv} is a supertype of {\ex :o},
+if {\ex :deriv} is the output of a tool
+whose inputs can be derived from {\ex :o},
+or if {\ex :deriv} is a supertype of an object
+that can be derived from {\ex :o}.
+
+In some rare circumstances, a tool produces an object of a specified type,
+but this object should not be used to provide this type as an intermediate
+step in derivations.
+In this case, the output type of the tool should be declared to be
+a {\ex base subtype} of the specified type.
+This is indicated by placing angle brackets around the supertype.
+For example, the derivation graph entry:
+\begin{verbatim}
+   :dummy_main.c 'dummy main program for a C executable' => <:c>;
+\end{verbatim}
+declares that the direct base supertype of {\ex :dummy\_main.c} is {\ex :c}.
+This states that derivations appropriate to objects of type
+{\ex :c} can be applied to objects of type {\ex :dummy\_main.c},
+but that a derived object of type {\ex :dummy\_main.c} cannot be used
+for a derivation that must produce an object of type {\ex :c}.
+
+
+\subsection{Built-In Supertypes}
+\label{builtin}
+
+The following object type declarations are built into the Odin system:
+\begin{verbatim}
+   :OBJECT 'any object'                                      => :OBJECT;
+   :FILE 'a file'                                            => :OBJECT;
+   :LIST 'a list'                                            => :OBJECT;
+   :VOID 'an object with no value'                           => :OBJECT;
+   :REFERENCE 'a reference'                                  => :OBJECT;
+   :EXECUTABLE 'a file that should be executed when queried' => :FILE;
+   :GENERIC 'a file whose type is based on its label'        => :FILE;
+   :PIPE 'a file produced by a type-preserving tool'         => :FILE;
+   :DERIVED-DIRECTORY 'a derived directory'                  => :FILE;
+\end{verbatim}
+Every object type other than the built-in object types
+must be a subtype of exactly one of
+{\ex :FILE}, {\ex :LIST}, or {\ex :VOID}.
+
+If the type of an object is a subtype of {\ex :VOID},
+the the object does not have a value.
+These types are useful for declaring tools that do not generate an output file,
+but do have side effects such as printing a file or writing a tape.
+
+If the type of an object is a subtype of {\ex :REFERENCE},
+then the object refers to another object.
+Whenever a reference object is used,
+such as when it is displayed or when it is given as input to a tool,
+it is automatically dereferenced by Odin.
+
+If the type of an object is a subtype of {\ex :EXECUTABLE},
+when the object is specified in a query odin-command (see Section~\ref{query}),
+the object is automatically executed
+after it has been made up-to-date.
+Executable types are analagous to executable targets
+(see Section~\ref{executabletarget}).
+
+If the type of an object is a subtype of {\ex :GENERIC},
+then the object is a derived file whose type
+is based on the root of the source file from which it is derived
+(see Section~\ref{selection}).
+A generic type is commonly produced as the result of a checkout
+operation from a source control file
+or as the result of an uncompress operation on a compressed file.
+For example, if the root of {\ex prog.c.sm,v} is {\ex prog.c.sm},
+if the type of a file named {\ex prog.c.sm} is {\ex :c.sm},
+and if {\ex :checkout} is declared in the derivation graph entry:
+\begin{verbatim}
+   :checkout 'version checked out of a version control file' => :GENERIC;
+\end{verbatim}
+then the type of {\ex prog.c.sm,v :checkout} is {\ex :c.sm}.
+
+If the type of an object is a subtype of {\ex :PIPE},
+then the object is a derived file whose type is the same
+as the input object to the tool that produced it.
+For example, if {\ex :stdout} is declared in the derivation graph entry:
+\begin{verbatim}
+   :stdout 'standard output file of a tool run' => :PIPE;
+\end{verbatim}
+and if the type of {\ex prog.c} is {\ex :c},
+then the type of {\ex prog.c +cmd='sed s/a/b/' :stdout} is also {\ex :c}.
+
+If the type of an object is a subtype of {\ex :DERIVED-DIRECTORY},
+then the object must be a directory produced by a tool.
+
+\subsection{Built-In Derived Object Types}
+\label{builtindrv}
+
+\begin{verbatim}
+   :err          'errors'                              => :FILE;
+   :warn         'warnings'                            => :FILE;
+   :targets      'targets in an Odinfile'              => :FILE;
+   :name         'name of an object'                   => :FILE;
+   :names        'names of the elements of a list'     => :FILE;
+   :filename     'filename of a file'                  => :FILE;
+   :ls           'filenames of the elements of a list' => :FILE;
+   :cat          'concatenation of the contents of the elements of a list'
+                                                       => :FILE;
+   :first        'first element of a list'             => :OBJECT;
+   :union        'list union'                          => :LIST;
+   :id           'unique numeric id of an object'      => :FILE;
+   :label        'label of an object'                  => :FILE;
+   :labels       'labels of the elements of a list'    => :FILE;
+   :dir          'directory containing a file'         => :REFERENCE;
+   :vir_dir      'directory containing virtual files'  => :DERIVED-DIRECTORY;
+   :depend       'source dependencies'                 => :LIST;
+   :source_names 'source components of a system model' => :FILE;
+   :operation_names 'operation components of a system model'
+                                                       => :FILE;
+   :view         'view from a view-path specification' => :LIST;
+   :expand_hooks 'expand hooks'                        => :FILE;
+   :apply        'apply operations'                    => :REFERENCE;
+   :odin_help    'top level help for odin'             => :EXECUTABLE;
+\end{verbatim}
+
+The {\ex :err} derivation produces a text file from an arbitrary input object.
+This text file contains all error messages generated by any tool
+used in the process of creating the input object.
+The {\ex :warn} derivation produces a text file
+that contains both warning and error messages.
+
+An {\ex Odinfile} can contain nested target definitions
+(see Section~\ref{nestedtarget}).
+The {\ex :targets} derivation produces a flattened version
+of the {\ex Odinfile} containing all target definitions.
+
+The {\ex :name} derivation produces a text file that contains an
+odin-expression that specifies the input object.
+The {\ex :names} derivation produces a text file from a list,
+where the text file contains a sequence of odin-expressions
+corresponding to the elements of the input object.
+
+The {\ex :filename} derivation produces a text file from a file,
+where the text file contains the host filename of the input object.
+The {\ex :ls} derivation produces a text file from a list,
+where the text file contains a sequence of host filenames
+corresponding to the elements of the input object.
+The filename of a string object is the identifier that names the string object.
+
+The {\ex :cat} derivation produces a text file from a list,
+where the text file contains the concatenation of the contents
+of the elements of the input object.
+The contents of a string object is the identifier that names the string object.
+
+The {\ex :first} derivation produces an object from a list,
+by selecting the first element of the list.
+This derivations is primarily used in parameter type declarations.
+
+The {\ex :union} derivation produces a list from a list,
+where each element in the input list appears exactly once in the output list.
+
+The {\ex :id} derivation generates a text file containing a unique
+integer for the input object.
+The {\ex :label} derivation generates a text file containing
+the label of the input object.
+The {\ex :labels} derivation produces a text file from a list,
+where the text file contains a sequence of labels corresponding to
+the elements of the input object.
+
+The {\ex :dir} derivation produces a reference object that refers to
+the directory containing the input object.
+If the input object is a derived object,
+then {\ex :dir} produces the directory that contains
+the source object from which the input object is derived.
+
+The {\ex :vir\_dir} derivation produces a derived directory
+containing all the virtual targets defined in the input file.
+For the syntax of a virtual target definition,
+see Section~\ref{virtualtarget}.
+
+The {\ex :depend} derivation produces a list
+from an arbitrary input object.
+This list contains all source objects used in the process
+of creating the input object.
+
+The {\ex :source\_names} derivation produces a text file from a text file.
+The format of the input text file is a sequence of odin-expressions
+naming file objects.
+The output text file contains just the initial source filename component
+of each odin-expression (i.e. the first derivation or parameterization
+operator and all subsequent operations are removed).
+An example of such an input file would be:
+\begin{verbatim}
+   ../prog.c :fmt +debug
+   test.c +inc_sp=(..)
+\end{verbatim}
+The result of applying {\ex :source\_names} to this input file would be:
+\begin{verbatim}
+   ../prog.c
+   test.c
+\end{verbatim}
+
+The {\ex :operation\_names} derivation produces a text file from a text file.
+The format of the input text file is a sequence of odin-expressions
+naming file objects, one odin-expression per line.
+The output text file contains any text following the initial source
+filename component of each odin-expression (i.e. everything preceding
+the first derivation or parameterization operator is removed).
+An example of such an input file would be:
+\begin{verbatim}
+   ../prog.c :fmt +debug
+   test.c +inc_sp=(..)
+\end{verbatim}
+The result of applying {\ex :operation\_names} to this input file would be:
+\begin{verbatim}
+   :fmt +debug
+   +inc_sp=(..)
+\end{verbatim}
+
+The {\ex :view} derivation produces a list from a text file.
+The format of the text file is sequences of odin-expressions
+naming file objects, where each sequence is terminated by
+an odin-expression naming a string object.
+An example of such an input file would be:
+\begin{verbatim}
+# the search sequence for test.h
+   test.h
+   test.h,v :co
+   RCS/test.h,v :co
+   = 'test.h'
+# the search sequence for sys.h
+   sys.h
+   SCCS/s.sys.h :co
+   = 'sys.h'
+\end{verbatim}
+The {\ex :view} list contains the first file from each sequence
+whose status is greater than {\ex ERROR}.
+If none of the files in a particular sequence have the appropriate
+status, the status of the {\ex :view} object is set to {\ex ERROR},
+unless the sequence is terminated by the empty string odin-expression:
+\begin{verbatim}
+   = ''
+\end{verbatim}
+in which case that sequence is just ignored.
+The {\ex :view} derivation depends only on the file selected
+from a given sequence and on the files preceding the
+selected file in the given sequence.
+This means that error messages from these preceding files
+are included in {\ex :error} reports for the {\ex :view} object,
+but any derived files following a selected files
+from a given sequence are ignored when the {\ex :view}
+object is made up-to-date.
+
+The {\ex :expand\_hooks} derivation produces a text file
+from an input text file by expanding all {\em hooks} found in the input file.
+A hook is a way of linking a message back to an appropriate area
+in a source file that is relevant to understanding the given message.
+
+A hook is text of the form:
+\begin{verbatim}
+   (| odin-expression | hooktype | hookdata |)
+\end{verbatim}
+where {\ex odin-expression} is the name of the object referenced by the hook,
+{\ex hooktype} is the type of the hook, and {\ex hookdata} is the actual
+reference.
+In order to escape the delimiter `{\ex ($|$}', `{\ex $|$}', or `{\ex $|$)}',
+precede it with a backslash.
+
+The {\ex :expand\_hooks} derivation
+replaces all constructs of this form with the result of
+applying {\ex :hooktype} to the object specified by {\ex odin-expression}.
+The value of {\ex hookdata} is placed in the {\ex +hookvalue} parameter.
+Hooks appearing in the hookdata string ({\em nested hooks}) are passed
+unexpanded to the {\ex :hooktype} tool.
+The result of the {\ex :hooktype} derivation should be
+text that references the appropriate location in a source file.
+This text can in turn contain additional hooks that will be expanded
+(in particular, this allows for the expansion of nested hooks).
+
+If {\ex :hooktype} cannot be applied to the object specified by 
+{\ex odin-expression},
+Odin attempts to apply {\ex :hooktype} to any object
+from which this object can be derived.
+If all attempts to apply {\ex :hooktype} fail, the result of hook
+expansion is the input text with the delimiters around the hook deleted.
+
+The {\ex :apply} derivation produces a reference object
+from an input object and a {\ex +apply} parameter.
+The value of the {\ex +apply} parameter is a file containing
+an arbitrary sequence of selection, derivation, and parameterization
+expressions, which are applied to the input object by the
+{\ex :apply} derivation.  For example, if the file {\ex apply.expr}
+contained the text:
+\begin{verbatim}
+   +debug :output /OUT.DAT
+\end{verbatim}
+the two odin-expressions:
+\begin{verbatim}
+   prog.c +debug :output /OUT.DAT
+   prog.c +apply=(apply.expr) :apply
+\end{verbatim}
+would be equivalent.
+
+The {\ex :odin\_help} derivation produces an executable file
+from the current working directory.
+This file is executed whenever the user requests help with the odin-command
+\begin{verbatim}
+   -> ?
+\end{verbatim}
+The {\ex :odin\_help} derivation can be overridden in a tool package
+to provide a different response to this help command.
+
+
+\section{Parameter Type Declarations}
+\label{parametertype}
+
+A parameter type declaration consists of
+the parameter type being declared,
+a help identifier, a right arrow, and an object type.
+When a parameter type is used as the input to a tool,
+the list of values for that parameter type
+is first derived to the specified object type.
+For example, the derivation graph entries:
+\begin{verbatim}
+   +define 'a macro definition'     => :cat;
+   +lib    'an object code library' => :ls;
+   +debug  'debug flag'             => :first;
+\end{verbatim}
+declare a {\ex +define} parameter type whose values are {\ex :cat}'ed,
+a {\ex +lib} parameter type whose values are {\ex :ls}'ed,
+and a {\ex +debug} parameter type which is a flag.
+
+
+\section{Environment Variable Declarations}
+\label{envvardecl}
+
+An environment variable declaration consists of
+the environment variable being declared,
+a help identifier, an equal-sign, and either an identifier
+or a parenthesized odin-expression.
+The value following the equal-sign specifies
+the default value for that variable.
+For example, the derivation graph entries:
+\begin{verbatim}
+   $CC 'name of the C compiler' = 'gcc';
+
+   $CC_HOME 'directory containing the C compiler tools' = '/usr/local/bin';
+\end{verbatim}
+specify default values for {\ex \$CC} and {\ex \$CC\_HOME}.
+These values can then be overridden by corresponding values in the
+environment when a particular cache is created or reset.
+For example, if the value of {\ex \$CC\_HOME} is defined to be
+{\ex /usr/public/bin} in the environment of the process 
+that resets a cache,
+then the value of {\ex \$CC\_HOME} is {\ex /usr/public/bin}
+whenever it is used in odin-expressions or odin-commands
+for that cache.
+
+If the default value is a parenthesized odin-expression,
+the expression is evaluated and the resulting filename is used as
+the default value.
+
+The current environment variables for a cache can be found
+in {\ex \$ODINCACHE/ENV}.
+
+
+\section{Tool Declarations}
+\label{execdecl}
+
+A tool declaration consists of a tool name, the tool inputs,
+a right arrow, and the tool outputs.
+The tool name is either {\ex EXEC}, {\ex COLLECT}, {\ex READ-LIST},
+or {\ex READ-REFERENCE}.
+A tool input is an identifier
+or an {\em input-expression} in parentheses (see Section~\ref{input}).
+A tool output is an object type in parentheses.
+
+For example, the derivation graph entry:
+\begin{verbatim}
+   EXEC (/bin/yacc) -dv (:y) => (:y.tab.c) (:y.tab.h) (:y.output);
+\end{verbatim}
+declares an {\ex EXEC} tool that has inputs
+{\ex (/bin/yacc)}, {\ex -dv}, and {\ex (:y)},
+and that has outputs:
+{\ex (:y.tab.c)}, {\ex (:y.tab.h)}, and {\ex (:y.output)}.
+
+\subsection{Input-Expressions}
+\label{input}
+
+An {\em input-expression} is just like an odin-expression,
+except that a {\em derived input} or a {\em parameter input}
+can appear wherever a source filename can appear in an odin-expression.
+A {\em derived input} consists of a declared object type (e.g. {\ex :o}),
+while a {\em parameter input} consists of a declared parameter type
+(e.g. {\ex +debug}).
+
+An input-expression can contain references to
+declared environment variables.
+For example, the following derivation graph entries declare
+and reference the environment variable {\ex \$YACC\_HOME}:
+\begin{verbatim}
+   $YACC_HOME 'directory containing yacc' = '/bin';
+
+   EXEC ($YACC_HOME/yacc) -dv (:y) => (:y.tab.c) (:y.tab.h) (:y.output);
+\end{verbatim}
+
+An input-expression can contain {\em second-order derivations}.
+A second-order derivation consists of a
+{\em second-order object type} followed by an equal sign
+and a derivation expression.
+For example, the input-expression:
+\begin{verbatim}
+   :lookup=:o
+\end{verbatim}
+contains the second-order object type {\ex :lookup} whose
+argument is the derivation {\ex :o}.
+
+The five second-order object types are {\ex :map}, {\ex :recurse},
+{\ex :extract}, {\ex :delete}, and {\ex :lookup}.
+The derivation {\ex :map=:type} takes a list as input and produces
+a list containing the application of {\ex :type}
+to each element of the input list.
+The derivation {\ex :recurse=:type} takes a list
+as input and produces a list containing the application of
+{\ex :type :recurse=:type} to each element of the input list
+to which {\ex :type} can be applied, and just the original
+element otherwise.  The derivation {\ex :recurse=:type} can
+also take a file as input, in which case the input is treated as
+if it were a list containing that file as its only member.
+The derivation {\ex :extract=:type} takes a list as input and produces a list
+containing each element of the input list that is a subtype of {\ex :type}.
+The derivation {\ex :delete=:type} takes a list as input and produces a list
+containing each element of the input list that is not a subtype of {\ex :type}.
+The derivation {\ex :lookup=:type} takes an object as input and
+produces a reference to an object
+which is the application of {\ex :type} to the input object,
+except that each parameter value that is a reference or list
+is replaced by the sequence of files contained by the reference
+or list.
+
+\subsection{Ignoring the Status of a Tool Input}
+
+By default, a tool is not run if any of its inputs 
+have {\ex ERROR} status or less.
+In case the tool should ignore the status of an input object,
+an ampersand is appended to the declaration of that input.
+For example, the derivation graph entry:
+\begin{verbatim}
+   EXEC (od.sh) (:FILE)& => (:FILE);
+\end{verbatim}
+declares that the {\ex od.sh} tool does not care
+what the status of the {\ex :FILE} input object is.
+
+\subsection{Ignoring Changes to the Value of a Tool Input}
+
+If a tool only uses the name of an input file
+or only uses the names of the elements of an input list,
+then that input is marked with an at-sign.
+In this case Odin ignores changes to the value(s) of the input object,
+and only reruns the tool if the name(s) change.
+For example, consider a tool that takes all relative names specified
+in {\ex \#include} statements from an input file,
+and forms the cross product of those names with a set of directory names
+in a specified search path.
+A derivation graph entry for such a tool is:
+\begin{verbatim}
+   EXEC (c_inc.sh) (:c) (+search_path)@ => (:c_inc);
+\end{verbatim}
+This declares that {\ex c\_incs.sh} should be re-executed
+if the {\ex :c} file or the names in the {\ex +search\_path} parameter change,
+but not if the contents of the directories in the search path change.
+
+\subsection{EXEC Tool}
+\label{exec}
+
+The {\ex EXEC} tool passes its inputs to the Unix {\ex execl()} system call
+and expects its outputs to be placed in current working directory.
+For example, the derivation graph entry:
+\begin{verbatim}
+   EXEC (/bin/ld) -o exe (:o) => (:exe);
+\end{verbatim}
+declares that a file named {\ex exe}
+is produced in the current working directory by executing the C statement:
+\begin{verbatim}
+   status = execl("/bin/ld", "/bin/ld", "-o", "exe", "/xxx/filename.o");
+\end{verbatim}
+where {\ex /xxx/filename.o} is the name of a file with type {\ex :o}.
+When the {\ex execl()} completes,
+Odin moves all output files into the cache.
+
+An identifier input is passed to the {\ex execl()} as a {\ex C} string.
+
+An input-expression is passed to the {\ex execl()} as an absolute pathname
+of the file named by the input-expression.
+Any relative source filename in the input-expression refers to a file
+in the same directory as the derivation graph file containing the type
+expression.  For example, if an {\ex EXEC} declaration in the
+derivation graph file {\ex /usr/local/Odin/misc/1.0/misc.dg} contains
+the input {\ex (od.sh)},
+then this input is passed to the {\ex execl()} as
+{\ex "/usr/local/Odin/misc/1.0/od.sh"}.
+
+The value of a derived or parameter input in the input-expression
+depends on the input object to which the tool is being applied.
+For example, in the odin-expression:
+\begin{verbatim}
+    prog.c +debug :exe
+\end{verbatim}
+the input object to the {\ex :exe} derivation is {\ex prog.c+debug}.
+
+Each derived input is replaced by a file that is
+the result of applying the derived input object type to the input object.
+For example, when the {\ex :exe} object is
+being computed for {\ex prog.c+debug:exe},
+the {\ex :o} derived input is replaced by the file
+{\ex prog.c+debug:o}.
+
+Each parameter input is replaced by
+the object resulting from applying the object type
+specified in the parameter declaration for that parameter type,
+to the list of values of all parameters
+of that type associated with the input object.
+As a special case,
+if no parameters of that type are associated with the input object,
+the parameter input is replaced by the empty string.
+
+Each {\ex execl()} is invoked in an empty directory provided by Odin,
+and the tool is expected to put its output files in that directory.
+The name of an output file should be the same as the type-name of
+the output.  For example, the result of the {\ex execl()} call
+for the output {\ex (:exe)} should be an output file named {\ex exe}.
+
+In addition to the declared outputs,
+there are two standard output files named {\ex ERRORS} and {\ex WARNINGS}.
+Fatal errors should be written to {\ex ERRORS},
+while recoverable errors should be written to {\ex WARNINGS}.
+The {\ex ERRORS} and {\ex WARNINGS} files
+are used by Odin to determine if error or warning status
+should be set for the output of the tool.
+
+Normally, the standard input of the {\ex execl()} is assigned to
+{\ex /dev/null} and the standard output and error is assigned to
+a temporary file that is written to the standard output of the
+Odin client process after the {\ex execl()} completes.
+To aid in debugging of an {\ex EXEC} tool,
+if the Odin variable {\ex MaxBuilds} is set to {\ex 1},
+the standard input, output, and error of the {\ex execl()}
+are those of the Odin client process.
+
+If the exit status of the {\ex execl()} call is non-zero,
+Odin ignores the results of the {\ex execl()},
+and aborts the current odin-command.
+Non-zero exit status should therefore only be used to indicate
+transient failures (such as memory or disk errors).
+This means that most standard Unix tools must be wrapped in shell scripts,
+so that normal error messages are sent to the file {\ex ERRORS}
+and only transient errors cause a non-zero exit status.
+
+Since the Odin system caches the results of {\ex EXEC} tools
+and assumes the results are still valid if none of the input objects change,
+the tool writer must ensure that all files referenced during a tool run
+are specified as inputs to that tool.
+In addition to explicit input files,
+many tools use additional implicit input files whose names are specified
+in the text of the explicit input to the tool.
+It is necessary in these cases to provide a dependency scanning tool
+that produces as output a list containing the names of all of these
+additional input files.
+These additional inputs are specified in the tool declaration
+separated from the explicit inputs by the keyword {\ex NEEDS}.
+For example, the derivation graph entry:
+\begin{verbatim}
+   EXEC (cc.sh) (:c) (+cc_flags) NEEDS (:all_c_inc) => (:o);
+\end{verbatim}
+declares that the script {\ex cc.sh} uses as inputs an object of type {\ex :c}
+and a parameter of type {\ex +cc\_flags},
+and indirectly uses as input an object of type {\ex :all\_c\_incs}.
+
+\subsection{COLLECT Tool}
+
+When the output type of a {\ex COLLECT} tool declaration is a list,
+the {\ex COLLECT} tool produces a list whose elements are the input objects.
+For example, the derivation graph entry:
+\begin{verbatim}
+   COLLECT (:c_inc) (:c_inc :map=:all_c_inc) => (:all_c_inc);
+   :all_c_inc 'all c includes' => :LIST;
+\end{verbatim}
+declares that {\ex :all\_c\_inc} is a list that contains {\ex :c\_inc}
+and the result of applying {\ex :all\_c\_inc} to each element of {\ex :c\_inc}.
+
+When the output type of a {\ex COLLECT} tool declaration is a reference,
+the {\ex COLLECT} tool produces a reference to the input object.
+For example, the derivation graph entry:
+\begin{verbatim}
+   COLLECT (:c +debug :o) => (:debug.o);
+   :debug.o 'C compile with debug on' => :REFERENCE;
+\end{verbatim}
+declares that {\ex :debug.o} is a reference to an object that
+results from applying {\ex +debug:o} to a {\ex :c} file.
+
+\subsection{READ-LIST Tool}
+
+The {\ex READ-LIST} tool produces a list from an input object.
+If the input object is a directory, this list contains all the files in
+the directory.
+If the input object is a file, this list contains
+the objects named by the odin-expressions in the input file.
+For example, the derivation graph entry:
+\begin{verbatim}
+   READ-LIST (:c.sm) => (:c.sm.list) ;
+\end{verbatim}
+declares that {\ex :c.sm.list} is the list specified by the contents of
+a file of type {\ex :c.sm}.
+
+\subsection{READ-REFERENCE Tool}
+
+The {\ex READ-REFERENCE} tool produces a reference to
+the object named by the single odin-expression in the input file.
+For example, the derivation graph entry:
+\begin{verbatim}
+   READ-REFERENCE (:stub.name) => (:stub.ref) ;
+\end{verbatim}
+declares that {\ex :stub.ref} will be a reference
+to the object named by the contents of
+a file of type {\ex :stub.name}.
+
+
+\chapter{Derivation Graph Syntax}
+
+\begin{verbatim}
+DerivationGraph -> DGEntry ';' DerivationGraph
+                -> ;
+
+DGEntry         -> 'BANNER' "Identifier"
+                -> 'INCLUDE' "Identifier"
+                -> Pattern '=' '>' ObjectType
+                -> ObjectType Description '=' '>' SuperType+
+                -> ParameterType Description '=' '>' ObjectType
+                -> Variable Description '=' "Identifier"
+                -> Tool Arg+ Needs '=' '>' Result+ ;
+
+Pattern         -> "Identifier" '*'
+                -> '*' "Identifier"
+                -> '*' ;
+
+ObjectType      -> ':' "Identifier" ;
+
+ParameterType   -> '+' "Identifier" ;
+
+Description     -> "Identifier" '?'
+                -> "Identifier" ;
+
+Tool            -> 'EXEC'
+                -> 'COLLECT'
+                -> 'READ-LIST'
+                -> 'READ-REFERENCE' ;
+
+SuperType       -> '<' ObjectType '>'
+                -> ObjectType ;
+
+Needs           -> 'NEEDS' Arg+
+                -> ;
+
+Result          -> '(' ObjectType ')' ;
+
+Arg             -> Word
+                -> FileArg
+                -> FileArg '@'
+                -> FileArg '&' ;
+
+FileArg         -> '(' Root Operation* ')' ;
+
+Root            -> Word
+                -> ObjectType
+                -> ParameterType
+                -> '/'
+                -> '/' Word
+                -> '%' Word ;
+
+Operation       -> Parameter
+                -> ObjectType
+                -> ObjectType '=' ObjectType
+                -> '/' Word
+                -> '/'
+                -> '%' Word ;
+
+Parameter       -> ParameterType
+                -> ParameterType '=' PrmVal+ ;
+
+PrmVal          -> Word
+                -> FileArg ;
+
+Word            -> "Identifier"
+                -> Variable;
+
+Variable        -> '$' "Identifier";
+\end{verbatim}
+
+
+\chapter{Derivation Graph Example}
+
+\begin{verbatim}
+# Source Types
+
+*.c.sm => :c.sm ;
+
+*.c => :c ;
+
+*.o => :o ;
+
+
+# Object Types
+
+:c.sm 'system model'? => :FILE ;
+
+:c 'C code'? => :FILE ;
+
+:o 'object module'? => :FILE ;
+
+:dir 'directory' => :REFERENCE ;
+
+:c_inc 'potential C-style included files' => :LIST ;
+
+:all_c_inc 'C-style transitively included files' => :LIST ;
+
+:c.list 'c source code list for tools wanting list input' => :c.sm.list ;
+
+:c.sm.list 'list' => :LIST ;
+
+:fmt 'formatted version of C code' => :PIPE ;
+
+:exe 'executable binary'? => :FILE ;
+
+
+# Parameter Types
+
++search_path 'name of a directory in an include search path'? => :ls ;
+
++ignore 'prefix of dependencies to ignore'? => :ls ;
+
++debug 'debug switch'? => :first ;
+
++prof 'profiling switch'? => :first ;
+
++gnu 'use gnu tools'? => :first ;
+
++cc_flags 'flags for cc'? => :cat ;
+
++ld_flags 'flags for ld'? => :cat ;
+
+
+# Environment Variables
+
+$CC 'name of C compiler' = 'gcc';
+
+$CC_HOME 'directory containing C compiler tools' = '/usr/local/bin';
+
+
+# Tools
+
+READ-LIST (:c.sm)
+   => (:c.sm.list) ;
+
+EXEC (indent.sh) (:c)
+   => (:fmt) ;
+ 
+EXEC (c_inc.sh) (:FILE) (:FILE :dir)@ (+search_path) (+ignore)
+   => (:c_inc) ;
+
+COLLECT (:c_inc :map=:all_c_inc) (:c_inc)
+   => (:all_c_inc) ;
+
+EXEC (cc.sh) (:c) (:c :dir)@ (+search_path)
+ (+debug) (+prof) (+gnu) (+cc_flags) NEEDS (:all_c_inc)& $CC $CC_HOME
+   => (:o) ;
+
+COLLECT (:c)
+   => (:c.list) ;
+
+EXEC (ld.sh) (:c.sm.list :map=:o) (+debug) (+gnu) (+prof) (+ld_flags)
+   => (:exe) ;
+\end{verbatim}
+
+\bibliographystyle{plain}
+\bibliography{odin}
+
+\end{document}

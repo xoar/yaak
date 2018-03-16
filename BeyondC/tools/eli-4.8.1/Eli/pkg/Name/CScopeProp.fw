@@ -1,0 +1,130 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: CScopeProp.fw,v 5.2 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements consistent renaming of identifiers
+using scopes which are properties associated with object keys.
+
+Using this module requires that the module for the basic 
+consistent renaming task, |NAME|CScope is also used.
+Both modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+The module provides the following computational roles:
+
+~O~<|NAME|CScopeProp.lido~>~{
+~<|NAME|Extend~>
+~<|NAME|ExportRange~>
+~<|NAME|QualIdUse~>
+~<|NAME|ChkQualIdUse~>
+~}
+
+The module introduces the property |NAME|Scope:
+
+~O~<|NAME|CScopeProp.pdl~>~{
+|NAME|Scope:	Environment; "envmod.h"
+~}
+
+The Computational Roles:
+
+The |NAME|RootScope computations are augmented
+by establishing
+a condition THIS.|NAME|GotScopeProp which guarantees
+that all |NAME|Scope properties are associated and the bindings
+in those scopes are made.
+
+~$~<|NAME|Extend~>==~{
+CLASS SYMBOL |NAME|RootScope:
+	|NAME|GotScopeProp:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|GotScopeProp = TAIL._C_|NAME|GotKeys;
+END;
+~}
+
+|NAME|ExportRange 
+is a |NAME|RangeScope. Its scope
+is to be associated as the |NAME|Scope property
+to the key THIS.|KEY|ScopeKey.
+All local definitions are bound in this scope.
+
+~$~<|NAME|ExportRange~>==~{
+CLASS SYMBOL |NAME|ExportRange INHERITS |NAME|AnyScope END;
+
+CLASS SYMBOL |NAME|ExportRange:
+	|KEY|ScopeKey:		DefTableKey;	/* required */
+
+CLASS SYMBOL |NAME|ExportRange INHERITS |NAME|RangeScope COMPUTE
+  HEAD._C_|NAME|GotKeys =
+	Reset|NAME|Scope (THIS.|KEY|ScopeKey, THIS.|NAME|Env)
+	<- THIS._C_|NAME|GotKeys;
+END;
+~}
+
+|NAME|QualIdUse
+is an applied identifier occurrence.
+A scope is to be given by the attribute SYNT.|NAME|Scope.
+This identifier is bound in the scope SYNT.|NAME|Scope.
+
+~$~<|NAME|QualIdUse~>==~{
+CLASS SYMBOL |NAME|QualIdUse:
+	Sym:		int,			/* required */
+	|NAME|ScopeKey:	DefTableKey,		/* required or Scope */
+	|NAME|Scope:	Environment,		/* required */
+	|KEY|Bind:	Binding		SYNT,	/* provided */
+	|KEY|Key:	DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|QualIdUse INHERITS _|NAME|InhPrecondDefault
+COMPUTE
+  INH.|NAME|ScopeKey = NoKey; /* default if Scope computation is overridden */
+  SYNT.|NAME|Scope = Get|NAME|Scope (THIS.|NAME|ScopeKey, NoEnv)
+     <- THIS._C_|NAME|GotKeys;
+  SYNT.|KEY|Bind =
+	BindingInScope (THIS.|NAME|Scope, THIS.Sym)
+	<- (THIS._C_|NAME|GotKeys,
+	    SYNT._|NAME|InhPrecond);
+  SYNT.|KEY|Key = KeyOf (SYNT.|KEY|Bind);
+  THIS._C_|NAME|GotKeys = SYNT.|KEY|Key;
+END;
+~}
+
+|NAME|ChkQualIdUse
+may be used for any applied identifier occurrence to issue an error
+message if no binding is found.
+
+~$~<|NAME|ChkQualIdUse~>==~{
+CLASS SYMBOL |NAME|ChkQualIdUse:
+      |NAME|Scope:	Environment,		/* required */
+      |KEY|Key:		DefTableKey	SYNT,	/* required */
+      Sym:		int,			/* required */
+      SymErr:		int             SYNT,	/* required */
+      SymMsg:		VOID            SYNT;	/* required */
+
+CLASS SYMBOL |NAME|ChkQualIdUse COMPUTE
+  SYNT.SymErr = AND(NE(THIS.|NAME|Scope,NoEnv),EQ(THIS.|KEY|Key,NoKey));
+  SYNT.SymMsg = IF (THIS.SymErr,
+      message (ERROR, CatStrInd ("identifier is not defined: ", THIS.Sym),
+           0, COORDREF));
+END;
+~}

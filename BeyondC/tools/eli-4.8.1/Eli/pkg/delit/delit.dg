@@ -1,0 +1,40 @@
+# $Id: delit.dg,v 2.4 2001/07/09 06:35:02 tony Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.delit => :delit;
+:delit 'Literals to be deleted from the finite-state machine'? => :FILE;
+:delit.cmpd 'Set of delit specification fragments' => :LIST;
+COLLECT  (:delit)
+  => (:one.delit.cmpd);
+:one.delit.cmpd 'Singleton delit specification' => :delit.cmpd;
+COLLECT  (:LIST :extract=:delit)
+  => (:ext.delit.cmpd);
+:ext.delit.cmpd 'Extracted delit specification fragments' => :delit.cmpd;
+COLLECT  (:one.gla.cmpd :extract=:delit)
+  => (:empty.delit.gla.cmpd);
+:empty.delit.gla.cmpd 'Empty delit specification derived from gla' => :delit.cmpd;
+EXEC (lit_out.sh) (:delit.cmpd :names) (:lex_code.cmpd :names) (:lit_gen :name)
+  => (:lit_out);
+:lit_out 'Results of literal processing' => :FILE;
+EXEC (lit_gen.sh) (:delit.cmpd :cpp) (:lex_code.cmpd :cpp)
+  => (:lit_gen);
+:lit_gen 'Generated literal descriptions' => :DERIVED-DIRECTORY;
+
+COLLECT (:level_6_specs +incl=(:etaIncl) :lit_out :list)
+  => (:eli*level_7_specs_in);

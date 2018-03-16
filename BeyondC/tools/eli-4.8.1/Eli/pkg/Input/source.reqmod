@@ -1,0 +1,7 @@
+/* $Id: source.reqmod,v 2.2 2013/07/30 20:32:38 profw Exp $
+ * Source text input.
+ * Copyright (c) 1991, The Regents of the University of Colorado
+ */
+
+source.c
+source.h

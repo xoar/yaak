@@ -1,0 +1,9 @@
+{
+#if defined(__cplusplus) || defined(__STDC__)
+extern int ___Eli_Main(void);
+#else
+extern int ___Eli_Main();
+#endif
+
+int i = ___Eli_Main();
+}

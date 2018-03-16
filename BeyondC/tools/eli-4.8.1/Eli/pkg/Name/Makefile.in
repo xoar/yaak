@@ -1,0 +1,62 @@
+# $Id: Makefile.in,v 1.7 2010/03/04 20:12:39 profw Exp $
+# 
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+# 
+
+CC      =       @CC@
+
+DIR	=	pkg/Name
+SRC	=	AlgInh.fw  \
+		AlgRangeSeq.fw  \
+		AlgScope.fw  \
+		AlgScopeProp.fw  \
+		BuInh.fw  \
+		BuRangeSeq.fw  \
+		BuScope.fw  \
+		BuScopeProp.fw  \
+		CInh.fw  \
+		CRangeSeq.fw  \
+		CScope.fw  \
+		CScopeProp.fw  \
+		ScopeProp.fw  \
+		PreDefId.fw  \
+		PreDefine.fw  \
+		PreDefMod.c PreDefMod.h PreDefMod.specs \
+		ShowBinding.fw  \
+		envmod.h envmod.c envmod.specs envmod.head envmod.save.eta \
+                envmod.tcl envmod.dapto envmod.reqmod
+COP	=	Makefile.in version
+AUX	=	$(COP) Makefile
+COM	=	AlgInh.gnrc AlgRangeSeq.gnrc AlgScope.gnrc AlgScopeProp.gnrc \
+		BuInh.gnrc BuRangeSeq.gnrc BuScope.gnrc BuScopeProp.gnrc \
+		CInh.gnrc CRangeSeq.gnrc CScope.gnrc CScopeProp.gnrc ScopeProp.gnrc \
+		PreDefId.gnrc PreDefine.gnrc ShowBinding.gnrc
+CMD	=	$(COM)
+RCS	=
+EXE	=	
+GEN	=
+GENINS  =       Name.dg
+SRCDIR	=	Examples
+AUXDIR	=
+
+@toolmk_h@
+
+Name.dg:	
+	cp /dev/null $@

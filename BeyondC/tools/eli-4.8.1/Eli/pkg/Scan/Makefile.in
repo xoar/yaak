@@ -1,0 +1,23 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:43:35 waite Exp $
+# Copyright (c) 1989, The Regents of the University of Colorado 
+
+CC	= @CC@
+
+DIR	= pkg/Scan
+SRC	= auxEOF.c auxNUL.c auxNewLine.c auxScanEOL.c auxTab.c \
+	  auxNoEOL.c coordAdjust.c dflteot.c dfltscan.c int.c str.c \
+	  idn.c idn.h idn.specs idntbl.h idn.reqmod idn.save.eta \
+	  CchStr.c Cint.c Ccomment.c Ctext.c \
+	  M2chStr.c M2int.c M3comment.c \
+	  pascalCom.c pascalStr.c ScanProc.h
+GENINS	= Scan.dg
+AUX	= Makefile Makefile.in version
+CMD	=
+EXE	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+Scan.dg:
+	cp /dev/null $@

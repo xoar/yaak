@@ -1,0 +1,9 @@
+/* $Id: sets.con,v 1.5 1996/03/26 23:34:51 waite Exp $ */
+
+text: set_defs .
+set_defs: set_def / set_defs set_def .
+set_def: set_name '{' set_body '}' .
+set_name: word .
+set_body: elements .
+elements: set_element / elements set_element .
+set_element: word .

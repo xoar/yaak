@@ -1,0 +1,29 @@
+# $Id: burg.dg,v 1.3 2001/07/09 06:34:56 tony Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+*.burg => :burg;
+:burg 'burg specification'? => :FILE;
+:burg.cmpd 'Set of burg specification fragments' => :LIST;
+
+COLLECT  (:burg)
+  => (:one.burg.cmpd);
+:one.burg.cmpd 'Singleton burg specification' => :burg.cmpd;
+
+COLLECT  (:LIST :extract=:burg)
+  => (:ext.burg.cmpd);
+:ext.burg.cmpd 'Extracted burg specification fragments' => :burg.cmpd;
+
+EXEC (burgGen.sh) (burg.exe) (burg.err) (:burg.cmpd :cat)
+  => (:burgGen);
+:burgGen 'Objects generated from burg specifications' => :DERIVED-DIRECTORY;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:burgGen) burgErr
+  => (:burgErr);
+:burgErr 'Identity map for errors in standard form' => :line_err;
+
+EXEC (burgOut.sh) (.) (:burg.cmpd :names) (:burgGen :name)
+  => (:burgOut);
+:burgOut 'Results of burg processing' => :FILE;
+
+COLLECT (:level_1_specs +incl=(:etaIncl) :burgOut :list)
+  => (:eli*level_2_specs_in);

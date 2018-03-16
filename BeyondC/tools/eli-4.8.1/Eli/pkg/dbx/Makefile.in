@@ -1,0 +1,16 @@
+# $Id: Makefile.in,v 2.1 2001/05/09 20:45:21 waite Exp $
+# Copyright 2001, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/dbx
+SRC	= dbx.dg
+AUX	= Makefile Makefile.in version
+CMD	= dbx.sh gdb.sh
+EXE	=
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@

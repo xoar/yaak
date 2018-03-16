@@ -1,0 +1,573 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from lidoref.tnf on 5 December 2013 -->
+
+<TITLE>LIDO - Reference Manual - Remote Attribute Access</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>LIDO - Reference Manual</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_8.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_10.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC16" HREF="lidoref_toc.html#SEC16">Remote Attribute Access</A></H1>
+<P>
+Remote access constructs are used to relate computations 
+that belong to distant contexts
+in the tree, rather than those of adjacent contexts. The
+<CODE>INCLUDING</CODE> construct accesses attributes of symbols that are further up
+in the tree (i. e. closer to the root). The <CODE>CONSTITUENT(S)</CODE> construct
+accesses attributes of symbols that are further down in the tree (i. e. closer
+to the leaves). The <CODE>CHAIN</CODE> construct relates computations in a
+left-to-right depth-first order within subtrees.
+<A NAME="IDX164"></A>
+<A NAME="IDX165"></A>
+<A NAME="IDX166"></A>
+<A NAME="IDX163"></A>
+<P>
+These constructs may propagate values or simply specify
+dependencies between computations.
+<P>
+Remote access constructs are used to abstract from the particular tree structure
+between related computations. Computational patterns can be specified
+independent of the particular grammar using remote access in
+combination with symbol computations and <CODE>CLASS</CODE> symbols. Reusable specification
+modules are based on that technique.
+<A NAME="IDX167"></A>
+<P>
+<H2><A NAME="SEC17" HREF="lidoref_toc.html#SEC17">INCLUDING</A></H2>
+<P>
+The <CODE>INCLUDING</CODE>-construct accesses an attribute of a symbol that is on the
+path towards the tree root. Hence, several computations in a subtree may depend
+on an attribute at the subtree root.
+<A NAME="IDX168"></A>
+<P>
+<H4>Syntax</H4>
+<PRE>
+    RemoteAccess ::= 'INCLUDING' RemAttrList
+    RemAttrList  ::=  RemAttr | '(' RemAttrs ')'
+    RemAttrs     ::=  RemAttr ',' RemAttrs '|' RemAttr
+    RemAttr      ::=  SymbName '.' AttrName
+<A NAME="IDX169"></A>
+<A NAME="IDX170"></A>
+<A NAME="IDX171"></A>
+</PRE>
+<P>
+<H4>Examples</H4>
+<PRE>
+    INCLUDING Range.Env
+    INCLUDING (Block.Scope, Root.Env)
+</PRE>
+<P>
+The <CODE>RemAttrList</CODE> specifies the set of attributes referred to by the 
+<CODE>INCLUDING</CODE> construct, called the <DFN>referred set</DFN>. On evaluation it accesses an 
+attribute of the first symbol on the
+path to the root which is in that set.
+<A NAME="IDX172"></A>
+<P>
+An <CODE>INCLUDING</CODE> in a rule computation accesses an attribute of a symbol
+above the current context, even if the left-hand side symbol is in the
+<CODE>RemAttrList</CODE>.
+<P>
+An <CODE>INCLUDING</CODE> in a symbol computation accesses an attribute of a symbol
+above the current one, even if the current one is in the <CODE>RemAttrList</CODE>.
+<P>
+An attribute of a <CODE>CLASS</CODE> symbol <CODE>C.a</CODE> in the <CODE>RemAttrList</CODE> contributes
+attributes <CODE>X.a</CODE> to the referred set for all <CODE>TREE</CODE> 
+symbols <CODE>X</CODE> by which <CODE>C</CODE> is inherited.
+<P>
+An <CODE>INCLUDING</CODE> in a <CODE>VOID</CODE> context does not cause a value to be
+propagated; it just states a dependency.
+<A NAME="IDX173"></A>
+<P>
+<H4>Restrictions</H4>
+<P>
+The referred set may not be empty, unless the computation which contains it
+is not part of or inherited by any rule context.
+<A NAME="IDX174"></A>
+<P>
+The tree grammar must guarantee that in every tree there is at least one of the
+symbols of the referred set above the context of the <CODE>INCLUDING</CODE>.
+<A NAME="IDX175"></A>
+<P>
+The referred set must not contain different attributes of the same symbol.
+<P>
+The types of the attributes in the referred set must be equal, unless
+<CODE>INCLUDING</CODE> is in a <CODE>VOID</CODE> context.
+<A NAME="IDX177"></A>
+<A NAME="IDX176"></A>
+<P>
+<H2><A NAME="SEC18" HREF="lidoref_toc.html#SEC18">CONSTITUENT(S)</A></H2>
+<P>
+The <CODE>CONSTITUENTS</CODE>-construct accesses attributes of symbols that are in
+the subtree of the current context. Hence, it may depend on several
+computations in the subtree. If values are to be propagated they are combined
+by user defined functions.
+<A NAME="IDX178"></A>
+<P>
+The <CODE>CONSTITUENT</CODE>-construct accesses a single attribute instance of a
+symbol that is in the subtree of the current context.
+<P>
+<H4>Syntax</H4>
+<PRE>
+    RemoteAccess ::= [ SymbolRef ] 'CONSTITUENT' 
+                     RemAttrList [ ShieldClause ]
+                   | [ SymbolRef ] 'CONSTITUENTS' 
+                     RemAttrList [ ShieldClause ] [ WithClause ]
+    ShieldClause ::= 'SHIELD' SymbNameList
+    SymbNameList ::= SymbName | '(' SymbNames ')' | '(' ')'
+    WithClause   ::= 'WITH' '(' TypeName ',' CombFctName ',' 
+                                SingleFctName ',' NullFctName ')'
+<A NAME="IDX179"></A>
+<A NAME="IDX180"></A>
+<A NAME="IDX181"></A>
+<A NAME="IDX182"></A>
+<A NAME="IDX183"></A>
+<A NAME="IDX184"></A>
+<A NAME="IDX185"></A>
+<A NAME="IDX186"></A>
+<A NAME="IDX187"></A>
+<A NAME="IDX188"></A>
+<A NAME="IDX189"></A>
+<A NAME="IDX190"></A>
+</PRE>
+<P>
+<H4>Examples</H4>
+<PRE>
+    CONSTITUENT Declarator.type
+    Declarations CONSTITUENTS DefIdent.GotType
+    CONSTITUENTS Range.GotLocKeys SHIELD Range
+    CONSTITUENTS Stmt.code SHIELD Stmt
+       WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull)
+</PRE>
+<P>
+The <CODE>RemAttrList</CODE> specifies the set of attributes referred to
+by the <CODE>CONSTITUENT(S)</CODE> construct, called the <DFN>referred set</DFN>.
+On evaluation it accesses all
+instances of attributes of that set which are in a certain range of the subtree
+of the current context. That range is determined by its root node, which itself
+does not belong to the range, and by the set of shield symbols. The tree nodes
+below a shield symbol are excluded from that range.
+<A NAME="IDX191"></A>
+<P>
+In a rule computation the root of the tree range is the node corresponding to
+the left-hand side of the production. The optional <CODE>SymbolRef</CODE> may
+restrict the root of the tree range to a node corresponding to a symbol of the
+right-hand side of the production.
+<P>
+In a (lower or upper) symbol computation the root of the tree range is the node
+corresponding to that symbol.
+<P>
+If the optional <CODE>ShieldClause</CODE> is given it specifies the set of shielded
+symbols. If an empty <CODE>ShieldClause</CODE> is given,
+no symbols are shielded from the tree range.
+If the <CODE>ShieldClause</CODE> is omitted then the root symbol of the tree range
+(as described above) is shielded from the range.
+<A NAME="IDX192"></A>
+<P>
+An attribute of a <CODE>CLASS</CODE> symbol <CODE>C.a</CODE> in the <CODE>RemAttrList</CODE> contributes
+attributes <CODE>X.a</CODE> to the referred set for all <CODE>TREE</CODE> symbols <CODE>X</CODE>
+to which <CODE>C</CODE> is inherited.
+<A NAME="IDX194"></A>
+<A NAME="IDX193"></A>
+<P>
+A <CODE>CLASS</CODE> symbol <CODE>C</CODE> in the <CODE>ShieldClause</CODE> contributes symbols <CODE>X</CODE>
+to the set of shielded symbols for all <CODE>TREE</CODE> symbols <CODE>X</CODE> to which
+<CODE>C</CODE> is inherited.
+<P>
+A <CODE>CONSTITUENT(S)</CODE> in a <CODE>VOID</CODE> context simply states a dependency 
+and does not cause a value to be propagated.
+<A NAME="IDX195"></A>
+<P>
+For a <CODE>CONSTITUENTS</CODE> that is not in <CODE>VOID</CODE> context a
+<CODE>WithClause</CODE> specifies how the values of the accessed attribute instances
+are combined into one value.
+<P>
+The given <CODE>TypeName</CODE> specifies the type of the result and of 
+intermediate values.
+<A NAME="IDX197"></A>
+<A NAME="IDX196"></A>
+<P>
+The <CODE>CombFctName</CODE> specifies a function (or macro) that is 
+applied to two values of the given type and 
+yields one value of that type.
+<P>
+The <CODE>SingleFctName</CODE> specifies a function (or macro) that is 
+applied to each accessed attribute instance and yields a value
+of the given type.
+<P>
+The <CODE>NullFctName</CODE> specifies a function (or macro) that has no
+argument and yields an intermediate value. It is called for every node in the
+tree range that could have referred attribute instances below it according to the
+tree grammar, but for the particular tree it has none. Hence, the result of
+this function should be neutral with respect to the combine function.
+<P>
+It is guaranteed that the combine function is applied to 
+intermediate values
+according to a post-order projection of the accessed tree nodes. 
+It is left
+open in which associative order that function combines intermediate 
+values.
+<P>
+The referred set of a <CODE>CONSTITUENTS</CODE>
+may be empty if no attributes of the <CODE>RemAttrList</CODE>
+are reachable in the subtree or if <CODE>CLASS</CODE> symbols in the
+<CODE>RemAttrList</CODE> are not inherited to any <CODE>TREE</CODE> symbol.
+In that case a <CODE>VOID</CODE> <CODE>CONSTITUENTS</CODE> is ignored,
+and a value <CODE>CONSTITUENTS</CODE> results in a call of 
+the <CODE>NullFctName</CODE>.
+<P>
+<H4>Restrictions</H4>
+<P>
+A <CODE>SymbolRef</CODE> must denote a right-hand side symbol of the production. It
+must not be specified in symbol computations.
+<P>
+A <CODE>CONSTITUENTS</CODE> in a value context must have a <CODE>WithClause</CODE>.
+<P>
+For a <CODE>CONSTITUENT</CODE> the tree grammar must guarantee that the accessed 
+attribute instance is uniquely determined for every tree.
+<A NAME="IDX198"></A>
+<P>
+The <CODE>RemAttrs</CODE> must have the same type if the <CODE>CONSTITUENT(S)</CODE> is in
+value context.
+<A NAME="IDX199"></A>
+<P>
+<H2><A NAME="SEC19" HREF="lidoref_toc.html#SEC19">CHAIN</A></H2>
+<P>
+Chains relate computations in left-to-right depth-first order within certain
+subtrees. A chain may propagate values or just specify dependencies in that
+order. Only effective computations, that compute a new chain value or a new
+post-condition need to be specified. They are automatically linked in the
+described order.
+<A NAME="IDX201"></A>
+<A NAME="IDX200"></A>
+<P>
+The basic idea is captured by the following diagram representing the
+way of a chain through the tree context of a rule graphically:
+<PRE>
+        RULE: LhsSym ::= RhsSym1 RhsSym2 END;
+
+                 |                ^
+                 v                |
+                 u     LhsSym     d
+                /                  ^
+               /                    \
+              /        _____         \
+             /         |   |          \
+            v          |   v           \
+            d  RhsSym1 u   d  RhsSym2   u
+            |          ^   |            ^
+            |          |   |            |
+            ------------   --------------
+</PRE>
+The arcs represent the path of the chain through this context,
+coming in from the upper context of <CODE>LhsSym</CODE>, going through the
+two subtrees, and leaving to the upper context.
+That chain propagation is established automatically if the chain is not
+used in this context.
+Usually, some of the three arcs inside the the context may be specified
+by explicit computations that
+use and define the chain at a certain symbol occurrence.
+The <CODE>u</CODE> and <CODE>d</CODE> in the graphic stand for usable and definable
+chain accesses respectively.
+<P>
+Chain accesses are denoted like attribute accesses with a <CODE>ChainName</CODE>
+instead of an attribute name.
+<P>
+<H4>Syntax</H4>
+<PRE>
+    ChainSpec     ::= 'CHAIN' ChainNames ':' TypeName
+
+    Computation   ::= 'CHAINSTART' Attribute '=' Expression Terminator
+
+    Attribute     ::= SymbolRef '.' ChainName
+<A NAME="IDX202"></A>
+<A NAME="IDX203"></A>
+</PRE>
+<P>
+<H4>Examples</H4>
+<PRE>
+    CHAIN cnt : int
+    RULE: Block ::= '{' Decls Stmts '}' COMPUTE
+      CHAINSTART Stmts.cnt = 0;
+      printf ("Block has %d statements\n", Stmts.cnt);
+    END;
+    RULE: Stmt ::= Var '=' Expr ';' COMPUTE
+      Stmt.cnt = ADD (Stmt.cnt, 1);
+    END;
+
+    CHAIN codeseq: PTGNode;
+    SYMBOL Block COMPUTE
+      CHAINSTART HEAD.codeseq = PTGNULL;
+      SYNT.transl = TAIL.codeseq;
+    END;
+    SYMBOL Stmt COMPUTE
+      THIS.codeseq = PTGSeq (THIS.codeseq, THIS.transl);
+    END;
+</PRE>
+<P>
+A <CODE>CHAIN</CODE> specification introduces the name and the type of a chain. Any
+attribute notation using a <CODE>ChainName</CODE> denotes a chain access.
+<P>
+A chain states a precondition and a postcondition for each symbol node on the
+chain. The precondition is set by the upper context of the symbol,
+the postcondition by its lower context.
+They can be understood as an implicitly introduced pair of attributes, an
+inherited one for the precondition and a synthesized one 
+for the postcondition. 
+<P>
+A computation is allocated on the chain if it
+depends on the chain and its result contributes to the chain.
+Such computations are automatically linked in left-to-right depth-first
+order.
+A computation is only linked in chain order if it defines the chain and depends
+directly or indirectly on it. A computation that only accesses the chain
+without defining it is not necessarily executed in chain order.
+<P>
+A computation that defines a chain without directly or indirectly accessing it
+breaks the chain, i. e. the execution order of subsequent chain computations is
+independent of those prior to this computation.
+<P>
+There may be several instances of a chain that have the same name
+and type. Each instance is identified by a context
+that contains a <CODE>CHAINSTART</CODE> computation for that chain.
+Chain references in subtrees of such a <CODE>CHAINSTART</CODE> context
+belong to that instance, unless they belong to a nested instance
+of <CODE>CHAINSTART</CODE> context deeper in the tree.
+Different instances of a chain are not related to
+each other, regardless of whether they are nested or separate.
+However, they may be explicitly connected by computations.
+The structure of the tree grammar must ensure that there is a 
+<CODE>CHAINSTART</CODE> context above any computation that
+refers to the chain.
+<P>
+A <CODE>CHAINSTART</CODE> computation defines the initial value of a chain.
+The chain is started at the symbol specified as the destination of
+the <CODE>CHAINSTART</CODE> computation. It must be the leftmost of the
+right-hand side symbols which the chain is to be passed through.
+<CODE>HEAD.c</CODE> may be used for a chain <CODE>c</CODE>
+to denote the leftmost symbol of the right-hand side, in symbol computations
+as well as in rule computations.
+<P>
+A computation may refer to a chain <CODE>c</CODE> by one of the following
+notations: <CODE>X.c</CODE> in rule computations, 
+<CODE>THIS.c</CODE>, <CODE>SYNT.c</CODE>, <CODE>INH.c</CODE> in symbol computations,
+<CODE>HEAD.c</CODE>, and <CODE>TAIL.c</CODE> in both rule and symbol computations.
+<A NAME="IDX205"></A>
+<A NAME="IDX206"></A>
+<A NAME="IDX207"></A>
+<A NAME="IDX208"></A>
+<A NAME="IDX209"></A>
+<A NAME="IDX204"></A>
+<P>
+The notations <CODE>X.c</CODE> and <CODE>THIS.c</CODE> have different meanings
+depending on their occurrence in a defining position of an attribute
+computation or in an applied position within an expression:
+<P>
+In rule computations the following holds:
+If <CODE>X</CODE> is the left-hand side symbol of the production,
+then an applied occurrence <CODE>X.c</CODE> denotes
+the chain's precondition at <CODE>X</CODE>;
+a defining occurrence <CODE>X.c</CODE> denotes
+the chain's postcondition at <CODE>X</CODE>.
+If <CODE>X</CODE> is a right-hand side symbol of the production,
+then a defining occurrence <CODE>X.c</CODE> denotes
+the chain's precondition at <CODE>X</CODE>;
+an applied occurrence <CODE>X.c</CODE> denotes
+the chain's postcondition at <CODE>X</CODE>.
+<P>
+In symbol contexts only lower computations may access or define a chain.
+An applied occurrence of <CODE>THIS.c</CODE>
+denotes the chain's precondition of that symbol;
+<CODE>INH.c</CODE> may be used instead.
+A defining occurrence of <CODE>THIS.c</CODE>
+denotes the chain's postcondition of that symbol;
+<CODE>SYNT.c</CODE> may be used instead.
+<A NAME="IDX211"></A>
+<A NAME="IDX210"></A>
+<P>
+The notation <CODE>HEAD.c</CODE> can be used to define the chain's
+precondition of the leftmost subtree.
+The notation <CODE>TAIL.c</CODE> can be used to access the chain's 
+postcondition of the rightmost subtree.
+These notations can be used in symbol computations
+and in rule computations. If used in a rule computation that
+rule must have at least one subtree.
+<A NAME="IDX212"></A>
+<P>
+If <CODE>HEAD.c</CODE>, <CODE>TAIL.c</CODE>, or <CODE>CHAINSTART</CODE> is used in a
+symbol computation that is inherited by a rule which has no subtree,
+they have the same effect as if there was a subtree which passes
+the chain dependency and the chain value, if any, unchanged.
+<P>
+In the following example a chain <CODE>c</CODE> is used in symbol computations.
+They state that the functions <CODE>Prefix</CODE> and <CODE>Suffix</CODE>
+are called on the chain for every <CODE>Expression</CODE> context.
+The <CODE>Prefix</CODE> call is applied to the incoming chain and
+specifies the chain precondition for the leftmost
+subtree of <CODE>Expression</CODE>.
+The <CODE>Suffix</CODE> call is applied to the result of the
+rightmost subtree and specifies the chain postcondition of
+this <CODE>Expression</CODE>:
+<PRE>
+    SYMBOL Expression COMPUTE
+        HEAD.c = Prefix (THIS.c);
+        THIS.c = Suffix (TAIL.c);
+    END;
+</PRE>
+<P>
+<H4>Restrictions</H4>
+<P>
+Every <CODE>ChainName</CODE> must be different from any attribute name and any
+<CODE>AttrName</CODE>.
+<P>
+The tree grammar must guarantee that each access of a chain is in a subtree of
+a <CODE>CHAINSTART</CODE> context for that chain.
+Furthermore that subtree may not be to the left of the symbol where
+the <CODE>CHAINSTART</CODE> initiates the chain.
+<A NAME="IDX213"></A>
+<P>
+None of <CODE>THIS.c</CODE>, <CODE>SYNT.c</CODE>, <CODE>INH.c</CODE>, <CODE>TAIL.c</CODE>
+may be used in upper symbol computations.
+<P>
+<CODE>HEAD.c</CODE> must not be used in applied positions.
+<P>
+<CODE>TAIL.c</CODE> must not be used in defining positions.
+<P>
+Chains can not be accessed in <CODE>INCLUDING</CODE> or
+<CODE>CONSTITUENT(S)</CODE> constructs.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_8.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_10.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="lidoref_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

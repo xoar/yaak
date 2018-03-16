@@ -1,0 +1,345 @@
+@A@<Create an XML Structural Unparser@>
+
+The FunnelWeb file defining an XML structural unparser begins with a brief
+description of how to output unparsed values, and specifies
+the types of the attributes holding those values.
+It then defines
+the tree to be unparsed,
+the class symbol computations,
+and which tree symbols inherit which class symbol computations.
+PTG templates follow these definitions.
+Finally, the file defines the @{IGNORE@} macro and instantiates the
+necessary library modules.
+
+@$@<Complete FunnelWeb file@>==@{
+@=~
+Frame:
+  "@p maximum_input_line_length = infinity\n\n"
+  "The following symbol computation can be used to display the entire input:"
+  "\n\nSYMBOL ROOTCLASS COMPUTE\n"
+  "  BP_Out(THIS." $1 string "Ptg);\n"
+  "END;\n\n"
+  "Applying this output function to the " $1 string
+    "Ptg attribute of any nonterminal\n"
+  "symbol in the tree will cause the subtree rooted in that node to be"
+    " displayed.\n\n"
+  "@O@<" $1 string "copy.lido@>@{\n"
+  "ATTR " $1 string "Ptg, " $1 string "OrigPtg: PTGNode;\n\n"
+  $2 "\n"	/* Tree grammar */
+  $3		/* Class computations */
+  $4		/* Inheritances */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg@>@{\n"
+  $5		/* PTG templates */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg.phi@>@{\n"
+  "#define IGNORE(f,n)\n"
+  "@}\n\n"
+  "@O@<" $1 string "copy.specs@>@{\n"
+  "$/Output/PtgCommon.fw\n"
+  "$/Output/BlockPrint.fw\n"
+  "@}\n"
+~=@
+@}
+
+The FunnelWeb file defining the generated unparser is written as file
+@{tree@} in the current working directory:
+
+@$@<Output the complete FunnelWeb file@>==@{
+SYMBOL xRoot COMPUTE
+  PTGOutFile(
+    "tree",
+    PTGFrame(
+      THIS.Prefix,
+      THIS.TreeGram,
+      TAIL.ClassComp,
+      TAIL.Inherit,
+      TAIL.PtgTemplates));
+END;
+@}
+
+@B@<PTG templates for non-literal terminal symbols@>
+
+The same PTG template is generated for each non-literal terminal symbol:
+
+@$@<Format for a non-literal terminal symbol@>==@{
+Term: $ string "_" $ ":\n  [PtgOutId $ int]\n"
+@}
+
+This template assumes that the internal representation of a
+non-literal terminal symbol is a string table index.
+The user must override it for any non-literal terminal symbol with a
+different internal representation.
+
+@$@<Create PTG templates@>+=@{
+SYMBOL xSymbol COMPUTE
+  THIS.PtgTemplates =
+    IF(AND(THIS.IsTerminal,AND(THIS.IsFirstOcc,GetNoPtgGiven(THIS.Key,1))),
+      PTGSeq(THIS.PtgTemplates,PTGTerm(INCLUDING xRoot.Prefix,THIS.Ptg)),
+      THIS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<PTG templates for plain productions@>
+
+The body of the template for a plain production is the sequence of the
+representations of the non-literal elements on the right-hand side of
+that production, separated by invocations of the line break function.
+
+A plain production with an empty body is represented by only a single tag.
+
+@$@<Formats for productions@>+=@{
+PlainProd:
+  $1 string "_" $2 string ":\n"
+  "  \"<" $2 string ">\" [BP_BeginBlockI] [BP_BreakLine] "
+    $3 " [BP_BreakLine] [BP_EndBlockI] \"</" $2 string ">\"\n"
+
+SepSeq:
+  $ { " [BP_BreakLine] " } $
+
+Empty:
+  $1 string "_" $2 string ":\n \"<" $2 string "/>\"\n"
+@}
+
+An @{Insert@} attribute is computed for each element on the right-hand side
+of a plain production, and then the values of these attributes are
+collected as the body of the production's template:
+
+@$@<Create PTG templates@>+=@{
+ATTR Insert: PTGNode;
+
+RULE: Element ::= xLiteral
+COMPUTE
+  Element.Insert = PTGNULL;
+END;
+
+RULE: Element ::= xSymbol
+COMPUTE
+  Element.Insert = Element.Mark;
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  Element.Insert = Element.Mark;
+END;
+
+ATTR Body: PTGNode;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  .Body=
+    xRHS CONSTITUENTS Element.Insert
+      WITH (PTGNode, PTGSepSeq, IDENTICAL, PTGNull);
+  xProduction.PtgTemplates=
+    IF(GetNoPtgGiven(xRule.Key,1),
+      PTGSeq(
+        xRHS.PtgTemplates,
+        IF(EQ(.Body,PTGNULL),
+          PTGEmpty(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGPlainProd(INCLUDING xRoot.Prefix,StringTable(xRule.Sym),.Body))),
+      xRHS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<PTG templates for LISTOF productions@>
+
+There are three templates for a @{LISTOF@} production, and none of their
+bodies depend on the right-hand side of that production:
+
+@$@<Formats for productions@>+=@{
+ListProd:
+  $1 string "_"  $2 string ":\n  \"<" $2 string
+    ">\" [BP_BeginBlockI] [BP_BreakLine] "
+    "$ [BP_BreakLine] [BP_EndBlockI] \"</" $2 string ">\"\n"
+
+ListProd2: $1 string "_2" $2 string ":\n  $ { [BP_BreakLine] } $\n" 
+ListProd1: $1 string "_1" $2 string ":\n  $\n"
+
+Triple: $ $ $
+@}
+
+Each one of the PTG templates can be overridden individually:
+
+@$@<Create PTG templates@>+=@{
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.PtgTemplates=
+    PTGSeq(
+      Syms.PtgTemplates,
+      PTGTriple(
+        IF(GetNoPtgGiven(xRule.Key,1),
+          PTGListProd(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg2Given(xRule.Key,1),
+          PTGListProd2(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg1Given(xRule.Key,1),
+          PTGListProd1(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL)))
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<Create the DTD@>
+
+A document type definition consists of a set of entity declarations
+followed by a set of element declarations:
+
+@$@<Structure of the document type definition@>==@{
+dtd:
+  $	/* Entity definitions */
+  $	/* Element definitions */
+@}
+
+The file containing the document type definition is written into the
+@{treeDef@} sub-directory of the current working directory, so that its
+name can be changed by a derivation parameter:
+
+@$@<Output the complete DTD file@>==@{
+SYMBOL xRoot COMPUTE
+  PTGOutFile(
+    CatStrStr("treeDef/", CatStrStr(THIS.Prefix, ".dtd")),
+    PTGdtd(
+      CONSTITUENTS xSymbol.Entity WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull),
+      CONSTITUENTS xProduction.Element WITH(PTGNode,PTGSeq,IDENTICAL,PTGNull)));
+END;
+@}
+
+An entity in the document type definition corresponds to a non-terminal
+symbol in the tree.
+It is defined by the list of the names of the productions
+having that symbol on the left-hand side.
+This list, which uses a vertical bar as a separator, is built up in the
+@{Entity@} property of each non-terminal symbol.
+
+@O@<Xml.pdl@>==@{
+Entity: PTGNode;	"ptg_gen.h"
+@}
+
+@$@<Collect the rule names for all non-terminal symbols@>==@{
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  xProduction.GotElement=
+    ResetEntity(
+      xSymbol.Key,
+      PTGAltSeq(
+        GetEntity(xSymbol.Key,PTGNULL),
+        PTGAsIs(StringTable(xRule.Sym))));
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.GotElement=
+    ResetEntity(
+      xSymbol.Key,
+      PTGAltSeq(
+        GetEntity(xSymbol.Key,PTGNULL),
+        PTGAsIs(StringTable(xRule.Sym))));
+END;
+@}
+
+The entity definition construct specifies the name of the non-terminal
+symbol and gives the production names as a quoted, parenthesized, list:
+
+@$@<Format of an entity definition@>==@{
+EntityDef: "<!ENTITY % " $ string " \"(" $ ")\">\n"
+@}
+
+@$@<Construct the entity definitions@>==@{
+ATTR Entity: PTGNode;
+
+SYMBOL xRoot COMPUTE
+  SYNT.GotAllEntities=CONSTITUENTS xProduction.GotElement;
+END;
+
+SYMBOL xSymbol COMPUTE
+  SYNT.Entity=
+    IF(AND(THIS.IsFirstOcc,NOT(THIS.IsTerminal)),
+      PTGEntityDef(StringTable(TERM),GetEntity(THIS.Key,PTGNULL)),
+      PTGNULL)
+    <- INCLUDING xRoot.GotAllEntities;
+END;
+@}
+
+An element in the document type definition corresponds to a production
+in the tree.
+Plain productions are defined by their right-hand sides or, in the case of
+an empty right-hand side, by the symbol @{EMPTY@}.
+@{LISTOF@} productions are defined by a regular expression indicating that
+any of the symbols on the right-hand side is possible, and can occur zero
+or more times.
+
+Non-literal terminal symbols appearing on the right-hand side of a
+production are represented by @{#PCDATA@}; non-terminal symbols are uses of
+the corresponding entity.
+
+@$@<Format of an element definition@>==@{
+Element: "<!ELEMENT " $ string " " $ ">\n"
+
+Content:
+"(" $ ")"
+
+ListContent:
+"(" $ ")*"
+
+EntityUse:
+  "%" $ string ";"
+@}
+
+@$@<Construct the element definitions@>==@{
+ATTR Element, Content: PTGNode;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  .Content=
+    xRHS CONSTITUENTS xSymbol.Content
+      WITH(PTGNode, PTGCommaSeq, IDENTICAL, PTGNull);
+  xProduction.Element=
+    PTGElement(
+      StringTable(xRule.Sym),
+      IF(EQ(.Content,PTGNULL),
+        PTGAsIs("EMPTY"),
+        PTGContent(.Content)));
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.Element=
+    PTGElement(
+      StringTable(xRule.Sym),
+      PTGListContent(
+        Syms CONSTITUENTS xSymbol.Content SHIELD ()
+          WITH(PTGNode, PTGAltSeq, IDENTICAL, PTGNull)));
+END;
+
+SYMBOL xSymbol COMPUTE
+  SYNT.Content=
+    IF(THIS.IsTerminal,
+      PTGAsIs("#PCDATA"),
+      PTGEntityUse(StringTable(TERM)));
+END;
+@}
+
+@B@<Output files@>
+
+@O@<Xml.ptg@>@{
+@<Complete FunnelWeb file@>
+@<Format for a non-literal terminal symbol@>
+@<Formats for productions@>
+@<Structure of the document type definition@>
+@<Format of an entity definition@>
+@<Format of an element definition@>
+
+AltSeq: $ { " | " } $
+@}
+
+@O@<Xml.lido@>@{
+@<Output the complete FunnelWeb file@>
+@<Create PTG templates@>
+@<Output the complete DTD file@>
+@<Collect the rule names for all non-terminal symbols@>
+@<Construct the entity definitions@>
+@<Construct the element definitions@>
+@}

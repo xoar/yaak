@@ -1,0 +1,463 @@
+@p typesetter = latex2html
+
+@A@<The Specification Language@>
+
+OIL is a language for specifying the initial state of the operator
+identification data base.
+
+@B
+
+The lexical elements of a language are the basic symbols that make up the
+text to be analyzed and the comments that make up the text to be ignored.
+OIL's basic symbols are identifiers, integer denotations, and delimiters
+like ``@{;@}''.
+White space and text delimited by comment markers is ignored.
+
+@$@<Lexical elements@>==@{
+@<Identifiers@>
+@<Integer denotations@>
+@<Comments@>
+@}
+
+Delimiters are given as literals in the OIL grammar,
+and need not be re-specified.
+
+@C
+
+Identifiers are used in OIL to represent types and operators.
+These identifiers will appear unaltered in both LIDO specifications and C
+programs, so it is important to avoid reserved words of those languages.
+
+@$@<Identifiers@>==@{
+Identifier:	C_IDENTIFIER_ISO
+@}
+
+The canned specification @{C_IDENTIFIER@} recognizes any sequence of
+characters that begins with a letter and contains letters and digits (an
+underscore is considered a letter).
+In addition, it stores that sequence of characters exactly once in the
+string table and makes the (unique) index the value of the intrinsic
+attribute of the @{Identifier@} leaf.
+
+Identifiers can appear in a number of contexts, with different meanings.
+In each case, the intrinsic attribute of the identifier must be used in
+conjunction with the scope rules of OIL to uniquely determine the entity
+denoted by that identifier.
+
+@$@<Identifier context@>@(@1@)@M@{
+RULE: @1 ::= Identifier COMPUTE @1.Sym=Identifier; END;
+@}
+
+An identifier may appear no more than once in certain contexts within a
+particular region of the program.
+This property is verified via the @{Unique@} module:
+
+@$@<Instantiate the module to verify unique definition@>==@{
+$/Prop/Unique.gnrc :inst
+@}
+
+@$@<Unique definition@>@(@1@)@M@{
+@<Identifier context@>@(@1@)
+SYMBOL @1 INHERITS Unique COMPUTE
+  IF(NOT(THIS.Unique),
+    message(ERROR,"Multiply-defined identifier",0,COORDREF));
+END;
+@}
+
+An identifier appearing in certain other contexts must have a meaning
+assigned to it by appearing in yet another context.
+This property is verified by checking for a valid key.
+
+@$@<Application@>@(@1@)@M@{
+@<Identifier context@>@(@1@)
+SYMBOL @1 COMPUTE
+  IF(EQ(THIS.Key,NoKey),
+    message(ERROR,"Undefined identifier",0,COORDREF));
+END;
+@}
+
+@C
+
+Integers are used in OIL to represent operator costs.
+
+@$@<Integer denotations@>==@{
+Integer:	C_INTEGER
+@}
+
+The canned specification @{C_INTEGER@} recognizes any sequence of digits.
+In addition, it converts that sequence of characters to an integer and
+makes that integer the value of the terminal symbol @{Integer@}.
+
+@C
+
+By default, white space terminates a basic symbol but is otherwise ignored.
+OIL comments either take the same form as comments in C, or they begin with
+@{%@} or @{#@} and continue to the end of the current line.
+
+@$@<Comments@>==@{
+	C_COMMENT
+	$[%#]	(auxEOL)
+@}
+
+@B
+
+An OIL specification consists of a non-empty set of operator definitions,
+operator identifications, and class definitions.
+Type definitions are implicit: a type is defined for each type identifier
+appearing in an operator definition, and each type identifier appearing in
+a class definition that is neither the class name nor a parameter of the
+class.
+
+The initial state of the OIL data base will reflect the specification.
+There will be one node in the type lattice for each defined type, and one
+arc for each operator defined as a coercion.
+Every defined operator will appear in the data base, as will its signature.
+The defined classes will be available for instantiation, and the defined
+identifications will be available for use.
+
+@$@<OIL specification@>==@{
+OIL: SpecificationElement* .
+
+@<Operator definitions@>
+@<Identifications@>
+@<Class definitions@>
+@<Type equivalence classes@>
+@}
+
+@C
+
+An operator accepts operands of specific types and produces a result of a
+specific type.
+Operator definitions are used to name operators.
+Each associates an identifier with a particular signature that gives the
+operand and result types for the operator being named.
+
+@$@<Operator definitions@>==@{
+SpecificationElement: Operation.
+@<Operator@>@(@)
+@}
+
+Operator definitions may appear not only at the top level of an OIL
+specification, but also within a class definition.
+These two contexts have very different semantics, even though the allowable
+constructs are identical in form.
+
+In order to distinguish the two contexts, all of the nonterminals that
+appear within a class definition are prefixed by ``@{Class@}''.
+The form of the text within a class is guaranteed to be identical to that
+outside of the class by generating each set of rules from the same
+specification:
+
+@$@<Operator@>@(@1@)@M@{
+@1Operation:
+  'OPER' @1Oper+ /
+  'COERCION' @1Coerce+ .
+
+@1Oper: @1OpDefList @1OperationSig CostSpecification ';' .
+
+@1Coerce: @1OpDef @1CoercionSig CostSpecification ';' .
+
+@1OpDefList: @1OpDef // ',' .
+
+@1OperationSig: '(' @1ArgSig ')' ':' TypeIdentifier .
+@1ArgSig: / TypeIdentifier / TypeIdentifier ',' @1ArgSig .
+@1CoercionSig: '(' @1OneArg ')' ':' TypeIdentifier .
+@1OneArg: TypeIdentifier .
+@}
+
+Whether an operator is defined within a class or not, the definition of
+that operator consititues the unique defining occurrence of the operator's
+identifier.
+A @{TypeIdentifier@} is never a unique defining occurrence.
+
+@$@<Occurrences of identifiers in operator definitions@>==@{
+RULE: OpDef ::=
+COMPUTE OpDef.Sym=GenerateName("_AnonOp");
+END;
+
+RULE: ClassOpDef ::=
+COMPUTE ClassOpDef.Sym=GenerateName("_AnonOp");
+END;
+
+@<Unique definition@>@(OpDef@)
+@<Unique definition@>@(ClassOpDef@)
+@<Identifier context@>@(TypeIdentifier@)
+@}
+
+A number of different symbols are used in the grammar to embody the concept
+of an operator's signature.
+The purpose of making these distinctions is to enforce the constraint
+that a coercion must have exactly one argument.
+Because the semantics of these symbols are identical, they are placed in an
+equivalence class and represented in the tree by a single symbol.
+This symbol must preserve the fact that a signature appears within a class:
+
+@$@<Equivalence class for signatures@>@(@1@)@M@{
+@1Signature ::= @1OperationSig @1CoercionSig @1ArgSig @1OneArg .
+@}
+
+A @{CostSpecification@} is optional, and if it is omitted it is assumed to
+be 1:
+
+@$@<Cost specifications@>==@{
+ATTR cost: int;
+
+RULE: CostSpecification ::=
+COMPUTE
+  CostSpecification.cost=1;
+END;
+
+RULE: CostSpecification ::= 'COST' Integer
+COMPUTE
+  CostSpecification.cost=Integer;
+END;
+@}
+
+@C
+
+A class is a parameterized abstract data type, whose parameters are types.
+It defines a set of operators and coercions that can be instantiated with
+given types substituted for the type parameters.
+
+@$@<Class definitions@>==@{
+SpecificationElement: Class .
+Class:
+  'CLASS' ClassName ClassBody .
+
+ClassBody:
+  '(' [ClassParameters] ')' 'BEGIN' ClassOperation+ 'END' ';' .
+
+ClassParameters: ClassParameter // ',' .
+
+@<Operator@>@(Class@)
+@}
+
+Each @{ClassName@} is the unique defining occurrence of the class
+identifier.
+A @{ClassParameter@} is the unique defining occurrence of that identifier
+within the class; the same identifier can be used freely outside the class
+and in other classes.
+
+@$@<Defining occurrences of identifiers in a class@>==@{
+@<Unique definition@>@(ClassName@)
+@<Unique definition@>@(ClassParameter@)
+@}
+
+@C
+
+An identification is a relation between two operators.
+The first operator of the pair is the indication being identified,
+the second is one possible operator that could be represented by that
+indication.
+All of the operators that could be represented by a particular indication
+must have the same signature.
+
+@$@<Identifications@>==@{
+SpecificationElement: Identification .
+Identification: 'INDICATION' Indication+.
+
+Indication: IndDef ':' OpRefList ';' .
+
+OpRefList: OpRef // ',' .
+@}
+
+If the operator @{IndDef@} is not defined elsewhere in the specification
+then a new operator will be created to act as the indication.
+Each @{OpRef@}, however, must have a definition.
+
+@$@<Occurrences of identifiers in an identification@>==@{
+@<Identifier context@>@(IndDef@)
+@<Application@>@(OpRef@)
+@}
+
+@C
+
+Sometimes a set of types forms an equivalence class with respect to some
+operation or property.
+For example, suppose that we are specifying a processor for C that should
+assign a result type to every expression.
+Assume further that the actual identification of the operators is
+uninteresting.
+In this case, the arithmetic types form an equivalence class with respect
+to normal arithmetic operations: addition, subtraction, multiplication and
+division all apply to every arithmetic type.
+
+Although the arithmetic types are equivalent with respect to normal
+arithmetic operations, the goal of assigning a result type to every
+expression requires that we apply the ``standard arithmetic conversions'',
+and ensure that the operands of every dyadic operator have the same type.
+This means that the Oil data base must actually contain a distinct object
+for each legal combination of operator and operands.
+We are not, however, interested in distinguishing these objects in the
+specification.
+
+To address this problem, Oil allows the user to specify sets of equivalent
+types.
+Operators can then be defined in terms of those sets, and the result is a
+set of operators that all have the same name.
+These names, in turn, can be used in identifications:
+
+@{SET Arithmetic = [Type_int, Type_long, Type_float, Type_double];@}
+
+@{OPER Add(Arithmetic,Arithmetic): Arithmetic;@}
+
+@{INDICATION Plus: Add;@}
+
+This specification will create four operators, all with the name @{Add@}.
+Their signatures will be
+@{(Type_int,Type_int):Type_int@},
+@{(Type_long,Type_long):Type_long@},
+@{(Type_float,Type_float):Type_float@} and
+@{(Type_double,Type_double):Type_double@} respectively.
+The indication @{Plus@} can be identified as any of those operators.
+
+A description of an equivalence class appears at the top level of the Oil
+specification:
+
+@$@<Type equivalence classes@>==@{
+SpecificationElement: EquivalenceClass .
+EquivalenceClass: 'SET' SetIdDef '=' xTypeExpr ';' .
+SetIdDef: Identifier .
+
+xTypeExpr:
+  xTEterm /
+  xTypeExpr '+' xTEterm /
+  xTypeExpr '-' xTEterm .
+
+xTEterm:
+  xTEprimary /
+  xTEterm '*' xTEprimary .
+
+xTEprimary:
+  SetIdUse /
+  '[' xTypeList ']' /
+  '(' xTypeExpr ')' .
+
+SetIdUse: Identifier .
+xTypeList: Singleton // ',' .
+Singleton: TypeIdentifier .
+@}
+
+There is no semantic distinction among the type expressions; a syntactic
+distinction is made only to implement precedence:
+
+@$@<Type expressions are semantically identical@>==@{
+xTypeExpr ::= xTEterm xTEprimary .
+@}
+
+Each equivalence class identifier must be uniquely defined,
+and has the entire specification as its scope:
+
+@$@<Occurrences of identifiers in set definitions@>==@{
+@<Unique definition@>@(SetIdDef@)
+@<Application@>@(SetIdUse@)
+@}
+
+@B
+
+The entire OIL specification constitutes a single scope, with a nested
+scope for each class body.
+All identifiers are defined in the outer scope unless their definition is
+hidden within a particular class body by the definition of a parameter of
+that class.
+
+To implement the rules, the compiler first binds all identifiers
+other than those appearing in a @{ClassParameter@} or @{OpRef@} context
+in the outer scope.
+It then binds class parameters in the corresponding class bodies, and
+computes the value of the @{Key@} attribute of each identifier occurrence
+according to the scope rules.
+
+@$@<Scope rules@>==@{
+ATTR Sym: int;
+ATTR Env: Environment;
+ATTR Key: DefTableKey;
+
+SYMBOL OIL INHERITS RangeUnique COMPUTE
+  SYNT.Env=NewEnv();
+  SYNT.BoundInOuter=CONSTITUENTS DefinedId.bound;
+  SYNT.GotAllDefs=CONSTITUENTS Unique.bound;
+END;
+
+SYMBOL ClassBody INHERITS RangeUnique COMPUTE
+  SYNT.Env=NewScope(INCLUDING OIL.Env) DEPENDS_ON INCLUDING OIL.BoundInOuter;
+  SYNT.BoundInInner=CONSTITUENTS ClassParameter.bound;
+END;
+
+SYMBOL AllIdentifiers COMPUTE
+  SYNT.Key=
+    KeyInEnv(INCLUDING (OIL.Env,ClassBody.Env), THIS.Sym)
+      DEPENDS_ON INCLUDING (OIL.BoundInOuter,ClassBody.BoundInInner);
+END;
+
+SYMBOL DefinedId INHERITS AllIdentifiers COMPUTE
+  SYNT.bound=DefineIdn(INCLUDING OIL.Env, THIS.Sym);
+END;
+
+SYMBOL ClassParameter INHERITS AllIdentifiers COMPUTE
+  SYNT.bound=DefineIdn(INCLUDING ClassBody.Env, THIS.Sym);
+END;
+
+SYMBOL OpDef INHERITS DefinedId END;
+SYMBOL ClassOpDef INHERITS DefinedId END;
+SYMBOL TypeIdentifier INHERITS DefinedId END;
+SYMBOL ClassName INHERITS DefinedId END;
+SYMBOL IndDef INHERITS DefinedId END;
+SYMBOL OpRef INHERITS AllIdentifiers END;
+SYMBOL SetIdDef INHERITS DefinedId END;
+SYMBOL SetIdUse INHERITS AllIdentifiers END;
+@}
+
+These computations use the operations exported by the environment module,
+so its interface must be made available:
+
+@$@<Environment module interface@>==@{
+#include "envmod.h"
+@}
+
+@B@<Specification files for text validation@>
+
+@C
+
+@O@<oil.gla@>@{
+@<Lexical elements@>
+@}
+
+@C
+
+@O@<oil.con@>@{
+@<OIL specification@>
+@}
+
+@C
+
+@O@<language.sym@>@{
+@<Equivalence class for signatures@>@(@)
+@<Equivalence class for signatures@>@(Class@)
+@<Type expressions are semantically identical@>
+@}
+
+@C
+
+@O@<language.lido@>@{
+@<Cost specifications@>
+@<Occurrences of identifiers in operator definitions@>
+@<Defining occurrences of identifiers in a class@>
+@<Occurrences of identifiers in an identification@>
+@<Occurrences of identifiers in set definitions@>
+@<Scope rules@>
+@}
+
+@C
+
+@O@<language.specs@>@{
+@<Instantiate the module to verify unique definition@>
+$/Name/envmod.specs
+$/Tech/MakeName.gnrc +instance=Identifier :inst
+@}
+
+@C
+
+@O@<language.head@>@{
+@<Environment module interface@>
+@}

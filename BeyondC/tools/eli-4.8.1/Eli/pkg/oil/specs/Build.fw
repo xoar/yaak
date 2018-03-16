@@ -1,0 +1,999 @@
+@p typesetter = latex2html
+
+@A
+
+The Oil compiler constructs a normal Oil data base from the specifications
+provided by the user.
+It does this by invoking the Oil library's construction functions.
+Because these functions normally do their work by side effects on the data
+base, @{VOID@} attributes must be used to express the dependence of the
+completed data base upon them.
+
+@$@<Oil Database Construction@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.DataBaseBuilt=
+    CONSTITUENTS OpRef.bind
+      DEPENDS_ON (THIS.GotAllOperators, THIS.GotAllClasses);
+END;
+@}
+
+@B@<Assign internal names@>
+
+A @/named entity@/ in Oil is one that can be referred to by name in a
+computation using the Oil data base.
+Types, operators and classes are the only named entities.
+Type identifiers have no defining occurrence, and operator identifiers used
+as operator indications may or may not have defining occurrences as
+operators.
+To simplify the creation of database entries and other operations that must
+be done once for each named entity, the Eli library module @{FirstOcc@} is used
+to create an @{IsFirstOcc@} attribute for each.
+The @{IsFirstOcc@} attribute is nonzero for the first occurrence of the
+entity's identifier (in textual order) and zero for all other occurrences.
+
+@$@<Instantiate the FirstOcc module@>==@{
+$/Prop/FirstOcc.gnrc                :inst
+$/Prop/FirstOcc.gnrc +instance=Type :inst
+@}
+
+The second instantiation is required to support cases in which
+a type name also appears as an operator indication.
+This is a common situation when the type property of a procedure is used to
+carry the invocation operator for that procedure.
+
+Each named entity is given it's symbol value as an internal name.
+
+Because set identifiers appearing in signatures cannot be distinguished
+syntactically from type identifiers, the distinction must be made
+semantically by testing for the presence of a non-empty @{TypeSet@}
+property.
+No such test is required for operator and class identifiers,
+which are distinguished from set identifiers by their context.
+
+@$@<Assign internal names@>==@{
+ATTR DoType: int;
+
+SYMBOL TypeName INHERITS FirstOcc, TypeFirstOcc COMPUTE
+  SYNT.GotIndex=ResetIndex(THIS.Key, THIS.Sym);
+  SYNT.DoType=
+    AND(
+      THIS.IsTypeFirstOcc,
+      EQ(GetTypeSet(THIS.Key,NULLDefTableKeyList),NULLDefTableKeyList));
+END;
+
+SYMBOL OperatorName INHERITS FirstOcc COMPUTE
+  SYNT.GotIndex=ResetIndex(THIS.Key, THIS.Sym);
+END;
+
+SYMBOL OIL COMPUTE
+  SYNT.GotAllNames=
+    CONSTITUENTS (TypeName.GotIndex,OperatorName.GotIndex);
+END;
+@}
+
+A class parameter can also appear in the context of a type identifier.
+The syntax of Oil guarantees, however, that class parameter's definition
+(which does @/not@/ appear in a type identifier context) precedes any such
+appearance.
+Thus the following prevents the @{IsFirstOcc@} attribute of a class parameter
+from being true in a type identifier context.
+
+@$@<Mark a class parameter@>==@{
+SYMBOL ClassParameter INHERITS FirstOcc END;
+@}
+
+@$@<Index property@>@{
+Index: int;
+@}
+
+@B
+
+A type is an atomic data item.
+Types have no properties other than their own identities, so any occurrence
+of a type identifier can serve as the defining occurrence for the
+identified type.
+The @{IsFirstOcc@} attribute is used to select the first occurrence in textual
+order.
+Subsequent occurrences of the same type identifier represent the same Oil
+type, which is obtained from the definition table.
+Thus there is a dependence between the creation of the Oil type at the
+first occurrence and the access to that type at subsequent occurrences.
+This dependence is expressed by the @{VOID@} chain @{GotEarlierTypes@}.
+
+@$@<Construct a type@>==@{
+CHAIN GotEarlierTypes: VOID;
+
+SYMBOL OIL COMPUTE
+  CHAINSTART HEAD.GotEarlierTypes="yes" DEPENDS_ON THIS.GotAllSets;
+  SYNT.GotAllTypes=TAIL.GotEarlierTypes;
+END;
+
+ATTR type: tOilType;
+
+SYMBOL TypeIdentifier INHERITS TypeName COMPUTE
+  SYNT.type=
+    ORDER(
+      IF(THIS.DoType, ResetType(THIS.Key, OilNewType(THIS.Key))),
+      GetType(THIS.Key,OilErrorType()))
+    DEPENDS_ON THIS.GotEarlierTypes;
+  THIS.GotEarlierTypes=SYNT.type;
+END;
+@}
+
+@$@<Type property@>==@{
+Type: tOilType;
+@}
+
+@B
+
+A set of types can be named, and the set name used wherever a type
+identifer is allowed.
+Currently, the definition of a set must textually precede any use of that
+set's name.
+Subsequent occurrences of the set identifier represent the set of types
+established by the definition.
+Thus there is a dependence between the definition of a set at the first
+occurrence of the set identifier and the access to that set at subsequent
+occurrences.
+This dependence is expressed by the @{VOID@} chain @{GotEarlierSets@}.
+
+@$@<Construct a set@>==@{
+CHAIN GotEarlierSets: VOID;
+
+SYMBOL OIL COMPUTE
+  CHAINSTART HEAD.GotEarlierSets="yes";
+  SYNT.GotAllSets=TAIL.GotEarlierSets;
+END;
+
+ATTR set: DefTableKeyList;
+
+RULE: EquivalenceClass ::=  'SET' SetIdDef '=' xTypeExpr ';'
+COMPUTE
+  EquivalenceClass.GotEarlierSets=
+    ResetTypeSet(SetIdDef.Key, xTypeExpr.set)
+    DEPENDS_ON EquivalenceClass.GotEarlierSets;
+END;
+
+RULE: xTypeExpr ::=  SetIdUse
+COMPUTE
+  xTypeExpr.set=
+    GetTypeSet(SetIdUse.Key, NULLDefTableKeyList)
+    DEPENDS_ON xTypeExpr.GotEarlierSets;
+  xTypeExpr.GotEarlierSets=
+    IF(EQ(xTypeExpr.set, NULLDefTableKeyList),
+      message(ERROR, "Undefined set", 0, COORDREF));
+END;
+@}
+
+@$@<Type set property@>==@{
+"DefTableKeyList.h"
+TypeSet: DefTableKeyList;
+@}
+
+Sets are implemented as linear lists of definition table keys.
+Each element of the list is the key of one of the types in the set.
+The @{PtrList@} module from the Eli library is used to manage the lists.
+
+@$@<Instantiate the PtrList module for keys@>==@{
+$/Adt/PtrList.gnrc +instance=DefTableKey +referto=deftbl :inst
+@}
+
+An operation comparing two definition table keys is required by the
+@{PtrList@} module:
+
+@$@<Interface for the key comparison@>==@{
+extern int CmpKey ELI_ARG((DefTableKey, DefTableKey));
+@}
+
+@$@<Key comparison@>==@{
+int
+#ifdef PROTO_OK
+CmpKey(DefTableKey left, DefTableKey right)
+#else
+CmpKey(left, right) DefTableKey left, right;
+#endif
+{ return left < right ? -1 : left == right ? 0 : 1; }
+@}
+
+The set is defined by an expression involving the set operations union,
+intersection and set difference.
+Those operations are carried out by C routines that accept two lists
+as operands and return a single list as a result.
+
+@$@<Set computations@>@(@1@)@M@{
+DefTableKeyList
+#ifdef PROTO_OK
+@1(DefTableKeyList left, DefTableKeyList right)
+#else
+@1(left, right) DefTableKeyList left, right;
+#endif
+@}
+
+They are invoked at the tree nodes corresponding to the set operators,
+and build the set's representation as the value of the @{set@} attribute.
+
+@$@<Set expressions@>==@{
+RULE: xTypeExpr ::=  xTypeExpr '+' xTypeExpr
+COMPUTE
+  xTypeExpr[1].set=Union(xTypeExpr[2].set, xTypeExpr[3].set);
+END;
+
+RULE: xTypeExpr ::=  xTypeExpr '-' xTypeExpr
+COMPUTE
+  xTypeExpr[1].set=Difference(xTypeExpr[2].set, xTypeExpr[3].set);
+END;
+
+RULE: xTypeExpr ::=  xTypeExpr '*' xTypeExpr
+COMPUTE
+  xTypeExpr[1].set=Intersection(xTypeExpr[2].set, xTypeExpr[3].set);
+END;
+@}
+
+A set literal is a bracketed list of type identifiers, each representing a
+singleton set.
+This context for a type identifier is indicated by the symbol
+@{Singleton@}.
+The list of keys describing the set is built up from left to right as the
+value of the @{DefTableKeyList@} chain @{partialSet@}.
+
+@$@<Set literals@>==@{
+CHAIN partialSet: DefTableKeyList;
+
+RULE: xTypeExpr ::= '[' xTypeList ']'
+COMPUTE
+  CHAINSTART xTypeList.partialSet=NULLDefTableKeyList;
+  xTypeExpr.set=xTypeList.partialSet;
+END;
+
+RULE: Singleton ::= TypeIdentifier
+COMPUTE
+  Singleton.partialSet=
+    AddToSetDefTableKeyList(
+      TypeIdentifier.Key,
+      Singleton.partialSet,
+      CmpKey);
+END;
+@}
+
+The C implementations of the set computations are straightforward encodings
+of the normal mathematical definitions.
+No attempt is made to optimize these algorithms, because in practice sets
+are quite small.
+
+@$@<Set operations on pointer lists@>==@{
+@<Set computations@>@(Union@)
+{ while (left != NULLDefTableKeyList) {
+    right = AddToSetDefTableKeyList(HeadDefTableKeyList(left), right, CmpKey);
+    left = TailDefTableKeyList(left);
+  }
+  return right;
+}
+
+@<Set computations@>@(Difference@)
+{ DefTableKeyList temp = NULLDefTableKeyList;
+  while (left != NULLDefTableKeyList) {
+    if (!ElemInDefTableKeyList(HeadDefTableKeyList(left), right, CmpKey))
+      temp = ConsDefTableKeyList(HeadDefTableKeyList(left), temp);
+    left = TailDefTableKeyList(left);
+  }
+  return temp;
+}
+
+@<Set computations@>@(Intersection@)
+{ DefTableKeyList temp = NULLDefTableKeyList;
+  while (left != NULLDefTableKeyList) {
+    if (ElemInDefTableKeyList(HeadDefTableKeyList(left), right, CmpKey))
+      temp = ConsDefTableKeyList(HeadDefTableKeyList(left), temp);
+    left = TailDefTableKeyList(left);
+  }
+  return temp;
+}
+@}
+
+@B
+
+A signature is a tuple of types, and has no associated identifier.
+The tuple is built in reverse order, starting with the last element and
+adding each element in turn to the front of the tuple.
+The last element added represents the type of the result.
+
+@$@<Construct a signature@>==@{
+ATTR signature: tOilArgSig;
+
+RULE: Signature ::=
+COMPUTE
+  Signature.signature=OilNewArgSig();
+END;
+
+RULE: Signature ::=  SignatureElement
+COMPUTE
+  Signature.signature=OilAddArgSig(SignatureElement.type,OilNewArgSig());
+END;
+
+RULE: Signature ::=  SignatureElement ',' Signature
+COMPUTE
+  Signature[1].signature=
+    OilAddArgSig(SignatureElement.type,Signature[2].signature);
+END;
+
+RULE: Signature ::=  '(' Signature ')' ':' SignatureElement
+COMPUTE
+  Signature[1].signature=
+    OilAddArgSig(SignatureElement.type,Signature[2].signature);
+END;
+@}
+
+Each element of a signature is an identifier that might denote either a
+single type or a set of types.
+A signature containing elements that denote sets of types actually
+represents a set of signatures, and its attributes will be evaluated
+iteratively.
+On each iteration, every set identifier is bound to a specific type.
+All occurrences of the same set identifier are bound to the same type.
+(Of course these bindings are not possible until all of the set definitions
+have been processed.)
+
+The first step in processing a signature is to obtain the set of set names
+appearing in that signature.
+This is the purpose of the @{DefTableKeyList@} chain @{SetNames@}.
+@{FirstSetBinding@} uses that set to obtain a particular binding for each set
+identifier to one of the types in the set it identifies.
+A sequence of such bindings can be defined, and @{NextSetBinding@} advances
+from one element of that sequence to the next.
+By definition, the distinguished value @{NoSetBinding@} is the last element of
+any such sequence.
+@{NoSetBinding@} is also the value returned by @{FirstSetBinding@} if no set
+names appear in the signature.
+
+@$@<Determine the meaning of a signature element@>==@{
+CHAIN SetNames: DefTableKeyList;
+
+ATTR SetBinding: SetBindingState;
+
+SYMBOL Binder COMPUTE
+  CHAINSTART HEAD.SetNames=
+    NULLDefTableKeyList DEPENDS_ON (
+      INCLUDING OIL.GotAllDefs,
+      INCLUDING OIL.GotAllTypes,
+      INCLUDING OIL.GotAllNames);
+  SYNT.SetBinding=
+    FirstSetBinding(TAIL.SetNames) DEPENDS_ON INCLUDING RangeUnique._GotUnique;
+  SYNT.Done=
+    UNTIL EQ(SYNT.SetBinding,NoSetBinding)
+    ITERATE SYNT.SetBinding=NextSetBinding(SYNT.SetBinding)
+    DEPENDS_ON THIS.defined;
+END;
+
+RULE: SignatureElement ::= TypeIdentifier
+COMPUTE
+  SignatureElement.Key=TypeIdentifier.Key;
+  SignatureElement.SetNames=
+    IF(
+      NE(
+        GetTypeSet(TypeIdentifier.Key,NULLDefTableKeyList),
+        NULLDefTableKeyList),
+      AddToSetDefTableKeyList(
+        TypeIdentifier.Key,
+        SignatureElement.SetNames,
+        CmpKey),
+      SignatureElement.SetNames);
+  SignatureElement.type=
+    GetType(
+      GetBoundType(TypeIdentifier.Key, TypeIdentifier.Key),
+      OilErrorType())
+    DEPENDS_ON INCLUDING Binder.SetBinding;
+END;
+
+SYMBOL Operator INHERITS Binder END;
+SYMBOL ClassOperator INHERITS Binder END;
+@}
+
+@$@<Type property of a set identifier@>==@{
+BoundType: DefTableKey;
+@}
+
+A @{SetBindingState@} is an array that contains the set names appearing in the
+signature, each associated with a subset of the types in its set.
+@{KeyForSet@} gives an array element's set name, and @{ElementsRemaining@}
+gives its subset.
+The array is terminated by an element specifying @{NoKey@} as its set name.
+The distinguished element @{NoSetBinding@} is a null array.
+
+The binding corresponding to a @{SetBindingState@} is that in which each of
+the set identifiers has the first element of the associated subset as the
+value of its @{BoundType@} property.
+
+@$@<Binding state element@>==@{
+typedef struct {
+  DefTableKey KeyForSet;
+  DefTableKeyList ElementsRemaining;
+} OneSetBinding, *SetBindingState;
+
+#define NoSetBinding (SetBindingState)0
+@}
+
+The first binding state in a sequence is the one in which every set
+identifier is associated with its complete set.
+Given a binding state in such a sequence, the next state in the sequence is
+obtained by deleting the first element of the subset associated with the
+first set identifier.
+If the subset becomes empty thereby, the complete set is restored and the
+same operation carried out on the next set identifier.
+All possible bindings have been made when there is no ``next set
+identifier''.
+(This process is analogous to the normal algorithm for counting:
+The @{SetBindingState@} behaves as a mixed-radix number, with the radix of
+each digit being the cardinality of the set value for the corresponding set
+identifier.
+The first element of the array is the least significant digit.)
+
+@$@<Operations on the binding state@>+=@{
+static Obstack SetObstk;
+
+SetBindingState
+#ifdef PROTO_OK
+FirstSetBinding(DefTableKeyList SetKeys)
+#else
+FirstSetBinding(SetKeys) DefTableKeyList SetKeys;
+#endif
+{ OneSetBinding temp;
+
+  if (SetKeys == NULLDefTableKeyList) return NoSetBinding;
+
+  do {
+    temp.KeyForSet = HeadDefTableKeyList(SetKeys);
+    temp.ElementsRemaining = GetTypeSet(temp.KeyForSet, NULLDefTableKeyList);
+    ResetBoundType(
+      temp.KeyForSet,
+      HeadDefTableKeyList(temp.ElementsRemaining));
+    obstack_grow(&SetObstk, &temp, sizeof(temp));
+    SetKeys = TailDefTableKeyList(SetKeys);
+  } while (SetKeys != NULLDefTableKeyList);
+
+  temp.KeyForSet = NoKey; temp.ElementsRemaining = NULLDefTableKeyList;
+  return NextSetBinding(
+    (SetBindingState)obstack_copy(&SetObstk, &temp, sizeof(temp)));
+}
+
+SetBindingState
+#ifdef PROTO_OK
+NextSetBinding(SetBindingState last)
+#else
+NextSetBinding(last) SetBindingState last;
+#endif
+{ SetBindingState current;
+
+  for (current = last; current->KeyForSet != NoKey; current++) {
+    current->ElementsRemaining=TailDefTableKeyList(current->ElementsRemaining);
+    if (current->ElementsRemaining != NULLDefTableKeyList) {
+      ResetBoundType(
+        current->KeyForSet,
+        HeadDefTableKeyList(current->ElementsRemaining));
+      return last;
+    }
+    current->ElementsRemaining=
+      GetTypeSet(current->KeyForSet,NULLDefTableKeyList);
+    ResetBoundType(
+      current->KeyForSet,
+      HeadDefTableKeyList(current->ElementsRemaining));
+  }
+
+  obstack_free(&SetObstk, last);
+  return NoSetBinding;
+}
+@}
+
+@{SetObstk@} must be initialized as part of the program setup.
+
+@$@<Initialize SetObstk@>==@{
+{ extern void InitSetBinding(); InitSetBinding(); }
+@}
+
+@$@<Operations on the binding state@>+=@{
+void InitSetBinding() { obstack_init(&SetObstk); }
+@}
+
+@B
+
+An operator has a signature and a cost, which are supplied at the unique
+defining occurrence of that operator's identifier.
+
+@$@<Construct an operator@>==@{
+SYMBOL OpDef INHERITS OperatorName COMPUTE
+  SYNT.OpList=
+    ResetOperator(
+      THIS.Key,
+      ConstOilOpList(
+        OilNewOp(
+          THIS.Key,
+          INCLUDING Operator.signature,
+          INCLUDING Operator.cost),
+        GetOperator(THIS.Key,NULLtOilOpList)));
+END;
+@}
+
+@$@<Operator property@>==@{
+"tOilOpList.h"
+Operator: tOilOpList;
+@}
+
+@$@<Instantiate the PtrList module for operators@>==@{
+$/Adt/PtrList.gnrc +instance=tOilOp +referto=oiladt2 :inst
+@}
+
+Applied occurrences of an operator identifier can either precede or
+follow the defining occurrence of that identifier.
+Since the Oil operator corresponding to an operator identifier must be
+obtained from the definition table, there is a dependence between the
+creation of the Oil operator at the defining occurrence and the access to
+that operator at applied occurrences.
+This dependence is expressed by a @{VOID@} attribute of the root:
+
+@$@<Operator property dependence@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.GotOperators=CONSTITUENTS Operator.Done;
+END;
+@}
+
+An operator definition provides a signature and a cost
+for one or more operators.
+Remember that if the signature contains set identifiers, it actually
+represents a set of signatures.
+If the signature represents a set of signatures, then each operator name
+mentioned in the operator definition names any one of a collection of
+operators.
+These operators are distinct, even though they have the same name.
+
+If the operator definition defines a coercion, the concrete grammar restricts
+the form of the signature.
+Again, the operator definition may actually define a set of coercions with
+the same name and different signatures.
+In addition to being defined as operators, coercions must be added to the
+Oil data base as lattice arcs.
+That is the function of @{AddCoercions@}.
+
+@$@<Operator definitions@>==@{
+RULE: Oper ::= OpDefList Signature CostSpecification ';'
+COMPUTE
+  Oper.signature=Signature.signature;
+  Oper.cost=CostSpecification.cost;
+  Oper.defined=CONSTITUENTS OpDef.OpList;
+END;
+
+RULE: Coerce ::= OpDef Signature CostSpecification ';'
+COMPUTE
+  Coerce.signature=Signature.signature;
+  Coerce.cost=CostSpecification.cost;
+  Coerce.defined=OpDef.OpList;
+  AddCoercions(OpDef.Key) DEPENDS_ON Coerce.Done;
+END;
+
+SYMBOL Oper INHERITS Operator END;
+SYMBOL Coerce INHERITS Operator END;
+@}
+
+@{AddCoercions@} uses the @{Operator@} property of its argument to obtain
+the list of the operators named by @{OpDef@}.
+
+@$@<Add lattice arcs for coercions@>==@{
+void
+#ifdef PROTO_OK
+AddCoercions(DefTableKey OpName)
+#else
+AddCoercions(OpName) DefTableKey OpName;
+#endif
+{ tOilOpList ops;
+
+  for (ops = GetOperator(OpName, NULLtOilOpList);
+       ops != NULLtOilOpList;
+       ops = TailtOilOpList(ops))
+    OilAddCoercion(HeadtOilOpList(ops));
+}
+@}
+
+@B
+
+A class is a parameterized abstract data type, whose parameters are types.
+It defines a set of operators and coercions that can be instantiated with
+given types substituted for the type parameters.
+Each @{ClassName@} is the unique defining occurrence of the class
+identifier.
+
+@$@<Construct a class@>==@{
+ATTR class: tOilClass;
+ATTR argNum: int;
+
+SYMBOL ClassName INHERITS OperatorName COMPUTE
+  SYNT.class=OilNewClass(THIS.Key, THIS.argNum);
+END;
+
+RULE: Class ::= 'CLASS' ClassName ClassBody
+COMPUTE
+  Class.class=ClassName.class;
+  ClassName.argNum=
+    CONSTITUENTS ClassParameter.Key WITH (int, ADD, ARGTOONE, ZERO);
+END;
+@}
+
+@C@<Contextual information within a class@>
+
+Type identifiers appearing within a class are interpreted according to
+their bindings within that class.
+If the identifier is free, then it represents some specific type
+independent of the instantiation of the class.
+If the identifier is bound as the name of the class, then it represents the
+type being created by the instantiation of the class.
+If the identifier is bound as a parameter of the class, then it represents
+the corresponding argument of the instantiation.
+
+In order to invoke the operator that adds an element to a class signature,
+the compiler must have access to the binding status of each identifier.
+In addition, it must have access to the type of a free identifier and the
+index of a parameter in the parameter list of the class.
+No information beyond the binding status is required for the class name.
+All of this information is made available by properties accessible from the
+identifier's definition table key.
+
+@$@<Properties of bound identifiers@>==@{
+BindingStatus: int;
+ParameterIndex: int;
+@}
+
+There is no particular order in which classes must be supplied, relative to
+the free identifiers used within them.
+Bound identifiers, however, are always bound to the left of their uses
+within the class.
+This suggests the use of a chain to establish the dependence between
+definitions and uses of the bound identifiers.
+The same chain can guarantee the definitions of the free identifiers
+if it is not started until all specific types are known.
+Finally, that chain can be used to indicate that the class definition
+entry in the data base has been completed.
+
+@$@<Class property dependence@>==@{
+CHAIN GotEarlierBindings: VOID;
+
+SYMBOL Class COMPUTE
+  CHAINSTART HEAD.GotEarlierBindings=THIS.GotEarlierTypes;
+  THIS.GotEarlierTypes=TAIL.GotEarlierBindings;
+  SYNT.defined=TAIL.GotEarlierBindings;
+END;
+
+SYMBOL ClassName COMPUTE
+  THIS.GotEarlierBindings=
+    ResetBindingStatus(THIS.Key, eClassRef)
+      DEPENDS_ON THIS.GotEarlierBindings;
+END;
+
+SYMBOL OIL COMPUTE
+  SYNT.GotAllClasses=CONSTITUENTS Class.defined;
+END;
+@}
+
+@C
+
+The parameter indices can be assigned via an integer chain that runs
+through the class parameter list.
+Cross-dependence with @{GotEarlierBindings@} maintains the necessary
+dependence relations.
+
+@$@<Class parameters@>==@{
+CHAIN ParameterIndex: int;
+
+SYMBOL ClassParameters COMPUTE
+  CHAINSTART HEAD.ParameterIndex=1;
+  THIS.GotEarlierBindings=TAIL.ParameterIndex;
+END;
+
+SYMBOL ClassParameter COMPUTE
+  THIS.ParameterIndex=
+    ORDER(
+      ResetBindingStatus(THIS.Key, eElementRef),
+      ResetParameterIndex(THIS.Key, THIS.ParameterIndex),
+      ADD(THIS.ParameterIndex, 1));
+END;
+@}
+
+@C
+
+@$@<Construct a class signature@>==@{
+ATTR classSignature: tOilClassArgSig;
+
+RULE: ClassSignature ::=
+COMPUTE
+  ClassSignature.classSignature=OilNewClassSigArg();
+END;
+
+RULE: ClassSignature ::= SignatureElement
+COMPUTE
+  ClassSignature.classSignature=
+    OilAddClassSigArg(
+      GetBindingStatus(SignatureElement.Key,eSpecTypeRef),
+      SignatureElement.type,
+      GetParameterIndex(SignatureElement.Key,0),
+      OilNewClassSigArg());
+END;
+
+RULE: ClassSignature ::=  SignatureElement ',' ClassSignature
+COMPUTE
+  ClassSignature[1].classSignature=
+    OilAddClassSigArg(
+      GetBindingStatus(SignatureElement.Key,eSpecTypeRef),
+      SignatureElement.type,
+      GetParameterIndex(SignatureElement.Key,0),
+      ClassSignature[2].classSignature);
+END;
+
+RULE: ClassSignature ::=  '(' ClassSignature ')' ':' SignatureElement
+COMPUTE
+  ClassSignature[1].classSignature=
+    OilAddClassSigArg(
+      GetBindingStatus(SignatureElement.Key,eSpecTypeRef),
+      SignatureElement.type,
+      GetParameterIndex(SignatureElement.Key,0),
+      ClassSignature[2].classSignature);
+END;
+@}
+
+@C
+
+@$@<Construct a class operator@>==@{
+SYMBOL ClassOpDef INHERITS OperatorName COMPUTE
+  SYNT.classOpList=
+    ResetClassOperator(
+      THIS.Key,
+      ConstOilClassOpList(
+        OilAddClassOp(
+          THIS.Key,
+          INCLUDING ClassOperator.classSignature,
+          INCLUDING ClassOperator.cost,
+          INCLUDING Class.class),
+        GetClassOperator(THIS.Key,NULLtOilClassOpList)));
+END;
+@}
+
+@$@<Class operator property@>==@{
+"tOilClassOpList.h"
+ClassOperator: tOilClassOpList;
+@}
+
+@$@<Instantiate the PtrList module for class operators@>==@{
+$/Adt/PtrList.gnrc +instance=tOilClassOp +referto=oiladt2 :inst
+@}
+
+@$@<Class operator property dependence@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.GotClassOperators=CONSTITUENTS ClassOperator.Done;
+END;
+@}
+
+@$@<Class operator definitions@>==@{
+RULE: ClassOper ::= ClassOpDefList ClassSignature CostSpecification ';'
+COMPUTE
+  ClassOper.classSignature=ClassSignature.classSignature;
+  ClassOper.cost=CostSpecification.cost;
+  ClassOper.defined=CONSTITUENTS ClassOpDef.classOpList;
+END;
+
+RULE: ClassCoerce ::= ClassOpDef ClassSignature CostSpecification ';'
+COMPUTE
+  ClassCoerce.classSignature=ClassSignature.classSignature;
+  ClassCoerce.cost=CostSpecification.cost;
+  ClassCoerce.defined=
+    AddClassCoercions(ClassOpDef.Key) DEPENDS_ON ClassOpDef.classOpList;
+END;
+
+SYMBOL ClassOper INHERITS ClassOperator END;
+SYMBOL ClassCoerce INHERITS ClassOperator END;
+@}
+
+@$@<Add lattice arcs for class coercions@>==@{
+void
+#ifdef PROTO_OK
+AddClassCoercions(DefTableKey OpName)
+#else
+AddClassCoercions(OpName) DefTableKey OpName;
+#endif
+{ tOilClassOpList ops;
+
+  for (ops = GetClassOperator(OpName, NULLtOilClassOpList);
+       ops != NULLtOilClassOpList;
+       ops = TailtOilClassOpList(ops))
+    OilAddClassCoercion(HeadtOilClassOpList(ops));
+}
+@}
+
+@B
+
+An identification is a relation between two operators.
+The first operator of the pair is the indication being identified,
+the second is one possible operator that could be represented by that
+indication.
+All of the possible identifications for a particular indication are given
+by a single declaration that specifies the indication and lists the
+operators that indication could represent.
+All of these operators must have the same signature.
+
+@$@<Construct an identification@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.GotAllOperators=THIS.GotOperators DEPENDS_ON THIS.GotClassOperators;
+END;
+
+ATTR indication: tOilOp;
+
+RULE: Indication ::= IndDef ':' OpRefList ';'
+COMPUTE
+  Indication.indication=
+    HeadtOilOpList(GetOperator(IndDef.Key, NULLtOilOpList))
+    DEPENDS_ON INCLUDING OIL.GotAllIndications;
+END;
+
+SYMBOL OpRef COMPUTE
+  SYNT.bind=
+    AddIdentifications(INCLUDING Indication.indication, THIS.Key)
+    DEPENDS_ON INCLUDING OIL.GotAllOperators;
+END;
+@}
+
+@{AddIdentifications@} uses the @{Operator@} or @{ClassOperator@}
+property of its argument to obtain the list of the operators named by
+@{OpDef@}.
+Exactly one of these properties will be non-empty.
+
+@$@<Add identifications@>==@{
+void
+#ifdef PROTO_OK
+AddIdentifications(tOilOp Indication, DefTableKey OpName)
+#else
+AddIdentifications(Indication, OpName) tOilOp Indication; DefTableKey OpName;
+#endif
+{ tOilOpList ops;
+  tOilClassOpList cops;
+
+  for (ops = GetOperator(OpName, NULLtOilOpList);
+       ops != NULLtOilOpList;
+       ops = TailtOilOpList(ops))
+    OilAddIdentification(Indication, HeadtOilOpList(ops));
+
+  for (cops = GetClassOperator(OpName, NULLtOilClassOpList);
+       cops != NULLtOilClassOpList;
+       cops = TailtOilClassOpList(cops))
+    OilAddClassOpId(Indication, HeadtOilClassOpList(cops));
+}
+@}
+
+The indication may have been defined as an operator.
+If it has not been defined, then a definition must be created:
+
+@$@<Obtain the Oil operator for an indication@>==@{
+SYMBOL OIL COMPUTE
+  SYNT.GotAllIndications=CONSTITUENTS IndDef.OpList;
+END;
+
+SYMBOL IndDef INHERITS OperatorName COMPUTE
+  SYNT.OpList=
+    IF(EQ(GetOperator(THIS.Key,NULLtOilOpList),NULLtOilOpList),
+      ResetOperator(
+        THIS.Key,
+        ConstOilOpList(
+          OilNewOp(THIS.Key, OilNewArgSig(), 0),
+          NULLtOilOpList)))
+    DEPENDS_ON INCLUDING OIL.GotAllOperators;
+END;
+@}
+
+@B@<Specification files@>
+
+@C
+
+@O@<Build.lido@>@{
+@<Oil Database Construction@>
+@<Assign internal names@>
+@<Mark a class parameter@>
+@<Construct a type@>
+@<Construct a set@>
+@<Set expressions@>
+@<Set literals@>
+@<Construct a signature@>
+@<Determine the meaning of a signature element@>
+@<Construct an operator@>
+@<Operator property dependence@>
+@<Operator definitions@>
+@<Construct an identification@>
+@<Obtain the Oil operator for an indication@>
+@<Construct a class@>
+@<Class property dependence@>
+@<Class parameters@>
+@<Construct a class signature@>
+@<Construct a class operator@>
+@<Class operator property dependence@>
+@<Class operator definitions@>
+@}
+
+@C
+
+@O@<Build.pdl@>@{
+"oiladt2.h"
+@<Index property@>
+@<Type property@>
+@<Operator property@>
+@<Class operator property@>
+@<Properties of bound identifiers@>
+@<Type set property@>
+@<Type property of a set identifier@>
+@}
+
+@C@<C module@>
+
+@O@<Build.h@>@{
+#ifndef BUILD_H
+#define BUILD_H
+
+#include "eliproto.h"
+#include "deftbl.h"
+#include "oiladt2.h"
+#include "DefTableKeyList.h"
+#include "tOilOpList.h"
+#include "tOilClassOpList.h"
+
+@<Binding state element@>
+
+@<Interface for the key comparison@>
+
+extern DefTableKeyList Union ELI_ARG((DefTableKeyList, DefTableKeyList));
+extern DefTableKeyList Difference ELI_ARG((DefTableKeyList, DefTableKeyList));
+extern DefTableKeyList Intersection ELI_ARG((DefTableKeyList, DefTableKeyList));
+extern SetBindingState FirstSetBinding ELI_ARG((DefTableKeyList));
+extern SetBindingState NextSetBinding ELI_ARG((SetBindingState));
+extern void AddCoercions ELI_ARG((DefTableKey));
+extern void AddClassCoercions ELI_ARG((DefTableKey));
+extern void AddIdentifications ELI_ARG((tOilOp, DefTableKey));
+
+#endif
+@}
+
+@O@<Build.c@>@{
+#include "Build.h"
+#include "obstack.h"
+#include "pdl_gen.h"
+#include "oiladt2.h"
+#include "DefTableKeyList.h"
+#include "tOilOpList.h"
+#include "tOilClassOpList.h"
+
+@<Key comparison@>
+@<Set operations on pointer lists@>
+@<Operations on the binding state@>
+@<Add lattice arcs for coercions@>
+@<Add lattice arcs for class coercions@>
+@<Add identifications@>
+@}
+
+@C
+
+@O@<Build.head@>@{
+#include "oiladt2.h"
+#include "oiladt2b.h"
+#include "csm.h"
+#include "Build.h"
+
+#include "ptg_gen.h"
+extern PTGNode PTGElements();
+@}
+
+@C
+
+@O@<Build.init@>@{
+@<Initialize SetObstk@>
+@}
+
+@C
+
+@O@<Build.specs@>@{
+$/oil/oil.specs
+$/Output/LeafPtg.gnrc :inst
+@<Instantiate the FirstOcc module@>
+@<Instantiate the PtrList module for keys@>
+@<Instantiate the PtrList module for operators@>
+@<Instantiate the PtrList module for class operators@>
+@}

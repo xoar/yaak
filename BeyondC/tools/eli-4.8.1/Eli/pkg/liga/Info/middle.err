@@ -1,0 +1,360 @@
+# $Id: middle.err,v 4.9 1999/08/13 07:57:25 cogito Exp $
+
+# (C) Copyright 1997 University of Paderborn
+#
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+# The sed patterns in this file are divided into two sections:
+#
+#	Section 1 contains patterns representing ONE specific message
+#	Section 2 contains patterns representing a lot of messages
+#
+# Specific patterns MUST be before general patterns !
+#
+
+# Section 1: patterns representing ONE specific message
+#
+# Here in section 1 the messages additionally are in order:
+#	       DEADLY errors
+#	before (FATAL, ERROR) errors 
+#	before WARNING messages
+#	before NOTE messages
+
+#
+# 1.1 DEADLY Errors
+#
+/illegal entry in reference table/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/ligaMe (expand) failed/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+
+/IDL input file is empty/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/expand: out of memory/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/Too many definitions./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+/no more memory/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)limits./
+	p
+	d
+}
+
+# 
+# 1.2 (FATAL, ERROR) Errors
+#
+/Illegal lhs in assignment/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/ there is no computations of attribute .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/Internal error .* in .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/ambiguous root symbol/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Rule Specifications./
+	p
+	d
+}
+/class conflict for attribute .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Types and Classes of Attributes./
+	p
+	d
+}
+/exp.*: internal error .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/multiple attributions for production/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/no candidates for root symbol found/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Rule Specifications./
+	p
+	d
+}
+/type conflict in CONSTITUENT(S)/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref) CONSTITUENT(S)./
+	p
+	d
+}
+/type conflict in INCLUDING/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)INCLUDING./
+	p
+	d
+}
+/Cannot open order_option file/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Left Hand Side of attrrule is not an attribute./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Not expected Entity in initMAX_SYMBNO()/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/Unknown Visit Class/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/computation of .* is missing in RULE .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/computation of rule attribute .* is missing in RULE .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Attributes./
+	p
+	d
+}
+/computation of .* must not occur in RULE .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/computation of .* occurrs multiply in RULE .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/did not find evaluation order; see OrdInfo, add dependencies, or use gorto/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/evaluation order for .* not found/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/.* is involved in a cyclic dependency/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/BOTTOMUP evaluation not possible (possible reasons: User or maptool request for 'TREE_COMPLETE' or computed subtrees)/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/bottom up INH value computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/bottom up INH code computation/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/from visitsequence() pid = .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/impossible bottom-up visit to symb .* in RULE .*/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/in RULE .* FROM EXPAND/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/in Visit Sequence of Rule./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/in appendnextvs()/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/system fault: missing BottomUpAttr/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/AG contains more than one STARTSYMBOL !/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/attribute .* in Prod. .* is not evaluated./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/last action in VS .* is not a LEAVE/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/no CAN_EVAL set found for CAN_EVAL [ .*, .* ]/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/no death leave ord found !/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/no lifetimebegin for Attr. .* in Prod. .* found !/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/no lifetimeend for Attr. .* in Prod. .* found/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/not expanded INCLUDING found/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+
+#
+# 1.3 WARNING messages
+#
+/ATTRIBUTE .* can't be in this GROUP./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+/ATTRIBUTE .* does not exist!/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/ATTRIBUTE .* is defined, but never used./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)Computations./
+	p
+	d
+}
+/ATTRIBUTE .* is multiple declared in OPTION!/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+/ATTRIBUTES with name .* are multiple declared in OPTION./{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+	p
+	d
+}
+
+#
+# 1.4 NOTE messages
+#
+#/ATTRIBUTE .* can not be implemented as GLOBAL_VARIABLE/{
+#	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+#	p
+#	d
+#}
+#/ATTRIBUTES .* are not global VARIABLES./{
+#	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+#	p
+#	d
+#}
+#/ATTRIBUTES with name . are not global STACKS./{
+#	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Optim Options./
+#	p
+#	d
+#}
+#
+#
+# Section 2: patterns representing a lot of messages
+#
+/CHAIN/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CHAIN./
+	p
+	d
+}
+/CONSTITUENT/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)CONSTITUENT(S)./
+	p
+	d
+}
+/INCLUDING/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lidoref)INCLUDING./
+	p
+	d
+}
+/Can't/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (help)system./
+	p
+	d
+}
+/bottom up/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/bottom-up/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/BOTTOMUP/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 :  (lidoref)Computations./
+	p
+	d
+}
+/Arrange:/{
+	s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (lcl)Order Options./
+	p
+	d
+}
+s/^\([^ ]* [0-9]* [0-9]*\)/\1 : (nodoc)./
+
+
+

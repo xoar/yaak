@@ -1,0 +1,175 @@
+# $Id: Makefile.in,v 2.23 2010/07/26 09:00:38 profw Exp $
+# Copyright 2001, The Regents of the University of Colorado
+
+SHELL	= /bin/sh
+CC	= @CC@
+CFLAGS	= -g
+ELISYS	= @ELISYS@
+
+SUBDIR	= pkg
+
+# Do not re-run Tex
+NOTEX	= true
+
+# File set definitions
+AUX	= autom4te.cache *.in *.log *.status configure README \
+	  INSTALL Makefile include tests
+TIDY	= *.o a.out core ERRS RLOG FILES INFO LOCAL ELI
+CLEAN	= $(TIDY) *~ CACHE
+
+all:	notest
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE tests%test
+
+notest:
+	@for i in $(SUBDIR); do echo; echo Making $$i; \
+		(cd ./$$i; \
+		$(MAKE) NOTEX=$(NOTEX) ELISYS=$(ELISYS) \
+			DESTDIR=$(DESTDIR) CC="$(CC)"); \
+		done
+
+install:	$(DESTDIR)
+	./INSTALL $(DESTDIR)
+
+executable:
+	@for i in $(SUBDIR); do echo; echo Making $$i executable; \
+		(cd ./$$i; $(MAKE) executable); done
+	rm -rf $(TIDY) $(AUX)
+
+tidy:
+	rm -rf $(TIDY)
+	@for i in $(SUBDIR); do echo; echo Tidying $$i; \
+		(cd ./$$i; $(MAKE) tidy); done
+
+clean:
+	rm -rf $(CLEAN)
+	@for i in $(SUBDIR); do echo; echo Cleaning $$i; \
+		(cd ./$$i; $(MAKE) clean); done
+		
+predist:
+	@for i in $(SUBDIR); do echo; echo Pre-disting $$i; \
+		(cd ./$$i; $(MAKE) DESTDIR=$(DESTDIR) predist); done
+
+distclean:	clean
+	rm -f *.log config.cache config.status
+	rm -f Makefile config.h
+	rm -f pkg/Adt/Makefile
+	rm -f pkg/Adt/config.h
+	rm -f pkg/Name/Examples/Makefile
+	rm -f pkg/Name/Makefile
+	rm -f pkg/Input/Makefile
+	rm -f pkg/Output/Makefile
+	rm -f pkg/Prop/Makefile
+	rm -f pkg/Scan/Makefile
+	rm -f pkg/Tech/Makefile
+	rm -f pkg/Type/Examples/Makefile
+	rm -f pkg/Type/Makefile
+	rm -f pkg/Unparser/Makefile
+	rm -f pkg/adtinit/src/Makefile
+	rm -f pkg/adtinit/Makefile
+	rm -f pkg/burg/Makefile
+	rm -f pkg/cc/Makefile
+	rm -f pkg/cc/c.o.sh
+	rm -f pkg/cc/cc.dg
+	rm -f pkg/clp/Makefile
+	rm -f pkg/clp/lib/Makefile
+	rm -f pkg/cola/Frames/Makefile
+	rm -f pkg/cola/Makefile
+	rm -f pkg/cola/colaBe.sh
+	rm -f pkg/cola/Info/Makefile
+	rm -f pkg/cola/idl/idllib/Makefile
+	rm -f pkg/cola/idl/Makefile
+	rm -f pkg/cola/lalr/back/both/Makefile
+	rm -f pkg/cola/lalr/back/Makefile
+	rm -f pkg/cola/lalr/back/table/Makefile
+	rm -f pkg/cola/lalr/Makefile
+	rm -f pkg/cola/lalr/front/lalr/Makefile
+	rm -f pkg/cola/lalr/front/Makefile
+	rm -f pkg/cola/lalr/helptools/Makefile
+	rm -f pkg/cola/lib/Makefile
+	rm -f pkg/cola/option/Makefile
+	rm -f pkg/cola/trafos/fmt/Makefile
+	rm -f pkg/cola/trafos/Makefile
+	rm -f pkg/cola/trafos/pgs2cmr/Makefile
+	rm -f pkg/cpp/Makefile
+	rm -f pkg/cxx/Makefile
+	rm -f pkg/cxx/cxx.o.sh
+	rm -f pkg/dapto/Makefile
+	rm -f pkg/dapto/dapOut.sh
+	rm -f pkg/dapto/init.sh
+	rm -f pkg/dbx/Makefile
+	rm -f pkg/delit/Makefile
+	rm -f pkg/delit/lit_gen.sh
+	rm -f pkg/eli/src/Makefile
+	rm -f pkg/eli/Makefile
+	rm -f pkg/eli/mkfile.sh
+	rm -f pkg/fw/src/Makefile
+	rm -f pkg/fw/Makefile
+	rm -f pkg/gla/backend/Makefile
+	rm -f pkg/gla/gla_be.sh
+	rm -f pkg/gla/nflex/Makefile
+	rm -f pkg/gla/Makefile
+	rm -f pkg/idem/specs/Makefile
+	rm -f pkg/idem/Makefile
+	rm -f pkg/idl/Makefile
+	rm -f pkg/info/Makefile
+	rm -f pkg/info/info.sh
+	rm -f pkg/info/doc.sh
+	rm -f pkg/info/html/Makefile
+	rm -f pkg/info/hypermsg/Makefile
+	rm -f pkg/info/texinfo/Makefile
+	rm -f pkg/info/tnf/Makefile
+	rm -f pkg/kwd/Makefile
+	rm -f pkg/lib/Makefile
+	rm -f pkg/liga/Frames/Makefile
+	rm -f pkg/liga/Makefile
+	rm -f pkg/liga/ligaBe.sh
+	rm -f pkg/liga/Info/Makefile
+	rm -f pkg/liga/backend/Makefile
+	rm -f pkg/liga/frontend/Makefile
+	rm -f pkg/liga/gorto/Makefile
+	rm -f pkg/liga/idl/idllib/Makefile
+	rm -f pkg/liga/idl/Makefile
+	rm -f pkg/liga/ligaErr/Makefile
+	rm -f pkg/liga/ligaProd/Makefile
+	rm -f pkg/liga/ligascel/Makefile
+	rm -f pkg/liga/middle/expand/Makefile
+	rm -f pkg/liga/middle/Makefile
+	rm -f pkg/liga/middle/optim/Makefile
+	rm -f pkg/liga/middle/order/Makefile
+	rm -f pkg/liga/option/Makefile
+	rm -f pkg/liga/show/Makefile
+	rm -f pkg/lint/Makefile
+	rm -f pkg/maptool/Makefile
+	rm -f pkg/noosa/Makefile
+	rm -f pkg/noosa/mon.sh
+	rm -f pkg/noosa/mongdb.sh
+	rm -f pkg/odi/Makefile
+	rm -f pkg/oil/specs/Makefile
+	rm -f pkg/oil/Makefile
+	rm -f pkg/oldodin/Makefile
+	rm -f pkg/parser/Makefile
+	rm -f pkg/parser/parserOut.sh
+	rm -f pkg/pdl/Makefile
+	rm -f pkg/pgs/src/Makefile
+	rm -f pkg/pgs/Makefile
+	rm -f pkg/pgs/pgsGen.sh
+	rm -f pkg/phi/Makefile
+	rm -f pkg/phi/phiOut.sh
+	rm -f pkg/ptg/Makefile
+	rm -f pkg/ptg/ptg_out.sh
+	rm -f pkg/ptg/sample/Makefile
+	rm -f pkg/skeleton/Makefile
+	rm -f pkg/skeleton/src/Makefile
+	rm -f pkg/symcode/Makefile
+	rm -f pkg/tp/specs/Makefile
+	rm -f pkg/tp/Makefile
+	rm -f pkg/version/Makefile
+	rm -f pkg/version/version
+	rm -f pkg/version/version.dg
+	rm -f pkg/Makefile
+	(cd ./pkg/cpp/gnu_cpp; make distclean)
+	(cd ./pkg/eli/ofiles; make distclean)
+	(cd ./pkg/skeleton/gnu_sed; make distclean)
+
+$(DESTDIR):
+	mkdir $(DESTDIR)

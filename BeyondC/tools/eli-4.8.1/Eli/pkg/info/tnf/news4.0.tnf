@@ -1,0 +1,686 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename news4.0
+@settitle New Features of Eli4.0
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: news4.0.tnf,v 4.1 1997/08/07 16:04:14 mjung Exp $
+
+@titlepage
+@center @titlefont{New Features of Eli4.0}
+@sp 3
+@center $Revision: 4.1 $
+@sp 3
+@center Compiler and Programming Language Group
+@center University of Paderborn, FB 17
+@center 33098 Paderborn, FRG
+@sp 2
+@center Compiler Tools Group
+@center Electrical and Computer Engineering Department
+@center University of Colorado
+@center Boulder, CO, USA
+@center 80309-0425
+@sp 2
+@center Department of Computing
+@center School of Mathematics, Physics, Computing and Electronics
+@center Macquarie University
+@center Sydney, NSW 2109
+@sp 3
+@center Copyright, 1998 The Regents of the University of Colorado.
+@center Copyright, 1998 University of Paderborn.
+@center Copyright, 1998 Anthony M. Sloane.
+@page
+This document gives information about new facilities available in Eli
+version 4.0 and those modifications made since the previous distributed
+Eli version 3.8.3 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here. They shall just help users to solve their problem without taking
+notice of Eli's mechanism.
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node top, User Interface, (news), (news)
+
+@ifinfo
+@unnumbered New Features of Eli4.0
+
+$Revision: 4.1 $
+@set intro
+@end ifinfo
+@ifset html
+@set into
+@end ifset
+
+@ifset intro
+@comment processed in info and html-versions, not TeX.
+@comment the TeX-Variant is located in the copyright-page
+
+This document gives information about new facilities available in Eli
+version 4.0 and those modifications made since the previous distributed
+Eli version 3.8.3 that might be of general interest. Numerous corrections,
+improvements, and additions have been made without being described
+here. They shall just help users to solve their problem without taking
+notice of Eli's mechanism.
+@end ifset
+
+@menu
+* User Interface::              
+* Liga::                        Modifications to Liga.
+* ModLib::                      
+* PTG::                         New specification types in Ptg.
+* Monitoring::                  New interface to monitoring.
+* CLP::                         New command-line processing features.
+
+* Index::                       Index to this manual.
+
+ --- The Detailed Node Listing ---
+
+Changes to the Eli User-Interface
+
+* Invocation of Eli::           Environment-variables and Path specifications.
+* Using Eli::                   Using the Eli/Odin command prompt.
+* Derived Object Names::        New names for important derived objects.
+
+Lido News for Eli 4.0
+
+* Terminals::                   
+* TRANSFER::                    
+* separators::                  
+* bottom-up evaluation::        
+* class and tree symbols::      
+* LIGAPragmas::                 
+* terminals in LISTOF productions::  
+* depends on::                  
+* LINE COL COORDREF::           
+* chain productions::           
+* type definitions::            
+* separated CHAINSTART::        
+* Lido Tokens::                 
+
+Changes in Specification Module Library
+
+* modlib modifications::        
+* New Modules::                 
+* Modified Modules::            
+@end menu
+
+@c *********************************************************************
+@node User Interface, Liga, top, top
+@comment  node-name,  next,  previous,  up
+@chapter Changes to the Eli User-Interface
+@c *********************************************************************
+
+@menu
+* Invocation of Eli::           Environment-variables and Path specifications.
+* Using Eli::                   Using the Eli/Odin command prompt.
+* Derived Object Names::        New names for important derived objects.
+@end menu
+
+@node Invocation of Eli, Using Eli, User Interface, User Interface
+@subsubheading Invocation of Eli
+
+Eli is built on top of the Odin-System. Up to Version 3.8.3 of the Eli-System, 
+an Odin-Version was integrated in the Eli-System. With the years passing, this
+odin-system was debugged and adapted to the Eli-System thus making it
+difficult to integrate new Odin-Versions developed by the author. 
+While Odin is still distributed with Eli, the directories for the two
+are now completely separated.  Eli is actually a set of Odin @emph{packages}.
+
+What does this mean for the Eli-User?
+
+While an @file{eli} invocation script is still provided, all it does is
+to set an Odin environment variable, @code{ODINPATH}, to the location
+of the Eli packages and then invoke the @file{odin} invocation script.
+Note that the command-line options for this script are different than
+those older versions of Eli had.  Read the manual page for @file{odin}
+to learn more about the command-line options.
+
+In order to start using Eli, you should set up your account with a few
+environment-variable settings. First, you must enter the Path to the
+Odin-System into your Environment-variable @samp{PATH}. Since the exact
+commandline differs in different shells, the following example is valid for
+usage in @samp{csh}-compatible shells:
+
+@example
+   setenv PATH /usr/local/eli/Odin/bin:$PATH
+   setenv MANPATH /usr/local/eli/Odin/man:$MANPATH
+@end example
+
+If you wish to use the @file{odin} script directly, rather than using the
+@file{eli} script, you will have to set the @code{ODINPATH} environment
+variable to point to the directory where the Eli packages are installed.
+For example, you might execute the following command before issuing calls
+to @file{odin}.
+
+@example
+   setenv ODINPATH /usr/local/eli/ELI4.0
+@end example
+
+By default, Odin maintains a cache directory @samp{.ODIN} in your 
+home-directory. If you dislike this, you can supply a new definition in the
+environment-variable @samp{ODINCACHE}.
+
+Note that with this new version of Odin you can specify Odin requests
+to execute on the command-line.  Odin will execute the requests and return
+to the shell.  If you do not provide any command-line requests, Odin
+will come up interactively, which looks like this:
+
+@example
+   Eli Version 4.0 (? for help, ^D to exit) (local)
+   -> 
+@end example
+
+@node Using Eli, Derived Object Names, Invocation of Eli, User Interface
+@subsubheading Using Eli
+
+In this section, only the main differences between the usage of the
+Odin-System and the Eli-System up to Version 3.8.3 will be pointed out. For a 
+more complete introduction, please refer to @ref{top, , Overview, ui, Eli User
+Interface Reference Manual}.
+ 
+An Odin command that simply specifies an object makes sure that this object
+is up to date. Up to version 3.8.3 of Eli, such an object was immediately
+displayed on the Terminal. This is no longer the case. For example, the
+command @code{x.specs:exe:warning} will generate a file containing all
+the warnings and errors while deriving the executable from the given
+specification. Odin @emph{will not} display the warnings, however.
+
+To display an object, append a @code{>} to the derivation. A @code{<} appended
+to an object will invoke your editor with the filename of the generated
+object. By appending a @code{!} and a command, you can invoke a unix-command
+with the filename of the generated object.
+
+@example
+   x.specs+arg=(i):run     # Make up-to-date
+   x.specs:parsable<       # To your editor
+   x.specs>                # To standard output
+   x.specs:exe>x.exe       # To file x.exe
+   x.specs:source>src      # To directory src
+   x.specs:absyntax!more   # Start 'more' with product
+@end example
+
+If an object is executable (e.g. the derivation to @samp{:help}
+yields an executable object), this object is immediately executed upon deriving it. So a
+derivation @code{x.specs:exe:help} starts the help-browser with the error- and warning
+messages occured while deriveing the executable. If you append a @samp{>} to the
+request, you will get the generated executable shellscript displayed.
+
+Another change in the user interface is, that the history mechanism has been
+dropped. Instead, you can browse in older commandlines using the arrow-keys of
+your keyboard, @xref{ui,,User Interface, EliRefCard, Quick Reference for Eli
+4.0}, for further information.
+
+@node Derived Object Names,  , Using Eli, User Interface
+@subsubheading Changed names for derived objects
+
+In the following, you will see a list with the names of legal derivations for
+Eli Version 3.8.3. After each derivation, a Eli4.0 substitute will be
+mentioned. Derivations that have not changed will not be mentioned here.
+
+@table @code
+@item :err
+   @code{:err} has been predefined in Odin to mean an object with the raw
+   error output from a derivation (Eli3.8-name was @code{:.error}) The Eli4.0
+   name for this is @code{:error}.
+@item :warn
+   @code{:warn} has been predefined in Odin to mean an object with the raw
+   error and warning output from a derivation (Eli3.8-name was
+   @code{:.warning}) The Eli4.0 name for this is @code{:warning}.
+@item +arg=(filename):stdout
+   Odin has now a more powerful method of executing a generated object. Here,
+   a directory in which the execution should be performed is the main option.
+   The commandline must be supplied in the option @code{+cmd}. From there,
+   the standard output or the error output can be obtained as objects. A 
+   substitute for @code{x.specs+arg=(in):stdout} is now
+@example
+   . +cmd=(x.specs:exe) (in):stdout
+@end example
+   For further information, @xref{arg, , Supply Command Line Parameters, pp,
+   Products and Parameters Reference}.
+@item :gencode
+   is a list of generated @code{.c} and @code{.h} files generated
+   from the processor-specification. To display such a list, use a derivation
+   to @code{:viewlist} which starts a browser session with the given list. In
+   total, use @code{:gencode:viewlist} instead of the given Eli3.8-derivation.
+
+   This technique also applies to other derivations, for example
+   @code{:showFe:viewlist}, @code{:showMe:viewlist},
+   @code{:allspecs:viewlist} and @code{:source:viewlist}.
+@end table
+
+@comment
+@c *********************************************************************
+@node Liga, ModLib, User Interface, top
+@comment  node-name,  next,  previous,  up
+@chapter Lido News for Eli 4.0
+
+@menu
+* Terminals::                   
+* TRANSFER::                    
+* separators::                  
+* bottom-up evaluation::        
+* class and tree symbols::      
+* LIGAPragmas::                 
+* terminals in LISTOF productions::  
+* depends on::                  
+* LINE COL COORDREF::           
+* chain productions::           
+* type definitions::            
+* separated CHAINSTART::        
+* Lido Tokens::                 
+@end menu
+
+@node Terminals, TRANSFER, Liga, Liga
+@section Terminals
+
+@findex terminal
+In previous LIDO versions non-literal terminals were considered to
+be symbols that may have attributes - several inherited attributes
+and at most one that is supplied when the node is constructed. Hence,
+non-literal terminals may have upper symbol computations, and their
+attributes may be used in adjacent and in remote contexts.
+
+In the new LIDO version a non-literal terminal, like Ident in a rule
+
+@example     
+   RULE decl: Declaration ::= Ident ':' Type END;
+@end example
+
+may supply a value to computations associated to the @code{RULE} context. 
+That value usually describes a property
+of the corresponding input token, e. g. the encoding of an identifier
+determined by the scanner and passed through by the parser.
+
+The type of the value supplied by a non-literal terminal is specified
+by a terminal specification like
+
+@findex @code{TERM}
+@example
+   TERM Ident : int;
+@end example
+
+The above construct can be omitted if the type is @code{int}, i.e.
+in all cases where the terminal is provided by an Eli generated
+scanner. Types other than @code{int} may occur if tree nodes are
+created by explicit computations.
+
+The value of a non-literal terminal of a certain context can be
+used in computations associated to that context, e. g.
+
+@findex @code{INCLUDING}
+@example
+   Declaration.Key = DefineIdn (INCLUDING Root.Env, Ident);
+@end example
+
+There the name of the non-literal terminal stands for its value.
+If there are several occurrences of a non-literal terminal in a
+production, their values are distinguished by indexing their names,
+e. g. @code{Ident[1]}, @code{Ident[2]}, ...
+
+The values of non-literal terminals may also be used in symbol computations.
+There the notation is @code{TERM}, @code{TERM[1]}, @code{TERM[2]}, ..., e. g. in
+
+@example
+   SYMBOL Use COMPUTE
+      SYNT.Key = KeyInEnv (INCLUDING Root.Env, TERM);
+   END;
+@end example
+
+In order not to immediatly invalidate existing specifications LIGA
+still accepts most uses of old style terminals and internally
+transforms them into new style terminals.
+
+@node TRANSFER, separators, Terminals, Liga
+@section @code{TRANSFER}
+
+@findex @code{TRANSFER}
+The @code{TRANSFER} construct provided by former LIDO versions is no
+longer available.
+
+@node separators, bottom-up evaluation, TRANSFER, Liga
+@section Separators
+
+The new LIDO version requires semicolons (';') to terminate @code{RULE}
+and @code{SYMBOL} specifications and computations. In previous versions
+of LIDO the '@code{;}' after the last specification or computations
+could be ommited.
+
+@node bottom-up evaluation, class and tree symbols, separators, Liga
+@section Bottom-Up Evaluation
+
+@findex @code{BOTTOM_UP}
+
+If computations are to be executed while the input is read
+they are now to be marked @code{BOTTOM_UP}, e.g.
+
+@example
+        printf ("immediate reply\n") BOTTOM_UP;
+@end example
+@noindent
+@findex @code{LIGAPragma}
+instead of using a @code{LIGAPragma}.
+
+Bottom-Up attribute evaluation, i.e. attribute computations during 
+abstract structure tree construction ("parse-time") is no-longer the
+default strategy used in Eli. To switch to Bottom-Up evaluation it has
+to be activated in an .ctl specification (@code{ORDER: TREE BOTTOM_UP}),
+@xref{Order Options, , Order Options, lcl, LCL - Liga Control Language}, 
+or requested by a @code{BOTTOM_UP} specifier in LIDO
+@xref{Computations, , Computations, lidoref, LIDO - Reference Manual}.
+
+
+@node class and tree symbols, LIGAPragmas, bottom-up evaluation, Liga
+@section @code{CLASS} and @code{TREE SYMBOLS}
+
+@findex @code{CLASS SYMBOL}
+@findex @code{TREE SYMBOL}
+Symbols that describe computational roles (e.g. @code{RangeScope})
+are now explicitly distinguished from tree grammar symbols
+by using the keyword @code{CLASS} before @code{SYMBOL}, e.g.
+
+@example
+   CLASS SYMBOL RangeScope COMPUTE ... END;
+@end example
+
+Symbols that occur in the tree grammar (@emph{tree symbols}) are specified
+as @code{TREE SYMBOLS}:
+
+@example
+   TREE SYMBOL expr COMPUTE ... END;
+@end example
+
+With this extension Liga can then check whether incidentally the name 
+of a tree grammar symbol coincides with a @code{CLASS} symbol, that may be 
+obtained from a library module.
+
+Liga will issue warning messages if there is an @code{INHERITS} from a tree 
+grammar symbol, or if a @code{CLASS} symbol is also a tree grammar symbol.
+For upward compatibility symbol specifications without @code{TREE} or @code{CLASS} 
+prefix are still supported.
+
+@node LIGAPragmas, terminals in LISTOF productions, class and tree symbols, Liga
+@section @code{LIGAPragma}
+
+The @code{LIGAPragma} notation of former versions has been substituted by
+simpler notations (@pxref{Outdated Constructs, , Outdated constructs, lidoref,
+LIDO - Reference Manual}).
+
+@node terminals in LISTOF productions, depends on, LIGAPragmas, Liga
+@section Terminals in @code{LISTOF} productions
+
+@findex @code{LISTOF}
+@findex terminal
+
+In previous LIDO versions terminals were allowed to be used as
+@code{LISTOF} elements, e.g.:
+
+@example
+   RULE: Idents LISTOF Identifier
+@end example
+
+This facility is not supported anymore.
+
+@node depends on, LINE COL COORDREF, terminals in LISTOF productions, Liga
+@section @code{DEPENDS_ON}
+
+@findex @code{DEPENDS_ON}
+An alternative token @code{<-} for @code{DEPENDS_ON} is accepted.
+
+@node LINE COL COORDREF, chain productions, depends on, Liga
+@section @code{LINE}, @code{COL}, @code{COORDREF}
+
+@findex @code{LINE}
+@findex @code{COL}
+@findex @code{COORDREF}
+If the source coordinates of contexts are used in computations, the
+identifiers @code{LINE}, @code{COL}, @code{COORDREF} must occur directly
+in the Lido text. They may not be introduced by macros defined in a
+@file{.head} file. As a consequence the library module Message has been
+removed.
+
+If there is no such coordinate usage in a certain
+context, that information is not stored in the tree node.
+The storage needed for the tree is reduced by this means.
+
+@node chain productions, type definitions, LINE COL COORDREF, Liga
+@section Chain Productions
+
+@findex @code{IS}
+Chain Productions of the form
+@example
+   Production  ::=  SymbName  'IS'  SymbName
+@end example
+are no longer valid.
+
+Productions using @code{::=} now have the same meaning as the former @code{IS}.
+The effect of hiding such productions from the parser
+is achieved by mapping the concrete grammar to the tree grammar.
+
+@node type definitions, separated CHAINSTART, chain productions, Liga
+@section Type Definitions
+
+Specifications of the form
+@findex @code{TYPE}
+@findex @code{LISTEDTO}
+@example
+   Specification   ::=     'TYPE' TypeName [Extern] ['LISTEDTO' TypeName]
+   Extern          ::=     Literal
+@end example
+
+are no longer valid.
+@code{TypeNames} are now simply introduced by their use. 
+
+@node separated CHAINSTART, Lido Tokens, type definitions, Liga
+@section Separated @code{CHAINSTART}
+
+@findex @code{CHAINSTART}
+Computations of the form
+@example
+   Computation     ::=     'CHAINSTART' ChainAttr
+@end example
+are no longer valid.
+
+The keyword @code{CHAINSTART} is now attached to the computation that starts
+the chain.
+
+@node Lido Tokens,  , separated CHAINSTART, Liga
+@section LIDO Tokens
+
+@findex @code{STATIC}
+@findex @code{COMPUTE}
+@findex @code{CONDITION}
+The keyword @code{STATIC} (equivalent to @code{COMPUTE}) is no longer valid.
+
+The @code{:=} token (equivalent to @code{=}) in computations is no longer valid.
+
+The keyword @code{CONDITION} in front of plain computations (computations
+that do not compute an attribute) is now omitted.
+
+@node ModLib, PTG, Liga, top
+@chapter Changes in Specification Module Library
+
+@menu
+* modlib modifications::        
+* New Modules::                 
+* Modified Modules::            
+@end menu
+
+@node modlib modifications, New Modules, ModLib, ModLib
+@section General Modifications
+
+The library modules of version 3.6 that have been marked outdated
+in version 3.8 are removed now. See @ref{ModLib3_6, , Migration of Eli Version 3.6 modules, oldmod, Migration of Old Library Module Usage}, for migration.
+
+All changes to modules of version 3.8 which may require updates
+in existing specifications are described in @ref{ModLib3_8, ,Migration of Eli Version 3.8 modules, oldmod, Migration of Old Library Module Usage}.
+
+Modules that do not have a generic parameter are used by their
+name occurring in a @file{.specs} file, rather than by @code{:inst} instantiation.
+If generic parameters are omitted for an instantiation the
+@code{:inst} command has still to be used.
+
+All @code{SYMBOL} roles provided by any library module are specified
+@code{CLASS SYMBOL}. By this means accidental name clashes with tree
+grammar symbols result in warnings. The @code{INHERITS} construct
+has to be used to associate a module role to a tree grammar symbol.
+
+Symbol roles that issue a message are separated from roles that
+compute the condition for such messages. Hence, the message
+roles can be substituted by individual ones.
+
+@node New Modules, Modified Modules, modlib modifications, ModLib
+@section New Modules
+
+Solutions of common type analysis tasks are supported by the following
+new modules:
+
+The module @code{BasicType} provides roles for definition and use of
+typed objects, for type notations and type definitions, @ref{BasicType,
+, Typed Entities, type, Type Analysis Reference Manual}.
+
+The module @code{Defer} allows to defer association of properties
+to objects, as required in the presence of type definitions or constant
+definitions, see @ref{Defer, , Deferred Property Association, type,
+Specification Module Library: Type Analysis}.
+
+The module @code{Operator} supports resolution of overloaded operators
+using the Oil tool, see @ref{Operator, , Operator Identification, type,
+Specification Module Library: Type Analysis}.  Its functionality is increased
+compared to the outdated module AdaptOil.
+
+In the abstract data type library the @code{List} module has been
+augmented by a module that can be used if instantiations for several
+different pointer types are needed, see @ref{List, , Linear Lists of Any
+Type, adt, Specification Module Library: Abstract Data Types}. In that case a fully typed
+interface is provided without duplicating the code.
+
+In the output library, two modules for support of pretty printed output
+have been added. @ref{PrettyPrint, , Pretty Printing, output,
+Specification Module Library: Generating Output}, is a module for the support of word
+wrapping at a specified right margin. @ref{BlockPrint, , Typesetting for
+Block Structured Output, output, Specification Module Library: Generating Output}, is
+designed to output block-oriented program text.  Both modules are very
+similar and use the new Ptg-Feature of post-processed output.
+
+@node Modified Modules,  , New Modules, ModLib
+@section Modified Modules
+
+Many details in the name analysis modules are improved.  The significant
+modifications are described in more detail in @ref{ModLib3_8, ,
+Migration of Eli Version 3.8 modules, oldmod, Migration of Old Library 
+Module Usage}. It is recommended to check the tables of changed modules and
+modified features for adaption of existing specifications.
+
+Most specifications will be affected by the change of the
+names @code{IdDef} to @code{IdDefScope}, and @code{IdUse} to @code{IdUseEnv}, which help
+to adapt certain specifications to the use of @code{CLASS SYMBOLS}.
+
+The generic paramerisation of the @code{PreDefId} module is another
+prominent change in the name analysis modules.
+
+@node PTG, Monitoring, ModLib, top
+@comment  node-name,  next,  previous,  up
+@chapter New specification types in PTG
+ 
+@ftable @strong
+@item Optional Patterns
+  In a PTG-Specification rule, optional parts can now be
+  specified. These optional parts will be printed only, if all insertions
+  actually yield output. This can be applied to simplify list
+  construction, see @ref{Optional, , Optional parts of patterns, ptg, PTG --
+  a Pattern-based Text Generator}.
+
+@findex empty output
+  Additionally, a pattern-construction-function yields the special value
+  @code{PTGNULL}, if its output would be empty. This makes it possible
+  to check a @code{PTGNode} for empty output, 
+
+@item Postprocessing
+  PTG now processes it's output by generating applications of a set of 
+  output macros. This enables postprocessing the output, e.g. to
+  implement pretty printing or changing output destinations, e.g. to
+  process PTG-Output into an obstack buffer. Applications of this
+  techique are described in the Ptg and the ModLib-documentation, see
+  @ref{Macros, , Influencing PTG Output, ptg, PTG - a Pattern-based Text
+  Generator}.
+@end ftable
+
+See @ref{PrettyPrint, , Pretty Printing, output, Specification Module Library: Generating Output}, 
+for an application for the PTG Postprocessing abilities.
+
+@comment
+@c *********************************************************************
+@node Monitoring, CLP, PTG, top
+@comment  node-name,  next,  previous,  up
+@chapter New interface to monitoring
+
+@findex monitoring
+Since the last release of Eli the monitoring support has been almost
+completely rewritten.  Apart from internal changes to make the event
+processing more reliable and a little bit more efficient, the main
+changes have taken place in the user interface.
+
+@findex noosa
+The noosa tool which is the main interface to monitoring has a new
+interface in which all of the monitors are integrated.  Previously
+a new window was created for each monitor.  Now they are all handled
+by the one window, with a common transcript area for output.  The 
+only exception is the display of the abstract syntax tree (a new
+feature) which is performed in a separate window.
+
+Before attempting to use the new monitoring interface it is best
+to read through the monitoring manual.  Also, there is extensive
+online help which should be consulted while learning the system.
+
+The user interface is somewhat experimental so feedback would be
+appreciated.
+
+@findex mondbx
+@findex mongdb
+Some work has been done to get the @code{:mondbx} and @code{:mongdb}
+derivations working properly (which they didn't in the previous
+release).  They have been tested with a variety of debuggers but there
+are some debuggers for which they do not work (e.g., the Solaris
+non-window version of dbx).  They do work with the windowing version
+of dbx ("debugger" on Solaris) and ups (an X-based debugger).  As usual
+some care is needed to keep track of the current state of execution
+because the two systems (noosa and the debugger) have different ideas
+of when the program is running.
+
+@comment
+@c *********************************************************************
+@node CLP, Index, Monitoring, top
+@comment  node-name,  next,  previous,  up
+@chapter New command-line processing features
+
+@findex input parameters
+CLP now distinguishes between positional parameters used as input files
+and other positional parameters.  The former must now be designated as
+input parameters (this is an incompatibility between Eli 4.0 and Eli
+3.8).  There may only be one of these.  Its value is used as the name
+of the input file (or stdin if the user doesn't specify a value).
+@ref{Input parameters, , , clp, Command Line Processing}.
+
+This new scheme allows processor writers to customise input file
+handling more closely by using 'plain' positional parameters and
+handling the input processing themselves.
+
+To avoid clashes with the Eli list modules, CLP has been changed to use
+those modules instead of its own version (this is an incompatibility
+between Eli 4.0 and Eli 3.8).  Eli 3.8 code that uses the linked
+lists to access repeated options or positional parameters will have to
+be changed to work with Eli 4.0.
+@ref{Repeated options, , , clp, Command Line Processing}.
+
+
+@comment
+@c *********************************************************************
+@node Index,  , CLP, top
+@comment  node-name,  next,  previous,  up
+@unnumbered Index
+@printindex fn
+@contents
+@bye 
+

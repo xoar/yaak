@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>Generation of test output</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Generation of test output</h1>
+
+<hr>
+Manual instrumentation of specification or generated sources to
+generate log or debug output.
+
+<p>
+<b>Example (instrumented specification): </b>
+
+<pre>
+     RULE: tabentry ::= name
+     COMPUTE tabentry.entered = enter(name.id);
+             printf("entered %s\n",
+                     StringTable(name.id)) <- tabentry.entered;
+</pre>
+
+<p>
+<b>To change the generated processor at the source level:</b>
+
+<p>
+<pre>
+    xyz.specs : source > xyz.src
+</pre>
+
+<p>
+generates the language processor's sources in directory <tt>xyz.src</tt>.
+
+<p>
+These sources can be modified and compiled outside of Eli:
+
+<p>
+<pre>
+   cd xyz.src;
+   // some source instrumentation 
+   make 
+   ./xyz.exe inp
+</pre>
+
+</h2>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

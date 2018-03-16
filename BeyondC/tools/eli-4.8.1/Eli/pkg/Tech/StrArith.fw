@@ -1,0 +1,222 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: StrArith.fw,v 1.3 2008/08/14 20:23:31 profw Exp $
+~!
+~! Copyright 2005 The Regents of the University of Colorado.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+@setchapternewpage odd
+@settitle Simple Arithmetic on Strings
+@headings double
+
+@ifnotinfo
+~t title titlefont centre "Simple Arithmetic on Strings"
+~t title smalltitlefont centre "Module Implementation"
+~t vskip 15 mm
+@end ifnotinfo
+
+This module implements simple arithmetic on strings that are stored
+in the string table.
+
+The module is instantiated by:
+
+@example
+$/Tech/StrArith.gnrc +instance=NAME +referto=BASE :inst
+@end example
+
+Either or both instantiation parameters can be omitted.
+If @code{BASE} is omitted, the radix is 10.
+
+@code{StrArith} is implemented using the character string arithmetic library
+(@pxref{strmath,,Character String Arithmetic,lib,The Eli Library}).
+
+~O~<|NAME|StrArith.specs~>~{
+$/Tech/ndxmath.specs
+~}
+
+~O~<|NAME|StrArith.head~>~{
+#include "strmath.h"
+#include "ndxmath.h"
+~}
+
+When the operations of the module are used within a LIDO file, the
+coordinates for the error reporting are taken from the nodes.
+
+~O~<|NAME|StrArith.lido.eta~>==~{
+#ifndef |NAME|STRARITH_LIDO_ETA
+#define |NAME|STRARITH_LIDO_ETA
+
+#define |NAME|StrAdd(l,r) ndxtwoop(stradd,l,r,|BASE|,COORDREF)
+#define |NAME|StrSub(l,r) ndxtwoop(strsub,l,r,|BASE|,COORDREF)
+#define |NAME|StrMul(l,r) ndxtwoop(strmult,l,r,|BASE|,COORDREF)
+#define |NAME|StrDiv(l,r) ndxtwoop(strdivf,l,r,|BASE|,COORDREF)
+#define |NAME|StrQuo(l,r) ndxtwoop(strdivi,l,r,|BASE|,COORDREF)
+#define |NAME|StrRem(l,r) ndxtwoop(strrem,l,r,|BASE|,COORDREF)
+#define |NAME|StrExp(l,r) ndxtwoop(strpow,l,r,|BASE|,COORDREF)
+
+#define |NAME|StrNeg(r)   ndxoneop(strneg,r,|BASE|,COORDREF)
+#define |NAME|StrSqrt(r)  ndxoneop(strsqrt,r,|BASE|,COORDREF)
+
+#define |NAME|StrNorm(r,o,n,s) ndxnorml(r,o,n,s,COORDREF)
+
+#endif
+~}
+
+When the operations of the module are used in other files, no coordinates
+are assumed.
+
+~O~<|NAME|StrArith.c~>==~{
+#include "|NAME|StrArith.h"
+
+int
+#ifdef PROTO_OK
+|NAME|StrBad1(int r)
+#else
+|NAME|StrBad1(r) int r;
+#endif
+{ return 0; }
+
+int
+#ifdef PROTO_OK
+|NAME|StrBad2(int l, int r)
+#else
+|NAME|StrBad2(l,r) int l, r;
+#endif
+{ return 0; }
+
+int
+#ifdef PROTO_OK
+|NAME|StrAdd(int l, int r)
+#else
+|NAME|StrAdd(l,r) int l, r;
+#endif
+{ ndxtwoop(stradd,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrSub(int l, int r)
+#else
+|NAME|StrSub(l,r) int l, r;
+#endif
+{ ndxtwoop(strsub,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrMul(int l, int r)
+#else
+|NAME|StrMul(l,r) int l, r;
+#endif
+{ ndxtwoop(strmult,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrDiv(int l, int r)
+#else
+|NAME|StrDiv(l,r) int l, r;
+#endif
+{ ndxtwoop(strdivf,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrQuo(int l, int r)
+#else
+|NAME|StrQuo(l,r) int l, r;
+#endif
+{ ndxtwoop(strdivi,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrRem(int l, int r)
+#else
+|NAME|StrRem(l,r) int l, r;
+#endif
+{ ndxtwoop(strrem,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrExp(int l, int r)
+#else
+|NAME|StrExp(l,r) int l, r;
+#endif
+{ ndxtwoop(strpow,l,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrNop(int r)
+#else
+|NAME|StrNop(r) int r;
+#endif
+{ return r; }
+
+int
+#ifdef PROTO_OK
+|NAME|StrNeg(int r)
+#else
+|NAME|StrNeg(r) int r;
+#endif
+{ ndxoneop(strneg,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrSqrt(int r)
+#else
+|NAME|StrSqrt(r) int r;
+#endif
+{ ndxoneop(strsqrt,r,|BASE|,NoPosition); }
+
+int
+#ifdef PROTO_OK
+|NAME|StrNorm(int r, int o, int n, char *s)
+#else
+|NAME|StrNorm(r,o,n,s) int r, o, n; char *s;
+#endif
+{ ndxnorml(r,o,n,s,NoPosition); }
+~}
+
+~O~<|NAME|StrArith.h~>==~{
+#ifndef |NAME|STRARITH_H
+#define |NAME|STRARITH_H
+
+#include "strmath.h"
+#include "ndxmath.h"
+
+typedef int (*StrOp1)(int);
+typedef int (*StrOp2)(int, int);
+
+extern int |NAME|StrBad2 ELI_ARG((int, int));
+extern int |NAME|StrBad1 ELI_ARG((int));
+
+extern int |NAME|StrAdd ELI_ARG((int, int));
+extern int |NAME|StrSub ELI_ARG((int, int));
+extern int |NAME|StrMul ELI_ARG((int, int));
+extern int |NAME|StrDiv ELI_ARG((int, int));
+extern int |NAME|StrQuo ELI_ARG((int, int));
+extern int |NAME|StrRem ELI_ARG((int, int));
+extern int |NAME|StrExp ELI_ARG((int, int));
+
+extern int |NAME|StrNop ELI_ARG((int));
+extern int |NAME|StrNeg ELI_ARG((int));  
+extern int |NAME|StrSqrt ELI_ARG((int)); 
+
+extern int |NAME|StrNorm ELI_ARG((int, int, int, char*));
+
+#endif
+~}

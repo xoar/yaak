@@ -1,0 +1,61 @@
+# $Id: Makefile.in,v 1.2 2002/05/08 15:00:49 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile for Tool/cola/idl
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/idl
+SRC	=	
+HDR   	= 	comar.h comarMacros.h comar_func.h prsiface.h prsifaceM.h \
+		name.h global.h reader.h writer.h scalarlist.h
+COP	=	Makefile.in comar.c comar_func.c prsiface.c writer.c $(HDR)
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=	
+EXE	=
+GEN	=	IDL.a
+SRCDIR	=
+AUXDIR	=	idllib
+
+IDLLIB	=	idllib
+OFILES 	= $(IDLLIB)/nextOne.o $(IDLLIB)/rmisc.o $(IDLLIB)/reader.o \
+	  $(IDLLIB)/scanner.o $(IDLLIB)/labels.o $(IDLLIB)/wmisc.o \
+	  $(IDLLIB)/init.o $(IDLLIB)/list.o $(IDLLIB)/debug.o \
+	  $(IDLLIB)/MsgChar.o $(IDLLIB)/array.o $(IDLLIB)/wrat.o \
+	  $(IDLLIB)/string.o $(IDLLIB)/basics.o $(IDLLIB)/alloc.o
+OBJ	= comar.o comar_func.o prsiface.o writer.o
+
+@toolmk_h@
+
+IDL.a:	$(OBJ) $(OFILES)
+	rm -f $@
+	ar rcu $@ $(OBJ) $(OFILES)
+	@RANLIB@ $@
+
+comar.o: comar.c comar.h global.h reader.h writer.h
+
+prsiface.o: prsiface.c prsiface.h global.h reader.h writer.h
+
+comar_func.o: comar_func.c comar_func.h global.h
+
+writer.o: writer.c writer.h
+

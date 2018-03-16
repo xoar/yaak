@@ -1,0 +1,2 @@
+
+#define PTG_OUTPUT_STRING(file,param) OutputLine(file,param)

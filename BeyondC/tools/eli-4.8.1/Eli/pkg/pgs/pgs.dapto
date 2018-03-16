@@ -1,0 +1,24 @@
+/*
+ * $Id: pgs.dapto,v 1.3 1998/10/12 06:06:12 tony Exp $
+ */
+
+aspect parser;
+
+event production* "Recognition of a production during parsing"
+	(int prod "Index of production",
+	 int uses "Number of preceding recognitions subsumed",
+	 int linebeg "Line number of beginning of extent",
+	 int colbeg "Column number of beginning of extent",
+	 int lineend "Line number of ending of extent",
+	 int colend "Column number of ending of extent");
+
+operation get_conc_prod "Look up the text of a concrete production"
+	(int index "Index of the production") : str
+{
+    extern char *conc_prods[];
+    extern int conc_prodmap[];
+
+    DAPTO_RESULT_STR (conc_prods[conc_prodmap[index]]);
+}
+
+end;

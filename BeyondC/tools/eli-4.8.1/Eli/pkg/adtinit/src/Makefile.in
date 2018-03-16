@@ -1,0 +1,35 @@
+# $Id: Makefile.in,v 1.2 2001/11/23 23:30:36 waite Exp $
+# Copyright 1993, The Regents of the University of Colorado
+
+CC	= @CC@
+LIBS	= @LIBS@
+LDFLAGS	= @LDFLAGS@
+
+DIR	= pkg/adtinit/src
+SRC	=
+AUX	= adtinit.c transl.c Makefile.in Makefile
+CMD	=
+GEN	=
+EXE	= adtinit.exe transl.exe
+
+@toolmk_h@
+@Adtmk_h@
+@Inputmk_h@
+@Scanmk_h@
+
+transl.exe:	transl.c
+	$(CC) -o $@ $(CFLAGS) $? $(LDFLAGS) $(LIBS)
+
+CFLAGS  = -DSAVE -DNORESTORE
+
+OBJ	= adtinit.o csm.o idn.o err.o source.o obstack.o
+
+adtinit.exe:	$(OBJ)
+	$(CC) -o adtinit.exe $(CFLAGS) $(OBJ) $(LDFLAGS) $(LIBS)
+
+adtinit.o:	adtinit.c $(ADTLIB)/csm.h $(ADTLIB)/obstack.h
+adtinit.o:	$(INPLIB)/err.h $(INPLIB)/source.h $(SCNLIB)/idn.h
+	$(CC) $(CFLAGS) $(ADTINCL) $(INPINCL) $(SCNINCL) -c adtinit.c
+
+csm.o:	$(ADTLIB)/csmtbl.h
+idn.o:	$(SCNLIB)/idntbl.h

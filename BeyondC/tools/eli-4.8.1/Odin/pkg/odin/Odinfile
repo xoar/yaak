@@ -1,0 +1,55 @@
+%all! == <<
+   %install-rbs; ../tregrm%install; %install; %lint
+
+%install! == <<
+   %exe >$THORPKGS/odin/odin.exe
+   ../dg%install
+
+%install-rbs! == <<
+   %rbs-exe >$THORPKGS/odin/rbs.exe
+
+%odin-install! == <<
+   %rbs-exe > $ODINPKG/rbs.exe
+
+%lint! == <<
+   %odin.c.sm +debug +ignore=\\.hh\$ +stub=(extra.c) :lint >
+
+%etags! == !<<
+#!/bin/csh
+   etags ipcgen/ig-gen.c *.c ../dg/*.c {inc,../dg/inc}/*.{h,hh}
+
+%size == () +cmd= wc `cat (%src-files)` :stdout
+
+%src-files == %exe :depend :ls +cmd=egrep -v "ODIN|os9|boot|dg\/if|h\$" :stdout
+
+%exe == %odin.c.sm +ignore=\\.hh\$ +(%extra-lib) :exe
+
+%rbs-exe == %rbs.c.sm +ignore=\\.hh\$ +(%extra-lib) :exe
+
+%extra-lib == %el-script +cmd=sh :stdout
+
+%el-script == <<
+   if [ $ODINBOOT_CONFIG ] ; then echo $ODINBOOT_SOCKET_LIBS_PRM;
+      elif [ -f /usr/lib/libsocket.* ] ; then echo '+lib=socket +lib=nsl';
+      else true; fi
+
+%odin.c.sm == <<
+   if-bcast.c; if-candrv.c; if-build.c; if-client.c; if-cmd.c;
+   if-depend.c; if-drvgrf.c; if-dir.c; if-drvpth.c; if-drvspc.c;
+   if-edg.c; if-env.c; if-err.c; if-exec.c; if-execint.c; if-execspc.c;
+   if-fhacc.c; if-fhnam.c; if-fhnew.c; if-fhsrc.c;
+   if-fhstat.c; if-file.c; if-filelm.c; if-filhdr.c; if-filinp.c;
+   if-filprm.c; if-filpval.c; if-filtyp.c; if-ft.c; if-get.c;
+   if-help.c; if-hook.c; if-info.c; if-io.c; if-ipc.c;
+   if-lex.c; if-lvl.c; if-main.c; if-nod.c; if-oclex.c;
+   if-pfilhdr.c; if-prmtyp.c; if-rbs.c;
+   if-symbol.c; if-sysdep.c; if-system.c; if-systools.c;
+   if-update.c; if-util.c; if-var.c; if-yylex.c;
+   editline%editline.sm; boot%boot.sm;
+
+%rbs.c.sm == <<
+   rbs.c; if-dir.c; if-err.c +define=NO_IPC; if-file.c; if-io.c;
+   if-symbol.c; if-sysdep.c; if-system.c;
+
+version == \
+   inc/Version.h  +cmd='sed \'s/^.*VERSION_STR "\\(.*\\)"/\\1/\'' :stdout

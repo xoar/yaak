@@ -1,0 +1,32 @@
+This is Info file testcurses, produced by Makeinfo-1.43 from the input
+file testcurses.tnf.
+
+
+File: testcurses,  Node: Top,  Up: (dir)
+
+   This info document is used to make sure that your curses based info
+browser is working properly.  You should see a menu below.  Please type
+`m' to bring up a menu prompt in the bottom left corner of the window.
+ Press enter at the menu prompt to bring up the next node.  If the
+prompt appears elsewhere (in the middle of the bottom line, for
+example), it is indicative of a problem with the curses version you are
+using.
+
+* Menu:
+
+* Test::        Follow this menu item
+
+
+File: testcurses,  Node: Test,  Up: Top
+
+   If you've reached this node without problems, your info browser is
+working properly.  Press `q' to exit the browser.  You will be
+prompted before the browser exits.
+
+
+
+Tag Table:
+Node: Top94
+Node: Test611
+
+End Tag Table

@@ -1,0 +1,48 @@
+# $Id: pgs.dg,v 2.12 2009/05/04 15:31:13 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
++pgsOpt 'PGS Options'? => :first;
+
+EXEC (pgsGen.sh) (:Pgram) (:BuPgram) (+monitor) (+pgsOpt)
+     (eingabe.exe) (analyse.exe) (pgs_optim.exe) (buildtab.exe)
+     (StructConn) (parser.c) (pgs.dapto)
+  => (:pgsGen);
+:pgsGen 'Objects generated from a parsing grammar' => :DERIVED-DIRECTORY;
+
+EXEC (pgsInfo.sh) (:Pgram) (:BuPgram) (+pgsOpt)
+     (eingabe.exe) (analyse.exe)
+  => (:pgsInfo);
+:pgsInfo 'Information about PGS parser generation'? => :FILE;
+
+EXEC (pgsConflict.sh) (:FILE) (eingabe.exe) (analyse.exe)
+  => (:pgsConflict);
+:pgsConflict 'Conflicting derivations' => :FILE;
+
+EXEC (pgsGenErr.sh) (+hookvalue) (:FILE) (:pgsConflict)
+  => (:pgsGenErr);
+:pgsGenErr 'PGS error report in standard form' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:pgsGen) pgsMiscErr
+  => (:pgsMiscErr);
+:pgsMiscErr 'Identity map for errors in standard form' => :line_err;
+
+EXEC (pgsOut.sh) (:pgsGen :name) (:pgsInfo :name) (+parser)
+  => (:pgsOut) (:pgsData);
+:pgsOut 'Selected PGS-generated parser' => :FILE;
+:pgsData 'Selected PGS-generated information' => :FILE;

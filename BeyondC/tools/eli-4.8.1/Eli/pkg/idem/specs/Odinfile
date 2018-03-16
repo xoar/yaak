@@ -1,0 +1,15 @@
+Idem.exe  == ../../Unparser%Idem.specs :exe
+Tree.exe  == ../../Unparser%Tree.specs :exe
+XML.exe   == ../../Unparser%Xml.specs  :exe
+CPP.exe   == ../../Unparser%Cpp.specs  :exe
+Java.exe  == ../../Unparser%Java.specs :exe
+
+%current == Xml.specs+debug+monitor+cc=gcc
+
+%h  ! == %current:exe:help
+%a  ! == %current:abstree
+%d  ! == %current:gdb
+%g  ! == %current:gencode:viewlist
+%m  ! == %current+arg=(input):mon
+%md ! == %current+arg=(input):mongdb
+%r  ! == .+cmd=(%current:exe) -p Test (input):run

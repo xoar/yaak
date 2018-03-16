@@ -1,0 +1,91 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+~! $Id: LeafPtg.fw,v 3.10 2002/12/03 12:48:26 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+~t title titlefont centre "Module LeafPtg"
+
+Copyright, 1994, AG-Kastens, University Of Paderborn
+
+This module computes PTG nodes for identifiers, numbers, and strings
+This module is not generic. It uses output functions provided by the
+module ~{OutStr.fw~}.
+
+Each symbol role provided by this module is assumed to have a
+~{Sym~} attribute that is an integral encoding of an input token.
+
+The module provides computations for the following attributes:
+
+@table @code
+@item IdPtg.Ptg	
+	PTG node for reproducing the value of the input token
+@item NumPtg.Ptg
+	PTG node for an intregral number value
+@item CStringPtg.Ptg	
+	PTG node for a string value as C string
+@item CCharPtg.Ptg
+	PTG node for a int value as C character.
+@item PStringPtg.Ptg
+	PTG node for a string value as Pascal string
+@end table
+
+All computations are specified as upper computations.
+
+@subsubheading Implementation
+
+The following attachment contains the Lido CLASS SYMBOL computations:
+
+~O~<LeafPtg.lido~>~{
+CLASS SYMBOL IdPtg, NumPtg, CStringPtg, PStringPtg:
+	Sym: int, 	/* required */
+	Ptg: PTGNode;	/* provided */
+
+CLASS SYMBOL IdPtg COMPUTE
+  INH.Ptg = PTGId (THIS.Sym);
+END;
+
+CLASS SYMBOL NumPtg COMPUTE
+  INH.Ptg = PTGNumb (THIS.Sym);
+END;
+
+CLASS SYMBOL CStringPtg COMPUTE
+  INH.Ptg = PTGCString (StringTable (THIS.Sym));
+END;
+
+CLASS SYMBOL CCharPtg COMPUTE
+  INH.Ptg = PTGCChar (THIS.Sym);
+END;
+
+CLASS SYMBOL PStringPtg COMPUTE
+  INH.Ptg = PTGPString (StringTable (THIS.Sym));
+END;
+~}
+
+The following imports the PTG Pattern definitions and the output functions from
+the ~{PtgCommon~}-module.
+
+~O~<LeafPtg.specs~>~{
+$/Output/PtgCommon.fw
+~}
+
+@bye

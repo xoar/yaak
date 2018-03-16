@@ -1,0 +1,9 @@
+# $Id: Odinfile,v 1.6 1996/04/02 20:25:44 waite Exp $
+
+%program == sets.specs +monitor :exe
+%source == sets.specs +monitor :source
+
+%results == input +cmd=(%program) :stdout
+%warnings == %results :warning
+%diffcmd == . +cmd=diff (%results) (result) :run
+%test ! == %diffcmd

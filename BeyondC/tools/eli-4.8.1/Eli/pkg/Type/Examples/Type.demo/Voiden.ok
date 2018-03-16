@@ -1,0 +1,9 @@
+begin
+  var	int k;
+  var	int[5] pi;
+  var	record int i, bool b end rv;
+  
+  k;
+  pi;
+  rv;
+end

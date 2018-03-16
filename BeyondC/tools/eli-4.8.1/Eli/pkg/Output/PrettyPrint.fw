@@ -1,0 +1,824 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~p maximum_output_line_length = infinity
+
+~! $Id: PrettyPrint.fw,v 1.13 2009/01/07 14:51:06 peter Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+~t title titlefont centre "Module PrettyPrint"
+
+This module supplies a set of functions to support Pretty-Printing in
+PTG specifications. It uses the module ~{PtgOutput~} to support
+a means of dynamic selection of PTG Output routines.
+
+To use the module, simply include it's name ~{PrettyPrint.fw~} into
+a ~{.specs~} file. Through this, some C-functions are included
+into your specification. These functions will be described in the 
+following, thereby explaining the technique for pretty printing.
+After this, the implementation of the Pretty-printing module will be
+presented.
+
+~A~<Interface~>
+
+The main objective for pretty printing is to assure that the
+destination output has a certain maximal line length. To obtain such a
+result, the output processor should be able to insert linebreaks
+at certain insertion points when necessary. These insertion points can be
+marked with the following function. It can be used inside a PTG
+pattern specification.
+
+~$~<Interface Definition~>+=~{
+void PP_SetLineWidth ELI_ARG((int newwidth));
+void PP_BreakLine ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+Since linebreaks occur very often inside an output file, some time and
+specification effort can be reduced by defining a shortcut character
+to yield a linebreak. A good choice for such a
+Linebreak-Shortcut-Character is the tab-character. If specified, every
+tabulation character inside a PTG pattern will yield a linebreak
+instead. The default shortcut chatacter for linebreaks is the
+Null-character, meaning that there is no shortcut character.
+
+~$~<Interface Definition~>+=~{
+void PP_SetSoftBreakShortcut ELI_ARG((char sbc));
+~}
+
+At certain points in the output file, a linebreak should be inserted
+regrardless of the resulting line-length. In such a case, a ~{PP_Newline~}
+can be inserted. The hardbreak can also be specified by inserting a
+newline-character into the PTG pattern. It's effect is to insert a
+linefeed in the output file and the next line will be
+indented properly.
+
+~$~<Interface Definition~>+=~{
+void PP_Newline ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+Another feature of pretty printing is indentation. To specify indentation, a
+set of functions is supplied. The first can be used to set the width
+of an indentation step. A negative indentation step specifies that a
+single TAB character should be used to mark an indentation level. The
+other two functions can be used inside a PTG pattern to mark a region
+of indentation.
+
+~$~<Interface Definition~>+=~{
+void PP_SetIndentationWidth ELI_ARG((int newindent));
+void PP_Indent ELI_ARG((PTG_OUTPUT_FILE f));
+void PP_Exdent ELI_ARG((PTG_OUTPUT_FILE f));
+~}
+
+In different environments, ASCII-files have different conventions for
+line endings. For example, UNIX-Environments normally only use a
+newline character. On MS-DOS Systems or in Mime-conform messages, a
+carrige return and a newline is used. With the following function, a
+string-constant can be set that will be used as end-of-line token. By
+default, it is set to a single newline character.
+
+~$~<Interface Definition~>+=~{
+void PP_SetEndline ELI_ARG((char *new_eol));
+~}
+
+To process pretty-printing, the output of a PTG Pattern needs to be
+postprocessed. In order to do this, the module ~{PTGOutput~} is
+used. This module supplies some output functions that should be used
+to enable the prettyprinting features. They substitute the
+default-definitions supplied by PTG.
+
+~$~<Interface Definition~>+=~{
+PTGNode PP_OutFPtr ELI_ARG((FILE *fptr, PTGNode root));
+PTGNode PP_OutFile ELI_ARG((const char *filename, PTGNode root));
+PTGNode PP_Out ELI_ARG((PTGNode root));
+~}
+
+~A~<Implementation~>
+
+The pretty-printing module is a postprocessor for PTG-Output.
+It uses the module ~{PTGOutput~} to coordinate different postprocessors and
+allow dynamic selection of the "right" postprocessor.
+
+~O~<PrettyPrint.specs~>~{
+$/Output/PtgOutput.fw
+~}
+
+To perform it's pretty-printing task, the module needs to buffer the beginning
+of the last line of output. With this, upon closing an indentation-region it 
+can be decided if suggested linebreaks need to be converted into real linefeeds.
+
+The buffer is defined by two static variables: The first variable
+stores the characters of the printed line, the second records
+beginning and ending indentation regions and a count of suggested
+linebreaks. 
+
+Please note, that the buffers must be longer than the the linewidth by
+one char.
+
+~$~<Variables~>+=~{
+static char *buffer = 0;
+static struct _flagstruct {
+	short start;
+	short end;
+	short lbreak;
+} *flags = 0;
+~}
+
+Now, the internal character printing function can be defined. It
+inserts a single character into the output buffer and on overflow,
+calls a buffer printing function. If the buffer is exeeded, it will
+print the remains of the line directly into the output file.  
+
+As additional status information, it needs the current line-width, and
+the current offset in the printed line. The initializations of these
+variables are default values only. They can be assigned with functions defined
+in a later section. Additionally, we need a flag variable that is set to
+one if the beginning of the current line is already printed.
+
+~$~<Variables~>+=~{~-
+static int width = 80;
+static int nextwidth = 80;
+static int offset = 0;
+static int bol_printed = 0;
+~}
+
+~$~<Forward Decls~>+=~{~-
+static void AcceptChar ELI_ARG((char c));
+~}
+
+~$~<Functions~>+=~{
+#ifdef PROTO_OK
+static void AcceptChar(char c)
+#else
+static void AcceptChar(c) char c;
+#endif 
+{   
+    if (offset >= width && !bol_printed) /* Will exeed buffer now. */
+	PrintBuffer();                  /* Print beginning of line */
+    
+    if (offset < width)            /* Inside of buffer. */
+    {   
+	buffer[offset++] = c;  /* Store only. */
+	return;
+    }
+    else
+    {
+	putc(c, outputfile);       /* Print directly if overflow */
+        offset++;
+    }
+}
+~}
+
+~$~<Forward Decls~>+=~{~-
+static void PrintBuffer ELI_ARG((void));
+~}
+
+The main work is performed by the ~{PrintBuffer~}-function that prints
+a beginning of the line and inserts linebreaks where necessary. It needs
+to know the indent level.
+
+~$~<Variables~>+=~{
+static int region_top = 0;	  /* Indentation level at current position */
+static int startline_region = 0;  /* Indentation level at beginning of line */
+~}
+
+At exit of the ~{PrintBuffer~}-routine, one of two postconditions should
+hold: If the current line contained no linebreak,
+the function should print the beginning of the line, but no
+linefeed. The other functions can then append characters directly to
+the output stream until the next linebreak is encountered. This
+linebreak should be used to print a newline and resume normal
+behaviour.
+
+If the current line contained at least one linebreak, the first part of the
+buffer should be printed thereby converting suggested linebreaks into linefeeds.
+The function will terminate by printing a linefeed and reorganizing the linebuffer
+so that it can hold more characters.
+
+First of all, the printing engine has to check if the beginning of the current line
+had already been printed. If so, the line is already too long and has no
+room in the buffer. In this situation, ~{PrintBuffer~} needs to do nothing.
+
+~$~<PrintBuffer~>+=~{
+   if (bol_printed)
+      return;
+~}
+
+After that, the function needs to determine, which part of the buffer can be
+printed. It searches the rightmost breakpoint.
+
+~$~<PrintBuffer Variables~>+=~{~-
+   register int col;
+   int lastcol = -1;
+~}
+
+~$~<PrintBuffer~>+=~{
+   for (col = offset; col >= 0; col--)
+      if (flags[col].lbreak)
+      {
+         lastcol = col;
+         break;
+      }
+~}
+
+If no linebreaks could be found, the beginning of the line must be printed. 
+A variable remembers, that the beginning has been printed, so that it will not
+be done again.
+
+~$~<PrintBuffer~>+=~{
+   if (lastcol == -1)
+   {
+      if (offset >= width)
+      {
+         buffer[offset] = '\0';
+         fputs(buffer, outputfile);
+         bol_printed = 1;
+      }
+   }
+   else
+   {
+~<PrintBuffer1~>
+   }
+~}
+
+Otherwise, proper indentation can be performed now. The function 
+steps through the buffer keeping track of beginning and ending indentation
+regions. It uses a function to print a newline and the according indentation 
+space at it's end.
+
+~$~<PrintBuffer1~>+=~{
+      col = 0;
+      while(42)
+      {
+         startline_region += flags[col].start;
+         startline_region -= flags[col].end;
+         if (col == lastcol)
+            break;
+         putc(buffer[col], outputfile);
+         col++;
+      }
+
+      PrintNewLine(startline_region);
+~}
+
+The rest of the line, from ~{lastcol~} upto ~{offset~} needs to be printed
+in the next line. So move the characters to the beginning of the buffer.
+
+~$~<PrintBuffer1~>+=~{
+      if (lastcol < offset)
+      {
+         offset = (offset - lastcol);   /* #remaining characters */
+         MEMMOVE(buffer, buffer+lastcol, sizeof(char)*offset);
+	 MEMMOVE(flags, flags+lastcol, sizeof(struct _flagstruct)*(offset+1));
+	 memset(flags+offset+1, 0, (width+1-offset)*sizeof(struct _flagstruct));
+	 flags[0].lbreak = 0;
+      }
+      else
+      {
+	 offset = 0;
+	 memset(flags, 0, (width+1) * sizeof(struct _flagstruct));
+      }
+      bol_printed = 0;
+~}
+
+This concludes the ~{PrintBuffer~}-function.
+~$~<Functions~>+=~{
+static void PrintBuffer()
+{ 
+~<PrintBuffer Variables~>
+
+~<PrintBuffer~>
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void PrintNewLine ELI_ARG((int region));~}
+
+The ~{PrintNewLine~}-function prints a newline and does indentation.
+It uses a global variable that specifies the indentation amount for 
+each region. If it is negative, TAB-characters should be used for
+indentation. Another global variable contains the end-of-line sequence that
+should be used.
+
+~$~<Variables~>+=~{~-
+static int indent = 2;
+static char *eol = "\n";
+~}
+
+~$~<Functions~>+=~{
+#ifdef PROTO_OK
+static void PrintNewLine(int region)
+#else
+static void PrintNewLine(region) int region;
+#endif
+{
+   static char *spaces = "                                                                                ";
+   fputs(eol, outputfile);
+
+   if (indent > 0)
+   {
+      int required = indent * region;
+      while (required > 0)
+      {
+	 char *s = spaces;
+	 if (required < 80)
+	    s += (80-required);
+
+	 fputs(s, outputfile);
+	 required -= 80;
+      }
+   }
+   else
+   {
+      int level;
+	
+      for (level = 0; level < region; level++)
+         putc('\t', outputfile);
+   }
+   width = nextwidth;
+}
+~}
+
+The next function adjusts the buffer for a linebreak or a newline.
+
+~$~<Forward Decls~>+=~{~-
+static void AcceptSoftBreak ELI_ARG((void));
+static void AcceptHardBreak ELI_ARG((void));
+~}
+
+~$~<Functions~>+=~{
+static void AcceptSoftBreak()
+{
+   if (offset < width)
+   {  /* Has room in current buffer. */
+      flags[offset].lbreak = 1;
+   }
+   else 
+   {  /* Print some piece of the buffer */
+      PrintBuffer();
+
+      if (bol_printed)
+      {  /* Current line too long */
+         PrintNewLine(region_top);
+	 startline_region = region_top;
+	 offset = 0;
+	 memset(flags, 0, (width+1) * sizeof(struct _flagstruct));
+         bol_printed = 0;
+      }
+      else
+      	flags[offset].lbreak = 1;
+   }
+}
+
+static void AcceptHardBreak()
+{
+   if (offset == 0)
+   {  /* More than one Hardbreak. */
+      PrintNewLine(region_top);
+   }
+   else
+   {
+      while (offset > 0)
+      {
+         if (offset < width)
+            flags[offset].lbreak = 1;
+         PrintBuffer();
+
+         if (bol_printed)
+         {  /* Current line too long */
+            PrintNewLine(region_top);
+	    startline_region = region_top;
+	    offset = 0;
+	    memset(flags, 0, (width+1) * sizeof(struct _flagstruct));
+            bol_printed = 0;
+         }
+      }
+   }
+}
+~}
+
+Next, we need some supporting functions to mark an indentation-region.
+The Indenting-function adjusts the right margin properly and calls the
+~{PrintBuffer~} function if the decreased margin fills the buffer.
+
+~$~<Forward Decls~>+=~{~-
+static void AcceptOpenRegion ELI_ARG((void));
+~}
+
+~$~<Functions~>+=~{
+#ifdef PROTO_OK
+static void AcceptOpenRegion()
+#else
+static void AcceptOpenRegion()
+#endif
+{
+   int abs_indentation = (indent < 0 ? 8 : indent);
+   if (abs_indentation >= nextwidth)
+      return;
+
+   if (offset >= width)
+      PrintBuffer();
+
+   region_top++;
+   if (offset < width)
+   	flags[offset].start++;
+
+   nextwidth -= abs_indentation;
+   if (offset >= width)
+      PrintBuffer();
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void AcceptCloseRegion ELI_ARG((void));~}
+
+~$~<Functions~>+=~{
+static void AcceptCloseRegion()
+{
+   int abs_indentation = (indent < 0 ? 8 : indent);
+	
+   if (region_top == 0)
+      return;
+
+   if (offset >= width && !bol_printed)
+      PrintBuffer();
+
+   if (offset < width)
+      flags[offset].end++;
+   region_top--;    
+   nextwidth += abs_indentation;
+}
+~}
+
+The last internal function is an initialization-function, that should be
+called at the beginning of the output for a new file. It sets the 
+line-length from a user adjustable value for two reasons: First, the
+line-length should match the length of the buffer. Second, the linewidth
+is manipulated while opening and closing regions and should be resetted
+to it's original value, just in case a closing-region-command has been 
+omitted.
+
+~$~<Variables~>+=~{
+static int linewidth = 80;
+~}
+
+~$~<Forward Decls~>+=~{
+static void Init ELI_ARG((void));~}
+
+~$~<Functions~>+=~{
+static void Init()
+{
+   width = nextwidth = linewidth;
+   if (buffer)
+      free(buffer);
+   buffer = (char *)malloc((width+1) * sizeof(char));
+   if (flags)
+      free(flags);    
+   flags = (struct _flagstruct *)malloc((width+2) * sizeof(struct _flagstruct));
+   if (!buffer || !flags)
+   {
+      fprintf (stderr, "*** No more memory!\n");
+      exit(1);
+   }
+   memset(flags, '\0', sizeof(struct _flagstruct) * (width+1));
+
+   offset = 0;
+   bol_printed = 0;
+
+   region_top = 0;
+   startline_region = 0;
+}
+~}
+
+~A~<PTG Interface~>
+
+Up to this point, only general-purpose pretty-printing functions have
+been defined. In this section, the interface to PTG will be
+defined. It falls into two different categories. One set of functions
+redirect PTG output into the pretty-printing functions. The second set
+of functions supplies additional Function-Call-Insertion routines,
+that influence the pretty-printing behaviour.
+
+The first pair of functions insert a newline and a linebreak. They perform a
+consistency-check to assure that they have been called from within a call
+to our new Output function that will be defined later.
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+void PP_Newline(PTG_OUTPUT_FILE f)
+#else
+void PP_Newline(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	PTG_OUTPUT_STRING(f, "\n");
+    else
+#endif
+	AcceptHardBreak();
+}
+
+#ifdef PROTO_OK
+void PP_BreakLine(PTG_OUTPUT_FILE f)
+#else
+void PP_BreakLine(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	PTG_OUTPUT_STRING(f, "\n");
+    else
+#endif
+	AcceptSoftBreak();
+}
+~}
+
+The next function marks the beginning of an indentation-region. It is
+supplied in three variants which optionally include a linebreak or a
+newline automatically at the beginning of the block. 
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+void PP_Indent(PTG_OUTPUT_FILE f)
+#else
+void PP_Indent(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	return;
+#endif
+    AcceptOpenRegion();
+}
+~}
+
+The next function marks the end of an indenting region. It also inserts
+a linebreak optionally and uses the same configuration variable as above.
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+void PP_Exdent(PTG_OUTPUT_FILE f)
+#else
+void PP_Exdent(f) PTG_OUTPUT_FILE f;
+#endif
+{
+#ifndef NO_CHECK
+    if ((char *)(f->destinfo) != unique)
+	return;
+#endif
+    AcceptCloseRegion();
+}	
+~}
+
+Next, we need to supply a function to print strings. We will also supply
+a function that prints a character to speed up the processing. The routines
+should convert a newline-character into a fixed newline. Optionally, 
+a shortcut-character can be supplied that is transformed into a softbreak.
+
+~$~<Variables~>+=~{
+static char SoftBreakShortcut = '\0';
+~}
+
+The two functions have a similar body that will be defined in a macro
+here.
+
+~$~<PTG Character Printing~>~(~1~)~M~{
+if (~1 == SoftBreakShortcut)
+    AcceptSoftBreak();
+else if (~1 == '\n')
+    AcceptHardBreak();
+else
+    AcceptChar(~1);
+~}
+
+Since a null-character cannot be printed, the default-setting of 0 
+disables the shortcut for soft linebreaks. The above macro is used to
+generate the two output-routines, one for strings and and one for characters.
+
+~$~<Forward Decls~>+=~{
+static void PP_PrintString ELI_ARG((PTG_OUTPUT_FILE f, const char *s));~}
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+static void PP_PrintString(PTG_OUTPUT_FILE f, const char *s)
+#else
+static void PP_PrintString(f, s) PTG_OUTPUT_FILE f; char *s;
+#endif
+{
+    while (*s)
+    {
+       ~<PTG Character Printing~>~(*s~)
+       s++;
+    }
+}
+~}
+
+~$~<Forward Decls~>+=~{
+static void PP_PrintChar ELI_ARG((PTG_OUTPUT_FILE f, char c));~}
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+static void PP_PrintChar(PTG_OUTPUT_FILE f, char c)
+#else
+static void PP_PrintChar(f, c) PTG_OUTPUT_FILE f; char c;
+#endif
+{
+   ~<PTG Character Printing~>~(c~)
+}
+~}
+
+The remaining functions in this section perform the actual printing. The
+main routine expects a ~{PTGNode~} and a file-argument. It constructs the
+~{PTG_OUTPUT_FILE~}-object and calls the printing routine from PTG.
+Hereby, the routine uses the optional structure component ~{destinfo~} from
+the ~{PTG_PUTPUT_FILE~}-structure to store a magic value that is used by
+the other functions to determine, if the Output-procedures supplied by this
+module have been called for output.
+
+~$~<Variables~>+=~{
+static char *unique = "";
+static FILE *outputfile = 0;
+~}
+
+The main output-processing-function follows:
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+PTGNode PP_OutFPtr(FILE *f, PTGNode root)
+#else
+PTGNode PP_OutFPtr(f, root) FILE *f; PTGNode root;
+#endif
+{
+    PtgFilePtr ptgfile = NewPtgFile(unique, PP_PrintString);
+    outputfile = f;
+    ptgfile->PrintChar = PP_PrintChar;
+    
+    Init();
+    
+    PTGProcess(ptgfile, root);
+    if (offset > 0)
+    {
+	if (offset < width)
+	    flags[offset].lbreak++;
+	PrintBuffer();
+    }
+    FreePtgFile(ptgfile);
+    
+    return root;
+}
+~}
+
+This function is used to supply two other commonly used output functions:
+
+~$~<PTG Interface~>+=~{
+#ifdef PROTO_OK
+PTGNode PP_Out (PTGNode r)
+#else
+PTGNode PP_Out (r)
+        PTGNode r;
+#endif
+{
+	return PP_OutFPtr(stdout, r);
+}
+
+#ifdef PROTO_OK
+PTGNode PP_OutFile (const char *filename, PTGNode root)
+#else
+PTGNode PP_OutFile (filename, root)
+        char * filename; PTGNode root;
+#endif
+{
+	FILE *f = fopen(filename, "w");
+        if (!f)
+        {
+                fprintf(stderr, "DEADLY: PP_OutFile: output file '%s' can't be opened.\n",
+			filename);
+                exit(1);
+        }
+        PP_OutFPtr(f, root);
+        fclose(f);
+        return root;
+}
+~}
+
+~A~<Parameter Setting Routines~>
+
+This section will supply all the little routines to assign values to the
+different global variables that influence pretty printing processing.
+
+~$~<Parameters~>==~{
+#ifdef PROTO_OK
+void PP_SetLineWidth(int newwidth)
+#else
+void PP_SetLineWidth(newwidth) int newwidth;
+#endif
+{
+    linewidth = newwidth;
+}
+
+#ifdef PROTO_OK
+void PP_SetIndentationWidth(int newindent)
+#else
+void PP_SetIndentationWidth(newindent) int newindent;
+#endif
+{
+    indent = newindent;
+}
+
+#ifdef PROTO_OK
+void PP_SetEndline(char *new_eol)
+#else
+void PP_SetEndline(new_eol) char *new_eol;
+#endif
+{
+    eol = new_eol;
+}
+
+#ifdef PROTO_OK
+void PP_SetSoftBreakShortcut(char sbc)
+#else
+void PP_SetSoftBreakShortcut(sbc) char sbc;
+#endif
+{
+    SoftBreakShortcut = sbc;
+}
+~}
+
+~A~<Collecting the Output file~>
+
+As a matter of fact, there are Compilers that do not support the ANSI ~{memmove~}
+function that can copy memory that possibly overlaps. For this reason, we implement
+a substitute here. This is not a generally usable substitute: It takes advantage of
+the fact thst ~{src~} is always less than ~{dest~} in invocations of this module.
+
+~$~<Substitute memmove~>~{
+#ifndef PROTO_OK
+static void MEMMOVE(dest, src, len)
+char *dest, *src;
+int len;
+{
+   while (len--) *(dest++) = *(src++);
+}
+#else
+#define MEMMOVE(dest,src,len) memmove(dest,src,len)
+#endif
+~}
+
+~O~<PrettyPrint.h~>~{
+#ifndef _PRETTY_PRINT_H
+#define _PRETTY_PRINT_H
+
+#include "ptg_gen.h"
+#include "eliproto.h"
+
+~<Interface Definition~>
+
+#endif
+~}
+
+~O~<PrettyPrint.c~>~{
+#include <stdlib.h>
+#include <string.h>
+#include "PrettyPrint.h"
+
+~<Substitute memmove~> 
+
+~<Variables~>
+
+~<Parameters~>
+
+~<Forward Decls~>
+
+~<Functions~>
+
+~<PTG Interface~>
+~}
+
+~O~<PrettyPrint.HEAD.phi~>~{
+#include "PrettyPrint.h"
+~}
+
+
+
+    
+    
+    
+
+

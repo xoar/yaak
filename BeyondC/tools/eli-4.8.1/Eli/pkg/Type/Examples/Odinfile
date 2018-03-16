@@ -1,0 +1,166 @@
+# $Id: Odinfile,v 1.7 2008/08/25 08:49:00 peter Exp $
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+#
+
+%filter_errors == <<EOF
+s,/[^ ]*Examples,Examples,g
+EOF
+
+TypeTutorial.fw.exe == TypeTutorial.fw:exe
+Type.warn == TypeTutorial.fw:exe:warning
+%Type ! == <<EOF
+	TypeTutorial.fw.exe
+	Type.warn
+EOF
+
+%trenn == <<EOF
+==============
+EOF
+
+%TypeOk == <<EOF
+%Type.TEST == . +cmd=cat (%trenn) \
+	(Type.demo/TEST:label) \
+	(Type.demo/TEST) \
+	(Type.demo/TEST +cmd=(TypeTutorial.fw.exe) :stdout :warn) \
+	(Type.demo/TEST +cmd=(TypeTutorial.fw.exe) :stdout) :stdout
+EOF
+
+%TypeErr == <<EOF
+%Type.TEST == . +cmd=cat (%trenn) \
+	(Type.demo/TEST:label) \
+	(Type.demo/TEST) \
+	((Type.demo/TEST +cmd=(TypeTutorial.fw.exe) :stdout :warn) +cmd=sed -f (%filter_errors):stdout) :stdout
+EOF
+
+
+== %TypeErr +cmd=sed -e 's/TEST/Array.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/ArrayType.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/AssigCoerce.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/FctType.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Function.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Opr.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Pointer.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/RecFct.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Record.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/RecPtr.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/RecType.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/RecurType.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Simple.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Structequal.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/TypeDef.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/Union.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/UnionType.err/g' :stdout
+== %TypeErr +cmd=sed -e 's/TEST/VoidArr.err/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Apply.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Array.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/ArrayType.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/DiffCompNames.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/FctType.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Function.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Opr.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Pointer.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Record.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Simple.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/StrEqArr.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Structequal.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/TypeDef.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Union.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/UnionType.ok/g' :stdout
+== %TypeOk +cmd=sed -e 's/TEST/Voiden.ok/g' :stdout
+
+
+Type.messages == . +cmd=cat \
+	(%Type.Array.err) \
+	(%Type.ArrayType.err) \
+	(%Type.AssigCoerce.err) \
+	(%Type.FctType.err) \
+	(%Type.Function.err) \
+	(%Type.Opr.err) \
+	(%Type.Pointer.err) \
+	(%Type.RecFct.err) \
+	(%Type.Record.err) \
+	(%Type.RecPtr.err) \
+	(%Type.RecType.err) \
+	(%Type.RecurType.err) \
+	(%Type.Simple.err) \
+	(%Type.Structequal.err) \
+	(%Type.TypeDef.err) \
+	(%Type.Union.err) \
+	(%Type.UnionType.err) \
+	(%Type.VoidArr.err) \
+	(%Type.Apply.ok) \
+	(%Type.Array.ok) \
+	(%Type.ArrayType.ok) \
+	(%Type.DiffCompNames.ok) \
+	(%Type.FctType.ok) \
+	(%Type.Function.ok) \
+	(%Type.Opr.ok) \
+	(%Type.Pointer.ok) \
+	(%Type.Record.ok) \
+	(%Type.Simple.ok) \
+	(%Type.StrEqArr.ok) \
+	(%Type.Structequal.ok) \
+	(%Type.TypeDef.ok) \
+	(%Type.Union.ok) \
+	(%Type.UnionType.ok) \
+	(%Type.Voiden.ok) \
+		:stdout
+
+%Type.test ! == <<EOF
+	Type.messages
+	! diff Type.messages Type.savedmessages > Type.diff || true
+	Type.diff >
+EOF
+
+%Type.testsok ! == <<EOF
+	Type.messages > Type.savedmessages
+EOF
+
+%all ! == <<EOF
+	%Type
+EOF
+
+%test ! == <<EOF
+	%Type.test
+	! if test -s Type.diff; then echo "*** Diffs encountered"; exit 1; else echo "All tests passed without diffs."; fi
+EOF
+
+%helpmsg == <<EOF
+Virtual targets, defined in the Odinfile manage processor generation and
+testing. The following targets can be used:
+
+TypeTutorial.fw.exe             Generates the Type-Examples
+
+%all                    Abbreviation of that.
+
+%Type.test              Tests the Processor 
+                        after bringing it up to date.
+
+%test                   Abbreviation of that.
+
+Additionally, the target %Type.testsok can be used to bring the
+compared test output, used in the ...test-targets for verification, up
+to date.  
+EOF
+
+%help ! == <<EOF
+        %helpmsg>
+EOF
+

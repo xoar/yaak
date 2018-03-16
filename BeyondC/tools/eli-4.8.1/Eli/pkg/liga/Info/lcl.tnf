@@ -1,0 +1,348 @@
+\input texinfo @c -*-texinfo-*-
+@comment %**start of header
+@comment 
+@comment (C) Copyright 1997 University of Paderborn
+@comment 
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment 
+
+@setfilename lcl
+@settitle LCL
+@setchapternewpage odd
+@comment %**end of header
+@comment $Id: lcl.tnf,v 4.11 2000/04/03 12:49:28 peter Exp $
+@paragraphindent 0
+
+
+@titlepage
+@center @titlefont{LCL: Liga Control Language}
+@sp 4
+@center $Revision: 4.11 $
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center Compiler and Programming Language Group
+@center University of Paderborn, FB 17
+@center 33102 Paderborn, FRG
+@sp 4
+@center Copyright, 1997 University of Paderborn
+@end titlepage
+
+@iftex
+@finalout
+@end iftex
+
+@ifinfo
+@set topnode
+@end ifinfo
+@ifset html
+@set topnode
+@end ifset
+
+@ifset topnode
+@node Top, , (dir), (dir)
+@ifinfo
+@unnumbered LCL - Liga Control Language
+@end ifinfo
+$Revision: 4.11 $
+
+The LIGA control language LCL allows for specifying certain
+options to control the analysis and translation phase of
+the LIGA system. 
+
+@menu
+* Introduction::              Overview and Notation of LCL.
+* Expand Options::            Description of Expand Options.
+* Order Options::             Description of Order Options.
+* Optim Options::             Description of Optim Options.
+@end menu
+@end ifset
+
+@node Introduction, Expand Options, Top, Top
+@chapter Introduction
+
+The analysis and translation of an attribute grammar by the LIGA system may
+be influenced in various ways. For that purpose the user specifies certain
+options in the LIGA Control Language LCL. You can introduce options to the
+ELI system in a file ending in @code{.ctl}. A default is assumed for each 
+option if it is not set or if no LCL specification is given. The denotations 
+of the options are headed by a prefix indicating one of the liga phases the 
+option mainly refers to.
+ 
+LCL has a simple, keyword-oriented syntax.
+Each keyword consists solely of upper-case letters
+and underscores. 
+Comments are enclosed in '/*' and '*/', and must not be nested.
+@page
+
+@example
+Options  ::=   ( Option ';' )*
+Option   ::=   'EXPAND'  ':' ExpandOpts / 
+               'ORDER'   ':' OrderOpts / 
+               'OPTIM'   ':' OptimOpts
+
+ExpandOpts  ::=  ExpandOpt  ',' ExpandOpts / ExpandOpt 
+OrderOpts   ::=  OrderOpt   ',' OrderOpts / OrderOpt 
+OptimOpts   ::=  OptimOpt   ',' OptimOpts / OptimOpt 
+ 
+Expandopt   ::= 'INFO' / 'INCLUDINGS_SEPARATE' /
+                'INCLUDING' 'ON' / 'INCLUDING' 'OFF'
+
+OrderOpt    ::= 'PARTITION' Strategy / 'TOPOLOGICAL' Strategy / 
+                'GRAPH' Type ( ident ) * / 
+                'ARRANGE' arrangePart
+Strategy    ::= 'EARLY' / 'LATE'
+Type        ::= 'DIRECT_SYMBOL' / 'TRANSITIVE_SYMBOL' / 'INDUCED_SYMBOL' /
+                'DIRECT_RULE' / 'TRANSITIVE_RULE' / 'INDUCED_RULE' /
+                'PARTITIONED_RULE' / 'PARTITION' / 'VISIT_SEQUENCE'
+arrangePart ::= 'AUTOMATICALLY' / 'FAST' /
+                'FOR' 'SYMB' ident 'EVAL' ident 'BEFORE' ident /
+                'IN' 'RULE' ident 'EVAL' ident '[' intval ']' '.' ident
+                'BEFORE' ident '[' intval ']' '.' ident
+
+OptimOpt    ::= 'OFF' / 'INFO' / 'MORE_GLOBALS' /
+                'NO_VARIABLES' / 'NO_STACKS' / 'GROUPING' 'VARIABLE' /
+                'ATTRSPEZ' Type ( symbname '[' ( ident ) + ']' ) *
+symbname    ::= ident / 'ANYSYMBOL'
+Type        ::= 'GLOBAL VAR' / 'GLOBAL STACK' / 'TREE_NODE' /
+                'GROUP VAR' / 'GROUP STACK'
+
+
+            Figure 1: Context-free grammar for LCL
+@end example
+
+
+The next four sections of this manual describe the detailed syntax and
+effects of the options.
+
+
+@node Expand Options, Order Options, Introduction, Top
+@chapter Expand Options
+
+Options introduced by "Expandopt" influence the expansion of used shorthands.
+
+@example
+Expandopt  ::= 'INFO' / 'INCLUDINGS_SEPARATE' / 
+               'INCLUDING' 'ON' / 'INCLUDING' 'OFF' 
+@end example
+
+@noindent
+@code{'INFO'}
+@*
+If this option is set, additional information on the expansion
+results is included in the listing. The default is not to produce
+the additional information.
+This option affects REPLINCL and EXPAND. This option can be included
+automatically in Eli by using the derivation @code{:ExpInfo}.
+
+@noindent
+@code{'INCLUDINGS_SEPARATE'}
+@*
+In the default case, identical @code{INCLUDING} constructs are expanded 
+by one single set of generated attributes. The number of new 
+attributes is thereby reduced, and in some situations
+OAG-conflicts are avoided. This option is recommended for
+debugging purposes. If it is set, each @code{INCLUDING}-construct is 
+expanded separately.
+
+@noindent
+@code{'INCLUDING' 'OFF'}
+@*
+In the default case values are propagated
+by global variables from the @code{INCLUDING} sources to
+their destinations.
+
+@noindent
+@code{'INCLUDING' 'ON'}
+@*
+With this option you can specify that attributes are generated
+for propagating @code{INCLUDING} values through the tree.
+
+@node Order Options, Optim Options, Expand Options, Top
+@chapter Order Options
+
+Options introduced by "Orderopt" control the general strategies 
+applied by Order.
+
+@example
+OrderOpt    ::= 'PARTITION' Strategy /
+                'GRAPH' Type ( ident ) * / 'ARRANGE' arrangePart
+Strategy    ::= 'EARLY' / 'LATE'
+Type        ::= 'DIRECT_SYMBOL' / 'TRANSITIVE_SYMBOL' / 'INDUCED_SYMBOL' /
+                'DIRECT_RULE' / 'TRANSITIVE_RULE' / 'INDUCED_RULE' /
+                'PARTITIONED_RULE' / 'PARTITION' / 'VISIT_SEQUENCE'
+arrangePart ::= 'AUTOMATICALLY' / 'FAST' /
+                'FOR' 'SYMB' ident 'EVAL' ident 'BEFORE' ident /
+                'IN' 'RULE' ident 'EVAL' ident '[' intval ']' '.' ident
+                'BEFORE' ident '[' intval ']' '.' ident
+
+@end example
+
+@noindent
+@code{'PARTITION' Strategy}
+@*
+This option is used to specify the strategy for computation of 
+attribute partitions.
+
+@noindent
+@code{'GRAPH' Type ( ident ) *}
+@*
+This option is used to obtain additional information about 
+specific attribute dependencies. It is most useful for tracking 
+down dependency cycles.
+The dependency graphs for the given symbols and rules are listed. 
+If the @code{Identlist} is empty, then the graphs for all symbols or 
+rules are listed. The default for this option is to provide no 
+listings of any dependency graphs.
+
+@noindent
+@code{'TREE' 'COMPLETE'} and @code{'TREE' 'BOTTOM_UP'}
+@* 
+These options are outdated. They are still accepted, but do not
+have any effect.
+If some computations are to be executed while the tree is
+being built, they are specified @code{BOTTOMUP} in the LIDO text.
+See also @ref{Computations, Computations, Computations, lidoref, LIDO - Reference Manual}.
+
+@noindent
+@code{'ARRANGE' arrangePart}
+@*
+This option is used to fix the evaluation order of attributes of 
+a single symbol or of a single rule. If an attribute grammar is 
+not ordered, but may be well-defined --i.e. cycles do not occur 
+before computation of the partitioned rule graphs -- these 
+specifications may be used to constrain the admissible partitions.
+
+@code{AUTOMATICALLY} invokes an additional algorithm that tries to avoid cycles
+while computing the visit-sequences. @code{FAST} avoids to invoke that
+algorithm, speeding up the analysis and increasing the risk not to find
+suitale visit-sequences in certain cases. The default is @code{AUTOMATICALLY}.
+By specifying another arrange option a certain evaluation sequence is
+explicitly requested.
+
+@node Optim Options, , Order Options, Top
+@chapter Optim Options
+
+Options introduced by "Optimopt" control the strategy for attribute
+optimization applied by Optim.
+
+@example
+OptimOpt    ::= 'OFF' / 'INFO' / 'MORE_GLOBALS' /
+                'NO_VARIABLES' / 'NO_STACKS' / / 
+                'NO_GROUPING' / 'GROUPING VARIABLE' 
+                'ATTRSPEZ' Type ( symbname '[' ( ident ) + ']' ) *
+symbname    ::= ident / 'ANYSYMBOL'
+Type        ::= 'GLOBAL VAR' / 'GLOBAL STACK' / 'TREE_NODE' /
+                'GROUP VAR' / 'GROUP STACK'
+
+@end example
+
+@noindent
+@code{'OFF'} 
+@*
+This option supresses the optimization entirely.
+
+@noindent
+@code{'INFO'} 
+@*
+This option produces a listing of the results of the optimization that gives
+all attribute storage decisions and the visit-sequences
+as modified by stack operations. Attribute evaluations that are
+omitted due to optimization are marked by the string @code{IS DELETED}.
+
+This option can be included automatically in Eli by using the derivation 
+@code{:OptimInfo}.
+
+@noindent
+@code{'MORE_GLOBALS'} 
+@*
+If this option is set, a second optimization algorithm is started. This
+algorithm takes the attributes which are classified as tree nodes by the
+first optimization algorithm and tries to globalize them too.
+
+@noindent
+@code{'NO_VARIABLES'} 
+@*
+No attributes are implemented as global variable. Instead
+all attributes which can be globalized are implemented as global stack.
+
+@noindent
+@code{'NO_STACKS'}
+@*
+No attributes are implemented as global stack. Instead all attributes which
+could be implemented by global stack are allocated in the tree.
+
+@noindent
+@code{'NO_GROUPING'}
+@*
+If this option is set, all grouping of variables is supressed, including
+the grouping requested by system internal grouping directives for CHAIN
+attributes. 
+This option usually leads to increased memory and time requirements 
+of the generated processor. It is only recommended during the development
+of language processors for large specifications, since it may decrease
+the time required for processor generation.
+
+@noindent
+@code{'GROUPING VARIABLE'}
+@*
+If this option is set, different attributes which can be implemented by a
+global variable each are possibly grouped to one global variable.
+
+@noindent
+@code{'ATTRSPEZ' Type ( symbname '[' ( ident )+ ']' )*}
+@*
+This option requires a particular storage decision for the specified
+attributes.
+
+@noindent
+Type @code{'GLOBAL VAR'} requires global variables.
+
+@noindent
+Type @code{'GLOBAL STACK'} requires global stacks.
+
+@noindent
+Type @code{'TREE_NODE'} requires allocation in the tree.
+
+@noindent
+Type @code{'GROUP VAR'} requires allocation to a single global variable.
+
+@noindent
+Type @code{'GROUP STACK'} requires allocation to a single global stack.
+
+@noindent
+@kbd{symbname} specifies a symbolname and @kbd{ident} an attributname.
+If @code{'ANY_SYMBOL'} is used instead, all attributes with 
+corresponding attribute name are taken.
+
+Optim will try to fulfill the above given specifications. It 
+will ignore those that would result in incorrect computation.
+A specified group will not be enlarged by an attribute not 
+belonging to this specification; an attribute specified but 
+not in a group will not be put in any group; and a group 
+specification consisting of @dfn{n} attributes will result 
+in a set of groups within these @dfn{n} attributes, which is
+the best found by the algorithm.
+
+Any attributes which are not appearing in any @code{ATTRSPEZ}
+specification will be optimized as usual.
+
+To specify the @code{ATTRSPEZ}-specifications, the tool Gorto can be
+used, see @ref{Top, , , gorto, Graphical Dependancy Analyzer}.
+
+@contents
+@bye

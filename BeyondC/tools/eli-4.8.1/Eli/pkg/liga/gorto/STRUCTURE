@@ -1,0 +1,138 @@
+/*======================================================================*
+ *									*
+ *	FILE:		STRUCTURE					*
+ *									*
+ *	CONTENTS:	Source Tree Description for GORTO		*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+
+/* Modified on Aug 16, 1991:
+ * All Subdirectories removed. All files now in one directory.
+ */
+/* This file is part of the Eli translator construction system.
+
+Eli is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Eli; see the file COPYING.  If not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+Gorto.ad		Application Defaults for Gorto
+Makefile		Toplevel Makefile
+README			Quick startup guide
+STRUCTURE		Source Tree Structure
+
+Graph/				GRAPH WIDGET
+Graph/Graph.c		Implementation of the Graph widget
+Graph/Graph.h		Public header file for the Graph widget
+Graph/Makefile		Makefile to construct obj-<machine>/Graph.a
+
+Main/				MAIN WINDOW OF GORTO
+Main/Main.c		Main module of Gorto
+Main/Main.h		Header file for the modules Main/*
+Main/MainList.c		Lists of symbols and productions
+Main/MainWindow.c	Creation of the main window
+Main/Makefile		Makefile to construct obj-<machine>/Main.a
+Main/Order.c		Calls to the Order implementation
+Main/OrderStrategy.c	Menu creation for partition and topological strategy
+Main/Reftab.c		Handling of the additions to Order's ref_tab
+
+Misc/				BASIC MODULES
+Misc/Arrange.c		List of active arrange options
+Misc/Bitmaps.c		Useful bitmaps
+Misc/Cascade.bm		X bitmap of cascade indicator
+Misc/CheckMark.bm	X bitmap of check-mark 
+Misc/Create.h		Macros dealing with widget creation
+Misc/Debug.c		Symbolic debugging support
+Misc/DepLayout.c	Layout of dependencies
+Misc/Drawing.c		Basic routines for drawing under X
+Misc/Icon.bm		X bitmap for Gorto icon
+Misc/Makefile		Makefile to construct obj-<machine>/Misc.a
+Misc/Misc.h		Header file for the modules Misc/*
+Misc/PathFind.c		Finding the origin of a dependency
+Misc/Resources.c	Resources of Gorto
+Misc/Util.c		Utilities
+
+Popup/				POPUP WINDOWS
+Popup/Hide.c		Hide and UnHide Popup
+Popup/Lido.c		LIDO source window
+Popup/Makefile		Makefile to construct obj-<machine>/Popup.a
+Popup/Message.c		Message Popup
+Popup/Popup.h		Header file for the modules Popup/*
+Popup/PopupUtil.c	Automatic placement of popup windows
+
+Prod/				PRODUCTION WINDOWS
+Prod/Makefile		Makefile to construct obj-<machine>/Prod.a
+Prod/Prod.h		Header file for the modules Prod/*
+Prod/ProdCreate.c	Creation of production windows
+Prod/ProdDep.c		Dependency drawing in production windows
+Prod/ProdDraw.c		Drawing of production graphs
+Prod/ProdMenu.c		Production menu
+Prod/ProdSelect.c	Processing of mouse selections in production windows
+Prod/ProdSymbol.c	Drawing of symbols in production graphs
+Prod/ProdUtil.c		Utilities used for production windows
+
+Symb/				SYMBOL WINDOWS
+Symb/Makefile		Makefile to construct obj-<machine>/Symb.a
+Symb/Symb.h		Header file for the modules Symb/*
+Symb/SymbAttrs.c	Utilities for manipulation of current partition
+Symb/SymbCreate.c	Creation of symbol windows
+Symb/SymbDep.c		Dependency drawing in symbol graphs
+Symb/SymbDraw.c		Drawing of symbol graphs
+Symb/SymbMenu.c		Symbol menu
+Symb/SymbProd.c		Popup for selection of production 
+Symb/SymbSelect.c	Processing of mouse selections in symbol windows
+Symb/SymbUtil.c		Utilities used for symbol windows
+
+Visit/				VISIT-SEQUENCE WINDOWS
+Visit/Makefile		Makefile to construct obj-<machine>/Visit.a
+Visit/Visit.h		Header file for the modules Visit/*
+Visit/VisitCreate.c	Creation of visit-sequence windows
+Visit/VisitDraw.c	Drawing of visit-sequences
+Visit/VisitLife.c	Computation and drawing of attribute lifetimes
+Visit/VisitMenu.c	Visit-sequence menu
+Visit/VisitSelect.c	Processing of mouse selections in visit-sequence windows
+Visit/VisitUtil.c	Utilities used for visit-sequence windows
+
+app-defaults/			APPLICATION DEFAULTS SPECIFICATION
+app-defaults/Basic	Basic Specifications
+app-defaults/Colors	Color Specifications
+app-defaults/Gorto.ad	Constructed applications defaults specification
+app-defaults/Makefile	Makefile to construct app-defaults/Gorto.ad
+app-defaults/Sizes.default Specifications for default window sizes
+app-defaults/Sizes.large   Specifications for large window sizes
+app-defaults/Sizes.small   Specifications for small window sizes
+app-defaults/Sizes.tiny    Specifications for tiny window sizes
+app-defaults/Strings.english Specifications for english interaction
+app-defaults/Strings.german  Specifications for german interaction
+
+obj-<machine>/			LIBRARIES AND EXECUTABLE
+
+order/				ORDER IMPLEMENTATION
+order/Gorto.h		Modified Order header file
+order/Makefile		Makefile to construct obj-<machine>/Order.a and Order
+order/induce.c		Transitive closure and construction of induced graphs
+order/initdp.c		Initial (direct) production dependencies
+order/initds.c		Initial (direct) symbol dependencies
+order/mem.c		Memory allocation (not used with Gorto)
+order/option.c		Processing of order options
+order/order.c		Main module of order (not used with Gorto)
+order/order.h		Header file of order (not used with Gorto)
+order/output.c		Readable output (not used with Gorto)
+order/part.c		Computation of partitions
+order/reftab.c		Initialization of order's ref_tab
+order/set.c		Set manipulation
+order/set.h		Header file for order/set.c
+order/stat.c		Statistic output (not used with Gorto)
+order/visit.c		Computation of visit-sequences
+order/write.c		Output of IDL Structure 

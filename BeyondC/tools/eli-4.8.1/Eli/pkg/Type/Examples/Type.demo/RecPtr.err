@@ -1,0 +1,14 @@
+begin
+(* The definitions of p2 and p3 are erroneous
+   because p2 and p3 are equivalent. But, messages are
+   not given. p2 and p3 are considered to be different.
+   If the definitions of rp is removed, the messages
+   for p2 and p3 are given.
+*)
+  type p2! p3;
+  type p3! p2;
+(* *)  type record int i, rp! p end rp;
+  var p2 v2;
+  var p3 v3;
+  v2 = v3;
+end

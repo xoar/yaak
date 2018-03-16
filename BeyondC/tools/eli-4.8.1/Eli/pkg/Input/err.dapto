@@ -1,0 +1,26 @@
+/*
+ * $Id: err.dapto,v 1.2 2010/09/22 02:31:34 profw Exp $
+ */
+
+aspect messages;
+
+event message* "Generation of a program message"
+	(str severity "Severity of this message",
+	 str text "Message text",
+	 int line "Line number",
+	 int col "Column number");
+
+end;
+
+aspect coordinates;
+
+"err.h"
+
+operation get_coordinate_info
+    "Return the coordinates"
+    (CoordPtr coord "The coordinates of interest") : str
+{
+    DAPTO_RESULTPOSITION(*coord);
+}
+
+end;

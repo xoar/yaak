@@ -1,0 +1,737 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from name.tnf on 5 December 2013 -->
+
+<TITLE>Name analysis according to scope rules - Inheritance of Scopes</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Name analysis according to scope rules</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC15" HREF="name_toc.html#SEC15">Inheritance of Scopes</A></H1>
+<P>
+The basic scope rule concepts are described by hierarchically nested
+environments which reflect the structure of nested ranges in a program.
+Using scopes as properties of objects, as described in 
+See  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>,
+allows to export a scope with bindings from a range, propagate them by a 
+property, and bind single identifiers that occur outside of the range
+where the binding is established,
+e.g. a component identifier that is qualified by a module name.
+<P>
+In this section we further extend that concept such that scope rules
+for language constructs like <CODE>with</CODE> statements of Pascal,
+<CODE>use</CODE> qualifications of Ada, or inheritance of classes as in
+object-oriented languages can be specified.
+All these constructs allow that non-qualified identifier occurrences
+may be bound to definitions contained in surrounding ranges or to definitions
+of scopes that are inherited by a surrounding range, for example
+<PRE>
+  module m { int i; float f() {...} }
+  { float g;
+    with m 
+      { int i; g = f();}
+  }
+</PRE>
+<P>
+The new concept is described by an inheritance relation between scopes
+that is used when applied identifier occurrences in a range are bound
+to definitions. In the above example the range of the <CODE>with</CODE>-statement
+inherits the scope of the module <CODE>m</CODE> and is embedded in the
+surrounding range.
+<P>
+Name analysis computations for such constructs rely on several different
+operations: scopes being created, bindings in a scope being established, 
+scope properties being set, inheritance relations between scopes
+being established. The propagation of scope properties
+is not limited to strictly nested structures. Hence, the dependencies
+between the computations are rather sophisticated.
+That is why the combination of modules is restricted.
+<P>
+There are three modules that provide computations for the
+consistent renaming task based on inheritance. They rely on the
+use of the corresponding modules for basic scope rules and for
+scope properties:
+<P>
+<DL COMPACT>
+<DT><CODE>AlgInh</CODE>
+<DD>Inheritance with Algol-like Scope Rules (recommended to be used in general)
+<DT><CODE>CInh</CODE>
+<DD>Inheritance with C-like Scope Rules
+<DT><CODE>BuInh</CODE>
+<DD>Inheritance computed while processing input
+</DL>
+<P>
+Using one of these modules requires that the corresponding
+basic scope rule module and a suitable scope property module is instantiated 
+with the same generic parameters
+<CODE>+instance=NAME</CODE> and <CODE>+referto=KEY</CODE>.
+<P>
+Each of the three modules implements consistent renaming of identifiers.   
+Identifier occurrences are bound to object keys of type <CODE>DefTableKey</CODE>
+according to the following inheritance rule:
+<P>
+An inheritance relation between scopes is introduced:
+A scope <CODE>c1</CODE> may inherit the bindings of a scope <CODE>c2</CODE>, i.e.
+a definition of <CODE>c2</CODE> is inherited by <CODE>c1</CODE> unless it is
+hidden by another definition of the same identifier in <CODE>c1</CODE>.
+A scope may inherit from several scopes (multiple inheritance).
+The inheritance relation is transitive and must be acyclic.
+<P>
+Together with the nesting of ranges the following general scope rule
+is applied:
+<P>
+An applied occurrence of an identifier <CODE>a</CODE> is bound to a definition
+of <CODE>a</CODE> which is contained in or inherited by the smallest
+enclosing range. 
+<P>
+Definitions contained in a range hide definitions
+inherited (directly or indirectly) by that range.
+<P>
+Definitions inherited by a range hide definitions of enclosing
+ranges.
+<P>
+Using multiple inheritance a scope <CODE>c1</CODE> may inherit from
+a scope <CODE>c2</CODE> and from <CODE>c3</CODE>, where <CODE>c2</CODE> also
+inherits from <CODE>c3</CODE>. If both <CODE>c2</CODE> and <CODE>c3</CODE> define
+an identifier <CODE>a</CODE>, then the definition of <CODE>a</CODE> in <CODE>c3</CODE>
+is hidden by that of <CODE>c2</CODE>. This holds for
+<CODE>c1</CODE>, too, although there is an inheritance path from <CODE>c3</CODE>
+to <CODE>c1</CODE> that does not pass <CODE>c2</CODE>.
+<P>
+If several definitions of an identifier <CODE>a</CODE> are inherited
+via different unrelated inheritance paths, the applied occurrence
+is bound to an arbitrary one of them.
+This module provides a means to detect that situation, in order
+to issue an error message or to access all those definitions,
+depending on the requirements of the particular language.
+<A NAME="IDX165"></A>
+<A NAME="IDX166"></A>
+<A NAME="IDX167"></A>
+<P>
+If the computations of this module are used to establish inheritance
+relations, then the computations of identifier roles, like
+<CODE>NAMEIdUseEnv</CODE>, <CODE>NAMEIdUseScope</CODE>, and <CODE>NAMEQualIdUse</CODE>
+are modified such that inheritance relations are considered 
+when bindings are looked up.
+<P>
+The modules provide <CODE>.lido</CODE> specifications for the following
+computational roles:
+<A NAME="IDX168"></A>
+<A NAME="IDX169"></A>
+<A NAME="IDX170"></A>
+<A NAME="IDX171"></A>
+<A NAME="IDX172"></A>
+<P>
+<CODE>NAMEInhRange</CODE>
+is a range that may inherit scopes exported form other ranges, but does not
+export its own scope. This role is, for example, applied to <CODE>with</CODE>-statements.
+The role <CODE>NAMEInheritScope</CODE> (see below) is used to establish
+the inheritance relations. No distinction is made whether one or more
+scopes can be inherited.
+A user computation for the <CODE>VOID</CODE> attribute <CODE>NAMEInhRange.NAMEGotInh</CODE> 
+has to be provided in upper or lower computation, such that it states
+the condition that all those inheritances are done. Usually the attributes
+<CODE>NAMEInheritScope.NAMEInheritOk</CODE> are used for that purpose.
+<P>
+<CODE>NAMEExportInhRange</CODE>
+is both an <CODE>NAMEExportRange</CODE> and a <CODE>NAMEInhRange</CODE>, i.e. it inherits
+scopes and exports its own scope. This role is, for example, applied to 
+bodies of class declarations.
+It is essential to use this role, instead of inheriting both roles,
+<CODE>NAMEExportRange</CODE> and <CODE>NAMEInhRange</CODE>, to one grammar symbol;
+otherwise the dependences provided by the two roles could cause conflicts.
+<A NAME="IDX173"></A>
+<A NAME="IDX174"></A>
+<A NAME="IDX175"></A>
+<A NAME="IDX176"></A>
+<A NAME="IDX177"></A>
+<A NAME="IDX178"></A>
+<A NAME="IDX179"></A>
+<A NAME="IDX180"></A>
+<A NAME="IDX181"></A>
+<A NAME="IDX182"></A>
+<P>
+<CODE>NAMEInheritScope</CODE> is used to establish one inheritance relation
+between two scopes: <CODE>THIS.NAMEInnerScope</CODE> is stated to inherit
+from <CODE>THIS.NAMEOuterScope</CODE>, both of type <CODE>Environment</CODE>. 
+<CODE>THIS.NAMEInnerScope</CODE> has to be set by a user computation, either
+in upper or lower context. Another user computation is required
+to set <CODE>THIS.NAMEScopeKey</CODE> in in upper or lower context.
+A provided computation obtains the <CODE>NAMEScope property</CODE> from it
+and sets <CODE>SYNT.NAMEOuterScope</CODE>. The inheritance relation is
+established by a call of the function <CODE>NAMEInheritClass</CODE> provided
+by the environment module.
+The attribute <CODE>SYNT.NAMEInheritOk</CODE> is set to 1 iff the 
+inheritance relation is legal, i.e. both scopes exist and belong to the 
+same environment hierarchy, in the outer scope bindings have not been 
+looked up before, and this inheritance does not establish a cyclic
+inheritance relation.
+<A NAME="IDX183"></A>
+<P>
+<CODE>NAMEChkInhinherit</CODE> can be used to issue error messages at a
+<CODE>NAMEInheritScope</CODE> node.
+If the outer scope does not exist, then the attribute
+<CODE>NAMEInheritScope.SrcErr</CODE> has the value 1 and a message is issued by
+the computation:
+<P>
+<PRE>
+SYNT.SrcMsg=
+  IF(THIS.SrcErr,
+    message (ERROR, "Source of inheritance is missing", 0, COORDREF));
+</PRE>
+<P>
+If the stated inheritance is invalid, then the attribute
+<CODE>NAMEInheritScope.ScpErr</CODE> has the value 1 and a message is issued by
+the computation:
+<P>
+<PRE>
+SYNT.InhMsg=
+  IF(THIS.InhErr,
+    message (ERROR, "Wrong scope inherited", 0, COORDREF));
+</PRE>
+<A NAME="IDX184"></A>
+<A NAME="IDX185"></A>
+<P>
+<CODE>NAMEChkInhIdUse</CODE> and <CODE>NAMEChkInhQuaIdUse</CODE>
+are roles to be associated to an applied identifier occurrence.
+If several definitions of the identifier are inherited on different
+unrelated inheritance paths, then the attribute
+<CODE>NAMEChkInhIdUse.MulErr</CODE> (or <CODE>NAMEChkInhQuaIdUse.MulErr</CODE>)
+has the value 1 and a message is issued by the computation:
+<P>
+<PRE>
+SYNT.MulMsg=
+  IF(THIS.MulErr,
+    message (ERROR,
+      CatStrInd(
+        "Several definitions are inherited for: ",
+	IdnOf(THIS.|KEY|Bind)),
+      0, COORDREF));
+</PRE>
+<P>
+<CODE>NAMEChkInhIdUse</CODE> may be used together with <CODE>NAMEIdUseEnv</CODE>
+or <CODE>NAMEIdUseScope</CODE>;
+<CODE>NAMEChkInhQualIdUse</CODE> may be used together with 
+<CODE>NAMEQualIdUse</CODE>.
+<P>
+We demonstrate the use of inheritance by extending our 
+running example by a <CODE>with</CODE> statement for modules
+(see  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>).
+<P>
+<PRE>
+   Statement:    'with' WithClause 'do' WithBody.
+   WithClause:   ModUseIdent.
+   WithBody:     Statement.
+</PRE>
+<P>
+The identifier should be bound to a module. The <CODE>WithBody</CODE>
+inherits the module's scope. I.e. the definitions of the module
+body are valid in the <CODE>WithBody</CODE>. They may be hidden by definitions
+in ranges contained in the <CODE>WithBody</CODE>. They may hide definitions
+in ranges enclosing the <CODE>with</CODE> statement.
+Hence, the <CODE>WithBody</CODE> plays the role of a <CODE>InhRange</CODE>
+and its scope is the target of the inheritance relation.
+(The <CODE>WithBody</CODE> does not export its bindings.)
+The module's scope property is its source:
+<P>
+<PRE>
+   SYMBOL WithBody INHERITS InhRange END;
+   SYMBOL WithClause INHERITS InheritScope, ChkInherit END;
+
+   RULE: Statement ::= 'with' WithClause 'do' WithBody COMPUTE
+     WithClause.InnerScope = WithBody.Env;
+     WithBody.GotInh = WithClause.InheritOk;
+   END;
+
+   RULE: WithClause ::= ModUseIdent COMPUTE
+     WithClause.ScopeKey = ModUseIdent.Key;
+   END;
+</PRE>
+<P>
+Note: In this example the <CODE>WithClause</CODE> can only be a simple
+identifier, <CODE>ModUseIdent</CODE>. If a typed expression would be
+allowed there instead, as in Pascal, the scope property would be
+associated to and obtained from type keys.
+<P>
+Similarly we can extend the language of our running example by
+classes with multiple inheritance:
+<P>
+<PRE>
+   Declaration:   'class' DefIdent Inheritances ClassBlock ';'.
+   ClassBlock:    Compound.
+   Inheritances:  Inheritance*.
+   Inheritance:   ':' InheritIdent.
+   InheritIdent:  Ident.
+</PRE>
+<P>
+A declaration of a class exports the bindings of the class body,
+like the declaration of a module (see  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>).
+Additionally other classes may be inherited by a class, i.e.
+their definitions are valid within the class body, if not
+hidden by inner definitions. The inherited definitions may hide
+definitions in ranges the class declaration is contained in.
+Hence, the scope of the class body is the target of
+all <CODE>Inheritances</CODE>, their sources are given by the scope
+property associated to the classes identified in the <CODE>Inheritances</CODE>.
+<P>
+<PRE>
+   SYMBOL ClassBlock INHERITS ExportRange, InhRange END;
+
+   RULE: Declaration ::= 'class' DefIdent Inheritances ClassBlock ';'
+   COMPUTE
+     ClassBlock.ScopeKey = DefIdent.Key;
+     ClassBlock.GotInh = 
+        Inheritances CONSTITUENTS InheritIdent.InheritOk;
+     Inheritances.InnerScope = ClassBlock.Env;
+   END;
+
+   SYMBOL Inheritances:  InnerScope: Environment;
+
+   SYMBOL InheritIdent INHERITS 
+          InheritScope, ChkInherit, IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.InnerScope = INCLUDING Inheritances.InnerScope;
+     SYNT.Scopekey = THIS.KeyK;
+   END;
+</PRE>
+<P>
+Note: In this example the inherited classes are determined by an unqualified
+identifier each, <CODE>InheritIdent</CODE>. 
+In case of Algol-like scope rules that can not be extended to qualified
+identifiers, because of the dependence pattern used by the  <CODE>AlgInh</CODE> module.
+It would cause cyclic attribute dependences, in general.
+<P>
+Languages (like C++) allow that different definitions of an
+identifier may be inherited on different inheritance paths
+to a range. But in that case such an identifier may not be applied
+in that range.
+This restriction is checked by the roles <CODE>ChkInhIdUse</CODE> and
+<CODE>ChkInhIdUseScopeProp</CODE>. They have to be associated to
+applied identifier symbols which are bound in the enclosing
+environment or in the scope obtained from a property,
+respectively:
+<PRE>
+   SYMBOL UseIdent INHERITS ChkInhIdUse END;
+   SYMBOL QualIdent INHERITS ChkInhIdUseScopeProp END;
+</PRE>
+<P>
+The error messages can be changed globally by symbol computations
+overriding the computations of the <CODE>...Msg</CODE> attributes:
+<PRE>
+   SYMBOL UseIdent COMPUTE
+     SYNT.MulMsg=IF(THIS.MulErr,message (ERROR,
+      CatStrInd("Ambiguous symbol: ", IdnOf(THIS.|KEY|Bind)),
+      0, COORDREF));
+   END;
+</PRE>
+<P>
+The above specification also fits to the specification
+for identifiers that are qualified by a module name given in 
+(see  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>).
+If in a construct <CODE>c::x</CODE> <CODE>c</CODE> is a class, then
+<CODE>x</CODE> is bound to a component defined in <CODE>c</CODE> or in a
+class inherited by <CODE>c</CODE>. This is the concept of the
+scope operator in C++.
+<P>
+These examples are applied in the same way for Algol-like and for
+C-like scope rules. The differences for bottom-up computation
+are explained in the description of the <CODE>BuInh</CODE> module.
+<P>
+<A NAME="IDX187"></A>
+<A NAME="IDX186"></A>
+<H2><A NAME="SEC16" HREF="name_toc.html#SEC16">Inheritance with Algol-like Scope Rules</A></H2>
+<P>
+This module implements consistent renaming of identifiers
+according to inheritance relations. It assumes that the scope rules
+do not restrict defining and applied occurrences of identifiers
+by a certain order in the program text, as the C-like scope rules do.
+The module computation in particular fit to Algol-like scope rules
+as described in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/AlgInh.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<P>
+Using this module requires that the modules <CODE>AlgScope</CODE> 
+and <CODE>ScopeProp</CODE> are instantiated   
+with the same values of the generic parameters.
+<A NAME="IDX188"></A>
+<A NAME="IDX189"></A>
+<A NAME="IDX190"></A>
+<A NAME="IDX191"></A>
+<A NAME="IDX192"></A>
+<A NAME="IDX193"></A>
+<A NAME="IDX194"></A>
+<P>
+The module provides <CODE>.lido</CODE> specifications for the 
+computational roles <CODE>NAMEInhRange</CODE>, <CODE>NAMEExportInhRange</CODE>,
+<CODE>NAMEInheritScope</CODE>, <CODE>NAMEChkInherit</CODE>,
+<CODE>NAMEChkInhIdUse</CODE> and <CODE>NAMEChkInhIdUseScopeProp</CODE>
+as described in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>.
+<P>
+The dependence pattern used in the computations of this module, as
+described below, imposes a restriction on the use of the role 
+<CODE>NAMEInheritScope</CODE>, that determines an inheritance:
+In case that the inheritance is established for a <CODE>NAMEExportInhRange</CODE>,
+the corresponding
+<CODE>NAMEInheritScope</CODE> may not depend on a qualified name that is bound using 
+the role <CODE>NAMEQualIdUse</CODE>, because the computations then may cause cyclic 
+dependences.
+<A NAME="IDX195"></A>
+<A NAME="IDX196"></A>
+<A NAME="IDX197"></A>
+<A NAME="IDX198"></A>
+<A NAME="IDX199"></A>
+<P>
+Computations of the module provide attributes <CODE>NAMEAnyScope.NAMEGotVisibleKeys</CODE>.
+They describe that for all <CODE>NAMEExportRange</CODE>s visible from this range
+its keys have been bound, the scope property has been set, and its
+inheritance relation has been established (if any).
+Module computations use these attributes as precondition for the lookup
+of unqualified names.
+Computations of the module also provide attributes 
+<CODE>NAMEAnyScope.NAMEGotVisibleKeysNest</CODE>. They specify that the state described 
+above additionally holds for the visible and their recursively, directly
+nested <CODE>NAMEExportRange</CODE>s. 
+Module computations use these attributes as precondition for the lookup
+of qualified names.
+Usually these attributes and their dependence patterns need not be considered
+by user specifications. Only is cases where unconventional language rules
+for the export or the inheritance of bindings cause conflicts with
+these dependence patterns the computations of these attributes may be considered
+for being overridden.
+<P>
+<A NAME="IDX201"></A>
+<A NAME="IDX200"></A>
+<H2><A NAME="SEC17" HREF="name_toc.html#SEC17">Inheritance with C-like Scope Rules</A></H2>
+<P>
+This module implements consistent renaming of identifiers
+according to inheritance relations 
+as described in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>.
+However, the module computations establish bindings, lookup names,
+associate scope properties, establish inheritance relations, and
+lookup qualified names in left-to-right depth-first order. 
+It imposes the strong requirement that a
+qualified name, for example the <CODE>f</CODE> in <CODE>m.f</CODE>,
+may not precede its definition.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/CInh.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<P>
+Using this module requires that the modules <CODE>CScope</CODE> 
+and <CODE>CScopeProp</CODE> are instantiated   
+with the same values of the generic parameters.
+<P>
+The use of this module enforces the requirement that
+for any kind of identifier occurrence strictly hold that
+the definition precedes its uses.
+<A NAME="IDX202"></A>
+<A NAME="IDX203"></A>
+<A NAME="IDX204"></A>
+<A NAME="IDX205"></A>
+<A NAME="IDX206"></A>
+<A NAME="IDX207"></A>
+<A NAME="IDX208"></A>
+<P>
+The module provides <CODE>.lido</CODE> specifications for the 
+computational roles <CODE>NAMEInhRange</CODE>, <CODE>NAMEExportInhRange</CODE>,
+<CODE>NAMEInheritScope</CODE>, <CODE>NAMEChkInherit</CODE>,
+<CODE>NAMEChkInhIdUse</CODE> and <CODE>NAMEChkInhIdUseScopeProp</CODE>
+as described in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>.
+<P>
+This module uses a strict left-to-right depth-first dependence
+pattern for all its attribute computations.
+<A NAME="IDX210"></A>
+<A NAME="IDX209"></A>
+The attribute <CODE>NAMERootScope.NAMEGotInhScopes</CODE> states that
+all inheritance relations are established for the whole tree.
+<P>
+<A NAME="IDX212"></A>
+<A NAME="IDX213"></A>
+<A NAME="IDX211"></A>
+<H2><A NAME="SEC18" HREF="name_toc.html#SEC18">C-like Inheritance Bottom-Up</A></H2>
+<P>
+This module implements consistent renaming of identifiers
+according to inheritance relations based on C-like scope rules.
+The computations can be executed while input is read.
+<P>
+The module is instantiated by
+<PRE>
+   $/Name/BuInh.gnrc+instance=NAME +referto=KEY :inst
+</PRE>
+<P>
+Using this module requires that the modules <CODE>BuScope</CODE> 
+and <CODE>BuScopeProp</CODE> are instantiated   
+with the same values of the generic parameters.
+<P>
+The use of this module enforces the requirement that
+for any kind of identifier occurrence strictly hold that
+the definition precedes its uses.
+<A NAME="IDX214"></A>
+<A NAME="IDX215"></A>
+<A NAME="IDX216"></A>
+<A NAME="IDX217"></A>
+<A NAME="IDX218"></A>
+<P>
+The module provides <CODE>.lido</CODE> specifications for the
+computational roles 
+<CODE>NAMEInheritScope</CODE>, <CODE>NAMEChkInherit</CODE>
+<CODE>NAMEChkInhIdUse</CODE> and <CODE>NAMEChkInhIdUseScopeProp</CODE>
+as described in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>.
+No additional range role (as <CODE>NAMEInhRange</CODE> or <CODE>NAMEExportInhRange</CODE>)
+is provided by this module.
+The role <CODE>NAMERangeScope</CODE> of the basic scope rule module
+is to be used for ranges that are affected by inheritance, too.
+<A NAME="IDX219"></A>
+<A NAME="IDX220"></A>
+<A NAME="IDX221"></A>
+<A NAME="IDX222"></A>
+<A NAME="IDX223"></A>
+<A NAME="IDX224"></A>
+<P>
+The role <CODE>NAMEInheritScope</CODE> differs from the description
+in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A>:
+<P>
+The target scope for the inheritance relation is assumed to be
+computed by the role 
+<BR> <CODE>NAMECreateNewScope</CODE> in this context
+or in a preceding context. It is passed via a variable.
+If <CODE>NAMECreateNewScope</CODE> and <CODE>NAMEInheritScope</CODE>
+are used in the same context, a computation
+<CODE>SYNT.NAMEInhPrecond = THIS.NAMENewScope;</CODE> has to be
+added, in order to guarantee proper use of the variable.
+<P>
+A lower computation of <CODE>SYNT.NAMEOuterScope</CODE> is
+required for this context.
+<P>
+The examples given in See  <A HREF="name_6.html#SEC15">Inheritance of Scopes</A> are modified
+here to allow for bottom-up computation using this module.
+<P>
+We demonstrate the use of single inheritance by extending our 
+running example by a <CODE>with</CODE> statement for modules
+(see  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>).
+<P>
+<PRE>
+   Statement:    'with' WithUseIdent 'do' WithBody.
+   WithBody:     Statement.
+</PRE>
+<P>
+The identifier should be bound to a module. The <CODE>WithBody</CODE>
+inherits the module's scope. I.e. the definitions of the module
+body are valid in the <CODE>WithBody</CODE>. They may be hidden by definitions
+in ranges contained in the <CODE>WithBody</CODE>. They may hide definitions
+in ranges enclosing the <CODE>with</CODE> statement.
+<CODE>WithBody</CODE> plays the role of a <CODE>RangeScope</CODE>.
+In the preceding <CODE>WithUseIdent</CODE> context the scope is
+created and determined to be target of an inheritance relation.
+The scope property of the module key is stated to be
+the outer scope of the inheritance relation.
+<P>
+<PRE>
+   RULE: Statement ::= 'with' WithUseIdent 'do' WithBody END;
+
+   SYMBOL WithBody INHERITS RangeScope END;
+
+   SYMBOL WithUseIdent INHERITS
+          GetScopeProp, CreateNewScope, InheritScope, 
+          OpenNewScope, IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.ScopeKey = SYNT.Key;
+     SYNT.OuterScope = SYNT.ScopeProp;
+     SYNT.OpenPrecond = SYNT.Key;
+   END;
+</PRE>
+<P>
+Similarly we can extend the language of our running example by
+classes with multiple inheritance:
+<P>
+The scope of the class body is created in the context
+<CODE>ClassDefIdent</CODE>, associated a property of the class identifier,
+and used as a target for the inheritance relations established
+in all <CODE>Inheritances</CODE>.
+The roles <CODE>RecentNewScope</CODE> and <CODE>OpenNewScope</CODE> in the
+newly introduced context <CODE>BuClass</CODE> access and open
+that scope.
+<A NAME="IDX225"></A>
+<P>
+<PRE>
+   RULE: Declaration ::= 'class' ClassDefIdent Inheritances 
+                                 BuClass ClassBlock ';'
+   END;
+
+   SYMBOL ClassDefIdent INHERITS
+          CreateNewScope, IdSetScopeProp, IdDefScope, IdentOcc
+   END;
+
+   SYMBOL BuClass INHERITS RecentNewScope, OpenNewScope END;
+</PRE>
+<P>
+In the <CODE>InheritIdent</CODE> contexts the scope property of
+the identifier is accessed and determined to be the outer
+scope to be inherited to the previously created scope.
+<P>
+<PRE>
+   SYMBOL InheritIdent INHERITS
+          GetScopeProp, InheritScope, 
+          IdUseEnv, ChkIdUse, IdentOcc
+   COMPUTE
+     SYNT.ScopeKey = SYNT.Key;
+     SYNT.OuterScope = SYNT.ScopeProp;
+
+     IF (AND (NOT (THIS.InheritOk), NE (THIS.Key, NoKey)),
+     message (FATAL, CatStrInd ("cyclic inheritance: ", THIS.Sym),
+              0, COORDREF))
+     BOTTOMUP;
+   END;
+</PRE>
+<P>
+The above specification also fits to the specification
+for identifiers that are qualified by a module name given in 
+(see  <A HREF="name_5.html#SEC11">Scopes Being Properties of Objects</A>).
+If in a construct <CODE>c::x</CODE> <CODE>c</CODE> is a class, then
+<CODE>x</CODE> is bound to a component defined in <CODE>c</CODE> or in a
+class inherited by <CODE>c</CODE>. This is the concept of the
+scope operator in C++.
+<P>
+<A NAME="IDX227"></A>
+<A NAME="IDX226"></A>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="name_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

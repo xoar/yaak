@@ -1,0 +1,46 @@
+# $Id: Makefile.in,v 1.12 2010/07/26 09:00:38 profw Exp $
+# Copyright 1995, The Regents of the University of Colorado
+
+# Makefile for Eli Info system
+
+CC	= @CC@
+
+NOTEX   = true
+
+DIR	= pkg/info
+SRC	= info.dg help_header help_trailer search.c
+AUX	= info.sh.cpp Makefile Makefile.in version
+CMD	= all_info.sh help.sh hypertext.sh info_data.sh makeinfo.sh \
+	  std_err.sh tex.sh tex_input.sh info.sh index.sh tnfauxin.sh \
+	  doc.sh
+EXE	= hypermsg.exe search.exe
+GEN	= man
+GENINS	= manuals
+SRCDIR	= texinfo tnf examples html
+AUXDIR	= hypermsg
+PREDIR	= html
+
+@toolmk_h@
+
+hypermsg.exe:	hypermsg/hypermsg.exe
+	@rm -f $@
+	@LINK@ $? $@
+	
+search.exe:	search.c
+	$(CC) $(CFLAGS) -o search.exe $?
+
+man:	manuals
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE \
+		'tnf%hypertext >manuals; tnf%index >manuals/gindex'
+
+manuals:
+	-mkdir manuals
+
+predist: docs
+
+docs:
+	@rm -f $(ELIDOC)/*.pdf $(ELIDOC)/*.html
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE 'tnf%pdf >$(ELIDOC)'
+	@cd $(ELIDOC); for i in *.tnf.tnfpdf; do mv $$i `basename $$i .tnf.tnfpdf`.pdf; done
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE 'tnf%html >$(ELIDOC)'
+	chmod +w $(ELIDOC)/*.pdf $(ELIDOC)/*.html

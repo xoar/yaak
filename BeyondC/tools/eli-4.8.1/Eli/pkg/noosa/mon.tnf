@@ -1,0 +1,1442 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright (c) 1989, The Regents of the University of Colorado
+@comment Copyright (c) 1994-1999 Anthony M. Sloane
+@comment
+@comment This file is part of the Eli translator construction system.
+@comment 
+@comment Eli is free software; you can redistribute it and/or modify it under
+@comment the terms of the GNU General Public License as published by the Free
+@comment Software Foundation; either version 2, or (at your option) any later
+@comment version.
+@comment 
+@comment Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+@comment WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@comment FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@comment for more details.
+@comment 
+@comment You should have received a copy of the GNU General Public License along
+@comment with Eli; see the file COPYING.  If not, write to the Free Software
+@comment Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+@comment %**start of header
+@setfilename mon
+@settitle Execution Monitoring Reference
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Execution Monitoring Reference}
+@sp 1
+@center $Revision: 1.28 $
+@include mqorg.tnf
+@end titlepage
+
+@iftex
+@catcode`@_=11
+@end iftex
+
+@node top, Using Noosa, (dir), (dir)
+
+@ifinfo
+$Revision: 1.28 $
+@end ifinfo
+
+This manual describes how to use the Noosa
+@findex Noosa
+monitoring system to diagnose problems in Eli-generated programs or
+simply to observe their behaviour.  While this manual provides general
+information about the system and the types of information that can
+be obtained, the reader is directed to the Noosa online help
+@findex online help
+for more specific information on how to operate the user interface.
+(See the Help menus in most windows.)
+
+@menu
+* Using Noosa::                 How to use the monitoring system.
+* Information::                 Finding out about your program's execution.
+* Implementation::              How does it work?
+
+* Index::                       Index to this manual.
+
+ --- The Detailed Node Listing ---
+
+Using Noosa
+
+* Invoking Noosa::              How to start up and exit from the system.
+* Controlling Your Program::    Which program and what arguments?
+* User Initialisation::         Startup files.
+* Editing files::               Changing files from within Noosa.
+* X resources::                 X resources used by Noosa.
+
+Information
+
+* Input Text Display::          How do you see your input text?
+* Messages::                    Monitoring the messages your program generates.
+* String Table::                Watching the use of the string table.
+* Lexical Structure::           Examining the token structure of the input.
+* Phrase Structure::            Looking at the input phrase structure.
+* Trees::                       Browsing your trees, examining attributes.
+
+Generic Information and Control
+
+* Breakpoints::                 Making your program stop in the middle.
+* Frequency Profiles::          Finding out how many times something happens.
+* Time Profiles::               Seeing how long something takes.
+* Tracing Events::              Finding out exactly what happened.
+
+Implementation
+
+* Monitoring Interfaces::       Interfacing the program and Noosa.
+* Implementing Interfaces::     Turning a monitoring interface into code.
+* Database::                    Monitoring database.
+* Monitoring Support::          Adding monitoring support to a component.
+* Supporting Profiling::        Adding profiling support to a component.
+* Dapto Grammar::               The syntax of the Dapto language.
+
+Monitoring Interfaces
+
+* Aspects::                     Modules for monitoring interfaces.
+* Event Types::                 Describing events.
+* Operations::                  Describing operations.
+* Header Files::                Including other interfaces.
+* Non-standard types::          Monitoring non-standard types of values.
+* Browsing non-standard types:: Adding browsing support for non-standard types.
+@end menu
+
+@node Using Noosa, Information, top, top
+@chapter Using Noosa
+
+This chapter describes how to invoke the Noosa system and run your program
+under the control of Noosa.
+
+@menu
+* Invoking Noosa::              How to start up and exit from the system.
+* Controlling Your Program::    Which program and what arguments?
+* User Initialisation::         Startup files.
+* Editing files::               Changing files from within Noosa.
+* X resources::                 X resources used by Noosa.
+@end menu
+
+@node Invoking Noosa, Controlling Your Program, Using Noosa, Using Noosa
+@section Invoking Noosa
+@findex invoking Noosa
+@findex mouse buttons
+
+Noosa is invoked from within Eli using any of the
+@findex @code{mon}
+@code{:mon}, or
+@findex @code{mongdb}
+@code{:mongdb} products in conjunction with the @code{+monitor}
+parameter.  @xref{Monitoring,,,pp,Products and Parameters Reference
+Manual}, for details on how to use these products.  Because Noosa is
+based on an X11 window system toolkit, you must be running an X session
+when Noosa is invoked.
+
+Invoking Noosa will produce a window containing two main areas: an input
+text window and a transcript window.  Noosa has a fairly conventional
+menu-based interface.  See the Help menus in most windows for general
+information about how to use Noosa and to get specific descriptions of
+all menu commands.
+
+@findex exiting Noosa
+@findex quitting Noosa
+The most important menu command to know at this stage is Quit in the
+main Noosa menu since it gets you out of Noosa when your monitoring
+session is over.  You will then be able to resume your interactive Eli
+session.
+
+@node Controlling Your Program, User Initialisation, Invoking Noosa, Using Noosa
+@section Controlling Your Program
+@findex controlling execution
+@findex controlling program
+@findex running program
+@findex program arguments
+@findex arguments
+@findex program options 
+@findex options 
+@findex command-line options
+
+The text entry area just under the menu bar in the main Noosa window
+contains the name of your program and command-line arguments.  Normally
+you shouldn't need to worry about the name of your program.  It will be
+set by Eli and will refer to a file in your Eli cache.
+
+The program arguments will be as specified using the @code{+arg}
+parameter when you invoked Noosa (@pxref{arg,,,pp,Products and
+Parameters Reference Manual}).  If you didn't specify +arg then the
+program will not be given any command-line arguments when run.  The
+arguments can be edited in the text entry; there is no need to exit
+Noosa and re-enter with a new @code{+arg} setting if the argument
+values must be changed.  You can specify as many @code{+arg} parameters
+as you like; their values will all be passed as command-line arguments.
+
+@findex Run command
+@findex Continue command
+@findex Kill command
+Use the Execution menu to control the execution of your program by
+running it (Run command), continuing from a stoppage (Continue) or
+killing the process entirely (Kill).  For convenience the same menu can
+be obtained by pressing the middle button in either the input text
+window or the transcript window.  These commonly used commands are also
+available via the keyboard shortcuts @key{Alt-R}, @key{Alt-C}, and
+@key{Alt-K}, respectively.
+
+@node User Initialisation, Editing files, Controlling Your Program, Using Noosa
+@section User Initialisation
+@findex user initialisation
+@findex initialisation
+@findex @file{.noosarc}
+@findex startup file
+@findex rc file
+@findex customisation
+@findex @code{tcl} files
+
+When Noosa begins execution it loads user initialisation files called
+@file{.noosarc} from the user's home directory and the current
+directory in that order (if they exist).
+
+A @file{.noosarc} can contain arbitrary Tcl/Tk code to initialise the
+Noosa system.  A complete description of the Tcl language and Tk
+toolkit is beyond the scope of this manual.  See the Tcl/Tk online
+manual pages or any of the available books for details.
+
+The @file{.noosarc} interface is presently mostly undocumented.  Future
+versions of this manual will describe in detail how Noosa can be
+configured using a @file{.noosarc} file.
+
+@findex autoloading handlers
+One facility that @emph{is} documented is the ability to use a
+@file{.noosarc} file to autoload event handlers.  The Handlers window
+allows you to save the current state of your handlers in a file.
+Suppose that you save them in @file{myhandlers.hnd}.  That file can
+loaded on startup by placing the following lines in a @file{.noosarc}.
+
+@example
+source myhandlers.hnd
+@end example
+
+Noosa also loads any files of type @code{tcl} that are present in your
+Eli specifications.  You can provide any extra monitoring support you
+need in these files.  @xref{Browsing non-standard types}, for
+information on how to provide Tcl support for browsing your own data
+types.
+
+@node Editing files, X resources, User Initialisation, Using Noosa
+@section Changing files from within Noosa
+
+@findex editing files
+It is often useful to be able to edit files while monitoring your
+program.  For example, you might want to change the test data being
+used, or you might want to fix bugs in your specifications before you
+forget about them.  The Files command in the Windows menu brings up a
+window from which you can open arbitrary files and edit them.  
+
+@findex VerifyLevel
+If you change your specifications while monitoring, Eli will only notice
+the changes if you have the @dfn{VerifyLevel} variable in Eli set to 2.
+(@xref{Variables,,,ui,}, for more information on influencing Eli with
+variables.)
+
+@node X resources,  , Editing files, Using Noosa
+@section X resources used by Noosa
+
+@findex X resources
+@findex window sizes
+@findex fonts
+@findex colours
+
+Noosa is written using the Tk X11 toolkit.  Thus you can set any X11
+resources that Tk supports.  These include settings for the fonts used
+in various types of window, the colours used to highlight various
+regions, and so on.  For complete documentation of the resources that Tk
+supports, see the Tk documentation.
+
+To illustrate the use of Tk resources, suppose that you want to change
+the fonts used for text and entry windows, and alter the colours used for
+the selection (Noosa default: red background and yellow foreground).
+The following settings might be used in your @file{.Xdefaults} file.
+
+@example
+Noosa*Text.font:         -adobe-courier-bold-r-*-*-12-*-*-*-*-*-*-* 
+Noosa*Entry.font:        -adobe-courier-bold-r-*-*-12-*-*-*-*-*-*-*
+Noosa*selectBackground:  blue
+Noosa*selectForeground:  green
+@end example
+
+To make common situations easier, Noosa also supports some specific
+resources.
+
+@ftable @code
+@item Noosa.width
+The width in characters of text windows except file windows (see
+below) (default: 80).
+
+@item Noosa.inputHeight
+@itemx Noosa.transHeight
+The height in lines of the input and transcript windows (default: 15 and 
+15).
+
+@item Noosa.handHeight
+The height in lines of the text part of the handlers window (default:
+20).
+
+@item Noosa.fileWidth
+@itemx Noosa.fileHeight
+The width in characters and the height in lines of the file editing
+windows (defaults: 80 and 30).
+
+@item Noosa.treeWidth
+@itemx Noosa.treeHeight
+The width and height in pixels of the tree windows (see also below)
+(defaults: 400 and 300).
+
+@item Noosa.valueColour
+The colour used to highlight values in the transcript window that can be 
+opened (default: blue).
+
+@item Noosa.nodeColour
+The colour used to highlight nodes in the abstract tree displays
+(default: red).
+
+@item Noosa.treeFont
+@itemx Noosa.treeFontSize
+The font used to describe the tree nodes (default: TkFixedFont, 10).
+@end ftable
+
+Note that in each case the width and height of a window is the actual
+display area of the window, not including any borders.
+
+Noosa also allows fine-grained control over the sizes of the various
+tree displays.  The following resources control the sizes of the four
+different types of tree display.  If these resources are not set, the
+values of @code{Noosa.treeWidth} and @code{Noosa.treeHeight} are used.
+
+@findex Noosa.treeFullWidth
+@code{treeFullWidth},
+@findex Noosa.treeFullHeight
+@code{treeFullHeight},
+@findex Noosa.treeSrcWidth
+@code{treeSrcWidth},
+@findex Noosa.treeSrcHeight
+@code{treeSrcHeight},
+@findex Noosa.treeCompWidth
+@code{treeCompWidth},
+@findex Noosa.treeCompHeight
+@code{treeCompHeight},
+@findex Noosa.treeIncrWidth
+@code{treeIncrWidth},
+and
+@findex Noosa.treeIncrHeight
+@code{treeIncrHeight}.
+
+@node Information, Implementation, Using Noosa, top
+@chapter Information
+
+This chapter briefly describes the type of information that Noosa
+can provide about the execution of your program and how to go 
+about getting it.
+
+@menu
+* Input Text Display::          How do you see your input text?
+* Messages::                    Monitoring the messages your program generates.
+* String Table::                Watching the use of the string table.
+* Lexical Structure::           Examining the token structure of the input.
+* Phrase Structure::            Looking at the input phrase structure.
+* Trees::                       Browsing your trees, examining attributes.
+
+Generic Information and Control
+
+* Breakpoints::                 Making your program stop in the middle.
+* Frequency Profiles::          Finding out how many times something happens.
+* Time Profiles::               Seeing how long something takes.
+* Tracing Events::              Finding out exactly what happened.
+@end menu
+
+@node Input Text Display, Messages, Information, Information
+@section Input Text Display  
+@findex input text display
+@findex source text display
+
+Usually the initial input to an Eli-generated program is specified on
+the command-line of the processor (@pxref{,,,clp,Command Line
+Processing}) and subsequent input (if any) is given by the input text
+itself (perhaps via @code{include} directives or similar mechanisms).
+
+Noosa displays the input text as seen by your program in the top part
+of the main window.
+@findex standard input
+(The current Noosa system does not fully support the monitoring of
+programs when their input is standard input.)
+The input text is shown @emph{exactly} as your program sees it.  In
+particular, it appears as one contiguous piece of text rather than
+(say) a set of files included into other files.  Note also that when the
+program stops, the input text displayed is the text that has been seen
+by the program at that point.  Text encountered later on (perhaps by
+later @code{include} directives) will be displayed when it is
+encountered.
+
+In various settings Noosa will display input text coordinates (e.g.,
+when you ask to see the lexical tokens recognised).  There are two
+formats used to display coordinates:
+
+@example
+12,3
+9,1-12,80
+@end example
+@noindent
+The first form indicates a single coordinate (column three of line
+twelve); the second indicates a range of coordinates (column one of line
+nine through to column eighty of line twelve, inclusive).
+
+In the transcript window coordinates or coordinate ranges will be
+underlined.  Clicking the left mouse button on a displayed coordinate
+(or range) causes Noosa to highlight the coordinate (or range) in the
+input text.  This enables you to conveniently match Noosa output to
+input text.
+
+@findex DescribeCoord command
+@findex cumulative coordinates
+As mentioned above, the input to your program may come from more than
+one text file.  The coordinates used by Noosa are @emph{cumulative} in
+that they reflect the overall input text, not the individual text files.
+To find out from which file a location comes, select the location in the
+input text window and execute the Describe coord command from the
+Examine menu (also available on the right button in the main windows).
+
+@node Messages, String Table, Input Text Display, Information
+@section Messages
+@findex messages
+@findex error messages
+
+Eli-generated programs take text as input, analyse that text, and
+perhaps produce some text as output.  During analysis, messages may be
+produced for a variety of reasons.  Eli provides a module to help
+generate messages (@pxref{Error,,,lib, Library Reference Manual}).
+
+If your program generates any messages they will be displayed in the
+transcript window.
+The coordinate of the message will be shown with the severity and
+the message text.
+
+@node String Table, Lexical Structure, Messages, Information
+@section String Table
+@findex string table
+@findex String command
+@findex Strings command
+
+Most Eli-generated programs need to manipulate text strings.  To avoid
+the overhead of copying strings around during execution, a string table
+can be used.  Eli has a module that implements a string table allowing
+integers to be used to represent strings (@pxref{Storage,,,lib,Library
+Reference Manual}).
+
+Noosa allows you to see the contents of the string table using the
+Strings command from the Examine menu.  Each string in the table will be
+displayed with its index.  The String command can be used to display a
+single particular string.  Select the numeric string index with the
+mouse then execute String.  This mode of use is particularly useful if
+the string index has already been displayed by Noosa in some other
+setting (e.g., as the intrinsic attribute of a token).
+
+@node Lexical Structure, Phrase Structure, String Table, Information
+@section Lexical Structure
+@findex lexical structure
+@findex lexical analysis
+@findex Token command
+
+Eli-generated programs that perform lexical analysis can do so using the
+support of an automatically-generated lexical analyser
+(@pxref{,,,lex,Lexical Analysis}).  Noosa lets you examine the behaviour
+of the generated analyser on your program's input text.
+
+Your program will generate a stream of tokens.  Selecting an input text
+coordinate (or range of coordinates) in the input text window and
+executing the Token command from the Examine menu will cause Noosa to
+display the tokens recognised that overlap that coordinate (or range).
+
+The following information is displayed for each token: input text
+coordinate range, numeric token code used internally by the analyser,
+length in characters, the intrinsic attribute value of the token, the
+input text (lexeme) matched by the token, and, for non-literal tokens,
+the name of the non-literal as specified in your type-@file{gla}
+specifications (@pxref{Specifications,,,lex,Lexical Analysis}).
+
+@node Phrase Structure, Trees, Lexical Structure, Information
+@section Phrase Structure
+@findex parsing
+@findex phrase structure
+@findex Phrase command
+
+Programs that need to determine the phrase structure of their input can
+do so within Eli using automatically-generated parsers
+(@pxref{,,,syntax,Syntactic Analysis}).
+
+The Noosa Phrase command (in the Examine menu) lets you look at the
+phrase structure that is recognised by your parser.  Selecting an input
+text coordinate in the input text window and executing Phrase will
+produce a list of all the production instances recognised by your
+program that overlap the selected coordinate.
+
+The instances are listed from most general to most specific, so the
+first one is always the root production of the grammar.  Each production
+instance is displayed with the input text coordinate range for that
+instance.  On the right-hand side of each production the symbol
+corresponding to the left-hand side of the following production is
+highlighted.  (Note that in some cases chain production elimination is
+performed by Eli-generated parsers.  This may mean that the highlighted
+symbol on the right-hand side of a production instance is not the same
+symbol as the left-hand side of the next production instance.)
+
+@findex parser generators
+Examination of the phrase structure with Noosa will work if you are
+using either the
+@findex PGS parser generating system
+PGS or
+@findex COLA parser generating system
+COLA parser generating systems available within Eli
+(@pxref{parser,,,pp,Products and Parameters Reference Manual}).
+
+@node Trees, Breakpoints, Phrase Structure, Information
+@section Trees and Attribute Values
+@findex browsing the abstract tree
+@findex Trees menu
+
+If your processor contains attribution, Eli will automatically construct
+an abstract tree for the input text.  Noosa has facilities for examining
+this tree and any other trees computed by your processor. 
+
+Tree display can be enabled using the Trees item in the Windows menu.
+Windows containing the selected trees will appear next time the program
+is run.  There are four options in the Trees menu: Just Source, Separate
+Computed, Source and Computed, and Incremental.  Any combination of
+these options can be used.
+
+The first three options draw trees in a traditional tree manner with the
+root at the top and children under their parents. The Incremental option
+draws the root at the left and children to the right of their parents.
+The former style always uses a nice layout but always draws the whole
+the tree (but see below); the latter initially just draws the root of
+the tree but allows nodes to be selectively expanded (see the online
+help for details).
+
+The Just Source option causes the source tree built by your processor's
+parser to be displayed.  The Separate Computed option will cause each
+computed tree to be displayed in a separate window as soon as they are
+complete.  This option is most suitable if you have a few largish
+computed trees.  The Source and Computed option shows the entire tree
+(including computed trees joined at the appropriate places) so it is
+more suitable if you have many smaller computed trees.  Finally, the
+Incremental display allows access to the entire tree that has been
+computed so far.  
+
+The tree displays can be saved as Postscript via the Tree menu.  You can
+elect to save just the visible portion of the tree or the whole tree.
+
+@findex examining attributes
+@findex attribute values
+
+In any of the tree displays it is possible to select nodes with the left
+button.  The abstract grammar production derived at that node will be
+displayed in the transcript window and the input text extent of the node
+will be highlighted in the input text window.
+
+Also, the right button can be used on a symbol (rule name) to display a
+menu listing the attributes (attributes and terminal values) of that
+occurrence of the symbol (rule).  Each attribute or terminal has a pull
+right menu with which you can indicate whether you want to see its value
+(with optional stopping of execution) or ignore it (the default).  Using
+this facility you can check that your attribution is working correctly.
+Note that values will only be displayed when they are next calculated,
+so you will need to run the program again after selecting some values
+for display.
+
+@findex browsing attribute values
+
+Note: The current version of Noosa is not able to deal properly with
+chain
+@findex chain attributes
+@findex browsing chain values
+attributes.  Chain attributes will show up in the attribute menu as a
+pair of regular attributes with @code{_pre} and @code{_post} appended to
+the attribute name.  It is possible to select these attributes for
+display.  However, in the current system, not all will be displayed
+because of limitations in the generated processor code.
+
+Noosa has a simple mechanism for displaying the values of attributes in
+the transcript window.  Values are displayed preceded by their type
+name.  If a value can be browsed (or ``opened'') it will be underlined
+and browsing is performed by clicking on the value with the left button.
+
+Eli currently has support to allow the following types of value to be
+browsed.
+
+@ftable @asis
+@item Tree nodes (Node, NODEPTR)
+Clicking on a tree node value causes your abstract tree display(s) (if
+any) to highlight that node.  A NODEPTR value is a run-time pointer to a
+tree node.  Clicking on one of these values will select the
+corresponding node in a tree display if it is there.
+
+@item PTG nodes (PTGNode)
+Opening a PTG node causes the system to run the function
+@code{PTGOutFile} on the node and display the resulting output in the
+transcript window.  Note that due to side-effects in PTG functions or
+redirected output, the text displayed may not be same as the text
+finally output by your processor.
+
+@item Environments (Environment)
+Opening an environment produces in the transcript a list of the name-key
+pairs in that environment.  If the environment is nested within another
+environment then the parent environment is printed so that it can be
+browsed as well.
+
+@item Bindings (Binding)
+Opening a binding will produce the identifier that is bound (@code{IdnOf}),
+the key to which it has been bound (@code{KeyOf}),
+and the environment containing the binding (@code{EnvOf}).
+
+@item Definition table keys (DefTableKey)
+Opening a definition table key will produce a list of the current
+properties of that key and the values of those properties.
+
+@item OIL types and typesets (tOilType, tOilTypeSet)
+These types are used for operator identification.  Opening an OIL
+type shows the type name (a definition table key).  Opening an OIL
+typeset shows the elements of the set and their associated costs.
+
+@item Tree parser nodes (TPNode)
+Opening a tree parser node will produce the node name and a list of its
+children.
+@end ftable
+
+@node Breakpoints, Frequency Profiles, Trees, Information
+@section Breakpoints and events
+@findex breakpoints
+@findex stopping execution
+@findex Handlers command
+@findex event handlers
+
+Noosa follows the progress of your program using
+@findex event
+@dfn{events}.  When a significant thing happens during execution the
+program will generate an event to signal that fact to the monitoring
+system.  Event instances have
+@findex parameters
+@findex event parameters
+@dfn{parameters} which allow them to provide arbitrary information to
+the monitoring system.
+
+Breakpoints in the Noosa system are conceptually similar to breakpoints
+in source-level debuggers, but operate at the level of events rather
+than source code locations, functions or variables.
+They are implemented by attaching handlers to event types.
+
+The Handlers command in the Windows menu creates a dialog window through
+which you can enter handlers for the different types of events that your
+program may produce during execution.  A list of relevant event types is
+displayed and handlers can be entered, edited, deleted etc.  (See the
+Help menu in the Handlers dialog for more information.)
+@findex saving handlers
+@findex autoloading handlers
+Handlers can also be saved to files and autoloaded, see @xref{User
+Initialisation}.
+
+Handlers are expressed using the
+@findex tool command language
+@findex TCL 
+Tool Command Language (Tcl).  (A complete description of TCL is beyond
+the scope of this manual.  See the Tcl online manual pages or any book
+on Tcl/Tk for details.)  Handlers can contain arbitrary Tcl code and may
+refer to the event parameters as Tcl variables.  To cause execution to
+stop as the result of handler execution, have the handler call the Tcl
+@code{n_break} command.
+
+For example, the following handler causes execution to stop if the
+string @code{printf} is stored into the string table.
+This handler would be attached to the @code{string_stored} event.
+
+@example
+if @{$string == "printf"@} @{
+    n_break
+@}
+@end example
+
+@findex @code{n_send} to invoke operations
+@findex @code{n_say} in handlers
+There is no requirement that a handler actually cause execution to stop.
+It may just display information and allow execution to continue.  Within
+a handler, the builtin Noosa command @code{n_say} may be used to display
+information in the Noosa transcript window.  
+
+For example, the following handler causes the lexeme of every token on
+line three of the input to be displayed.  This handler would be attached
+to the @code{token} event type thereby making the @code{linebeg} and
+@code{lexeme} parameters available.
+
+@example
+if @{$linebeg == 3@} @{
+    n_say "lexeme is $lexeme\n"
+@}
+@end example
+
+All Eli-generated programs prepared for monitoring automatically
+generate a single event instance of type
+@findex init event type
+@findex initialisation
+@code{init} at the beginning of execution, and one of type 
+@findex finit
+@findex finalisation
+@code{finit} at the end of execution.
+This can be useful if you want to collect some information using handlers
+during execution and display a summary at the end using a handler on
+the @code{finit} event type.
+
+@node Frequency Profiles, Time Profiles, Breakpoints, Information
+@section Frequency Profiles
+@findex frequency profile
+@findex event counting
+@findex Freq command
+@findex FreqZero command
+
+Frequency profiles provide information about the frequency of
+events generated by your program.  When execution stops, a summary of
+events generated up to that point will be produced.  The summary
+contains the name of each event type generated and the count of the
+number of times events of that type were generated by a particular
+component of the program.
+
+Frequency profiles are enabled and disabled by the Frequency profile
+checkbutton in the Profile menu.  By default they are disabled.  The
+Zero frequencies command can be used to set all of the frequencies to
+zero.  This can be useful if you only want to collect frequencies from a
+particular point during the execution.
+
+@node Time Profiles, Tracing Events, Frequency Profiles, Information
+@section Time Profiles
+@findex time profile
+@findex timing
+@findex reset times
+
+Time profiles provide information about the CPU time spent in
+components of your program.  For each component the CPU time in seconds
+is given with the percentage of total CPU time due to that component.
+
+Time profiles are enabled and disabled by the Time profile command in
+the Profile menu.  By default they are disabled.  The Reset times
+command can be used to set all of the times to zero.
+
+Time profiles are obtained by generating an
+@findex enter event
+@code{enter} event each time execution enters the code for a component,
+and a
+@findex leave event
+@code{leave} event when execution leaves again.  Consequently, time is
+only allocated to components which have appropriate monitoring support.
+Currently, the main components within Eli have this support, but not all
+components do.  Also, due to the short running time of most
+Eli-generated programs on test input, the times reported in a time
+profile are likely to vary considerably from run to run due to the
+granularity of the timing mechanisms.  Consequently, time profiles
+should only be relied on when using large inputs or running time is
+larger for some other reason.
+
+@node Tracing Events,  , Time Profiles, Information
+@section Tracing Events
+@findex tracing events
+
+Sometimes it is useful to see the event stream generated by your
+program.  The Event trace command in the Profile menu provides this
+capability.  When tracing is enabled Noosa will display the event type
+and parameters of every event generated by the program until it stops.
+
+The Set event filter command allows subsets of events to be selected
+using a regular expression.  A dialog box allows you to set a new
+expression or clear an old one.  Executing the Set event filter command
+will cause subsequent tracing to display an event only if the event
+information matches the regular expression.  The default regular
+expression is @code{.*} meaning all events are displayed.
+
+@node Implementation, Index, Information, top
+@chapter Implementation
+
+This chapter describes some of the implementation of Noosa in detail.
+Eli users who just want to perform monitoring with existing monitors do
+@emph{not} need to read this chapter.  It is intended for Eli
+developers or advanced users who want to extend the capabilities of
+Noosa.
+
+@menu
+* Monitoring Interfaces::       Interfacing the program and Noosa.
+* Implementing Interfaces::     Turning a monitoring interface into code.
+* Database::                    Monitoring database.
+* Monitoring Support::          Adding monitoring support to a component.
+* Supporting Profiling::        Adding profiling support to a component.
+* Dapto Grammar::               The syntax of the Dapto language.
+@end menu
+
+@node Monitoring Interfaces, Implementing Interfaces, Implementation, Implementation
+@section Monitoring Interfaces
+@findex monitoring interface
+
+Noosa needs to obtain information from the running program.  It uses the
+program's @dfn{monitoring interface} to do it.  A program's monitoring
+interface is the union of all of the monitoring interfaces of the
+components making up that program.  The contents of the monitoring
+interface for a component depend on the nature of the component and the
+information that it wants to make available to the monitoring system.
+
+Monitoring interfaces are described by type-@file{dapto} files.
+(@xref{Dapto Grammar}, for the syntax of the Dapto language.)  Dapto
+files contain the information described in the following.  Examples are
+taken from the monitoring interface for the string table module in Eli
+(see the file @file{pkg/Adt/csm.dapto} in the Eli distribution).
+
+In the following discussion, two pre-defined data types: @code{int} and
+@code{str} are used.  These correspond to the C data types @code{int}
+and @code{char *}, respectively.
+
+@menu
+* Aspects::                     Modules for monitoring interfaces.
+* Event Types::                 Describing events.
+* Operations::                  Describing operations.
+* Header Files::                Including other interfaces.
+* Non-standard types::          Monitoring non-standard types of values.
+* Browsing non-standard types:: Adding browsing support for non-standard types.
+@end menu
+
+@node Aspects, Event Types, Monitoring Interfaces, Monitoring Interfaces
+@subsection Aspects
+
+All elements of a monitoring interface are grouped together into
+@findex aspect
+@dfn{aspects} (similar to a module).  The names of aspects are used to
+enable the monitoring system to decide what components are present in
+the program.  Some monitoring commands are only applicable to programs
+which provide the aspects on which the monitor depends.
+For example, the Phrase command can only be used on programs that
+contain parsers.
+@xref{Database}, for more details on this mechanism.
+
+An aspect syntactically encloses the interface elements which it
+contains.
+
+@example
+aspect string;
+    @emph{Interface elements of the string aspect}
+end;
+@end example
+
+@node Event Types, Operations, Aspects, Monitoring Interfaces
+@subsection Event Types
+@findex event type
+@findex event
+
+Event types are described in a monitoring interface by giving their
+names plus the names and types of their parameters.  We also enforce the
+inclusion of documentation strings for each of these entities to enable
+the user interface to provide readable descriptions of events where
+necessary.
+
+The string table monitoring interface contains one event,
+@code{string_stored}, which is generated whenever a string is inserted
+into the table.  Consequently we have the following event description in
+the monitoring interface:
+
+@example
+event string_stored* "Storage of a new string in the string table"
+    (int index "Index of new string", str string "New string");
+@end example
+
+Normally event types are assumed to be hidden from the user.  If you
+want the events of a particular type to be visible to the user through
+the Handlers window, it is necessary to append a @code{*} to the name of
+the type, as is done in the example above.
+
+@node Operations, Header Files, Event Types, Monitoring Interfaces
+@subsection Operations
+@findex operation
+
+Operation signatures are described in the monitoring interface by giving
+the name of the operation, its parameters (if any), its return type (if
+any), along with documentation strings.  Currently the return type of
+an operation must be @code{str} or there must be no return type.
+
+Here is the signature for the string table @code{get_string} and
+@code{set_string} operations:
+
+@example
+operation get_string "Look up a string given its index"
+    (int index "Index of the string to be looked up") : str
+
+operation set_string "Change the value of a stored string"
+    (int index "Index of string to be changed",
+     str value "New value for string")
+@end example
+
+Operation implementations are given in C following the operation
+signature.  Any legal C code can be used in an operation definition,
+except that C
+@findex @code{return} statements
+@findex C @code{return} statements
+@code{return} statements should not be used and to return values from an
+operation you must use the following macros:
+
+@table @code
+@findex @code{DAPTO_RESULT_STR}
+@item DAPTO_RESULT_STR(char *s)
+Append the string s to the result to be returned by this operation.
+@findex @code{DAPTO_RESULT_INT}
+@item DAPTO_RESULT_INT(int i)
+Append the integer i as a string to the result to be returned by this
+operation.
+@findex @code{DAPTO_RESULT_LONG}
+@item DAPTO_RESULT_LONG(long l)
+Append the long integer l as a string to the result to be returned by this
+operation.
+@findex @code{DAPTO_RESULT_PTR}
+@item DAPTO_RESULT_PTR(void *v)
+Append the arbitrary pointer v to the result to be returned by this
+operation.
+The value will be passed as a long integer and won't be interpreted by Noosa.
+To be useful, this value must later be passed back to another part of the
+monitoring interface where it can be used as a pointer again.
+@findex @code{return}
+@item DAPTO_RETURN
+Return the current result as the value of this operation.
+@end table
+@noindent
+Use of the @code{DAPTO_RESULT} macros sets up a value that is returned when
+the end of the operation is reached.  To return from the middle of an
+operation use the @code{DAPTO_RETURN} macro with no arguments.
+
+For example, the following is the full definition of the
+@code{get_string} operation:
+
+@example
+operation get_string "Look up a string given its index"
+    (int index "Index of the string to be looked up") : str
+@{ 
+    if ((index < 0) || (index >= numstr)) @{
+        DAPTO_RESULT_STR ("*** Illegal string table index ***");
+    @} else @{
+        char *s = string[index];
+        if (s == (char *) 0) @{
+            DAPTO_RESULT_STR ("*** No string at this index ***");
+        @} else @{
+            DAPTO_RESULT_STR (s);
+        @}
+    @}
+@}
+@end example
+
+The @code{DAPTO_RESULT} macros for integer, long and pointer values
+@findex @code{DAPTO_RESULT_INTVAL}
+@findex @code{DAPTO_RESULT_LONGVAL}
+@findex @code{DAPTO_RESULT_PTRVAL}
+should only be used with arguments whose addresses can be taken.  For
+other values (e.g., return values from function calls or the values of
+expressions) there are analogous macros whose names are formed by
+appending @code{VAL} to the macro name.  For example, the first of the
+following calls will not compile; the second must be used.
+
+@example
+DAPTO_RESULT_INT (i + 1);
+DAPTO_RESULT_INTVAL (i + 1);
+@end example
+
+@noindent 
+The @code{VAL} forms of the macros can always be used, but they incur
+the cost of an extra copy compared to the non-@code{VAL} form.
+
+@node Header Files, Non-standard types, Operations, Monitoring Interfaces
+@subsection Header Files
+@findex header files
+@findex include files
+
+When writing the operation and translation parts of a monitoring
+interface it is often necessary to refer to C entities exported by other
+modules.  To enable the implementation of the monitoring interface to
+access these other interfaces it is necessary to include them in the
+monitoring interface description.  Interfaces are included by simply
+naming the header files which contain them.
+
+The string table monitoring interface uses some standard C library
+functions, C string functions and entities made available by the string
+table module.  Consequently the interface also includes the following
+lines:
+
+@example
+<stdlib.h>
+<string.h>
+"csm.h"
+@end example
+
+@node Non-standard types, Browsing non-standard types, Header Files, Monitoring Interfaces
+@subsection Non-standard types
+@findex monitoring non-standard types
+@findex non-standard types, monitoring
+@findex unknown value
+
+By default, Dapto can handle the built-in types @code{int} and
+@code{str}.  If you want to pass a value of some other type to an
+operation or receive such a value as an event parameter you need to tell
+the system about it.  If you don't do anything then the values will be
+passed as the string "unknown".
+
+Even if you do not add new operations or events involving non-standard
+types you probably want to provide proper monitoring support for them
+anyway.  The reason is that other parts of the system may need to report
+values of these types to Noosa.  Most notably, the attribute evaluator
+generates events whenever attributes are evaluated.  If you want to be
+able to monitor attributes of non-standard types then you must add
+proper monitoring support for these types or the attribute values will
+be reported as "unknown".
+
+The rest of this section explains what you need to do to monitor values
+of a non-standard type.  It talks about the monitoring interface and
+associated support.  The next section describes how you might go about
+displaying values in the Noosa transcript window for user browsing.
+
+The following information is based on the monitoring support for
+environment values in the current Eli system.  The environment module
+has the following monitoring interface containing a couple of events and
+an operation (see the file @file{pkg/Name/envmod.dapto} in the Eli
+distribution).
+
+@example
+aspect envmod;
+
+"envmod.h"
+
+event env_created* "An environment value has been created"
+    (Environment env "The environment that was created",
+     Environment parent "The parent environment (if any)");
+
+event binding_made* "A binding has been made in an environment"
+    (Environment env "The environment in which the binding was made",
+     int idn "The identifier that was bound",
+     DefTableKey key "The key to which the identifier was bound");
+
+operation get_scope_info
+    "Return the parent environment of an environment and its idn-key bindings"
+    (Environment env "The environment to be searched") : str
+@{
+    Scope s;
+
+    DAPTO_RESULT_PTR (env->parent);
+    for (s = env->relate; s != NoScope; s = s->nxt) @{
+        DAPTO_RESULT_INT (s->idn);
+        DAPTO_RESULT_PTR (s->key);
+    @}   
+@}
+ 
+end;
+@end example
+
+As is conventional in a monitoring interface, the events are used to
+notify Noosa of important changes to the environment values as they
+occur.  The operation is used to allow Noosa to get the complete
+contents of an environment.  Providing both events and operations in
+this style is a good idea because the events allow fine-grained control
+via breakpoints and handlers while the operation can be used to
+implement value browsing.
+
+Note that the operation implementation can use any C code it likes to
+determine the appropriate information and return it to Noosa.  In this
+case we use the fields provided by the environment module to return the
+parent environment and all of the integer-key pairs.
+
+Since @code{Environment} and @code{DefTableKey} values are passed as
+event and operation parameters we need to tell Dapto how to pass them.
+In the following we just talk about environment values.  Support for
+definition table keys is similar.
+
+When Dapto generates the event generation code for an event parameter
+of unknown type it attempts to use a macro of the form
+@code{DAPTO_RESULTx} where @emph{x} is the name of the parameter type.
+Thus to get the value passed correctly you need to define this macro.
+Usually the definition is placed in the header file that defines the
+type itself.  E.g., @file{envmod.h} contains the following definition.
+
+@findex @code{DAPTO_RESULT} and non-standard types
+
+@example
+#define DAPTO_RESULTEnvironment(e) DAPTO_RESULT_PTR (e)
+@end example
+@noindent
+which says that an environment value should be sent from the running
+program to Noosa as a pointer (since it is a pointer).
+
+Similarly, to permit values of this type to be sent from Noosa to the
+running program (as operation parameters) you need to define a macro
+whose name is @code{DAPTO_ARGx}.  For example, for environments we
+define the following macro.
+
+@findex @code{DAPTO_ARG} and non-standard types
+
+@example
+#define DAPTO_ARGEnvironment(e)    DAPTO_ARG_PTR (e, Environment)
+@end example
+@noindent
+which says that it should be received as a pointer.  In the definition
+of the macro, the second parameter is the type of the value.  It is used
+to cast the received value to the appropriate type.
+
+@node Browsing non-standard types,  , Non-standard types, Monitoring Interfaces
+@subsection Browsing non-standard types
+@findex non-standard types, browsing support
+@findex browsing non-standard types
+@findex startup file
+@findex @code{tcl} files
+
+Once you have Noosa and the running program correctly passing values of
+a non-standard type back and forth, you usually want to see those values
+in the Noosa transcript.  If the values are structured, you will also
+want to add browsing support for them.
+
+Adding browsing support for a non-standard type involves writing Tcl
+code that will be invoked whenever a value of this type is browsed.  The
+procedure can be automatically loaded into Noosa by placing its
+definition in a startup file (@pxref{User Initialisation}).
+Alternatively, it can be placed in a file of type @code{tcl} and
+included in your specifications.  At startup Noosa will load all files
+of this type.
+
+@findex @code{n_say} in browsing support
+
+The Noosa transcript is a general text display area, so you can use
+@code{n_say} to display whatever you like (it always displays at the
+end).  As a special case if you display something of the form @code{t:v}
+where @emph{t} is the name of a type which has browsing support, then
+the value @emph{v} will also be browsable.  In general it's a good idea
+to arrange for values to be prefixed by their type in this way even if
+no browsing support is currently available.  The type provides a
+valuable clue to the user and if browsing support is added later it will
+available here without you having to do anything.
+
+Here is a slightly simplified version of the Tcl support used by Eli to
+support browsing of environment values.
+
+@example
+set n(Environment,desc) "Identifier scoping environment"
+
+proc n_Environment_say @{env@} @{
+    n_say "Environment:0x[n_dectohex $env]"
+@}
+
+proc n_Environment_open @{text env@} @{
+    n_say "$text"
+    if @{$env == 0@} @{
+        n_say "\n  NoEnv\n"
+    @} else @{
+        set env [n_hextodec $env]
+        set r [n_send get_scope_info $env]
+        if @{[lindex $r 0] != 0@} @{
+            n_say " (parent: "
+            n_Environment_say [lindex $r 0]
+            n_say ")"
+        @}
+        set r [lreplace $r 0 0]
+        n_say "\n"
+        set c 0
+        foreach @{i j@} $r @{
+            n_say "  "
+            n_say_val DefTableKey $j
+            set s [n_send get_string $i]
+            n_say " $s\n"
+            incr c
+        @}
+        if @{$c == 0@} @{
+            n_say "  No bindings\n"
+        @}
+    @}
+@}
+@end example
+
+The first @code{set} command sets a documentation string that will be
+used to display an information message at the bottom of the Noosa window
+whenever the user moves the mouse over a value of this type in the
+transcript window.  In general, for a type @emph{x} you need to set the
+array element @code{n(x,desc)} in the global scope.
+
+@findex @code{n_dectohex}
+
+The procedure @code{n_Environment_say} is used by Noosa to display
+values of this type.  Since Environment values are pointers, the code
+displays them in hex to facilitate cross-referencing with values
+displayed by a source-level debugger.  The Noosa library procedure
+@code{n_dectohex} is used to obtain the hexadecimal representation of
+the value.  If @code{n_Environment_say} did not exist, values would be
+displayed in the style @emph{t:v} where @emph{t} is the type and
+@emph{v} is the value in decimal.
+
+The procedure @code{n_Environment_open} is invoked whenever the user
+clicks on a value of this type in the transcript window.  In general,
+the procedure name must be @code{n_x_open} where @emph{x} is the type
+name.  The existence of this procedure is taken by Noosa as an
+indication that values of type @emph{x} should be browsable.  The
+procedure gets two parameters; the first is the complete text that the
+user clicked on (which includes the type name) and the second is the
+value part of that text.  In this case the second parameter will be the
+environment value of interest.
+
+@findex @code{n_say_val}
+@findex @code{n_hextodec} 
+
+The implementation of this procedure first displays the clicked-on text
+to identify the subsequent output because the browsable value may be a
+long distance from the bottom of the transcript where the output will be
+displayed.  A null environment is displayed in a standard way to match
+the user's view of the module.
+
+@findex @code{n_send} in browsing support
+
+Non-null environments are converted by @code{n_hextodec} into decimal
+before being passed to the @code{get_scope_info} operation defined in
+the environment module monitoring interface (@pxref{Non-standard
+types}).  This operation gets the parent environment and the integer-key
+pairs as a Tcl list.  The Noosa procedure @code{n_send} is used to
+invoke the operation with the environment value as the sole parameter.
+
+When the @code{get_scope_info} operation returns, the
+@code{n_Environment_open} procedure goes on to display various
+information in the Noosa transcript window.  Strings are displayed using
+@code{n_say}.  The parent environment (if there is one) is displayed
+using @code{n_Environment_say} so that it is displayed in a style
+consistent with other environments.
+
+All of the integer-key pairs in the environment are displayed.  The
+routine @code{n_say_val} is used to display the keys.  It is passed the
+type of the value and the value itself.  @code{n_say_val} separates the
+decision about how to display keys from other code.  @code{n_say_val}
+just dispatches to @code{n_DefTableKey_say} if it exists.
+
+Note that we don't display the integers as-is, we use the
+@code{get_string} operation from the string storage module to convert
+them to strings which is generally more helpful.  Note: arguably this is
+a bug since it's possible to use the environment module with integers
+that are not string table indexes.
+
+@node Implementing Interfaces, Database, Monitoring Interfaces, Implementation
+@section Implementing Monitoring Interfaces
+@findex monitoring interface implementation
+@findex implementing monitoring interfaces
+
+A type-@file{dapto} file defines the monitoring interface of a
+component.  (@xref{Dapto Grammar}, for the syntax of the Dapto
+language.)  The @code{dapto} program turns these interfaces into code
+that can be incorporated into a program that we want to be able to
+monitor.  Dapto does two main things:
+
+@enumerate
+@item
+Generates a type-@file{c} file and a type-@file{h} file containing an
+implementation of the monitoring interface given by its input
+type-@file{dapto} file.
+
+The type-@file{c} file will contain routines to enable the monitoring
+system to invoke data operations and receive the results.  The
+mechanisms by which this happens are beyond the scope of this manual.
+
+Also contained in the type-@file{c} file will be one function definition
+for each event type defined in the monitoring interface.  For each event
+type @emph{X} there will be a function @code{_dapto_}@emph{X} that has
+parameters corresponding to the parameters of @emph{X}.
+(@xref{Monitoring support}, for details on how to use this function.)
+
+The type-@file{h} file generated by dapto will contain the externally
+visible interface of the type-@file{c} file.
+
+@item
+@findex database
+@findex monitoring database
+Generates a type-@file{db} file containing a @dfn{monitoring database}
+with information about the monitoring interface.  This file is a TCL
+script that sets up data structures for use by the monitoring system.
+It is used to let the monitoring system know which aspects are provided
+by the monitoring interface and which events are contained in those
+aspects. @xref{Database}, for more information on how the database is
+used.
+@end enumerate
+
+The names of the generated files depend on the name of the input file;
+@file{csm.dapto} will produce @file{csm_dapto.c}, @file{csm_dapto.h} and
+@file{csm_dapto.db}.
+
+@node Database, Monitoring Support, Implementing Interfaces, Implementation
+@section Monitoring Database
+@findex database
+@findex monitoring database
+
+A monitoring database is generated by Dapto from a monitoring interface
+description (@pxref{Implementing Interfaces}).  The concatenation of
+the monitoring databases for all of the components present in a program
+comprises the monitoring database for the program.
+
+The monitoring database is simply a TCL file which, when loaded by
+Noosa, provides information about the aspects and events of the
+monitoring interface.  For example, the monitoring database for the
+string table monitoring interface (@pxref{Monitoring Interfaces}) yields
+the following database (reformatted slightly):
+
+@example
+lappend n(aspects) string
+lappend n(events) \
+    [list string_stored "Storage of a new string in the string table" \
+        @{ index "Index of new string" string "New string" @} 1]
+@end example
+@noindent
+The global TCL lists
+@findex @code{n(aspects)}
+@code{n(aspects)} and
+@findex @code{n(events)}
+@code{n(events)} are used to store the database information.
+@code{n(aspects)} contains a list of the all of the aspect names
+contained in the program.  @code{n(events)} is a list of lists; each
+sub-list contains the name and documentation strings for a single event
+type and its parameters, plus a flag which is 1 if the event is visible
+to the user and 0 otherwise.
+
+@node Monitoring Support, Supporting Profiling, Database, Implementation
+@section Adding Monitoring Support To A Component
+@findex monitoring support
+@findex changing a component
+
+Once you have a monitoring interface implementation for a component you
+must add monitoring support to the component itself.  This support
+consists entirely of calls to the event generation routines for any
+events you have in your interface (@pxref{Monitoring interfaces} and
+@pxref{Implementing interfaces}).  If you have no events in your
+interface, the code of the component does not need to be changed.
+
+Adding event generation to a component is a matter of adding calls to
+event generation routines at the appropriate places.  The details of
+this will depend on the component, but the idea is to insert the calls
+at places where the action which the event represents can be said to
+have taken place.  Any necessary event parameters should be passed to
+the event generation routine.
+
+To enable a monitoring-free version of the component to be easily
+produced, the convention is that all additions purely for the purpose of
+monitoring be conditionalised by
+
+@example
+#ifdef MONITOR
+...
+#endif
+@end example
+
+The following examples are based on monitoring support for the Eli
+string table component.  The component must be modified to include the C
+interface to the monitoring interface:
+
+@example
+#ifdef MONITOR
+#include "csm_dapto.h"
+#endif
+@end example
+
+Then we must identify places in the code where @code{string_stored}
+events must be generated.  There is only one of these, at the end of the
+routine @code{stostr}, so we add the following code to generate the
+event with the appropriate parameter values:
+
+@example
+#ifdef MONITOR
+    _dapto_string_stored (numstr, string[numstr]);
+#endif
+@end example
+
+When the component is compiled by Eli with the @code{-DMONITOR} compiler
+option (implied by the @code{+monitor} parameter), this monitoring
+support will be included.
+
+@node Supporting Profiling, Dapto Grammar, Monitoring Support, Implementation
+@section Supporting Profiling
+
+Noosa contains support for two kinds of profiles (@pxref{Frequency
+profiles} and @pxref{Time profiles}).  To support profiling of a
+component it is necessary to add extra event generation to a component.
+It is necessary to generate an @code{enter} event whenever execution
+enters the code of the component and a @code{leave} event whenever
+execution leaves the code of the component.  These events have the
+following signatures:
+
+@example
+@findex @code{enter} event
+event enter "Enter a program component"
+    (str name "Name of component");
+@findex @code{leave} event
+event leave "Leave a program component"
+    (str name "Name of component");
+@end example
+
+For the string table component we would add the following code to the
+beginning of each string table routine:
+
+@example
+#ifdef MONITOR
+  _dapto_enter ("string");
+#endif
+@end example
+@noindent
+and the following code at each exit point of each string table routine:
+@example
+#ifdef MONITOR
+  _dapto_leave ("string");
+#endif
+@end example
+@noindent
+The event parameter (``string'' in this case) is used by the profile
+monitoring code to identify the component.
+
+@node Dapto Grammar,  , Supporting Profiling, Implementation
+@section Dapto Grammar
+@findex type-@file{dapto} file format
+@findex @file{.dapto} file format
+@findex @file{dapto} file format
+@findex file format
+
+@findex dapto scoping rules
+
+The following context-free grammar defines the syntax of the Dapto
+language.  @var{ident} is an identifier in the C style.  Identifier
+definitions are required to be unique within a specification and within
+event and operation blocks.  @var{str} and @var{bstr} are strings
+delimited by double quotes and angled brackets, respectively.
+@var{text} is arbitrary text delimited by braces.
+
+@display
+@var{spec}: @var{aspects}.
+
+@var{aspects}: @var{aspect_stmt} / @var{aspects} @var{aspect_stmt}.
+@var{aspect_stmt}: @samp{aspect} @var{iddef} @samp{;} @var{sigs} @samp{end} @samp{;}.
+
+@var{sigs}: @var{sig} / @var{sigs} @var{sig}.
+@var{sig}: @var{event_sig} / @var{operation_sig} / @var{str} / @var{bstr}.
+
+@var{event_sig}: @samp{event} @var{iddef} @var{export} @var{str} @var{event_block} @samp{;}.
+@var{event_block}: @samp{(} @var{optattrs} @samp{)}.
+@var{export}: @samp{*} / /* empty */.
+@var{optattrs}: /* empty */ / @var{attrs}.
+@var{attrs}: @var{attr} / @var{attrs} @samp{,} @var{attr}.
+@var{attr}: @var{typeid} @var{iddef} @var{str}.
+
+@var{operation_sig}: @samp{operation} @var{iddef} @var{str} @var{operation_block} @var{text} /
+               @samp{operation} @var{iddef} @var{str} @var{operation_block} @samp{:} @var{typeid} @var{text}.
+@var{operation_block}: @samp{(} @var{optparams} @samp{)}.
+@var{optparams}: /* empty */ / @var{params}.
+@var{params}: @var{param} / @var{params} @samp{,} @var{param}.
+@var{param}: @var{typeid} @var{iddef} @var{str}.
+
+@var{iddef}: @var{ident}.
+@var{iduse}: @var{ident}.
+@var{typeid}: @var{ident}.
+@end display
+
+@node Index,  , Implementation, top
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

@@ -1,0 +1,353 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from tp.tnf on 5 December 2013 -->
+
+<TITLE>Tree Parsing - Actions Carried Out During Parsing</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tree Parsing</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<A NAME="IDX23"></A>
+<H1><A NAME="SEC9" HREF="tp_toc.html#SEC9">Actions Carried Out During Parsing</A></H1>
+<P>
+Each rule has an associated action, written as an
+identifier:
+<P>
+<PRE>
+N0 ::= s(Ni,aj)    : Action1
+N0 ::= N1          : Action2
+N0 ::= s(t(Ni),Nj) : Action3
+</PRE>
+<P>
+The action associated with a rule is carried out each time the rule is used
+in a derivation.
+Each rule may be associated with a distinct action, or a single action may
+be associated with several rules.
+<P>
+<H2><A NAME="SEC10" HREF="tp_toc.html#SEC10">Actions and Values</A></H2>
+<P>
+The action carried out for each use of a rule in a derivation is a function
+application.
+<A NAME="IDX25"></A>
+<A NAME="IDX24"></A>
+The action identifier is the name of the function, and the arguments to
+which it is applied are the values of the nonterminals and attributes
+appearing on the right-hand side of the pattern.
+These values are taken in order from left to right.
+The result of the function becomes the value of the nonterminal appearing on
+the left-hand side of the pattern.
+<P>
+For example, consider one of the rules of the specification introduced above
+(see  <A HREF="tp_2.html#SEC6">Rules Describing Tree Nodes</A>), augmented by an action called
+<CODE>IntR_loadconst</CODE>:
+<P>
+<PRE>
+IntReg ::= IntegerVal(int) : IntR_loadconst
+</PRE>
+For each use of the rule <CODE>IntReg ::= IntegerVal(int)</CODE> in some
+derivation, the function named <CODE>IntR_loadconst</CODE> will be applied to the
+integer-valued attribute of the leaf.
+The result of this function application will become the value of the
+<CODE>IntReg</CODE> nonterminal.
+<A NAME="IDX26"></A>
+<A NAME="IDX27"></A>
+<P>
+The types of the attribute values are stated explicitly in the rules.
+<A NAME="IDX29"></A>
+<A NAME="IDX28"></A>
+A type is also associated with each nonterminal by means of a declaration
+(see  <A HREF="tp_4.html#SEC13">Summary of the Specification Language</A>).
+For example, the type associated with the nonterminal <CODE>IntReg</CODE> might
+be structure of type <CODE>reg</CODE> defined as follows:
+<P>
+<PRE>
+typedef struct { int register; PTGNode code; } reg;
+</PRE>
+Here the <CODE>register</CODE> field would be the number of the register holding
+the result and the <CODE>code</CODE> field would be a representation of the
+assembly language instructions producing the result in that register
+(see  <A HREF="ptg_1.html#SEC1">Introduction of Pattern-Based Text Generator</A>).
+<P>
+In this case, execution of <CODE>IntR_loadconst</CODE> would allocate a register
+and create a PTG node representing the assembly language instruction
+loading the integer constant specified by the integer-valued attribute of
+the leaf into that register.
+It would return a type-<CODE>reg</CODE> structure containing that information.
+This structure would then become the value of the <CODE>IntReg</CODE> nonterminal.
+<P>
+Here's another example of a rule, this time augmented by an action called
+<CODE>IntRR_sub</CODE>:
+<P>
+<PRE>
+IntReg ::= Minus(IntReg,IntReg) : IntRR_sub
+</PRE>
+The function named <CODE>IntRR_sub</CODE> will be applied to the values returned
+by the two children of the <CODE>Minus</CODE> node for each use of
+<CODE>IntReg ::= Minus(IntReg,IntReg)</CODE> in some derivation,
+and the result will become the value of the <CODE>IntReg</CODE> nonterminal on
+the left-hand side of the rule.
+The first argument of <CODE>IntRR_sub</CODE> would be the value returned by the
+action associated with the left child of the <CODE>Minus</CODE> node, and the
+second would be the value returned by the right child.
+<P>
+Execution of <CODE>IntRR_sub</CODE> might allocate a register to hold the result
+of the subtraction and create a PTG node representing the sequence
+consisting of the PTG nodes passed to it as operands followed by
+the assembly language instruction that computes the difference of two
+integer values in registers and leaves the result in a register.
+<CODE>IntRR_sub</CODE> would return a type-<CODE>reg</CODE> structure, which would
+become the value of the <CODE>IntReg</CODE> nonterminal on the left-hand side of
+the rule.
+<P>
+Each nonterminal is associated with a function whose
+name is <CODE>TP_</CODE> followed by the name of the nonterminal.
+This function takes as its only argument a tree (of type <CODE>TPNode</CODE>,
+see  <A HREF="tp_1.html#SEC4">Node Construction Functions</A>), and returns a value of
+the type associated with the nonterminal.
+Whenever one of these functions is applied to the root of a tree,
+it parses that tree.
+The parse finds the cheapest derivation of the function's nonterminal
+at the root of the tree.
+All of the actions implied by the derivation are executed, and the result
+of the function is the result delivered by the action executed at the root
+of the tree.
+The only guarantee one can make about the order in which the actions are
+executed is that it respects the data flow constraints implied by the
+function applications.
+<P>
+A specification with all of the rules described so far
+has only two nonterminals (<CODE>IntReg</CODE> and <CODE>FltReg</CODE>).
+The translator will generate two parsing functions that can be applied
+to the root of a tree:
+<P>
+<A NAME="IDX30"></A>
+<U>:</U> reg <B>TP_IntReg</B> <I>(TPNode <VAR>tree</VAR>)</I><P>
+A derivation for the tree rooted in <VAR>tree</VAR> in which the root is
+interpreted as an <CODE>IntReg</CODE> will be sought.
+If such a derivation is possible, the actions associated with the steps for
+the cheapest will be executed.
+The result of the action associated with the derivation step at the root
+will be returned.
+Otherwise the program will terminate abnormally.
+<P>
+<A NAME="IDX31"></A>
+<U>:</U> reg <B>TP_FltReg</B> <I>(TPNode <VAR>tree</VAR>)</I><P>
+A derivation for the tree rooted in <VAR>tree</VAR> in which the root is
+interpreted as a <CODE>FltReg</CODE> will be sought.
+If such a derivation is possible, the actions associated with the steps for
+the cheapest will be executed.
+The result of the action associated with the derivation step at the root
+will be returned.
+Otherwise the program will terminate abnormally.
+<P>
+The program will terminate abnormally when a requested derivation is not
+possible.
+This condition always arises from a design fault; either the patterns are
+incomplete, or the tree to be parsed is malformed.
+<P>
+<A NAME="IDX32"></A>
+<H2><A NAME="SEC11" HREF="tp_toc.html#SEC11">Implementing Actions</A></H2>
+<P>
+An action is a function application, and the name of the action is the
+function to be invoked.
+The rule with which the action is associated determines the signature of
+the function:
+Recall that the arguments of the function are the nonterminals and
+attributes appearing on the right-hand side of the associated rule, in
+order from left to right.
+The result of the function becomes the value of the nonterminal appearing
+on the left-hand side of the associated rule.
+Each nonterminal and attribute has a fixed type.
+<P>
+Function application can be implemented either by calling a
+<A NAME="IDX33"></A>
+macro or by invoking a
+<A NAME="IDX34"></A>
+routine.
+If the action requires a routine invocation, and the
+<A NAME="IDX36"></A>
+<A NAME="IDX35"></A>
+signature of the
+routine to be invoked matches the signature determined by the rule, then
+the routine name can be used directly as the action.
+Often, however, there is a mismatch between the signatures.
+In that case, the action can be made the name of a macro that rearranges
+arguments, inserts constants, or does whatever else is needed to correct
+the mismatch.
+<P>
+<A NAME="IDX37"></A>
+<H2><A NAME="SEC12" HREF="tp_toc.html#SEC12">Commutative Actions</A></H2>
+<P>
+Many computers have instruction sets that are asymmetric in their treatment
+of operands.
+For example, a machine with two-operand instructions may allow only the
+second of these operands to be a literal value.
+If two values in registers are being added, the "add register"
+instruction is used, but if a literal value were being added to a value in a
+register the "add immediate" instruction would be necessary.
+One rule characterizing an integer addition operation for such a machine,
+with an action to generate the "add immediate" instruction,
+might be the following:
+<P>
+<PRE>
+IntReg ::= Plus(IntReg,IntLit) : IntRI_add
+</PRE>
+(Here the nonterminal <CODE>IntLit</CODE> represents the interpretation
+"a literal integer".)
+<P>
+Notice that the children of the <CODE>Plus</CODE> node in this rule have
+different interpretations; this rule cannot be used in a derivation that
+interprets the left child of the <CODE>Plus</CODE> node as an <CODE>IntLit</CODE> and
+the right child as an <CODE>IntReg</CODE>.
+<P>
+Because addition is commutative, however, it is possible to interchange
+the children of the <CODE>Plus</CODE> node without changing the resulting value.
+Therefore if a derivation interprets the left child of the <CODE>Plus</CODE> node
+as an <CODE>IntLit</CODE> and the right child as an <CODE>IntReg</CODE>, the tree
+parser should be able to simply invoke the <CODE>IntRI_add</CODE> action with the
+two operands reversed.
+<P>
+This possibility is indicated by using <CODE>::</CODE> instead of <CODE>:</CODE>
+between the rule and its associated action:
+<P>
+<PRE>
+IntReg ::= Plus(IntReg,IntLit) :: IntRI_add
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="tp_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

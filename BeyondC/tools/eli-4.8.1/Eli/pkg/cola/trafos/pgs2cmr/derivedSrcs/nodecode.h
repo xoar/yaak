@@ -1,0 +1,116 @@
+
+/* encoding of tree node types and symbols */
+
+#ifndef NODECODE_H
+#define NODECODE_H
+
+extern int LHSMAP[];
+
+#define IsSymb(_n,_c) (LHSMAP[(_n)->_prod] == (_c))
+
+#define SYMBpgs_root 0
+#define SYMBG3 1
+#define SYMBG2 2
+#define SYMBerr_part 3
+#define SYMBG4 4
+#define SYMBG1 5
+#define SYMBactpts_root 6
+#define SYMBterm_def 7
+#define SYMBcode_def 8
+#define SYMBelem_list 9
+#define SYMBalt_op 10
+#define SYMBmod_op 11
+#define SYMBskip_part 12
+#define SYMBbracket_part 13
+#define SYMBterm_def_list 14
+#define SYMBsepa_part 15
+#define SYMBcode_def_list 16
+#define SYMBcode_part 17
+#define SYMBelem 18
+#define SYMBoptelem 19
+#define SYMBdel_op 20
+#define SYMBrep_op 21
+#define SYMBstop_part 22
+#define SYMBmodification 23
+#define SYMBnonliteral 24
+#define SYMBliteral 25
+#define SYMBconnection 26
+#define SYMBt_or_nt 27
+#define SYMBterminal 28
+#define SYMBroot 29
+#define SYMBrhs 30
+#define SYMBsep_op 31
+#define SYMBnonterminal 32
+#define SYMBrulename 33
+#define SYMBrule 34
+#define SYMBrule_list 35
+#define SYMBstart 36
+#define SYMBgrammarname 37
+#define SYMBgrammar_part 38
+#define RULErule_46 0
+#define RULErule_47 1
+#define RULErule_58 2
+#define RULErule_28 3
+#define RULErule_23 4
+#define RULErule_11 5
+#define RULErule_1 6
+#define RULErule_32 7
+#define RULErule_39 8
+#define RULErule_40 9
+#define RULErule_48 10
+#define RULErule_49 11
+#define RULErule_50 12
+#define RULErule_51 13
+#define RULErule_52 14
+#define RULErule_55 15
+#define RULErule_56 16
+#define RULErule_30 17
+#define RULErule_22 18
+#define RULErule_21 19
+#define RULErule_10 20
+#define RULErule_9 21
+#define RULErule_8 22
+#define RULErule_2 23
+#define RULErule_35 24
+#define RULErule_36 25
+#define RULErule_41 26
+#define RULErule_42 27
+#define RULErule_43 28
+#define RULErule_44 29
+#define RULErule_45 30
+#define RULErule_53 31
+#define RULErule_54 32
+#define RULErule_61 33
+#define RULErule_62 34
+#define RULErule_63 35
+#define RULErule_64 36
+#define RULErule_65 37
+#define RULErule_26 38
+#define RULErule_25 39
+#define RULErule_24 40
+#define RULErule_20 41
+#define RULErule_19 42
+#define RULErule_18 43
+#define RULErule_17 44
+#define RULErule_16 45
+#define RULErule_15 46
+#define RULErule_14 47
+#define RULErule_13 48
+#define RULErule_5 49
+#define RULErule_4 50
+#define RULErule_3 51
+#define RULERmod_op1 52
+#define RULErule_31 53
+#define RULErule_33 54
+#define RULErule_34 55
+#define RULErule_37 56
+#define RULErule_38 57
+#define RULErule_57 58
+#define RULErule_59 59
+#define RULErule_60 60
+#define RULErule_29 61
+#define RULErule_27 62
+#define RULErule_12 63
+#define RULErule_7 64
+#define RULErule_6 65
+#endif

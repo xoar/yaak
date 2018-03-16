@@ -1,0 +1,90 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright, 1998, University of Paderborn
+@comment Copyright, 1997 Anthony M. Sloane
+@comment %**start of header
+@setfilename news
+@settitle New Features of Eli
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{New Features of Eli}
+@sp 4
+@center Uwe Kastens
+@sp 1
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 2
+@center A. M. Sloane
+@sp 1
+@center Department of Computing
+@center School of Mathematics, Physics, Computing and Electronics
+@center Macquarie University
+@center Sydney, NSW 2109 
+@center Australia
+@sp 2
+@center W. M. Waite
+@sp 1
+@center Department of Electrical and Computer Engineering
+@center University of Colorado
+@center Boulder, CO  80309-0425
+@center USA
+@sp 8
+@center $Date$
+@end titlepage
+
+@iftex 
+@finalout
+@end iftex
+
+@node top,, (dir), (dir)
+@ifinfo
+@comment  node-name,  next,  previous,  up
+@unnumbered New Features of Eli
+
+$Date$
+@end ifinfo
+
+This document lists information-documents that contain new facilities
+available in Eli and those modifications made since the previous 
+distributed Version that might be of general interest. Advice is given to
+upgrade Eli-Specifications written for older Eli-Versions. Numerous corrections,
+improvements, and additions have been made without being described
+here. They'll just help users to solve their problem without taking
+notice of Eli's mechanism.
+
+@menu
+* (news4.8).::      New Features of Eli Version 4.8
+* (news4.7).::      New Features of Eli Version 4.7
+* (news4.6).::      New Features of Eli Version 4.6
+* (news4.5).::      New Features of Eli Version 4.5
+* (news4.4).::      New Features of Eli Version 4.4
+* (news4.3).::      New Features of Eli Version 4.3
+* (news4.2).::      New Features of Eli Version 4.2
+* (news4.1).::      New Features of Eli Version 4.1
+* (news4.0).::      New Features of Eli Version 4.0
+@end menu
+@ifset html
+@itemize
+@item
+@ref{top, , , news4.8, New Features of Eli Version 4.8}
+@item
+@ref{top, , , news4.7, New Features of Eli Version 4.7}
+@item
+@ref{top, , , news4.6, New Features of Eli Version 4.6}
+@item
+@ref{top, , , news4.5, New Features of Eli Version 4.5}
+@item
+@ref{top, , , news4.4, New Features of Eli Version 4.4}
+@item
+@ref{top, , , news4.3, New Features of Eli Version 4.3}
+@item
+@ref{top, , , news4.2, New Features of Eli Version 4.2}
+@item
+@ref{top, , , news4.1, New Features of Eli Version 4.1}
+@item
+@ref{top, , , news4.0, New Features of Eli Version 4.0}
+@end itemize
+@end ifset
+@bye

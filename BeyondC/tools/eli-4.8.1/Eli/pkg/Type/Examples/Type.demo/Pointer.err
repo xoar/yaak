@@ -1,0 +1,15 @@
+begin
+  var	int k, int! kk;
+  var	t! pi, s! pj;
+  type	record int x, t! next end t;
+  var   t rv;
+  pi = new t;
+  pi = new int;
+  pi = pj;
+  pi! = pj!;
+  pi!.x = true;
+  pi!.next!.next!.x = pi!;
+  kk = new int;
+  kk! = pi!; 
+  pi!.next!.next!.x = rv!;
+end

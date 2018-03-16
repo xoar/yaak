@@ -1,0 +1,20 @@
+# $Id: Makefile.in,v 1.3 2009/08/03 19:16:19 profw Exp $
+# Copyright 1998, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/tp/specs
+SRC	=
+AUX	= Makefile Makefile.in Odinfile tp.fw
+CMD	=
+EXE	= tp.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+tp.exe:	Odinfile tp.fw
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE 'tp.exe'
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done

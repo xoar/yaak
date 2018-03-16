@@ -1,0 +1,338 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from ui.tnf on 5 December 2013 -->
+
+<TITLE>Eli User Interface Reference Manual - The Command Editing Mechanism</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Eli User Interface Reference Manual</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC14" HREF="ui_toc.html#SEC14">The Command Editing Mechanism</A></H1>
+<P>
+During an interactive Eli session, an odin-command may be edited
+before it is interpreted by typing either control characters
+or escape sequences.
+(An escape sequence is entered by typing <KBD>ESC</KBD> followed by one or
+more characters.
+Note that unlike control keys, case matters in escape sequences;
+<KBD>ESC F</KBD> is not the same as <KBD>ESC f</KBD>.)
+<P>
+A control character or escape sequence may be typed anywhere on the line,
+not just at the beginning.
+In addition, a return may also be typed anywhere on the line, not just at
+the end.
+<P>
+Most control characters and escape sequences may be given a repeat count,
+<VAR>n</VAR>, where <VAR>n</VAR> is a number.
+To enter a repeat count, type the escape key, the number, and then
+the character or escape sequence:
+<P>
+<PRE>
+ESC 4 ^F
+</PRE>
+<P>
+This sequence moves the cursor forward four characters.
+If a command may be given a repeat count then the text "[<VAR>n</VAR>]"
+is given at the end of its description.
+<P>
+Eli accepts the following control characters when editing odin-commands:
+<P>
+<DL COMPACT>
+<DT><KBD>^A</KBD>
+<DD>Move to the beginning of the line
+<P>
+<DT><KBD>^B</KBD>
+<DD>Move left (backwards) [<VAR>n</VAR>]
+<P>
+<DT><KBD>^D</KBD>
+<DD>Delete character [<VAR>n</VAR>]
+<P>
+<DT><KBD>^E</KBD>
+<DD>Move to end of line
+<P>
+<DT><KBD>^F</KBD>
+<DD>Move right (forwards) [<VAR>n</VAR>]
+<P>
+<DT><KBD>^G</KBD>
+<DD>Ring the bell
+<P>
+<DT><KBD>^H</KBD>
+<DD>Delete character before cursor (backspace key) [<VAR>n</VAR>]
+<P>
+<DT><KBD>^I</KBD>
+<DD>Complete filename (tab key); see below
+<P>
+<DT><KBD>^J</KBD>
+<DD>Done with line (return key)
+<P>
+<DT><KBD>^K</KBD>
+<DD>Kill to end of line (or column [<VAR>n</VAR>])
+<P>
+<DT><KBD>^L</KBD>
+<DD>Redisplay line
+<P>
+<DT><KBD>^M</KBD>
+<DD>Done with line (alternate return key)
+<P>
+<DT><KBD>^N</KBD>
+<DD>Get next line from history [<VAR>n</VAR>]
+<P>
+<DT><KBD>^P</KBD>
+<DD>Get previous line from history [<VAR>n</VAR>]
+<P>
+<DT><KBD>^R</KBD>
+<DD>Search backward (forward if [<VAR>n</VAR>]) through history for text;
+must start line if text begins with an uparrow
+<P>
+<DT><KBD>^T</KBD>
+<DD>Transpose characters
+<P>
+<DT><KBD>^V</KBD>
+<DD>Insert next character, even if it is an edit command
+<P>
+<DT><KBD>^W</KBD>
+<DD>Wipe to the mark
+<P>
+<DT><KBD>^X^X</KBD>
+<DD>Exchange current location and mark
+<P>
+<DT><KBD>^Y</KBD>
+<DD>Yank back last killed text
+<P>
+<DT><KBD>^[</KBD>
+<DD>Start an escape sequence (escape key)
+<P>
+<DT><KBD>^]<VAR>c</VAR></KBD>
+<DD>Move forward to next character <VAR>c</VAR>
+<P>
+<DT><KBD>^?</KBD>
+<DD>Delete character before cursor (delete key) [<VAR>n</VAR>]
+</DL>
+<P>
+Eli accepts the following escape sequences when editing odin-commands:
+<P>
+<DL COMPACT>
+<DT><KBD>ESC ^H</KBD>
+<DD>Delete previous word (backspace key) [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC DEL</KBD>
+<DD>Delete previous word (delete key) [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC SP</KBD>
+<DD>Set the mark (space key); see ^X^X and ^Y above
+<P>
+<DT><KBD>ESC .</KBD>
+<DD>Get the last (or [<VAR>n</VAR>]'th) word from previous line
+<P>
+<DT><KBD>ESC ?</KBD>
+<DD>Show possible completions; see below
+<P>
+<DT><KBD>ESC &#60;</KBD>
+<DD>Move to start of history
+<P>
+<DT><KBD>ESC &#62;</KBD>
+<DD>Move to end of history
+<P>
+<DT><KBD>ESC b</KBD>
+<DD>Move backward a word [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC d</KBD>
+<DD>Delete word under cursor [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC f</KBD>
+<DD>Move forward a word [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC l</KBD>
+<DD>Make word lowercase [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC m</KBD>
+<DD>Toggle whether 8-bit chars display normally or with the <CODE>M-</CODE> prefix
+<P>
+<DT><KBD>ESC u</KBD>
+<DD>Make word uppercase [<VAR>n</VAR>]
+<P>
+<DT><KBD>ESC y</KBD>
+<DD>Yank back last killed text
+<P>
+<DT><KBD>ESC w</KBD>
+<DD>Make area up to mark yankable
+<P>
+<DT><KBD>ESC <VAR>nn</VAR></KBD>
+<DD>Set repeat count to the number <VAR>nn</VAR>
+<P>
+<DT><KBD>ESC <VAR>C</VAR></KBD>
+<DD>Read from environment variable <VAR>_C_</VAR>, where <VAR>C</VAR> is an uppercase letter
+</DL>
+<P>
+If you type the escape key followed by an uppercase letter, <VAR>C</VAR>,
+then the contents of the environment variable <VAR>_C_</VAR>
+are read in as if you had typed them at the keyboard.
+For example, if the variable <CODE>_L_</CODE> contains the following:
+<P>
+<PRE>
+^A^Kecho '^V^[[H^V^[[2J'^M
+</PRE>
+<P>
+Then typing <CODE>ESC L</CODE> will move to the beginning of the line, kill the
+entire line, enter the echo command needed to clear the terminal (if your
+terminal is like a VT-100), and send the line back to Eli.
+<P>
+The command editing mechanism also supports filename completion.
+Suppose the root directory has the following files in it:
+<P>
+<PRE>
+bin	vmunix	core	vmunix.old
+</PRE>
+<P>
+If you type <CODE>rm /v</CODE> and then the tab key, Eli will finish off
+as much of the name as possible by adding <CODE>munix</CODE>.
+Because the name is not unique, it will then beep.
+If you type the escape key and a question mark, it will display the
+two choices.
+If you then type a period and a tab, Eli will finish off the filename
+for you:
+<P>
+<PRE>
+rm /v[TAB]<VAR>munix</VAR>.[TAB]<VAR>old</VAR>
+</PRE>
+<P>
+The tab key is shown by <CODE>[TAB]</CODE> and the automatically-entered text
+is shown as <VAR>munix</VAR>.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="ui_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

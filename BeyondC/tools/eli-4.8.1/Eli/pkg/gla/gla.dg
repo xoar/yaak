@@ -1,0 +1,92 @@
+# $Id: gla.dg,v 2.11 2010/02/26 17:50:57 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.gla => :gla;
+:gla 'Structure of comments and named terminals'? => :FILE;
+:gla.cmpd 'Set of gla specification fragments' => :LIST;
+
+COLLECT  (:gla)
+  => (:one.gla.cmpd);
+:one.gla.cmpd 'Singleton gla specification' => :allspecs :gla.cmpd;
+
+COLLECT  (:LIST :extract=:gla)
+  => (:gla.cmpd);
+
+EXEC (gla_out.sh) (:scan_spec :list :names) (:gla_be :name)
+     (gla.specs) (dfltscan.reqmod)
+  => (:gla_out);
+:gla_out 'Results of scanner generation' => :FILE;
+
+EXEC (gla_be.sh) (gla_be.exe)
+     (:backend_data) (:flex_binary) (:accept_binary) (:lastdfa_binary)
+     (+printtokens) (+monitor)
+     (specs_ref) (reqmod_ref) ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:gla_be);
+:gla_be 'Generated parts of the scanner (tables and code)' => :DERIVED-DIRECTORY;
++printtokens 'Flag to request that tokens be printed as they are read'? => :first;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:gla_be) glaBeErr
+  => (:glaBeErr);
+:glaBeErr 'Identity map for errors in standard form' => :line_err;
+
+EXEC (flex_out.sh) (.) (:flex_spec)
+  NEEDS (flex.exe) ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:flex_binary) (:accept_binary) (:lastdfa_binary);
+:flex_binary 'Automata states' => :FILE;
+:accept_binary 'Accepting states' => :FILE;
+:lastdfa_binary 'Number of states' => :FILE;
+
+EXEC (gla_fe.sh) (.) (:scan_spec :list :cpp)
+  NEEDS (gla_fe.exe) (gla.err)
+  => (:flex_spec) (:backend_data);
+:flex_spec 'Flex input specification for scanner' => :FILE;
+:backend_data 'Data for the backend' => :FILE;
+
+# EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:scan_spec :list :cpp) glaFeErr
+EXEC (glaFeErr.sh) (+hookvalue) (:scan_spec :list :cpp) (:flex_spec)
+  => (:glaFeErr);
+:glaFeErr 'Identity map for errors in standard form' => :line_err;
+
+EXEC (scan_spec.sh) (.) (:gla.cmpd :names) (:lex_code.cmpd :names)
+     (:dflt_codes :name)
+  NEEDS (separator)
+  => (:scan_spec);
+:scan_spec 'Scanning specification' => :FILE;
+*.lex_code => :lex_code;
+:lex_code 'Basic symbol coding'? => :FILE;
+:lex_code.cmpd 'Set of lex_code specification fragments' => :LIST;
+
+COLLECT  (:lex_code)
+  => (:one.lex_code.cmpd);
+:one.lex_code.cmpd 'Singleton lex_code specification' => :lex_code.cmpd;
+
+COLLECT  (:LIST :extract=:lex_code)
+  => (:ext.lex_code.cmpd);
+:ext.lex_code.cmpd 'Extracted lex_code specification fragments' => :lex_code.cmpd;
+
+COLLECT  (:one.gla.cmpd :extract=:lex_code)
+  => (:empty.lex_code.gla.cmpd);
+:empty.lex_code.gla.cmpd 'Empty lex_code specification derived from gla' => :lex_code.cmpd;
+
+EXEC (dflt_codes.sh) (:gla.cmpd :cpp)
+  => (:dflt_codes);
+:dflt_codes 'Default token codes' => :FILE;
+
+COLLECT (:level_7_specs +incl=(:etaIncl) :gla_out :list)
+  => (:eli*level_8_specs_in);

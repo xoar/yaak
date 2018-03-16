@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>Remote Attribute Access: CONSTITUENT/S</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Remote Attribute Access: CONSTITUENT/S</h1>
+<hr>
+<P>
+
+<h2>CONSTITUENT/S</h2>
+Accessing a single attribute from a subtree of the current context
+
+<pre>
+     [ SymbolRef ] 'CONSTITUENT' 
+     RemAttrList [ ShieldClause ]
+</pre>
+
+
+Accessing multiple attributes from a subtree of the current context
+
+<p>
+<pre>
+     [ SymbolRef ] 'CONSTITUENTS' 
+     RemAttrList [ ShieldClause ] 
+     WITH' '(' TypeName ',' CombFctName ',' 
+               SingleFctName ',' NullFctName ')'
+</pre>
+
+<!--NewPage-->
+<p>
+<b>Typical Error Situation</b>
+
+<ul>
+<li> No unique target attribute for a <tt>CONSTITUENT</tt> clause
+
+<br>
+==> <tt>ERROR: multiple CONSTITUENT symbols</tt>
+<p>
+<li> Using remote attributes with different attribute type in the CONSTITUENTS list.
+<br>
+==> <tt>ERROR: type conflict in CONSTITUENT(S)</tt>
+
+<p>
+<li>Accessing more than one attribute of a symbol
+<br>
+==> <tt>ERROR: Remote access to two attributes of one symbol</tt>
+
+<p> 
+<li> Shielding errors, e.g. forgetting to turn of default shielding behavior
+by <tt>SHIELD()</tt>.
+
+<p>
+<li>Errors implementing the <tt>WITH</tt> clause (C/C++ functions)
+</ul>
+<p>
+
+<p>
+In conjunction with symbol computations
+
+<pre>
+     CONSTITUENTS (C.a)     /* C is a CLASS symbol */
+</pre>
+
+stands for
+
+<pre>
+     CONSTITUENTS (X1.a, X2.a, X3.a, ...)     
+</pre>
+
+for all <tt>Xi</tt> that <tt>C</tt> is inherited to.
+<p>
+This list of refered attributes may be empty.
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

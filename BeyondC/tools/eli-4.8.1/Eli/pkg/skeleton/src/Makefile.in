@@ -1,0 +1,42 @@
+# $Id: Makefile.in,v 1.3 2002/10/01 20:37:59 waite Exp $
+# Copyright (c) 1991, The Regents of the University of Colorado
+
+CC	= @CC@
+LIBS	= @LIBS@
+LDFLAGS	= @LDFLAGS@
+
+DIR	= pkg/skeleton/src
+SRC	=
+AUX	= map_errors.c err_tab.c err_map.c mk_include.c get_incl.c \
+	  type_sel.c cat-n.c fmt.c eliexpand.c paste.c vtd.c line_err.c \
+	  Makefile Makefile.in
+CMD	=
+EXE	= map_errors.exe err_tab.exe err_map.exe mk_include.exe \
+	  get_incl.exe type_sel.exe cat-n.exe fmt.exe eliexpand.exe \
+	  paste.exe vtd.exe rel_err.exe line_err.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+@Adtmk_h@
+@Inputmk_h@
+
+CFLAGS	=
+
+get_incl.o:	get_incl.c $(ADTLIB)/obstack.h $(INPLIB)/source.h
+	$(CC) $(CFLAGS) $(ADTINCL) $(INPINCL) -c get_incl.c
+
+get_incl.exe:	get_incl.o obstack.o source.o
+	$(CC) $(CFLAGS) -o get_incl.exe get_incl.o obstack.o source.o
+
+err_map.o:	err_map.c $(ADTLIB)/obstack.h
+	$(CC) $(CFLAGS) $(ADTINCL) -c err_map.c
+
+err_map.exe:	err_map.o obstack.o
+	$(CC) $(CFLAGS) -o err_map.exe err_map.o obstack.o
+
+.SUFFIXES:      .exe
+.c.exe:
+	$(CC) $(CFLAGS) -o $@ $*.c $(LDFLAGS) $(LIBS)

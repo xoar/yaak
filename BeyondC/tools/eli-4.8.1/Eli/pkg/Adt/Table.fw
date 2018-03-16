@@ -1,0 +1,233 @@
+@=~
+~! $Id: Table.fw,v 1.2 2010/03/02 23:14:55 profw Exp $
+~!
+~! Copyright 2008, The Regents of the Unbiversity of Colorado
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+@setchapternewpage odd
+@settitle Hash Table
+@headings double
+
+@ifnotinfo
+~t title titlefont centre "Hash Table"
+~t title smalltitlefont centre "Module Implementation"
+~t vskip 15 mm
+@end ifnotinfo
+
+Each instance of this module is a distinct table of definition table keys,
+addressed by elements of a specified data type.
+An instance is created by:
+
+@example
+$/Adt/Table.gnrc +instance=NAME +referto=TYPE :inst
+@end example
+@noindent
+Here ~{NAME~} is the name of the table and ~{TYPE~} is the data type used
+to address table elements.
+If ~{TYPE~} is not predefined in C then its definition must be made
+available by some ~{.head~} specification.
+
+The user must supply pointers to two functions on values of type ~{TYPE~}:
+@table @samp
+@item hash
+Accepts a value of type ~{TYPE~} and returns a value of type ~{ub4~}
+characterizing it.
+Eli provides a general mechanism for implementing such functions
+(@pxref{Hash,,Computing a Hash Value,problems,
+Specification Module Library}).
+@item compare
+Accepts two values of type ~{TYPE~} and returns an integer less than, equal
+to, or greater than zero if the first argument is respectively less than,
+equal to, or greater than the second.
+@end table
+
+There are three operations defined for each table:
+
+~$~<Exported operations~>==~{
+extern void |NAME|InitTable ELI_ARG((ub4 (*)(|TYPE|), int (*)(|TYPE|,|TYPE|)));
+extern DefTableKey |NAME|KeyInTable ELI_ARG((|TYPE|));
+extern DefTableKey |NAME|DefInTable ELI_ARG((|TYPE|));
+~}
+
+Collisions are kept on a list, ordered by the ~{|TYPE|~} comparison function:
+
+~$~<Local data types~>+=~{
+typedef struct CollElt {	/* A collision list entry */
+  struct CollElt *next;		  /* The next collider */
+  |TYPE| sought;		  /* Value being looked up */
+  DefTableKey key;		  /* The corresponding key */
+} *CollList;
+~}
+
+The table itself is unique to the module:
+
+~$~<Local variables~>+=~{
+static Obstack HashtblObstack;
+static ub4 (*hashfn)(|TYPE|);
+static int (*testfn)(|TYPE|,|TYPE|);
+static HashList **l = (HashList **)0;
+static int indexbits = 8;
+~}
+
+~$~<void |NAME|InitTable(ub4 (*h)(|TYPE|), int (*t)(|TYPE|,|TYPE|))~>==~{
+{ if (!l) {
+    l = (HashList **)malloc(hashsize(indexbits) * sizeof(HashList *));
+    if (!l) {
+      perror("|NAME|InitTable");
+      message(DEADLY,"Execution terminated",0,NoPosition);
+    }
+    hashfn = h; testfn = t;
+    obstack_init(&HashtblObstack);
+  }
+}
+~}
+
+The two lookup routines communicate through common storage:
+
+~$~<Local variables~>+=~{
+static ub4 code;
+static HashList result;
+static int found;
+static CollList clist;
+~}
+
+~$~<DefTableKey |NAME|KeyInTable(|TYPE| c)~>==~{
+{ if (!l) {
+    message(DEADLY,"|NAME|Table has not been initialized",0,NoPosition);
+  }
+
+  code = hashfn(c);
+  found = hashFind(code, (HashList)&l[code & hashmask(indexbits)], &result);
+
+  if (found) {
+    CollList l, t;
+
+    l = (CollList)&result->keylist; t = l->next;
+    while (t && testfn(t->sought, c) > 0) { l = t; t = l->next; }
+    if (t && testfn(t->sought, c) == 0) return t->key;
+    clist = l;
+  }
+  return NoKey;
+}
+~}
+
+~$~<DefTableKey |NAME|DefInTable(|TYPE| c)~>==~{
+{ DefTableKey k;
+  CollList t;
+
+  k = |NAME|KeyInTable(c);
+  if (k != NoKey) return k;
+
+  t = (CollList)obstack_alloc(&HashtblObstack, sizeof(struct CollElt));
+  t->sought = c; t->key = NewKey();
+
+  if (found) {
+    t->next = clist->next; clist->next = t;
+  } else {
+    HashList l;
+
+    t->next = (CollList)0;
+
+    l = (HashList)obstack_alloc(&HashtblObstack, sizeof(struct HashElt));
+    l->next = result->next; l->selector = code; l->keylist = t;
+
+    result->next = l;
+  }
+
+  return t->key;
+}
+~}
+
+This header file defines all of the exported operations of the module.
+It must be included in any C file that refers to those operations.
+
+~O~<|NAME|Table.h~>~{
+#ifndef |NAME|TABLE_H
+#define |NAME|TABLE_H
+
+#include "deftbl.h"
+#include "obstack.h"
+#include "hash.h"
+#include "hashtbl.h"
+#include "eliproto.h"
+#include "HEAD.h"
+
+~<Exported operations~>
+
+#endif
+~}
+
+This file allocates the space for the table.
+It will be added to the set of components of the generated program
+automatically.
+
+~O~<|NAME|Table.c~>~{
+#include "|NAME|Table.h"
+#include "err.h"
+
+~<Local data types~>
+
+~<Local variables~>
+
+void
+#ifdef PROTO_OK
+|NAME|InitTable(ub4 (*h)(|TYPE|), int (*t)(|TYPE|,|TYPE|))
+#else
+|NAME|InitTable(h, t) ub4 (*h)(|TYPE|); int (*t)(|TYPE|,|TYPE|);
+#endif
+~<void |NAME|InitTable(ub4 (*h)(|TYPE|), int (*t)(|TYPE|,|TYPE|))~>
+
+DefTableKey
+#ifdef PROTO_OK
+|NAME|KeyInTable(|TYPE| c)
+#else
+|NAME|KeyInTable(c) |TYPE| c;
+#endif
+~<DefTableKey |NAME|KeyInTable(|TYPE| c)~>
+
+DefTableKey
+#ifdef PROTO_OK
+|NAME|DefInTable(|TYPE| c)
+#else
+|NAME|DefInTable(c) |TYPE| c;
+#endif
+~<DefTableKey |NAME|DefInTable(|TYPE| c)~>
+~}
+
+This file makes the interface of the table module available to LIDO
+computations and to the main program.
+
+~O~<|NAME|Table.head~>~{
+#include "|NAME|Table.h"
+~}
+
+These files ensure that the necessary support routines are available.
+
+~O~<|NAME|Table.reqmod~>~{
+hashtbl.c
+hashtbl.h
+~}
+
+~O~<|NAME|Table.specs~>~{
+$/Tech/Hash.specs
+~}

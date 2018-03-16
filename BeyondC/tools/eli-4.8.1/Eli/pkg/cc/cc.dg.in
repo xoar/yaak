@@ -1,0 +1,41 @@
+# Environment Variables
+
+$ODIN_CC_HOME 'directory containing the C compiler' = '';
+
+$ODIN_CC 'name of the C compiler' = '@CC@';
+
+$ODIN_CC_FLAGS 'cc flags' = '@CFLAGS@';
+
+$ODIN_CC_DEBUGF 'debug flag for C compiler' = @CC_DEBUG@;
+
+$ODIN_CC_I 'directory containing default C include files' = '/usr/include';
+
+*.c => :c;
++cc 'name of the C compiler'? => :first;
++cc_flags 'flags for cc'? => :cat;
+
+:c 'C source code' => :FILE;
++incls 'List of files actually included' => :ls;
+EXEC (c.o.sh) (.)
+    (:c_srcs)
+    (:c_srcs :list :dir_of :vir_dir)
+    (+debug) (+define) (+monitor) (+cc) (+cc_flags)
+  NEEDS (:c_srcs :list) (errfilter.sed)
+  => (:c.o);
+:c.o 'C object module' => :o;
+
+COLLECT (:c +incls=(:incl.all) :lookup=:c_srcs)
+  => (:lookup_c_srcs);
+:lookup_c_srcs 'Reference to a file naming files needed by C' => :REFERENCE;
+
+EXEC (c_srcs.sh) (:c) (+incls)
+  => (:c_srcs);
+:c_srcs 'Source text needed for a C compilation' => :FILE;
++debug 'Flag to request debugging information in object files'? => :first;
++define 'List of symbols to be defined by the C preprocessor'? => :cat;
+*.o => :o;
+:o 'Object file' => :FILE;
+
+EXEC (cexe.sh) (:c) (+cc) (+cc_flags)
+  => (:exe);
+:exe 'Executable compiled from C independent of Eli' => :FILE;

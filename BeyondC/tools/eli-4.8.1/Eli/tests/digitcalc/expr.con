@@ -1,0 +1,17 @@
+/* $Id: expr.con,v 1.2 1991/08/21 20:33:41 waite Exp $ */
+/* Structure of an integer expression */
+
+program: expression &'ExprFinl();' .
+
+expression:
+   term /
+   expression '+' term &'ExprPlus();' /
+   expression '-' term &'ExprMinus();' .
+
+term:
+   primary /
+   term '*' primary &'ExprTimes();' /
+   term '/' primary &'ExprDiv();' .
+
+primary:
+   '(' expression ')' .

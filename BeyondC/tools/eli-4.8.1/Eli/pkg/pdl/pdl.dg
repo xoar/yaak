@@ -1,0 +1,47 @@
+# $Id: pdl.dg,v 2.12 2010/02/26 17:50:58 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.pdl => :pdl;
+:pdl 'PDL specification'? => :FILE;
+:pdl.cmpd 'Set of pdl specification fragments' => :LIST;
+
+COLLECT  (:pdl)
+  => (:one.pdl.cmpd);
+:one.pdl.cmpd 'Singleton pdl specification' => :pdl.cmpd;
+
+COLLECT  (:LIST :extract=:pdl)
+  => (:ext.pdl.cmpd);
+:ext.pdl.cmpd 'Extracted pdl specification fragments' => :pdl.cmpd;
+
+EXEC (pdlGen.sh) (pdl.exe) (:pdl.cmpd :cpp) (lib.pdl) (pdl.err)
+     ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:pdlGen);
+:pdlGen 'Objects generated from PDL specifications' => :DERIVED-DIRECTORY;
+
+EXEC (pdlOut.sh) (:pdl.cmpd :names) (:pdlGen :name)
+     (deftbl.head) (deftbl.save.eta) (deftbl.reqmod) (pdl.dapto) (pdl.tcl)
+  => (:pdlOut);
+:pdlOut 'Results of PDL processing' => :FILE;
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:pdlGen) pdlGenErr
+  => (:pdlGenErr);
+:pdlGenErr 'Identity map for errors in standard form' => :line_err;
+
+COLLECT (:level_1_specs +incl=(:etaIncl) :pdlOut :list)
+  => (:eli*level_2_specs_in);

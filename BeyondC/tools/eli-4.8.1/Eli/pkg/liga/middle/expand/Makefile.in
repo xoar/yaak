@@ -1,0 +1,99 @@
+# $Id: Makefile.in,v 1.1 2001/10/25 14:35:20 cogito Exp $
+# Makefile for pkg/liga/expand
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+# This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  
+
+CC	=	@CC@
+
+DIR	=	pkg/liga/middle/expand
+SRC	=
+SOURCES	= 	exp_io.c expidl.c expref.c expclass.c exptrav.c \
+		exptransfer.c expincl.c expchain.c expconstit.c do_expand.c \
+		exp_prot.c
+HDRS	= 	expconst.h exp_types.h expidl.h expand.h exp_io.h \
+		expchain.h expclass.h expconstit.h expincl.h expref.h \
+		exptransfer.h exptrav.h do_expand.h exp_prot.h
+OBJS	= 	exp_io.o expidl.o expref.o expclass.o exptrav.o \
+		exptransfer.o expincl.o expchain.o expconstit.o do_expand.o \
+		exp_prot.o
+COP	=       Makefile.in $(SOURCES) $(HDRS)
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=	$(COM)
+RCS	=	
+GEN	= 	$(OBJS)
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+IDL	= 	../../idl
+SCEL	= 	../../ligascel
+OPTION	= 	../../option
+MIDDLE	= 	..
+
+LIBS	= $(OPTION)/opt_input.o \
+          $(MIDDLE)/middle_mem.o $(MIDDLE)/obstack.o \
+          $(IDL)/IDL.a  $(SCEL)/err.o $(SCEL)/source.o \
+	  $(MIDDLE)/linemap.o
+
+CFLAGS		= -I$(IDL) -I$(OPTION) -I$(SCEL) -I$(MIDDLE)
+
+@toolmk_h@
+
+exp_io.o: $(IDL)/LIGA.h $(IDL)/global.h $(OPTION)/option_enums.h \
+	$(OPTION)/option_types.h expconst.h exp_types.h expand.h exp_io.h
+
+expchain.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(OPTION)/option_enums.h $(OPTION)/option_types.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h exp_io.h expref.h \
+	expidl.h expand.h exptrav.h expchain.h exp_prot.h
+
+expclass.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h expref.h \
+	expidl.h expand.h expclass.h
+
+expconstit.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(OPTION)/option_enums.h $(OPTION)/option_types.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h exp_io.h expref.h \
+	expidl.h expand.h exptrav.h expconstit.h exp_prot.h
+
+expidl.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(OPTION)/option_enums.h $(OPTION)/option_types.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h exp_io.h expand.h \
+	expref.h expidl.h
+
+expincl.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h expref.h expidl.h \
+	expand.h exptrav.h expincl.h exp_prot.h
+
+expref.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h expconst.h \
+	exp_types.h expand.h expref.h expidl.h
+
+exptransfer.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h expand.h expref.h \
+	expidl.h exptransfer.h
+
+exptrav.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(OPTION)/option_enums.h $(OPTION)/option_types.h \
+	$(SCEL)/ligaconsts.h expconst.h exp_types.h expref.h exp_prot.h \
+	expidl.h expand.h expincl.h expchain.h expconstit.h exptrav.h
+exp_prot.o : exp_prot.h $(IDL)/LIGA.h $(IDL)/global.h \
+	$(IDL)/LIGAMacros.h $(SCEL)/ligaconsts.h exp_types.h expref.h \
+	$(MIDDLE)/linemap.h 
+
+

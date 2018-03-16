@@ -1,0 +1,23 @@
+# $Id: mkgortosym,v 1.1 2001/10/25 14:32:57 cogito Exp $
+
+IDL	=	../idl
+ORDER	=	../middle/order
+OPTION	=	../option
+SCEL	=	../ligascel
+
+GORTO_OBJS	= \
+   Actions.o Arrange.o Bitmaps.o Debug.o DepLayout.o Drawing.o Graph.o \
+   Hide.o Lido.o Main.o MainList.o MainWindow.o Message.o Order.o OrdStrategy.o \
+   PathFind.o PopupUtil.o ProdCreate.o ProdDep.o ProdDraw.o ProdMenu.o \
+   ProdSelect.o ProdSymbol.o ProdUtil.o Reftab.o Resources.o SymbAttrs.o \
+   SymbCreate.o SymbDep.o SymbDraw.o SymbMenu.o SymbProd.o SymbSelect.o \
+   SymbUtil.o Util.o VisitCreate.o VisitDraw.o VisitLife.o VisitMenu.o \
+   VisitSelect.o VisitUtil.o Compile.o
+
+IDL_LIB		= $(IDL)/IDL.a
+
+CFLAGS		= -DGORTO -I$(IDL) $(X_CFLAGS)
+
+LIBS		= $(OPTION)/opt_input.o $(ORDER)/gorto.a $(IDL_LIB) \
+		  $(XLIBS) $(SCEL)/printerr.o $(SCEL)/err.o \
+		  $(SCEL)/source.o -lm

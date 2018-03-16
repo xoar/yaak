@@ -1,0 +1,609 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from syntax.tnf on 5 December 2013 -->
+
+<TITLE>Syntactic Analysis - Context-Free Grammars and Parsing</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Syntactic Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC1" HREF="syntax_toc.html#SEC1">Context-Free Grammars and Parsing</A></H1>
+<P>
+A <DFN>context-free grammar</DFN>
+<A NAME="IDX8"></A>
+<A NAME="IDX7"></A>
+is a formal system that describes a language by
+specifying how any legal text can be derived from a distinguished symbol
+called the <DFN>axiom</DFN>,
+<A NAME="IDX9"></A>
+or <DFN>sentence symbol</DFN>.
+<A NAME="IDX10"></A>
+It consists of a set of <DFN>productions</DFN>,
+<A NAME="IDX11"></A>
+each of which states that a given symbol can be replaced by a given sequence
+<A NAME="IDX12"></A>
+of symbols.
+To derive a legal text,
+<A NAME="IDX13"></A>
+the grammar is used as data for the following algorithm:
+<P>
+<OL>
+<LI>
+Let <CODE>text</CODE> be a single occurrence of the axiom.
+<P>
+<LI>
+If no production states that a symbol currently in <CODE>text</CODE> can be replaced
+by some sequence of symbols, then stop.
+<P>
+<LI>
+Rewrite <CODE>text</CODE> by replacing one of its symbols with a sequence
+according to some production.
+<P>
+<LI>
+Go to step (2).
+</OL>
+<P>
+When this algorithm terminates, <CODE>text</CODE> is a legal text in the language.
+The <DFN>phrase structure</DFN>
+<A NAME="IDX14"></A>
+of that text is the hierarchy of sequences used in its derivation.
+<P>
+Given a context-free grammar that satisfies certain conditions,
+Eli can generate a <DFN>parsing routine</DFN>
+<A NAME="IDX15"></A>
+to determine the derivation (and hence the phrase structure) of any legal text.
+This routine will also automatically detect and report any errors
+<A NAME="IDX17"></A>
+<A NAME="IDX18"></A>
+<A NAME="IDX19"></A>
+<A NAME="IDX16"></A>
+in the text, and repair
+<A NAME="IDX20"></A>
+them to produce a correct phrase structure
+(which may not be that intended by the person who wrote the erroneous text).
+<P>
+<H2><A NAME="SEC2" HREF="syntax_toc.html#SEC2">How to describe a context-free grammar</A></H2>
+<P>
+Each production of a context-free grammar consists of a symbol to be replaced
+and the sequence that replaces it.
+This can be represented in a type-<TT>`con'</TT> file
+<A NAME="IDX22"></A>
+<A NAME="IDX23"></A>
+<A NAME="IDX21"></A>
+by giving the symbol to be replaced, followed by a colon,
+followed by the sequence that replaces it, followed by a period:
+<P>
+<PRE>
+Assignment: Variable ':=' Expression.
+StatementList: .
+Statement:
+   'if' Expression 'then' Statement
+   'else' Statement.
+</PRE>
+<P>
+The first production asserts that the symbol <CODE>Assignment</CODE> can be replaced
+by the sequence consisting of the three symbols <CODE>Variable</CODE>, <CODE>':='</CODE>,
+and <CODE>Expression</CODE>.
+Any occurrence of the symbol <CODE>StatementList</CODE> can be replaced by an empty
+sequence according to the second production.
+In the third production, you see that new lines can be used as separators
+in the description of a production.  This notation is often more commonly
+referred to as <DFN>Backus Naur Form</DFN>, or just <DFN>BNF</DFN>.
+<A NAME="IDX25"></A>
+<A NAME="IDX24"></A>
+<P>
+Symbols that are to be replaced are called <DFN>nonterminals</DFN>,
+<A NAME="IDX26"></A>
+and are always represented by <DFN>identifiers</DFN>.
+<A NAME="IDX27"></A>
+(An identifier is a sequence of letters and digits, the first of which is a
+letter.)
+Every nonterminal must appear before a colon in at least one production. 
+The axiom is a nonterminal that appears before the colon in exactly one
+production, and does not appear between the colon and the period in any
+production.
+There must be exactly one nonterminal satisfying the conditions for the axiom.
+<P>
+Symbols that cannot be replaced are called <DFN>terminals</DFN>,
+<A NAME="IDX28"></A>
+and may be represented by either identifiers or <DFN>literals</DFN>.
+<A NAME="IDX29"></A>
+(A literal is a sequence of characters bounded by apostrophes (<KBD>'</KBD>).
+An apostrophe appearing within a literal is represented by two successive
+apostrophes.)
+No terminal may appear before a colon in any production.
+Terminals represent character strings that are recognized by the lexical
+analyzer (see  <A HREF="lex_1.html#SEC1">Specifications of Lexical Analysis</A>).
+<A NAME="IDX30"></A>
+<P>
+<DFN>Extended BNF</DFN> allows the use of certain operators on the right hand side
+of a production.  These operators are designed to be short-hands to simplify
+the grammar description.  Rules with extended BNF operators can be
+translated into rules which use only the strict BNF constructs described
+so far.  While the use of extended BNF constructs is supported for the
+concrete syntax description in Eli, only strict BNF constructs are allowed
+in the abstract syntax.  When it comes time to deduce the correspondence
+between the concrete and abstract syntax, Maptool operates on the abstract
+syntax and a version of the concrete syntax in which all rules containing 
+extended BNF constructs have been translated into equivalent strict
+BNF rules.
+<P>
+The remainder of this section is devoted to describing how each of the extended
+BNF constructs are translated to their strict BNF equivalents.  Note that
+most of the EBNF constructs require the introduction of generated symbols
+for their strict BNF translation.  Users are strongly discouraged from using
+these constructs in instances where attribution is required for those
+contexts, because changes in the grammar will change the names of the
+generated symbols used.
+<P>
+The most appropriate use of EBNF constructs that introduce generated
+symbols is when matching the LIDO
+<CODE>LISTOF</CODE> construct, since the <CODE>LISTOF</CODE> construct makes no
+assumptions about the phrase structure of the list.
+For a description of the <CODE>LISTOF</CODE> construct, see
+ <A HREF="lidoref_3.html#SEC4">Productions of LIDO - Reference Manual</A>.
+<P>
+When a grammar contains many productions specifying replacement of the same
+nonterminal, a slash, denoting <DFN>alternation</DFN>
+<A NAME="IDX31"></A>
+can be used to avoid re-writing the symbol being replaced:
+<P>
+<PRE>
+Statement:
+   Variable ':=' Expression /
+   'if' Expression 'then' Statement 'else' Statement /
+   'while' Expression 'do' Statement .
+</PRE>
+<P>
+This alternation specifies three productions.
+The nonterminal to be replaced is <CODE>Statement</CODE> in each case.
+Possible replacement sequences are separated by slashes (<KBD>/</KBD>).
+The strict BNF translation for the above example is:
+<P>
+<PRE>
+Statement: Variable ':=' Expression .
+Statement: 'if' Expression 'then' Statement 'else' Statement . 
+Statement: 'while' Expression 'do' Statement . 
+</PRE>
+<P>
+Alternation does not introduce any generated symbols and has a very
+straight-forward translation.  As a result, it is the most heavily used
+of the EBNF constructs.
+<P>
+Square brackets are used to denote that the set of symbols
+enclosed by the brackets are optional.  In the following
+example, <CODE>Constants</CODE> and <CODE>Variables</CODE> are optional,
+but <CODE>Body</CODE> is not:
+<P>
+<PRE>
+Program: [Constants] [Variables] Body .
+</PRE>
+<P>
+The strict BNF translation of this construct is to generate
+a rule for each possible permutation of the right hand side.
+In the case of the above example, the following four rules
+would result:
+<P>
+<PRE>
+Program: Body .
+Program: Variables Body .
+Program: Constants Body .
+Program: Constants Variables Body .
+</PRE>
+<P>
+While the translation doesn't introduce any generated symbols,
+indiscriminate use of this construct may lead to less readable specifications.
+<P>
+An asterisk (or star) is used to denote zero or more occurrences
+of the phrase to which it is applied.  In the following example,
+<CODE>Program</CODE> consists of zero or more occurrences of <CODE>Variable</CODE>
+followed by <CODE>Body</CODE>:
+<P>
+<PRE>
+Program: Variable* Body .
+</PRE>
+<P>
+The strict BNF translation of this construct requires the introduction
+of a generated symbol.  Generated symbols begin with the letter <CODE>G</CODE>
+and are followed by a unique number.  Generated symbols are chosen to not
+conflict with existing symbols in the concrete syntax.  No check is
+performed to ensure that the generated symbols do not conflict with
+symbols in the abstract syntax, so users should avoid using symbols
+of this form in their abstract syntax.  The translation
+for the above example is as follows:
+<P>
+<PRE>
+Program: G1 Body .
+G1: G1 Variable .
+G1: .
+</PRE>
+<P>
+A plus is used to denote one or more occurrences
+of the phrase to which it is applied.  In the following example,
+<CODE>Program</CODE> consists of one or more occurrences of <CODE>Variable</CODE>
+followed by <CODE>Body</CODE>:
+<P>
+<PRE>
+Program: Variable+ Body .
+</PRE>
+<P>
+The strict BNF translation of this construct is similar to the translation
+of the asterisk (@xref{Asterisk}).  The translation
+for the above example is as follows:
+<P>
+<PRE>
+Program: G1 Body .
+G1: G1 Variable .
+G1: Variable .
+</PRE>
+<P>
+A double slash is used to denote one or more occurrences of a phrase
+separated by a symbol.  In the following example, <CODE>Input</CODE> is a
+sequence of one or more <CODE>Declaration</CODE>'s separated by a comma:
+<P>
+<PRE>
+Input: Declaration // ',' .
+</PRE>
+<P>
+The strict BNF translation for the above example is as follows:
+<P>
+<PRE>
+Input: G1 .
+G1: G2 .
+G1: G1 ',' G2 .
+G2: Declaration .
+</PRE>
+<P>
+Note that all of the EBNF constructs, except the single slash (for alternation)
+have higher precedence than the separator construct.
+<P>
+Parentheses are used to group EBNF constructs.  This is used primarily
+to apply other EBNF operators to more than a single symbol.  For example:
+<P>
+<PRE>
+Program: (Definition Use)+ .
+</PRE>
+<P>
+In this example, we want to apply the Plus operator to the concatenation of
+a <CODE>Definition</CODE> and a <CODE>Use</CODE>.  The result denotes one or more
+occurrences of <CODE>Definition</CODE>'s followed by <CODE>Use</CODE>'s.  The strict
+BNF translation for the above is:
+<P>
+<PRE>
+Program: G2 .
+G1: Definition Use .
+G2: G1 .
+G2: G2 G1 .
+</PRE>
+<P>
+This is identical to the translation for the Plus operator operating on a
+single symbol, except that another generated symbol is created to represent
+the parenthetical phrase.
+<P>
+Note that a common error is to introduce parentheses where they are not
+needed.  This will result in the introduction of unexpected generated
+symbols.
+<P>
+<H2><A NAME="SEC3" HREF="syntax_toc.html#SEC3">Using structure to convey meaning</A></H2>
+<P>
+A production is a construct with two components: the symbol to be replaced
+and the sequence that replaces it.
+We defined the meaning of the production in terms of those components,
+saying that whenever the symbol was found in <CODE>text</CODE>, it could be
+replaced by the sequence.
+This is the general approach that we use in defining the meaning of constructs
+<A NAME="IDX32"></A>
+in any language.
+For example, we say that an assignment is a statement with two components,
+a variable and an expression.
+The meaning of the assignment is to replace the value of the variable with
+the value resulting from evaluating the expression.
+<P>
+The context-free grammar for a language specifies a "component" relationship.
+Each production says that the components of the phrase represented by the
+symbol to be replaced are the elements of the sequence that replaces it.
+To be useful, the context-free grammar for a language should embody exactly the
+relationship that we use in defining the meanings of the constructs of that
+language.
+<P>
+<H3><A NAME="SEC4" HREF="syntax_toc.html#SEC4">Operator precedence</A></H3>
+<P>
+Consider the following expressions:
+<P>
+<PRE>
+A + B * C
+(A + B) * C
+</PRE>
+<P>
+In the first expression, the operands of the addition are the variable
+<CODE>A</CODE> and the product of the variables <CODE>B</CODE> and <CODE>C</CODE>.
+The reason is that in normal mathematical notation, multiplication takes
+precedence over addition.
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<A NAME="IDX33"></A>
+Parentheses have been used in the second expression to indicate that the
+operands of the multiplication are the sum of variables <CODE>A</CODE> and
+<CODE>B</CODE>, and the variable <CODE>C</CODE>.
+<P>
+The general method for embodying this concept of operator precedence in a
+context-free grammar for expressions is to associate a distinct nonterminal
+with each precedence level, and one with operands that do not contain
+"visible" operators.
+For our expressions, this requires three nonterminals:
+<P>
+<DL COMPACT>
+<DT><CODE>Sum</CODE>
+<DD>An expression whose operator is <CODE>+</CODE>
+<P>
+<DT><CODE>Term</CODE>
+<DD>An expression whose operator is <CODE>*</CODE>
+<P>
+<DT><CODE>Primary</CODE>
+<DD>An expression not containing "visible" operators
+</DL>
+<P>
+The productions that embody the concept of operator precedence would then
+be:
+<P>
+<PRE>
+Sum: Sum '+' Term / Term.
+Term: Term '*' Primary / Primary.
+Primary: '(' Sum ')' / Identifier.
+</PRE>
+<P>
+<H3><A NAME="SEC5" HREF="syntax_toc.html#SEC5">Operator associativity</A></H3>
+<P>
+Consider the following expressions:
+<P>
+<PRE>
+A - B - C
+A ** B ** C
+A &#60; B &#60; C
+</PRE>
+<P>
+Which operator has variable <CODE>B</CODE> as an operand in each case?
+<P>
+This question can be answered by stating an <DFN>association</DFN>
+<A NAME="IDX37"></A>
+<A NAME="IDX38"></A>
+<A NAME="IDX36"></A>
+for each operator:
+If <CODE>-</CODE> is "left-associative",
+<A NAME="IDX39"></A>
+then the first expression is interpreted as though it had been written
+<CODE>(A-B)-C</CODE>.
+Saying that <CODE>**</CODE> is "right-associative"
+<A NAME="IDX40"></A>
+means that the second expression is interpreted as though it had been written
+<CODE>A**(B**C)</CODE>.
+The language designer may wish to disallow the third expression by saying
+that <CODE>&#60;</CODE> is "non-associative".
+<A NAME="IDX41"></A>
+<P>
+Association rules are embodied in a context-free grammar by selecting
+appropriate nonterminals to describe the operands of an operator.
+For each operator, two nonterminals must be known:
+the nonterminal describing expressions that may contain that operator, and
+the nonterminal describing expressions that do not contain that operator
+but may be operands of that operator.
+Usually these nonterminals have been established to describe operator
+precedence.
+Here is a typical set of nonterminals used to describe expressions:
+<P>
+<DL COMPACT>
+<DT><CODE>Relation</CODE>
+<DD>An expression whose operator is <CODE>&#60;</CODE> or <CODE>&#62;</CODE>
+<P>
+<DT><CODE>Sum</CODE>
+<DD>An expression whose operator is <CODE>+</CODE> or <CODE>-</CODE>
+<P>
+<DT><CODE>Term</CODE>
+<DD>An expression whose operator is <CODE>*</CODE> or <CODE>/</CODE>
+<P>
+<DT><CODE>Factor</CODE>
+<DD>An expression whose operator is <CODE>**</CODE>
+<P>
+<DT><CODE>Primary</CODE>
+<DD>An expression not containing "visible" operators
+</DL>
+<P>
+The association rules discussed above would therefore be expressed by the
+following productions
+(these are <EM>not</EM> the only productions in the grammar):
+<P>
+<PRE>
+Sum: Sum '-' Term.
+Factor: Primary '**' Factor.
+Relation: Sum '&#60;' Sum.
+</PRE>
+<P>
+The first production says that the left operand of <CODE>-</CODE> can contain
+other <CODE>-</CODE> operators, while the right operand cannot (unless the
+subexpression containing them is surrounded by parentheses).
+Similarly, the right operand of <CODE>**</CODE> can contain other <CODE>**</CODE>
+operators but the left operand cannot.
+The third rule says that neither operand  of <CODE>&#60;</CODE> can contain other
+<CODE>&#60;</CODE> operators.
+<P>
+<H3><A NAME="SEC6" HREF="syntax_toc.html#SEC6">Scope rules for declarations</A></H3>
+<P>
+Identifiers
+<A NAME="IDX43"></A>
+<A NAME="IDX42"></A>
+are normally given meaning by declarations.
+The meaning given to an identifier by a particular declaration holds over
+some portion of the program, called the <DFN>scope</DFN>
+<A NAME="IDX44"></A>
+of that declaration.
+A context-free grammar for a language should define a phrase structure that
+is consistent with the scope rules of that language.
+<P>
+For example, the declaration of a procedure <CODE>P</CODE> within the
+body of procedure <CODE>Q</CODE> gives meaning to the identifier <CODE>P</CODE>, and
+its scope might be the body of the procedure <CODE>Q</CODE>.
+If <CODE>P</CODE> has parameters, the scope of their declarations (which are
+components of the procedure declaration) is the body of procedure <CODE>P</CODE>.
+<P>
+Now consider the following productions describing a procedure declaration:
+<A NAME="IDX45"></A>
+<P>
+<PRE>
+procedure_declaration: 'procedure' procedure_heading procedure_body.
+procedure_heading:
+   ProcIdDef formal_parameter_part ';' specification_part.
+</PRE>
+<P>
+Notice that the phrase structure induced by these productions is
+inconsistent with the postulated scope rules.
+The declaration of <CODE>P</CODE> (<CODE>ProcIdDef</CODE>) is in the same phrase
+(<CODE>procedure_heading</CODE>) as the declarations of the formal parameters.
+This defect can be remedied by a slight change in the productions:
+<P>
+<PRE>
+procedure_declaration: 'procedure' ProcIdDef ProcRange.
+ProcRange:
+   formal_parameter_part ';' specification_part procedure_body.
+</PRE>
+<P>
+Here the formal parameters and the body have both been made components of a
+single phrase (<CODE>ProcRange</CODE>), which defines the scope of the formal
+parameter declarations.
+The declaration of <CODE>P</CODE> lies outside of this phrase, thus allowing its
+scope to be differentiated from that of the formal parameters.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_2.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

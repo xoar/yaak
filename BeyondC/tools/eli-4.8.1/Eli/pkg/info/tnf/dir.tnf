@@ -1,0 +1,150 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename adt
+@setchapternewpage odd
+@settitle Abstract data types to be used in specifications
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: dir.tnf,v 2.2 2008/03/18 13:20:25 asloane Exp $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@node top, , , 
+
+@chapter Eli Documentation
+
+This is the root of the Eli system documentation.  Please follow the links
+below to obtain detailed information on all aspects of the system.
+
+@menu
+* Reference Card: (EliRefCard).       Eli Quick Reference Card.
+* Frequently Asked Questions: (faq).  Answers to Common Questions.
+
+Tutorials:
+
+* Introduction: (novice).             Guide For New Eli Users.
+* Release Notes: (news).              New Features of Eli.
+* Name Analysis: (nametutorial).      Tutorial on Name Analysis.
+* Type Analysis: (typetutorial).      Tutorial on Type Analysis.
+
+Reference Manuals:
+
+* User Interface: (ui).               Interacting with Eli.
+* Info: (info).                       Documentation browsing system.
+* Products: (pp).                     Eli products and parameters.
+
+Libraries:
+
+* Library: (lib).                     Eli library routines.
+* MODLIB: (modlib).                   Specification Module Library.
+
+Translation Tasks:
+
+* Lexical: (lex).                     Lexical analysis specification.
+* Syntax: (syntax).                   Syntactic Analysis Manual.
+* Semantic: (comptrees).              LIDO -- Computation in Trees.
+
+Tools:
+
+* LIDO: (lidoref).                    LIDO -- Reference Manual.
+* LCL: (lcl).                         LIGA Control Language.
+* SHOW: (show).                       Debugging Information for LIDO.
+* GORTO: (gorto).                     Graphical ORder TOol.
+                                      
+* FunnelWeb: (fw).                    FunnelWeb User's Manual.
+                                      
+* PTG: (ptg).                         Pattern-based Text Generator.
+* PDL: (deftbl).                      Property definition language.
+* OIL: (oil).                         Operator Identification Language.
+* TP: (tp).                           Tree grammar specification language.
+* CLP: (clp).                         Command line processing.
+* COLA: (cola).                       COLA Options Reference Manual.
+                                      
+* Unparsing: (idem).                  Generating unparsing code.
+                                      
+* Monitoring: (mon).                  Monitoring a processor's execution.
+                                      
+Administration:                       
+                                      
+* System Admin: (sysadmin).           System Administration Guide.
+
+* Index: (gindex).                    Global index for all manuals.
+@end menu
+
+@iftex
+@paragraphindent 0
+
+@section Overview Information
+
+Eli Quick Reference Card: @xref{top,,,EliRefCard,EliRefCard}@*
+Frequently Asked Questions and Answers: @xref{top,,,faq,faq}@*
+
+@section Tutorials
+
+Guide For New Eli Users: @xref{top,,,novice,novice}@*
+Release Notes: @xref{top,,,news,news}@*
+Name Analysis Tutorial: @xref{top,,,nametutorial}@*
+Type Analysis Tutorial: @xref{top,,,typetutorial}@*
+
+@section Reference Manuals
+
+User interface: @xref{top,,,ui,ui}@*
+Info documentation browsing system: @xref{top,,,info,info}@*
+Products and parameters: @xref{top,,,pp,pp}@*
+
+@section Libraries
+
+Library routines: @xref{top,,,lib,lib}@*
+Specification Module Library: @xref{top,,,modlib,modlib}@*
+
+@section Translation Tasks
+
+Lexical analysis specification: @xref{top,,,lex,lex}@*
+Syntactic Analysis: @xref{top,,,syntax,syntax}@*
+LIDO -- Computation in Trees: @xref{top,,,comptrees,comptrees}@*
+
+@section Tools
+
+LIDO -- Reference Manual: @xref{top,,,lidoref,lidoref}@*
+LIGA Control Language: @xref{top,,,lcl,lcl}@*
+Debugging Information for LIDO: @xref{top,,,show,show}@*
+Graphical ORder TOol: @xref{top,,,gorto,gorto}@*
+                                      
+FunnelWeb User's Manual: @xref{top,,,fw,fw}@*
+                                      
+Pattern-based Text Generator: @xref{top,,,ptg,ptg}@*
+Property definition language: @xref{top,,,deftbl,deftbl}@*
+Operator Identification Language: @xref{top,,,oil,oil}@*
+Tree grammar specification language: @xref{top,,,tp,tp}@*
+Command line processing: @xref{top,,,clp,clp}@*
+COLA Options Reference Manual: @xref{top,,,cola,cola}@*
+                                      
+Generating unparsing code: @xref{top,,,idem,idem}@*
+                                      
+Monitoring a processor's execution: @xref{top,,,mon,mon}@*
+                                      
+@section Administration
+                                      
+System Administration Guide: @xref{top,,,sysadmin,sysadmin}@*
+
+Global index for all manuals: @xref{top,,,gindex,gindex}@*
+@end iftex
+
+@bye

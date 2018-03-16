@@ -1,0 +1,962 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename prop
+@setchapternewpage odd
+@settitle Association of properties to definitions
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: prop.tnf,v 1.9 2002/05/28 07:29:54 peter Exp peter $
+@comment
+@comment (C) Copyright 1999 University of Paderborn.
+@comment 
+@comment This file is part of the Eli Module Library.
+@comment 
+@comment The Eli Module Library is free software; you can redistribute it and/or
+@comment modify it under the terms of the GNU Library General Public License as
+@comment published by the Free Software Foundation; either version 2 of the
+@comment License, or (at your option) any later version.
+@comment 
+@comment The Eli Module Library is distributed in the hope that it will be
+@comment useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@comment Library General Public License for more details.
+@comment 
+@comment You should have received a copy of the GNU Library General Public
+@comment License along with the Eli Module Library; see the file COPYING.LIB.
+@comment If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@comment Suite 330, Boston, MA 02111-1307, USA.
+@comment
+
+@titlepage
+@sp 2
+@center @titlefont{Association of properties to definitions}
+@sp 4
+@center Uwe Kastens
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center FRG
+@sp 8
+@center $Revision: 1.9 $
+@end titlepage
+ 
+@iftex 
+@finalout
+@end iftex
+
+@node top, , , (modlib)
+@comment  node-name,  next,  previous,  up
+@ifinfo
+@chapheading Specification Module Library
+@chapheading Property Library
+@end ifinfo
+
+@findex Library @code{Prop}
+@findex Prop
+@findex property
+@findex PDL
+@findex key
+@comment The Reference in the next paragraph is nonexistent.
+The input for a text processor usually describes objects that have certain 
+properties, e.g.@: named entities like variables in a program, or fields of 
+a data base. Their properties are determined, used, or checked according 
+to the context in which an object occurs. An object may occur several times 
+in the input.  The occurrences are mapped to a unique identification, 
+a key (@pxref{top, , Name Analysis Library, name, Name analysis according to scope rules}). Properties are associated and accessed
+via those keys. Properties are represented by values of certain types.
+The Eli tool PDL is used to generate functions that
+store property values in a data base of the language processor and that
+retrieve values from it.
+
+
+@ifclear html
+The first section describes how the modules are instatiated and used,
+the others describe the modules contained in this library:
+@end ifclear
+
+@menu
+* Usage::     Common Aspects of Property Modules
+* OccCnt::    Count Occurrences of Objects
+* SetFirst::  Set a Property at the First Object Occurrence
+* Unique::    Check for Unique Object Occurrences
+* FirstOcc::  Determine First Object Occurrence
+* ObjCnt::    Map Objects to Integers
+* Kind::      Associate Kinds to Objects
+* KindSet::   Associate Sets of Kinds to Objects
+* Reflex::    Reflexive Relations Between Objects
+* PropLib::   Some Useful PDL Specifications
+* Defer::     Deferred Property Association
+* Index::     Index
+@end menu
+@iftex
+@ifclear html
+@table @code
+@item Usage
+Common Aspects of Property Modules
+@item OccCnt
+Count Occurrences of Objects
+@item SetFirst
+Set a Property at the First Object Occurrence
+@item Unique
+Check for Unique Object Occurrences
+@item FirstOcc
+Determine First Object Occurrence
+@item ObjCnt
+Map Objects to Integers
+@item Kind
+Associate Kinds to Objects
+@item KindSet
+Associate Sets of Kinds to Objects
+@item Reflex
+Reflexive Relations Between Objects
+@item PropLib
+Some Useful PDL Specifications
+@item Defer
+Deferred Property Association
+@end table
+@end ifclear
+@end iftex
+
+The modules of this library can solve a large variety of tasks.
+E.g.@: the @code{OccCnt} module enumerates occurrences of each
+object. Its result can be used to check whether an identifier
+is multiply defined. It can also be used to trigger an output
+operation exactly once for each object. Such an output
+may say how often the identifier occurs in the text, or
+it may be a declaration of the identifier in the target code.
+
+@ifset html
+The first section describes how the modules are instatiated and used,
+the others describe the modules contained in this library:
+@end ifset
+
+@comment =====================================
+@node Usage, OccCnt, , top
+@findex instantiation
+@chapter Common Aspects of Property Modules
+
+The use of any module of this library requires that objects are 
+identified by keys as computed by the consistent renaming modules.
+
+All modules of this library, except @code{SetFirst}, @code{Reflex}, 
+and @code{PropLib}, are instantiated by the same pattern:
+@example
+   $/Prop/ModuleName.gnrc+instance=NAME +referto=KEY :inst
+@end example
+@noindent
+for example
+@example
+   $/Prop/OccCnt.gnrc+instance=Var +referto=CtrlVar :inst
+@end example
+
+The @code{instance} parameter is used to distinguish several instances
+of a module that are used in one specification.
+If only one instance of a module is used the parameter can be omitted.
+The @code{referto} parameter is used to specify the name of the
+@code{Key} attribute, @code{CtrlVarKey} in the example above.
+The value must be the same as that of the @code{referto} parameter
+specified for the instance of the consistent renaming module
+which computed the @code{Key} attribute.
+(The @code{referto} parameter is usually omitted, unless there are
+symbols that have more than one @code{Key} attribute.)
+
+The instantiation of the modules @code{SetFirst}, @code{Reflex},
+and @code{PropLib} is described in the corresponding section.
+The modules @code{PropLib} and @code{Reflex} provide some useful
+PDL operations on definition table entries.
+All other modules of this library provide some computational role 
+to be used in @code{.lido} specifications. The following applies only
+to these modules.
+
+The computational results of each module can be accessed using attributes
+in @code{.lido} computations, or by application of PDL generated
+access functions applied to object keys, as described for each module
+individually.
+
+@findex range
+The computations provided by each module ensure that properties
+are not accessed before they are set.
+For this purpose each module provides a computational role
+named @code{NAMERangeModName}, where @code{ModName} is the
+name of the module and @code{NAME} is the value of the
+@code{instance} parameter.
+(Exception: in the module @code{OccCnt} it is named @code{NAMERangeCnt}.)
+The root of the grammar automatically inherits this role.
+Hence, it need not be used in usual cases.
+The condition that all properties are set
+is provided by an attribute of the range symbol. It may be used
+as a precondition for computations which rely on that fact.
+
+In seldom cases it may be necessary that symbols other than the grammar root
+inherit that range role
+in order to avoid cyclic dependencies between computations:
+if the computation of a property value in one range
+of the program depends on the access of a property in another 
+(e.g.@: enclosing) range.
+
+Note: The computations of these modules identify program objects
+by definition table keys. Hence, ranges specified for
+the computation of the keys by a unique renaming module,
+e.g.@: @code{RangeScope}, are irrelevant for these modules here.
+
+In our running example we use the @code{OccCnt} module to check
+for multiply defined identifiers. As it is the first use of this
+module we can ommit the @code{instance} parameter. Since we
+omitted the @code{referto} parameter in the instance of the
+consistent renaming module that computes the keys, we omit it here, too:
+
+@example
+   $/Prop/OccCnt.gnrc :inst
+@end example
+
+@findex identifier occurrence
+@findex attribute @code{Key}
+The central computations of each module are provided by one or
+several computational roles, e.g.@: @code{NAMECount} and @code{NAMETotalCnt}
+in case of the @code{OccCnt} module.
+These roles are usually associated to grammar symbols representing
+identifier occurrences. In general they may be associated
+to any symbol that has a @code{Key} attribute.
+
+In order to check for multiply defined identifiers in our running example
+both the @code{Count} role and the @code{TotalCnt} role is associated
+to defining identifier occurrences. As there are several symbols
+representing defining identifier occurrences which all have to be
+checked in the same way, we introduce a new role @code{MultDefChk}
+that comprises the necessary computations:
+
+@example
+   SYMBOL MultDefChk    INHERITS Count, TotalCnt END;
+
+   SYMBOL DefIdent      INHERITS MultDefChk END;
+   SYMBOL ClassDefIdent INHERITS MultDefChk END;
+   SYMBOL ModDefIdent   INHERITS MultDefChk END;
+@end example
+
+
+@comment =====================================
+@node OccCnt, SetFirst, Usage, top
+@chapter Count Occurrences of Objects
+
+@findex Module @code{OccCnt}
+@findex count occurrences of objects
+The computations of this module enumerate certain occurrences of
+objects represented by symbols that have a @code{Key} attribute.
+That are usually certain occurrences of identifiers.
+
+The information computed by the module may be used for different purposes,
+e.g.@: for statistics about the input text, checks for unique occurrences,
+computations at the first or the last occurrence, etc.
+
+The module is instantiated by
+@example
+   $/Prop/OccCnt.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@findex Count
+@findex TotalCnt
+The module provides two computational roles,
+@code{NAMECount} and @code{NAMETotalCnt}.
+The roles may be associated to one or several grammar symbols.
+
+@findex RangeCnt
+The role @code{NAMERangeCnt} is automatically
+associated to the grammar root. It usually need not
+be used. It is not intended to provide separate counting
+in different parts of the tree (@pxref{Usage}).
+
+@findex attribute @code{Cnt}
+@findex attribute @code{TotalCnt}
+@findex attribute @code{GotCnt}
+Let @code{k} be a key, then all occurrences of @code{k} in a
+@code{NAMECount} context are enumerated in left-to-right depth-first order.
+The attribute @code{NAMECount.NAMECnt} is the number of @code{k}'s
+occurrence with respect to this order. The total number of
+occurrences of @code{k} is associated as the property @code{NAMECnt}
+to @code{k}. The role @code{NAMETotalCnt} makes it available
+as an attribute @code{NAMETotalCnt.NAMETotalCnt}.
+If the @code{NAMECnt} property is accessed directly in user's computations,
+those have to state @code{NAMERangeCnt.GotNAMECnt} as precondition.
+
+In (@pxref{Usage}), we explained how to associate these rule to
+grammar symbols in order to check for multiply definitions:
+
+@example
+   SYMBOL MultDefChk    INHERITS Count, TotalCnt END;
+
+   SYMBOL DefIdent      INHERITS MultDefChk END;
+   SYMBOL ClassDefIdent INHERITS MultDefChk END;
+   SYMBOL ModDefIdent   INHERITS MultDefChk END;
+@end example
+
+The check is completed by using the results of this module in
+computations associated to @code{MultDefChk}:
+
+@example
+   SYMBOL MultDefChk COMPUTE
+      IF (GT (THIS.TotalCnt, 1),
+      message (ERROR, 
+               CatStrInd ("identifier is multiply defined: ",
+                          THIS.Sym),
+               0, COORDREF));
+   END;
+@end example
+
+The following example demonstrates a different application of this module.
+Assume we want to print how often each object in a program is
+referenced in some context. Hence, any identifier occurrence
+has to be counted. To avoid that this module application
+collides with the previous, we have to use a different instance of the
+@code{OccCnt} module:
+
+@example
+   $/Prop/OccCnt.gnrc +instance=Prnt:inst
+@end example
+
+
+That is easily achieved by associating the
+@code{Count} and the @code{TotalCnt} roles to the role 
+@code{IdentOcc} previously introduced in our running example:
+
+@example
+   SYMBOL IdentOcc  INHERITS PrntCount, PrntTotalCnt COMPUTE
+      IF (EQ (THIS.PrntCnt, 1),
+      printf ("identifier %s occurs %d times\n",
+              StringTable (THIS.Sym), THIS.PrntTotalCnt));
+   END;
+@end example
+
+@comment =====================================
+@node SetFirst, Unique, OccCnt, top
+@chapter Set a Property at the First Object Occurrence
+
+@findex Module @code{SetFirst}
+This module associates values of type @code{TYPE} as property @code{NAME}
+to objects identified by keys. The property is set at most once
+at the first occurrence of the object which has the @code{NAMESetFirst}
+role. The module may for example be used to associate source
+coordinates of defining identifier occurrences to objects.
+
+The module instantiation differs from the usual pattern for this library:
+
+@example
+   $/Prop/SetFirst.gnrc+instance=NAME +referto=TYPE :inst
+@end example
+
+Note: This module is not applicable to symbol occurrences that
+do not have an attribute named @code{Key}, e.g.@: due to the
+use of the @code{referto} parameter for a consistent renaming module.
+
+Values are associated in the first @code{NAMESetFirst} context
+with respect to left-to-right depth-first tree order.
+The property value to be set has to be provided by a user's computation
+for the attribute @code{NAMESetFirst.NAME} (in any, not only the first
+@code{NAMESetFirst} context).
+
+@findex RangeSetFirst
+The role @code{NAMERangeSetFirst} is automatically associated
+to the root of the grammar (@pxref{Usage}).
+The attribute @code{NAMERangeSetFirst.GotNAME}
+has to be used as a precondition for computations which access
+the @code{NAME} property to guarantee that the property is set.
+
+@findex source coordinates
+If we want to associate the source coordinates
+of defining identifier occurrences to object keys in our running example
+we instantiate this module using the coordinate type @code{CoordPtr}
+exported by the error module, and the property name @code{DefPt}
+
+@example
+   $/Prop/SetFirst.gnrc+instance=DefPt +referto=CoordPtr :inst
+@end example
+
+Then the roles of this module are associated to our grammar symbols:
+
+@example
+   SYMBOL DefPoint      INHERITS DefPtSetFirst COMPUTE
+      SYNT.DefPt = COORDREF;
+   END;
+
+   SYMBOL DefIdent      INHERITS DefPoint END;
+   SYMBOL ClassDefIdent INHERITS DefPoint END;
+   SYMBOL ModDefIdent   INHERITS DefPoint END;
+@end example
+
+@findex PropLib
+@findex CoordLess
+@findex definition before application
+@findex Pascal
+The property computed this way may for example be used to check
+whether an identifier occurs in an applied context before its
+definition, as required e.g.@: in Pascal.
+For that purpose a function @code{CoordLess} is used
+to compare coordinates. (It is provided by the @code{PropLib}      
+module, which is automatically instantiated when this module is used.)
+
+@example
+   SYMBOL ChkBeforeDef COMPUTE 
+      IF (CoordLess (COORDREF, GetDefPt (THIS.Key, COORDREF)),
+      message (ERROR, 
+               CatStrInd ("identifier occurs before its definition: ", 
+                          THIS.Sym),
+               0, COORDREF))
+      DEPENDS_ON INCLUDING DefPtRangeSetFirst.GotDefPt;
+   END;
+@end example
+
+The role @code{ChkBeforeDef} is then associated to all grammar symbols
+that represent applied identifer occurreces which shall be checked.
+
+@comment =====================================
+@node Unique, FirstOcc, SetFirst, top
+@findex Module @code{Unique}
+@findex Unique
+@findex attribute @code{Unique}
+@chapter Check for Unique Object Occurrences
+
+This module associates a boolean property @code{NAMEUnique}
+to object keys. It has the value 1 if the object occurs
+only once in the SYMBOL context @code{NAMEUnique}.
+It has the value 0 if it occurs more than once in the @code{NAMEUnique}
+context; otherwise the property is not set.
+The final value of the property is
+obtained by the attribute @code{NAMEUnique.NAMEUnique}, e.g.
+used to issue a message indicating multiple occurrences.
+(The same task can be solved using the more general module,
+@xref{OccCnt}.)
+
+The module is instantiated by
+@example
+   $/Prop/Unique.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@findex RangeUnique
+The role @code{NAMERangeUnique} is automatically associated to
+the grammar root (@pxref{Usage}).
+
+The multiply defined check for our running example, as explained for
+the @code{OccCnt} module (@pxref{OccCnt}), can be also achieved by:
+
+@example
+   SYMBOL MultDefChk    INHERITS Unique COMPUTE
+      IF (NOT (THIS.Unique),
+      message (ERROR, 
+               CatStrInd ("identifier is multiply defined: ", 
+               THIS.Sym),
+               0, COORDREF));
+   END;
+@end example
+
+@comment =====================================
+@node FirstOcc, ObjCnt, Unique, top
+@findex Module @code{FirstOcc}
+@findex FirstOcc
+@findex attribute @code{IsFirstOcc}
+@chapter Determine First Object Occurrence
+
+This module determines whether a @code{NAMEFirstOcc} occurrence of an object 
+is the first one in left-to-right depth-first tree order.
+The result is obtained by the attribute @code{NAMEFirstOcc.IsNAMEFirstOcc}
+that has the value 1 if it is the first occurrence, 0 otherwise.
+The computations of the module use the property named @code{NAMEFirstOcc}.
+(The same task can be solved using the more general module @code{OccCnt},
+@xref{OccCnt}.)
+
+@findex RangeFirstOcc
+The role @code{NAMERangeFirstOcc} is automatically associated
+to the grammar root (@pxref{Usage}).
+
+The module is instantiated by
+@example
+   $/Prop/FirstOcc.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@comment =====================================
+@node ObjCnt, Kind, FirstOcc, top
+@findex Module @code{ObjCnt}
+@findex property @code{ObjNo}
+@chapter Map Objects to Integers
+
+This module computes a mapping of object keys to non-negative numbers
+A number is associated as property named @code{NAMEObjNo} 
+to each object exactly once.
+In each @code{NAMERangeObjCnt} subtree the numbers are chosen
+separately starting from 0 incrementing by 1 (changeable default).
+@code{NAMERangeObjCnt} is automatically associated to the grammar root.
+
+The module can be used to just count the objects that occur in a
+range, to prepare for generating unique identifier names on output,
+or to map objects of a range to addresses that are incremented
+by a certain value.
+
+The module is instantiated by
+@example
+   $/Prop/ObjCnt.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@findex ObjCnt
+@findex attribute @code{ObjNo}
+The role @code{NAMEObjCnt} has to be associated to grammar
+symbols such that all objects that should be considered have
+an occurrence in such a context.
+The attribute @code{NAMEObjCnt.NAMEObjNo} is the number
+the object is mapped to.
+
+@findex RangeObjCnt
+@findex attribute @code{TotalObjNo}
+@code{NAMERangeObjCnt} is automatically associated to the
+grammar root (@pxref{Usage}).
+The attribute @code{NAMERangeObjCnt.NAMETotalObjNo}
+is the total number of objects in that range.
+The ranges may be nested. The mapping starts anew for each
+range node. The mappings of inner ranges do not contribute to
+outer ranges. 
+
+@findex attribute @code{InitObjCnt}
+@findex attribute @code{IncrementCnt}
+The default start value is 0. It can be changed by
+overriding the computation of @code{NAMERangeObjCnt.NAMEInitObjCnt}.
+The computation of @code{NAMEObjCnt.NAMEIncrementCnt} can be overridden
+to change the default increment value of 1.
+
+If the @code{ObjNo} property is accessed by user's computations, they
+have to state @code{NAMERangeObjCnt.NAMETotalObjNo} as a precondition.
+
+We demonstrate an application of this module by mapping the objects
+of out running example to unique numbers, in order to print
+unique names as they resulted from the consistent renaming task.
+For that purpose the grammar root can be chosen for the range role.
+The @code{ObjCnt} is simply attached to the @code{IdentOcc} role
+which represents any identifier occurrence in our example:
+
+@example
+   SYMBOL Program COMPUTE
+     printf ("the program references %d different objects\n",
+             THIS.TotalObjNo);
+   END;
+   SYMBOL IdentOcc INHERITS ObjCnt COMPUTE
+     printf ("object %s%d referenced in line %d\n",
+             StringTable (THIS.Sym), THIS.ObjNo, LINE); 
+   END;
+@end example
+
+@comment =====================================
+@node Kind, KindSet, ObjCnt, top
+@findex Module @code{Kind}
+@findex Kind
+@findex object kind
+@chapter Associate Kinds to Objects
+
+Objects in an input text are often classified to belong to one
+of several kinds, e.g.@: variables, procedures or labels in programming
+languages. They may occur in different contexts which determine their kind,
+require that they belong to a certain kind, or select different computations
+depending on their kind. 
+Such a classification is often the part of the type analysis task.
+
+This module can be used for any unique classification of objects
+which is encoded by integral values.
+
+If Objects may belong to more than one kind, or occurrences allow
+for objects of several kinds the module @code{KindSet}
+(@pxref{KindSet}) should be used instead of this one.
+
+The module is instantiated by
+@example
+   $/Prop/Kind.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@findex property @code{Kind}
+@findex SetKind
+@findex GetKind
+This module associates a property named @code{NAMEKind} of type @code{int} 
+to objects. Two computational roles @code{NAMESetKind} and @code{NAMEGetKind}
+are provided. 
+
+@findex attribute @code{Kind}
+In a context @code{NAMESetKind} the @code{NAMEKind}
+property of the object is set to the value of the attribute 
+@code{NAMESetKind.NAMEKind}, which has to be provided by a user's computation.
+In case that different @code{Kind} values are stated for one object
+in some @code{NAMESetKind} contexts the property value 0 named 
+@code{IntMultiple} is associated.
+
+@findex attribute @code{HasKind}
+In a context @code{NAMEGetKind} the property is accessed and supplied by
+the attribute @code{NAMEGetKind.HasNAMEKind}.
+It can be used to check if it is the required kind, or
+if the kind is ambigously set (@code{IntMultiple}), or
+if the kind is not set at all (value -1 named (@code{IntNone}).
+
+The roles @code{NAMESetKind} and @code{NAMEGetKind} may be associated
+to the same grammar symbol. That is necessary if kinds are determined
+by applications of objects rather than by definitions, or if a
+language does not distinguish between defining and applied occurrences.
+
+@findex RangeKind
+@findex attribute @code{GotKind}
+@code{NAMERangeKind} is automatically associated to the
+grammar root (@pxref{Usage}).
+If the @code{NAMEKind} property is accessed in other user's computations,
+those have to state @code{NAMERangeKind.GotNAMEKind} as precondition.
+
+@code{IntMultiple} and @code{IntNone} are defined in a file
+@code{KindBad.h}. If their encoding is inconvenient for a particular
+implementation, that file may be overridden by a user supplied file
+having the name @code{KindBad.h}.
+
+@comment =====================================
+@node KindSet, Reflex, Kind, top
+@findex Module @code{KindSet}
+@findex KindSet
+@findex object kind
+@chapter Associate Sets of Kinds to Objects
+
+Objects in an input text are often classified to belong to one or more
+of several kinds, e.g.@: variables, procedures or labels in programming
+languages. They may occur in different contexts which determine their kind,
+require that they belong to a certain kind, or select different computations
+depending on their kind.
+Such a classification is often the part of the type analysis task.
+
+This module can be used for any classification of objects
+which is encoded by non negative integral values.
+
+The module is instantiated by
+@example
+   $/Prop/KindSet.gnrc+instance=NAME +referto=KEY :inst
+@end example
+
+@findex Module @code{IntSet}
+@findex IntSet
+The module uses sets of kinds implemented by values of type
+@code{unsigned int} provided by the @code{IntSet} module (@pxref{IntSet, , Bit Sets of Integer Size, adt, Bit Sets of Integer Size}).
+(That module is instantiated automatically with @code{referto} parameter
+@code{int}, and the @code{instance} parameter omitted.)
+Hence the largest code chosen for a kind value must be less than
+the number of bits
+of an @code{unsigned int} (16 or 32 implementation dependent).
+
+@findex property @code{KindSet}
+This module associates a property named @code{NAMEKindSet} of type 
+@code{IntSet} to objects. 
+Three computational roles @code{NAMEAddKind}, @code{NAMEAddKindSet},
+and @code{NAMEGetKindSet} are provided. 
+
+@findex AddKind
+@findex attribute @code{Kind}
+In a context @code{NAMEAddKind}
+the kind value of the attribute @code{NAMEAddKind.NAMEKind} is added to
+the set of kinds of the object. The attribute
+has to be provided by a user's computation.
+
+@findex AddKindSet
+@findex attribute @code{KindSet}
+Similarly in a context @code{NAMEAddKindSet} the @code{IntSet} value of 
+the attribute @code{NAMEAddKindSet.NAMEKindSet} is united to
+the set of kinds of the object. The attribute
+has to be provided by a user's computation.
+
+@findex GetKindSet
+@findex attribute @code{HasKindSet}
+In a context @code{NAMEGetKindSet} the property is accessed and supplied by
+the attribute @code{NAMEGetKindSet.HasNAMEKindSet}.
+It can be used to compare the set of required kinds to the
+set of associated kinds using functions of the @code{IntSet} module.
+
+The roles @code{AddKind} and @code{AddKindSet} must not be associated
+to the same grammar symbol. @code{GetKindSet} may be combined with
+one of them. That is necessary if kinds are determined
+by applications of objects rather than by definitions, or if a
+language does not distinguish between defining and applied occurrences.
+
+@findex RangeKindSet
+@findex attribute @code{GotKind}
+@code{NAMERangeKindSet} is automatically associated to the
+grammar root (@pxref{Usage}).
+If the @code{NAMEKindSet} property is accessed in other user's computations,
+those have to state @code{NAMERangeKindSet.GotNAMEKind} as precondition.
+
+This module also provides three operations that modify
+@code{NAMEKindSet} properties stored in the definition module:
+
+@code{InsertNAMEKindSet(k,i)} inserts element @code{i} into the
+set stored for key @code{k}, and yields the new set as result.
+
+@code{UnionNAMEKindSet(k,s)} adds the set @code{s} to the
+set stored for key @code{k}, stores the result and returns it.
+
+@code{IntersectNAMEKindSet(k,s)} intersects the set @code{s} with
+set stored for key @code{k}, stores the result and returns it.
+
+We demonstrate the use of this module in our running example.
+It shall be analysed if each variable occurs at least once on the
+lefthand side of an assignment and on the righthand side.
+Hence, we introduce the kinds @code{VarAssigned} and @code{VarUsed}.
+A variable can have any set of the values depending on its occurrences.
+The values are named by a @code{.head} specification:
+
+@example
+   #define   VarAssigned    1
+   #define   VarUsed        2
+@end example
+
+In our tree grammar the two occurrences of variables can be distinguished
+for the symbol @code{Variable} rather than for the symbol @code{UseIdent}.
+Hence we propagate the @code{Key} attribute of @code{UseIdent}
+upto @code{Variable} and apply the module roles there:
+
+@example
+   SYMBOL Variable: Key: DefTableKey;
+   RULE: Variable ::= UseIdent COMPUTE
+     Variable.Key = UseIdent.Key;
+   END;
+
+   RULE: Statement::= Variable '=' Expression ';' COMPUTE
+     Variable.Kind = VarAssigned;
+   END;
+
+   RULE: Expression ::= Variable COMPUTE
+     Variable.Kind = VarUsed
+   END;
+
+   SYMBOL Variable INHERITS AddKind END;
+@end example
+
+In the context of a variable declaration the set of kinds is checked
+using functions of the @code{IntSet} module:
+
+@example
+   SYMBOL DefIdent INHERITS GetKindSet END;
+   RULE: ObjDecl ::= TypeDenoter DefIdent COMPUTE
+     IF (NOT (InIS (VarAssigned, DefIdent.HasKindSet)),
+     printf ("variable %s declared in line %d is never assigned\n", 
+              StringTable (DefIdent.Sym), LINE));
+
+     IF (NOT (InIS (VarUsed, DefIdent.HasKindSet)),
+     printf ("variable %s declared in line %d is never assigned\n",
+              StringTable (DefIdent.Sym), LINE));
+   END;
+@end example
+
+
+@comment =====================================
+@node Reflex, PropLib, KindSet, top
+@findex Module @code{Reflex}
+@findex pairwise related keys
+@findex property @code{To}
+@findex property @code{From}
+@findex ReflexTo
+@findex ReflexFrom
+@chapter Reflexive Relations Between Objects
+
+This module introduces properties that relate object keys pairwise
+to each other, e.g.@: a type and its pointer type.
+
+The module is instantiated by
+
+@example
+   $/Prop/Reflex.gnrc+instance=NAME :inst
+@end example
+
+It defines a pair of properties @code{NAMETo} and @code{NAMEFrom}
+that have values of type @code{DefTableKey} that
+relate keys pairwise to each other.
+When the relation is established between two keys @code{kf} and @code{kt}
+@code{GetNAMETo (kf, NoKey) == kt} and
+@code{GetNAMEFrom (kt, NoKey) == kf} hold.
+
+The relation is established by a call @code{ReflexNAMETo (kf)} that
+yields a new key @code{kt}, or by @code{ReflexNAMEFrom (kt)} that
+yields a new key @code{kf}. Any further such call yields the same
+key as result.
+
+Typical applications of such relations are found in type analysis
+tasks: Types can be represented by keys. Assume @code{intKey} represents
+the type @code{int}, then a call @code{ReflexPointerTo (intKey)}
+yields a key representing a type @code{pointer to int}.
+Using the @code{Reflex} functions guarantee that there is exactly
+one key representing the type @code{pointer to int}.
+Here the module is instantiated with the generic parametr 
+@code{+instance=Pointer}. The same pattern can be applied for
+other unary type constructors.
+
+@comment =====================================
+@node PropLib, Defer, Reflex, top
+@findex Module @code{PropLib}
+@findex PDL pattern
+@chapter Some Useful PDL Specifications
+
+This module specifies a set of useful generic PDL patterns.
+If such patterns are associated to a property specification
+PDL generates additional access functions for that property.
+
+For example the PDL property specification
+@example
+   Size: int [SetGet, SetDiff];
+@end example
+@noindent
+allows to set the @code{Size} property using the functions
+@code{SetGetSize} and @code{SetDiffSize} besides the basic
+access functions provided by PDL.
+
+The module does not have generic parameters.
+It is used by writing
+@example
+   $/Prop/PropLib.fw
+@end example
+@noindent
+in a @code{.specs} file.
+
+It provides the following PDL patterns:
+
+@findex SetGet
+@code{SetGet}:
+The @code{SetGet} functions have same effect as the basic @code{Set}
+function. But the value which is set is also returned as result of the call.
+
+@findex SetOnce
+@code{SetOnce}:
+The @code{SetOnce} functions have one value argument like the @code{Reset}
+functions. The given value is only set if that property is not yet set.
+The current value of the property is returned as result of the call.
+
+@findex KReset
+@code{KReset}:
+The @code{KReset} functions have same effect as the basic 
+@code{Reset} functions. But the key is returned as result of the call.
+By that means one can set several properties for one key
+using nested calls.
+
+@findex VReset
+@code{VReset}:
+The @code{VReset} functions have same effect as the basic 
+@code{Reset} functions. 
+But the value which is set is also returned as result of the call.
+
+@findex Trans
+@code{Trans}:
+The @code{Trans} functions are applicable for 
+properties of type @code{DefTableKey}.
+They have only a key argument.
+A call @code{TransProp(k)} for a property @code{Prop}
+is recursively applied to the property value
+until a key is reached for which the property @code{Prop}
+is not set. that key is returned.
+The property chain must not be cyclic.
+E.g. if @code{GetTypeOf (a, NoKey) == b} and @code{GetTypeOf (b, NoKey) == c}
+and @code{GetTypeOf (c, NoKey) == NoKey}, then
+@code{TransTypeOf (a) == c}.
+
+@findex SetDiff
+@code{SetDiff}:
+The @code{SetDiff} functions
+have two value arguments, like the @code{Set} functions.
+The first value argument is set if the property is not yet set.
+If the property has a value that differs from the first value argument,
+the property is set to the second value argument.
+
+The module also provides comparison functions @code{CoordLess} and
+@code{CoordLessEqual} for source coordinates.
+
+@comment =====================================
+@node Defer, , PropLib, top
+@findex Deferred Property Association
+@findex Module Defer
+@findex Defer
+@chapter Deferred Property Association
+
+This module implements the technique of deferred property
+association:
+Many languages have constructs that define an identifier to denote
+the same object as another, different identifier does.
+Properties accessed or set via the one key should yield the same
+results or effects as if the other key was used.
+Typical examples for such constructs are type definitions
+or constant definitions.
+
+The module is instantiated by
+@example
+   $/Type/Defer.gnrc +referto=KEY :inst
+@end example
+@noindent
+The @code{referto} parameter modifies the names
+of @code{Key} attributes, and hence, has to be the same as the
+@code{referto} parameter used for the module instance that supplied
+those attributes.
+
+The roles of this module relate keys to each other which represent
+the same object. That relation has to be acyclic. The properties
+are associated to the keys at the ends of those relation chains.
+A function is provided that walks down the chain when accessing
+a property from any of the related keys.
+
+This technique also decouples the computations which establish
+the equivalence between keys from those which associate properties
+to keys. It avoids cyclic dependencies between computations
+in cases where properties of entities may be defined recursively,
+e.g. recursively defined types.
+
+@findex property Defer
+The property @code{Defer} implements the relation between keys described
+here. It should not be set otherwise than by using the
+@code{SetDeferId} role of this module.
+
+Setting a property to a key that may be an end of a @code{Defer}
+chain should occur in the context of the @code{SetDeferProp}
+role.
+
+@findex TransDefer
+If properties are accessed for a key @code{k} that may be
+on a @code{Defer} chain, the result of the call
+@code{TransDefer (k)} has to be used instead of the
+the key @code{k} itself, e.g. @code{GetKind (TransDefer (k), NoKind)}.
+
+
+@findex Module PropLib
+@findex PropLib
+This module uses the @code{PropLib} module
+(@xref{PropLib, , Some Useful PDL Specifications, prop, Association of properties to definitions},) to obtain the @code{TransDefer} function.
+
+The module provides the following computational roles:
+
+@findex SetDeferId
+@findex DeferredKey
+@findex attribute DeferredKey
+@code{SetDeferId}
+is a role for a defining occurrence of an identifier.
+It establishes the @code{Defer} relation from
+@code{SetDeferId.|KEY|Key} to point to
+@code{SetDeferId.DeferredKey}.
+A lower or upper computation for @code{THIS.DeferredKey} has to be
+provided.
+An attempt to complete a @code{Defer} cycle is not executed.
+
+@findex ChkSetDeferId
+@code{ChkSetDeferId} is a role that may be inherited
+by any identifier occurrence.
+It checks whether an attempt was made to complete
+a @code{Defer} cycle involving this key.
+The role should be inherited together with @code{SetDeferId},
+if @code{Defer} cycles are not otherwise excluded.
+
+@findex SetDeferProp
+@findex GotDeferProp
+@findex attribute GotDeferProp
+@code{SetDeferProp}
+is a role that characterizes a context where properties may be
+set to a key at the end of a @code{Defer} chain.
+Computations that associate the properties have to
+establish the postcondition represented by the @code{VOID}
+attribute @code{SYNT.GotDeferProp}.
+The role provides a default computation for
+@code{SYNT.GotDeferProp} that states the empty postcondition.
+
+@findex RootDefer
+@code{RootDefer}
+is inherited by the grammar root by default.
+
+@node Index, , , top
+@unnumbered Index
+@printindex fn
+@contents
+@bye

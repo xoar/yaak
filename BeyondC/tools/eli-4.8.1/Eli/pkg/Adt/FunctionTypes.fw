@@ -1,0 +1,73 @@
+@p maximum_input_line_length = infinity
+@! $Id: FunctionTypes.fw,v 1.4 1997/08/29 12:08:20 mjung Exp $
+@!
+@! (C) Copyright 1997 University of Paderborn.
+@! 
+@! This file is part of the Eli Module Library.
+@! 
+@! The Eli Module Library is free software; you can redistribute it and/or
+@! modify it under the terms of the GNU Library General Public License as
+@! published by the Free Software Foundation; either version 2 of the
+@! License, or (at your option) any later version.
+@! 
+@! The Eli Module Library is distributed in the hope that it will be
+@! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+@! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+@! Library General Public License for more details.
+@! 
+@! You should have received a copy of the GNU Library General Public
+@! License along with the Eli Module Library; see the file COPYING.LIB.
+@! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+@! Suite 330, Boston, MA 02111-1307, USA. 
+@!
+
+@A@<Useful Function Types@>
+
+Several abstract data types require functions to compare element values,
+compute new element values from existing ones, and combine two element
+values into a single one.
+Because those abstract data types may be declared separately, each must be
+able to access the definition of the appropriate function types
+independently.
+Because those abstract data types may be used together in the same
+application, the type definitions must constitute a separate module.
+(It is then protected against multiple inclusion and hence multiple
+definition errors are avoided.)
+
+@O@<|TYPE|FunctionTypes.h@>==@{
+#ifndef |TYPE|FUNCTIONTYPES_H
+#define |TYPE|FUNCTIONTYPES_H
+
+#include "eliproto.h"
+
+/* include header file defining |TYPE| if |HDR| is set: */
+#define EMPTY|HDR|HDR
+#ifndef EMPTYHDR
+#include "|HDR|.h"
+#endif
+#undef EMPTY|HDR|HDR
+
+typedef int (*|TYPE|CmpFctType) ELI_ARG((|TYPE|, |TYPE|));
+/* Functions that compare two |TYPE| values
+ *   If the left argument is less than the right then on exit-
+ *     |TYPE|CmpFctType = -1
+ *   Else if the arguments are equal then on exit-
+ *     |TYPE|CmpFctType = 0
+ *   Else on exit-
+ *     |TYPE|CmpFctType = 1
+ ***/
+
+typedef |TYPE| (*|TYPE|MapFct) ELI_ARG((|TYPE|));
+/* Functions that map one |TYPE| value into another
+ *   On exit-
+ *     |TYPE|MapFct = image of the argument under the map
+ ***/
+
+typedef |TYPE| (*|TYPE|SumFct) ELI_ARG((|TYPE|, |TYPE|));
+/* Functions that combine two |TYPE| values
+ *   On exit-
+ *     |TYPE|SumFct = combination of the two arguments
+ ***/
+
+#endif
+@}

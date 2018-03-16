@@ -1,0 +1,5 @@
+/* $Id: word.gla,v 1.2 1991/08/03 11:29:12 waite Exp $ */
+/* Structure of the words to be counted */
+
+word:	$[A-Za-z]+	[CountWord]	{ Strings that are words }
+	$[.:,;!?()/\"\'*-]		{ Strings that are punctuation }

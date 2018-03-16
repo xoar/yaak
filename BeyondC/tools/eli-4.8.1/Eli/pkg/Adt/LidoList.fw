@@ -1,0 +1,178 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: LidoList.fw,v 3.8 1999/08/18 14:08:40 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module provides computations that construct linear lists
+of elements of type |TYPE|. 
+The elements are arranged in left-to-right 
+order as they occur in the tree (see below).
+The type |TYPE| has to be defined
+in a file |HDR|.h; for types predefined in C |HDR| can be left empty.
+
+The CLASS SYMBOL |TYPE|ListRoot is to be inherited to a SYMBOL
+that has all the element SYMBOLs in its subtrees.
+The result of the computation is the attribute
+|TYPE|ListRoot.|TYPE|List of the type |TYPE|List.
+
+There are three roles for symbols that contribute elements to the list.
+They yield different results in cases where these symbols occur
+recursively in the tree:
+
+If the CLASS SYMBOL Pre|TYPE|ListElem is used the elements are taken 
+in pre-order;
+i.e. the element of a node occurs in the list prior to those
+of nodes in its subtrees.
+
+If the CLASS SYMBOL Post|TYPE|ListElem is used the elements are taken 
+in post-order;
+i.e. the element of a node occurs in the list after those
+of nodes in its subtrees.
+
+If the CLASS SYMBOL |TYPE|ListElem is used no elements are taken 
+from subtrees.
+
+In each case the attribute named |TYPE|Elem has to 
+have a an element value of type |TYPE|.
+
+There is a corresponding set of CLASS SYMBOLs that distribute
+a given list over a sequence of nodes in the tree.
+
+This module uses an instance of the generic |TYPE|List.fw module.
+
+~O~<|TYPE|LidoList.specs~>~{
+#define EMPTY|HDR|HDR
+#ifdef EMPTYHDR
+$/Adt/List.gnrc+instance=|TYPE| :inst
+#else
+$/Adt/List.gnrc+instance=|TYPE| +referto=|HDR| :inst
+#endif
+~}
+
+~O~<|TYPE|LidoList.lido~>~{
+CLASS SYMBOL |TYPE|ListRoot:
+	|TYPE|List, _|TYPE|auxList:	|TYPE|List;
+CLASS SYMBOL |TYPE|ListElem, Pre|TYPE|ListElem, Post|TYPE|ListElem:
+	|TYPE|TakeIt:	int,
+	|TYPE|Elem:	|TYPE|;
+
+CHAIN _c|TYPE|ListPtr:	|TYPE|ListPtr;
+
+CLASS SYMBOL |TYPE|ListRoot COMPUTE
+  SYNT._|TYPE|auxList = NULL|TYPE|List;
+  CHAINSTART HEAD._c|TYPE|ListPtr = _|TYPE|ListADDROF (SYNT._|TYPE|auxList);
+  SYNT.|TYPE|List = THIS._|TYPE|auxList DEPENDS_ON TAIL._c|TYPE|ListPtr;
+END;
+
+CLASS SYMBOL |TYPE|ListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  THIS._c|TYPE|ListPtr = 
+    IF (THIS.|TYPE|TakeIt,
+        RefEndCons|TYPE|List (THIS._c|TYPE|ListPtr, THIS.|TYPE|Elem),
+        THIS._c|TYPE|ListPtr);
+END;
+
+CLASS SYMBOL Pre|TYPE|ListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  HEAD._c|TYPE|ListPtr = 
+    IF (THIS.|TYPE|TakeIt,
+        RefEndCons|TYPE|List (THIS._c|TYPE|ListPtr, THIS.|TYPE|Elem),
+        THIS._c|TYPE|ListPtr);
+END;
+
+CLASS SYMBOL Post|TYPE|ListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  THIS._c|TYPE|ListPtr = 
+    IF (THIS.|TYPE|TakeIt,
+        RefEndCons|TYPE|List (TAIL._c|TYPE|ListPtr, THIS.|TYPE|Elem),
+        TAIL._c|TYPE|ListPtr);
+END;
+
+CLASS SYMBOL |TYPE|DeListRoot:
+	|TYPE|List, |TYPE|ListTail:	|TYPE|List;
+CLASS SYMBOL |TYPE|DeListElem, Pre|TYPE|DeListElem, Post|TYPE|DeListElem:
+	|TYPE|TakeIt:	int,
+	|TYPE|Elem:	|TYPE|;
+
+CHAIN |TYPE|DeList:	|TYPE|List;
+
+CLASS SYMBOL |TYPE|DeListRoot COMPUTE
+  CHAINSTART HEAD.|TYPE|DeList = THIS.|TYPE|List;
+  SYNT.|TYPE|ListTail = TAIL.|TYPE|DeList;
+END;
+
+CLASS SYMBOL |TYPE|DeListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  SYNT.|TYPE|Elem = 
+    IF (OR (EQ (NULL|TYPE|List, THIS.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        No|TYPE|, 
+        Head|TYPE|List (THIS.|TYPE|DeList));
+  SYNT.|TYPE|DeList = 
+    IF (OR (EQ (NULL|TYPE|List, THIS.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        NULL|TYPE|List,
+        Tail|TYPE|List (THIS.|TYPE|DeList));
+END;
+
+CLASS SYMBOL Pre|TYPE|DeListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  SYNT.|TYPE|Elem = 
+    IF (OR (EQ (NULL|TYPE|List, THIS.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        No|TYPE|, 
+        Head|TYPE|List (THIS.|TYPE|DeList));
+  HEAD.|TYPE|DeList = 
+    IF (OR (EQ (NULL|TYPE|List, THIS.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        NULL|TYPE|List,
+        Tail|TYPE|List (THIS.|TYPE|DeList));
+END;
+
+CLASS SYMBOL Post|TYPE|DeListElem COMPUTE
+  SYNT.|TYPE|TakeIt = 1;
+  SYNT.|TYPE|Elem = 
+    IF (OR (EQ (NULL|TYPE|List, TAIL.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        No|TYPE|, 
+        Head|TYPE|List (TAIL.|TYPE|DeList));
+  SYNT.|TYPE|DeList = 
+    IF (OR (EQ (NULL|TYPE|List, TAIL.|TYPE|DeList),
+            NOT (THIS.|TYPE|TakeIt)),
+        NULL|TYPE|List,
+        Tail|TYPE|List (TAIL.|TYPE|DeList));
+END;
+
+CLASS SYMBOL |TYPE|FilterListElem COMPUTE
+  THIS._c|TYPE|ListPtr =
+    IF(|TYPE|Filter (THIS.|TYPE|Elem),
+      RefEndCons|TYPE|List (THIS._c|TYPE|ListPtr, THIS.|TYPE|Elem),
+      THIS._c|TYPE|ListPtr);
+END;
+~}
+
+~O~<|TYPE|LidoList.head~>~{
+#define _|TYPE|ListADDROF(x)       (&(x))
+~}
+

@@ -1,0 +1,33 @@
+# $Id: adtinit.dg,v 2.3 2001/07/09 06:34:54 tony Exp $
+# Copyright 1994, The Regents of the University of Colorado
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.str => :str;
+:str 'String table initialization'? => :FILE;
+
+EXEC (csmidnOut.sh) (.) (:LIST :extract=:str :names) (:csmidnProd :name)
+  => (:csmidnOut);
+:csmidnOut 'Results of identifier and string table generation' => :FILE;
+
+EXEC (csmidnProd.sh) (.) (:LIST :extract=:str :cat) (+fold)
+  => (:csmidnProd);
+:csmidnProd 'Identifier and string table ADTs' => :DERIVED-DIRECTORY;
++fold 'Flag to suppress case distinctions in identifiers and keywords'? => :first;
+
+COLLECT (:level_7_specs +incl=(:etaIncl) :csmidnOut :list)
+  => (:eli*level_8_specs_in);

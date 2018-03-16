@@ -1,0 +1,902 @@
+\input texinfo   @c -*-texinfo-*-
+@comment Copyright, 1992, The Regents of the University of Colorado
+@comment %**start of header
+@setfilename deftbl
+@settitle Definition Table
+@setchapternewpage odd
+@comment %**end of header
+
+@titlepage
+@center @titlefont{Definition Table}
+@sp 1
+@center $Revision: 1.15 $
+@include org.tnf
+@end titlepage
+
+@node    top ,     ,  (dir)  ,(dir)    
+@comment Name, Next, Previous, Up,   Eg
+
+The definition table is a data base in which the compiler stores
+information about defined entities like types, variables and procedures.
+Each entity is represented by a unique @dfn{definition table key}.
+Information about that entity is stored as an arbitrary number of
+@dfn{properties} associated with its definition table key.
+The value of a particular property can be set via an @dfn{update} operation
+and examined via a @dfn{query} operation.
+The definition table module exports
+an operation that yields a new definition table key
+and a distinguished key to represent an undefined entity that has no
+properties.
+
+A user obtains a definition table module for a particular application by
+specifying the set of properties to be stored by that module.
+Different information may be associated with various kinds of entities,
+and specific items of information are determined at different times
+by various parts of the compiler.
+These characteristics determine the best ways of grouping individual items 
+of information into properties, and it is possible to state general
+definition table design criteria based upon them.
+
+The definition table module provides standard query and update operations.
+Additional operations are available from a library, and the user is allowed
+to define still others for particular applications.
+All of these operations use the same interface for accessing the definition
+table.
+
+@menu
+* Module::	Structure of the definition table module
+* Criteria::	Hints on definition table design
+* Interface::	How to interact with the definition table module
+* Syntax::      Complete syntax of a @file{.pdl} file
+* Index::
+@end menu
+
+@node    Module, Criteria, top,      top
+@comment Name,     Next,      Previous, Up, Eg
+@chapter  The Definition Table Module
+
+The definition table module embodies the concept of a set of
+distinguishable entities, each having some set of properties.
+There is at least one entity, the invalid entity;
+it has an empty set of properties.
+No other entities exist unless they are explicitly created.
+Nothing is assumed about entities, other than the fact that they are
+distinguishable.
+
+Each distinct entity is represented by a distinct key.
+The module exports a key representing the invalid entity, and
+an operation that creates a new key each time it is invoked.
+
+Properties are declared by the user.
+Each property declaration specifies the type of data item that defines the
+property, but does not associate the property with any specific entity or
+entities.
+
+Query and update operations are used to associate property values with
+entities.
+Each query or update operation is defined for a single property, and
+an invocation associates a single value of the declared type
+with the entity to which the operation is applied.
+
+To make the definition table module accessible to a program,
+include the header file @file{deftbl.h} in that program.
+@findex deftbl.h
+
+@menu
+* Keys::	How to create and use definition table keys
+* Properties::	How to declare properties
+* Query::	Behavior of the basic query operations
+* Update::	Behavior of the basic update operations 
+* Example::	A simple definition table application
+@end menu
+
+@node    Keys, Properties, Module,   Module
+@comment Name, Next,       Previous, Up,    Eg
+@section How to create and use definition table keys
+
+Definition table keys are objects of type @code{DefTableKey}.
+@findex key
+@findex DefTableKey
+@code{DefTableKey} is a private type of the definition table module:
+Clients of the definition table module may declare variables and parameters
+of type @code{DefTableKey}, but they must make no assumptions about its
+representation.
+
+The invalid key is @code{NoKey}, a legal value of type @code{DefTableKey}. 
+@findex invalid key
+@findex NoKey
+No property values are ever associated with @code{NoKey}.
+
+@code{NewKey} is a parameterless function that yields a value of type
+@findex NewKey
+@code{DefTableKey} each time it is invoked.
+All of these values are distinct from each other and from @code{NoKey}.
+Any client of the definition table module may invoke @code{NewKey}.
+@findex creating keys
+
+Definition table keys are often bound to identifiers via the
+environment module operation @code{DefineIdn}
+@findex environment module
+@findex DefineIdn
+(@pxref{environment, , Contour-Model Environment Module, lib, Library
+Reference Manual}).
+In this case @code{DefineIdn} will invoke @code{NewKey} if necessary;
+@code{NewKey} should be invoked directly @emph{only} for entities that
+are not under control of the environment module.
+
+It is sometimes useful to be able to get a new key that is just like an
+existing one.  The @code{CloneKey}
+@findex CloneKey
+@findex cloning keys
+operation takes a single key as argument, uses @code{NewKey} to get a
+new one, and initialises the properties of the new key to be the same as
+those of the key argument.  The new key is returned.
+
+Note that @code{CloneKey} implements shallow-copying of property values.
+For example, if a property value of the key argument is a pointer then
+after the @code{CloneKey} call two keys will have properties pointing to
+the same data.
+
+@node    Properties, Query, Keys,     Module
+@comment Name,       Next,  Previous, Up,    Eg
+@section How to declare properties
+
+Each property has a @dfn{name} and a @dfn{type}.
+@findex property name
+@findex property type
+
+A property type is denoted by a C identifier (a sequence of letters,
+digits and underscores that does not begin with a digit).
+Property types must either be built-in types of C (such as @code{int}),
+or they must be declared via @code{typedef} in some accessible module.
+The definition table module then becomes a client of the module defining
+the property type.
+
+A property name is also denoted by a C identifier.
+Property names must be unique, and must be declared in a file of type
+@findex uniqueness of property names
+@code{.pdl}.
+@findex .pdl
+The simplest form of declaration is:
+
+@example
+Name: Type;
+@end example
+@findex property declaration
+
+@noindent
+Here @code{Name} is the property name being declared and @code{Type} is the
+data type of the possible values for that property.
+
+Any type that can be returned by a function can be used as the type of a
+property.
+If the type is declared via @code{typedef}, some @code{.pdl} file must
+contain a C string (sequence of characters delimited by @kbd{"} characters)
+that specifies the name of the file containing that declaration.
+
+@node    Query, Update, Properties, Module
+@comment Name,  Next,   Previous,   Up,    Eg
+@section Behavior of the basic query operations
+
+Each declared property has a basic query operation.
+@findex query operation
+If the name declared for the property is @code{Name}, then the
+basic query operation is a function named @code{GetName}.
+@findex Get operations
+If property @code{Name} has been declared to have values of type
+@code{Type}, then the function implementing the basic query
+operation has the following prototype:
+
+@example
+Type GetName(DefTableKey key, Type deflt)
+@end example
+
+If @code{GetName} is applied to a definition table key with which a value
+of the @code{Name} property has been associated,
+then @code{GetName} returns the associated value.
+Otherwise it returns the value of parameter @code{deflt}.
+
+Since @code{NoKey} represents an invalid entity that never has associated
+@findex NoKey
+property values, applying any basic query operation to @code{NoKey}
+will yield the value of parameter @code{deflt}.
+
+@node    Update, Example,  Query,    Module
+@comment Name,   Next,     Previous, Up,    Eg
+@section Behavior of the basic update operations
+
+Each declared property is has two basic update operations.
+@findex update operation
+If the name declared for the property is @code{Name}, then the
+basic update operations are functions named @code{SetName}
+and @code{ResetName}.
+@findex Set operations
+@findex Reset operation
+If property @code{Name} has been declared to have values of type
+@code{Type}, then the functions implementing the basic update
+operations have the following prototypes:
+
+@example
+void SetName(DefTableKey key, Type add, Type replace)
+void ResetName(DefTableKey key, Type val)
+@end example
+
+If @code{SetName} is applied to a definition table key with which a value
+of the @code{Name} property has been associated, then that value is
+replaced by the value of parameter @code{replace}.
+Otherwise the value of parameter @code{add} becomes the value of the
+@code{Name} property associated with that definition table key.
+Application of @code{ResetName} to a definition table key always
+results in the value of the @code{Name} property being set to @code{val}.
+
+Since @code{NoKey} represents an invalid entity that has no associated
+@findex NoKey
+property values, applying any basic update operation to @code{NoKey}
+has no effect.
+
+@node    Example,        , Update,   Module
+@comment Name,    Next,     Previous, Up,    Eg
+@section A simple definition table application
+
+@findex example application
+@dfn{Defining occurrences} of identifiers are the points at which those
+identifiers are declared, while @dfn{applied occurrences} are points at
+which they are used.
+In many programming languages, it is possible to distinguish defining
+occurrences from applied occurrences on the basis of context.
+Let us assume that this is the case, and use the definition table to verify
+that each identifier has exactly one defining occurrence.
+
+The environment module is used to implement the scope rules of the
+language, binding a definition table key to each occurrence of an identifier.
+Within each individual scope, the same key will be bound to all
+occurrences of a particular identifier.
+To verify that there is a single defining occurrence,
+associate a property @code{Def} with the definition table key.
+
+@code{Def} is of type integer, and three values are significant:
+
+@table @code
+@item 0
+There is no defining occurrence
+
+@item 1
+There is exactly one defining occurrence
+
+@item 2
+There is more than one defining occurrence
+@end table
+
+At each defining occurrence, the update operation @code{SetDef} is invoked
+with the @code{add} parameter @code{1} and the @code{replace} parameter
+@code{2}.
+After all defining occurrences are processed, the @code{Def} property value
+@code{1} will be associated with the definition table key for each
+identifier having exactly one defining occurrence.
+The @code{Def} property value @code{2} will be associated with the
+definition table key for each identifier having more than one defining
+occurrence, and there won't be any @code{Def} property value associated
+with the definition table key for each identifier without defining
+occurrences.
+
+At each applied occurrence, the query operation @code{GetDef} is invoked  
+with the @code{deflt} parameter @code{0}.
+If the identifier has one or more defining occurrences, @code{GetDef} will
+yield the @code{Def} property value (either @code{1} or @code{2})
+associated with the definition table key for the applied occurrence.
+Otherwise there will be no @code{Def} property value associated with the
+definition table key for the applied occurrence, and @code{GetDef} will
+yield the value of the @code{deflt} parameter: @code{0}.
+
+@node    Criteria, Interface, Module, top
+@comment Name,     Next,  Previous,  Up, Eg
+@chapter Definition Table Design Criteria
+
+There are many properties that might be of interest to a compiler.
+A Pascal compiler needs to know the type and value of a constant.
+More information is needed for a variable: its type,
+the static nesting level of the procedure containing its declaration,
+and where it is located in the target machine's memory.
+The compiler designer must decide how to represent this information.
+
+The first task in definition table design is to select the set of entities
+@findex definition table design
+to be represented by definition table keys.
+Then a set of properties must be defined to carry the information
+associated with the entities.
+There is no need to specify relationships between properties and
+entities: a value of any property may be associated with any entity.
+
+@menu
+* Entities::	Criteria for selecting entities
+* Data::	Criteria for grouping data values
+@end menu
+
+@node    Entities, Data, Criteria, Criteria
+@comment Name,     Next, Previous, Up, Eg
+@section Criteria for selecting entities
+
+@findex selecting entities
+Identifier definitions must be represented by definition table keys
+if the normal environment module is used.
+Whether there are other entities that should be represented by definition
+table keys depends on the particular translation problem.
+
+Entities that are invariably created by an identifier declaration can be
+represented by the definition table key bound to that declaration.
+If an entity may be created without being bound to an identifier,
+however, then it must be represented by a distinct definition table key.
+For example, the following Pascal variable declaration
+defines an identifier and creates a variable bound to that identifier,
+but also creates a type that is not bound to any identifier:
+
+@example
+var I: 1..10;
+@end example
+@findex variable entities
+@findex anonymous entities
+
+@noindent
+A Pascal compiler could use one key for the definition of @code{I}
+and the variable, since Pascal variables are created only in conjunction
+with identifier declarations.
+It must use a separate key for the subrange type, however, since types can be
+created without declaring any identifier.
+
+Distinct definition table keys should be used for generated entities that
+are ``similar'' to user-defined entities.
+For example, Pascal labels are created only in conjunction with label
+definitions; a user-defined label entity can therefore be represented by
+the definition table key requested by the environment module to represent
+the label definition.
+A Pascal compiler will probably create labels in the course of translating
+statements like @code{if}, @code{case} and @code{while}.
+These labels should also be represented by definition table keys (obtained
+from @code{NewKey}) to maintain compatibility with user-defined labels.
+This compatibility is important because of the semantics common to
+generated and user-defined labels.
+If it is necessary to distinguish the two, that is easily done via
+a Boolean property.
+
+@node    Data,        , Entities, Criteria
+@comment Name, Next,      Previous, Up, Eg
+@section Criteria for grouping data values
+
+Each definition table key provides access to information about an entity.
+The information is embodied in a set of properties.
+How should those properties be defined?
+
+@findex combining properties
+One possibility is to define a single property to carry all of the information
+associated with a particular definition table entry.
+That property would be a structure, with distinct fields to hold the
+distinct items of information.
+There is a subtle problem with this approach:
+Because the items of information associated with an entity are determined
+at different times by different modules, fields of the structure
+will be undefined for various periods during its lifetime.
+If, through an oversight in the design, the compiler accesses one of these
+undefined fields, then it may very well crash.
+Such errors are often extremely difficult to diagnose, and the compiler
+development time is thus increased unnecessarily.
+
+A better approach is to group related information that is obtained at a
+particular point in the compilation as a single property,
+and to leave unrelated information or information that is obtained
+at several different points as separate properties.
+When a property value is set, that value is complete
+(if any information was not available at the time,
+it would have been treated as a separate property),
+and any query must supply a consistent default value to be returned
+in case the desired property is not available.
+
+In general, it is better to err on the side of too many properties than too
+few.
+Each definition table key is actually implemented as a pointer to a
+list, with the properties being elements of that list.
+The list element consists of a code identifying the property and a block of
+storage large enough to hold a value of the property's type.
+The length of the list for a particular definition table key is the number
+of values that have actually been associated with that definition table
+key.
+If no update operation is performed for a particular property on an entity,
+nothing is stored for that property.  A valid value is guaranteed to be
+returned from a query operation because of the default argument
+supplied to the query call.  A default value for a property can be
+simulated by always using the same value every time the query
+operation is used for that property.
+
+When properties are combined, the number of list entries may be reduced.
+(This is not always the case, because two distinct properties only require
+one list element if one of these properties has its default value.)
+If the number of list entries is reduced, the time to access properties is
+reduced.
+Normally, however, property lists are short and the time to access properties
+is an insignificant fraction of the total processing time.
+Thus there is usually little payoff in access time from combining properties.
+
+@node    Interface, Syntax, Criteria, top
+@comment Name,      Next,     Previous, Up, Eg
+@chapter The Definition Table Interface
+
+The interface to the definition table module has two parts, one fixed and
+the other dependent on a specification supplied by the user.
+The fixed part of the interface exports the value @code{NoKey} and the
+@findex NoKey
+operation @code{NewKey}
+@findex NewKey
+(@pxref{Keys,,How to create and use definition table keys}).
+The variable part of the interface exports the query and update operations
+@findex query and update operations
+for the properties specified by the user.
+
+A library of predefined query and update operations is provided to
+implement common tasks; users can also provide their own operations.
+The set of operations and properties for a specific processor is defined by
+a specification written in a special-purpose language.
+
+PDL generates definitions for each of the operations specified in files
+of type @file{.pdl}.  These definitions are made available in the
+@findex pdl_gen.h
+generated file @file{pdl_gen.h}.  Although this file is automatically
+included for use in your attribute grammar specifications, any C files
+which use definition table operations must include this file.
+
+@menu
+* Library::	Predefined query and update operations
+* Definition::	The property definition language
+@end menu
+
+@node    Library, Definition, Interface, Interface
+@comment Name,    Next,       Previous,  Up,        Eg
+@section Predefined query and update operations
+
+The basic query and update operations for the @code{Name} property
+are @code{GetName}
+(@pxref{Query,,Behavior of the basic query operations}),
+@code{SetName}, and @code{ResetName}
+(@pxref{Update,,Behavior of the basic update operations}).
+These operations are sufficient in most cases, and are provided
+automatically for every property.
+Other operations, such as @code{IsName} and @code{UniqueName} are available, 
+but must be explicitly requested as
+discussed in the next section.
+
+@menu
+* Is::		Signal an error if a property changes
+* Unique::	Guarantee a unique value for a property
+* Has::		Find out whether a key has a property
+@end menu
+
+@node    Is,   Unique, Library, Library
+@comment Name, Next,   Previous,Up,        Eg
+@ifinfo
+@subsubheading Signal an error if a property changes
+@end ifinfo
+
+@example
+void IsName(DefTableKey key, Type which, Type error)
+@end example
+@findex Is
+@findex IsName
+
+If @code{IsName} is applied to a definition table key that has no
+associated @code{Name} property,
+then a @code{Name} property with the value of parameter @code{which}
+becomes associated with that definition table key as a result of the
+operation.
+If it is applied to a definition table key that does have an associated
+@code{Name} property, and the current value of that property is not equal to
+the value of the parameter @code{which}, then the value of that property is
+changed to the value of the parameter @code{error}.
+Otherwise the operation has no effect.
+
+Since @code{NoKey} represents an invalid entity that has no properties,
+applying @code{IsName} to @code{NoKey} has no effect.
+
+@node    Unique, Has,        Is,       Library
+@comment Name,   Next,       Previous, Up,        Eg
+@ifinfo
+@subsubheading Guarantee a unique value for a property
+@end ifinfo
+
+@example
+void UniqueName(DefTableKey key, Type next())
+@end example
+@findex Unique
+
+If @code{UniqueName} is applied to a definition table key that has no
+associated @code{Name} property,
+then a @code{Name} property with the value returned by the invocation of
+parameter @code{next} becomes associated with that definition table key as a
+result of the operation.
+Otherwise the operation has no effect.
+
+Since @code{NoKey} represents an invalid entity that has no properties,
+applying @code{UniqueName} to @code{NoKey} has no effect.
+
+Parameter @code{next} is invoked if and only if @code{UniqueName} is
+applied to a definition table key that differs from @code{NoKey} and has
+no associated @code{Name} property.
+
+@node    Has,               , Unique,   Library
+@comment Name,   Next,       Previous, Up,        Eg
+@ifinfo
+@subsubheading Find out whether a key has a property
+@end ifinfo
+
+@example
+int HasName(DefTableKey key)
+@end example
+@findex Has
+
+If @code{Has} is applied to a definition table key that has an
+associated @code{Name} property, then it yields 1; otherwise it yields 0.
+
+Since @code{NoKey} represents an invalid entity that has no properties,
+applying @code{Has} to @code{NoKey} yields 0.
+
+@node    Definition,      , Library, Interface
+@comment Name,       Next,  Previous,Up,        Eg
+@section The property definition language
+
+The property definition language allows a user to specify an arbitrary set
+@findex property definition language
+of properties of arbitrary types, to assert that certain operations from
+the library should be available to query or update these properties, and to
+define new operations.
+It also allows a user to establish the initial state of the definition table.
+Specifications in the property definition language are distinguished by
+@findex specifications
+being provided in files of type @code{pdl}.
+@findex pdl
+
+An arbitrary number of such files may be provided; they will be
+concatenated to form the complete specification of the variable part of the
+definition table module's interface.
+Each file consists of a set of property and operation declarations
+as are described in the following sections.
+Because the files are concatenated, specifications in one need not be
+repeated in another.
+Nevertheless, we strongly suggest that each file contain a
+complete specification for one or more tasks.
+This allows maximum reuse of existing text.
+
+C pre-processor directives and C comments can be used in type-@code{pdl}
+@findex pre-processor directives
+@findex comments
+files.
+
+@menu
+* Declarations::	How to declare properties
+* Operations::		How to declare operations
+* Initializations::	How to specify the initial state
+@end menu
+
+@node    Declarations, Operations, ,         Definition
+@comment Name,         Next,       Previous, Up,        Eg
+@subsection How to declare properties
+
+Properties are declared by specifying the property name and type,
+optionally with a set of operations that should apply to properties of the
+type specified.
+If the type is defined by a typedef, and is not equal to
+@code{DefTableKey},
+the file containing the typedef must be specified.
+
+The general form of a property declaration is given by:
+
+@findex specification grammar
+@example
+PropertySpec: FileName / PropertyDecl .
+FileName: String .
+PropertyDecl: PropertyNameList ':' Type ';' .
+PropertyNameList: Identifier / PropertyNameList ',' Identifier .
+Type: Identifier / Identifier '[' OperationList ']' .
+OperationList: Identifier / OperationList ',' Identifier .
+@end example
+
+Both @code{String} and @code{Identifier} are constructed according to the
+rules of C.
+The @code{FileName} string must be a valid file name.
+Each @code{Identifier} appearing in a @code{PropertyNameList} is a defining
+occurrence; all other occurrences of @code{Identifier} are applied.
+Multiple defining occurrences for property names are allowed, provided that
+they all define the property to hold values of the same type.
+@findex multiple property definitions
+
+Operation names are formed by concatenating an @code{Identifier} appearing
+@findex operation names
+in an @code{OperationList} with an @code{Identifier} appearing in a
+@code{PropertyNameList}.
+@code{Reset}, @code{Get} and @code{Set} are automatically defined
+for every property, and need not appear in any @code{OperationList}.
+
+Here are some valid property definitions:
+
+@findex property specification
+@example
+Def, Kind: int;
+Type: DefTableKey [Is];
+Storage: StorageRequired; "Storage.h"
+@end example
+
+@noindent
+@code{Def} and @code{Kind} are integer-valued properties.
+The variable part of the definition table interface will export operations
+@code{GetDef}, @code{SetDef}, @code{ResetDef}, 
+@code{GetKind}, @code{SetKind}, and @code{ResetKind}.
+It will also export @code{GetType}, @code{SetType}, @code{ResetType},
+and @code{IsType}
+because the library operation @code{Is} appears in the @code{OperationList}
+on the second line.
+Note that this specification will produce @code{GetStorage}, 
+@code{SetStorage}, and @code{ResetStorage}, but will not produce 
+@code{IsStorage}, because @code{Is} does not appear in any
+@code{OperationList} for the property @code{Storage}.
+If @code{Is} did appear in an @code{OperationList} for the property
+@code{Storage} anywhere in the specification, even in another
+type-@code{pdl} file, then the generated module would export
+@code{IsStorage}.
+
+Type @code{int} is a primitive type of C, and @code{DefTableKey} is defined
+by the definition table module itself.
+Thus neither of these types needs to be defined specially.
+@code{StorageRequired} must be defined, however, and therefore file
+@file{storage.h} is named explicitly
+(@pxref{datamap, , Storage Allocation Module, lib, Library Reference Manual}).
+This file name could be placed anywhere in the specification, even in
+another type-@code{pdl} file.  The order in which such header files are
+named within any given @code{pdl} file is maintained in the generated
+modules.
+
+@node    Operations, Initializations, Declarations, Definition
+@comment Name,       Next,            Previous,     Up,        Eg
+@subsection How to declare operations
+
+Operations can be declared by specifying a name, a prototype and a body.
+The operations are generic, with the operand and result types depending on
+the type of the property for which the generic operation is associated
+(@pxref{Declarations, , How to declare properties}).
+If an operation is declared to have the same name as one present in the
+library, the user-defined operation will take precedence.
+
+The general form of an operation declaration is given by:
+
+@findex specification grammar
+@example
+OperationDecl: Gtype Identifier '(' Parameters ')' Text .
+Gtype: 'TYPE' / Ctype .
+Parameters: Parameter / Parameters ',' Parameter .
+Parameter: Gtype Identifier .
+@end example
+
+@code{TYPE} is used to represent the type of the property with which the
+operation is associated, while @code{Ctype} stands for any valid C type
+declarator.
+One of the parameters (by convention the first) must be of type
+@code{DefTableKey}, and must have the name @code{key}; the other parameters
+are arbitrary.
+
+@code{Text} is any C compound statement, enclosed in @code{@{@}}.
+Within this compound statement, certain macros may be used:
+
+@findex operation macros
+@table @code
+@item PRESENT
+@findex PRESENT
+Returns true if the property has an associated value and false if it
+does not.
+@item ACCESS
+@findex ACCESS
+The return value is the same as that of PRESENT, but ACCESS guarantees
+that space has been allocated for the property after invocation.
+@item VALUE
+@findex VALUE
+Current value of the property.
+@end table
+
+@noindent
+The @code{VALUE} macro can be used either as the source of an existing
+value or the destination for a new value.
+It is defined after an invocation of the @code{ACCESS} macro, or whenever
+the @code{PRESENT} macro returns true.
+
+@menu
+* GetCode::	Basic query operation
+* SetCode::	Set update operation
+* ResetCode::	Reset update operation
+* IsCode::	Conditional update operation
+* UniqueCode::	Update with unique value
+@end menu
+
+@node    GetCode, SetCode, ,         Operations
+@comment Name,    Next,    Previous, Up,        Eg
+@ifinfo
+@subsubheading Basic query operation
+@end ifinfo
+
+Here is the declaration of the basic query operation from the library:
+
+@findex example operation declaration
+@example
+TYPE Get(DefTableKey key, TYPE deflt)
+@findex Get
+@{ if (key == NoKey) return deflt;
+  if (PRESENT) return VALUE;
+  else return deflt;
+@}
+@end example
+
+The type of the value returned by a @code{Get} operation is the type of the
+associated property (@code{TYPE}), which is also the type of the
+@code{deflt} parameter.
+@code{PRESENT} is used to check whether a value is associated with the
+property, and if so that value (@code{VALUE}) is returned.
+
+@node    SetCode,  ResetCode,   GetCode,      Operations
+@comment Name, Next, Previous, Up,        Eg
+@ifinfo
+@subsubheading Set update operation
+@end ifinfo
+
+Here is the declaration of the @code{Set} operation from the library:
+
+@example
+void Set(DefTableKey key, TYPE add, TYPE replace)
+@findex Set
+@{ if (key == NoKey) return;
+  if (ACCESS) VALUE = replace;
+  else VALUE = add;
+@}
+@end example
+
+No value is returned by a @code{Set} operation.
+@code{ACCESS} is used to check whether a value is associated with the
+property, and also to guarantee that space for a value is available.
+The available space is then filled appropriately.
+
+@node    ResetCode,  IsCode,   SetCode,      Operations
+@comment Name, Next, Previous, Up,        Eg
+@ifinfo
+@subsubheading Reset update operation
+@end ifinfo
+
+Here is the declaration of the @code{Reset} operation from the library:
+
+@example
+void Reset(DefTableKey key, TYPE val)
+@findex Reset
+@{ if (key == NoKey) return;
+  ACCESS; VALUE = val;
+@}
+@end example
+
+No value is returned by a @code{Reset} operation.
+@code{ACCESS} is used to ensure that space is made available to hold
+the value of the property.  The value is then set to @code{val}.
+
+@node    IsCode,   UniqueCode, ResetCode,      Operations
+@comment Name, Next,   Previous, Up,        Eg
+@ifinfo
+@subsubheading Conditional update operation
+@end ifinfo
+
+Here is the declaration of the conditional update operation from the library:
+
+@example
+void Is(DefTableKey key, TYPE which, TYPE error)
+@findex Is
+@{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = which;
+  else if (VALUE != which) VALUE = error;
+@}
+@end example
+
+@node    UniqueCode,    , IsCode,       Operations
+@comment Name,   Next,  Previous, Up,        Eg
+@ifinfo
+@subsubheading Update with unique value
+@end ifinfo
+
+Here is the library operation that guarantees a unique value for a
+property:
+
+@example
+void Unique(DefTableKey key, TYPE next())
+@findex Unique
+@{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = next();
+@}
+@end example
+
+The @code{next} parameter is a function that delivers a new value of the
+type of the associated property each time it is called.
+It will be invoked only when there is currently no value associated with
+the property.
+
+@node    Initializations, ,     Operations, Definition
+@comment Name,            Next, Previous,   Up,        Eg
+@subsection How to specify the initial state
+
+The initial state of the definition table consists of a set of
+@dfn{known keys},
+@findex known keys
+some of which may have associated property values.
+Each known key is represented by an identifier, which can be used anywhere
+that a value of type @code{DefTableKey} is required.
+
+The general form of a known key specification is given by:
+
+@findex initialization grammar
+@example
+KnownKey: Identifier PropertyValueList ';' .
+PropertyValueList: / '->' PropertyValues .
+PropertyValues: PropertyValue // ',' .
+PropertyValue: Identifier '=' Text .
+@end example
+
+@code{Text} is any C initializer valid for the type of the property, enclosed
+in @code{@{@}}.
+It may contain constant identifiers, including identifiers that represent
+known keys, regardless of where they are declared.
+Each @code{Identifier} appearing in a @code{PropertyValue} must be declared
+elsewhere in the PDL specification (i.e. in some type-@code{pdl} file,
+@pxref{Definition, , How to declare properties}).
+
+Here are some valid specifications of known keys:
+
+@example
+ErrorType;
+IntegerKey -> Def=@{1@}, Type=@{IntegerType@};
+IntegerType -> Storage = @{4,4,0@};
+@end example
+
+The known key @code{ErrorType} has no properties initially, while the known
+key @code{IntegerKey} has two and the known key @code{IntegerType} has one.
+All of these properties were declared above
+(@pxref{Definition, , How to declare properties}).
+@code{IntegerType} is a value of type @code{DefTableKey}, and is therefore
+a valid initializer for the @code{Type} property of @code{IntegerKey}.
+To see that the initializer given for the @code{Storage} property of
+@code{IntegerType} is valid, one would need to consult the file
+@file{storage.h}.
+That file is the interface specification for the data mapping module, and
+its name appeared in the declaration of the @code{Storage} property.
+
+@node    Syntax, Index, Interface, top
+@comment Name,   Next,  Previous,  Up, Eg
+@chapter PDL Input Grammar
+
+@example
+Source: Spec .
+Spec: ( PropertyDecl / FileDecl / OperationDecl / KnownKeyDecl )* .
+
+PropertyDecl: PropertyNameList ':' Type ';' .
+PropertyNameList: Identifier / PropertyNameList ',' Identifier .
+Type: Identifier / Identifier '[' OperationList ']' .
+OperationList: Identifier / OperationList ',' Identifier .
+
+FileDecl: String .
+
+OperationDecl: Gtype Identifier '(' Parameters ')' Text .
+Gtype: 'TYPE' / Ctype .
+Parameters: Parameter / Parameters ',' Parameter .
+Parameter: Gtype Identifier .
+
+KnownKeyDecl: Identifier PropertyValueList ';' .
+PropertyValueList: / '->' PropertyValues .
+PropertyValues: PropertyValue // ',' .
+PropertyValue: Identifier '=' Text .
+@end example
+
+In the above grammar, Text refers to a C block enclosed in braces.
+
+@node    Index,    ,  Syntax, top
+@comment Name,  Next, Previous,  Up, Eg
+@unnumbered Index
+@printindex fn
+
+@contents
+
+@bye

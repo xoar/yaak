@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>Eli's monitoring tool Noosa</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Eli's monitoring tool Noosa</h1>
+
+<hr>
+<p>
+Diagnose problems in Eli-generated programs or simply observe their
+behaviour. 
+
+<p>
+<b>Activation:</b>
+
+<p>
+<pre>
+    xyz.specs +monitor : mon
+</pre>
+
+<p>
+oder
+
+<p>
+<pre>
+    xyz.specs +monitor  +arg = (input) : mon
+</pre>
+
+<p>&nbsp;
+
+<p>
+<p align="center">
+&nbsp;<img src="gifs/NoosaStartScreen.gif">
+</p>
+
+<p>
+<b>Available Runtime Information</b>
+
+<ul>
+<li> Token Stream
+<ul>
+<li>show <a href="NoosaTokenExample.html">token information</a> for a given source text element
+<li>show source text element for a given  token information
+</ul>
+<li> <a href="NoosaStrings.html">String Table</a>
+<li> <a href="NoosaPhrase.html">Phrase Structure:</a> a
+list of all the production instances recognized by the generated processor
+that overlap the selected coordinate. 
+<li> Abstract tree (<a href="NoosaAbstree1.html">left-to-right</a>, 
+<a href="NoosaAbstree2.html">top-to-bottom</a>) with rudimentary support for attribute value monitoring. Large trees are not easy to handle.
+</ul>
+
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>

@@ -1,0 +1,59 @@
+# $Id: Makefile.in,v 1.13 2010/03/09 21:59:46 profw Exp $
+# 
+# (C) Copyright 1997 University of Paderborn.
+# 
+# This file is part of the Eli Module Library.
+# 
+# The Eli Module Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+# 
+# The Eli Module Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+# 
+# You should have received a copy of the GNU Library General Public
+# License along with the Eli Module Library; see the file COPYING.LIB.
+# If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+# Suite 330, Boston, MA 02111-1307, USA.
+# 
+
+CC	= @CC@
+
+DIR	=	pkg/Adt
+SRC	=	BitSet.fw  \
+		csm.specs csm.c csm.h csmtbl.h csm.save.eta \
+		csm.reqmod csm.dapto \
+		DynSpace.fw \
+		FunctionTypes.fw  \
+		IntSet.fw  \
+		LidoList.fw  \
+		List.fw  \
+		PtrList.fw  PtrList.specs VoidPtr.h \
+		Map.fw  \
+		Table.fw hashtbl.c hashtbl.h \
+		obstack.specs obstack.reqmod \
+		obstack.c obstack.h config.h gettext.h \
+		obsave.specs obsave.reqmod obsave.c obsave.h \
+		elisave.fw \
+		Stack.fw 
+COP	=	Makefile.in version
+AUX	=	$(COP) Makefile
+COM	=	BitSet.gnrc FunctionTypes.gnrc IntSet.gnrc LidoList.gnrc \
+		List.gnrc PtrList.gnrc Map.gnrc Table.gnrc Stack.gnrc
+CMD	=	$(COM)
+RCS	=
+EXE	=
+GEN	=
+GENINS  = 	Adt.dg
+SRCDIR	=
+AUXDIR	=
+
+CFLAGS	= -I../Input
+
+@toolmk_h@
+
+Adt.dg:
+	cp /dev/null $@

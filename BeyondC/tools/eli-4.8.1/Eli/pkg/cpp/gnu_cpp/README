@@ -1,0 +1,59 @@
+$Id: README,v 1.1.1.1 2001/04/26 20:01:46 waite Exp $
+
+This directory contains a version of CPP (C PRE PROCESSOR) used by Eli to
+provide selection, inclusion, and comment stripping for various
+specification languages.
+ 
+SYNOPSYS
+	cpp [ options ] [ input-file ] [ output-file ] 
+
+     cpp optionally accepts two filenames as  arguments.   input-
+     file and output-file are, respectively, the input and output
+     files for the preprocessor.  They default  to  the  standard
+     input and the standard output.
+
+OPTIONS
+	-i inputfilename
+
+	-o outputfilename
+
+	-p 			pedantic:don't print warning messages
+
+	-traditional	        try to imitate old fashioned non-ANSI           
+                                preprocessor
+
+	-trigraphs	        process the ANSI trigraph sequences 	
+
+	-+			cplusplus
+
+	-w			inhibit warnings
+
+	-Wtrigraphs		warn trigraphs
+
+	-Wcomment		warn comments
+
+	-Wall			warn trigraphs and warn comments
+
+	-M			print the #include <filename>
+						   "filename"
+	-MM			print the #include "filename" only
+
+	-d			dump macros and no output 
+
+	-D Macro_name
+
+	-U Macro_name
+
+	-C			put out comments
+
+	-P			don't output line number information
+
+	-$			Don't include $ in identifiers
+
+	-I Directory_name	Add directory to path for includes
+
+	-nostdinc               causes no default include directories
+				You must specify all include-file
+				directories with -I
+
+	-u			Remove initial definitions for all 			      		 	predefined symbols

@@ -1,0 +1,52 @@
+# $Id: Makefile.in,v 1.1 2001/10/25 14:38:58 cogito Exp $
+# Makefile for pkg/liga/show
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+CC	=	@CC@
+
+SCEL	= 	../ligascel
+IDL	=	../idl
+OBJS	= 	show.o showproc.o \
+                derivedSrcs/ptg_gen.o map_errors.o \
+                derivedSrcs/obstack.o
+LIBS	= 	$(IDL)/IDL.a 
+
+DIR	=	pkg/liga/show
+SRC	=
+DERIVED =	derivedSrcs/ptg_gen.c derivedSrcs/ptg_gen.h \
+                derivedSrcs/obstack.c derivedSrcs/obstack.h derivedSrcs/gettext.h derivedSrcs/ptg.h
+SOURCES	=       Makefile.in show.c showproc.c map_errors.c \
+		showproc.h map_errors.h 
+COP	=       $(SOURCES)
+DISTDIR	=       derivedSrcs
+AUX	=	$(DERIVED) $(SOURCES) Makefile
+COM	= 
+CMD	=	$(COM)
+RCS	=	$(SOURCES)
+EXE	=	../ligaShow.exe
+GEN	=	$(OBJS)
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+
+CFLAGS	=	-I$(IDL) -I$(SCEL) -IderivedSrcs
+
+@toolmk_h@
+
+.c.o:
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(EXE): $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $(EXE) $(OBJS) $(LIBS)
+
+show.o: $(IDL)/LIGA.h showproc.h
+
+showproc.o: $(IDL)/LIGA.h $(IDL)/global.h $(IDL)/LIGAMacros.h \
+	$(IDL)/liga_func.h $(IDL)/lookup_idl.h $(SCEL)/ligaconsts.h \
+	derivedSrcs/ptg_gen.h showproc.h map_errors.h derivedSrcs/obstack.h
+
+derivedSrcs/ptg_gen.o: derivedSrcs/ptg_gen.c derivedSrcs/ptg_gen.h \
+           derivedSrcs/obstack.h derivedSrcs/ptg.h
+
+derivedSrcs/obstack.o: derivedSrcs/obstack.c derivedSrcs/obstack.h

@@ -1,0 +1,254 @@
+@A@<Create a Textual Unparser@>
+
+The FunnelWeb file defining a textual unparser begins with a brief
+description of how to output unparsed values, and specifies
+the types of the attributes holding those values.
+It then defines
+the tree to be unparsed,
+the class symbol computations,
+and which tree symbols inherit which class symbol computations.
+PTG templates follow these definitions.
+Finally, the file defines the @{IGNORE@} macro and instantiates the
+necessary library modules.
+
+@$@<Complete FunnelWeb file@>==@{
+@=~
+Frame:
+  "@p maximum_input_line_length = infinity\n\n"
+  "The following symbol computation can be used to display the entire input:"
+  "\n\nSYMBOL ROOTCLASS COMPUTE\n"
+  "  Sep_Out(THIS." $1 string "Ptg);\n"
+  "END;\n\n"
+  "Applying this output function to the " $1 string
+    "Ptg attribute of any nonterminal\n"
+  "symbol in the tree will cause the subtree rooted in that node to be"
+    " displayed.\n\n"
+  "@O@<" $1 string "copy.lido@>@{\n"
+  "ATTR " $1 string "Ptg, " $1 string "OrigPtg: PTGNode;\n\n"
+  $2 "\n"	/* Tree grammar */
+  $3		/* Class computations */
+  $4		/* Inheritances */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg@>@{\n"
+  $5		/* PTG templates */
+  "@}\n\n"
+  "@O@<" $1 string "copy.ptg.phi@>@{\n"
+  "#define IGNORE(f,n)\n"
+  "@}\n\n"
+  "@O@<" $1 string "copy.specs@>@{\n"
+  "$/Output/PtgCommon.fw\n"
+  "$/Output/Separator.fw\n"
+  "@}\n"
+~=@
+@}
+
+The FunnelWeb file defining the generated unparser is written as file
+@{idem@} in the current working directory:
+
+@$@<Output the complete FunnelWeb file@>==@{
+SYMBOL xRoot COMPUTE
+  PTGOutFile(
+    "idem",
+    PTGFrame(
+      THIS.Prefix,
+      THIS.TreeGram,
+      TAIL.ClassComp,
+      TAIL.Inherit,
+      TAIL.PtgTemplates));
+END;
+@}
+
+@B@<PTG templates for non-literal terminal symbols@>
+
+The same PTG template is generated for each non-literal terminal symbol:
+
+@$@<Format for a non-literal terminal symbol@>==@{
+Term: $ string "_" $ ":\n  [PtgOutId $ int]\n"
+@}
+
+This template assumes that the internal representation of a
+non-literal terminal symbol is a string table index.
+The user must override it for any non-literal terminal symbol with a
+different internal representation.
+
+@$@<Create PTG templates@>+=@{
+SYMBOL xSymbol COMPUTE
+  THIS.PtgTemplates =
+    IF(AND(THIS.IsTerminal,AND(THIS.IsFirstOcc,GetNoPtgGiven(THIS.Key,1))),
+      PTGSeq(THIS.PtgTemplates,PTGTerm(INCLUDING xRoot.Prefix,THIS.Ptg)),
+      THIS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<PTG templates for plain productions@>
+
+The body of the template for a plain production is the sequence of the
+representations of the elements on the right-hand side of that production,
+separated by spaces.
+Each literal and non-literal terminal symbol representation is followed by
+an invocation of the @{Separator@} function.
+
+@$@<Formats for productions@>+=@{
+PlainProd: $1 string "_"  $2 string ":\n  " $3 "\n"
+
+SepSeq:    $ { " " } $ 
+
+Separator: $ " [Separator]"
+@}
+
+An @{Insert@} attribute is computed for each element on the right-hand side
+of a plain production, and then the values of these attributes are
+collected as the body of the production's template:
+
+@$@<Create PTG templates@>+=@{
+ATTR Insert: PTGNode;
+
+RULE: Element ::= xLiteral
+COMPUTE
+  Element.Insert = PTGSeparator(PTGCStringId(FunnelWebEscape(xLiteral)));
+END;
+
+RULE: Element ::= xSymbol
+COMPUTE
+  Element.Insert =
+    IF(xSymbol.IsTerminal, PTGSeparator(Element.Mark), Element.Mark);
+END;
+
+RULE: Element ::= '$' xSymbol
+COMPUTE
+  Element.Insert = Element.Mark;
+END;
+
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol '::=' xRHS 'END' ';'
+COMPUTE
+  xProduction.PtgTemplates=
+    IF(GetNoPtgGiven(xRule.Key,1),
+      PTGSeq(
+        xRHS.PtgTemplates,
+        PTGPlainProd(
+          INCLUDING xRoot.Prefix,
+          StringTable(xRule.Sym),
+          xRHS CONSTITUENTS Element.Insert
+            WITH (PTGNode, PTGSepSeq, IDENTICAL, PTGNull))),
+      xRHS.PtgTemplates)
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@{FunnelWebEscape@} takes a Pascal string, removes the outer apostrophes,
+turns any double internal apostrophes into single apostrophes, and doubles
+any occurrence of the @{@@@} character:
+
+@$@<int FunnelWebEscape(int sym)@>==@{
+@=~
+/* Double each occurrence of the FunnelWeb escape charcter in a literal
+ *   On entry-
+ *     sym=string table index of the unmodified literal
+ *   On exit-
+ *     FunnelWebEscape=string table index of the modified string
+ ***/
+{ char ch;
+  CONST char *str;
+  int n, t, v = 0;
+
+  str = StringTable(sym) + 1;
+  n = 0;
+
+  while (str[1]) {
+    ch = *str++;
+    obstack_1grow(Csm_obstk, ch); n++;
+    if (ch == '\'') str++;	/* throw away the extra quote */
+    else if (*str == '@') {
+      obstack_1grow(Csm_obstk, '@');
+      ++n;
+    }
+  }
+
+  obstack_1grow(Csm_obstk, '\0');
+  CsmStrPtr = (char *)obstack_finish(Csm_obstk);
+
+  mkidn(CsmStrPtr, n, &t, &v);
+  return v;
+}
+~=@
+@}
+
+@B@<PTG templates for LISTOF productions@>
+
+There are three templates for a @{LISTOF@} production, and none of their
+bodies depend on the right-hand side of that production:
+
+@$@<Formats for productions@>+=@{
+ListProd:  $1 string "_"  $2 string ":\n  $\n" 
+ListProd2: $1 string "_2" $2 string ":\n  $ $\n" 
+ListProd1: $1 string "_1" $2 string ":\n  $\n"
+
+Triple: $ $ $
+@}
+
+Each one of the PTG templates can be overridden individually:
+
+@$@<Create PTG templates@>+=@{
+RULE: xProduction ::=  'RULE' xRule ':' xSymbol 'LISTOF' Syms 'END' ';'
+COMPUTE
+  xProduction.PtgTemplates=
+    PTGSeq(
+      Syms.PtgTemplates,
+      PTGTriple(
+        IF(GetNoPtgGiven(xRule.Key,1),
+          PTGListProd(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg2Given(xRule.Key,1),
+          PTGListProd2(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL),
+        IF(GetNoPtg1Given(xRule.Key,1),
+          PTGListProd1(INCLUDING xRoot.Prefix,StringTable(xRule.Sym)),
+          PTGNULL)))
+    <- INCLUDING xRoot.GotProperties;
+END;
+@}
+
+@B@<Output files@>
+
+@O@<Idem.ptg@>@{
+@<Complete FunnelWeb file@>
+@<Format for a non-literal terminal symbol@>
+@<Formats for productions@>
+@}
+
+@O@<Idem.head@>@{
+#include "Idem.h"
+@}
+
+@O@<Idem.h@>@{
+#ifndef IDEM_H
+#define IDEM_H
+
+#include "eliproto.h"
+
+extern int FunnelWebEscape ELI_ARG((int sym));
+
+#endif
+@}
+
+@O@<Idem.c@>@{
+static char RCSid[] = "$Id";
+
+#include "obstack.h"
+#include "csm.h"
+#include "idn.h"
+
+int
+#ifdef PROTO_OK
+FunnelWebEscape(int sym)
+#else
+FunnelWebEscape(sym) int sym;
+#endif
+@<int FunnelWebEscape(int sym)@>
+@}
+
+@O@<Idem.lido@>@{
+@<Output the complete FunnelWeb file@>
+@<Create PTG templates@>
+@}

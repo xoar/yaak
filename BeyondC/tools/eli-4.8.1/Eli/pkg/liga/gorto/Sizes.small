@@ -1,0 +1,36 @@
+/*======================================================================*
+ *									*
+ *	FILE:		app-defaults/Sizes.small			*
+ *									*
+ *	CONTENTS:	Sizing part of application defaults for Gorto	*
+ *			(Small version)					*
+ *									*
+ *	AUTHOR:		Volker Niepel					*
+ *									*
+ *======================================================================*/
+
+
+!			FONTS
+
+Gorto*Font:				-*-new ce*-medium-r-*-*-*-100-*
+Gorto*Text*Font:			-*-fixed-*-r-*-*-12-*
+Gorto*Label.Font:			-*-*-demibold-i-*-*-*-120-*
+Gorto.criticalFont:			-*-*-bold-i-*-*-*-100-*
+Gorto.boldFont:				-*-*-bold-i-*-*-*-140-*
+Gorto*SimpleMenu*Font:			-*-new cent*-medium-r-*-*-12-*
+Gorto*SimpleMenu*menuLabel.Font:	-*-new cent*-bold-r-*-*-17-*
+
+
+!			DEPENDENCY GRAPH LAYOUT
+
+Gorto.textPadding:			2
+Gorto.synthesizedIndent:		12
+Gorto.symbolvPadding:			8
+Gorto.symbolhPadding:			4
+Gorto.arrowWidth:			3
+Gorto.arrowHeight:			8
+Gorto.arrowLength:			25
+Gorto.depColumnWidth:			3
+Gorto.depFaseLength:			5
+
+Gorto.selectWidth:			3

@@ -1,0 +1,13 @@
+/* $Id: config.h.in,v 1.1 2001/05/09 20:48:41 waite Exp $ */
+
+/* Checks for header files */
+#undef STDC_HEADERS
+#undef HAVE_STRINGS_H
+#undef HAVE_ALLOCA_H
+
+/* Checks for typedefs, structures, and compiler characteristics */
+#undef const
+
+/* Checks for library functions */
+#undef HAVE_BCOPY
+#undef HAVE_MEMCPY

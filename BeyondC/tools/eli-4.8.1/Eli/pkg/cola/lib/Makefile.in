@@ -1,0 +1,58 @@
+# $Id: Makefile.in,v 1.2 2002/05/08 15:00:50 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/lib
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/lib
+SRC	=
+COP	=	cmrlib.c cmrio.c bitset.c cmrlib.h cmrio.h bitset.h \
+		cmrinternal.h Makefile.in
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	= 	
+EXE	=
+GEN	=	lib.a
+GENINS	=
+SRCDIR	=	
+AUXDIR	=
+OBJ 	=	cmrlib.o cmrio.o bitset.o
+
+# causes additional tests which can be helpful to search bugs
+# ALLDEB = -DDEBUG_LIB -DDEBUG_BIT
+
+IDL 	= 	../idl
+
+CFLAGS 	=  	$(ALLDEB) -I$(IDL)
+
+@toolmk_h@
+
+lib.a:  $(OBJ)
+	rm -f $@
+	ar rcu $@ $(OBJ)
+	@RANLIB@ $@
+
+cmrlib.o: $(IDL)/comar.h $(IDL)/comar_func.h cmrlib.h cmrinternal.h
+
+cmrio.o:  $(IDL)/comar.h cmrlib.h cmrio.h
+
+bitset.o: bitset.h

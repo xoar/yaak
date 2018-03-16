@@ -1,0 +1,56 @@
+# Output Object Types
+
+:list 'read a list from a file' => :LIST;
+
+:redo 'redo this object step'? => :EXECUTABLE;
+
+:redo_errs 'redo all steps with errors'? => :EXECUTABLE;
+
+:boot_name 'name of the boot-strap file' => :FILE;
+
+:boot 'boot-strap a file' => :REFERENCE;
+
+:diff 'differences between two files'? => :FILE;
+
+:rcp 'archive'? => :VOID;
+
+:installpkg 'install a versioned package or collection'? => :EXECUTABLE;
+
+
+# Parameter Types
+
++default 'default value'? => :first;
+
++other 'another file'? => :first;
+
++f_dest 'file destination'? => :first;
+
++d_dest 'directory destination'? => :first;
+
+
+# Tools
+
+READ-LIST (:FILE)
+   => (:list);
+
+EXEC (redo.sh) (:OBJECT :name)
+   => (:redo);
+
+EXEC (redo_errs.sh) (:err)
+   => (:redo_errs);
+
+EXEC (boot.sh) (:FILE)& (+default)
+   => (:boot_name);
+
+READ-LIST (:boot_name)
+   => (:boot);
+
+EXEC (diff.sh) (:FILE) (+other)
+   => (:diff);
+
+EXEC (rcp.sh) (:FILE) (+f_dest) (+d_dest)
+   => (:rcp);
+
+EXEC (install.sh) (:FILE) (+d_dest) (INSTALL)
+   => (:installpkg);
+

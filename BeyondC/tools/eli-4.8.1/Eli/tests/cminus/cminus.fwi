@@ -1,0 +1,1230 @@
+@=~
+~! $Id: cminus.fwi,v 1.6 1995/11/07 16:40:14 waite Exp $
+~p maximum_input_line_length = infinity
+~A~<The C- - Language~>
+
+C-\thinspace- is a scaled-down version of C.
+The features selected illustrate basic problems for compiler designers:
+scanning, parsing, name analysis, overload resolution, static storage
+allocation and code generation.
+Features that merely increase the implementation effort without
+illustrating such techniques were excluded.
+
+This chapter defines the structure and meaning of a C-\thinspace- program.
+It has five sections, each dealing with one aspect of the
+language: basic symbols and comments, program structure, declarations,
+expressions and statements.
+Basic symbols are the indivisible atoms of the language, and their meanings
+are defined by relating them to our shared experience with programming
+languages.
+All other constructs are composite; each is formed by combining
+parts.
+Their meanings can thus be defined in terms of the meanings of their
+components and fundamental concepts such as ``sequence of execution''.
+
+~B
+
+The basic symbols of a language can be classified as identifiers,
+denotations and delimiters.
+Some of these basic symbols must appear in a program exactly as they are
+defined in this document; others must have the structure described here,
+but their content is arbitrary.
+This section describes the structure of those basic symbols whose content
+is not fixed by the language definition.
+The remaining basic symbols are described by literal character sequences
+that appear in the grammar defining the phrase structure of C-\thinspace-.
+
+Comment structure is also described in this section.
+Although comments are not basic symbols of the language, their structure
+and meaning is given in terms similar to those used to describe basic
+symbols.
+
+~$~<Basic Symbols and Comments~>==~{
+~<Identifiers~>
+~<Denotations~>
+~<Comments~>
+~}
+
+~C
+
+Identifiers in C-\thinspace-
+are identical to their counterparts in C.
+
+~$~<Identifiers~>==~{
+Identifier:		C_IDENTIFIER
+~}
+
+An identifier is a freely chosen representation for an object.
+It is given meaning by a construct of the program.
+The appearances at which an identifier is given a meaning are called
+~/defining occurrences~/ of that identifier.
+All other appearances of the identifier are called
+~/applied occurrences~/.
+Each identifier is represented internally by a unique integer.
+The value of the integer is given by the attribute ~{Identifier.Sym~};
+all occurrences of a particular identifier will have the same value for
+~{Identifier.Sym~}.
+
+~$~<Defining and applied occurrences of identifiers~>==~{
+RULE DefiningOccurrence: IdDef ::= Identifier
+COMPUTE IdDef.Sym=Identifier;
+END;
+
+RULE AppliedOccurrence: IdUse ::= Identifier
+COMPUTE IdUse.Sym=Identifier;
+END;
+~}
+
+~$~<Classification of identifier phrases~>==~{
+IdDef: Identifier .
+IdUse: Identifier .
+~}
+
+~C
+
+Denotations in C-\thinspace-
+are identical to their counterparts in C.
+
+~$~<Denotations~>==~{
+IntDenotation:		C_INTEGER
+FloatDenotation:	C_FLOAT
+~}
+
+A denotation is a representation of a numeric value,
+and has the usual meaning.
+Any sign preceding a denotation is not part of that denotation,
+but rather part of an enclosing expression.
+Therefore, only nonnegative values are represented by denotations.
+
+~C
+
+Comments are arbitrary sequences of characters beginning with ``/*''
+and ending with ``*/''.
+They cannot be nested, and their structure is identical to that of comments
+in C.
+
+~$~<Comments~>==~{
+	C_COMMENT
+~}
+
+Comments, spaces, and newlines are meaningless.
+
+~B
+
+~$~<Program Structure~>==~{
+Program: ResultType Identifier '(' ParameterList ')' Compound .
+ResultType: 'int' / 'float' .
+Compound:
+  '{' VariableDeclList StatementList '}' /
+  '{' StatementList '}' .
+~<Declarations~>
+~<Statements~>
+~}
+
+A ~{Program~} specifies a computation by describing a sequence of actions.
+A computation specified in C-\thinspace- may be realized by
+any sequence of actions having the same effect as the one described here
+for the given computation.
+The meaning of constructs that do not satisfy the rules given here is undefined.
+Whether, and in what manner, a particular implementation of C-\thinspace-
+gives meaning to undefined constructs is outside the scope of this definition.
+
+~C~<Execution Sequence~>
+
+A ~{Program~} is executed by reading parameter values from the standard input
+unit and then executing the component ~{Compound~}.
+The components of the ~{Compound~}, in turn, are executed from left to
+right.
+A return statement must be executed to terminate the program.
+The value returned, of the type specified, is written to the standard output.
+
+~C
+
+Every applied occurrence of an identifier must ~/identify~/
+some defining occurrence of that identifier.
+The properties of the applied occurrence are those established by the
+defining occurrence it identifies.
+
+Identification is controlled by the visibility rules of the language,
+which are based on program structure.
+The important components of the program structure for the visibility rules
+are the ~/ranges~/ --- regions of the program in which identifiers can be
+defined.
+One of these regions is distinguished as the ~/root~/, a range not
+contained within any other range.
+
+Given these regions, the visibility rules are defined in terms of a
+~/consistent renaming~/ that associates every identifier occurrence with a
+~/definition table key~/.
+The same definition table key is associated with a defining occurrence and
+all of the applied occurrences identifying it.
+Distinct defining occurrences are associated with
+distinct definition table keys.
+Properties of the object represented by the identifier can be stored under
+the definition table key at the defining occurrence and then accessed at
+any applied occurrence.
+
+In C-\thinspace-, the ranges are the ~{Program~} and each ~{Compound~}.
+The ~{Program~} is the root.
+
+~$~<Visibility Rules~>==~{
+SYMBOL Program INHERITS Root END;
+SYMBOL Compound INHERITS Range END;
+~<Consistent renaming~>
+~<Multiply-defined identifiers~>
+~<Undefined identifiers~>
+~}
+
+~D
+
+In C-\thinspace-, as in C, the scope of an identifier definition is from
+the point of definition to the end of the range containing that
+definition.
+The consistent renaming process must therefore consider the identifier
+occurrences in textual order.
+At each occurrence, ~{AllEarlierRenamed~} asserts that
+all textually preceding occurrences have been renamed.
+~{Env~} provides the current environment, in which the identifier must
+be either found or defined.
+
+~$~<Consistent renaming~>==~{
+ATTR Env: Environment;
+ATTR Sym: int;
+ATTR Key: DefTableKey;
+
+CHAIN AllEarlierRenamed: VOID;
+
+SYMBOL Root INHERITS Range COMPUTE
+  INH.Env = NewEnv();
+  CHAINSTART HEAD.AllEarlierRenamed="yes";
+END;
+
+SYMBOL Range COMPUTE
+  INH.Env = NewScope(INCLUDING Range.Env);
+END;
+
+SYMBOL IdDef COMPUTE
+  SYNT.Key=
+    DefineIdn(INCLUDING Range.Env, THIS.Sym) DEPENDS_ON THIS.AllEarlierRenamed;
+  THIS.AllEarlierRenamed=THIS.AllEarlierRenamed DEPENDS_ON THIS.Key;
+END;
+
+SYMBOL IdUse COMPUTE
+  SYNT.Key=
+    KeyInEnv(INCLUDING Range.Env, THIS.Sym) DEPENDS_ON THIS.AllEarlierRenamed;
+  THIS.AllEarlierRenamed=THIS.AllEarlierRenamed DEPENDS_ON THIS.Key;
+END;
+~}
+
+(For an example of consistent renaming in C-\thinspace-,
+see the visibility example.)
+
+~D
+
+Every applied occurrence must identify some defining occurrence.
+An applied occurrence identifies some defining occurrence if and only if
+the consistent renaming process associates it with a definition table key.
+
+~$~<Undefined identifiers~>==~{
+SYMBOL IdUse COMPUTE
+  IF(EQ(THIS.Key, NoKey), message(FATAL, "Undefined identifier", 0, COORDREF));
+END;
+~}
+
+~D
+
+The text of a range, excluding the text of ranges nested within it,
+may contain no more than one defining occurrence of a given identifier.
+If a range contains more than one defining occurrence of a given
+identifier, the consistent renaming process will associate the same
+definition table key with each.
+~{GotAllDefs~} asserts that a definition table key has been associated with
+each defining occurrence in the program.
+
+~$~<Multiply-defined identifiers~>==~{
+SYMBOL Root COMPUTE
+  INH.GotAllDefs = CONSTITUENTS IdDef.Def;
+END;
+
+SYMBOL IdDef COMPUTE
+  SYNT.Def = SetDef(THIS.Key, 1, 2);
+  IF(EQ(GetDef(THIS.Key,0), 2),
+    message(FATAL, "Multiply-defined identifier", 0, COORDREF))
+    DEPENDS_ON INCLUDING Root.GotAllDefs;
+END;
+~}
+
+~$~<Property to check for multiple definition~>==~{
+Def: int;	/* 1 if one defining occurrence is associated with this key */
+		/* 2 if more than one */
+~}
+
+~B
+
+~/Values~/ are abstract entities upon which operations may be performed,
+~/types~/ classify values
+according to the operations that may be performed upon them, and
+~/objects~/ are the concrete instances of values that may be operated upon.
+Two objects are ~/equal~/ if they are instances of the same value.
+A declaration is a construct that associates an identifier with an object.
+
+~$~<Declarations~>==~{
+~<Variable declarations~>
+~<Parameter declarations~>
+~}
+
+Every object has a specified ~/extent~/, during which it can be operated upon.
+The extents of denotations are unbounded;
+the extents of variables are determined by their declarations.
+
+Values of types ~{int~} and ~{float~} have the usual meanings.
+The range of ~{int~} values, and the range and precision of ~{float~} values,
+are determined by the particular implementation of C-\thinspace-.
+
+Each declared object has an associated property that specifies its type.
+This property is stored under the definition table key for the object
+represented by the identifier.
+~{GotAllTypes~} asserts that a type property has been established for every
+defining occurrence in the program.
+
+~$~<Type property~>==~{
+"oiladt2.h"
+Type: tOilType;
+~}
+
+~$~<Type determination~>+=~{
+SYMBOL Program COMPUTE
+  SYNT.GotAllTypes=CONSTITUENTS (VariableDecl.GotType, ParameterDecl.GotType);
+END;
+~}
+
+~C
+
+A ~/variable~/ of type ~{t~} is an object that can ~/refer to~/
+(or ~/contain~/) an object that is an instance of a value of type ~{t~}.
+
+~$~<Variable declarations~>==~{
+VariableDeclList: VariableDeclSeg / VariableDeclList VariableDeclSeg .
+VariableDeclSeg: 'int' VarIdList ';' / 'float' VarIdList ';' .
+VarIdList: VariableDecl / VarIdList ',' VariableDecl .
+VariableDecl: IdDef OptInitialize .
+OptInitialize: / '=' Expression .
+~}
+
+A variable is created by a ~{VariableDecl~},
+and the specified identifier represents this variable.
+If the variable declaration has the form ~{t Identifier~}
+then the created variable can refer to objects of type ~{t~}.
+Initially, it refers to an arbitrary object.
+
+~$~<Type determination~>+=~{
+ATTR type: tOilType;
+
+RULE IntVar: VariableDeclSeg ::= 'int' VarIdList ';'
+COMPUTE VariableDeclSeg.type=OilTypeint_t;
+END;
+
+RULE FloatVar: VariableDeclSeg ::= 'float' VarIdList ';'
+COMPUTE VariableDeclSeg.type=OilTypefloat_t;
+END;
+
+RULE VarDecl: VariableDecl ::= IdDef OptInitialize
+COMPUTE
+  VariableDecl.GotType=
+    SetType(IdDef.Key, INCLUDING VariableDeclSeg.type, 0);
+END;
+~}
+
+If the variable declaration has the form ~{t Identifier = Expression~}
+then the created variable can refer to objects of type ~{t~}.
+Initially, it refers to the object yielded by the given ~{Expression~}.
+
+~$~<Type determination~>+=~{
+RULE Initialize: OptInitialize ::= '=' Expression
+COMPUTE Expression.yields=INCLUDING VariableDeclSeg.type;
+END;
+~}
+
+The extent of the created variable begins when the declaration is executed
+and ends when execution of the smallest ~{Compound~} containing
+the declaration is complete.
+
+~C
+
+~$~<Parameter declarations~>==~{
+ParameterList: ParameterDecl / ParameterList ',' ParameterDecl .
+ParameterDecl: 'int' IdDef / 'float' IdDef .
+~}
+
+A variable is created, and the identifier represents this variable.
+If the parameter declaration has the form ~{t Identifier~}
+then the created variable can refer to objects of type ~{t~}.
+Initially it refers to an object read from the standard input unit
+before program execution begins.
+The objects read are referred to by the variables named in the parameter list
+in order from left to right.
+
+~$~<Type determination~>+=~{
+RULE IntParDecl: ParameterDecl ::= 'int' IdDef
+COMPUTE
+  ParameterDecl.GotType=SetType(IdDef.Key, OilTypeint_t, 0);
+END;
+
+RULE FloatParDecl: ParameterDecl ::= 'float' IdDef
+COMPUTE
+  ParameterDecl.GotType=SetType(IdDef.Key, OilTypefloat_t, 0);
+END;
+~}
+
+The extent of the created variable is
+the entire execution history of the program.
+
+~B
+
+A C-\thinspace- ~{Expression~} is a construct that yields an object when
+executed.
+Its structure is determined by operator precedence and association
+in the usual way.
+The precedence levels are those of C.
+
+~$~<Expressions~>==~{
+Expression: Condition / IdUse '=' Expression .
+Condition: Disjunction / Disjunction '?' Expression ':' Condition .
+Disjunction: Conjunction / Disjunction BarBar Conjunction .
+BarBar: '||' .
+Conjunction: Comparison / Conjunction AmpAmp Comparison .
+AmpAmp: '&&' .
+Comparison: Relation / Relation EquEqu Relation .
+EquEqu: '==' .
+Relation: Sum / Sum Relop Sum .
+Relop: '<' / '>' .
+Sum: Term / Sum Addop Term .
+Addop: '+' / '-' .
+Term: Factor / Term Mulop Factor .
+Mulop: '*' / '/' / '%' .
+Factor: Primary / Unop Factor / Notop Factor .
+Unop: '-' .
+Notop: '!' .
+Primary: IntDenotation / FloatDenotation / IdUse / '(' Expression ')' .
+~}
+
+Expressions at all precedence levels are semantically equivalent.
+
+~$~<Equivalent expressions~>==~{
+Expression ::=
+  Condition Disjunction Conjunction Comparison Relation Sum
+  Term Factor Primary .
+
+ShortCircuitOp ::=
+  BarBar AmpAmp .
+
+Binop ::=
+  EquEqu Relop Addop Mulop .
+~}
+
+The type of the object yielded by an expression is determined by the types
+of the expression's operands and by the context in which the expression
+occurs.
+~{Expression.possible~} describes the set of all types
+that could be yielded by ~{Expression~}.
+This set contains the ``natural'' type and all types to which values of
+that type can be coerced.
+~{Expression.yields~} describes the type that ~{Expression~} actually
+yields; it is determined from the context in which the expression occurs.
+
+~$~<Type determination~>+=~{
+ATTR possible: tOilTypeSet;
+ATTR yields: tOilType;
+
+RULE IntVal: Expression ::= IntDenotation
+COMPUTE Expression.possible=OilTypeToSet(OilTypeint_t);
+END;
+
+RULE FloatVal: Expression ::= FloatDenotation
+COMPUTE Expression.possible=OilTypeToSet(OilTypefloat_t);
+END;
+
+RULE IdnVal: Expression ::= IdUse
+COMPUTE
+  Expression.possible=
+    OilTypeToSet(GetType(IdUse.Key, OilTypeunknown_t))
+    DEPENDS_ON INCLUDING Program.GotAllTypes;
+END;
+~}
+
+The types that could be yielded by denotations are determined by the kind
+of denotation, but the type of an identifier must be obtained from its type
+property.
+If the identifier is undefined, then its type property is not available.
+The distinguished type ~{unknown_t~} is used in that case.
+
+~C
+
+~$~<Operations~>==~{
+~<Assignment~>
+~<Condition~>
+~<Disjunction, conjunction and complement~>
+~<Comparisons~>
+~<Arithmetic~>
+~}
+
+Each operator ~/indication~/ (~{=~}, ~{&&~}, ~{<~}, etc.) denotes a set of
+possible ~/operations~/,
+with the particular one meant in a given context being determined by the
+operand types and the context in which the expression occurs.
+
+~$~<Type determination~>+=~{
+ATTR indication, operator: tOilOp;
+
+SYMBOL Binop INHERITS Operator END;
+
+RULE DyadicExp: Expression ::= Expression Binop Expression
+COMPUTE ~<Identify a dyadic operator~>~(Binop~)
+END;
+
+SYMBOL Unop INHERITS Operator END;
+
+RULE MonadicExp: Expression ::= Unop Expression
+COMPUTE ~<Identify a monadic operator~>~(Unop~)
+END;
+~}
+
+~$~<Identify a dyadic operator~>~(~1~)~M==~{
+  Expression[1].possible=
+    OilIdResultTS2(
+      ~1.indication,
+      Expression[2].possible,
+      Expression[3].possible);
+  ~1.operator=
+    OilIdOpTS2(
+      Expression[1].yields,
+      ~1.indication,
+      Expression[2].possible,
+      Expression[3].possible);
+  Expression[2].yields=OilGetArgType(~1.operator,1);
+  Expression[3].yields=OilGetArgType(~1.operator,2);
+~}
+
+~$~<Identify a monadic operator~>~(~1~)~M==~{
+  Expression[1].possible=
+    OilIdResultTS1(
+      ~1.indication,
+      Expression[2].possible);
+  ~1.operator=
+    OilIdOpTS1(
+      Expression[1].yields,
+      ~1.indication,
+      Expression[2].possible);
+  Expression[2].yields=OilGetArgType(~1.operator,1);
+~}
+
+It must be possible to determine an operation for every operator indication
+appearing in a program.
+
+~$~<Type determination~>+=~{
+SYMBOL Operator COMPUTE
+  IF(NOT(OilIsValidOp(THIS.operator)),
+    message(FATAL, "Invalid operator in this context", 0, COORDREF));
+END;
+~}
+
+~D
+
+~$~<Assignment~>==~{
+RULE AssignExp: Expression ::= IdUse '=' Expression
+COMPUTE
+  .possible=
+    OilTypeToSet(GetType(IdUse.Key, OilTypeunknown_t))
+    DEPENDS_ON INCLUDING Program.GotAllTypes;
+  .operator=
+    OilIdOpTS2(
+      Expression[1].yields,
+      OilOpEqual,
+      .possible,
+      Expression[2].possible);
+  Expression[1].possible=
+    OilIdResultTS2(
+      OilOpEqual,
+      .possible,
+      Expression[2].possible);
+  Expression[2].yields=OilGetArgType(.operator,2);
+END;
+~}
+
+An assignment causes the variable represented by the left operand
+to refer to a new instance of the value yielded by the right operand.
+The result of the assignment is the value yielded by the right operand.
+
+If the left operand of an assignment represents an integer variable
+and the right operand yields a floating-point value,
+then the floating-point value is truncated to an integer
+by removing any nonzero fractional part.
+Thus, ~{3.6~} would become ~{3~} and ~{-3.6~} would become ~{-3~}.
+If the resulting integer is not representable,
+then the behavior of the assignment is undefined.
+
+~$~<Operator identification~>+=~{
+INDICATION Equal:
+  IntegerAssignment, TruncatingAssignment, FloatingAssignment;
+OPER IntegerAssignment(int_t,int_t): int_t;
+OPER TruncatingAssignment(int_t,float_t): int_t;
+OPER FloatingAssignment(float_t,float_t): float_t;
+~}
+
+~D
+
+~$~<Condition~>==~{
+RULE CondExp: Expression ::= Expression '?' Expression ':' Expression
+COMPUTE
+  Expression[1].possible=
+    OilTypeToSet(OilBalance(Expression[3].possible,Expression[4].possible));
+  Expression[2].yields=OilTypeint_t;
+  Expression[3].yields=Expression[1].yields;
+  Expression[4].yields=Expression[1].yields;
+END;
+~}
+
+A ~{Condition~} is evaluated by first evaluating the component ~{Disjunction~}.
+If the result is not zero, then the value of the condition is
+the value of the component ~{Expression~},
+and the component ~{Condition~} is not evaluated.
+Otherwise, the value of the condition is
+the value of the component ~{Condition~},
+and the component ~{Expression~} is not evaluated.
+
+The component ~{Expression~} and component ~{Condition~} of a ~{Condition~}
+must be ~/balanced~/ to ensure that the type of the result yielded is the same,
+no matter which alternative was chosen.
+Balancing involves coercing the result of each to a common type.
+When the type is uniquely prescribed by the context,
+then this type is chosen as the common result type for all alternatives.
+If the context of the expression is such that several result types are possible,
+the one leading to the smallest total number of coercions is chosen.
+
+~D
+
+~$~<Disjunction, conjunction and complement~>==~{
+SYMBOL ShortCircuitOp INHERITS Operator END;
+
+RULE ShortCircuitExp: Expression ::= Expression ShortCircuitOp Expression
+COMPUTE ~<Identify a dyadic operator~>~(ShortCircuitOp~)
+END;
+
+RULE BarOp: ShortCircuitOp ::= '||'
+COMPUTE ShortCircuitOp.indication=OilOpBarBar;
+END;
+
+RULE AmpOp: ShortCircuitOp ::= '&&'
+COMPUTE ShortCircuitOp.indication=OilOpAmpAmp;
+END;
+
+SYMBOL Notop INHERITS Operator END;
+
+RULE NotExp: Expression ::= Notop Expression
+COMPUTE ~<Identify a monadic operator~>~(Notop~)
+END;
+
+RULE ExclOp: Notop ::= '!'
+COMPUTE Notop.indication=OilOpExclam;
+END;
+~}
+
+The expression ~{e1 || e2~} has the same meaning as the
+expression ~{e1 == 0 ? e2 : 1~}.
+
+The expression ~{e1 && e2~} has the same meaning as the expression
+~{e1 == 0 ? 0 : e2~}.
+
+The expression ~{!e~} has the same meaning as the expression
+~{e == 0 ? 1 : 0~}.
+
+~$~<Operator identification~>+=~{
+INDICATION BarBar: Disjunction;
+OPER Disjunction(int_t,int_t): int_t;
+
+INDICATION AmpAmp: Conjunction;
+OPER Conjunction(int_t,int_t): int_t;
+
+INDICATION Exclam: Complement;
+OPER Complement(int_t): int_t;
+~}
+
+~D
+
+~$~<Comparisons~>==~{
+RULE EqualOp: Binop ::= '=='
+COMPUTE Binop.indication=OilOpEquEqu;
+END;
+
+RULE LessOp: Binop ::= '<'
+COMPUTE Binop.indication=OilOpLess;
+END;
+
+RULE GreaterOp: Binop ::= '>'
+COMPUTE Binop.indication=OilOpGreater;
+END;
+~}
+
+The operands of a comparison are evaluated collaterally.
+
+Equality yields the value 1 if its operands have the same value.
+Otherwise, it yields the value 0.
+
+Relational operators yield the value 1 if the relation they describe is
+satisfied.
+Otherwise, they yield the value 0.
+
+~$~<Operator identification~>+=~{
+INDICATION EquEqu: IntEqual, FloatEqual;
+OPER IntEqual(int_t,int_t): int_t;
+OPER FloatEqual(float_t,float_t): int_t;
+
+INDICATION Less: IntLess, FloatLess;
+OPER IntLess(int_t,int_t): int_t;
+OPER FloatLess(float_t,float_t): int_t;
+
+INDICATION Greater: IntGreater, FloatGreater;
+OPER IntGreater(int_t,int_t): int_t;
+OPER FloatGreater(float_t,float_t): int_t;
+~}
+
+~D
+
+~$~<Arithmetic~>==~{
+RULE PlusOp: Binop ::= '+'
+COMPUTE Binop.indication=OilOpPlus;
+END;
+
+RULE MinusOp: Binop ::= '-'
+COMPUTE Binop.indication=OilOpMinus;
+END;
+
+RULE StarOp: Binop ::= '*'
+COMPUTE Binop.indication=OilOpStar;
+END;
+
+RULE SlashOp: Binop ::= '/'
+COMPUTE Binop.indication=OilOpSlash;
+END;
+
+RULE PercentOp: Binop ::= '%'
+COMPUTE Binop.indication=OilOpPercent;
+END;
+
+RULE UMinusOp: Unop ::= '-'
+COMPUTE Unop.indication=OilOpUMinus;
+END;
+~}
+
+The operands of a dyadic arithmetic operator are evaluated collaterally.
+
+The arithmetic operators addition, subtraction, multiplication,
+floating division, and negation have the usual meaning
+as long as the values of all operands and results lie in the range permitted
+by the mapping from C-\thinspace- objects to target machine objects.
+Division and remainder are defined only when
+the value of the right operand is nonzero.
+
+The result of an integer division operation with dividend ~{m~} and
+divisor ~{n != 0~} is determined as follows:
+
+1) Let ~{q~} and ~{0 <= r < | n |~} be two integers such that
+~{m = q * n + r~}.
+
+2) If ~{r = 0~} then the result of ~{m / n~} is ~{q~}.
+
+3) Otherwise, if ~{m > 0~} and ~{n > 0~} then the result of ~{m / n~} is ~{q~}.
+
+4) Otherwise, the result of ~{m / n~} is either ~{q~} or ~{q + 1~}
+at the discretion of the implementor.
+
+The result of the remainder operation ~{m % n~} is given by
+~{m - ( m / n ) * n~}
+
+~$~<Operator identification~>+=~{
+INDICATION Plus: IntegerAddition, FloatingAddition;
+OPER IntegerAddition(int_t,int_t): int_t;
+OPER FloatingAddition(float_t,float_t): float_t;
+
+INDICATION Minus: IntegerSubtraction, FloatingSubtraction;
+OPER IntegerSubtraction(int_t,int_t): int_t;
+OPER FloatingSubtraction(float_t,float_t): float_t;
+
+INDICATION Star: IntegerMultiplication, FloatingMultiplication;
+OPER IntegerMultiplication(int_t,int_t): int_t;
+OPER FloatingMultiplication(float_t,float_t): float_t;
+
+INDICATION Slash: IntegerDivision, FloatingDivision;
+OPER IntegerDivision(int_t,int_t): int_t;
+OPER FloatingDivision(float_t,float_t): float_t;
+
+INDICATION Percent: Remainder;
+OPER Remainder(int_t,int_t): int_t;
+
+INDICATION UMinus: IntegerNegation, FloatingNegation;
+OPER IntegerNegation(int_t): int_t;
+OPER FloatingNegation(float_t): float_t;
+~}
+
+~C
+
+When the type of value delivered by an operand
+does not satisfy the requirements of an operation, coercions
+can be applied to yield a value that does satisfy the requirements.
+Any ambiguities in the process of selecting computations and coercions
+is resolved in favor of the choice with the smallest total number of
+coercions.
+
+C-\thinspace- allows the following coercion operations:
+
+~$~<Coercions~>==~{
+COERCION IntToFloat(int_t): float_t;
+COERCION IntToVoid(int_t): void_t;
+COERCION FloatToVoid(float_t): void_t;
+~}
+
+~B
+
+A C-\thinspace- ~{Statement~} is an action that does not yield a value
+when executed.
+
+~$~<Statements~>==~{
+StatementList: Statement / StatementList Statement .
+Statement: Compound / ';' .
+~<Conditional statement~>
+~<Iteration statement~>
+~<Break statement~>
+~<Continue statement~>
+~<Return statement~>
+~<Computation statement~>
+~}
+
+The elements of a ~{StatementList~} are executed in the order in which they
+appear in the program.
+
+An empty statement is executed by doing nothing at all.
+
+~C
+
+~$~<Conditional statement~>==~{
+Statement:
+  'if' '(' Expression ')' Statement $'else' /
+  'if' '(' Expression ')' Statement 'else' Statement .
+~}
+
+If the keyword ~{'else'~} is present, then it forms a
+~{Conditional statement~} with the closest preceding ~{'if'~}.
+Therefore the statement ~{if (e1) if (e2) s1; else s2;~}
+is identical in meaning to the statement
+~{if (e1) { if (e2) s1; else s2; }~}.
+This interpretation is guaranteed in the specification by the presence of
+~{$'else'~}, which says that ~{'if' '(' Expression ')' Statement~} should
+~/not~/ be interpreted as a complete statement if the next basic symbol of
+the input text is ~{else~}.
+
+A conditional statement is executed by first evaluating the component
+~{Expression~}, which must yield an object of type ~{int~}.
+If the result of this evaluation is not 0,
+the first component ~{Statement~} is executed.
+Otherwise, if the keyword ~{'else'~} is present,
+then the second component ~{Statement~} is executed.
+
+~$~<Statement context~>+=~{
+RULE OneSided: Statement ::= 'if' '(' Expression ')' Statement
+COMPUTE Expression.yields=OilTypeint_t;
+END;
+
+RULE TwoSided: Statement ::= 'if' '(' Expression ')' Statement 'else' Statement
+COMPUTE Expression.yields=OilTypeint_t;
+END;
+~}
+
+~C
+
+~$~<Iteration statement~>==~{
+Statement: WhileStmt .
+WhileStmt: 'while' '(' Expression ')' Statement .
+~}
+
+The iteration ~{while (e) s;~}
+is identical in meaning to the conditional ~{if (e) { s; while (e) s; }~}
+
+~$~<Statement context~>+=~{
+RULE Loop: WhileStmt ::= 'while' '(' Expression ')' Statement
+COMPUTE Expression.yields=OilTypeint_t;
+END;
+~}
+
+~C
+
+~$~<Break statement~>==~{
+Statement: 'break' ';' .
+~}
+
+A break may appear only within the component ~{Statement~} of an iteration.
+Execution of a break causes termination of the smallest containing iteration.
+
+~$~<Statement context~>+=~{
+ATTR BreakLbl: DefTableKey;
+
+SYMBOL WhileStmt COMPUTE SYNT.BreakLbl=NewKey(); END;
+SYMBOL Program COMPUTE SYNT.BreakLbl=NoKey; END;
+
+RULE BreakStmt: Statement ::= 'break' ';'
+COMPUTE
+  IF(EQ(INCLUDING (WhileStmt.BreakLbl, Program.BreakLbl), NoKey),
+    message(FATAL, "break must be inside an iteration", 0, COORDREF));
+END;
+~}
+
+~C
+
+~$~<Continue statement~>==~{
+Statement: 'continue' ';' .
+~}
+
+A continue may appear only within the component ~{Statement~} of an iteration.
+Execution of a continue causes termination of the component ~{Statement~} of the
+smallest containing iteration.
+The component ~{Expression~} of the iteration is evaluated next.
+Therefore, the continue has the effect of cutting short the current
+execution of the controlled statement
+and testing whether another should be commenced.
+Contrast this behavior with that of the break, which escapes from the
+iteration entirely.
+
+~$~<Statement context~>+=~{
+ATTR ContinueLbl: DefTableKey;
+
+SYMBOL WhileStmt COMPUTE SYNT.ContinueLbl=NewKey(); END;
+SYMBOL Program COMPUTE SYNT.ContinueLbl=NoKey; END;
+
+RULE ContinueStmt: Statement ::= 'continue' ';'
+COMPUTE
+  IF(EQ(INCLUDING (WhileStmt.ContinueLbl, Program.ContinueLbl), NoKey),
+    message(FATAL, "continue must be inside an iteration", 0, COORDREF));
+END;
+~}
+
+~C
+
+~$~<Return statement~>==~{
+Statement: 'return' Expression ';' .
+~}
+
+A return is executed by first evaluating the component ~{Expression~}.
+This value is written to the standard output, and
+execution of the program is then terminated.
+
+~$~<Statement context~>+=~{
+RULE ReturnStmt: Statement ::= 'return' Expression ';'
+COMPUTE
+  .operator=
+    OilIdOpTS1(INCLUDING Program.type, OilOpReturn, Expression.possible);
+  IF(NOT(OilIsValidOp(.operator)),
+    message(FATAL, "Returned value incompatible with program type",
+            0, COORDREF));
+  Expression.yields=OilGetArgType(.operator,1);
+END;
+
+RULE Source: Program ::= ResultType Identifier '(' ParameterList ')' Compound
+COMPUTE Program.type=ResultType.type;
+END;
+
+RULE IntResult: ResultType ::= 'int'
+COMPUTE ResultType.type=OilTypeint_t;
+END;
+
+RULE FloatResult: ResultType ::= 'float'
+COMPUTE ResultType.type=OilTypefloat_t;
+END;
+~}
+
+~$~<Operator identification~>+=~{
+INDICATION Return: IntOutput, FloatOutput;
+OPER IntOutput(int_t): int_t;
+OPER FloatOutput(float_t): float_t;
+~}
+
+~C
+
+~$~<Computation statement~>==~{
+Statement: Expression ';' .
+~}
+
+A computation is executed by first evaluating the component ~{Expression~}.
+The result of that evaluation is then discarded.
+It is convenient to describe a discarded value by a type, ~{void~},
+distinct from the types of the language's data.
+
+~$~<Statement context~>+=~{
+RULE ExprStmt: Statement ::= Expression ';'
+COMPUTE Expression.yields=OilTypevoid_t;
+END;
+~}
+
+~A~<Specification Files~>
+
+Several different kinds of formal specifications have been used to define
+various aspects of C-\thinspace-.
+Each kind has a specific purpose and is processed in a specific way by Eli.
+Eli requires that specification fragments of different kinds appear in
+separate files, with each file name reflecting the kind of specification
+it contains.
+
+This chapter collects the specification fragments appearing in the last
+chapter, placing those of a specific kind into a file with an appropriate
+name.
+The purpose of each file is briefly noted.
+
+~B
+
+A type-~{gla~} file describes the lexical structure of the comments and the
+basic symbols that do not appear literally in the concrete grammar.
+This information is used, in conjunction with descriptions of the literal
+basic symbols derived from the concrete grammar, to construct the scanner.
+
+~O~<cminus.gla~>==~{
+~<Basic Symbols and Comments~>
+~}
+
+~B
+
+A type-~{con~} file describes the phrase structure of the source text.
+This information is used to construct the parser.
+
+~O~<cminus.con~>==~{
+Axiom: Program .
+~<Program Structure~>
+~<Classification of identifier phrases~>
+~<Expressions~>
+~}
+
+~B
+
+A type-~{sym~} file defines sets of nonterminal symbols that are
+semantically equivalent.
+These nonterminals must be distinguished when constructing the parser, and
+hence are given distinct names in the context-free grammar describing the
+source text.
+In the remainder of the specification, however, they are not distinguished.
+Any member of a set is represented by the same symbol.
+This information is used to construct the tree-building actions invoked by
+the parser.
+
+~O~<cminus.sym~>==~{
+~<Equivalent expressions~>
+~}
+
+~B
+
+A type-~{lido~} file describes computations used to decorate the tree that
+represents the source program text internally.
+The computations gather contextual information and verify context
+conditions.
+This information is used to construct an algorithm that walks the tree,
+performing the necessary computations.
+
+~O~<cminus.lido~>==~{
+~<Defining and applied occurrences of identifiers~>
+~<Visibility Rules~>
+~<Statement context~>
+~<Operations~>
+~<Type determination~>
+~}
+
+~B
+
+A type-~{pdl~} file describes the properties that must be stored in the
+definition table to support computations over the tree.
+This information is used to construct access and update functions to
+maintain the definition table.
+
+~O~<cminus.pdl~>==~{
+~<Property to check for multiple definition~>
+~<Type property~>
+~}
+
+~B
+
+A type-~{oil~} file describes the possible overloading of symbols in the
+source program.
+This information is used to construct an overload resolution algorithm.
+
+~O~<cminus.oil~>==~{
+~<Operator identification~>
+~<Coercions~>
+COERCION UnkI(unknown_t):int_t;
+COERCION UnkF(unknown_t):float_t;
+~}
+
+~B
+
+A type-~{head~} file makes abstract data type interfaces available to
+modules generated by Eli.
+This information is used to verify procedure calls and access exported data.
+
+~O~<cminus.head~>==~{
+#include "envmod.h"
+~}
+
+~A~<Sample Programs~>
+
+This chapter gives several samples of correct and incorrect C-\thinspace-
+programs.
+Error messages produced by the generated processor are included with each
+incorrect program.
+
+~B
+
+Here is a C-\thinspace- program to compute the greatest common divisor of two
+integers:
+
+~$~<GCD example~>~Z==~{
+int
+GCD(int x, int y)
+{
+   while (!(x == y))
+      if (x > y) x = x-y;
+      else y = y-x;
+   return x;
+}
+~}
+
+The initial values of the parameters are read from the
+standard input device as a part of the initialization process.
+The result returned by the program is written to the standard output device as a
+part of the finalization process.
+
+~B
+
+The following factorial program uses an initialized variable declaration
+to define the limit imposed by machine arithmetic:
+
+~$~<Factorial example~>~Z==~{
+int
+Factorial(int v)
+{
+   int limit = 7;
+
+   if (v < 0 || v > limit) return -1;
+   {
+      int c = 0, fact = 1;
+
+      /* Loop invariant: fact == c! */
+      while (c < v) {
+         c = c+1; fact = fact*c;
+      }
+      return fact;
+   }
+}
+~}
+
+If the initial value of ~{v~} is invalid,
+the program returns ~{- 1~} as its answer.
+
+~B
+
+~$~<Visibility example~>~Z==~{
+int
+Scope(int v)
+{
+   int limit = v + 7, v = 3;
+
+   return limit-v;
+}
+~}
+
+The second occurrence of ~{v~} in the fourth line is a defining occurrence.
+Its scope is from this point to the end of the ~{Compound~} in which it
+appears.
+(The end of that ~{Compound~} is the last line of the program.)
+There is also a defining occurrence of ~{v~} in the second line.
+Its scope is from this point to the end of the program, excluding the scope
+of the declaration of ~{v~} in the fourth line.
+All other occurrences of ~{v~} are applied occurrences.
+
+From this description it is easy to see that the ~{v~} in the return statement
+identifies the defining occurrence in the variable declaration ~{v = 3~},
+while the first occurrence of ~{v~} in the fourth line identifies the
+defining occurrence in the parameter declaration ~{int v~}.
+Thus, the effect of this program is to print an integer larger by 4 than its
+input parameter.
+
+It is important to note that the visibility rules of C-\thinspace-
+make use of an identifier before its definition impossible.
+
+~B
+
+~$~<Identifier definition errors~>~Z==~{
+int
+DefErrors(int x, float x)
+{
+   int limit = v + 7, v = 3;
+   {float y = x, z = v, z; v = y / z;}
+   return v + y;
+}
+"input", line 4:16 FATAL: Undefined identifier
+"input", line 6:15 FATAL: Undefined identifier
+"input", line 2:15 FATAL: Multiply-defined identifier
+"input", line 2:24 FATAL: Multiply-defined identifier
+"input", line 5:18 FATAL: Multiply-defined identifier
+"input", line 5:25 FATAL: Multiply-defined identifier
+~}
+
+Note that the processor has marked every defining occurrence of each
+multiply-defined symbol and every applied occurrence of each undefined
+symbol.
+The fact that the first occurrence of ~{v~} in the fourth line is marked as
+undefined illustrates the point made in the last section about the
+impossibility of using an identifier before it is defined.
+
+~B
+
+~$~<Type agreement errors~>~Z==~{
+int
+type(float x, float y)
+{
+   return x || y;
+   return x && y;
+   return x + y;
+   return x - y;
+   return x * y;
+   return x / y;
+   return x % y;
+   return  !y;
+   return  -y;
+}
+"input", line 4:13 FATAL: Invalid operator in this context
+"input", line 5:13 FATAL: Invalid operator in this context
+"input", line 6:4 FATAL: Returned value incompatible with program type
+"input", line 7:4 FATAL: Returned value incompatible with program type
+"input", line 8:4 FATAL: Returned value incompatible with program type
+"input", line 9:4 FATAL: Returned value incompatible with program type
+"input", line 10:13 FATAL: Invalid operator in this context
+"input", line 11:12 FATAL: Invalid operator in this context
+"input", line 12:4 FATAL: Returned value incompatible with program type
+~}
+
+Here the errors are of two kinds.
+~{||~} is used in an invalid context because it requires integer operands
+and there is no coercion from ~{float~} to ~{int~} (a ~{float~} may be
+assigned to an ~{int~} variable, but that is an operation rather than a
+coercion).
+On the other hand, ~{+~} can be applied to operands of type ~{float~},
+yielding a result of type ~{float~}.
+The error here is that the program must return a value of type ~{int~}, and
+again coercion from ~{float~} to ~{int~} is not allowed.
+
+~B
+
+~$~<Program structure errors~>~Z==~{
+int
+brcont(float x)
+{
+   break;
+   continue;
+}
+"input", line 4:4 FATAL: break must be inside an iteration
+"input", line 5:4 FATAL: continue must be inside an iteration
+~}

@@ -1,0 +1,17 @@
+begin
+  var	int k;
+  var	int! pi, int! pj;
+  var	record int i, bool b, real! r end! rv;
+  type	record int x, t! next end t;
+  var	t l;
+  pi = new int;
+  pi! = 1;
+  pi = pj;
+  pi! = pj!;
+  rv!.b = true;
+  rv!.r! = 3.2;
+  l.next!.x = 1;
+  pi;
+  l.next = new t;
+  l.next = nil;
+end

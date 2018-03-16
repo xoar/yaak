@@ -1,0 +1,4 @@
+/* $Id: word.gla,v 1.5 1996/03/26 23:34:55 waite Exp $ */
+
+word:	$[a-zA-Z]+	[mkidn]
+	C_COMMENT

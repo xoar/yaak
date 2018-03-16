@@ -1,0 +1,12 @@
+begin
+  val x = 0;
+  module m
+	begin	val a = 1;
+		val b = 2;
+		a ;
+		n::a;
+	end;
+  m::x;
+  x::m;
+  r::q;
+end

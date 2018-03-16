@@ -1,0 +1,3071 @@
+\input texinfo    @c -*-texinfo-*-
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename type
+@settitle Type Analysis
+@setchapternewpage odd
+@comment %**end of header (This is for running Texinfo on a region.)
+@comment $Id: type.tnf,v 1.15 2008/09/11 09:26:16 peter Exp $
+
+@titlepage
+@sp 2
+@center @titlefont{Type Analysis Reference Manual}
+@sp 4
+@center Uwe Kastens
+@center W. M. Waite
+@sp 2
+@center University of Paderborn
+@center D-33098 Paderborn
+@center Germany
+@page
+@vskip 0pt plus 1filll
+This manual is for the type analysis module library
+($Revision: 1.15 $)
+
+Copyright @copyright{} 1999, 2008 University of Paderborn
+
+@quotation
+Permission is granted to make and distribute verbatim
+copies of this manual provided the copyright notice and
+this permission notice are preserved on all copies.
+@end quotation
+@end titlepage
+
+@contents
+
+@node Top
+@top Type Analysis Reference Manual
+
+The modules of the type analysis library define a comprehensive collection
+of computational roles that can be played by the symbols and rules of a
+LIDO grammar.
+This document is a reference manual for these roles; for a tutorial, see
+@ref{Top, Tutorial on Type Analysis,,typetutorial, Tutorial on Type Analysis}.
+
+@menu
+* Overview::	Overview
+* TypeProp::	Types, Operators, and Indications
+* BasicType::	Typed Entities
+* Expressions::	Expressions
+* UserTypes::	User-Defined Types
+* TypeEq::	Structural Type Equivalence
+* Errors::	Error Reporting in Type Analysis
+* RootType::	Dependence in Type Analysis
+* Index::	Index
+@end menu
+
+@comment =====================================
+@node Overview
+@chapter Overview
+
+Language designers define type systems in order to constrain the ways
+in which values may interact.
+These constraints protect the underlying representation of values from
+use that is contrary to the language designer's model,
+allowing early detection of a number of programming errors.
+The purpose of a compiler's @emph{type analysis} task is to verify, insofar
+as possible, that the constraints of the type system have been obeyed.
+
+Type analysis is complex, even for simple languages, but it is based
+upon a number of language-independent concepts.
+The type analysis of source text in a particular language can be described
+in terms of those concepts, by identifying constructs playing specific
+roles in the type system of that language.
+Once that identification has been made, most of the code required to carry
+out the analysis can be deduced automatically.
+
+The modules of the type analysis library define a comprehensive collection
+of computational roles that can be played by symbols of an abstract syntax;
+they also define computational roles that characterize specific contexts
+within expressions.
+They allow you to focus your attention on the important issues and
+make strategic decisions without delving into implementation details.
+
+This document is a reference manual for the type analysis specification
+modules.
+(For a tutorial on how to develop a type analyzer for a specific
+language, see
+@ref{Top, Tutorial on Type Analysis, Overview, typetutorial,
+Tutorial on Type Analysis}.)
+Examples are drawn from a variety of languages.
+Our strategy is to provide only the specification fragments needed to
+illustrate the relevant principles.
+In most cases, these fragments will be LIDO rules.
+We expect that the meaning of the abstract syntax for these rules will be
+obvious, although we will sometimes show snippets of source code to make
+the application clearer.
+
+@comment =====================================
+@node TypeProp
+@chapter Types, Operators, and Indications
+
+A @emph{type} characterizes a subset of values in the universe
+manipulated by the program,
+an @emph{operator} defines an operation applied to operands of
+specified types to produce a result of a specific type, and
+an @emph{indication} defines a set of operators.
+These three concepts form the basis for any type model.
+The designer must specify language-defined types, operators, and
+indications; it may also be possible for the user to provide additional
+specifications as part of a program
+(@pxref{UserTypes,,User-Defined Types}).
+
+Although language-defined types may be specified individually,
+they are usually introduced by language-defined operator specifications.
+These, along with language-defined indication specifications,
+are described in a language called @emph{OIL}
+(@pxref{language,,OIL's Specification Language,oil,Oil Reference Manual}).
+OIL text is written in a file whose name has the form @samp{name}@code{.oil}.
+
+@menu
+* Types::		Language-defined types
+* Operators::		Language-defined operators
+* Indications::		Language-defined indications
+* Coercibility::	Language-defined coercibility
+* Scalability::		Reducing specification size
+@end menu
+
+@node Types
+@section Language-defined types
+
+@vindex IsType
+@cindex property @code{IsType}
+@cindex @code{NoKey}
+Each type is represented by a unique definition table key whose
+@code{IsType} property has the value 1.
+Further properties of that key may be used to provide information about
+that particular type.
+@code{NoKey} represents an unknown or non-existent type.
+
+Language-defined types like ``integer'' are represented by known keys
+(@pxref{Initializations, How to specify the initial state, , deftbl,
+Definition Table}).
+The known key name can be used directly in an attribute computation.
+For example, suppose that the designer chose @code{intType} as the name of
+the known key for the Java integer type.
+The following rule would then interpret the keyword @code{int} as
+denoting that type:
+
+@example
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+@end example
+
+Language-defined types are sometimes denoted by pre-defined identifiers
+(as in Pascal) instead of keywords.
+This approach increases the complexity of the specification by introducing
+type identifiers
+(@pxref{TypeIdent,,Type identifiers}).
+It also allows a user to re-define the names of language-defined types as
+names of variables or parameters,
+making programs very hard to understand.
+We recommend that designers use keywords to denote language-defined types.
+
+@node Operators
+@section Language-defined operators
+
+An operator has a fixed signature, and is represented by a unique
+definition table key.
+Properties of that key may be used to provide information about that
+particular operator.
+@code{NoKey} represents an unknown or non-existent operator.
+
+@cindex OIL @code{OPER}
+@cindex @code{OPER}, OIL
+The OIL statement @code{OPER @samp{opr} @samp{sig};} defines
+the key and signature of an operator:
+
+@table @samp
+@item opr
+The name of the known definition table key representing the operator.
+Multiple operator definitions with the same value of @samp{opr}
+are not allowed.
+
+@item sig
+The signature of the operator represented by @samp{opr}.
+It consists of a parenthesized (possibly empty), comma-separated list of
+operand types followed by a colon and a return type.
+All of the types in the signature are automatically defined as known keys
+representing types; no further specification is required.
+@end table
+@noindent
+Only one occurrence of the keyword @code{OPER} is required for a sequence
+of contiguous operator definitions:
+
+@example
+OPER
+  iAddOp (intType,intType):intType;
+  fAddOp (floatType,floatType):floatType;
+  iGtrOp (intType,intType):boolType;
+@end example
+
+@noindent
+The known keys named @code{intType}, @code{floatType}, and @code{boolType}
+are defined by this specification,
+each with its @code{IsType} property set to 1.
+Known keys named @code{iAddOp}, @code{fAddOp}, and @code{iGtrOp} are also
+defined;
+no further specification of these names is necessary.
+
+Often there are a number of language-defined operators sharing the same
+signature.
+A shorthand notation for describing such a situation allows the designer
+to provide a comma-separated list of operator names and write the shared
+signature only once:
+
+@example
+OPER
+  iAddOp,iSubOp,iMulOp,iDivOp (intType,intType):intType;
+  fAddOp,fSubOp,fMulOp,fDivOp (floatType,floatType):floatType;
+@end example
+
+@node Indications
+@section Language-defined indications
+
+Each operator must belong to a set of operators associated with some
+indication, also represented by a unique definition table key.
+Properties of that key may be used to provide additional information about
+that indication.
+@code{NoKey} represents an unknown or non-existent indication.
+
+@cindex OIL @code{INDICATION}
+@cindex @code{INDICATION}, OIL
+The OIL statement @code{INDICATION @samp{ind}: @samp{list};} defines
+a subset of the operators associated with an indication:
+
+@table @samp
+@item ind
+The known definition table key representing the indication.
+Multiple indication definitions with the same value of @samp{ind}
+are allowed.
+In that case, the operator set associated with the indication is the union
+of the sets specified by the individual definitions.
+
+@item list
+A comma-separated list of operators in the indication's set.
+@end table
+@noindent
+Only one occurrence of the keyword @code{INDICATION} is required
+for a sequence of contiguous indication definitions:
+
+@example
+INDICATION
+  PlusInd: iAddOp, fAddOp;
+  MinusInd: iSubOp, fSubOp;
+@end example
+
+@node Coercibility
+@section Language-defined coercibility
+
+Language properties like the ``usual arithmetic conversions''
+of C and the ``widening conversions'' of Java allow the compiler to
+accept an operand of one type as though it were a value of another type.  
+We use the relation @code{acceptableAs} on types to model these
+properties.
+@code{acceptableAs} is a partial order:
+
+@table @emph
+@item Reflexive
+(@samp{T} @code{acceptableAs} @samp{T}) for any type @samp{T}
+
+@item Transitive
+(@samp{T} @code{acceptableAs} @samp{T1}) and
+(@samp{T1} @code{acceptableAs} @samp{T2})
+for some types @samp{T}, @samp{T1}, and @samp{T2}
+implies (@samp{T} @code{acceptableAs} @samp{T2})
+
+@item Antisymmetric
+(@samp{T} @code{acceptableAs} @samp{T1}) and
+(@samp{T1} @code{acceptableAs} @samp{T})
+implies @samp{T} is identical to @samp{T1}
+@end table
+
+@noindent
+To see why these properties are important, consider the following
+expression in C or Java (@code{s} is of type @code{short} and @code{f} is
+of type @code{float}):
+
+@example
+s + f
+@end example
+
+Both C and Java allow implicit conversion of @code{short} to @code{int} and
+@code{int} to @code{float} in the context of an arithmetic operand.
+Thus a designer would specify (@code{short} @code{acceptableAs} @code{int})
+and (@code{int} @code{acceptableAs} @code{float}) for C or Java.
+Transitivity guarantees that (@code{short} @code{acceptableAs} @code{float}),
+and reflexivity guarantees that (@code{float} @code{acceptableAs} @code{float}),
+so the operator @code{fAddOp} can be selected from the set associated
+with the indication @code{PlusInd} of the last section.
+
+Suppose that (@code{float} @code{acceptableAs} @code{int}).
+In that case, the meaning of the expression is ambiguous.
+There is no way to decide whether to select the operator @code{iAddOp} or
+the operator @code{fAddOp} from @code{PlusInd}'s set.
+But because @code{acceptableAs} is antisymmetric,
+(@code{float} @code{acceptableAs} @code{int}) would imply that
+@code{int} and @code{float} were identical types.
+Thus the designer cannot specify
+(@code{float} @code{acceptableAs} @code{int}) for C or Java.
+
+The @code{acceptableAs} relation is specified by defining @emph{coercion}
+operators.
+@cindex OIL @code{COERCION}
+@cindex @code{COERCION}, OIL
+The OIL statement @code{COERCION @samp{opr} @samp{sig};} defines
+the key and signature of a coercion:
+
+@table @samp
+@item opr
+The name of the known definition table key representing the coercion operator.
+If @samp{opr} is omitted, the OIL compiler will generate a unique name
+internally.
+Multiple coercion definitions with the same value of @samp{opr}
+are not allowed.
+A coercion definition cannot have the same value of @samp{opr} as an
+operator definition.
+
+@item sig
+The signature of the coercion operator represented by @samp{opr}.
+It consists of a parenthesized operand type followed by a colon and
+a return type.
+Both types in the signature are automatically defined as known keys
+representing types; no further specification is required.
+@end table
+@noindent
+Only one occurrence of the keyword @code{COERCION} is required for
+a sequence of contiguous coercion operator definitions:
+
+@example
+COERCION
+  sToi (shortType):intType;
+       (intType):floatType;
+@end example
+
+@noindent
+This specification illustrates both named and anonymous coercions.
+Generally speaking, coercions need be named only if they are to be
+discussed in associated documentation or extracted to support further
+processing (such as the evaluation of constant expressions).
+
+@node Scalability
+@section Reducing specification size
+
+A full specification of language-defined operators often leads to a
+combinatorial explosion.
+In many applications the effects of this explosion on the written
+specification can be mitigated by avoiding unnecessary operator names.
+For example, the task of type analysis is to verify type correctness;
+the identity of the operator that models the type behavior at a specific
+node is normally irrelevant.
+
+Language definitions avoid combinatorial explosions by giving names to sets
+of types and then defining properties of operations in terms of these sets
+rather than the individual elements.
+For example, the C definition describes operations on ``arithmetic types''
+rather than describing those operations on integers and then again on
+floating-point values.
+OIL provides a notation for naming and manipulating sets of types that
+allows the designer to encode such language definitions directly.
+
+The OIL statement @code{SET @samp{name} = @samp{expr} ;} defines a set of
+types:
+
+@table @samp
+@item name
+An identifier naming a set.
+Multiple sets with the same name are not allowed.
+
+@item expr
+An expression defining the types that are members of the set.
+There are five possible expression formats:
+
+@table @asis
+@item @code{[ @samp{elements} ]}
+Each member of the comma-separated list @samp{elements} is a known key
+representing a type.
+That type is an element of the value of this expression.
+There are no other elements.
+
+@item @samp{name}
+The previously-defined set @samp{name} is the value of this expression.
+
+@item @code{@samp{s1} + @samp{s2}}
+The value of this expression is the union of
+set @samp{s1} and set @samp{s2}.
+
+@item @code{@samp{s1} * @samp{s2}}
+The value of this expression is the intersection of
+set @samp{s1} and set @samp{s2}.
+
+@item @code{@samp{s1} - @samp{s2}}
+The value of this expression is the set of elements of @samp{s1}
+that are not elements of @samp{s2}.
+@end table
+@end table
+
+Here are some definitions that mirror the C language standard:
+
+@example
+SET Signed_IntegerType =
+  [signed_charType, shortType, intType, longType];
+
+SET Unsigned_IntegerType =
+  [unsigned_charType, unsigned_shortType,
+   unsigned_intType,  unsigned_longType];
+
+SET FloatingType =
+  [floatType, doubleType, long_doubleType];
+
+SET IntegralType =
+  [charType] + Signed_IntegerType + Unsigned_IntegerType;
+
+SET ArithmeticType = IntegralType + FloatingType;
+
+SET ScalarType = ArithmeticType + [VoidPointerType];
+@end example
+
+A specific context in a program will often require a value that can be of
+any type in a particular set.
+For example, the condition value in a C @code{if} statement or
+conditional expression can be of any scalar type.
+We model this situation by defining a ``type'' (@code{scalarType}, say) and
+making each scalar type acceptable as that type.
+The context can then require a value of @code{scalarType}, and any scalar
+type will be acceptable.
+
+When a type set name is used in an @code{OPER} or @code{COERCION}
+signature, the result is a number of distinct operators.
+Each operator's signature is constructed by consistently substituting
+one element of the named type set for each instance of the type name.
+Thus every scalar type can be made acceptable as @code{scalarType} as
+follows:
+
+@example
+COERCION (ScalarType):scalarType;
+@end example
+
+Similarly, signatures containing type set names can be used to reduce the
+number of specifications needed for operators.
+For example, consider the following specification:
+
+@example
+OPER ArithOp (ArithmeticType, ArithmeticType): ArithmeticType;
+@end example
+
+@noindent
+It defines a set of 12 operators, each named by the known key
+@code{ArithOp}.
+Each operator has a distinct signature, one of which is
+@code{(charType,charType):charType}.
+That signature results from the consistent substitution of the
+@code{charType} element of @code{ArithmeticType} for the name of that set
+in the @code{OPER} statement's signature.
+
+This set of 12 operators can be associated with an indication:
+
+@example
+INDICATION ArithInd: ArithOp;
+@end example
+
+Because the same element of a type set is substituted for each instance
+of the name of that set in a signature, the only way to get all
+combinations of elements is to create another name for that set and use
+both names in the signature.
+For example, a value of any scalar type in C can be cast to any other
+scalar type:
+
+@example
+SET CastResult = ScalarType;
+OPER ScalarCast (ScalarType):CastResult;
+@end example
+
+@noindent
+One of the operators named by the known key @code{ScalarCast} has the
+signature @code{(charType):floatType}.
+That signature results from substituting the @code{charType} element of
+@code{ScalarType} for the name of that set and the @code{floatType} element
+of @code{CastResult} for the name of that set.
+
+@comment =====================================
+@node BasicType
+@chapter Typed Entities
+@cindex Typed Entities
+@cindex @code{Typing} module
+@cindex Specification modules --- @code{Typing}
+
+A @emph{typed entity} is a named program component, one of whose properties
+is a type.
+Variables, formal parameters, and fields are the most common typed
+entities; functions are also typed entities in some languages
+(@pxref{FuncType,,Functions as typed entities}).
+When an identifier is used to represent a typed entity,
+the type specified by a defining occurrence of that identifier
+must be made available at each applied occurrence.
+This is accomplished through the use of a @code{DefTableKey}-valued
+property of the definition table key characterizing the typed entity.
+
+The @code{Typing} module exports computational roles to
+implement the definition and use of typed entities:
+
+@table @code
+@tindex TypedDefinition
+@item TypedDefinition
+The computational role inherited by a grammar symbol that represents
+a definition of one or more typed entities having the same type.
+
+@tindex TypedDefId
+@item TypedDefId
+The computational role inherited by a grammar symbol that represents
+a defining occurrence of an identifier for a typed entity.
+
+@tindex TypedUseId
+@item TypedUseId
+The computational role inherited by a grammar symbol that represents
+an applied occurrence of an identifier for a typed entity.
+@end table
+
+The @code{Typing} module is instantiated by
+
+@example
+   $/Type/Typing.gnrc +referto=@samp{prefix} :inst
+@end example
+@noindent
+@code{@samp{prefix}Key} (or simply @code{Key} if the @code{referto}
+parameter is missing) must be the name of an attribute of every
+grammar symbol inheriting the @code{TypedDefId} or @code{TypedUseId} role.
+The value of that attribute must be the definition table key bound to the
+symbol during name analysis
+(@pxref{Top,,Name analysis according to scope rules,name,
+Specification Module Library}).
+
+@menu
+* TypedDefId::		Establishing the type of an entity
+* TypedUseId::		Accessing the type of an entity
+* TypedEntityInfo::	Passing ancillary information
+@end menu
+
+@node TypedDefId
+@section Establishing the type of an entity
+
+A typical local variable declaration from Java or C specifies a type and a
+list of variable names:
+
+@example
+int a, b, c;
+@end example
+@noindent
+The entire declaration plays the role of a @code{TypedDefinition};
+each of @code{a}, @code{b}, and @code{c} plays the role of a
+@code{TypedDefId}.
+
+The value of the @code{TypedDefinition.Type} attribute must be set
+by a user computation to the definition table key of the type.
+No other user computations are needed because
+default computations provided by the @code{Typing} module in descendant
+@code{TypedDefId} constructs will access the @code{TypedDefinition.Type}
+attribute, setting the appropriate property of the definition table key
+characterizing the typed entity.
+
+A Java or C compiler might use the following specification to describe a
+variable declaration:
+
+@example
+@group
+@tindex TypedDefinition
+@tindex TypedDefId
+SYMBOL VrblDecl INHERITS TypedDefinition END;
+SYMBOL VarIdDef INHERITS TypedDefId      END;
+
+RULE: VrblDecl ::= Type VarIdDefs ';' COMPUTE
+  VrblDecl.Type=Type.Type;
+END;
+
+RULE: VarIdDefs LISTOF VarIdDef END;
+@end group
+@end example
+
+@node TypedUseId
+@section Accessing the type of an entity
+
+@code{TypedUseId}
+is an applied occurrence of an identifier representing a typed entity.
+A @code{Typing} module computation sets the value of the @code{TypedUseId.Type}
+attribute to the definition table key representing the entity's type.
+
+If @code{ExpIdUse} represented an applied occurrence of a variable or
+parameter identifier in the abstract syntax tree, the @code{Typing} module
+will provide a value for @code{ExpIdUse.Type} if the following line
+appears in the specification:
+
+@example
+@tindex TypedUseId
+SYMBOL ExpIdUse INHERITS TypedUseId END;
+@end example
+
+@node TypedEntityInfo
+@section Passing ancillary information
+
+The @code{Typing} module guarantees that every @code{TypedUseId.Type}
+attribute depends on all of the type analysis computations
+(@pxref{TypedIdDepend,,Dependences for typed entities}).
+In other words, any computation accessing @code{TypedUseId.Type} is
+guaranteed to take place after all type analysis computations have been
+completed.
+This dependence can be used to guarantee the availability of information
+characterizing the typed entity that is ancillary to type analysis.
+
+The operation that sets the @code{Type} property of the definition table key
+characterizing the typed entity depends on the void attribute 
+@code{TypedDefId.GotProp}.
+@code{TypedDefId.GotProp} is set by a default symbol computation that can
+be overridden by an upper-context computation of the symbol inheriting
+@code{TypedDefId} or by a computation in a rule having the symbol
+inheriting @code{TypedDefId} on the right-hand side.
+The @code{Typing} module will then guarantee that such a computation has
+been carried out before any access to @code{TypedUseId.Type} is allowed.
+Any such computation must, however, be independent of all results of type
+analysis.
+
+Pascal's distinction between variable and value parameters is a typical
+example of information ancillary to type analysis that must be conveyed
+from defining to applied occurrences of typed entities:
+
+@example
+@group
+@tindex TypedDefinition
+@tindex TypedIdDef
+@tindex TypedUseId
+ATTR IsVarParam: int;
+
+SYMBOL FormalParamSect INHERITS TypedDefinition COMPUTE
+  SYNT.IsVarParam=0;
+END;
+
+RULE: FormalParamSect ::= 'var' Formals ':' Type COMPUTE
+  FormalParamSect.IsVarParam=1;
+END;
+
+SYMBOL FormalIdDef INHERITS TypedIdDef COMPUTE
+  INH.GotProp=
+    ResetIsVarParam(THIS.Key,INCLUDING FormalParamSect.IsVarParam);
+END;
+
+SYMBOL ExpIdUse INHERITS TypedUseId COMPUTE
+  SYNT.IsVarParam=GetIsVarParam(THIS.Key,0) <- THIS.Type;
+END;
+@end group
+@end example
+@noindent
+This computation assumes that an integer-valued property @code{IsVarParam}
+has been defined.
+It is set by a computation in the upper context of @code{FormalIdDef} that
+overrides the default computation of the void attribute
+@code{TypedIdDef.GotProp}, and queried by a symbol computation in the lower
+context of @code{ExpIdUse}.
+The latter computation depends on @code{ExpIdUse.Type}, so the
+@code{Typing} module guarantees that the property value has been set for
+every formal parameter before it is queried.
+
+@code{FormalParamSect.IsVarParam} is an integer valued attribute, distinct
+from the @code{IsVarParam} property, set by a symbol computation in the
+lower context of @code{FormalParamSect}.
+That symbol computation is overridden in the rule representing
+a declaration of a variable parameter.
+
+Note that a particular instance of symbol @code{ExpIdUse} in the tree does
+not necessarily represent an applied occurrence of a formal parameter.
+(It might represent an applied occurrence of a variable identifier, for
+example.)
+Thus the @code{IsVarParam} property might not be set; the query will return
+the default value 0 in that case.
+The overall effect of these computations is therefore to set the value of
+@code{ExpIdUse.IsVarParam} to 1 if and only if that instance of
+@code{ExpIdUse} represents an applied occurrence of a variable parameter.
+
+@comment =====================================
+@node Expressions
+@chapter Expressions
+@cindex @code{Expression} module
+@cindex Specification modules --- @code{Expression}
+
+An @emph{expression node} represents a program construct that
+yields a value, and an @emph{expression tree} is a subtree of the
+abstract syntax tree made up entirely of expression nodes.
+Type analysis within an expression tree is uniform;
+additional specifications are needed only at the roots and leaves.
+(Note that these need not be roots and leaves in the sense of the
+abstract syntax tree.)
+A designer often chooses to represent a programming language expression
+by more than one expression tree, in order to capture special relationships
+within that expression.
+For example, each argument of a function call might be a separate
+expression tree because more type conversions are allowed in that context
+than in the context of an operator.
+
+The @code{Expression} module provides computational roles and rule
+computations to implement the type analysis of expression trees:
+
+@iftex
+@table @code
+@tindex ExpressionSymbol
+@item ExpressionSymbol
+The computational role inherited by a grammar symbol that represents an
+expression node.
+
+@tindex OperatorSymbol
+@item OperatorSymbol
+The computational role inherited by a grammar symbol that represents an
+operator node.
+
+@tindex OpndExprListRoot
+@item OpndExprListRoot
+@tindex BalanceListRoot
+@itemx BalanceListRoot
+Computational roles inherited by grammar symbols that represent
+operand lists.
+
+@tindex OpndExprListElem
+@item OpndExprListElem
+@tindex BalanceListElem
+@itemx BalanceListElem
+Computational roles inherited by grammar symbols that represent
+operand list elements.
+Every @code{OpndExprListElem} must be a descendant of @code{OpndExprListRoot}
+in the tree; every @code{BalanceListElem} must be a descendant of
+@code{BalanceListRoot}.
+
+@findex PrimaryContext
+@findex TransferContext
+@findex BalanceContext
+@findex MonadicContext
+@findex DyadicContext
+@findex ListContext
+@findex ConversionContext
+@findex CastContext
+@findex RootContext
+@item PrimaryContext
+@itemx TransferContext
+@itemx BalanceContext
+@itemx MonadicContext
+@itemx DyadicContext
+@itemx ListContext
+@itemx ConversionContext
+@itemx CastContext
+@itemx RootContext
+Rule computations implementing common expression contexts.
+
+@findex Indication
+@findex OperName
+@item Indication
+@itemx OperName
+Rule computations for expression contexts where operations are performed,
+but which have no grammar symbol representing the possible operations.
+@end table
+@end iftex
+
+The expression module is usually instantiated by:
+
+@example
+$/Type/Expression.gnrc :inst
+@end example
+@noindent
+For a discussion of alternatives,
+@pxref{IdentifyOperator,,Selecting an operator at an expression node}.
+
+@menu
+* AnalyzeExpression::	Type analysis of expression trees
+* IdentifyOperator::	Selecting an operator at an expression node
+* ExpressionSymbol::	Expression contexts without operators
+* OperatorSymbol::	Operators with explicit operands
+* OpndExprListRoot::	Operators with operand lists
+* ConversionContext::	Type conversion
+@end menu
+
+@node AnalyzeExpression
+@section Type analysis of expression trees
+
+@tindex ExpressionSymbol
+The symbol on the left-hand side of a rule defining an expression node
+characterizes the expression's result.
+It inherits the @code{ExpressionSymbol} role.
+Two attributes of @code{ExpressionSymbol} describe its type:
+
+@vtable @code
+@item Required
+An inherited attribute whose @code{DefTableKey} value represents
+the type required by the surrounding context.
+(A value of @code{NoKey} indicates that no specific type is required.)
+@code{Required} may be set by a user computation at the root of an
+expression subtree; computations are supplied by the @code{Expression}
+module for all other expression nodes.
+
+@item Type
+An attribute whose @code{DefTableKey} value is set by computations supplied
+by the @code{Expression} module to represent the type of the result
+delivered by the expression subtree rooted in this node.
+(A value of @code{NoKey} indicates that the type delivered by the node is
+unknown.)
+@code{Type} may depend on @code{Required} as well as on the possible types of
+the node's children; it must never be set by user computation.
+@end vtable
+
+An expression node is type-correct if the type specified by its @code{Type}
+attribute is acceptable as the type specified by its @code{Required}
+attribute.
+Any type is acceptable as an undefined required type,
+and an undefined type is acceptable as any required type.
+
+In order to support incremental development, @code{ExpressionSymbol}
+defines default computations setting the values of both @code{Required}
+and @code{Type} to @code{NoKey};
+those computations are overridden by the rule computations
+described in this chapter.
+The default computations allow one to declare that a symbol inherits
+@code{ExpressionSymbol} without producing specification errors for every
+context containing that symbol.
+This advantage is offset by the fact that if one forgets to provide rule
+computations for some contexts, the generated compiler will silently ignore
+certain errors in the input program.
+
+Rules defining expression nodes in an abstract syntax tree
+for a typical programming language describe constants, variables, and
+computations:
+
+@example
+@group
+@tindex ExpressionSymbol
+SYMBOL Expr INHERITS ExpressionSymbol   END;
+
+RULE: Expr   ::= Number                 END;
+RULE: Expr   ::= ExpIdUse               END;
+RULE: Expr   ::= Expr Operator Expr     END;
+RULE: Expr   ::= Expr '[' Subscript ']' END;
+@end group
+@end example
+
+@noindent
+The first two rules describe leaves of expression subtrees.
+Any node described by the first rule is a leaf of the abstract syntax tree
+as well as a leaf of some expression subtree.
+Nodes described by the second rule are not leaves of the abstract syntax
+tree because each has an @code{ExpIdUse} node as a child.
+
+A leaf of an expression subtree delivers a value whose type
+must be determined from the context of that leaf according to the
+definition of the language.
+For example, the @code{Expr} node in the first rule might deliver
+the language-defined integer type;
+in the second rule, the delivered type is the value of @code{ExpIdUse.Type}.
+
+The type analyzer models most interior expression nodes by operators
+applied to operands:
+@enumerate
+@item
+An indication is derived from the context.
+
+@item
+One operator is selected from the set associated with that indication.
+
+@item
+The @code{Type} attribute of the node is set to the result type of the
+selected operator.
+
+@item
+The @code{Required} attributes of one or more children are set to the
+operand types of the selected operator.
+@end enumerate
+
+@noindent
+For example, in the following rule, the indication is provided by the
+@code{Operator} child:
+
+@example
+RULE: Expr   ::= Expr Operator Expr     END;
+@end example
+@noindent
+Usually, a set of several operators (such as @{@code{iAddOp},
+@code{fAddOp}@}) is associated with that indication.
+An operator is then selected from that set as discussed in the next section.
+
+In the fourth rule, we might assume that each array type definition
+adds a dyadic access operator to an indication fixed by the rule
+(@pxref{OpDef,,Operator definitions}):
+
+@example
+RULE: Expr   ::= Expr '[' Subscript ']' END;
+@end example
+@noindent
+The left operand of that operator is the array type, the right operand is
+the index type, and the result is the element type.
+
+The operator/operand model provides support for expression node semantics
+that are ubiquitous in programming languages.
+Several other models, useful in special circumstances, are supported and
+will be introduced in later sections of this chapter.
+It is clear, however, that there will be situations in which the semantics
+of an expression context do not fit any of the supported models.
+Our advice is to consider such a context as a place where several disjoint
+expression subtrees meet:
+The expression symbol on the left-hand side of the rule defining the
+context is a leaf of an expression tree above the context, and each
+expression symbol on the right-hand side is the root of an expression tree
+below the context.
+
+@node IdentifyOperator
+@section Selecting an operator at an expression node
+
+If an indication is associated with a singleton operator set, that operator
+is selected regardless of operand or result types.
+
+There are two standard algorithms for selecting an operator if the
+indication's set has more than one element.
+The simplest ignores the type required by the context.
+For each operator in the set, it checks whether each operand is
+acceptable as the type required by that operator.
+If more than one operator in the set satisfies this condition, the
+algorithm chooses the one requiring the fewest coercions.
+If no operator can be identified, then the unknown operator is chosen.
+
+To select this algorithm, instantiate the @code{Expression} module without
+the @code{+referto} parameter:
+@cindex @code{Expression} module
+@cindex Specification modules --- @code{Expression}
+
+@example
+$/Type/Expression.gnrc :inst
+@end example
+
+Ada is a language in which the selection of an operator depends on the
+type required by the context as well as the types delivered by the
+operands.
+In that case, a two-pass algorithm is required.
+
+Starting with the leaves of an expression tree and working towards the root
+of that tree, the algorithm determines a @emph{possible type set} for each
+expression node.
+Every type in the possible type set at a node is either a leaf type or
+is a type associated with an operator whose result is that type, and whose
+operands are elements of the possible type sets of the node's children.
+The algorithm associates a @emph{cost} with each type in a possible type
+set.
+
+OIL allows one to specify an arbitrary integer cost for each operator and
+coercion independently.
+If this specification is omitted, a cost of 1 is assigned to the operator
+or coercion.
+For the remainder of this section, we assume that all cost specifications
+have been omitted and therefore all costs are 1.
+
+Consider a very simple expression node, the integer constant 3.
+One element of the possible type set for this node is the language-defined
+integer type, which has cost 0 because no operations are needed to create a
+value of that type.
+If a coercion has been defined with the language-defined integer type as
+its operand and the language-defined floating-point type as its result,
+then another element of the possible type set of this node is the
+language-defined floating-point type.
+It has cost 1, the total number of operators required to produce it.
+Similarly, if there is a coercion from floating-point to double,
+double will be an element of the possible type set of the node and
+it will have cost 2.
+
+When the algorithm computes the possible type set of an interior expression
+node, it considers the operators in that node's indication set.
+For each operator, it checks whether the type required by that
+operator for a given argument is in the possible type set of the
+corresponding operand.
+Each operator meeting that condition is a possible operator at the node.
+The cost of using an operator is one more than the sum of the costs
+associated with its argument types in the possible type sets of its
+operands.
+Finally, the possible type set of the node is the set of all types @code{T}
+such that the result type of a possible operator is acceptable as @code{T}.
+
+Often a particular element of the possible type set of an interior node
+can be obtained in more than one way.
+For example, consider a node representing the sum of two integers.
+Assuming that the integer type is acceptable as the floating-point type,
+the possible type set of each child contains both integer and
+floating-point types.
+Thus both integer addition and floating-point addition are possible
+selections at this node.
+There are then two ways to obtain a floating-point result:
+
+@enumerate
+@item
+Use an integer addition and convert the result to floating-point.
+
+@item
+Convert each operand to floating-point and use a floating-point addition.
+@end enumerate
+
+@noindent
+The cost of using an integer addition in this context is 1 because the cost
+of the integer elements of the possible type sets are both 0.
+Converting the result to floating-point costs one coercion, for a total
+cost of 2.
+The cost of using a floating-point addition, on the other hand, is 3
+because the cost of the floating-point elements of the possible type sets
+are both 1.
+
+The cost of obtaining a value of type @code{T} using a particular operator
+is the sum of the cost of using that operator and the number of
+coercion operators required to convert a value of the result type to
+a value of type @code{T}.
+When more than one possible operator selection leads to a value of a given
+type, the algorithm only retains the one with the lowest cost.
+
+If the @code{Required} attribute of the expression tree root is the
+unknown type, then the algorithm chooses the lowest-cost element of the
+root's possible type set as the result type of the expression.
+Otherwise, the @code{Required} attribute of the root is taken as the
+result type regardless of whether it appears in the root's possible type set.
+
+The second pass starts with the root of the tree and works towards the
+leaves.
+At each node, the value of the @code{Required} attribute specifies an
+element of the possible type set and hence an operator.
+Given an operator, the values of the node's @code{Type} attribute and the
+@code{Required} attributes of any operands are fixed.
+
+If the possible type set of an expression node does not contain an element
+equal to the value of that node's @code{Required} attribute, then the
+unknown operator is selected; the node's @code{Type} attribute and the
+@code{Required} attributes of any operands are set to the unknown type.
+
+To select the two-pass algorithm, instantiate the @code{Expression} module
+with the @code{+referto=Result} parameter:
+@cindex @code{Expression} module
+@cindex Specification modules --- @code{Expression}
+
+@example
+$/Type/Expression.gnrc +referto=Result :inst
+@end example
+
+@node ExpressionSymbol
+@section Expression contexts without operators
+
+Let @samp{e1} be a grammar symbol  playing the @code{ExpressionSymbol} role,
+and @samp{type} be an expression yielding the definition table key of a
+type.
+A @emph{primary context} is one in which the parent @samp{e1} delivers a
+value of a known type.
+@findex PrimaryContext
+@code{PrimaryContext(@samp{e1},@samp{type})} provides the rule
+computations to set @samp{e1}@code{.Type} to the type @samp{type}.
+(Recall that the value of the @code{Type} attribute of an expression node
+must never be set directly by a user computation.)
+
+The constant and variable expressions in C are examples of primary
+contexts:
+
+@example
+@group
+@tindex ExpressionSymbol
+@tindex TypedUseId
+SYMBOL Expr INHERITS ExpressionSymbol END;
+
+RULE: Expr ::= Number COMPUTE
+  PrimaryContext(Expr,intType);
+END;
+
+SYMBOL ExpIdUse INHERITS TypedUseId END;
+
+RULE: Expr ::= ExpIdUse COMPUTE
+  PrimaryContext(Expr,ExpIdUse.Type);
+END;
+@end group
+@end example
+@noindent
+The type of an integer constant is the language-defined integer type
+(@pxref{Types,,Language-defined types}), and the type of a variable is the
+type with which it was declared
+(@pxref{TypedUseId,,Accessing the type of an entity}).
+
+Let @samp{e1} and @samp{e2} be grammar symbols playing the
+@code{ExpressionSymbol} role.
+A @emph{transfer context} is one in which the parent @samp{e1} and
+one of its children @samp{e2} are identical with respect to type.
+@findex TransferContext
+@code{TransferContext(@samp{e1},@samp{e2})} provides the rule
+computations to set @samp{e1}@code{.Type} and @samp{e2}@code{.Required}.
+
+The comma expression in C is an example of a transfer context:
+
+@example
+RULE: Expr ::= Expr ',' Expr COMPUTE
+  TransferContext(Expr[1],Expr[3]);
+END;
+@end example
+
+@noindent
+Notice that the left operand of the comma, @code{Expr[2]}, is the root of an
+expression subtree distinct from the one containing the @code{TransferContext}.
+The value of this expression will be discarded, so its type is arbitrary.
+Thus there is no need to override the default computation
+@code{Expr[2].Required=NoKey}.
+
+Let @samp{e1}, @samp{e2}, and @samp{e3} be grammar symbols playing the
+@code{ExpressionSymbol} role.
+A @emph{balance context} is one in which the parent @samp{e1} must deliver
+either the result delivered by child @samp{e2} or the result delivered by
+child @samp{e3}.
+This means that values delivered by both children must be acceptable as
+a common type, and the parent must deliver a value of that common type.
+@findex BalanceContext
+@code{BalanceContext(@samp{e1},@samp{e2},@samp{e3})} provides the rule
+computations to set @samp{e1}@code{.Type}, @samp{e2}@code{.Required},
+and @samp{e3}@code{.Required} such that the following relations hold:
+
+@itemize @bullet
+@item
+@samp{e2}@code{.Type} @code{acceptableAs} @samp{e1}@code{.Type}
+@item
+@samp{e3}@code{.Type} @code{acceptableAs} @samp{e1}@code{.Type}
+
+@item
+There is no type @samp{t} other than @samp{e1}@code{.Type} such that
+@itemize @minus
+@item
+@samp{e2}@code{.Type} @code{acceptableAs} @samp{t}
+@item
+@samp{e3}@code{.Type} @code{acceptableAs} @samp{t}
+@item
+@samp{t} @code{acceptableAs} @samp{e1}@code{.Type}
+@end itemize
+
+@item
+@samp{e2}@code{.Required} equals @samp{e1}@code{.Type}
+@item
+@samp{e3}@code{.Required} equals @samp{e1}@code{.Type}
+@end itemize
+
+The conditional expression of C is an example of a balance context:
+
+@example
+@group
+RULE: Expr ::= Expr '?' Expr ':' Expr COMPUTE
+  BalanceContext(Expr[1],Expr[3],Expr[4]);
+  Expr[2].Required=scalarType;
+END;
+@end group
+@end example
+
+@noindent
+The condition, @code{Expr[2]}, is the root of an expression subtree
+distinct from that containing the @code{BalanceContext}.
+The definition of C requires that @code{Expr[2]} return a value of scalar
+type, independent of the types of the other expression nodes.
+(Pointers and numbers are values of scalar type in C.)
+Thus the default computation @code{Expr[2].Required=NoKey} must be overridden
+in this context.
+
+Some languages generalize the conditional expression to a case expression.
+For example, consider an ALGOL 68 computation of the days in a month:
+
+@example
+@group
+begin int days, month, year;
+days := case month in
+  31,
+  (year mod 4 and year mod 100 <> 0 or year mod 400 = 0 | 28 | 29),
+  31,30,31,30,31,31,30,31,30,31 esac
+end
+@end group
+@end example
+
+@noindent
+The number of cases is not fixed, and the balancing process therefore
+involves an arbitrary list.
+This is the purpose of the @code{BalanceListRoot} and
+@code{BalanceListElem} roles.
+Both inherit from @code{ExpressionSymbol}, and neither requires
+computations beyond the ones used in any expression context.
+The balancing computation described above is carried out pairwise on the
+list elements:
+
+@example
+@group
+@tindex BalanceListRoot
+@tindex BalanceListElem
+@findex TransferContext
+SYMBOL CaseExps INHERITS BalanceListRoot END;
+SYMBOL CaseExp  INHERITS BalanceListElem END;
+
+RULE: Expr ::= 'case' Expr 'in' CaseExps 'esac' COMPUTE 
+  TransferContext(Expr[1],CaseExps);
+END;
+
+RULE: CaseExps LISTOF CaseExp END;
+
+RULE: CaseExp ::= Expr COMPUTE
+  TransferContext(CaseExp,Expr);
+END;
+@end group
+@end example
+
+@noindent
+Notice that these rule computations simply interface with the
+@code{BalanceListRoot} and @code{BalanceListElem} roles; all significant
+computations are done by module code generated from those roles.
+
+@node OperatorSymbol
+@section Operators with explicit operands
+
+@tindex OperatorSymbol
+Tree symbols in the abstract syntax that correspond to operator symbols in
+a source program usually inherit the @code{OperatorSymbol} role.
+Two attributes of @code{OperatorSymbol} describe the operator selection
+in the current context:
+
+@vtable @code
+@item Indic
+A synthesized attribute whose @code{DefTableKey} value represents the
+indication derived from the context.
+(A value of @code{NoKey} indicates that no such indication can be derived.)
+@code{Indic} must be set by a user computation.
+
+@item Oper
+An attribute whose @code{DefTableKey} value is set by @code{Expression}
+module computations to represent the operator selected from the set
+identified by the associated indication.
+(A value of @code{NoKey} indicates that no operator could be selected.)
+@code{Oper} may depend on @code{Required} as well as on the possible types of
+the node's children and the operator indication;
+it must never be set by user computation.
+@end vtable
+
+In order to support incremental development, @code{OperatorSymbol}
+defines a default computation setting the values of both @code{Indic} and
+@code{Oper} to @code{NoKey}.
+The default computation of @code{Indic} is overridden by a user
+computation, and that of @code{Oper} by the rule computations
+described in this section.
+The default computations allow one to declare that a symbol inherits
+@code{OperatorSymbol} without producing specification errors for
+every context containing that symbol.
+This advantage is offset by the fact that if one forgets to provide
+appropriate overriding computations, the generated
+compiler will silently ignore certain errors in the input program.
+
+Let @samp{e1}, @samp{e2}, and @samp{e3} all play the @code{ExpressionSymbol}
+role, and @samp{rator} play the @code{OperatorSymbol} role.
+A @emph{monadic (dyadic) context} is one in which the parent @samp{e1}
+delivers the result of applying @samp{rator} to the operand(s).
+The following provide rule computations to set @samp{rator}@code{.Oper},
+@samp{e1}@code{.Type}, and @samp{e2}@code{.Required}
+(plus @samp{e3}@code{.Required} if present):
+
+@itemize @bullet
+@item
+@findex MonadicContext
+@code{MonadicContext(@samp{e1},@samp{rator},@samp{e2})}
+
+@item
+@findex DyadicContext
+@code{DyadicContext(@samp{e1},@samp{rator},@samp{e2},@samp{e3})}
+@end itemize
+
+@noindent
+Contexts with arbitrary numbers of operands are discussed in the next
+section.
+
+@example
+@group
+@tindex OperatorSymbol
+@findex DyadicContext
+SYMBOL Operator INHERITS OperatorSymbol END;
+
+RULE: Expr ::= Expr Operator Expr COMPUTE
+  DyadicContext(Expr[1],Operator,Expr[2],Expr[3]);
+END;
+
+RULE: Operator ::= '+' COMPUTE
+  Operator.Indic=PlusInd;
+END;
+@end group
+@end example
+
+The array access rule also fits the @code{DyadicContext} pattern,
+but has no symbol playing the @code{OperatorSymbol} role.
+In such cases, the @samp{rator} argument is omitted and the indication
+supplied by an additional context-dependent rule computation.
+
+Let @samp{ind} be a definition table key representing an indication.
+@code{Indication(@samp{ind})} provides the rule computations to set the
+node's indication to @samp{ind}.
+
+If the indication @code{indexInd}'s operator set includes
+one access operator for every array type
+(@pxref{OpDef,,Operator definitions}),
+then the following computation implements the type relationship in an array
+access:
+
+@example
+@group
+@tindex ExpressionSymbol
+@findex DyadicContext
+SYMBOL Subscript INHERITS ExpressionSymbol END;
+
+RULE: Expr ::= Expr '[' Subscript ']' COMPUTE
+  DyadicContext(Expr[1],,Expr[2],Subscript);
+  Indication(indexInd);
+END;
+@end group
+@end example
+@noindent
+Note that @code{Expr[2]} can be @emph{any} expression yielding
+an array value; it need not be a simple array name.
+
+In some cases it is useful to know the name of the operator selected from
+the indication set.
+The @code{OperatorSymbol.Oper} attribute normally supplies this
+information, but when there is no symbol playing that role the value can be
+accessed via a context-dependent rule computation:
+
+@vtable @code
+@item OperName
+Yields the operator selected from the context's indication set.
+If no operator can be selected, the result is the unknown operator.
+@end vtable
+
+@node OpndExprListRoot
+@section Operators with operand lists
+
+Function calls and multidimensional array references are common examples
+of expression contexts whose operators have operand lists
+rather than explicit operands.
+One symbol on the right-hand side of the rule defining such a context
+characterizes the entire list of operands.
+It inherits the @code{OpndExprListRoot} role.
+
+The symbol defining an operand in the list inherits the
+@code{OpndExprListElem} role.
+@code{OpndExprListElem} inherits the @code{ExpressionSymbol} role, and
+overrides @code{ExpressionSymbol}'s default computation of the
+@code{Required} attribute in all upper contexts.
+
+Let @samp{e} be a grammar symbol playing the @code{ExpressionSymbol} role,
+@samp{rator} be a grammar symbol playing the @code{OperatorSymbol} role,
+and @samp{rands} be a grammar symbol playing the @code{OpndExprListRoot}
+role.
+A @emph{list} context is one in which the parent @samp{e} delivers the
+result of applying @samp{rator} to the operand list @samp{rands}.
+@findex ListContext
+@code{ListContext(@samp{e},@samp{rator},@samp{rands})}
+provides the rule computations to set @samp{e}@code{.Type},
+@samp{rator}@code{.Oper}, and @code{OpndExprListElem.Required} for each
+@code{OpndExprListElem} descendant of @samp{rands}.
+
+If the language has multi-dimensional array references, they can be
+implemented using a strategy that differs from that of the previous
+section:
+
+@example
+@group
+@tindex OpndExprListRoot
+@tindex OpndExprListElem
+@findex ListContext
+@findex TransferContext
+SYMBOL Subscripts INHERITS OpndExprListRoot END; 
+SYMBOL Subscript  INHERITS OpndExprListElem END; 
+
+RULE: Expr ::= Expr '[' Subscripts ']' COMPUTE
+  ListContext(Expr[1],,Subscripts);
+  Indication(GetAccessor(Expr[2].Type,NoKey));
+END;
+
+RULE: Subscripts LISTOF Subscript END;
+
+RULE: Subscript ::= Expr COMPUTE
+  TransferContext(Subscript,Expr);
+END;
+@end group
+@end example
+
+@noindent
+This computation assumes that the indication is the value of the
+@code{Accessor} property of the array type
+(@pxref{UserTypes,,User-Defined Types}).
+
+Some languages have @emph{variadic} operators -- operators taking a variable
+number of operands.
+The most common of these are @code{max} and @code{min}, which can take two
+or more numeric operands.
+All of the operands must ultimately be of the same type, so the situation
+is similar to that of a balanced context.
+
+For type checking purposes, the variadic operator can be considered to have
+a single operand, whose type is determined by balancing the elements of the
+list
+(@pxref{ExpressionSymbol,,Expression contexts without operators}).
+Of course this form of operand list must be distinguished syntactically
+from a normal list operand:
+
+@example
+@group
+@tindex BalanceListRoot
+@tindex BalanceListElem
+@findex MonadicContext
+@findex TransferContext
+SYMBOL VarRands INHERITS BalanceListRoot END;
+SYMBOL VarRand  INHERITS BalanceListElem END;
+
+RULE: Expr ::= VarOper '(' VarRands ')' COMPUTE
+  MonadicContext(Expr,VarOper,VarRands)
+END;
+
+RULE: VarRands LISTOF VarRand END;
+
+RULE: VarRand ::= Expr COMPUTE
+  TransferContext(Actual,Expr);
+END;
+@end group
+@end example
+
+@node ConversionContext
+@section Type conversion
+
+The @code{acceptableAs} relation models implicit type conversion
+in the context of operators applied to operands.
+In other contexts, additional type conversions may be possible.
+For example, both Java and C allow a floating-point value to be assigned to
+an integer variable.
+That conversion cannot be modeled by the @code{acceptableAs} relation
+(@pxref{Coercibility,,Language-defined coercibility}).
+
+Additional type conversions such as those taking place on
+assignment can be modeled by specific conversion operators.
+An indication is associated with each context in which additional
+type conversions are possible, and the indication's set contains exactly
+the conversions allowable in that context.
+
+Let @samp{e1} and @samp{e2} play the @code{ExpressionSymbol} role, and
+@samp{rator} play the @code{OperatorSymbol} role.
+A @emph{conversion context} is one in which the rules of the language allow
+the type conversions in @samp{rator}@code{.Indic}'s set to be
+applied to the value yielded by @samp{e2} (in addition to any coercions)
+in order to obtain the type that must be yielded by @samp{e1}.
+@findex ConversionContext
+@code{ConversionContext(@samp{e1},@samp{rator},@samp{e2})} provides rule
+computations to set @samp{rator}@code{.Oper}, @samp{e1}@code{.Type}, and
+@samp{e2}@code{.Required}.
+If no additional conversion operator is required, or
+if none can be selected from @samp{rator}@code{.Indic}'s set,
+then @samp{rator}@code{.Oper} is set to the unknown operator
+and both @samp{e1}@code{.Type} and
+@samp{e2}@code{.Required} are set to @samp{e1}@code{.Required}.
+
+In C, an actual argument to a function call may be implicitly converted to
+the type of the corresponding formal parameter prior to the function call.
+The same set of conversions can be used in assignment contexts, so assume
+that the indication is @code{assignCvt}:
+
+@example
+@group
+@tindex OpndExprListElem
+@findex ConversionContext
+@findex Indication
+SYMBOL Actual INHERITS OpndExprListElem END;
+
+RULE: Actual ::= Expr COMPUTE
+  ConversionContext(Actual,,Expr);
+  Indication(assignCvt);
+END;
+@end group
+@end example
+
+Let @samp{e1} and @samp{e2} play the @code{ExpressionSymbol} role,
+@samp{rator} play the @code{OperatorSymbol} role, and
+@samp{type} yield a @code{DefTableKey} value representing a type.
+A @emph{cast context} is a conversion context in which the desired type
+is inherent in the context itself, rather than being determined by @samp{e1}.
+@findex CastContext
+@code{CastContext(@samp{e1},@samp{rator},@samp{e2},@samp{type})} provides rule
+computations to set @samp{rator}@code{.Oper}, @samp{e1}@code{.Type}, and
+@samp{e2}@code{.Required}.
+If no additional conversion operator is required, or
+if none can be selected from @samp{rator}@code{.Indic}'s set,
+then @samp{rator}@code{.Oper} is set to the unknown operator
+and both @samp{e1}@code{.Type} and
+@samp{e2}@code{.Required} are set to @samp{type}.
+
+The C cast expression is an example of a cast context.
+Here we assume that @code{castInd} is an indication whose set consists of
+all of the possible C conversions:
+
+@example
+@group
+@findex CastContext
+RULE: Expr ::= '(' Type ')' Expr COMPUTE
+  CastContext(Expr[1],,Expr[2],Type.Type);
+  Indication(castInd);
+END;
+@end group
+@end example
+
+Let @samp{e2} play the @code{ExpressionSymbol} role,
+@samp{rator} play the @code{OperatorSymbol} role, and
+@samp{type} yield a @code{DefTableKey} value representing a type.
+A @emph{root context} is a conversion context in which the desired type
+is inherent in the context itself, which is not an expression context.
+@findex RootContext
+@code{RootContext(@samp{type},@samp{rator},@samp{e2})} provides rule
+computations to set @samp{rator}@code{.Oper} and
+@samp{e2}@code{.Required}.
+If no additional conversion operator is required, or
+if none can be selected from @samp{rator}@code{.Indic}'s set,
+then @samp{rator}@code{.Oper} is set to the unknown operator
+and @samp{e2}@code{.Required} is set to @samp{type}.
+
+The C return statement is an example of a root context.
+It is not itself an expression, but it has an expression operand.
+That operand must yield the return type of the function,
+which is inherent in the context of the return statement,
+and can be obtained from the @code{Function} node.
+Here we assume that @code{assignInd} is an indication whose set consists of
+all of the possible C assignment conversions:
+
+@example
+@group
+@findex RootContext
+RULE: Statement ::= 'return' Expr COMPUTE
+  RootContext(INCLUDING (Function.ResultType),,Expr[2]);
+  Indication(assignInd);
+END;
+@end group
+@end example
+
+@comment =====================================
+@node UserTypes
+@chapter User-Defined Types
+
+A language that permits user-defined types must provide constructs for the
+user to denote such types.
+These constructs are called @emph{type denotations}.
+If a programmer writes two type denotations that look the same, it is
+natural to ask whether they represent the same type.
+There are two general answers to this question:
+
+@table @emph
+@cindex Name equivalence
+@cindex Type equivalence, name
+@item Name equivalence
+Each type denotation that the programmer writes represents a distinct type.
+
+@cindex Structural equivalence
+@cindex Type equivalence, structural
+@item Structural equivalence
+Two type denotations represent the same type if they are constructed in the
+same way and if corresponding components are the same
+(@pxref{TypeEq,,Structural Type Equivalence}).
+@end table
+@noindent
+All of the techniques discussed in this document apply independently of the
+selection of name equivalence or structural equivalence among user-defined
+types.
+
+A @emph{type identifier} is a name used in a source language program to
+refer to a type.
+It is important to distinguish between the concept of a type and the concept
+of a type identifier, using different keys to implement them, because a
+particular type might have zero or more type identifiers referring to it.
+For example, consider the following snippet of C code:
+
+@example
+typedef float time;
+typedef float distance;
+typedef struct @{ time t; distance d; @} leg;
+leg trip[100];
+@end example
+@noindent
+This snippet creates two user-defined types, a structure type and
+an array (or pointer) type.
+Moreover, it defines three type identifiers, @code{time}, @code{distance},
+and @code{leg}.
+The first two refer to the language-defined float type, and the third
+refers to the structure type; the array type is @emph{anonymous} --- no
+type identifier refers to it.
+Seven definition table keys are therefore associated with the types and
+type identifiers of this snippet; three more are associated with the typed
+entities @code{t}, @code{d}, and @code{trip}
+(@pxref{BasicType,,Typed Entities}).
+
+The @code{Typing} module exports computational roles to
+implement the definition and use of user-defined types:
+
+@table @code
+@tindex TypeDenotation
+@item TypeDenotation
+The computational role inherited by a grammar symbol that represents a
+subtree denoting a type.
+
+@tindex TypeDefDefId
+@item TypeDefDefId
+The computational role inherited by a grammar symbol that represents a
+defining occurrence of a type identifier.
+
+@tindex TypeDefUseId
+@item TypeDefUseId
+The computational role inherited by a grammar symbol that represents an
+applied occurrence of a type identifier.
+@end table
+
+@menu
+* TypeDenot::	Type denotations
+* TypeIdent::	Type identifiers
+* TypeUse::	Referring to a type
+* OpDef::	Operator, function, and method definitions
+* OilClass::	Reducing specification size
+@end menu
+
+@node TypeDenot
+@section Type denotations
+
+Type denotations are language constructs that describe user-defined types.
+The symbol on the left-hand side of a rule defining a type denotation
+characterizes the type denoted.
+It inherits the @code{TypeDenotation} role, which provides three attributes:
+
+@vtable @code
+@item Type
+A @code{DefTableKey}-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that does not require properties of
+the type.
+
+@item TypeKey
+A @code{DefTableKey}-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+
+@item GotType
+A void attribute representing the fact that information characterizing a
+user-defined type has been stored as properties of the key
+@code{TypeDenotation.Type}.
+@end vtable
+@noindent
+The information stored as properties of the definition table key
+@code{TypeDenotation.Type} cannot be dependent on the results of type analysis
+(@pxref{TypedIdDepend,,Dependences for typed entities}).
+
+For example, some languages (e.g. Modula-3, Ada) allow a user to define
+a subrange type that is characterized by its bounds.
+The bound information may be needed in various contexts where the type is
+used, and therefore it is reasonable to store that information as
+properties of the subrange type's key.
+Suppose, therefore, that @code{Lower} and @code{Upper}
+are defined as integer-valued properties.
+Bound information is independent of any aspect of type analysis:
+
+@example
+@group
+@tindex TypeDenotation
+@vindex GotType
+SYMBOL SubrangeSpec INHERITS TypeDenotation END;
+RULE:  SubrangeSpec ::= '[' Number 'TO' Number ']' COMPUTE
+  SubrangeSpec.GotType=
+    ORDER(
+      ResetLower(SubrangeSpec.Type,atoi(StringTable(Number[1]))),
+      ResetUpper(SubrangeSpec.Type,atoi(StringTable(Number[2]))));
+END;
+@end group
+@end example
+
+@noindent
+Here @code{Number} is a non-literal terminal symbol whose value is
+the digit string appearing in the source text; @code{atoi} is the
+string-to-integer conversion routine from the C library.
+
+@node TypeIdent
+@section Type identifiers
+
+The computational role @code{TypeDefDefId} is inherited by
+a defining occurrence of a type identifier.
+It provides two attributes:
+
+@vtable @code
+@item Type
+A @code{DefTableKey} value representing the type named by the type identifier.
+This attribute must be set by a user computation.
+It should be used in any computation that does not require properties of
+the type.
+
+@item TypeKey
+A @code{DefTableKey}-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+@end vtable
+
+The computational role @code{TypeDefUseId} is inherited by
+an applied occurrence of a type identifier.
+It provides two attributes:
+
+@vtable @code
+@item Type
+A @code{DefTableKey} value representing the type named by the type identifier.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that does not require properties of
+the type.
+
+@item TypeKey
+A @code{DefTableKey}-valued attribute representing the type denoted by this
+subtree.
+This attribute is set by a module computation that should never be
+overridden by the user.
+It should be used in any computation that accesses properties of the type.
+@end vtable
+
+@node TypeUse
+@section Referring to a type
+
+A type might be referenced in program text in any of three
+different ways, each illustrated by a Java or C variable definition:
+
+@enumerate
+@item
+By writing a keyword, as in @code{int v;}
+
+@item
+By writing a type identifier, as in @code{t v;}
+
+@item
+By writing a type denotation, as in @code{struct @{int i; float f;@} v;}
+@end enumerate
+
+Each of these representations of a type uses its own mechanism for encoding
+the type.
+In order to standardize the encoding, a type reference is normally
+represented in the tree by a distinct symbol having a
+@code{DefTableKey}-valued @code{Type} attribute
+(@pxref{TypedDefId,,Establishing the type of an entity}).
+For example, @code{Type} plays that role in this representation for
+a variable declaration:
+
+@example
+RULE: VrblDecl ::= Type VarIdDefs ';' COMPUTE
+  VrblDecl.Type=Type.Type;
+END;
+@end example
+
+@noindent
+Here the value of @code{Type.Type} represents some type.
+That attribute must be defined by providing
+a rule establishing the type represented by a type identifier,
+a rule establishing each language-defined type represented by a keyword,
+and
+a rule establishing each user-defined type represented by a type
+denotation:
+
+@example
+@group
+@tindex TypeDefUseId
+@vindex Type
+SYMBOL TypIdUse INHERITS TypeDefUseId END;
+
+RULE: Type ::= TypIdUse COMPUTE
+  Type.Type=TypIdUse.Type;
+END;
+
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+
+RULE: Type ::= SubrangeSpec COMPUTE
+  Type.Type=SubrangeSpec.Type;
+END;
+@end group
+@end example
+
+The @code{Type} attributes discussed in this chapter generally do not give
+direct access to properties of the type they represent, because many of
+their values are intermediate in the type analysis computations
+(@pxref{TypeIdDepend,,Dependences among types and type identifiers}).
+If it is necessary to access properties of a type at a symbol
+inheriting @code{TypeDenotation}, @code{TypeDefDefId} or
+@code{TypeDefUseId}, use the @code{TypeKey} attribute.
+Values of the @code{Type} attribute of a symbol inheriting
+@code{ExpressionSymbol} or @code{TypedUseId} can be used directly to
+access type properties.
+
+@node OpDef
+@section Operator, function, and method definitions
+
+A user-defined type is often associated with one or more operators.
+For example, an array type requires an access operator
+(@pxref{OperatorSymbol,,Operators with explicit operands}).
+The @code{Expression} module provides computational roles and rule
+computations to define these operators:
+
+@table @code
+@tindex OperatorDefs
+@item OperatorDefs
+The computational role inherited by a grammar symbol that represents a
+context where operators are defined.
+
+@tindex OpndTypeListRoot
+@tindex OpndTypeListElem
+@item OpndTypeListRoot
+@itemx OpndTypeListElem
+Computational roles inherited by grammar symbols that represent operand
+definition lists.
+
+@findex MonadicOperator
+@findex DyadicOperator
+@findex ListOperator
+@findex Coercible
+@item MonadicOperator
+@itemx DyadicOperator
+@itemx ListOperator
+@item Coercible
+Rule computations implementing definition contexts.
+@end table
+
+All operators associated with user-defined types must be added to the
+database of valid operators before type analysis of expressions can begin.
+This dependence is made explicit by having the left-hand side symbol of any
+rule in which operators are defined inherit the @code{OperatorDefs} role.
+One attribute is used to express the dependence:
+
+@vtable @code
+@item GotOper
+A void attribute indicating that @emph{all} of the operator definitions in
+this rule have been carried out.
+It is set by a module computation that should be overridden by the user.
+@end vtable
+
+The @code{OpndTypeListRoot} role is inherited by a grammar symbol
+representing a list of operand types.
+It has one attribute:
+
+@vtable @code
+@item OpndTypeList
+A synthesized attribute whose @code{DefTableKeyList} value is a list of the
+operand types in reverse order.
+It is set by a module computation that should not be overridden by the
+user.
+@end vtable
+
+The @code{OpndTypeListElem} role is inherited by a grammar symbol 
+representing a single operand type in a list.
+It must be a descendant of a node playing the @code{OpndTypeListRoot} role,
+and has one attribute:
+
+@vtable @code
+@item Type
+A synthesized attribute whose @code{DefTableKey} value is set by user
+computation to represent the operand type.
+@end vtable
+
+Operators are actually defined by rule computations.
+Let @samp{ind}, @samp{opr}, @samp{rand}, @samp{rand1}, @samp{rand2}, and
+@samp{rslt} be definition table keys and @samp{rands} be a
+list of definition table keys.
+
+@table @code
+@findex MonadicOperator
+@item MonadicOperator(@samp{ind},@samp{opr},@samp{rand},@samp{rslt})
+Adds operator @code{@samp{opr}(@samp{rand}):@samp{rslt}}
+to the set named by indication @samp{ind}.
+
+@findex DyadicOperator
+@item DyadicOperator(@samp{ind},@samp{opr},@samp{rand1},@samp{rand2},@samp{rslt})
+Adds operator @code{@samp{opr}(@samp{rand1},@samp{rand2}):@samp{rslt}}
+to the set named by indication @samp{ind}.
+
+@findex ListOperator
+@item ListOperator(@samp{ind},@samp{opr},@samp{rands},@samp{rslt})
+Adds operator @code{@samp{opr}(t1,...,tn):@samp{rslt}}
+to the set named by indication @samp{ind}.
+Here @code{t1,...,tn} are the values obtained from @samp{rands}.
+
+@findex Coercible
+@item Coercible(@samp{opr},@samp{rand},@samp{rslt})
+Adds coercion @code{@samp{opr}(@samp{rand}):@samp{rslt}}
+to the coercions in the database.
+@end table
+
+@noindent
+The actual value of @samp{opr} is often irrelevant in these computations,
+because the designer does not ask which operator was selected from the
+given indication.
+The @code{Expression} module provides the known key @code{NoOprName} for
+use in these situations.
+
+Consider a type denotation for one-dimensional arrays.
+Assume that a subscript must be of the language-defined integer type,
+and that each new array type overloads the standard array indexing
+indication @code{indexInd} with the indexing operator for that array
+(@pxref{OperatorSymbol,,Operators with explicit operands}).
+The operator name is uninteresting:
+
+@example
+@group
+@tindex TypeDenotation
+@tindex OperatorDefs
+@findex DyadicOperator
+@vindex GotOper
+SYMBOL ArraySpec INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: ArraySpec ::= Type '[' ']' COMPUTE
+  ArraySpec.GotOper=
+    DyadicOperator(
+      indexInd,
+      NoOprName,
+      ArraySpec.Type,
+      intType,Type.Type);
+END;
+@end group
+@end example
+
+Another approach defines the @code{Accessor} property of the array type
+to be an indication with a singleton operator set
+(@pxref{OperatorSymbol,,Operators with explicit operands}):
+
+@example
+@group
+@tindex OpndTypeListRoot
+@findex ListOperator
+@vindex GotType
+@vindex GotOper
+@vindex Type
+@vindex OpndTypeList
+ATTR Indic: DefTableKey;
+
+SYMBOL IndexTypes INHERITS OpndTypeListRoot END;
+
+RULE: ArraySpec ::= Type '[' IndexTypes ']' COMPUTE
+  .Indic=NewKey();
+  ArraySpec.GotType=ResetAccessor(ArraySpec.Type,.Indic);
+  ArraySpec.GotOper=
+    ListOperator(
+      .Indic,
+      NoOprName,
+      IndexTypes.OpndTypeList,
+      Type[1].Type);
+END;
+@end group
+@end example
+
+Functions and methods are simply operators with operand lists.
+These operators overload the indication that is the function or method
+name.
+In many cases, of course, a singleton operator set will be associated with
+a function or method name.
+The operator name may or may not be interesting, depending on how the
+designer chooses to interpret the results of type analysis.
+
+Java method definitions overload the method identifier:
+
+@example
+@group
+@tindex OperatorDefs
+@tindex OpndTypeListRoot
+@findex ListOperator
+@vindex GotOper
+@vindex OpndTypeList
+@vindex Type
+SYMBOL MethodHeader INHERITS OperatorDefs     END;
+SYMBOL Formals      INHERITS OpndTypeListRoot END;
+
+RULE: MethodHeader ::= Type MethIdDef '(' Formals ')' COMPUTE
+  MethodHeader.GotOper=
+    ListOperator(
+      MethIdDef.Key,
+      NoOprName,
+      Formals.OpndTypeList,
+      Type.Type);
+END;
+@end group
+@end example
+@noindent
+The corresponding method call uses the method identifier as the
+operator symbol in a list context.
+Its indication is its @code{Key} attribute, as in the declaration:
+
+@example
+@group
+@tindex OperatorSymbol
+@tindex OpndExprListRoot
+@findex ListContext
+SYMBOL MethIdUse INHERITS OperatorSymbol COMPUTE
+  SYNT.Indic=THIS.Key;
+END;
+SYMBOL Arguments INHERITS OpndExprListRoot END; 
+
+RULE: Expr ::= Expr '.' MethIdUse '(' Arguments ')' COMPUTE
+  ListContext(Expr[1],MethIdUse,Arguments);
+END;
+@end group
+@end example
+
+Every value in a C enumeration is coercible to an integer:
+
+@example
+@group
+@tindex TypeDenotation
+@tindex OperatorSymbol
+@findex Coercible
+@vindex GotOper
+SYMBOL enum_specifier INHERITS TypeDenotation, OperatorSymbol END;
+
+RULE: enum_specifier ::= 'enum' '@{' enumerator_list '@}'
+  enum_specifier.GotOper=
+    Coercible(NoOprName,enum_specifier.Type,intType);
+END;
+@end group
+@end example
+
+@node OilClass
+@section Reducing specification size
+
+A user type definition often requires definition of a number of operators,
+based on the relationship between the new type and its components.
+Although all of those operations can be defined using the techniques of the
+previous section, it may be simpler to define a ``template'' for the
+particular type constructor and then instantiate that template at each
+corresponding type denotation.
+
+@cindex OIL @code{CLASS}, definition
+@cindex @code{CLASS}, OIL
+@cindex @code{OPER}, OIL
+@cindex OIL @code{OPER}
+@cindex OIL @code{INDICATION}
+@cindex OIL @code{COERCION}
+@cindex @code{COERCION}, OIL
+@cindex @code{INDICATION}, OIL
+The necessary information can be captured in an OIL class
+(@pxref{CLASS,,Class definition,oil,Oil Reference Manual}).
+For example, a set type in Pascal implies operators for union,
+intersection, membership, and comparison:
+
+@example
+@group
+CLASS setType(baseType) BEGIN
+  OPER
+    setop(setType,setType): setType;
+    setmember(baseType,setType): boolType;
+    setrel(setType,setType): boolType;
+  COERCION
+    (emptyType): setType;
+END;
+@end group
+
+@group
+INDICATION
+  plus: setop;
+  minus: setop;
+  star: setop;
+  in: setmember;
+  equal: setrel;
+  lsgt: setrel;
+  lessequal: setrel;
+  greaterequal: setrel;
+@end group
+@end example
+@noindent
+Within the class definition, the class name (@code{setType} in this
+example) represents the type being defined.
+The parameters of the class (e.g. @code{baseType}) represent the related
+types.
+Thus a set requires a set member operation that takes a value of the base
+type and a value of the set type, returning a Boolean.
+Notice that the designer chose to use the same operator for union,
+intersection, and difference because all of these operators have the same
+signature and distinguishing them is irrelevant for type analysis.
+
+@cindex OIL @code{CLASS}, instantiation
+Let @samp{cl} be an OIL class name, and @samp{typ}, @samp{arg1},
+@samp{arg2}, @samp{arg3} be definition table keys representing types.
+Each of the following rule computations instantiates an OIL class with a
+specific number of parameters:
+
+@table @code
+@findex InstClass
+@item InstClass0(c,typ)
+@itemx InstClass1(c,typ,arg1)
+@itemx InstClass2(c,typ,arg1,arg2)
+@itemx InstClass3(c,typ,arg1,arg2,arg3)
+Create the operators defined by OIL class @samp{cl} for type @samp{typ}.
+Types @samp{arg1}, @samp{arg2}, and @samp{arg3} are the parameters of the
+instantiation:
+@end table
+
+A class instantiation creates operators, so it should have the @code{GotOper}
+attribute as a postcondition:
+
+@example
+@group
+@tindex TypeDenotation
+@tindex OperatorDefs
+@vindex GotOper
+@findex InstClass1
+SYMBOL TypeDenoter INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: TypeDenoter ::= 'set' 'of' type COMPUTE
+  TypeDenoter.GotOper=InstClass1(setType,TypeDenoter.Type,type.Type);
+END;
+@end group
+@end example
+
+@comment =====================================
+@node TypeEq
+@chapter Structural Type Equivalence
+@cindex @code{StructEquiv} module
+@cindex Specification modules --- @code{StructEquiv}
+
+The specific rules governing structural equivalence of types vary greatly
+from one language to another.
+Nevertheless, their effect on the type analysis task can be described in a
+manner that is independent of those rules.
+That effect is embodied in the @code{StructEquiv} module, instantiated by
+
+@example
+   $/Type/StructEquiv.fw
+@end example
+
+@menu
+* Partition::	Partitioning the set of types
+* EqClass::	Computing equivalence classes
+* FuncType::	Functions as typed entities
+@end menu
+
+@node Partition
+@section Partitioning the set of types
+
+This module defines two types as structurally equivalent
+if they satisfy two conditions:
+
+@enumerate
+@item
+They @emph{might} be equivalent according to the language definition.
+
+@item
+Corresponding components have equivalent types.
+@end enumerate
+
+@noindent
+For example, consider the structure types in the following variable
+declarations:
+
+@example
+struct a @{ int f; struct a *g; @} x;
+struct b @{ int h; struct b *i; @} y;
+struct c @{ struct c *i; int h; @} z;
+@end example
+
+@noindent
+The first two have the same components in the same order, but the field
+names are different.
+The second and third have the same field names naming the same components,
+but the order of those components is different.
+Depending on the rules of the language, either pair could be equivalent or
+all three could be distinct.
+
+A designer specifies possibly-equivalent types by partitioning a subset of
+the set of types such that all of the types in a particular block of the
+partition @emph{might} be equivalent according to the rules of the language.
+Types assigned to different blocks can never be equivalent.
+If a type is not assigned to any block, then it is assumed to be unique.
+An ordered (possibly empty) set of components may be associated with each type
+when it is assigned to a block.
+
+Let @samp{type} and @samp{set} be definition table keys, and
+@samp{components} be a list of definition table keys.
+@findex AddTypeToBlock
+@code{AddTypeToBlock(@samp{type},@samp{block},@samp{components})}
+adds type @samp{type} to the partition block defined by @samp{block}.
+It also sets the @code{DefTableKeyList}-valued property
+@code{ComponentTypes} of @samp{type} to @samp{components}.
+
+Suppose that the designer chose to assign every structure type to the same
+set (represented by a known key), and to list the field types in order of
+appearance.
+Then variables @code{x} and @code{y} above would have the same type,
+but @code{z} would have a different type.
+Another possibility would be to generate a unique definition table key
+on the basis of the sorted list of field identifiers, and then to list the
+field types in the order of their sorted identifiers.
+Variables @code{y} and @code{z} would then have the same type and @code{x}
+would have a different type.
+
+@node EqClass
+@section Computing equivalence classes
+
+Let @samp{S1},...,@samp{Sp} be the partition established by
+invocations of @code{AddTypeToBlock}.
+For each type @samp{t}, let @samp{f1(t)},...,@samp{fn(t)} be the ordered list
+of the component types.
+
+Computations supplied by the @code{StructEquiv} module then find the
+partition @{@samp{E1},...,@samp{Eq}@} having fewest blocks @samp{Ei}
+such that:
+
+@enumerate
+@item
+Each @samp{Ei} is a subset of some @samp{Sj}.
+
+@item
+@samp{x} and @samp{y} in @samp{Ei} implies that @samp{fj(x)} and
+@samp{fj(y)} are in some one @samp{Ek}, for all @samp{fj}.
+@end enumerate
+
+@noindent
+The blocks @samp{Ei} are the equivalence classes determined by refining
+the original partition introduced by @code{AddTypeToBlock} on the basis of
+the component types.
+
+The algorithm then selects an arbitrary member of each @samp{Ei} as the
+representative type for that equivalence class,
+and alters the properties of the other members of that class so that they
+act as type identifiers pointing to the key for the representative type
+(@pxref{TypeIdDepend,,Dependences among types and type identifiers}).
+This means that the values of an arbitrary property of the key used to
+represent a type in subsequent computation may not be the value of that
+property set at a specific instance of a type denotation for that type
+(@pxref{TypeUse,,Referring to a type}).
+
+@node FuncType
+@section Functions as typed entities
+
+Many languages have the concept that a function is a typed entity.
+Such a language provides a form of type denotation that can describe
+function types.
+Function definitions also implicitly describe function types, since there
+is usually no way of using a type identifier to specify the type of a
+function.
+Thus every function definition must also be considered a type denotation.
+
+Function definitions are operator definitions, defining an operator that is
+used verify the type-correctness of the function invocation.
+Because the structural equivalence algorithm will select an arbitrary
+element to represent the equivalence class, every function type
+denotation must also define an invoker.
+
+Modula-3 has constructs representing type denotations for
+function types (@code{ProcTy}) and function definitions (@code{Procedure})
+that could be specified as follows (a function invocation is also given):
+
+@example
+@group
+@tindex OpndTypeListRoot
+@tindex TypeDenotation
+@tindex OperatorDefs
+@vindex GotType
+@vindex GotOper
+@vindex Type
+@vindex ParameterTypeList
+@findex AddTypeToBlock
+@findex ListOperator
+SYMBOL Formals INHERITS OpndTypeListRoot             END;
+SYMBOL ProcTy  INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: ProcTy ::= 'PROCEDURE' '(' Formals ')' ':' Type COMPUTE
+  .Indic=NewKey();
+  ProcTy.GotType=
+    ORDER(
+      ResetInvoker(ProcTy.Type,.Indic),
+      AddTypeToBlock(
+        ProcTy.Type,
+        procClass,
+        ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList)));
+  ProcTy.GotOper=
+    ListOperator(.Indic,NoOprName,Formals.ParameterTypeList,Type.Type);
+END;
+@end group
+
+@group
+@tindex TypeDenotation
+@tindex OperatorDefs
+@vindex GotType
+@vindex GotOper
+@vindex Type
+@vindex ParameterTypeList
+@findex AddTypeToBlock
+@findex ListOperator
+SYMBOL Procedure INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: Procedure ::= '(' Formals ')' ':' Type '=' Block COMPUTE
+  Procedure.EqClass=procClass;
+  Procedure.ComponentTypes=
+    ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList);
+  .Indic=NewKey();
+  Procedure.GotType=
+    ORDER(
+      ResetInvoker(Procedure.Type,.Indic),
+      AddTypeToBlock(
+        Procedure.Type,
+        procClass,
+        ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList)));
+  Procedure.GotOper=
+    ListOperator(.Indic,NoOprName,Formals.ParameterTypeList,Type.Type);
+END;
+@end group
+
+@group
+@tindex ExpressionSymbol
+@tindex OpndExprListRoot
+@findex ListContext
+@findex Indication
+@vindex Type
+SYMBOL Expr    INHERITS ExpressionSymbol END;
+SYMBOL Actuals INHERITS OpndExprListRoot END;
+
+RULE: Expr ::= Expr '(' Actuals ')' COMPUTE
+  ListContext(Expr[1],,Actuals);
+  Indication(GetInvoker(Expr[2].Type,NoKey));
+END;
+@end group
+@end example
+
+@comment =====================================
+@node Errors
+@chapter Error Reporting in Type Analysis
+
+Language-dependent error reporting involves checks based on the
+types associated with program constructs by the computations specified
+in earlier chapters.
+For example, object-oriented languages differ in their requirements for
+overriding methods when extending a class definition.
+One possibility is
+to require that the type of each parameter of the overriding method be
+a supertype of the corresponding parameter type of the overridden method,
+and that the result type of the overriding method be a subtype of the
+result type of the overridden method.
+The type analysis modules will establish the complete signatures of both
+methods, and the subtype/supertype relation among all type pairs.
+Thus only the actual check remains to be written.
+
+Some errors make it impossible to associate any type with a program
+construct, and these are reported by the modules.
+Operations are also made available to support detection of incorrect
+typing.
+
+@menu
+* ChkTyped::	Verifying typed identifier usage
+* ChkTypeId::	Verifying type identifier usage
+* ChkExpr::	Verifying type consistency within an expression
+* Support::	Support for context checking
+@end menu
+
+@node ChkTyped
+@section Verifying typed identifier usage
+
+An applied occurrence of an identifier that purports to represent a
+typed entity inherits the @code{TypedIdUse} role.
+The value of its @code{Type} attribute should not be @code{NoKey}, and the
+identifier itself should not be a type identifier.
+Both of these conditions can be checked by inheriting the
+@tindex ChkTypedUseId
+@code{ChkTypedUseId} role:
+
+@example
+@tindex ChkTypedUseId
+SYMBOL ExpIdUse INHERITS ChkTypedUseId END;
+@end example
+
+If the identifier @samp{id} at an @code{ExpIdUse} node is bound,
+but the type is unknown, the @code{ChkTypedUseId} computation will
+issue the following report at the source coordinates of @samp{id}
+
+@example
+Must denote a typed object: @samp{id}
+@end example
+
+If the identifier @samp{id} at an @code{ExpIdUse} node is a type
+identifier, the report would be:
+
+@example
+Type identifier not allowed: @samp{id}
+@end example
+
+@node ChkTypeId
+@section Verifying type identifier usage
+
+Both defining and applied occurrences of type identifiers can be checked
+for validity.
+In each case, the value of the @code{Type} attribute must be a definition
+table key whose @code{IsType} property has the value 1.
+Two roles are available for this purpose:
+
+@table @code
+@tindex ChkTypeDefDefId
+@item ChkTypeDefDefId
+reports an error if the @code{Type} attribute does not refer to a type,
+or if the type refers to itself.
+
+@tindex ChkTypeDefUseId
+@item ChkTypeDefUseId
+reports an error if the @code{Type} attribute does not refer to a type.
+@end table
+
+@node ChkExpr
+@section Verifying type consistency within an expression
+
+The @code{Expression} module provides default error reporting associated
+with the following roles:
+
+@table @code
+@tindex ExpressionSymbol
+@item ExpressionSymbol
+@table @asis
+@item Condition:
+@code{@samp{e}.Type} is not acceptable as @code{@samp{e}.Required}.
+@item Message:
+@samp{Incorrect type for this context}
+@item Override symbols:
+@tindex @code{ExpMsg}
+@tindex @code{ExpErr}
+@tindex @code{ExpError}
+@code{ExpMsg}, @code{ExpErr}, @code{ExpError}
+@end table
+
+@tindex OperatorSymbol
+@item OperatorSymbol
+@table @asis
+@item Condition:
+The indication is valid but no operator could be identified.
+@item Message:
+@samp{Incorrect operand type(s) for this operator}
+@item Override symbols:
+@tindex @code{OprMsg}
+@tindex @code{OprErr}
+@tindex @code{OprError}
+@code{OprMsg}, @code{OprErr}, @code{OprError}
+@end table
+
+@tindex OpndExprListRoot
+@item OpndExprListRoot
+@table @asis
+@item Condition:
+The function requires more arguments than are present.
+@item Message:
+@samp{Too few arguments}
+@item Override symbols:
+@tindex @code{LstMsg}
+@tindex @code{LstErr}
+@tindex @code{LstError}
+@code{LstMsg}, @code{LstErr}, @code{LstError}
+@end table
+
+@tindex OpndExprListElem
+@item OpndExprListElem
+@table @asis
+@item Condition:
+The function requires fewer arguments than are present.
+@item Message:
+@samp{Too many arguments}
+@item Override symbols:
+@tindex @code{ArgMsg}
+@tindex @code{ArgErr}
+@tindex @code{ArgError}
+@code{ArgMsg}, @code{ArgErr}, @code{ArgError}
+@end table
+@end table
+
+This error reporting can be changed by overriding computations for the
+@code{@samp{xxx}Msg} attribute.
+The @code{@samp{xxx}Err} attribute has the value 1
+if the error condition is met, 0
+otherwise.
+Thus the overriding computation might be of the form:
+
+@example
+@samp{s}.@samp{xxx}Msg=
+  IF(@samp{s}.@samp{xxx}Err,message(ERROR,"My report",0,COORDREF));
+@end example
+
+@noindent
+Because @code{@samp{s}.@samp{xxx}Msg} is of type @code{VOID},
+you can remove a report completely by
+setting @code{@samp{s}.@samp{xxx}Msg} to @code{"no"}.
+
+If you wish to override the message in every context,
+write the overriding computation as a symbol computation
+in the lower context of the override symbol specified above.
+In this case, @samp{xxx} would be @code{SYNT}.
+Here is an example, changing the error report for invalid operators in all
+contexts:
+
+@example
+SYMBOL OprError COMPUTE
+  SYNT.OprMsg=
+    IF(SYNT.OprErr,message(ERROR,"Invalid operator",0,COORDREF));
+END;
+@end example
+
+If you wish to override the message in a few specific contexts,
+write the overriding computation as a rule computation
+in the lower context of a symbol inheriting the computational role.
+In this case, @samp{xxx} would be the symbol on the left-hand side of the
+rule.
+Here is an example, changing the standard expression error report to be more
+specific for function arguments:
+
+@example
+RULE: Actual ::= Expr COMPUTE
+  Actual.ExpMsg=
+    IF(Actual.ExpErr,message(ERROR,"Wrong argument type",0,COORDREF));
+END;
+@end example
+
+@node Support
+@section Support for context checking
+
+As noted in the previous section, @code{OperatorSymbol} role computations
+normally report an error when an indication is valid but no operator can be
+identified.
+The @code{Expression} module exports two context-dependent rule
+computations for use when an expression node has no children playing that
+role.
+One computation tests the indication and the other tests the operator:
+
+@ftable @code
+@item BadIndication
+Yields 1 if the operator indication supplied by @code{Indication} is
+unknown, 0 otherwise.
+
+@item BadOperator
+Yields 1 if the indication is valid but no operator can be selected from
+that indication's set, 0 otherwise.
+@end ftable
+
+Consider an expression in which a function is applied to arguments
+(@pxref{FuncType,,Functions as typed entities}):
+
+@example
+@group
+@tindex ExpressionSymbol
+@tindex OpndExprListRoot
+@findex ListContext
+@findex Indication
+@findex BadIndication
+@vindex Type
+SYMBOL Expr    INHERITS ExpressionSymbol END;
+SYMBOL Actuals INHERITS OpndExprListRoot END;
+
+RULE: Expr ::= Expr '(' Actuals ')' COMPUTE
+  ListContext(Expr[1],,Actuals);
+  Indication(GetInvoker(Expr[2].Type,NoKey));
+  IF(BadIndication,
+    message(ERROR,"Invalid function",0,COORDREF));
+END;
+@end group
+@end example
+
+Suppose that, because of a programming error, @code{Expr[2]} does not
+deliver a function type.
+In that case, @code{Expr[2].Type} would not have the @code{Invoker}
+property, and @code{BadIndication} would yield 1.
+Alternatively, @code{Expr[2]} might deliver a function whose signature
+does not match the context.
+Because the indication has only a singleton operator set, that operator
+will be selected regardless of the context.
+Errors will then be reported by the default mechanisms as an incorrect
+number of arguments, arguments of incorrect types, or result incorrect for
+the context.
+
+Now consider the array access expression
+(@pxref{OperatorSymbol,,Operators with explicit operands}):
+
+@example
+@group
+@tindex ExpressionSymbol
+@findex DyadicContext
+@findex Indication
+@findex BadOperator
+SYMBOL Subscript INHERITS ExpressionSymbol END;
+
+RULE: Expr ::= Expr '[' Subscript ']' COMPUTE
+  DyadicContext(Expr[1],,Expr[2],Subscript);
+  Indication(indexInd),
+  IF(BadOperator,
+    message(ERROR,"Invalid array reference",0,COORDREF));
+END;
+@end group
+@end example
+
+Suppose that, because of a programming error, @code{Expr[2]} does not
+deliver an array type.
+In that case, there would be no operator in @code{indexInd}'s operator set
+whose left operand was the type returned by @code{Expr[2]} and
+@code{BadOperator} would yield 1.
+
+@findex IsCoercible
+It is sometimes useful to be able to check whether one type is acceptable
+as another outside of the situations covered in the previous section.
+Let @samp{from} and @samp{to} be definition table keys representing types.
+@code{IsCoercible(@samp{from},@samp{to})} yields 1 if a value of type
+@samp{from} is acceptable wherever an value of type @samp{to} is required;
+it yields 0 otherwise.
+
+For example, consider a cast involving a reference type in Java.
+The cast is known to be correct at compile time if a value is being cast to
+its superclass.
+If the value is being cast to one of its subclasses, however, a run-time
+check is required.
+Thus the compiler must accept such a cast @emph{both} when the value is
+acceptable as a value of the cast type @emph{and} when a value of the cast
+type is acceptable as a value of the type being cast:
+
+@example
+RULE: Expression ::= '(' Expression ')' Expression COMPUTE
+  IF(AND(
+      NOT(IsCoercible(Expression[2].Type,Expression[3].Type)),
+      NOT(IsCoercible(Expression[3].Type,Expression[2].Type))),
+    message(ERROR,"Invalid cast",0,COORDREF));
+END;
+@end example
+
+@comment =====================================
+@node RootType
+@chapter Dependence in Type Analysis
+
+Type analysis is a complex process, involving several different kinds
+of entity.
+Each kind of entity has properties, which are stored in the definition
+table under the entity's key.
+Those properties are set and used in a variety of contexts.
+The result is a collection of implicit dependence relations among the type
+analysis computations, and these relations depend on the language being
+analyzed.
+
+The modules described in this document make the implicit relations
+explicit, using void attributes and dependent expressions in LIDO
+(@pxref{Dependent Expressions,,,lidoref,LIDO - Reference Manual}).
+Although the explicit dependences work for a wide range of typical
+programming languages, one or more of them must sometimes be overridden
+because of the rules of a particular language.
+This chapter explains the implicit dependences that must be made explicit,
+how the various modules make them explicit, and some typical circumstances
+in which the default treatment fails.
+
+The void attributes that make these dependences explicit are summarized
+here; the remainder of this chapter explains them in more detail:
+
+@vtable @code
+@item TypeDenotation.GotType
+The new type key has been created, and any properties that are not
+dependent on final types have been stored in the definition table
+as properties of that key.
+
+@item TypeDefDefId.GotDefer
+Information that can be used to find the final type
+has been stored in the definition table as properties of the key
+assigned to the identifier by the name analyzer.
+
+@item RootType.GotUserTypes
+Computations for all type denotations have reached the state represented by
+@code{TypeDenotation.GotType} and computations for all type identifier
+definitions have reached the state represented by
+@code{TypeDefDefId.GotDefer}.
+
+@item RootType.GotAllTypes
+All final types have been determined.
+
+@item TypedDefId.TypeIsSet
+Information that can be used to find the final type
+has been stored in the definition table as properties of the key
+assigned to the identifier by the name analyzer.
+
+@item RootType.TypeIsSet
+The state represented by @code{RootType.GotAllTypes} has been reached,
+and computations for all typed identifier definitions have reached
+the state represented by @code{TypedDefId.TypeIsSet}.
+
+@item TypedUseId.TypeIsSet
+All information needed to find the final type of this typed identifier
+is available.
+
+@item OperatorDefs.GotOper
+All operator descriptions associated with this construct have been
+entered into the operator data base.
+
+@item RootType.GotAllOpers
+Computations for all symbols inheriting @code{OperatorDefs} have reached
+the state represented by @code{OperatorDefs.GotOper}.
+@end vtable
+
+@menu
+* TypeIdDepend::	Dependences among types and type identifiers
+* TypequDepend::	Dependence on structural equivalence
+* OprdbDepend::		Dependence on the operator database
+* TypedIdDepend::	Dependences for typed entities
+@end menu
+
+@node TypeIdDepend
+@section Dependences among types and type identifiers
+
+Consider the following program, written in a C-like notation:
+
+@example
+@{ Measurement Length;
+  typedef Inches Measurement;
+  typedef int Inches;
+
+  Length = 3; printf("%d\n", Length + 7);
+@}
+@end example
+
+@noindent
+Suppose that the language definition states that type identifiers are
+statically bound, with the scope of a declaration being the entire block.
+Thus all of the type identifier occurrences have valid bindings.
+(That would @emph{not} be the case in C, because in C the scope of a
+declaration is from the end of the declaration to the end of the block.)
+
+The type analysis of each of the two occurrences of @code{Length} in the
+last line of the program is described by the following specifications
+discussed earlier:
+
+@example
+@group
+@tindex TypedUseId
+@tindex ChkTypedUseId
+@findex PrimaryContext
+@vindex Type
+SYMBOL ExpIdUse INHERITS TypedUseId, ChkTypedUseId END;
+
+RULE: Expr ::= ExpIdUse COMPUTE
+  PrimaryContext(Expr,ExpIdUse.Type);
+END;
+@end group
+@end example
+
+@noindent
+The value of @code{ExpIdUse.Type} should be @code{intType}, the known
+definition table key created for the language-defined integer type.
+Recall that @code{intType} was associated with the @code{int} keyword
+by the following specification:
+
+@example
+RULE: Type ::= 'int' COMPUTE
+  Type.Type=intType;
+END;
+@end example
+
+@noindent
+The problem is to make the @code{intType} value of the @code{Type.Type}
+attribute in this context the value of the @code{ExpIdUse.Type} attribute
+in the context quoted above.
+
+A human has no trouble seeing how this problem could be solved:
+
+@enumerate
+@item
+The type definition rule sets the @code{TypIdDef.Type} attribute of the
+occurrence of @code{Inches} in the third line of the program to
+@code{intType}.
+
+@item
+The value of a property of the @code{Inches} entity could be set from the
+value of the @code{TypIdDef.Type} attribute in that context.
+
+@item
+That property could be used to set the @code{TypIdUse.Type} attribute of
+the occurrence of @code{Inches} in the second line of the program.
+
+@item
+The type identifier use rule sets the value of the @code{Type.Type}
+attribute in that context the value of the @code{TypIdUse.Type} attribute.
+
+@item
+Similar reasoning results in the value of the @code{Type.Type} attribute
+in the variable definition context of the first line of the program
+becoming @code{intType}.
+
+@item
+Finally, a property of the @code{Length} entity is set in the context of
+the first line of the program and used to make @code{intType} the value
+of the @code{ExpIdUse.Type} attributes in the two contexts of the last line.
+@end enumerate
+
+@noindent
+Unfortunately, this solution is based on the human's ability to see the
+dependence among the type identifiers and process the lines of the program
+in an order determined by that dependence.
+One cannot, for example, blindly process the lines in the order in which
+they were written.
+
+The dependence among the lines in our example is a result of our use of the
+known key @code{intType} as the value of a property of the type identifier
+entities.
+This strategy is actually an example of a premature evaluation:
+There is no need to know the key representing the type of
+@code{Length} until the @code{ExpIdUse.Type} attribute is evaluated.
+We can avoid the constraint on the order of rule processing by a
+``lazy evaluation'' strategy in which we use properties of the type
+identifier entities to establish a means for determining the value of the
+@code{ExpIdUse.Type} attribute rather than establishing the value itself.
+
+Recall that there are three possible @code{Type} contexts: a keyword, a
+type denotation, and a type identifier
+(@pxref{TypeUse,,Referring to a type}).
+In the first two, we can set the value of the @code{Type.Type} attribute to
+the definition table key for the type itself.
+In the third, however, the only information that we are guaranteed to have
+is the definition table key for the type identifier.
+However, this information is sufficient to find the definition table key
+for the type @emph{once all of the type identifiers have been defined}.
+Thus we can simply set the value of the @code{Type.Type} attribute to the
+definition table key for the type identifier itself in this context.
+
+The computation provided by the @code{Typing} module for the
+@code{TypeDefDefId} context sets a property of the type identifier entity
+to the value of the @code{TypeDefDefId.Type} attribute
+(@pxref{TypeIdent,,Type identifiers}).
+Effectively, this computation creates a linear list of type identifier
+entities ending in a type entity.
+When all of the entities corresponding to type identifiers have this
+property set, the definition table key for a type should be the last
+element of each list.
+
+In our example, the value of this property of the identifier
+@code{Length}'s definition table key would be the definition table key of
+the identifier @code{Measurement}.
+The value of its property would be the definition table key of the
+identifier @code{Inches}, whose property would be @code{intType}.
+
+There is no guarantee, of course, that the last element of the list is
+actually a type.
+For example, consider the following incorrect program:
+
+@example
+@{ Measurement Length;
+  typedef Inches Measurement;
+  int Inches;
+
+  Length = 3; printf("%d\n", Length + 7);
+@}
+@end example
+
+@noindent
+Here the last element of the list beginning at @code{Measurement} would be
+@code{Inches}, a variable identifier.
+The @code{ChkTypeDefUseId} role checks the @code{IsType} property of the
+key that is the last element of the list to report errors of this kind
+(@pxref{ChkTypeId,,Verifying type identifier usage}).
+
+The void attribute @code{RootType.GotUserTypes} represents the state of the
+computation at which all of the type denotations and type identifiers have
+been formed into lists.
+
+@node TypequDepend
+@section Dependence on structural equivalence
+
+The structural equivalence computation must be carried out after all
+@code{Type.Type} attributes have been set and linked as described in the
+previous section, and
+all of the possibly-equivalent types have been added to the appropriate
+blocks of the initial partition
+(@pxref{EqClass,,Computing equivalence classes}).
+The latter condition is represented by all of the void attributes
+@code{TypeDenotation.GotType} having been set.
+A user can override the computation of the void attribute
+@code{RootType.GotType} to signal dependence of the structural equivalence
+computation on any additional information.
+
+@code{RootType.GotAllTypes} is the post-condition for the structural
+equivalence algorithm.
+After that computation is complete, however, some definition table keys
+that were thought to represent types have had their properties changed
+so that they represent type identifiers
+(@pxref{TypeEq,,Structural Type Equivalence}).
+Thus scanning a list of definition table keys to find the last one
+is only meaningful after @code{RootType.GotAllTypes} has been established.
+The @code{TypeKey} attributes of @code{TypeDenotation},
+@code{TypeDefDefId}, and @code{TypeDefUseId} reflect this fact.
+
+Sometimes a designer uses a C routine to access type properties.
+If the keys defining the types have been obtained from @code{Type}
+attributes of @code{TypeDenotation}, @code{TypeDefDefId}, or
+@code{TypeDefUseId} (rather than from @code{TypeKey} attributes of those
+nodes), then
+@findex FinalType
+@code{FinalType} can be used to obtain the key at the end of the list.
+The C program must include the header file @code{Typing.h}, and the code
+must enforce a dependence on @code{RootType.GotAllTypes}.
+If that dependence is not enforced, the results of invoking
+@code{FinalType} are undefined.
+
+@node OprdbDepend
+@section Dependence on the operator database
+
+The operator identification database used for type analysis within
+expressions is initialized from the specifications of language-defined
+types, operators, and operator indications.
+Database representations for function operators and operators associated
+with user-defined types cannot be constructed until the pre-condition
+@code{RootType.GotAllTypes} has been established.
+Moreover, type analysis of expressions cannot be carried out until that
+information has been entered into the database.
+
+Computations that define operators must establish the @code{GotOper}
+post-condition at their associated @code{OperatorDefs} nodes.
+The computation of @code{RootType.GotOper} can be overridden to provide
+dependence on computations not associated with an @code{OperatorDefs} node.
+@code{RootType.GotAllOpers} represents the state in which the database has
+been completely populated.
+All expression analysis computations have @code{RootType.GotAllOpers} as a
+pre-condition.
+
+@node TypedIdDepend
+@section Dependences for typed entities
+
+@vindex TypeIsSet
+The computation provided for the @code{TypedDefId} context sets the
+@code{TypeOf} property of that identifier's key to the value of
+@code{TypedDefId.Type}.
+@code{TypedDefId.TypeIsSet} is the post-condition for that computation.
+@code{RootType.AllTypesAreSet} is the conjunction of all of the
+@code{TypedDefId.TypeIsSet} post-conditions plus
+@code{RootType.GotAllTypes}.
+
+If other property values of the identifier's key are set by
+user computations in the lower context of @code{TypedDefId}
+that establish the postcondition @code{SYNT.GotProp},
+then the setting of these properties is also guaranteed by the
+post-condition @code{TypedDefId.TypeIsSet}.
+(@code{SYNT.GotProp} defaults to the empty postcondition.)
+Note that if any of these user computations depend on any results from type
+analysis, a cycle will be created.
+
+A computation supplied by the module sets the @code{TypedUseId.Type}
+attribute to the value of the @code{TypeOf} property of that identifier's
+definition table key.
+@code{TypedUseId.TypeIsSet} is a precondition for that computation.
+It must guarantee that the @code{TypeOf} property of the identifier
+has  actually been set.
+The module provides a default computation for @code{TypedUseId.TypeIsSet}
+in the lower context of the @code{TypedUseId} node, requiring the
+pre-condition @code{RootType.TypeIsSet}.
+
+Some languages provide initialized variable declarations, and allow the
+user to omit either the type specification or the initializing expression
+but not both.
+If the type specification is omitted, the variable's type is the type
+returned by the initializing expression.
+Here are some examples of such declarations in Modula-3:
+
+@example
+VAR Both: INTEGER := 3;
+VAR NoType := Both + 7;
+VAR NoInit: INTEGER;
+@end example
+
+@noindent
+The default computations for the @code{TypeIsSet} attributes in this
+example lead to a cycle:
+
+@enumerate
+@item
+The @code{TypedDefId.Type} attribute of @code{NoType}
+depends on @code{TypedUseId.Type} for @code{Both}.
+
+@item
+The computation of @code{TypedUseId.Type} for @code{Both}
+has the pre-condition @code{TypedUseId.TypeIsSet}.
+
+@item
+@code{TypedUseId.TypeIsSet} depends on @code{RootType.TypeIsSet} in the
+default computation.
+
+@item
+@code{RootType.TypeIsSet} is the conjunction of @emph{all}
+@code{TypedDefId.TypeIsSet} attributes.
+
+@item
+@code{TypedDefId.TypeIsSet} for @code{NoType} is the post-condition
+for a computation involving the @code{TypedDefId.Type} attribute
+of @code{NoType}.
+@end enumerate
+
+If the language requires that the initialized declaration of a variable
+precede any uses of that variable,
+then we can override the default dependence as follows:
+
+@example
+@group
+CHAIN TypeDepend: VOID;
+
+CLASS SYMBOL ROOTCLASS COMPUTE
+  CHAINSTART HEAD.TypeDepend=THIS.GotType;
+END;
+@end group
+
+@group
+RULE: VrblDecl ::= 'VAR' VarIdDef ':' Type ':=' Expr COMPUTE
+  VrblDecl.Type=Type.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet <- Expr.TypeDepend;
+END;
+@end group
+    
+@group
+RULE: VrblDecl ::= 'VAR' VarIdDef ':' Type COMPUTE
+  VrblDecl.Type=Type.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet <- Expr.TypeDepend;
+END;
+@end group
+    
+@group
+RULE: VrblDecl ::= 'VAR' VarIdDef ':=' Expr COMPUTE
+  VrblDecl.Type=Expr.Type;
+  VrblDecl.TypeDepend=VarIdDef.TypeIsSet <- Expr.TypeDepend;
+END;
+@end group
+
+@group
+SYMBOL VarIdUse COMPUTE
+  SYNT.TypeIsSet=THIS.TypeDepend;
+  THIS.TypeDepend=SYNT.TypeIsSet;
+END;
+@end group
+@end example
+
+If there is no ordering requirement, then a fixed-point computation is
+required to determine the variable types.
+In addition, code generated from the initializing expressions must be
+arranged to ensure that a variable's value is computed before it is used.
+Finally, such out-of-order dependence makes the program hard to understand.
+We strongly recommend that declaration before use be required if variables
+are allowed to obtain their type from their initializers.
+
+@node Index
+@unnumbered Index
+
+@menu
+* tp::	Symbol roles
+* fn::	Rule computations
+* vr::	Attributes
+* cp::	General concepts
+@end menu
+
+@node tp
+@section Symbol roles
+
+@printindex tp
+
+@node fn
+@section Rule computations
+
+@printindex fn
+
+@node vr
+@section Attributes
+
+@printindex vr
+
+@node cp
+@section General concepts
+
+@printindex cp
+
+@bye

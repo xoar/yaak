@@ -1,0 +1,334 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from type.tnf on 5 December 2013 -->
+
+<TITLE>Type Analysis - Structural Type Equivalence</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<A NAME="IDX153"></A>
+<A NAME="IDX154"></A>
+<H1><A NAME="SEC25" HREF="type_toc.html#SEC25">Structural Type Equivalence</A></H1>
+<P>
+The specific rules governing structural equivalence of types vary greatly
+from one language to another.
+Nevertheless, their effect on the type analysis task can be described in a
+manner that is independent of those rules.
+That effect is embodied in the <CODE>StructEquiv</CODE> module, instantiated by
+<P>
+<PRE>
+   $/Type/StructEquiv.fw
+</PRE>
+<P>
+<H2><A NAME="SEC26" HREF="type_toc.html#SEC26">Partitioning the set of types</A></H2>
+<P>
+This module defines two types as structurally equivalent
+if they satisfy two conditions:
+<P>
+<OL>
+<LI>
+They <EM>might</EM> be equivalent according to the language definition.
+<P>
+<LI>
+Corresponding components have equivalent types.
+</OL>
+<P>
+For example, consider the structure types in the following variable
+declarations:
+<P>
+<PRE>
+struct a { int f; struct a *g; } x;
+struct b { int h; struct b *i; } y;
+struct c { struct c *i; int h; } z;
+</PRE>
+<P>
+The first two have the same components in the same order, but the field
+names are different.
+The second and third have the same field names naming the same components,
+but the order of those components is different.
+Depending on the rules of the language, either pair could be equivalent or
+all three could be distinct.
+<P>
+A designer specifies possibly-equivalent types by partitioning a subset of
+the set of types such that all of the types in a particular block of the
+partition <EM>might</EM> be equivalent according to the rules of the language.
+Types assigned to different blocks can never be equivalent.
+If a type is not assigned to any block, then it is assumed to be unique.
+An ordered (possibly empty) set of components may be associated with each type
+when it is assigned to a block.
+<P>
+Let <SAMP>`type'</SAMP> and <SAMP>`set'</SAMP> be definition table keys, and
+<SAMP>`components'</SAMP> be a list of definition table keys.
+<A NAME="IDX155"></A>
+<CODE>AddTypeToBlock(<SAMP>`type'</SAMP>,<SAMP>`block'</SAMP>,<SAMP>`components'</SAMP>)</CODE>
+adds type <SAMP>`type'</SAMP> to the partition block defined by <SAMP>`block'</SAMP>.
+It also sets the <CODE>DefTableKeyList</CODE>-valued property
+<CODE>ComponentTypes</CODE> of <SAMP>`type'</SAMP> to <SAMP>`components'</SAMP>.
+<P>
+Suppose that the designer chose to assign every structure type to the same
+set (represented by a known key), and to list the field types in order of
+appearance.
+Then variables <CODE>x</CODE> and <CODE>y</CODE> above would have the same type,
+but <CODE>z</CODE> would have a different type.
+Another possibility would be to generate a unique definition table key
+on the basis of the sorted list of field identifiers, and then to list the
+field types in the order of their sorted identifiers.
+Variables <CODE>y</CODE> and <CODE>z</CODE> would then have the same type and <CODE>x</CODE>
+would have a different type.
+<P>
+<H2><A NAME="SEC27" HREF="type_toc.html#SEC27">Computing equivalence classes</A></H2>
+<P>
+Let <SAMP>`S1'</SAMP>,...,<SAMP>`Sp'</SAMP> be the partition established by
+invocations of <CODE>AddTypeToBlock</CODE>.
+For each type <SAMP>`t'</SAMP>, let <SAMP>`f1(t)'</SAMP>,...,<SAMP>`fn(t)'</SAMP> be the ordered list
+of the component types.
+<P>
+Computations supplied by the <CODE>StructEquiv</CODE> module then find the
+partition {<SAMP>`E1'</SAMP>,...,<SAMP>`Eq'</SAMP>} having fewest blocks <SAMP>`Ei'</SAMP>
+such that:
+<P>
+<OL>
+<LI>
+Each <SAMP>`Ei'</SAMP> is a subset of some <SAMP>`Sj'</SAMP>.
+<P>
+<LI>
+<SAMP>`x'</SAMP> and <SAMP>`y'</SAMP> in <SAMP>`Ei'</SAMP> implies that <SAMP>`fj(x)'</SAMP> and
+<SAMP>`fj(y)'</SAMP> are in some one <SAMP>`Ek'</SAMP>, for all <SAMP>`fj'</SAMP>.
+</OL>
+<P>
+The blocks <SAMP>`Ei'</SAMP> are the equivalence classes determined by refining
+the original partition introduced by <CODE>AddTypeToBlock</CODE> on the basis of
+the component types.
+<P>
+The algorithm then selects an arbitrary member of each <SAMP>`Ei'</SAMP> as the
+representative type for that equivalence class,
+and alters the properties of the other members of that class so that they
+act as type identifiers pointing to the key for the representative type
+(see  <A HREF="type_8.html#SEC35">Dependences among types and type identifiers</A>).
+This means that the values of an arbitrary property of the key used to
+represent a type in subsequent computation may not be the value of that
+property set at a specific instance of a type denotation for that type
+(see  <A HREF="type_5.html#SEC22">Referring to a type</A>).
+<P>
+<H2><A NAME="SEC28" HREF="type_toc.html#SEC28">Functions as typed entities</A></H2>
+<P>
+Many languages have the concept that a function is a typed entity.
+Such a language provides a form of type denotation that can describe
+function types.
+Function definitions also implicitly describe function types, since there
+is usually no way of using a type identifier to specify the type of a
+function.
+Thus every function definition must also be considered a type denotation.
+<P>
+Function definitions are operator definitions, defining an operator that is
+used verify the type-correctness of the function invocation.
+Because the structural equivalence algorithm will select an arbitrary
+element to represent the equivalence class, every function type
+denotation must also define an invoker.
+<P>
+Modula-3 has constructs representing type denotations for
+function types (<CODE>ProcTy</CODE>) and function definitions (<CODE>Procedure</CODE>)
+that could be specified as follows (a function invocation is also given):
+<P>
+<A NAME="IDX156"></A>
+<A NAME="IDX157"></A>
+<A NAME="IDX158"></A>
+<A NAME="IDX159"></A>
+<A NAME="IDX160"></A>
+<A NAME="IDX161"></A>
+<A NAME="IDX162"></A>
+<A NAME="IDX163"></A>
+<A NAME="IDX164"></A>
+<PRE>
+SYMBOL Formals INHERITS OpndTypeListRoot             END;
+SYMBOL ProcTy  INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: ProcTy ::= 'PROCEDURE' '(' Formals ')' ':' Type COMPUTE
+  .Indic=NewKey();
+  ProcTy.GotType=
+    ORDER(
+      ResetInvoker(ProcTy.Type,.Indic),
+      AddTypeToBlock(
+        ProcTy.Type,
+        procClass,
+        ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList)));
+  ProcTy.GotOper=
+    ListOperator(.Indic,NoOprName,Formals.ParameterTypeList,Type.Type);
+END;
+
+<A NAME="IDX166"></A>
+<A NAME="IDX167"></A>
+<A NAME="IDX168"></A>
+<A NAME="IDX169"></A>
+<A NAME="IDX170"></A>
+<A NAME="IDX171"></A>
+<A NAME="IDX172"></A>
+<A NAME="IDX165"></A>SYMBOL Procedure INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: Procedure ::= '(' Formals ')' ':' Type '=' Block COMPUTE
+  Procedure.EqClass=procClass;
+  Procedure.ComponentTypes=
+    ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList);
+  .Indic=NewKey();
+  Procedure.GotType=
+    ORDER(
+      ResetInvoker(Procedure.Type,.Indic),
+      AddTypeToBlock(
+        Procedure.Type,
+        procClass,
+        ConsDefTableKeyList(Type.Type,Formals.ParameterTypeList)));
+  Procedure.GotOper=
+    ListOperator(.Indic,NoOprName,Formals.ParameterTypeList,Type.Type);
+END;
+
+<A NAME="IDX174"></A>
+<A NAME="IDX175"></A>
+<A NAME="IDX176"></A>
+<A NAME="IDX177"></A>
+<A NAME="IDX173"></A>SYMBOL Expr    INHERITS ExpressionSymbol END;
+SYMBOL Actuals INHERITS OpndExprListRoot END;
+
+RULE: Expr ::= Expr '(' Actuals ')' COMPUTE
+  ListContext(Expr[1],,Actuals);
+  Indication(GetInvoker(Expr[2].Type,NoKey));
+END;
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="type_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

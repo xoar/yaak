@@ -1,0 +1,24 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:48:34 waite Exp $
+# Makefile fuer pkg/ptg
+# Copyright 1994, Universitaet Gesamthochschule Paderborn
+
+CC	= @CC@
+
+DIR	= pkg/ptg/sample
+SRC	= PtgEx.fw linepos.c linepos.ptg linepos.ptg.phi
+COP	= Makefile.in
+AUX	= $(COP) Makefile
+COM	= 
+CMD	= $(COM)
+RCS	= 
+EXE	= 
+GEN	=
+GENINS	=
+SRCDIR	= 
+AUXDIR	= 
+GENDIR	= 
+
+@toolmk_h@
+
+
+

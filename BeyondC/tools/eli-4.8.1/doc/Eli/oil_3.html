@@ -1,0 +1,540 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from oil.tnf on 5 December 2013 -->
+
+<TITLE>Oil Reference Manual - OIL's Specification Language</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Oil Reference Manual</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC8" HREF="oil_toc.html#SEC8">OIL's Specification Language</A></H1>
+<A NAME="IDX9"></A>
+<A NAME="IDX10"></A>
+<P>
+An OIL specification is composed of a list of statements.  The statements
+describe relationships among identifiers which the library functions
+will interpret as describing an operator identification scheme.
+<P>
+With the specification language a compiler writer defines four sets of 
+mutually exclusive identifiers:
+<P>
+<UL>
+<LI>
+<CODE>Operators</CODE> represent both indications and denotations.  That is an
+operator can be used as an indication and also have a type signature.
+<A NAME="IDX11"></A>
+<P>
+<LI>
+<CODE>Types</CODE> represent primitive types.  Unlike the types which are
+instantiations of classes.
+<A NAME="IDX12"></A>
+<P>
+<LI>
+<CODE>Classes</CODE> represent parameterized sets of operators. A new version
+of each operator is constructed for each instantiation of the class.
+Likewise each instantiation of a class creates a new type which is not
+primitive. 
+<A NAME="IDX13"></A>
+<P>
+<LI>
+<CODE>Type Sets</CODE> represent a set of primitive types which can be used to
+construct multiple instances of an operator; one for each element in the
+type set. 
+<A NAME="IDX14"></A>
+</UL>
+<P>
+The rest of this chapter of the manual describes the syntax
+of the specification language by covering the three main
+lexical and syntactic constructs:
+<CODE>Identifiers</CODE>, <CODE>Statements</CODE> and <CODE>Comments</CODE>.
+<P>
+<A NAME="IDX15"></A>
+<H2><A NAME="SEC9" HREF="oil_toc.html#SEC9">Identifiers</A></H2>
+<P>
+An <CODE>identifier</CODE> in an OIL specification is a sequence of characters which:
+<P>
+<UL>
+<LI>
+begins with an alphabetic character: A-Z, a-z
+<P>
+<LI>
+continues with an alphanumeric or underscore character: A-Z, a-z, 0-9, _.
+</UL>
+<P>
+Examples:
+<PRE>
+iAdd, Fmul2
+</PRE>
+<P>
+Identifiers are defined both explicitly and implicitly.  OPER and
+COERCION statements explicitly define operators.  CLASS statements
+explicitly define classes. SET statements explicitly define sets.
+Types are all implicitly defined; if an identifier appears only in a
+function signature or as a type element in a type set expression then it
+is a type.  If the indication in an INDICATION statement has no defining
+OPER statement it is implicitly defined as an operator.
+<P>
+An identifier can only be in one of the sets:
+<CODE>operator</CODE>, <CODE>type</CODE>, <CODE>class</CODE> or <CODE>type set</CODE>.
+<P>
+Constraints:
+An identifier can denote a <CODE>type</CODE> or an <CODE>operator</CODE> but not both.
+<P>
+An <CODE>identifier list</CODE> is a sequence of identifiers separated by commas.
+<P>
+Since OIL produces names to be used in your attribute grammar, you must
+not use a reserved word of your attribute grammar as an identifier in an
+OIL specification.
+<P>
+Examples:
+<PRE>
+iAdd,iMul  or  Fmul, Fadd, Fdiv
+</PRE>
+<P>
+<A NAME="IDX16"></A>
+<H2><A NAME="SEC10" HREF="oil_toc.html#SEC10">Comments</A></H2>
+<P>
+C-style comments, beginning with <CODE>/*</CODE> and ending with <CODE>*/</CODE>, are
+allowed in an OIL specification.
+A comment may appear anywhere that white space might be appropriate.
+<P>
+<A NAME="IDX17"></A>
+<H2><A NAME="SEC11" HREF="oil_toc.html#SEC11">Statement types</A></H2>
+<P>
+There are five types of statements in OIL:
+<P>
+<UL>
+<LI>
+<CODE>Operator definition</CODE> which defines the functional type signature of
+one or more operator denotations.
+<A NAME="IDX18"></A>
+<P>
+<LI>
+<CODE>Coercion operator definition</CODE> which defines a coercion operator and
+the ability for the source type of the coercion operator 
+to be acceptable in place of the destination type of the 
+coercion operator when performing operator identification.
+<A NAME="IDX19"></A>
+<P>
+<LI>
+<CODE>Operator identification</CODE> which defines an operator indication and
+a set of operator denotations which the indication may identify.
+<A NAME="IDX20"></A>
+<P>
+<LI>
+<CODE>Class definition</CODE> which defines a set of operators to be
+constructed when a parameterized type is instantiated.
+<A NAME="IDX21"></A>
+<P>
+<LI>
+<CODE>Type set definition</CODE> which defines an identifier to represent a
+set of types and allows explicit multiple operator definitions when used
+in an operator definition.
+<A NAME="IDX22"></A>
+<P>
+</UL>
+<P>
+<H3><A NAME="SEC12" HREF="oil_toc.html#SEC12">Operator definition</A></H3>
+<A NAME="IDX23"></A>
+<P>
+The basic form of an operator definition is:
+<PRE>
+`OPER' &#60;Op-name&#62; `(' &#60;arg-list&#62; `)' `:' &#60;result-id&#62; `;'
+</PRE>
+where: 
+<PRE>
+<CODE>&#60;Op-name&#62;</CODE> is an operator identifier.
+<CODE>&#60;arg-list&#62;</CODE> is a list of identifiers separated with commas which
+describes the argument signature of the operator.
+<CODE>&#60;result-id&#62;</CODE> is an identifier which determines the result type of
+the operator.
+</PRE>
+<P>
+The <CODE>&#60;result-id&#62;</CODE> and each identifier in the <CODE>&#60;arg-list&#62;</CODE> may
+be either a primitive type name, a SET name or if in a CLASS definition
+then they may refer to the CLASS name being defined or one of the
+parameters to the CLASS definition. see  <A HREF="oil_3.html#SEC13">Function Signatures</A>
+<P>
+Constraints: 
+Any given <CODE>&#60;Op-name&#62;</CODE> can appear only once in all definition statements.
+<P>
+An example is:
+<PRE>
+OPER iAdd( int_t, int_t ): int_t;
+</PRE>
+<P>
+In the example operator definition statement above, `iAdd' is
+defined to be an operator and `int_t' to be an operand type.
+<A NAME="IDX24"></A>
+<P>
+The multiple form of an operator definition is: 
+<PRE>
+`OPER' &#60;Op-name-list&#62; `(' &#60;arg-list&#62; `)' `:' &#60;result-id&#62; `;'
+</PRE>
+where: 
+<PRE>
+<CODE>&#60;Op-name-list&#62;</CODE> is a list of operators separated by commas.
+<CODE>&#60;arg-list&#62;</CODE> and <CODE>&#60;result-id&#62;</CODE> are as before.
+</PRE>
+<P>
+All the operators appearing in <CODE>&#60;Op-name-list&#62;</CODE> are given the same
+functional signature.
+<A NAME="IDX25"></A>
+<P>
+Constraints:
+Each operator in <CODE>&#60;Op-name-list&#62;</CODE> must appear only once
+in any operator definition.
+<P>
+An example is:
+<PRE>
+OPER rAdd, rSub, rMul, rDiv ( real_t, real_t ): real_t;
+</PRE>
+<P>
+<H4><A NAME="SEC13" HREF="oil_toc.html#SEC13">Function Signatures</A></H4>
+<P>
+How many and what kind of operator is being defined can vary a great
+deal depending on the definition of the identifiers which appear in the
+function signature.  There are essentially three different kinds of
+function signatures:
+<UL>
+<LI>
+Simple signature which only references primitive types.
+<LI>
+Class signature which references a class  or parameter name, though it
+may also refer to primitive types. 
+<LI>
+Set signature which references a set name in its signature, though it may
+also refer to primitive types.
+</UL>
+<P>
+A simple signature only defines a single operator.
+<P>
+A class signature defines a pattern of a single operator to be created
+when the class is instantiated.  The actual signature constructed has
+the class name replaced by the created type and the parameter names are
+replaced with the corresponding positional argument which is used in
+instantiating the class.
+<P>
+A set signature defines one operator for each element in the value of
+the referenced set.  Consider the example:
+<PRE>
+SET s=[a,b];
+sop(s):c;
+</PRE>
+<P>
+There are two operators with the name <CODE>sop</CODE> defined, with the
+signatures: 
+<PRE>
+sop(a):c;
+sop(b):c;
+</PRE>
+<P>
+If a set name is referenced more than once in the
+signature the same value appears in the corresponding position in the
+signature.   For example consider the specification:
+<PRE>
+SET s=[a,b];
+SET r=[c,d];
+OPER sop(s,r):s;
+</PRE>
+<P>
+Four operators with the name <CODE>sop</CODE> are created. With the four
+signatures:
+<PRE>
+sop(a,c):a;
+sop(b,c):b;
+sop(a,d):a;
+sop(b,d):b;
+</PRE>
+<P>
+The signature is duplicated once for each value in a unique set name.
+The set name is replaced with each value in turn reguardless of how many
+times the set name is referenced in the signature.
+<P>
+Constraints:
+<P>
+  If an identifier in a function signature is a CLASS name or a
+parameter to a CLASS then the operator definition must be in the body of
+the CLASS definition.
+<P>
+  No reference to a SET name may be used in a CLASS operator definition.
+<A NAME="IDX26"></A>
+<A NAME="IDX27"></A>
+<H3><A NAME="SEC14" HREF="oil_toc.html#SEC14">Coercion operator definition</A></H3>
+<P>
+The basic form of a coercion operator definition is: 
+<PRE>
+`COERCION' &#60;Cop-name&#62; `(' &#60;source-id&#62; `)' `:' &#60;result-id&#62; `;'
+</PRE>
+where: 
+<PRE>
+<CODE>&#60;Cop-name&#62;</CODE> is a coercion operator identifier.
+<CODE>&#60;source-id&#62;</CODE> is an identifier which determines the source type of
+the coercion.
+<CODE>&#60;result-id&#62;</CODE> is an identifier which determines the result type of
+the coercion.
+</PRE>
+<P>
+The <CODE>&#60;source-id&#62;</CODE> and <CODE>&#60;result-id&#62;</CODE> may be either a primitive
+type name, a SET name or if in a CLASS definition then they may refer to
+the CLASS name being defined or one of the parameters to the CLASS
+definition. 
+<P>
+An example is:
+<PRE>
+COERCION cFloat( int_t ): real_t;
+</PRE>
+<P>
+In the example coercion operator definition statement above, `cFloat'
+is defined to be an operator and, `int_t' and `real_t'
+are defined to be a operand types.
+<P>
+Constraints: 
+<CODE>&#60;Cop-name&#62;</CODE> can appear in only one definition statement.
+<P>
+<A NAME="IDX28"></A>
+<H3><A NAME="SEC15" HREF="oil_toc.html#SEC15">Operator identification</A></H3>
+<P>
+The basic form of an operator identification is: 
+<PRE>
+`INDICATION' &#60;Op-name&#62; `:' &#60;Op-name-list&#62; `;'
+</PRE>
+where: 
+<PRE>
+<CODE>&#60;Op-name&#62;</CODE> is an operator identifier.
+<CODE>&#60;Op-name-list&#62;</CODE> is list of operator denotations separated by commas.
+</PRE>
+<P>
+The order of appearance from left to right of the operators in
+the <CODE>&#60;Op-name-list&#62;</CODE> determines a search order for the identification process.
+When an operator identification operation is performed on <CODE>&#60;Op-name&#62;</CODE> then
+each operator in <CODE>&#60;Op-name-list&#62;</CODE> is tried from left to right.
+<P>
+Constraints: 
+<UL>
+<LI>
+All the operator denotations referenced 
+must have signatures of the same length.  (i.e. If the first 
+operator denotation has two arguments all the rest of the operators
+referenced must also have two arguments.)
+<A NAME="IDX29"></A>
+<P>
+<LI>
+All operator denotations must have appeared in an operator
+definition statement. 
+<P>
+<LI>
+<CODE>&#60;Op-name&#62;</CODE> must not appear in any other operator identification
+statements. All potential operators to be identified by
+<CODE>&#60;Op-name&#62;</CODE> must appear in one operator identification statement.
+</UL>
+<P>
+An example is:
+<PRE>
+INDICATION Plus: iAdd, rAdd, sUnion;
+</PRE>
+<P>
+In the example operator identification statement above, `Plus' is
+defined to be an operator and,  `iAdd', `rAdd' and `sUnion' are
+defined to be operators.
+<P>
+The example defines that `iAdd' will be the first operator tested for
+identification of `Plus' and `sUnion' would 
+be the last operator tested for identification.
+<P>
+<A NAME="IDX30"></A>
+<H3><A NAME="SEC16" HREF="oil_toc.html#SEC16">Class definition</A></H3>
+<P>
+The form of a class definition is:
+<PRE>
+`CLASS' &#60;Class-name&#62;`(' &#60;Param-name-list&#62; `)' `BEGIN' &#60;simple-stmts&#62; `END' `;'
+</PRE>
+where:
+<PRE>
+<CODE>&#60;Class-name&#62;</CODE> is a class identifier.
+<CODE>&#60;Param-name-list&#62;</CODE> is a list of parameter identifiers separated by
+commas.
+<CODE>&#60;simple-stmts&#62;</CODE> is a set of operator, coercion and indication statements
+that will be created by an instantiation of this class.
+</PRE>
+<P>
+The declarations in the <CODE>&#60;simple-stmts&#62;</CODE> do not define operators
+and coercions but patterns for the creation of such operators.  When a
+class is instantiated then the patterns for that class are used to
+define the operators and coercions from the patterns.
+<P>
+The type identifiers referenced in the declarations in
+<CODE>&#60;simple-stmts&#62;</CODE> may refer to the class name(<CODE>&#60;Class-name&#62;</CODE>),
+a specific primitive type or a parameter name(from
+<CODE>&#60;Param-name-list&#62;</CODE>.)  When a class is instantiated a type
+corresponding to each identifier is used to create an operator of
+coercion from the patterns in <CODE>&#60;simple-stmts&#62;</CODE>.
+<P>
+<A NAME="IDX31"></A>
+<H3><A NAME="SEC17" HREF="oil_toc.html#SEC17">Type set definition</A></H3>
+<P>
+The form of set definition is:
+<PRE>
+`SET' &#60;Set-name&#62;`=' &#60;set-expression&#62; `;'
+</PRE>
+where:
+<PRE>
+<CODE>&#60;Set-name&#62;</CODE> is a set identifier.
+<CODE>&#60;set-expression&#62;</CODE> is a expression which defines the types which
+are members of the set. 
+</PRE>
+<P>
+A set expression may be composed of any of the following
+constructs(where s1,s2... are set expressions):
+<UL>
+<LI>
+<CODE>[ &#60;Type-name-list&#62; ]</CODE> where <CODE>&#60;Type-name-list&#62;</CODE> is a list of
+one or more primitive type names. 
+<LI>
+<CODE>&#60;Set-name&#62;</CODE> which identifies a previously defined type set and
+yields its value.
+<LI>
+<CODE>s1 + s2</CODE> which yields the union of the two type sets.
+<LI>
+<CODE>s1 * s2</CODE> which yields the intersection of the two type sets.
+<LI>
+<CODE>s1 - s2</CODE> which yields the difference of the two type sets.
+</UL>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="oil_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

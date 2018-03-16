@@ -1,0 +1,6 @@
+/* $Id: clptest.specs,v 1.4 1994/08/25 18:13:56 waite Exp $ */
+
+clptest.lido
+clptest.c
+clptest.clp
+clptest.head

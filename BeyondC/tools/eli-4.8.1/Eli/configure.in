@@ -1,0 +1,378 @@
+# $Id: configure.in,v 2.58 2013/11/11 03:25:13 profw Exp $
+
+AC_INIT(Eli,[4.7.1],[eli-project-users@lists.sourceforge.net])
+AC_CONFIG_SRCDIR(pkg/PKGLST)
+AC_CONFIG_HEADERS(config.h)
+
+dnl ############################################################################
+dnl -- Specify where to install Eli
+
+AC_PREFIX_DEFAULT($HOME)
+
+dnl ############################################################################
+dnl -- Determine the name of the system directory
+
+AC_SUBST(ELISYS)
+ELISYS=`pwd`
+
+dnl ############################################################################
+dnl -- Check for a C Compiler and pre-processor
+
+AC_PROG_CC
+AC_ISC_POSIX
+AC_PROG_CPP
+
+CC_DEBUG=-g
+AC_SUBST(CC_DEBUG)
+
+dnl -- This sets some variables that are needed in later checks.
+AC_LANG_C
+
+dnl ############################################################################
+dnl -- Check for tools
+
+AC_PROG_AWK
+AC_PROG_RANLIB
+
+dnl ############################################################################
+dnl -- Check for the wc program
+
+ELI_PROG_WC
+
+dnl ############################################################################
+dnl -- Check whether hard links are usable
+
+ELI_CHECK_LN
+
+dnl ############################################################################
+dnl -- Check whether symbolic links are available
+
+ELI_CHECK_SYMLINK
+if test "$eli_no_symlink" = "yes"; then
+        AC_MSG_ERROR([ln -s does not work
+
+The symbolic links supported by your system are not compatible with the
+requirements of Eli. Please consult 'config.log' for more information 
+and/or send electronic mail to eli-project-users@lists.sourceforge.net
+for assistance with your system.
+])
+fi
+
+dnl ############################################################################
+dnl -- Check whether strerr() or sys_errlist() are available
+
+ELI_ERR_CHECK
+if test "$eli_no_errlib" = "yes"; then
+        AC_MSG_ERROR([strerr() or sys_errlist[] not available.
+
+Please correct your system and/or send mail to
+eli-project-users@lists.sourceforge.net for assistance.
+])
+fi      
+
+dnl ############################################################################
+dnl -- Find X Libraries, tools, and header files.
+dnl    
+
+AC_PATH_X
+AC_PATH_XTRA
+
+AC_PATH_PROG(xtermexe, xterm)
+
+gorto=$srcdir/pkg/liga/gorto/mknogorto
+AC_SUBST_FILE(gorto)
+gortosym=/dev/null
+AC_SUBST_FILE(gortosym)
+ordergorto=/dev/null
+AC_SUBST_FILE(ordergorto)
+ordergortosym=$srcdir/pkg/liga/middle/order/mknogortosym
+AC_SUBST_FILE(ordergortosym)
+
+tclinfo=
+AC_SUBST(tclinfo)
+
+monitor=
+AC_SUBST(monitor)
+MONITOR=0
+AC_SUBST(MONITOR)
+SHMONITOR=false
+AC_SUBST(SHMONITOR)
+DMONITOR=
+AC_SUBST(DMONITOR)
+DMONITOR_GEN=
+AC_SUBST(DMONITOR_GEN)
+tclIndex=
+AC_SUBST(tclIndex)
+noosa_exe=
+AC_SUBST(noosa_exe)
+CFLAGS_TCL=''
+AC_SUBST(CFLAGS_TCL)
+LIBS_TCL=''
+AC_SUBST(LIBS_TCL)
+
+xinfotool=
+AC_SUBST(xinfotool)
+HAVE_XVIEW=''
+AC_SUBST(HAVE_XVIEW)
+HAVE_XAW=''
+AC_SUBST(HAVE_XAW)
+
+if test "x$no_x" != "xyes"; then
+   HAVE_X=yes
+
+dnl ----------------------------------------------------------------------------
+dnl -- Test for Athena Widgets
+
+   ELI_LIB_XAW
+   if test "$eli_no_xaw" = "yes"; then
+      AC_MSG_WARN([Tool :gorto will not be usable, see config.log])
+      ELI_MSG_LOG([
+You will not be able to use the graphical order tool.  If you need it,
+please install Athena Widgets in your system first.  If you do so,
+you can use the option --with-Xaw to configure Eli.
+])
+   else
+      gorto=$srcdir/pkg/liga/gorto/mkgorto
+      gortosym=$srcdir/pkg/liga/gorto/mkgortosym
+      ordergorto=$srcdir/pkg/liga/middle/order/mkgorto
+      ordergortosym=$srcdir/pkg/liga/middle/order/mkgortosym
+   fi
+fi
+
+dnl ----------------------------------------------------------------------------
+dnl -- Test for Tcl/Tk
+
+if test "x$with-tcltk" != 'xno'
+then ELI_PATH_TCLTK(8.0:8.0 8.1:8.1 8.2:8.2 8.3:8.3 8.4:8.4 8.5:8.5 8.6:8.6)
+else eli_no_tcltk='yes'
+fi
+
+if test "x$eli_no_tcltk" = "xyes"; then
+   AC_MSG_WARN([Tool :mon will not be usable, see config.log])
+   ELI_MSG_LOG([
+No TCL/TK found. You will not be able to run the monitoring-tool of Eli.
+If you wish to install Tcl/Tk or correct the Tcl/Tk configuration, do so and 
+rerun configure with the option --with-tcltk and specifying the pathname.
+Please look also in 'config.log' for additional hints.
+])
+else
+   tclinfo='tclinfo.exe'
+   monitor='$(monitor)'
+   MONITOR=1
+   SHMONITOR=true
+   DMONITOR='-DMONITOR'
+   DMONITOR_GEN='-DMONITOR_GEN'
+   tclIndex='tclIndex'
+   noosa_exe='noosa.exe'
+fi
+
+dnl ----------------------------------------------------------------------------
+dnl -- If no Tcl/Tk, test for xview
+
+if test "x$no_x" != "xyes"; then
+   if test "x$ac_no_tcltk" != "x"; then
+
+      ELI_PATH_XVIEW
+      if test "$eli_no_xview" = "yes"; then
+         AC_MSG_WARN([Falling back to curses-based information-browser])
+         ELI_MSG_LOG([
+Neither TCL/TK nor XView are available. You will not be able to run the
+X-Windows-Version of the Information-System that comes with Eli. 
+Eli will fall back to the curses-based information-browser instead.
+])
+      else
+         xinfotool=xinfotool.exe
+      fi
+   fi
+fi
+
+dnl ############################################################################
+dnl -- Find the right curses-library
+
+# Find Curses-Library. First check ncurses, since it is free
+# of rights and the normal 'curses'-library does not always work
+# (e.g. on Linux)
+
+   ELI_PATH_CURSES	
+   if test "x$eli_no_curses" = "xyes"; then
+      AC_MSG_ERROR([Eli needs curses.])
+      ELI_MSG_LOG([
+No curses library found. You will not be able to run Eli.
+If you wish to install curses, ncurses or termcap, do so and 
+rerun configure with the option --with-curses and specifying the pathname.
+])
+   fi
+
+dnl ############################################################################
+dnl -- Check for libraries
+
+AC_CHECK_LIB(mld, ldopen)
+
+dnl ############################################################################
+dnl -- Check for header files
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(a.out.h)
+
+dnl ############################################################################
+dnl -- Check for functions
+
+AC_CHECK_FUNCS(memcpy)
+
+dnl ############################################################################
+dnl -- Check for typedefs, structures, and compiler characteristics
+
+AC_C_CONST
+
+dnl ############################################################################
+dnl -- Generate output files
+
+AC_SUBST_FILE(toolmk_h)
+toolmk_h=$srcdir/include/toolmk.h
+
+AC_SUBST_FILE(Adtmk_h)
+Adtmk_h=$srcdir/include/Adtmk.h
+
+AC_SUBST_FILE(Inputmk_h)
+Inputmk_h=$srcdir/include/Inputmk.h
+
+AC_SUBST_FILE(Scanmk_h)
+Scanmk_h=$srcdir/include/Scanmk.h
+
+AC_SUBST_FILE(pdlmk_h)
+pdlmk_h=$srcdir/include/pdlmk.h
+
+AC_OUTPUT([
+pkg/Adt/Makefile
+pkg/Name/Examples/Makefile
+pkg/Name/Makefile
+pkg/Makefile
+pkg/Input/Makefile
+pkg/Output/Makefile
+pkg/Prop/Makefile
+pkg/Scan/Makefile
+pkg/Tech/Makefile
+pkg/Type/Examples/Makefile
+pkg/Type/Makefile
+pkg/Unparser/Makefile
+pkg/adtinit/src/Makefile
+pkg/adtinit/Makefile
+pkg/burg/Makefile
+pkg/cc/Makefile
+pkg/cc/c.o.sh
+pkg/cc/cc.dg
+pkg/clp/lib/Makefile
+pkg/clp/Makefile
+pkg/cola/Frames/Makefile
+pkg/cola/Info/Makefile
+pkg/cola/idl/idllib/Makefile
+pkg/cola/idl/Makefile
+pkg/cola/lalr/back/both/Makefile
+pkg/cola/lalr/back/table/Makefile
+pkg/cola/lalr/back/Makefile
+pkg/cola/lalr/front/lalr/Makefile
+pkg/cola/lalr/front/Makefile
+pkg/cola/lalr/helptools/Makefile
+pkg/cola/lalr/Makefile
+pkg/cola/lib/Makefile
+pkg/cola/option/Makefile
+pkg/cola/trafos/fmt/Makefile
+pkg/cola/trafos/pgs2cmr/Makefile
+pkg/cola/trafos/Makefile
+pkg/cola/Makefile
+pkg/cola/colaBe.sh
+pkg/cpp/Makefile
+pkg/cxx/Makefile
+pkg/cxx/cxx.o.sh
+pkg/dapto/Makefile
+pkg/dapto/dapOut.sh
+pkg/dapto/init.sh
+pkg/dbx/Makefile
+pkg/delit/Makefile
+pkg/delit/lit_gen.sh
+pkg/eli/src/Makefile
+pkg/eli/Makefile
+pkg/eli/mkfile.sh
+pkg/fw/src/Makefile
+pkg/fw/Makefile
+pkg/gla/backend/Makefile
+pkg/gla/gla_be.sh
+pkg/gla/nflex/Makefile
+pkg/gla/Makefile
+pkg/idem/specs/Makefile
+pkg/idem/Makefile
+pkg/idl/Makefile
+pkg/info/html/Makefile
+pkg/info/hypermsg/Makefile
+pkg/info/texinfo/Makefile
+pkg/info/tnf/Makefile
+pkg/info/Makefile
+pkg/info/info.sh
+pkg/info/doc.sh
+pkg/kwd/Makefile
+pkg/lib/Makefile
+pkg/liga/Frames/Makefile
+pkg/liga/Info/Makefile
+pkg/liga/backend/Makefile
+pkg/liga/frontend/Makefile
+pkg/liga/gorto/Makefile
+pkg/liga/idl/idllib/Makefile
+pkg/liga/idl/Makefile
+pkg/liga/ligaErr/Makefile
+pkg/liga/ligaProd/Makefile
+pkg/liga/ligascel/Makefile
+pkg/liga/middle/expand/Makefile
+pkg/liga/middle/optim/Makefile
+pkg/liga/middle/order/Makefile
+pkg/liga/middle/Makefile
+pkg/liga/option/Makefile
+pkg/liga/show/Makefile
+pkg/liga/Makefile
+pkg/liga/ligaBe.sh
+pkg/lint/Makefile
+pkg/maptool/Makefile
+pkg/noosa/Makefile
+pkg/noosa/mon.sh
+pkg/noosa/mongdb.sh
+pkg/odi/Makefile
+pkg/oil/specs/Makefile
+pkg/oil/Makefile
+pkg/oldodin/Makefile
+pkg/parser/Makefile
+pkg/parser/parserOut.sh
+pkg/pdl/Makefile
+pkg/pgs/src/Makefile
+pkg/pgs/Makefile
+pkg/pgs/pgsGen.sh
+pkg/phi/Makefile
+pkg/phi/phiOut.sh
+pkg/ptg/sample/Makefile
+pkg/ptg/Makefile
+pkg/ptg/ptg_out.sh
+pkg/skeleton/src/Makefile
+pkg/skeleton/Makefile
+pkg/symcode/Makefile
+pkg/tp/specs/Makefile
+pkg/tp/Makefile
+pkg/version/Makefile
+Makefile
+],[
+chmod +x pkg/cc/c.o.sh
+chmod +x pkg/cola/colaBe.sh
+chmod +x pkg/dapto/dapOut.sh
+chmod +x pkg/dapto/init.sh
+chmod +x pkg/delit/lit_gen.sh
+chmod +x pkg/eli/exe.sh
+chmod +x pkg/eli/mkfile.sh
+chmod +x pkg/gla/gla_be.sh
+chmod +x pkg/info/info.sh
+chmod +x pkg/info/doc.sh
+chmod +x pkg/liga/ligaBe.sh
+chmod +x pkg/noosa/mon.sh
+chmod +x pkg/noosa/mongdb.sh
+chmod +x pkg/oil/oil_out.sh
+chmod +x pkg/parser/parserOut.sh
+chmod +x pkg/pgs/pgsGen.sh
+chmod +x pkg/phi/phiOut.sh
+chmod +x pkg/ptg/ptg_out.sh
+])

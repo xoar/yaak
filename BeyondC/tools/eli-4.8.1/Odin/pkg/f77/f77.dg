@@ -1,0 +1,30 @@
+# Source Types
+
+*.f => :f;
+
+
+# Input Object Types
+
+:f 'Fortran77 source code'? => :o_src;
+
+
+# Parameter Types
+
++f77_home 'directory containing the C compiler'? => :first;
+
++f77 'name of the C compiler'? => :first;
+
++f77_flags 'flags for f77'? => :cat;
+
++debug 'debug switch'? => :first;
+
++prof 'profiling flag'? => :first;
+
++array_bds 'array bound checking flag'? => :first;
+
+
+# Tools
+
+EXEC (f_obj.sh) (:f) (+debug) (+prof) (+f77_home) (+f77) (+f77_flags)
+   => (:o);
+

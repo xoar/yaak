@@ -1,0 +1,108 @@
+#!/bin/sh
+# $Id: cxx.o.sh.in,v 1.1 2010/05/10 17:51:39 profw Exp $
+# Copyright (c) 1990, The Regents of the University of Colorado
+
+# EXEC (cxx.o.sh) (:cxx_srcs) (:cxx_srcs :list :dir_of :vir_dir)
+#   (errfilter.sed)
+#   (+debug) (+define) (+monitor) (+cxx) (+cxx_flags)
+#   NEEDS (:c_srcs :list)
+#   => (:cxx.o);
+
+ODIN_RUNDIR=`pwd`
+ODIN_c_srcs=$1;shift; ODIN_c_src_dir=$1;shift;
+ODIN_errfilter=$1;shift;
+ODIN_debug=$1;shift; ODIN_define=$1;shift;
+ODIN_monitor=$1;shift; ODIN_cc=$1;shift; ODIN_flags=$1;shift;
+touch cxx.o
+
+SED=$ODINCACHE/PKGS/skeleton/sed.exe
+
+cd "$ODIN_c_src_dir"
+
+if   [ -f *.cxx ] ; then src='*.cxx'
+elif [ -f *.C ] ;   then src='*.C'
+elif [ -f *.cc ] ;  then src='*.cc'
+elif [ -f *.c++ ] ; then src='*.c++'
+fi
+
+flags=""
+if test "$ODIN_debug" != ""; then flags="$flags $ODIN_CC_DEBUGF"; fi
+if test "$ODIN_prof" != ""; then flags="$flags -pg"; fi
+if test "$ODIN_define" != ""
+then for def in `cat "$ODIN_define"`; do flags="$flags -D$def"; done
+fi
+
+if @SHMONITOR@
+then if test '' != "$ODIN_monitor"
+     then flags="$flags -DMONITOR -DRIGHTCOORD"
+     fi
+fi
+
+if test "$ODIN_cc" != ""; then ELI_CC=$ODIN_cc; fi
+CCPROG=${ELI_CC-$ODIN_CC}
+CCPROG=g++
+
+if test "$ODIN_flags" != ""; then flags="$flags `cat $ODIN_flags`"; fi
+
+${CCPROG} -c $flags $src >ERROR 2>&1
+compstat=$?
+if test -f *.o
+then mv *.o $ODIN_RUNDIR/cxx.o
+fi
+
+if test -s ERROR
+then
+	$SED -f $ODIN_errfilter ERROR > ERROR1
+
+	cfile=`echo *.cc | $SED -e 's/\./\\\./g'`
+
+	if test $compstat -eq 0 -a -s ERROR1
+	then
+		cat ERROR1 >> WARN1
+		rm -f ERROR1
+	fi
+
+	if test -s ERROR1
+	then
+		grep "^$cfile" ERROR1 > TMP1
+		grep -v "^$cfile" ERROR1 | \
+			$SED -e "s/\([^ ]*\) \([^ ]*\) \([^ ]*\) \(.*\)/\
+\1 \2 \3 ($cfile) \4/" \
+			> TMP2
+		echo '(|'"$ODIN_c_srcs"'|err_map|' > $ODIN_RUNDIR/ERRORS
+		cat TMP1 >> $ODIN_RUNDIR/ERRORS
+		cat TMP2 >> $ODIN_RUNDIR/ERRORS
+		echo '|)' >> $ODIN_RUNDIR/ERRORS
+		rm -f TMP* ERROR1
+	else
+		if test ! -s $ODIN_RUNDIR/cxx.o
+		then
+			cat ERROR >> $ODIN_RUNDIR/ERRORS
+		fi
+	fi
+
+	if test -s WARN1
+	then
+		grep "^$cfile" WARN1 > TMP1
+		grep -v "^$cfile" WARN1 | \
+			$SED -e "s/\([^ ]*\) \([^ ]*\) \([^ ]*\) \(.*\)/\
+\1 \2 \3 ($cfile) \4/" \
+			> TMP2
+		echo '(|'"$ODIN_c_srcs"'|err_map|' > $ODIN_RUNDIR/WARNINGS
+		cat TMP1 >> $ODIN_RUNDIR/WARNINGS
+		cat TMP2 >> $ODIN_RUNDIR/WARNINGS
+		echo '|)' >> $ODIN_RUNDIR/WARNINGS
+		rm -f TMP* WARN1
+	fi
+else :
+fi
+
+rm -f ERROR
+exit 0
+
+echo $ODIN_c \
+  | sed -e
+    's/\.cxx$/.cc/\
+     s/\.C$/.cc/\
+     s/\.c\+\+$/.cc/'\
+  > c_srcs

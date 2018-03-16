@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>Direct Attribute Dependence Cycles</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Direct Attribute Dependence Cycles</h1>
+<hr>
+<P>
+
+<p>
+<b>Typical Error Situations</b>
+
+<p>
+An attribute directly depends on itself.
+
+<pre>
+   ATTR a : sometype;
+   
+   RULE: root ::= X
+   COMPUTE X.a = ADD(1, X.a);
+   END;
+   
+   RULE: X ::= '.'
+   END;
+</pre>
+
+<p>
+results in:
+
+<pre>
+   ERROR: DIRECT cyclic dependencies; 
+          see OrdInfo, or use gorto
+   ERROR: evaluation order for X.a not found
+</pre>
+
+<!--NewPage-->
+<p>
+To locate the error write a <tt>.ctl</tt> file containing the line
+
+<p>
+<pre>
+   ORDER: GRAPH DIRECT_RULE;
+</pre>
+
+<p>
+add it to your .specs or .fw file and make a request for
+
+<pre>
+   foo.specs:OrdInfo>
+</pre>
+
+<p>
+which results in 
+
+<p>
+<pre>
+    GRAPHS FOR DIRECT DEPENDENCIES
+    ==============================
+
+    DIRECT GRAPH FOR RULE rule_1 ROW 3; COL 5
+    root ::=   X
+    ATNO  CLASS ATNAME DEPENDS ON
+    0     INH   X.a    CYCLIC [0]
+    END RULE
+</pre>
+
+<DIV class=NOPRINT>
+Here is another <a href="ordinfo.html">OrdInfo Output</a>
+</DIV>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

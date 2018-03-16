@@ -1,0 +1,289 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: AlgInh.fw,v 5.6 2003/01/10 15:41:36 uwe Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module implements inheritance of scope properties.
+
+Using this module requires that the modules for the basic 
+consistent renaming task, |NAME|AlgScope, and for scope properties,
+|NAME|ScopeProp are also used.
+All three modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+This module provides the following computational roles:
+
+|NAME|InheritScope:
+is a role that is used to establish
+an inheritance relation:
+|NAME|InheritScope.|NAME|InnerScope is stated to inherit from 
+|NAME|InheritScope.|NAME|OuterScope. 
+|NAME|InnerScope has to be set by a user computation.
+|NAME|OuterScope is computed as the |NAME|Scope property of
+|NAME|InheritScope.|NAME|ScopeKey.
+
+|NAME|InheritScope.|NAME|ScopeKey has to be computed by
+a user computation. Usually an identifier key or a type key
+of this context is used for that purpose.
+
+The role provides a boolean attribute
+|NAME|InheritScope.|NAME|InheritOk that indicates whether the
+inheritance relation has been set sucessfully, in particular that
+it does not cause a cycle in the inheritance graph.
+
+The attribute |NAME|InheritOk is to be used to set 
+|NAME|InhRange.|NAME|GotInh of the range which inherits scopes, 
+in order to establish
+dependences on the scopes that are potential sources of inheritance.
+
+|NAME|ChkInherit
+can be used to issue error messages in cases that the 
+|NAME|OuterScope is not set correctly or the inheritance
+relation could not be established, e.g. because it would be
+cyclic.
+
+~$~<|NAME|InheritScope~>==~{
+CLASS SYMBOL |NAME|InheritScope:
+	|NAME|InnerScope:	Environment,	/* required */
+	|NAME|OuterScope:	Environment,	/* default */
+	|NAME|ScopeKey:		DefTableKey,	/* required */
+	|NAME|InheritOk:	int	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|InheritScope COMPUTE
+  SYNT.|NAME|OuterScope = Get|NAME|Scope (THIS.|NAME|ScopeKey, NoEnv)
+    <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleScopePropNest;
+
+  SYNT.|NAME|InheritOk =
+    IF (EQ (SYNT.|NAME|OuterScope, NoEnv), 0,
+	InheritClass (THIS.|NAME|InnerScope,
+		      THIS.|NAME|OuterScope));
+END;
+
+CLASS SYMBOL |NAME|ChkInherit:
+	SrcErr:		int,	/* provided */
+	SrcMsg:		VOID,	/* provided */
+	ScpErr:		int,	/* provided */
+	ScpMsg:		VOID;	/* provided */
+
+CLASS SYMBOL |NAME|ChkInherit COMPUTE
+  SYNT.SrcErr = EQ (SYNT.|NAME|OuterScope, NoEnv);
+  SYNT.SrcMsg = IF (THIS.SrcErr,
+      message (ERROR, "Source of inheritance is missing", 0, COORDREF));
+
+  SYNT.ScpErr = AND (NOT (THIS.|NAME|InheritOk),
+           NE (THIS.|NAME|OuterScope, NoEnv));
+  SYNT.ScpMsg = IF (THIS.ScpErr,
+      message (ERROR, "Wrong scope inherited", 0, COORDREF));
+END;
+~}
+
+|NAME|InhRange:
+is to be used to characterize a range, the scope
+of which is extended by some inherited scopes.
+|NAME|InhRange.|NAME|GotInh indicates that the inheritances
+are established; it has to be set by a user computation.
+
+|NAME|ExportInhRange:
+is both an |NAME|ExportRange and |NAME|InhRange.
+It is essential to use this role, because grammar nodes
+having both roles are to be distinguished from those
+being only |NAME|InhRange.
+
+~$~<|NAME|InhRange~>==~{
+CLASS SYMBOL |NAME|InhRange:
+   |NAME|GotInh:	VOID;   /* required */
+
+CLASS SYMBOL |NAME|InhRange INHERITS |NAME|RangeScope END;
+
+CLASS SYMBOL |NAME|ExportInhRange:
+   |NAME|GotInhNest:	VOID;   /* local */
+
+CLASS SYMBOL |NAME|ExportInhRange 
+  INHERITS |NAME|InhRange, |NAME|ExportRange COMPUTE
+  SYNT.|NAME|GotInhNest = 
+    THIS.|NAME|GotInh
+    <- CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInhNest
+          SHIELD |NAME|AnyScope;
+END;
+~}
+
+The roles representing ranges are extended by computations
+of attributes |NAME|GotReqInh. 
+They guarantee that all candidates for sources of inheritance:
+- The scope properties are set and local keys are bound 
+  for all directly contained |NAME|ExportRanges
+  and those of surronding ranges (THIS.|NAME|GotVisibleKeys)
+- The inheritances are established for all directly contained 
+  |NAME|ExportInhRanges. 
+
+The roles representing ranges are extended by computations
+of attributes |NAME|GotReqInhNest. 
+They guarantee that additionally to |NAME|GotReqInh
+the inheritances are also established in all visible nests
+of |NAME|ExportInhRanges.
+
+~$~<|NAME|GotReqInh~>==~{
+CLASS SYMBOL |NAME|RootScope:
+	|NAME|GotReqInhCand:	VOID,		/* local */
+	|NAME|GotReqInh:	VOID,		/* local */
+	|NAME|GotReqInhNest:	VOID;		/* local */
+
+CLASS SYMBOL |NAME|RangeScope:
+	|NAME|GotReqInhCand:	VOID,		/* local */
+	|NAME|GotReqInh:	VOID,		/* local */
+	|NAME|GotReqInhNest:	VOID;		/* local */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|GotReqInhCand = 
+    SYNT.|NAME|GotVisibleKeys
+    <- CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInh
+          SHIELD |NAME|AnyScope;
+
+  SYNT.|NAME|GotReqInh = "yes";
+
+  SYNT.|NAME|GotReqInhNest = 
+    SYNT.|NAME|GotVisibleKeysNest
+    <- CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInhNest
+          SHIELD |NAME|AnyScope;
+END;
+
+CLASS SYMBOL |NAME|RangeScope COMPUTE
+  INH.|NAME|GotReqInh = INCLUDING |NAME|AnyScope.|NAME|GotReqInhCand;
+
+  INH.|NAME|GotReqInhCand =
+    SYNT.|NAME|GotVisibleKeys
+    <- (CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInh
+           SHIELD |NAME|AnyScope,
+        INH.|NAME|GotReqInh);
+
+  INH.|NAME|GotReqInhNest =
+    SYNT.|NAME|GotVisibleKeysNest
+    <- (CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInhNest
+           SHIELD |NAME|AnyScope,
+        INCLUDING |NAME|AnyScope.|NAME|GotReqInhNest);
+END;
+
+CLASS SYMBOL |NAME|InhRange INHERITS |NAME|RangeScope COMPUTE
+  INH.|NAME|GotReqInh = /* overridden to also establish THIS.|NAME|GotInh */
+     THIS.|NAME|GotInh
+     <- INCLUDING |NAME|AnyScope.|NAME|GotReqInhCand;
+
+  INH.|NAME|GotReqInhNest = /* overridden to also establish THIS.|NAME|GotInh */
+    SYNT.|NAME|GotVisibleKeysNest
+    <- (CONSTITUENTS |NAME|ExportInhRange.|NAME|GotInhNest
+           SHIELD |NAME|AnyScope,
+        INCLUDING |NAME|AnyScope.|NAME|GotReqInhNest,
+        THIS.|NAME|GotInh);
+END;
+~}
+
+The following computations extend preconditions for roles of the 
+AlgScope and the ScopeProp modules, such that inheritances are
+established, exported Scope properties are associated, and are
+populated with bindings.
+
+~$~<|NAME|InhPrecond~>==~{
+CLASS SYMBOL |NAME|IdUseEnv COMPUTE
+  SYNT._|NAME|InhPrecond =
+	INCLUDING |NAME|AnyScope.|NAME|GotReqInh;
+END;
+
+CLASS SYMBOL |NAME|IdUseScope COMPUTE
+  SYNT._|NAME|InhPrecond =
+	INCLUDING |NAME|AnyScope.|NAME|GotReqInh;
+END;
+
+CLASS SYMBOL |NAME|QualIdUse COMPUTE
+  SYNT._|NAME|InhPrecond =
+	INCLUDING |NAME|AnyScope.|NAME|GotReqInhNest;
+END;
+
+~}
+
+
+|NAME|ChkInhIdUse
+checks whether for a given identifier more that one binding 
+can be identified on different inheritance pathes due to
+multiple inheritance. 
+This role may be used for unqualified names, i.e. together 
+with |NAME|IdUseEnv or |NAME|IdUseScope;
+
+~$~<|NAME|ChkInhIdUse~>==~{
+CLASS SYMBOL |NAME|ChkInhIdUse:
+	|KEY|Bind:	Binding,	/* required */
+	MulErr:		int,		/* provided */
+	MulMsg:		VOID;		/* provided */
+
+CLASS SYMBOL |NAME|ChkInhIdUse COMPUTE
+  SYNT.MulErr=AND (NE (NoBinding, THIS.|KEY|Bind),
+           NE (NoBinding, 
+	       NextInhBinding 
+                 (INCLUDING |NAME|AnyScope.|NAME|Env, 
+                  THIS.|KEY|Bind)));
+  SYNT.MulMsg = IF (THIS.MulErr,
+       message (ERROR, 
+           CatStrInd ("Several definitions are inherited for: ",
+                      IdnOf (THIS.|KEY|Bind)), 
+           0, COORDREF));
+END;
+~}
+
+|NAME|ChkInhQualIdUse
+checks whether for a given identifier more that one binding 
+can be identified on different inheritance pathes due to
+multiple inheritance. 
+This role may be used for qualified names, i.e. together 
+|NAME|QualIdUse.
+
+~$~<|NAME|ChkInhQualIdUse~>==~{
+CLASS SYMBOL |NAME|ChkInhQualIdUse:
+	|NAME|Scope:	Environment,	/* required */
+	|KEY|Bind:	Binding,	/* required */
+	MulErr:		int,		/* provided */
+	MulMsg:		VOID;		/* provided */
+
+CLASS SYMBOL |NAME|ChkInhQualIdUse COMPUTE
+  SYNT.MulErr = AND (NE (NoBinding, THIS.|KEY|Bind),
+           NE (NoBinding, 
+	       NextInhBinding (THIS.|NAME|Scope, THIS.|KEY|Bind)));
+  SYNT.MulMsg = IF (THIS.MulErr,
+      message (ERROR, 
+           CatStrInd ("Several definitions are inherited for: ",
+                      IdnOf (THIS.|KEY|Bind)), 
+           0, COORDREF));
+END;
+~}
+
+~O~<|NAME|AlgInh.lido~>~{
+~<|NAME|InhRange~>
+~<|NAME|InheritScope~>
+~<|NAME|GotReqInh~>
+~<|NAME|InhPrecond~>
+~<|NAME|ChkInhIdUse~>
+~<|NAME|ChkInhQualIdUse~>
+~}
+
+~O~<|NAME|AlgInh.specs~>~{
+$/Tech/Strings.specs
+~}

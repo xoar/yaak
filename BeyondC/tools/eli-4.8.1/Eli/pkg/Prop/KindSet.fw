@@ -1,0 +1,120 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: KindSet.fw,v 3.7 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+
+This module associates an property |NAME|KindSet to object keys which
+is a set of int encoded values. The values must be in the range of
+0 .. 8*sizeof(unsigned int)-1.
+The set implementation is obtained by an instantiation of the
+IntSet module with base type (unsigned) int.
+
+The module provides computations for the CLASS SYMBOLs
+
+|NAME|RangeKindSet
+	a range that contains occurrences of |NAME|AddKind,
+	|NAME|AddKindSet, or |NAME|GetKindSet CLASS SYMBOLs.
+	|NAME|RangeKindSet is inherited to the grammar root by default.
+
+|NAME|AddKind
+	a context that adds the value given by
+	|NAME|AddKind.|NAME|Kind to the property.
+
+|NAME|AddKindSet
+	a context that adds the set value given by
+	|NAME|AddKind.|NAME|KindSet to the property.
+
+|NAME|GetKindSet
+	a context that acesses the property set value finally
+	associated to |NAME|GetKind.|KEY|Key. It may be obtained
+	by the attribute |NAME|GetKind.Has|NAME|KindSet, e.g. used
+	to issue messages.
+
+|NAME|AddKind and |NAME|AddKindSet must not be INHERITed to the same
+grammar CLASS SYMBOLs.
+
+|NAME|GetKind may be INHERITed to grammar CLASS SYMBOLs that also INHERIT
+|NAME|AddKind or |NAME|AddKindSet.
+
+~O~<|NAME|KindSet.specs~>~{
+$/Adt/IntSet.gnrc+referto=int :inst
+$/Prop/PropLib.fw
+~}
+
+~O~<|NAME|KindSet.pdl~>~{
+"IntSet.h" "err.h"
+
+|NAME|KindSet:	IntSet [Insert, Union, Intersect];
+~}
+
+~O~<|NAME|KindSet.lido~>~{
+CLASS SYMBOL ROOTCLASS INHERITS |NAME|RangeKindSet END;
+
+/* for compatibility to old version: */
+CLASS SYMBOL |NAME|RootKind INHERITS |NAME|RangeKindSet END;
+
+CLASS SYMBOL |NAME|AddKind:
+		|KEY|Key:		DefTableKey,
+		Got|NAME|Kind:	VOID	SYNT,
+		|NAME|Kind:		int;
+
+CLASS SYMBOL |NAME|AddKindSet:
+		|KEY|Key:		DefTableKey,
+		Got|NAME|Kind:	VOID	SYNT,
+		|NAME|KindSet:		IntSet;
+
+CLASS SYMBOL |NAME|GetKindSet:
+		|KEY|Key:		DefTableKey,
+		Has|NAME|KindSet:	IntSet	SYNT;
+
+CLASS SYMBOL |NAME|RangeKindSet:
+		Got|NAME|Kind:	VOID	SYNT;
+
+CLASS SYMBOL |NAME|RangeKindSet	COMPUTE
+	SYNT.Got|NAME|Kind =
+		CONSTITUENTS (|NAME|AddKind.Got|NAME|Kind,
+				|NAME|AddKindSet.Got|NAME|Kind)
+			SHIELD |NAME|RangeKindSet;
+END;
+
+CLASS SYMBOL |NAME|AddKind		COMPUTE
+SYNT.Got|NAME|Kind =
+	Insert|NAME|KindSet (THIS.|KEY|Key, THIS.|NAME|Kind);
+END;
+
+CLASS SYMBOL |NAME|AddKindSet	COMPUTE
+SYNT.Got|NAME|Kind =
+	Union|NAME|KindSet (THIS.|KEY|Key, THIS.|NAME|KindSet);
+END;
+
+CLASS SYMBOL |NAME|GetKindSet	COMPUTE
+SYNT.Has|NAME|KindSet =
+	Get|NAME|KindSet (THIS.|KEY|Key, NullIS())
+	DEPENDS_ON INCLUDING |NAME|RangeKindSet.Got|NAME|Kind;
+END;
+~}
+
+~O~<|NAME|KindSet.head~>~{
+#include "IntSet.h"
+~}

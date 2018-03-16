@@ -1,0 +1,7 @@
+/* $Id: pascal.gla,v 1.2 1992/07/07 23:31:58 waite Exp $ */
+/* Pascal denotations and comments */
+
+Integer:	PASCAL_INTEGER
+Real:		PASCAL_REAL
+String:		PASCAL_STRING
+		PASCAL_COMMENT

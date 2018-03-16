@@ -1,0 +1,9 @@
+/* $Id: hyprtxt.specs,v 2.5 2004/06/21 14:01:04 profw Exp $
+ * Copyright (c) 1990, The Regents of the University of Colorado
+ * Documents for which hypertext nodes are important
+ */
+
+#include "humans.specs"
+
+../../liga/Info/help.tnf	/* Special nodes for Error Messages in liga. */
+nodoc.tnf			/* "No documentation is available" message */

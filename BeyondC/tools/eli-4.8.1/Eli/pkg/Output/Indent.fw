@@ -1,0 +1,115 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+
+~! $Id: Indent.fw,v 3.3 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+@unnumbered Module Indent
+
+Copyright, 1994, AG-Kastens, University Of Paderborn
+
+This C module provides functions to be used for indentation.
+They are designed to be used in PTG pattern specifications, but
+could also be used independantly from PTG.
+
+~O~<Indent.head~>~{
+#include "Indent.h"
+~}
+
+~O~<Indent.ptg~>~{
+/* Empty specification file ensuring that a ptg_gen.h-file is generated */
+~}
+
+~O~<Indent.h~>~{
+#ifndef _INDENT_H
+#define _INDENT_H
+
+#include "ptg_gen.h"
+
+#if defined(__STDC__) || defined(__cplusplus)
+extern void IndentSetStep (int     i);
+extern void IndentIncr 	  (PTG_OUTPUT_FILE f);
+extern void IndentDecr 	  (PTG_OUTPUT_FILE f);
+extern void IndentNewLine (PTG_OUTPUT_FILE f);
+#else
+extern void IndentSetStep ();
+extern void IndentIncr ();
+extern void IndentDecr ();
+extern void IndentNewLine ();
+#endif
+
+#endif
+~}
+
+~O~<Indent.c~>~{
+#include "Indent.h"
+
+static int curind = 0;
+static int indstep = 3;
+
+#if defined(__STDC__) || defined(__cplusplus)
+void IndentSetStep (int i)
+#else
+void IndentSetStep (i) int i;
+#endif
+{
+    indstep = i;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void IndentIncr (PTG_OUTPUT_FILE f)
+#else
+void IndentIncr (f) 
+	PTG_OUTPUT_FILE f;
+#endif
+{
+    curind += indstep;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void IndentDecr (PTG_OUTPUT_FILE f)
+#else
+void IndentDecr (f) 
+	PTG_OUTPUT_FILE f;
+#endif
+{
+    curind -= indstep;
+}
+
+#if defined(__STDC__) || defined(__cplusplus)
+void IndentNewLine (PTG_OUTPUT_FILE f)
+#else
+void IndentNewLine (f) 
+	PTG_OUTPUT_FILE f;
+#endif
+{
+    int	i;
+
+    PTG_OUTPUT_CHAR(f, '\n');
+
+    for (i=0; i<curind; i++)
+	PTG_OUTPUT_CHAR (f, ' ');
+}
+~}
+
+
+

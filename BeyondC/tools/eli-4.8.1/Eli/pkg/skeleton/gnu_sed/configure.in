@@ -1,0 +1,28 @@
+# $Id: configure.in,v 1.2 2004/03/21 02:09:45 profw Exp $
+
+AC_INIT([GNU sed],[1.18])
+AC_CONFIG_SRCDIR(sed.c)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h malloc.h sys/file.h sys/time.h unistd.h sys/types.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+
+dnl Checks for library functions.
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(bcopy memcpy)
+AC_FUNC_ALLOCA
+
+AC_CONFIG_HEADER(config.h)
+
+AC_OUTPUT(Makefile)

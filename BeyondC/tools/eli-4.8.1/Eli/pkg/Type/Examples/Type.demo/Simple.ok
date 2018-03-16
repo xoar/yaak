@@ -1,0 +1,12 @@
+begin
+  var	int i, int j,
+	bool b, bool c,
+	real r, real s;
+  i = 1;
+  b = true;
+  r = 3.4;
+  j = i;
+  c = b;
+  s = r;
+  42;
+end

@@ -1,0 +1,9 @@
+begin
+  val a = 1, b = 2;
+  set a to a;
+  begin val a = 3;
+	set b to use a;
+	a; b;
+  end;
+  use b;
+end

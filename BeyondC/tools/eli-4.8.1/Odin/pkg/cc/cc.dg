@@ -1,0 +1,111 @@
+# Source Types
+
+*.c => :c;
+
+*.exe => :exe;
+
+*.c.sm  => :c.sm;
+
+
+# Input Object Types
+
+:c 'C source code'? => :o_src;
+
+:c.sm 'system model for a C program'? => :FILE;
+
+
+# Intermediate Object Types
+
+:c.one.list 'list of a single C file' => :code.list :c.exe.list;
+
+:c.sm.list 'list of files in a C system model' => :sm.list :c.exe.list;
+
+:c.exe.list 'list of files in a C system' => :LIST;
+
+:c_inc.view_desc 'view description of C-style included files' => :FILE;
+
+:c_inc 'list of potential C-style included files' => :LIST;
+
+:all_c_inc 'list of C-style transitively included files' => :LIST;
+
+
+# Output Object Types
+
+:exe 'executable binary'? => :FILE;
+
+:fmt 'formatted version' => :PIPE;
+
+:c.h 'C function declarations' => :FILE;
+
+
+# Parameter Types
+
++define 'macro definition'? => :cat;
+
++debug 'debug switch'? => :first;
+
++optimize 'optimization flag'? => :first;
+
++prof 'profiling flag'? => :first;
+
++eprof 'profiling flag for linking'? => :first;
+
++cc_home 'directory containing the C compiler'? => :first;
+
++cc 'name of the C compiler'? => :first;
+
++cc_flags 'flags for cc'? => :cat;
+
++ld_flags 'flags for ld'? => :cat;
+
++inc_sp 'name of a directory in an include search path'? => :ls;
+
++ignore 'egrep expression for includes to ignore'? => :ls;
+
++purify 'purify flag'? => :cat;
+
++home 'home directory for relative pathnames' => :first;
+
+
+# Environment Variables
+
+$ODIN_CC_HOME 'directory containing the C compiler' = '';
+
+$ODIN_CC_DEBUGF 'debug flag for C compiler' = '-g';
+
+$ODIN_CC_I 'directory containing default C include files' = '/usr/include';
+
+
+# Tools
+
+COLLECT (:c)
+   => (:c.one.list);
+
+READ-LIST (:c.sm)
+   => (:c.sm.list);
+
+EXEC (c_inc.sh) (:FILE) (:FILE :dir)@ (+home)@ (+inc_sp) (+ignore)
+   => (:c_inc.view_desc);
+
+COLLECT (:c_inc.view_desc :view)
+   => (:c_inc);
+
+COLLECT (:c_inc :map=:all_c_inc) (:c_inc)
+   => (:all_c_inc);
+
+EXEC (cc.sh) (:c) (:c :dir)@ (+inc_sp) (+cc_home)@ (+gnu) (+debug) (+prof)
+ (+optimize) (+define) (+cc) (+cc_flags)
+ NEEDS (:c +home=(:c :dir) :lookup=:all_c_inc)
+   => (:o);
+
+EXEC (ld.sh) (:o_of :vir_dir) (:library_flags)
+ (+cc_home)@ (+gnu) (+purify) (+debug) (+prof) (+eprof) (+cc) (+ld_flags)
+ NEEDS (:o_of :vir_tgt.list) (:libraries) (:c.exe.list)@
+   => (:exe);
+
+EXEC (fmt.c.sh) (:c)
+   => (:fmt);
+
+EXEC (c.h.sh) (:c) (:c :dir)@ (header_c.sed)
+   => (:c.h);
+

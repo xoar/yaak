@@ -1,0 +1,393 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from adt.tnf on 5 December 2013 -->
+
+<TITLE>Abstract data types to be used in specifications - Linear Lists of Any Type</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Abstract data types to be used in specifications</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<A NAME="IDX23"></A>
+<A NAME="IDX24"></A>
+<A NAME="IDX25"></A>
+<H1><A NAME="SEC2" HREF="adt_toc.html#SEC2">Linear Lists of Any Type</A></H1>
+<P>
+This module implements linear lists whose elements are of an arbitrary
+type that is specified by a generic instantiation parameter.
+Any assignable type can be chosen.
+<P>
+Storage for lists is allocated when needed.
+The module implementation uses efficient dynamic storage allocation
+of the <CODE>obstack</CODE> module.
+The module does not implement automatic garbage collection.
+Storage used by one instance of this module can be deallocated completely.
+<P>
+One subset of the functions provided by this module is strictly functional,
+i.e. list values are not modified.
+Another subset of functions modifies existing list values, e.g.
+inserts elements into a list. It is explicitly mentioned
+which functions may cause such side-effects on their arguments.
+<P>
+The module is instantiated by
+<PRE>
+   $/Adt/List.gnrc +instance=TYPE +referto=HDR :inst
+</PRE>
+where <CODE>TYPE</CODE> is the name of the element type and <CODE>HDR.h</CODE>
+is a file that defines the element type, e.g.
+<PRE>
+   $/Adt/List.gnrc+instance=DefTableKey +referto=deftbl :inst
+</PRE>
+If the element type is predefined in C the <CODE>referto</CODE> parameter
+is omitted, e.g.
+<PRE>
+   $/Adt/List.gnrc+instance=int :inst
+</PRE>
+<P>
+All entities exported by this module can be used in specifications
+of type <CODE>.lido</CODE>, <CODE>.init</CODE>, <CODE>.finl</CODE>, and <CODE>.con</CODE>.
+They can also be used in <CODE>.pdl</CODE> specifications or in C modules 
+if the interface file <CODE>TYPEList.h</CODE> is imported there.
+<A NAME="IDX26"></A>
+<A NAME="IDX27"></A>
+<A NAME="IDX28"></A>
+<P>
+A module <CODE>PtrList</CODE> is available. It produces list implementations
+with the same interface as the <CODE>List</CODE> module does.
+<CODE>PtrList</CODE> is only applicable if the element type <CODE>TYPE</CODE>
+is a pointer type. An instantiation of <CODE>PtrList</CODE> implements
+the lists by lists of <CODE>VoidPtr</CODE> (<CODE>void*</CODE>) using an
+instantiation of the <CODE>List</CODE> module. Hence, several instances
+of <CODE>PtrList</CODE> use one single implementation. The created
+interface files <CODE>TYPEList.h</CODE> provide macros for casting the
+element type to and from <CODE>VoidPtr</CODE>.
+The module <CODE>PtrList</CODE> is instantiated in the same way as
+the <CODE>List</CODE> module is:
+<PRE>
+   $/Adt/PtrList.gnrc +instance=TYPE +referto=HDR :inst
+</PRE>
+<P>
+The modules export the following type names and macros:
+<P>
+<DL COMPACT>
+<DT><CODE>TYPEList</CODE>
+<DD>A pointer type representing lists.
+<A NAME="IDX29"></A>
+<P>
+<DT><CODE>TYPEListPtr</CODE>
+<DD>A pointer type pointing to TYPEList objects.
+<A NAME="IDX30"></A>
+<P>
+<DT><CODE>TYPEMapFct</CODE>
+<DD>A function type for mapping: <CODE>TYPE -&#62; TYPE</CODE>.
+<A NAME="IDX32"></A>
+<A NAME="IDX31"></A>
+<P>
+<DT><CODE>TYPECmpFctType</CODE>
+<DD>A function type for comparison: <CODE>TYPE, TYPE -&#62; int</CODE>
+Function of this type have to yield 0 if the two values
+are equal, 1 if the left argument is greater than the right,
+-1 if the left argument is less than the right.
+<A NAME="IDX33"></A>
+<P>
+<DT><CODE>TYPESumFct</CODE>
+<DD>A function type for combining elements: <CODE>TYPE, TYPE -&#62; TYPE</CODE>
+<A NAME="IDX35"></A>
+<A NAME="IDX34"></A>
+<P>
+<DT><CODE>NULLTYPEList</CODE>
+<DD>Denotes the empty list.
+<A NAME="IDX36"></A>
+<P>
+<DT><CODE>NullTYPEList ()</CODE>
+<DD>Denotes the empty list.
+<A NAME="IDX37"></A>
+<P>
+<DT><CODE>SingleTYPEList(e)</CODE>
+<DD>Creates a list containing only the element <CODE>e</CODE>.
+<A NAME="IDX39"></A>
+<A NAME="IDX38"></A>
+</DL>
+<P>
+The following list processing functions are supplied by the module:
+<P>
+<DL COMPACT>
+<DT><CODE>void FinlTYPEList (void)</CODE>
+<DD>Deallocates all TYPELists (for <EM>all</EM> possible values of TYPE). 
+<A NAME="IDX41"></A>
+<A NAME="IDX40"></A>
+<P>
+<DT><CODE>TYPEList ConsTYPEList (TYPE e, TYPEList l)</CODE>
+<DD>Constructs a TYPEList of an element <CODE>e</CODE> and a given tail <CODE>l</CODE>.
+<CODE>e</CODE> is the first element of the list.
+<A NAME="IDX43"></A>
+<A NAME="IDX42"></A>
+<P>
+<DT><CODE>TYPE HeadTYPEList (TYPEList l)</CODE>
+<DD>Returns the first element of the list <CODE>l</CODE>.
+The list <CODE>l</CODE> must not be empty.
+<A NAME="IDX45"></A>
+<A NAME="IDX44"></A>
+<P>
+<DT><CODE>TYPEList TailTYPEList (TYPEList l)</CODE>
+<DD>Returns the tail of the list <CODE>l</CODE>.
+If <CODE>l</CODE> is empty, an empty list is returned.
+<A NAME="IDX47"></A>
+<A NAME="IDX46"></A>
+<P>
+<DT><CODE>int LengthTYPEList (TYPEList l)</CODE>
+<DD>Returns the number of elements in the list <CODE>l</CODE>.
+<A NAME="IDX49"></A>
+<A NAME="IDX48"></A>
+<P>
+<DT><CODE>TYPE IthElemTYPEList (TYPEList l, int i);</CODE>
+<DD>Returns the <CODE>i</CODE>-th element of the List <CODE>l</CODE>. The head of <CODE>l</CODE>
+is referred to as 1. If the value of
+i is greater than the length of the list, an error
+is reported and the program exits.
+<A NAME="IDX51"></A>
+<A NAME="IDX50"></A>
+<P>
+<DT><CODE>TYPEList CopyTYPEList (TYPEList l, TYPEMapFct cp)</CODE>
+<DD>Copies the list <CODE>l</CODE>. Elements are copied by calls of <CODE>cp</CODE>.
+<A NAME="IDX53"></A>
+<A NAME="IDX52"></A>
+<P>
+<DT><CODE>TYPEList AppTYPEList (TYPEList l1, TYPEList l2)</CODE>
+<DD>Concatenates two lists <CODE>l1</CODE> and <CODE>l2</CODE>. 
+The resulting list contains <CODE>l2</CODE> at
+the end of a copy of list <CODE>l1</CODE>. Hence, no argument
+is modified.
+<A NAME="IDX55"></A>
+<A NAME="IDX54"></A>
+<P>
+<DT><CODE>TYPEList AppElTYPEList (TYPEList l, TYPE e)</CODE>
+<DD>Appends an element <CODE>e</CODE> to the list <CODE>l</CODE>.
+The list <CODE>l</CODE> is not copied, it is modified as a side-effect
+of this function.
+<A NAME="IDX57"></A>
+<A NAME="IDX56"></A>
+<P>
+<DT><CODE>void InsertAfterTYPEList (TYPEList l, TYPE e)</CODE>
+<DD>This function requires a non-empty list <CODE>l</CODE>. 
+The element <CODE>e</CODE> is inserted
+just after the first element of <CODE>l</CODE>.
+The list <CODE>l</CODE> is modified as a side-effect of this function.
+<A NAME="IDX59"></A>
+<A NAME="IDX58"></A>
+<P>
+<DT><CODE>TYPEList OrderedInsertTYPEList (TYPEList l, TYPE e, TYPECmpFctType fcmp)</CODE>
+<DD>Inserts the element <CODE>e</CODE> into the list <CODE>l</CODE> maintaining <CODE>l</CODE> in
+ascending order with respect to the compare <CODE>fcmp</CODE>.
+The updated list is returned.
+The list <CODE>l</CODE> may be modified as a side-effect of this function.
+<A NAME="IDX61"></A>
+<A NAME="IDX60"></A>
+<P>
+<DT><CODE>TYPEListPtr RefEndConsTYPEList (TYPEListPtr addr, TYPE e);</CODE>
+<DD>Appends an element <CODE>e</CODE> to the end of a list given by its 
+address <CODE>addr</CODE>.
+The address where the next element may be appended is returned.
+The list is modified as a side-effect of this function.
+<A NAME="IDX63"></A>
+<A NAME="IDX62"></A>
+<P>
+<DT><CODE>TYPEListPtr RefEndAppTYPEList (TYPEListPtr addr, TYPEList l);</CODE>
+<DD>Appends a list <CODE>l</CODE> to the end of a list given by 
+its address <CODE>addr</CODE>.
+The address where the next element may be appended is returned.
+The list is modified as a side-effect of this function.
+<A NAME="IDX65"></A>
+<A NAME="IDX64"></A>
+<P>
+<DT><CODE>int ElemInTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct);</CODE>
+<DD>This function returns 1 iff the element <CODE>e</CODE> is in the list <CODE>l</CODE>.
+List elements are compared by the function <CODE>cmpfct</CODE>.
+<A NAME="IDX67"></A>
+<A NAME="IDX66"></A>
+<P>
+<DT><CODE>TYPEList AddToSetTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct)</CODE>
+<DD>If <CODE>l</CODE> contains <CODE>e</CODE> then <CODE>l</CODE> is returned.
+Otherwise a list is returned that contains <CODE>e</CODE> and the
+elements of <CODE>l</CODE>. The comparison function <CODE>cmpfct</CODE>
+is used to check whether <CODE>l</CODE> already contains <CODE>e</CODE>.
+The list <CODE>l</CODE> is not modified.
+<A NAME="IDX69"></A>
+<A NAME="IDX68"></A>
+<P>
+<DT><CODE>TYPEList AddToOrderedSetTYPEList (TYPE e, TYPEList l, TYPECmpFctType cmpfct)</CODE>
+<DD>If <CODE>l</CODE> contains <CODE>e</CODE> then <CODE>l</CODE> is returned.
+Otherwise a list is returned that contains <CODE>e</CODE> and the
+elements of <CODE>l</CODE>. The comparison function <CODE>cmpfct</CODE>
+is used to check whether <CODE>l</CODE> already contains <CODE>e</CODE>.
+<CODE>l</CODE> is assumed to be ordered increasingly in the sense of <CODE>cmpfct</CODE>.
+The list <CODE>l</CODE> may be modified as a side-effect of this function.
+<A NAME="IDX71"></A>
+<A NAME="IDX70"></A>
+<P>
+<DT><CODE>TYPEList MapTYPEList (TYPEList l, TYPEMapFct f);</CODE>
+<DD>Returns a new list obtained by applying <CODE>f</CODE> to each 
+element of <CODE>l</CODE>.
+<A NAME="IDX73"></A>
+<A NAME="IDX72"></A>
+<P>
+<DT><CODE>int CompTYPEList (TYPEList l1, TYPEList l2, TYPECmpFctType f);</CODE>
+<DD>Compares the lists <CODE>l1</CODE> and <CODE>l2</CODE> lexicographically 
+by applying <CODE>f</CODE>
+to the corresponding elements.
+<A NAME="IDX75"></A>
+<A NAME="IDX74"></A>
+<P>
+<DT><CODE>TYPE SumTYPEList (TYPEList l, TYPESumFct f, TYPE a);</CODE>
+<DD>Applies the binary function <CODE>f</CODE> to the elements of the list:
+<CODE>f( f(... f(a, e1), e2, ...), en)</CODE>
+If <CODE>l</CODE> is empty <CODE>a</CODE> is returned.
+<A NAME="IDX77"></A>
+<A NAME="IDX76"></A>
+</DL>
+<P>
+It should be pointed out that
+the functions <CODE>AppElTYPEList</CODE>, <CODE>InsertAfterTYPEList</CODE>, 
+<CODE>OrderedInsertTYPEList</CODE>, <CODE>RefEndConsTYPEList</CODE>,
+<CODE>RefEndAppTYPEList</CODE>, <CODE>AddToOrderedSetTYPEList</CODE>
+modify existing lists and hence cause side-effects.
+If the non modified original list values are still to be used they
+have to be copied (<CODE>CopyTYPEList</CODE>) before they are modified.
+The other functions can be used in a strictly functional style.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="adt_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

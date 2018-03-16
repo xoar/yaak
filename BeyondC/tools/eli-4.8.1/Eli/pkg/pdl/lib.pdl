@@ -1,0 +1,36 @@
+/* $Id: lib.pdl,v 1.5 2004/08/01 04:48:36 profw Exp $ */
+/* Library operation declarations */
+/* Copyright (c) 1992, The Regents of the University of Colorado */
+
+TYPE Get(DefTableKey key, TYPE deflt)
+{ if (key == NoKey) return deflt;
+  if (PRESENT) return VALUE;
+  else return deflt;
+}
+
+void Set(DefTableKey key, TYPE _add, TYPE _replace)
+{ if (key == NoKey) return;
+  if (ACCESS) VALUE = _replace;
+  else VALUE = _add;
+}
+
+void Reset(DefTableKey key, TYPE _val)
+{ if (key == NoKey) return;
+  ACCESS; VALUE = _val;
+}
+
+void Is(DefTableKey key, TYPE _which, TYPE _error)
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = _which;
+  else if (VALUE != _which) VALUE = _error;
+}
+
+void Unique(DefTableKey key, TYPE _next())
+{ if (key == NoKey) return;
+  if (!ACCESS) VALUE = _next();
+}
+
+int Has(DefTableKey key)
+{ if (key == NoKey) return 0;
+  return PRESENT;
+}

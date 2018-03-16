@@ -1,0 +1,78 @@
+Build a routine to extract symbols from object files and classify them as
+entry points or external symbols.  This routine, rdsymb.c, is needed to
+support Eli's construction of source directories.
+
+To verify that rdsymb.c works on your system, execute the following
+commands in this directory:
+
+  ./configure
+  make test
+
+Generally speaking, configuration options are irrelevant for this program.
+You should see some output from the configuration process, noting what the
+configuration checks found out about your environment.  A failure of the
+configuration process indicates some gross problem with the C compiler.
+
+The make command compiles rdsymb.c, a driver program, and data.c.  File
+data.c contains both entry points and external references.  If there are no
+errors, the driver program is executed.  The last line of the output should
+then be either the word "ok" or the word "ng".  If "ok" appears, symbols
+are being recognized and classified correctly.
+
+Compilation errors usually indicate that the binary representation is one
+unknown to rdsymb.c.  In that case, it assumes a typical "a.out"
+representation and expects appropriate header files defining the necessary
+symbols.  You will have to do some research into the details of the actual
+object code representation and either add it to the ones recognized by
+rdsymb.c, or simply replace the body of rdsymb.c entirely.
+
+If the programs compile but the last line of the output is "ng", then you
+should execute the following command in this directory:
+
+  ./try.exe
+
+This will print the symbols found in the file data.o, one per line.  The
+symbol is followed by the word "external" if it is referred to but not
+defined in try.o (the symbol "p" is an example).  The symbol is followed
+by the word "entry" if it is defined in try.o (the symbol "n" is an
+example).
+
+The maintainer of this package should concern themselves primarily with
+the following files:
+
+configure.in	Specification of appropriate environment tests.  New tests
+		may be needed as more experience is gained with a variety
+		of systems.
+acconfig.h	Specification of symbols denoting named binary formats.
+		These formats are determined by examination of the output
+		of the "file" command when it is applied to an object file.
+		New symbols must be added if new named binary formats are
+		recognized.
+rdsymb.c	Routine to read object files and classify their symbols.
+		If new binary formats are encountered, code to extract
+		their symbol information must be added to this routine.
+Makefile.in	Specification of the Makefile.  This file should only
+		rarely require modification.
+
+If any changes are made in these files, you should run the following
+sequence of commands:
+
+  autoheader
+  autoconf
+
+This sequence will construct the following files:
+
+ofile.h.in	Template for the environment definition file
+configure	Shell script to do environment inquiry
+
+The following files should not be modified, because they constitute the
+interface between rdsymb.c and the remainder of the system:
+
+rdsymb.h
+symbinfo.h
+
+The following file may need to be modified on occasion, to accommodate
+strange symbol representations:
+
+try.c		Program to invoke the object file reader and interpret
+		the classification of the symbols.

@@ -1,0 +1,766 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from syntax.tnf on 5 December 2013 -->
+
+<TITLE>Syntactic Analysis - The Relationship Between Phrases and Tree Nodes</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Syntactic Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC7" HREF="syntax_toc.html#SEC7">The Relationship Between Phrases and Tree Nodes</A></H1>
+<P>
+<CODE>RULE</CODE> declarations in files of type <TT>`lido'</TT> describe the
+structure of the abstract syntax tree over which computations are
+performed.  Eli will create a routine to construct an abstract syntax
+tree if any tree computations
+<A NAME="IDX46"></A>
+are specified
+(see  <A HREF="comptrees_1.html#SEC1">Tree Structure of LIDO -- Computations in Trees</A>).
+In order to do this, Eli must be able to deduce a unique correspondence
+between the concrete and abstract syntaxes, such that for each rule
+in the concrete syntax it is possible to uniquely determine what
+abstract syntax tree fragment to build.  The tool within Eli that
+does this is called Maptool.  In addition to generating a routine to
+construct the abstract syntax tree, Maptool will also deduce complete
+versions of the concrete and abstract syntaxes if only incomplete versions
+of each are provided by the user.  This can only be done if the two
+syntaxes can together form a complete syntax.
+<P>
+The concrete syntax is provided by the user in files of type <TT>`con'</TT>.
+Since EBNF constructs are allowed in these files, they are first translated
+into their strict BNF equivalents before being processed by Maptool
+(@xref{EBNF}).  The abstract syntax is extracted from the <CODE>RULE</CODE>
+declarations made in files of type <TT>`lido'</TT>
+(see  <A HREF="lidoref_3.html#SEC3">Rule Specifications of LIDO - Reference Manual</A>).
+<P>
+The remainder of this section will discuss how Maptool deduces the
+correspondence between the two syntaxes, the use of files of type <TT>`map'</TT>
+to influence the mapping process, and some usage hints.
+<P>
+<H2><A NAME="SEC8" HREF="syntax_toc.html#SEC8">Syntax mapping process</A></H2>
+<P>
+Maptool begins by matching any <CODE>LISTOF</CODE> constructs that appear
+in the abstract syntax to any appropriate concrete rules.  The next
+phase examines each concrete rule not matched in the previous phase
+and tries to find a matching abstract syntax rule.  After all matching
+is complete, unmatched concrete rules are added to the abstract syntax
+and unmatched abstract rules are added to the concrete syntax.  There
+are a few exceptions to this as are noted in the remainder of this
+section.
+<P>
+While the most obvious benefit to having Maptool deduce syntax fragments
+from one syntax and place them in the other is to reduce the amount
+of typing required, the more important advantage is the support it
+gives for incremental development.  It allows the user to only specify
+those portions of the syntax with which they are concerned at the moment.
+<P>
+<H3><A NAME="SEC9" HREF="syntax_toc.html#SEC9">Chain rule definitions</A></H3>
+<P>
+Chain rules have different behavior than other rules during the matching
+process. Descriptions for three different kinds of chain rules are given here
+to assist in the explanations given in the remainder of this section:
+<P>
+<DL COMPACT>
+<P>
+<A NAME="IDX47"></A>
+<DT><DFN>Chain Rule</DFN>
+<DD>A normal chain rule is a rule in which there is exactly one symbol on
+the right hand side of the rule that is not equivalent to the left
+hand side.  For example, <SAMP>`X ::= Y'</SAMP> where X is not equivalent to Y
+is a chain rule.
+<P>
+<A NAME="IDX48"></A>
+<DT><DFN>Trivial Chain Rule</DFN>
+<DD>A trivial chain rule is a chain rule in which the left hand side is
+equivalent to the right hand side.  This typically happens when a symbolic
+equivalence class is defined that includes both the left hand side symbol
+and the right hand side symbol (see  <A HREF="syntax_2.html#SEC14">Specifying symbolic equivalence classes</A>).
+<P>
+<A NAME="IDX49"></A>
+<DT><DFN>Literal Chain Rule</DFN>
+<DD>A literal chain rule is similar to a trivial chain rule, except that it
+also has literal symbols on its right hand side.  A typical example of
+this is the rule <SAMP>`Expr ::= '(' Expr ')''</SAMP>.
+<P>
+</DL>
+<P>
+Based on the above definition for normal chain rules, we define <DFN>coercions</DFN>
+<A NAME="IDX50"></A>
+between symbols.  A symbol <CODE>X</CODE> can be coerced to a symbol <CODE>Y</CODE> if
+there is a chain rule with <CODE>X</CODE> on the right hand side and <CODE>Y</CODE> on
+the left hand side.  Coercions are also transitive.  If <CODE>X</CODE> is coercible
+to <CODE>Y</CODE> and <CODE>Y</CODE> is coercible to <CODE>Z</CODE>, then <CODE>X</CODE> is also
+coercible to <CODE>Z</CODE>.  A symbol is also considered coercible to itself.
+<P>
+<H3><A NAME="SEC10" HREF="syntax_toc.html#SEC10">Matching the <CODE>LISTOF</CODE> construct</A></H3>
+<P>
+The <CODE>LISTOF</CODE> construct denotes zero or more occurrences of the
+elements that appear on its right hand side.  It does not dictate
+the ordering of those right hand side symbols or any delimiters that
+may be used to separate them.  The ordering and delimiters are determined
+by concrete rules.  In simple terms, Maptool begins with the left hand
+side of the <CODE>LISTOF</CODE> and recursively matches rules until it finds
+the right hand side elements.  The next paragraph gives a more precise
+description.
+<P>
+An abstract <CODE>LISTOF</CODE> construct is matched by starting with the
+symbol on the left hand side of the LISTOF.  All concrete rules with
+equivalent left hand side symbols are added to the set of matched rules.
+For each rule added to the set, the right hand side symbols are examined.
+Of these symbols, literal symbols are ignored.  If terminal symbols are
+encountered that aren't coercible to the symbols appearing on the right
+hand side of the <CODE>LISTOF</CODE>, an error is signalled, because the left
+hand side of the <CODE>LISTOF</CODE> may not derive symbols other than those that
+appear on the right hand side.  For each nonterminal symbol that isn't
+coercible to one of the right hand side symbols, the concrete rules that
+have that symbol on their left hand side are added to the set.  The process
+continues until no more rules can be added to the set.
+<P>
+The intermediate nonterminal symbols that are encountered as new concrete
+rules are added to the set may not appear on the right hand side of other
+concrete rules.
+<P>
+If Maptool doesn't find any concrete rules to match a <CODE>LISTOF</CODE>, it
+will generate a canonical left recursive representation.  For the
+list:
+<P>
+<PRE>
+RULE: Program LISTOF Declaration | Statement END;
+</PRE>
+<P>
+Maptool would generate the following:
+<P>
+<PRE>
+Program: LST_Program .
+LST_Program: LST_Program Declaration .
+LST_Program: LST_Program Statement .
+LST_Program: .
+</PRE>
+<P>
+This specifies zero or more occurrences of <CODE>Declaration</CODE>'s and
+<CODE>Statement</CODE>'s.
+<P>
+There is one other important thing to note about the <CODE>LISTOF</CODE> construct.
+Attribute computations associated with a <CODE>LISTOF</CODE> construct can
+just as easily be written as symbol computations on the symbols of the
+<CODE>LISTOF</CODE>.  The advantage to using the <CODE>LISTOF</CODE> construct is
+that it becomes possible to generate an abstract syntax tree structure
+which allows for more efficient traversal.  In order to construct this
+special tree structure, it is sometimes necessary to insert an additional
+chain rule into the concrete syntax at the root of the <CODE>LISTOF</CODE>.
+<P>
+This is the case when the rules matching the <CODE>LISTOF</CODE> have a recursive
+occurrence of the left hand side symbol.  As an example, the <CODE>LISTOF</CODE>
+construct shown above might be written as follows in the concrete syntax:
+<P>
+<PRE>
+Program: Program Declaration .
+Program: Program Statement .
+Program: .
+</PRE>
+<P>
+As you can see, the root of the <CODE>LISTOF</CODE>, <CODE>Program</CODE> is used both
+on the left hand side and right hand side of rules that match the <CODE>LISTOF</CODE>
+construct, meaning that it is used recursively.  If the <CODE>LISTOF</CODE>
+construct is provided in a <TT>`.lido'</TT> file, Maptool must introduce the
+chain rule <SAMP>`Program ::= LST_Program'</SAMP> and change other occurrences of
+<CODE>Program</CODE> to <CODE>LST_Program</CODE> in order to build the efficient tree
+structure.
+<P>
+Users should be aware that it is possible for the addition of this chain
+rule to cause LALR(1) conflicts for the parsability of the concrete syntax
+that do not appear in the absence of the <CODE>LISTOF</CODE> construct.
+In these cases, users must either rewrite the concrete syntax or
+avoid the use of the <CODE>LISTOF</CODE> construct to avoid the problem.
+<P>
+<H3><A NAME="SEC11" HREF="syntax_toc.html#SEC11">Matching remaining rules</A></H3>
+<P>
+After all <CODE>LISTOF</CODE> constructs have been matched, Maptool attempts
+to match the remaining concrete rules to rules given in the abstract
+syntax.  A match is determined if the signature of the concrete rule
+is equivalent to the signature of an abstract rule or coercions
+(see  <A HREF="syntax_2.html#SEC9">Chain rule definitions</A>) exist between any symbols which differ in the
+signatures.  Remember that symbolic equivalence classes are applied
+to concrete rules before this matching takes place, so symbols in the
+signatures are considered equivalent if they belong to the same equivalence
+class.
+<P>
+For example, consider the following abstract rules:
+<P>
+<PRE>
+RULE: Declaration ::= IdDef Type END;
+RULE: IdDef ::= Identifier END;
+</PRE>
+<P>
+The following concrete rule will match the first of the above abstract
+rules, because of the coercion defined between <CODE>Identifier</CODE> and
+<CODE>IdDef</CODE>:
+<P>
+<PRE>
+Declaration: Identifier Type .
+</PRE>
+<P>
+The reason for doing this is to distinguish semantically between
+<A NAME="IDX51"></A>
+occurrences of <CODE>Identifier</CODE>'s in different contexts.  In the above
+example, we have used <CODE>IdDef</CODE> to represent a definition of an
+<CODE>Identifier</CODE>.  In another place in the grammar, we may want to
+refer to uses of identifiers instead and use the symbol <CODE>IdUse</CODE>.
+Note that use of chain rules in the manner just described makes it
+impossible to perform attribute computations during tree construction
+(see  <A HREF="syntax_2.html#SEC20">Constraints on grammar mapping</A>).
+<P>
+It is possible for Maptool to detect multiple possible matching abstract
+rules for a single concrete rule.  Maptool signals an error in this case
+that must be fixed by changing the grammar to disambiguate the contexts.
+<P>
+<H3><A NAME="SEC12" HREF="syntax_toc.html#SEC12">Complete generated concrete and abstract syntaxes</A></H3>
+<P>
+After rule matching is complete, unmatched concrete rules, except
+trivial chain rules and literal chain rules (see  <A HREF="syntax_2.html#SEC9">Chain rule definitions</A>)
+are added to the abstract syntax.  The reason for this is that
+trivial chain rules are meaningless in the abstract syntax and literal
+chain rules are only meaningful if they have attribute computations
+associated with them, in which case they would already have been
+specified as part of the abstract syntax.  
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+<P>
+Sometimes it is desirable to include literal chain rules in the abstract
+syntax even when the user has not explicitly included them there.  A
+typical situation where this occurs is when generating output conforming
+to the concrete syntax using the Idem tool
+(see  <A HREF="idem_2.html#SEC3">Textual unparser of Abstract Syntax Tree Unparsing</A>).
+In this situation the output must contain all
+literals hence the literal chain rules must be in the abstract syntax so
+that Idem can generate output patterns for them.  To preserve the
+literal chain rules in the abstract syntax use the <CODE>MAPCHAINS</CODE>
+keyword in a specification (see  <A HREF="syntax_2.html#SEC16">Preserving literal chain rules</A>).
+<P>
+Unmatched abstract rules are included in the concrete syntax except in
+the following instances:
+<P>
+<UL>
+<P>
+<LI>
+The rule is a chain rule whose left hand side is not a symbol in
+the concrete syntax.  Adding the rule to the concrete syntax in this
+case would cause the concrete syntax to be disconnected.
+<P>
+<LI>
+The rule can only be part of a computed subtree
+(see  <A HREF="lidoref_10.html#SEC20">Computed Subtrees of LIDO - Reference Manual</A>).
+This is true if the rule is only reachable from the root symbol
+if symbols preceded by a <KBD>$</KBD> are included.
+<P>
+</UL>
+<P>
+Users can use the <CODE>:consyntax</CODE> product
+(see  <A HREF="pp_2.html#SEC14">consyntax of Products and Parameters</A>) to view the
+complete version of the concrete syntax.
+<P>
+The <CODE>:abstree</CODE> product
+(see  <A HREF="pp_2.html#SEC15">abstree of Products and Parameters</A>) is used to view
+the complete abstract tree grammar.  The <CODE>:absyntax</CODE> product
+(see  <A HREF="pp_2.html#SEC16">absyntax of Products and Parameters</A>) by contrast only
+shows the abstract syntax rules which are not part of computed subtrees.
+<P>
+<H2><A NAME="SEC13" HREF="syntax_toc.html#SEC13">User mapping specifications</A></H2>
+<P>
+Files of type <TT>`map'</TT> can be provided by the user to influence the
+way in which certain rules are matched.  The syntax of map files
+can be found with other grammar description towards the end of this
+document (see  <A HREF="syntax_7.html#SEC41">Grammars for the Specification Files</A>).
+<P>
+There are currently three ways in which the mapping can be affected.
+The first are symbolic equivalence classes, which group together
+symbols that have the same semantic meaning.  The second method is to
+map specific rules.  Using this method, concrete rules can be rewritten
+and/or reordered to match a specific abstract rule.  The third method
+controls the elimination of literal chain rules.
+<P>
+<H3><A NAME="SEC14" HREF="syntax_toc.html#SEC14">Specifying symbolic equivalence classes</A></H3>
+<A NAME="IDX57"></A>
+<A NAME="IDX58"></A>
+<P>
+Symbolic equivalence classes are used to group together symbols
+appearing in the concrete syntax because the semantics of the symbols
+are equivalent.  As a result, a single symbol can be used to represent
+all of the members of the symbolic equivalence class in the abstract
+syntax.  This representative symbol can either be one of the concrete
+symbols or a new symbol altogether.  Symbolic equivalence classes are
+specified in files of type <TT>`map'</TT>.  A series of symbolic
+equivalences must be preceded by the keyword <CODE>MAPSYM</CODE>.  An
+equivalence class is then specified by giving the representative symbol
+(the symbol to appear in the abstract syntax), followed by <KBD>::=</KBD> and
+the list of symbolically equivalent symbols from the concrete syntax
+terminated by a period.  For example, the following specification says
+that a <CODE>Primary</CODE>, <CODE>Factor</CODE>, and <CODE>Expr</CODE> belong to the same
+equivalence class:
+<P>
+<PRE>
+MAPSYM
+Expr ::= Primary Factor .
+</PRE>
+<P>
+Application of symbolic equivalence classes to rules in the concrete syntax
+is done before the matching process begins.  Symbolic equivalence classes
+can only be created for symbols which are either all nonterminals or
+all terminals (see  <A HREF="syntax_1.html#SEC2">How to describe a context-free grammar</A>).  An error message will also be issued
+if a symbolic equivalence class specification includes abstract syntax
+symbols on the right hand side, since each abstract syntax symbol
+represents its own equivalence class.
+<P>
+For backward compatibility with previous releases of Eli, symbolic
+equivalence classes may also be specified in files of type <TT>`sym'</TT>.
+<P>
+<H3><A NAME="SEC15" HREF="syntax_toc.html#SEC15">Specifying rule mappings</A></H3>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<P>
+Rule mapping allows users to rewrite a concrete rule for the purposes
+of matching it to a specific abstract rule.  This is useful in cases
+where two syntactically different constructs are semantically equivalent.
+Consider the following expression language with bound identifiers:
+<P>
+<PRE>
+Computation: LetExpr / WhereExpr .
+LetExpr: 'let' Definitions 'in' Expr .
+WhereExpr: Expr 'where' Definitions .
+</PRE>
+<P>
+In this example, <CODE>LetExpr</CODE> and <CODE>WhereExpr</CODE> are semantically
+equivalent constructs, but the ordering of <CODE>Definitions</CODE> and <CODE>Expr</CODE>
+are reversed and they use different literal symbols.
+We'd like to only specify the semantic computations for the two constructs
+once.  To do this, we can define a symbolic equivalence class for
+<CODE>LetExpr</CODE> and <CODE>WhereExpr</CODE>:
+<P>
+<PRE>
+MAPSYM
+BoundExpr ::= LetExpr WhereExpr .
+</PRE>
+<P>
+The abstract rule that we can use to represent the two constructs is:
+<P>
+<PRE>
+RULE: BoundExpr ::= Definitions Expr END;
+</PRE>
+<P>
+Finally, we must use rule mapping specifications to rewrite the two
+concrete rules to match the abstract rule:
+<P>
+<PRE>
+MAPRULE
+LetExpr: 'let' Definitions 'in' Expr &#60; $1 $2 &#62; .
+WhereExpr: Expr 'where' Definitions &#60; $2 $1 &#62; .
+</PRE>
+<P>
+The keyword <CODE>MAPRULE</CODE> precedes a group of rule mapping specifications
+in the map file.  Each rule mapping begins with the concrete rule
+to be rewritten followed by its rewritten form in angle brackets.  In
+angle brackets, nonliteral symbols appear as positional parameters.
+A positional parameter is specified with a <KBD>$</KBD> followed by a number
+indicating which nonliteral symbol from the concrete rule is to be used.
+Any literal symbols may also appear between the angle brackets.
+<P>
+An abstract syntax will sometimes have several rules with different names
+but identical signatures.
+For example, consider the case where dyadic expressions are represented by
+abstract rules that do not contain operators:
+<P>
+<PRE>
+RULE Add: Expression ::= Expression Expression END;
+RULE Mul: Expression ::= Expression Expression END;
+...
+</PRE>
+In this case, the rule mapping must specify the abstract rule name
+explicitly in order to disambiguate the pattern match:
+<P>
+<PRE>
+MAPRULE
+Expression: '(' Expression '+' Expression ')' &#60; $1 $2 &#62;: Add .
+Expression: '(' Expression '*' Expression ')' &#60; $1 $2 &#62;: Mul .
+...
+</PRE>
+Rule names are optional, and may be omitted when the pattern match is
+unambiguous (as in the bound variable example).
+<P>
+When rule matching proceeds, the concrete rule is seen in its rewritten
+form.  An abstract syntax rule must exist in a LIDO
+specification that corresponds to the rule mapping specification given.
+Note that the use of rule mapping makes it impossible to perform
+attribute computations during tree construction (see  <A HREF="syntax_2.html#SEC20">Constraints on grammar mapping</A>).
+<P>
+<H3><A NAME="SEC16" HREF="syntax_toc.html#SEC16">Preserving literal chain rules</A></H3>
+<A NAME="IDX61"></A>
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+<P>
+The mapping process normally does not include literal chain rules in the
+complete abstract syntax unless they appear in the user-supplied
+abstract syntax (see  <A HREF="syntax_2.html#SEC12">Complete generated concrete and abstract syntaxes</A>).  Sometimes it is desirable to
+preserve literal chain rules even if the user has not included them in
+the abstract syntax.  To force literal chain rules to be included in the
+abstract syntax, use the <CODE>MAPCHAINS</CODE> keyword.  The behavior is
+unchanged if all literal chain rules already appear in the abstract syntax.
+<P>
+Care should be taken when using <CODE>MAPCHAINS</CODE> in conjunction with
+attribution.  A specification using this keyword may require
+more attribution than the same specification without it, because it
+may be necessary to transfer attribute values from the child to the parent
+or vice versa.  The presence of symbol computations for
+the symbols occurring in the chain rules without the transfer computations
+just mentioned may result in incorrect attribution without warning.
+<P>
+<H2><A NAME="SEC17" HREF="syntax_toc.html#SEC17">Influences of BOTTOMUP specifications on mapping</A></H2>
+<P>
+The generation of the parsing grammar (the input to the parser) may be
+influenced by <CODE>BOTTOMUP</CODE> specifications
+(see  <A HREF="lidoref_5.html#SEC6">Computations of LIDO - Reference Manual</A>)
+specified in your attribute grammar.  This is because the parsing grammar
+must ensure that the nodes of the abstract syntax tree are constructed
+in a particular order in the presence of <CODE>BOTTOMUP</CODE> constraints.
+<P>
+In order to deal with this, Maptool must sometimes inject generated
+chain rules into the parsing grammar to which tree building actions can
+be attached.  These injected chain rules may cause the parsing grammar
+to exhibit LALR(1) conflicts.  If so, an error will be reported to
+indicate that the <CODE>BOTTOMUP</CODE> constraints you have provided cause
+your grammar to not be parsable.
+<P>
+In trying to resolve such a conflict, it is useful to use the <CODE>:pgram</CODE>
+derivation (see  <A HREF="pp_2.html#SEC17">pgram of Products and Parameters</A>) to be able to
+view the parsing grammar that is submitted to the parser generator and
+contains the injected chain rules.  It is also useful to use the
+<CODE>:OrdInfo</CODE> derivation to get more information about how
+<CODE>BOTTOMUP</CODE> constraints were introduced for specific rules.
+Approaches to resolving such a problem include eliminating unnecessary
+<CODE>BOTTOMUP</CODE> constraints from the attribute grammar or making changes
+to the concrete syntax that allow the chain rules to be injected without
+causing LALR(1) conflicts.
+<P>
+<H2><A NAME="SEC18" HREF="syntax_toc.html#SEC18">Syntax development hints</A></H2>
+<P>
+This section begins by describing typical patterns of syntax development.
+This is followed by two more specific examples of how to use the mapping
+techniques described in the previous sections.
+<P>
+<H3><A NAME="SEC19" HREF="syntax_toc.html#SEC19">Typical patterns of syntax development</A></H3>
+<P>
+When developing a translator for an existing language, the complete
+concrete syntax is typically already available.  In these cases,
+it is advantageous to start with the complete concrete syntax and
+add symbolic equivalences and rule mapping specifications to suit
+the attribute computations as they are being developed.
+<P>
+On the other hand, when designing a new language, it is easier to start
+work by specifying attribute computations and adding concrete syntax rules
+as necessary to resolve issues of precedence, associativity, and other
+parsing ambiguities.
+<P>
+When errors relating to the syntax appear, it is strongly recommended that
+the first course of action be to look at the complete generated versions of the
+syntaxes by using the <CODE>:consyntax</CODE>, <CODE>:absyntax</CODE>, and
+<CODE>:abstree</CODE> products (see  <A HREF="pp_2.html#SEC13">Specifications of Products and Parameters</A>).
+Very often these problems are simply a result
+of not correctly anticipating the matching process.
+<P>
+<H3><A NAME="SEC20" HREF="syntax_toc.html#SEC20">Constraints on grammar mapping</A></H3>
+<P>
+The LIGA attribute grammar system allows users to specify
+that the first pass of computations are to be performed as the
+abstract syntax tree is being built.  This is specified either
+by an option given in a LIGA control specification
+see  <A HREF="lcl_3.html#SEC3">Order Options of LIGA Control Language</A> or by using
+an additional keyword in an attribute grammar computation
+see  <A HREF="lidoref_5.html#SEC6">Computations of LIDO - Reference Manual</A>.
+<P>
+Combining computations with tree construction, however, requires
+that the tree be constructed in strict left-to-right and
+bottom-to-top order.  In the presence of more advanced grammar
+mappings, it is not possible to maintain this strict ordering.
+For this reason, Maptool generates the LIGA control directive:
+<P>
+<PRE>
+ORDER: TREE COMPLETE ;
+</PRE>
+<P>
+when it detects that one of these grammar mappings is required.
+The control directive indicates that the tree
+should be constructed completely before any computations
+take place.
+<P>
+The grammar mappings which cause Maptool to emit these directives
+are the use of chain rules in the abstract syntax that do
+not exist in the concrete syntax (see  <A HREF="syntax_2.html#SEC11">Matching remaining rules</A>)
+and any use of rule mapping (see  <A HREF="syntax_2.html#SEC15">Specifying rule mappings</A>).
+Aside from symbolic mappings (see  <A HREF="syntax_2.html#SEC14">Specifying symbolic equivalence classes</A>) and the
+use of LISTOF constructs,
+the generated concrete and abstract syntaxes need to be identical in order
+to allow computations to take place during tree construction.
+<P>
+<H3><A NAME="SEC21" HREF="syntax_toc.html#SEC21">Abstracting information from literals</A></H3>
+<P>
+Literal terminals often distinguish phrases whose structures are identical
+except for the particular literal terminal.
+For example, in a normal arithmetic expression the phrase describing
+addition and the phrase describing subtraction are identical except for
+the literal <CODE>+</CODE> or <CODE>-</CODE>.
+Taking nonterminal equivalence classes into account, it may be that
+<EM>all</EM> phrases representing operations with two operands are identical
+except for the operator literal.
+<P>
+When phrases have identical structure except for one or more literals,
+the tree computations carried out at the nodes corresponding to those
+phrases are often identical except for some parameter that depends on the
+particular literal.
+It is then useful to abstract from the distinct literals,
+<A NAME="IDX65"></A>
+<A NAME="IDX64"></A>
+obtaining a single phrase with which to associate the computation and
+a set of phrases with which to associate the parameter evaluation.
+The key point here is that in many cases the computation will apply to a
+wide variety of translation problems, whereas the particular set of
+literals characterizes a single translation problem.
+By abstracting from the distinct literals, the computation can be reused.
+<A NAME="IDX66"></A>
+<P>
+To abstract from a specific literal, simply replace that literal with a
+nonterminal and add a production that derives the literal from that
+nonterminal.
+This added production represents the phrase with which the parameter
+evaluation would be associated.
+The computation for the phrase in which the literal was replaced by
+the nonterminal will now obtain the parameter value from the corresponding
+child, rather than evaluating it locally.
+<P>
+<H3><A NAME="SEC22" HREF="syntax_toc.html#SEC22">Mapping expressions for overload resolution</A></H3>
+<P>
+It is quite common for a single operator to have different meanings that
+depend on the types of its operands.
+For example, in Pascal the operator <CODE>+</CODE> might mean integer addition,
+real addition or set union.
+There are well-known techniques for deciding what is meant in a particular
+context, and these techniques depend only on the particular set of operators
+and operand types.
+The computations themselves are parameterized by this information
+(see  <A HREF="type_4.html#SEC14">Selecting an operator at an expression node of Type Analysis</A>).
+<P>
+In order to reuse the tree computation to resolve overloading,
+<A NAME="IDX68"></A>
+<A NAME="IDX67"></A>
+abstract from the particular set of literals
+that represent the operators of the language.
+Then define equivalence classes in which every nonterminal representing an
+expression is replaced by <CODE>Expr</CODE> and every nonterminal representing an
+<A NAME="IDX69"></A>
+operator by <CODE>Op</CODE>.
+Finally, associate the appropriate computations with the following rules:
+<P>
+<PRE>
+Expr: Expr Op Expr.
+Expr: Op Expr.
+Expr: Identifier.
+Expr: Integer.
+...
+</PRE>
+<P>
+(Here <CODE>...</CODE> indicates rules for other denotations, such as
+floating-point numbers, <CODE>true</CODE>, etc., defined in the language.)
+<P>
+As an example of the process, consider a language with integer and Boolean
+expressions in the style of Pascal.
+<P>
+The literals that represent operators in this language are <CODE>+</CODE>,
+<CODE>-</CODE>, <CODE>*</CODE>, <CODE>/</CODE>, <CODE>div</CODE>, <CODE>mod</CODE>, <CODE>and</CODE>,
+<CODE>or</CODE> and <CODE>not</CODE>.
+<A NAME="IDX71"></A>
+<A NAME="IDX72"></A>
+<A NAME="IDX73"></A>
+<A NAME="IDX70"></A>
+Define a new nonterminal for each precedence level of the dyadic operators,
+one for the unary arithmetic operators, and one for <CODE>not</CODE>:
+<P>
+<PRE>
+Addop: '+' / '-' / 'or' .
+Mulop: '*' / '/' / 'div' / 'mod' / 'and' .
+Sign: '+' / '-' .
+Notop: 'not' .
+</PRE>
+<P>
+These productions abstract from the literals, and embody the information
+about the precedence and association (all operators are left-associative)
+needed to determine the phrase structure.
+<P>
+Using these new nonterminals, define the phrase structure of an expression:
+<P>
+<PRE>
+SimpleExpression: Sign Sum / Sum .
+Sum: Sum Addop Term / Term .
+Term: Term Mulop Factor / Factor .
+Factor: Notop Factor / Primary .
+Primary: Integer / Id / 'true' / 'false' / '(' SimpleExpression ')' .
+</PRE>
+<P>
+(Here <CODE>Integer</CODE> is a terminal representing arbitrary digit sequences
+and <CODE>Id</CODE> is a terminal representing arbitrary identifiers.
+These symbols will be recognized by the lexical analyzer.)
+<P>
+All of the dyadic operators fall into the same equivalence class, which
+should be represented by the symbol <CODE>Binop</CODE>.
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+<A NAME="IDX77"></A>
+<A NAME="IDX74"></A>
+<CODE>Sign</CODE> and <CODE>Notop</CODE> both belong to the <CODE>Unop</CODE> class, and
+<CODE>SimpleExpression</CODE>, <CODE>Sum</CODE>, <CODE>Term</CODE>, <CODE>Factor</CODE>,
+<CODE>Primary</CODE> are in the <CODE>Expr</CODE> class.
+Here is a type-<TT>`map'</TT> file defining these classes:
+<P>
+<PRE>
+MAPSYM
+Op ::= Addop Mulop Sign Notop .
+Expr ::= SimpleExpression Sum Term Factor Primary .
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_1.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_3.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="syntax_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

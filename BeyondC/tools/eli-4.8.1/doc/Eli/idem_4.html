@@ -1,0 +1,673 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from idem.tnf on 5 December 2013 -->
+
+<TITLE>Abstract Syntax Tree Unparsing - Deriving an Unparser</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Abstract Syntax Tree Unparsing</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC13" HREF="idem_toc.html#SEC13">Deriving an Unparser</A></H1>
+<P>
+Recall the example of the pretty-printer that was defined by the file
+following type-<TT>`specs'</TT> file
+(see  <A HREF="idem_1.html#SEC1">Using an Unparser</A>):
+<P>
+<PRE>
+example.fw
+example.fw :idem
+Add.fw
+</PRE>
+<P>
+The first line is the name of a file defining a processor that builds a
+tree from a sentence in the expression language.
+The second line is a request to derive a textual unparser from the
+definition of the expression language.
+Finally, the third line is the name of a file containing the computation
+that outputs the unparsed tree.
+These three lines constitute the complete definition of the pretty-printer,
+which could be derived from this type-<TT>`specs'</TT> file in the usual way.
+<P>
+Here we are concerned only with the problem of
+<A NAME="IDX122"></A>
+<A NAME="IDX121"></A>
+<EM>deriving</EM> an unparser, exemplified by the second line above.
+Such a derivation always yields a FunnelWeb file that defines the desired
+unparser.
+Since the derivation occurs as a component of a type-<TT>`specs'</TT> file, the
+derived unparser becomes a component of the processor defined by that
+type-<TT>`specs'</TT> file.
+<P>
+All of the information needed to construct the unparser must be derivable
+from its
+<A NAME="IDX123"></A>
+<EM>basis</EM> (file <TT>`example.fw'</TT> in this case).
+Different derivations are applied to the basis to create different kinds of
+unparsers, to control the representation language of the unparsed text, and
+to obtain a definition of the output structure.
+<P>
+<H2><A NAME="SEC14" HREF="idem_toc.html#SEC14">Establishing a basis</A></H2>
+<P>
+In the simplest case, the only information needed to derive an unparser
+is the tree grammar rules defining the set of trees to be unparsed.
+<P>
+Since the generated unparser will be a component of some processor,
+all of the rules defining trees to be unparsed must be
+valid rules of the tree grammar for that processor.
+The easiest way to satisfy this requirement is for the basis of the
+unparser derivation to define a complete tree grammar for the processor.
+This is the situation in our example; file <TT>`example.fw'</TT> defines the
+complete tree grammar for the expression language and therefore for the
+pretty-printer.
+(See  <A HREF="idem_4.html#SEC16">Deriving structural unparsers</A>, for applications in
+which unparsers are derived from parts of the tree grammar for a processor.)
+<P>
+Suppose that we were to create a file <TT>`evaluate.fw'</TT> containing
+computations that evaluate sentences in the expression language.
+A "desk calculator" could then be defined by a file <TT>`calculator.specs'</TT>
+with the content:
+<P>
+<PRE>
+example.fw
+evaluate.fw
+</PRE>
+<P>
+In this case, <TT>`calculator.specs'</TT> still defines the complete tree
+grammar for the expression language.
+Thus the following type-<TT>`specs'</TT> file would define a processor that
+reads sentences in the expression language, evaluates them,
+and prints them in a standard format:
+<P>
+<PRE>
+calculator.specs
+calculator.specs :idem
+Add.fw
+</PRE>
+<P>
+The situation is more complex when some PTG patterns must be overridden
+to obtain the desired output.
+Overriding patterns must be specified as part of the basis from which
+the unparser is derived,
+and they will be incorporated into the generated unparser definition.
+<P>
+One way to include overriding PTG patterns in the basis of an unparser
+derivation is to make them a part of the overall processor specification.
+Thus, for example, they could be included in <TT>`example.fw'</TT> of the
+specifications above.
+Then either of the derivations shown (the one based on <TT>`example.fw'</TT> or
+the one based on <TT>`calculator.specs'</TT>) would produce an unparser with
+the specified patterns overridden.
+It is important to note that the tree grammar and the PTG patterns are the
+<EM>only</EM> things defined by <TT>`calculator.specs'</TT>
+(or by <TT>`example.fw'</TT> in the earlier derivation)
+that are relevant to deriving an unparser.
+All other information is ignored.
+PTG patterns whose names do not match prefixed rule names from the tree
+grammar are also ignored.
+<P>
+It is often a violation of modularity to combine overriding patterns with
+the overall processor specification.
+For example, consider an unparser that outputs a postfix representation
+of a sentence in the expression language
+(see  <A HREF="idem_3.html#SEC11">Overriding PTG patterns</A>).
+The overriding patterns are specific to this particular processor, and have
+nothing to do with the definition of the expression language itself.
+Including them in <TT>`example.fw'</TT> would pollute the language
+specification, tying it to this application.
+<P>
+We can easily avoid this violation of modularity by adding a <CODE>patterns</CODE>
+parameter to <TT>`example.fw'</TT> to form the basis of the derivation.
+First, the overriding patterns are defined in a file named (say)
+<TT>`Postfix.ptg'</TT>:
+<P>
+<PRE>
+Idem_PlusExp: $1 $2  "+" [Separator]
+Idem_StarExp: $1 $2  "*" [Separator]
+Idem_Parens:  $1
+Idem_CallExp: $1 $2      [Separator]
+</PRE>
+<P>
+This file is then supplied as the value of the <CODE>patterns</CODE> parameter
+(see  <A HREF="ui_1.html#SEC5">Parameterization Expressions of Eli User Interface Reference Manual</A>):
+<A NAME="IDX124"></A>
+<P>
+<PRE>
+example.fw +patterns=(Postfix.ptg)
+</PRE>
+<P>
+The unparser derivation would then be:
+<P>
+<PRE>
+example.fw +patterns=(Postfix.ptg) :idem
+</PRE>
+<P>
+A complete processor accepting a sentence in the expression language and
+printing its postfix equivalent in standard form would then be defined by
+the following type-<TT>`specs'</TT> file:
+<P>
+<PRE>
+example.fw
+example.fw +patterns=(Postfix.ptg) :idem
+Add.fw
+</PRE>
+<P>
+A basis may include any number of file-valued <CODE>patterns</CODE> parameters.
+Only the PTG patterns defined by these files are relevant to the unparser
+generation; all other information is ignored.
+PTG patterns whose names do not match prefixed rule names from the tree
+grammar are also ignored.
+<A NAME="IDX125"></A>
+<P>
+Any unparser can be derived with a prefix other than <CODE>Idem</CODE> for the
+type-<CODE>PTGNode</CODE> attributes and PTG patterns that it creates.
+The desired prefix forms part of the basis from which the unparser is
+derived.
+This feature is useful if an application involves more than one unparser
+(see  <A HREF="idem_4.html#SEC18">Deriving multiple unparsers</A>).
+<P>
+The desired prefix is supplied as the value of the <CODE>prefix</CODE> parameter.
+For example, the basis for an expression language unparser computing the
+attributes <CODE>TargetPtg</CODE> and <CODE>TargetOrigPtg</CODE> instead of
+<CODE>IdemPtg</CODE> and <CODE>IdemOrigPtg</CODE> would be:
+<P>
+<PRE>
+example.fw +prefix=Target
+</PRE>
+<P>
+All PTG pattern names in an unparser derived from this basis would begin
+with <CODE>Target_</CODE>.
+Thus, if we wished to override the generated patterns in order to produce
+postfix, the overriding pattern names in <TT>`Postfix.ptg'</TT> would have to
+reflect the new prefix:
+<P>
+<PRE>
+Target_PlusExp: $1 $2  "+" [Separator]
+Target_StarExp: $1 $2  "*" [Separator]
+Target_Parens:  $1
+Target_CallExp: $1 $2      [Separator]
+</PRE>
+<P>
+The basis of such an unparser consists of the the specification file for
+the tree grammar, modified by the two parameters (which may be given in
+any order
+see  <A HREF="ui_1.html#SEC5">Parameterization Expressions of Eli User Interface Reference Manual</A>):
+<P>
+<PRE>
+example.fw +prefix=Target +patterns=(Postfix.ptg)
+</PRE>
+<P>
+In the remainder of this document, <TT>`Basis'</TT> will be used to denote the
+basis of an unparser derivation.
+As we have seen in this section, <TT>`Basis'</TT> consists of a single file
+defining a tree grammar, possibly parameterized by a set of overriding
+PTG patterns and/or a prefix to replace the default <CODE>Idem</CODE>.
+<P>
+<H2><A NAME="SEC15" HREF="idem_toc.html#SEC15">Deriving textual unparsers</A></H2>
+<A NAME="IDX126"></A>
+<A NAME="IDX127"></A>
+<P>
+A textual unparser is constructed by deriving the
+<A NAME="IDX128"></A>
+<CODE>:idem</CODE> product:
+<P>
+<PRE>
+Basis :idem
+</PRE>
+<P>
+The result of this derivation is a FunnelWeb file defining a textual
+unparser.
+That FunnelWeb file contains:
+<P>
+<UL>
+<LI>
+Named LIDO rules for the tree grammar specified by <TT>`Basis'</TT>.
+<P>
+<LI>
+PTG patterns either generated from the tree grammar
+(see  <A HREF="idem_2.html#SEC3">Textual unparser</A>)
+or supplied as part of <TT>`Basis'</TT>
+(see  <A HREF="idem_4.html#SEC14">Establishing a basis</A>).
+<P>
+<LI>
+<CODE>CLASS</CODE> <CODE>SYMBOL</CODE> computations for <CODE>IdemPtg</CODE> and
+<CODE>IdemOrigPtg</CODE>
+(see  <A HREF="idem_2.html#SEC3">Textual unparser</A>).
+Those computations invoke PTG routines generated from the patterns.
+The prefix of the attribute and routine names is either <CODE>Idem</CODE> or the
+string specified via a <CODE>prefix</CODE> parameter in <TT>`Basis'</TT>
+(see  <A HREF="idem_4.html#SEC14">Establishing a basis</A>).
+<P>
+<LI>
+A definition of the <CODE>IGNORE</CODE> macro
+(see  <A HREF="idem_3.html#SEC11">Overriding PTG patterns</A>).
+<P>
+<LI>
+Invocations of the <CODE>PtgCommon</CODE>
+(see  <A HREF="output_2.html#SEC2">Commonly used Output patterns for PTG of Tasks related to generating output</A>)
+and <CODE>Separator</CODE>
+(see  <A HREF="output_8.html#SEC8">Introduce Separators in PTG Output of Tasks related to generating output</A>)
+library modules.
+</UL>
+<P>
+A PostScript version of the unparser definition can also be derived for
+documentation purposes:
+<P>
+<PRE>
+Basis :idem :fwTex :ps
+</PRE>
+<P>
+<H2><A NAME="SEC16" HREF="idem_toc.html#SEC16">Deriving structural unparsers</A></H2>
+<A NAME="IDX129"></A>
+<A NAME="IDX130"></A>
+<P>
+A structural unparser is constructed by deriving the
+<A NAME="IDX131"></A>
+<CODE>:tree</CODE> product:
+<P>
+<PRE>
+Basis :tree
+</PRE>
+<P>
+The result of this derivation is a FunnelWeb file defining a structural
+unparser.
+That FunnelWeb file contains:
+<P>
+<UL>
+<LI>
+Named LIDO rules for the tree grammar specified by <TT>`Basis'</TT>.
+<P>
+<LI>
+PTG patterns either generated from the tree grammar
+(see  <A HREF="idem_2.html#SEC3">Textual unparser</A>)
+or supplied as part of <TT>`Basis'</TT>
+(see  <A HREF="idem_4.html#SEC14">Establishing a basis</A>).
+<P>
+<LI>
+<CODE>CLASS</CODE> <CODE>SYMBOL</CODE> computations for <CODE>IdemPtg</CODE> and
+<CODE>IdemOrigPtg</CODE>
+(see  <A HREF="idem_2.html#SEC3">Textual unparser</A>).
+Those computations invoke PTG routines generated from the patterns.
+The prefix of the attribute and routine names is either <CODE>Idem</CODE> or the
+string specified via a <CODE>prefix</CODE> parameter in <TT>`Basis'</TT>
+(see  <A HREF="idem_4.html#SEC14">Establishing a basis</A>).
+<P>
+<LI>
+A definition of the <CODE>IGNORE</CODE> macro
+(see  <A HREF="idem_3.html#SEC11">Overriding PTG patterns</A>).
+<P>
+<LI>
+Invocations of the <CODE>PtgCommon</CODE>
+(see  <A HREF="output_2.html#SEC2">Commonly used Output patterns for PTG of Tasks related to generating output</A>)
+and <CODE>BlockPrint</CODE>
+(see  <A HREF="output_6.html#SEC6">Typesetting for Block Structured Output of Tasks related to generating output</A>)
+library modules.
+</UL>
+<P>
+A PostScript version of the unparser definition can also be derived for
+documentation purposes:
+<P>
+<PRE>
+Basis :tree :fwTex :ps
+</PRE>
+<P>
+A structural unparser produces a description of the tree in some language.
+Recall that a generic functional representation is used by default.
+<A NAME="IDX132"></A>
+Any other standard representation language can be specified by supplying
+an appropriate value of the
+<A NAME="IDX133"></A>
+<CODE>lang</CODE> parameter to the derivation.
+For example, the following derives a structural unparser producing a
+description of the tree in XML:
+<P>
+<PRE>
+Basis +lang=XML :tree
+</PRE>
+<P>
+See  <A HREF="idem_2.html#SEC9">Languages describing tree structure</A>, for a list of the
+standard representation languages.
+<A NAME="IDX134"></A>
+<P>
+When none of the standard representation languages is appropriate, you
+can specify your own unparser generator.
+This unparser generator can be invoked by supplying its executable file to
+the derivation as the value of the <CODE>lang</CODE> parameter.
+<P>
+The most common way to specify a new unparser generator is to modify an
+existing specification and then use Eli to produce an executable file from
+that modified specification.
+We have already given an example of this technique
+(see  <A HREF="idem_2.html#SEC9">Languages describing tree structure</A>).
+In that example, file
+<A NAME="IDX135"></A>
+<TT>`M3.specs'</TT> defined a generator producing an
+unparser that represents a tree by a Modula-3 program.
+The executable version of that generator could be obtained in the usual way
+by deriving the <CODE>exe</CODE> product from <TT>`M3.specs'</TT>
+(see  <A HREF="pp_1.html#SEC2">exe -- Executable Version of the Processor of Products and Parameters Reference</A>).
+Thus the following derivation would create a Modula-3 unparser
+for the trees defined by <TT>`Basis'</TT>:
+<P>
+<PRE>
+Basis +lang=(M3.specs :exe) :tree
+</PRE>
+<P>
+Here the executable file supplied as the value of the <CODE>lang</CODE> parameter
+is the one derived from the specification of the Modula-3 unparser
+generator.
+<P>
+<H2><A NAME="SEC17" HREF="idem_toc.html#SEC17">Obtaining the structure definition</A></H2>
+<A NAME="IDX136"></A>
+<P>
+Structural unparser generators producing application-language code also
+deliver a definition of the data structure(s) described by that code.
+For example, an unparser generator producing tree descriptions in XML also
+delivers a "document type declaration" (DTD) file defining a grammar for
+those descriptions.
+<A NAME="IDX137"></A>
+Here's the DTD file for the expression language:
+<P>
+<PRE>
+&#60;!ENTITY % Axiom "(rule_000)"&#62;
+&#60;!ENTITY % Expression
+  "(PlusExp | StarExp | Parens | IdnExp | IntExp | CallExp)"&#62;
+&#60;!ENTITY % Arguments "(ArgList)"&#62;
+&#60;!ELEMENT rule_000 (%Expression;)&#62;
+&#60;!ELEMENT PlusExp (%Expression;, %Expression;)&#62;
+&#60;!ELEMENT StarExp (%Expression;, %Expression;)&#62;
+&#60;!ELEMENT Parens (%Expression;)&#62;
+&#60;!ELEMENT IdnExp (#PCDATA)&#62;
+&#60;!ELEMENT IntExp (#PCDATA)&#62;
+&#60;!ELEMENT CallExp (#PCDATA, %Arguments;)&#62;
+&#60;!ELEMENT ArgList ((%Expression;)*)&#62;
+</PRE>
+<A NAME="IDX138"></A>
+<P>
+This definition depends only on the tree grammar,
+not on any particular tree defined by that grammar.
+Thus it is built separately:
+<P>
+<PRE>
+Basis +lang=XML :treeStruc
+</PRE>
+<P>
+The <CODE>treeStruc</CODE> product is a set of files.
+Both the number of files in that set and their types depend on the
+particular structural unparser being generated.
+For example, the set is empty for the generic functional representation.
+The XML unparser generator produces a single DTD file, and
+the Java unparser generator produces one type-<TT>`java'</TT> file for every
+class in the representation.
+<P>
+You can list the files in the set with the following request:
+<P>
+<PRE>
+Basis +lang=XML :treeStruc :ls &#62;
+</PRE>
+<P>
+To obtain copies of the definition files, make a copy of the
+set itself
+(see  <A HREF="ui_3.html#SEC9">Extracting and Editing Objects of Eli User Interface Reference Manual</A>):
+<P>
+<PRE>
+Basis +lang=XML :treeStruc &#62; Structure
+</PRE>
+<P>
+(This request copies the generated files into a sub-directory named
+<TT>`Structure'</TT> of the current directory;
+the destination name <TT>`Structure'</TT> could be replaced by any directory
+name.
+The directory must exist before the request is made.)
+<P>
+<H2><A NAME="SEC18" HREF="idem_toc.html#SEC18">Deriving multiple unparsers</A></H2>
+<A NAME="IDX139"></A>
+<A NAME="IDX140"></A>
+<A NAME="IDX141"></A>
+<P>
+Consider a translator that builds a target program tree corresponding to
+the source program presented to it.
+Perhaps we would like to make that translator output a listing of the source
+text formatted according to standard rules and also an XML file that
+defined the target program tree.
+This can be done by including two unparsers, one textual and the other
+structural.
+<P>
+To make the discussion concrete, let <TT>`Source_i.specs'</TT> define
+a processor that reads a sentence in language <SAMP>`i'</SAMP> and builds a
+corresponding decorated tree.
+<TT>`Translator.fw'</TT> specifies computations over such a source program
+tree that build a target program tree according to the structure defined by
+file <TT>`Target_j.specs'</TT>.
+File <TT>`Translator.specs'</TT>, consisting of the following three lines,
+would then define a translator that would build a target program tree
+corresponding to a sentence in language <SAMP>`i'</SAMP>:
+<P>
+<PRE>
+Source_i.specs
+Target_j.specs
+Translate.fw
+</PRE>
+<P>
+If the root of the tree grammar defined in <TT>`Source_i.specs'</TT>
+is <CODE>Source</CODE>, and the root of the tree grammar defined in
+<TT>`Target_j.specs'</TT> is <CODE>Target</CODE>,
+then <TT>`Translate.fw'</TT> might contain the following LIDO computation:
+<P>
+<PRE>
+RULE Axiom: Root ::= Source $ Target
+COMPUTE
+  Target.GENTREE=Source.Code;
+END;
+</PRE>
+<P>
+This computation takes the target program tree that has been built as the
+value of attribute <CODE>Source.Code</CODE>, and makes it the second child of the
+root node
+(see  <A HREF="lidoref_10.html#SEC20">Computed Subtrees of LIDO - Reference Manual</A>).
+<P>
+Given <TT>`Translator.specs'</TT>, one way to define a processor producing
+a listing of the source text formatted according to standard rules and also
+an XML file defining the target program tree
+would be to write the following type-<TT>`specs'</TT> file:
+<P>
+<PRE>
+Translator.specs
+Translator.specs                          :idem
+Translator.specs +prefix=Target +lang=XML :tree
+Add.fw
+</PRE>
+<P>
+The first line of this file defines the translator itself, and the second
+line defines a textual unparser computing <CODE>IdemPtg</CODE> attributes.
+A structural unparser computing <CODE>TargetPtg</CODE> attributes that hold XML
+representations of their nodes is defined by the third line.
+Two of the additional computations defined by the last line of this file
+might be:
+<A NAME="IDX142"></A>
+<A NAME="IDX143"></A>
+<P>
+<PRE>
+SYMBOL Source COMPUTE Sep_Out   (      THIS.IdemPtg);   END;
+SYMBOL Target COMPUTE BP_OutFile("xml",THIS.TargetPtg); END;
+</PRE>
+<P>
+These computations will write the pretty-printed source program to the
+standard output, and the XML representation of the target program tree to
+file <TT>`xml'</TT>.
+<P>
+<H2><A NAME="SEC19" HREF="idem_toc.html#SEC19">Deriving unparsers from sub-grammars</A></H2>
+<A NAME="IDX144"></A>
+<P>
+Suppose that the tree grammars defined by <TT>`Source_i.specs'</TT> and
+<TT>`Target_j.specs'</TT> in the example of the previous section are disjoint.
+In that case, the processor defined there will compute
+unnecessary <CODE>IdemPtg</CODE> attributes for target tree nodes and
+unnecessary <CODE>TargetPtg</CODE> attributes for source tree nodes.
+These unnecessary computations can be avoided by simply changing the
+type-<TT>`specs'</TT> file to derive each unparser from the tree grammar
+to which it applies:
+<P>
+<PRE>
+Translator.specs
+Source_i.specs                          :idem
+Target_j.specs +prefix=Target +lang=XML :tree
+Add.fw
+</PRE>
+<P>
+Note that no other changes are needed in any of the files.
+<P>
+Each of the two tree grammars on which the unparsers are based defines a
+complete, rooted sub-tree of the complete tree.
+Moreover, because the tree grammar defined by <TT>`Target_j.specs'</TT>
+describes a tree created by attribution, each of its rules has been given
+an explicit name
+(see  <A HREF="lidoref_10.html#SEC21">Tree Construction Functions of LIDO - Reference Manual</A>).
+<P>
+The fact that no more than one of the tree grammars contains unnamed rules
+is crucial to the success of the complete processor derivation.
+Recall that an unparser definition contains the definition of the tree
+grammar on which it is based, and every rule in that tree grammar is named.
+If the names were not explicit in the unparser's basis, the names in the
+unparser definition will have been created as part of the unparser
+generation.
+The same name creation process is applied during every unparser generation,
+and therefore if two unparsers generated from disjoint tree grammars with
+unnamed rules are combined there will be name clashes.
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_3.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_5.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="idem_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

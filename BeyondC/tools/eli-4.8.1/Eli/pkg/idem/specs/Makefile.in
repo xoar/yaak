@@ -1,0 +1,26 @@
+# $Id: Makefile.in,v 1.4 2009/08/03 19:16:19 profw Exp $
+# Copyright 1997, The Regents of the University of Colorado
+
+CC	= @CC@
+
+DIR	= pkg/idem/specs
+SRC	=
+AUX	= Makefile Makefile.in Odinfile
+CMD	=
+EXE	= Idem.exe Tree.exe XML.exe CPP.exe Java.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+@toolmk_h@
+
+$(EXE):	Odinfile ../../Unparser/Odinfile ../../Unparser/Analysis.fw
+	$(DESTDIR)/bin/eli -c $(DESTDIR)/CACHE $@
+	@while test -f $(DESTDIR)/CACHE/*/SOCKET; do wait; done
+
+Idem.exe:	../../Unparser/Idem.fw
+Tree.exe:	../../Unparser/Tree.fw
+XML.exe:	../../Unparser/Xml.fw
+CPP.exe:	../../Unparser/Cpp.fw
+Java.exe:	../../Unparser/Java.fw

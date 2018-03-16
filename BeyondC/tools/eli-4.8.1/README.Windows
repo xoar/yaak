@@ -1,0 +1,75 @@
+$Id: README.Windows,v 1.14 2013/04/09 17:58:41 profw Exp $
+
+Eli runs reliably ONLY under Windows 2000 and later.  Windows 3.1,
+95, 98, and ME do not support pre-emption and true multi-threading.
+Eli is a multi-threaded program and therefore randomly deadlocks under
+these systems.
+
+There are two ways to implement Eli under Windows: via the Cygwin
+Unix environment, or via a virtual PC running some version of Unix.
+If you decide to use a virtual PC, you must implement that platform and
+then install an appropriate version of Unix.  At that point you are no
+longer dealing with Windows, and therefore you should perform a normal
+Unix installation.
+
+Cygwin can be obtained from http://www.cygwin.com.  In addition to the
+code istelf, this site provides implementation instructions and user
+documentation.  In order to run Eli under Cygwin, you need at least the
+DLL and the following tools:
+
+	Devel: gcc, gdb, make, libncurses-devel
+	Interpreters: gawk
+	Utils: file, diffutils
+
+Once you have a working copy of Cygwin, you can proceed to install Eli.
+
+Suggested procedure:
+
+    ./configure --without-x
+    make
+
+Please see also the README file in this directory and note the
+following suggestions:
+
+- Don't use windows tools to unpack Eli's tar.gz files.  The tar archive
+  contains links that cannot be handled by these tools.  Instead use
+  "tar -jxf" in your cygwin window.
+
+- Don't use path names that contain blanks (e.g. "Program Files") or
+  plusses (e.g. "w2000+i386").  Eli doesn't handle them properly.
+
+- Don't use Tcl/Tk.  The version of Tcl/Tk distributed with Cygwin is for
+  use only with gdb, and does not work with Eli.  It is safest for you to
+  ignore any implementation of X windows completely:
+
+    ./configure --without-x
+
+  If you have already configured Eli with other parameters, and the result
+  failed, then you should return to the pristine distribution before trying
+  these parameters.  To do that, either unpack the tar file again or make
+  the top-level "distribution clean":
+
+    make distclean
+
+- If you have difficulty with the interactive aspects of Eli (e.g. "?" for
+  getting help, "<" for putting a file into the editor, "!" for executing
+  a shell command), exit Eli and set your SHELL environment variable to
+  some other shell.  Eli users have had problems using the Korn shell under
+  Cygwin running on Windows XP, but we haven't heard of any other specific
+  problems.  If Eli builds correctly, then SHELL='/bin/sh' will definitely
+  work.
+
+- Another problem is that the SHELL variable may not be exported from bash
+  to eli.  You can test this by giving the following Eli request:
+
+    -> !echo $SHELL
+
+  If this yields only an Eli prompt, exit Eli and execute "export SHELL".
+
+- Some problems can be caused if Windows utilities are on your system PATH
+  before the corresponding Cygwin ones.  E.g., Windows has a "sort" program
+  that is incompatible with Cygwin's "sort" which is used by Eli.  Make sure
+  that the Cygwin directories take precedence on your PATH.
+
+Please note that Eli is considerably slower under Cygwin than it is under
+Unix.

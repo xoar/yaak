@@ -1,0 +1,12 @@
+begin
+  type (real, fct -> void) fct;
+  type (real, (int -> gct) -> void) gct;
+  type (real -> hct) kct;
+  type (kct, hct -> int) lct;
+  type (real -> lct) hct;
+  var fct fff;
+  var kct kkk;
+
+  fff (1.3, fff);
+  kkk (1.4) (1.5);
+end

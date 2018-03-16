@@ -1,0 +1,63 @@
+# $Id: Makefile.in,v 1.1 2001/05/09 20:44:23 waite Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/idl/idllib
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/idl/idllib
+SRC	=	
+COP	=	nextOne.c  rmisc.c reader.c scanner.c labels.c wmisc.c \
+		init.c list.c debug.c MsgChar.c array.c wrat.c string.c \
+		basics.c alloc.c Makefile.in
+AUX	= 	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=	
+EXE	=
+GEN	=	nextOne.o  rmisc.o reader.o scanner.o labels.o wmisc.o \
+		init.o list.o debug.o MsgChar.o array.o wrat.o string.o \
+		basics.o alloc.o
+SRCDIR	=
+AUXDIR	=
+INCDIR	=	..
+
+CFLAGS	= -I$(INCDIR)
+
+DECLINC = $(INCDIR)/global.h
+CODEINC = $(INCDIR)/writer.h
+READINC = $(INCDIR)/reader.h
+
+@toolmk_h@
+
+array.o: $(DECLINC) $(READINC)
+
+inseq.o: $(DECLINC) $(READINC)
+
+tester.o: $(DECLINC) $(READINC)
+
+rmisc.o: $(DECLINC) $(READINC)
+
+reader.o: $(DECLINC) $(READINC)
+
+labels.o: $(DECLINC) $(READINC)
+
+wmisc.o: $(DECLINC) $(CODEINC)
+

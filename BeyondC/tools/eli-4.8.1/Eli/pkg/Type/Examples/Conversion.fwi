@@ -1,0 +1,124 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Type Conversion~>
+
+This chapter introduces type conversion to our language. We say, a value 
+of a certain type @code{t} is converted into a corresponding
+value of some other type @code{s}. For example, a conversion of integral 
+values into floating point values is defined for many languages.
+We consider such a conversion be executed by a conversion
+operator that has a signature @code{t->s}. We call a conversion
+@code{coercion} if the application of a conversion operator 
+is determined implicitly, for example in the process of
+overloading resolution.
+
+In order to demonstrate type conversion, we extend our language
+by a second arithmetic type for floating point values an call the
+type @code{real}.
+
+The type representation is extended by:
+
+~$~<Real type representation~>==~{
+realType -> TypeName = {"real"};
+~}
+
+We add a new type denoter to the language
+
+~$~<Real type denoter~>==~{
+RULE: TypeDenoter ::= 'real' COMPUTE TypeDenoter.Type = realType; END;
+~}
+and introduce literals of type @code{real}:
+
+~$~<Real literals~>==~{
+RULE: Expression ::= RealNumber COMPUTE
+  PrimaryContext (Expression, realType);
+END;
+~}
+
+Now we extend the set of operator specifications by 
+operators for the type @code{real}:
+
+~$~<Real operators~>==~{
+OPER
+  rAdd  (realType,realType):realType;
+  rSub  (realType,realType):realType;
+  rMul  (realType,realType):realType;
+  rDiv  (realType,realType):realType;
+
+  rPlus (realType):realType;
+  rNeg  (realType):realType;
+~}
+
+We specify that the @code{real} operators overload the 
+corresponding ones for the type @code{int} by adding them
+to the corresponding indication:
+
+~$~<Real operators overload~>==~{
+INDICATION
+  AddOp: rAdd;
+  SubOp: rSub;
+  MulOp: rMul;
+  DivOp: rDiv;
+  PlusOp: rPlus;
+  NegOp:  rNeg;
+~}
+
+Now we want to allow that overloading resolution takes conversion
+from @code{int} to @code{real} into account. That means in an expression
+like @code{a + 1} the operand types need not match exactly to the 
+signature of a @code{+} operator, if coercion could convert the
+operand types into those required by the signature. In particular 
+@code{a} could have type @code{real}. In that case
+coercion from @code{int} to @code{real} would be applied to @code{1}
+in order to use the @code{real} addition operator.
+
+So, we define such a coercion operator @code{iTor} with the 
+signature @code{int->real}:
+
+~$~<Predefined Coercion Operator~>==~{
+COERCION
+  iTor (intType):realType;
+~}
+
+Finally we reconsider the type rules for assignments. We want
+to allow to have an @code{int} variable
+on the left-hand side and a @code{real} expression on the right,
+say @code{i = 3.4;}
+That means the result of the expression is to be converted to
+an @code{int} value, which is then assigned to the variable.
+
+For that purpose we specify a conversion operator @code{rToi}
+with the signature @code{real->int}, and associate it to
+the operator indication @code{assignOpr} which has been 
+introduced for the assignment context:
+
+~$~<Assignment Conversion Operator~>==~{
+OPER
+   rToi (realType):intType;
+INDICATION
+  assignOpr: rToi;
+~}
+
+Note: The conversion operator @code{rToi} is only applicable in
+a context that is chacterized by the indication @code{assignOpr},
+it is NOT applied as a coercion when resolving overloaded
+operators.
+
+~O~<RealType.pdl~>~{
+~<Real type representation~>
+~}
+
+~O~<RealType.lido~>~{
+~<Real type denoter~>
+~<Real literals~>
+~}
+
+~O~<OperatorExtensions.oil~>~{
+~<Real operators~>
+~<Real operators overload~>
+~<Assignment Conversion Operator~>
+~<Predefined Coercion Operator~>
+~}
+

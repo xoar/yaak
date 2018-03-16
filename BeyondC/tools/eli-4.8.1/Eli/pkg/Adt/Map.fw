@@ -1,0 +1,158 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: Map.fw,v 3.2 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements a mapping from int numbers in the range
+0 to max_n to |TYPE| values.
+
+max_n is set by the argument of the call of |NAME|InitMap.
+That function has to be called prior to any other call of module
+functions.
+
+A mapping i to v is set by a of |NAME|SetMap (i, v).
+
+A call |NAME|GetMap (i) yields the |TYPE| value set for
+i by the most recent call of |NAME|SetMap, if any;
+otherwise the result is undefined.
+
+All mappings in the range 0 to max_n may be initialized to the value v
+by al call of |NAME|InitMapValues (v).
+
+~O~<|NAME|Map.h~>~{
+#ifndef _|NAME|MAP_H
+#define _|NAME|MAP_H
+
+#include "HEAD.h"		/* for definition of |TYPE| */
+
+#if defined(__STDC__) || defined(__cplusplus)
+extern void |NAME|InitMap (int max_n);
+extern void |NAME|FinlMap (void);
+extern void |NAME|SetMap (int n, |TYPE| v);
+extern |TYPE| |NAME|GetMap (int n);
+extern void |NAME|InitMapValues (|TYPE| v);
+#else
+extern void |NAME|InitMap ();
+extern void |NAME|FinlMap ();
+extern void |NAME|SetMap ();
+extern |TYPE| |NAME|GetMap ();
+extern |NAME|InitMapValues ();
+#endif
+
+#endif
+~}
+
+~O~<MapIntTo|TYPE|.c~>~{
+#include <stdio.h>
+
+#if defined(__STDC__) || defined(__cplusplus)
+/* exit() is defined in stdlib.h */
+#include <stdlib.h>
+#endif
+
+#include "DynSpace.h"
+#include "|NAME|Map.h"
+
+static void*	MapSpace = (void *) 0;
+static int 	MaxDid = 0;
+static |TYPE|	*DidPtrMap;
+
+#if defined(__STDC__) || defined(__cplusplus)
+void |NAME|InitMap (int max_n)
+#else
+void |NAME|InitMap (max_n)
+    int		max_n;
+#endif
+{
+if (!MapSpace)
+	MapSpace = InitDynSpace ();
+MaxDid = max_n;
+DidPtrMap = (|TYPE|*) DynAlloc (MapSpace, (max_n+1)*(sizeof (|TYPE|)));
+}/* |NAME|InitMap */
+
+#if defined(__STDC__) || defined(__cplusplus)
+void |NAME|FinlMap (void)
+#else
+void |NAME|FinlMap ()
+#endif
+{
+if (MapSpace)
+	DynClear (MapSpace);
+}/* |NAME|FinlMap */
+
+#if defined(__STDC__) || defined(__cplusplus)
+void |NAME|SetMap (int n, |TYPE| v)
+#else
+void |NAME|SetMap (n, v)
+    int		n;
+    |TYPE|	v;
+#endif
+{
+if (!DidPtrMap) {
+	fprintf (stderr, "|NAME|SetMap: missing call of |NAME|InitMap\n");
+	exit (1);
+}
+if (n<0 || n>MaxDid) {
+	fprintf (stderr, "|NAME|SetMap: %d out of range 0 .. %d\n", n, MaxDid);
+	exit (1);
+}
+DidPtrMap[n] = v;
+}/* |NAME|SetMap */
+
+#if defined(__STDC__) || defined(__cplusplus)
+|TYPE| |NAME|GetMap (int n)
+#else
+|TYPE| |NAME|GetMap (n) int n;
+#endif
+{
+if (!DidPtrMap) {
+	fprintf (stderr, "|NAME|GetMap: missing call of |NAME|InitMap\n");
+	exit (1);
+}
+if (n<0 || n>MaxDid) {
+	fprintf (stderr, "|NAME|GetMap: %d out of range 0 .. %d\n", n, MaxDid);
+	exit (1);
+}
+return (DidPtrMap[n]);
+}/* |NAME|GetMap */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+|NAME|InitMapValues (|TYPE| v)
+#else
+|NAME|InitMapValues (v) |TYPE| v;
+#endif
+{  int i;
+
+   if (!DidPtrMap) {
+	fprintf (stderr, "|NAME|InitMapValues: missing call of |NAME|InitMap\n");
+	exit (1);
+   }
+
+   for (i=0; i<=MaxDid; i++) DidPtrMap[i]=v;
+}
+~}
+
+~O~<MapIntTo|TYPE|.head~>~{
+#include "|NAME|Map.h"
+~}

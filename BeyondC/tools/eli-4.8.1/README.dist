@@ -1,0 +1,64 @@
+These instructions are guidelines for Eli developers wishing to package
+a new Eli distribution.  They assume that all of the desired changes have
+been checked in, and that you are in the top-level of your working
+directory.  Note that the tag "Eli_X_Y_Z" and name "eli-X.Y.Z" should
+be changed to reflect the version of the distribution being packaged:
+
+  - Change X if the change will require changes in existing specifications
+  - Change Y if functionality is added in a backward-compatible manner
+  - Change Z if the changes are backward-compatible bug fixes
+
+(See semver.org for a discussion of this strategy.)
+
+1. Update the version number:
+
+	<edit configure.in to bump the second parameter of AC_INIT>
+	cvs ci configure.in
+
+2. Tag the repository, export a copy of the distribution, and set up its
+   configuration files and symbolic links:
+
+	cvs tag Eli_X_Y_Z
+	cvs export -r Eli_X_Y_Z -d eli-X.Y.Z Elidistrib
+	cd eli-X.Y.Z
+	./symlinks
+	cd ..
+
+3. Generate the internal documentation, insert it into the distribution,
+   and create the tar file:
+
+        make predist
+        cp -rf doc eli-X.Y.Z
+	tar -jcf eli-X.Y.Z.tar.bz2 eli-X.Y.Z
+	md5sum eli-X.Y.Z.tar.bz2 > eli-X.Y.Z.tar.bz2.md5
+
+4. Build Eli in eli-X.Y.Z, and (if possible) use eli-X.Y.Z.tar.bz2 to build
+   Eli on other supported systems.  On at least one system, install Eli and
+   run the tests (be sure that you are running the installed system, not
+   the build system):
+
+   	make install
+	cd Eli/tests
+	eli -R %test
+	cd ../..
+
+5. Follow the current directions for installing eli-X.Y.Z.tar.bz2
+   on SourceForge:  Log onto SourceForge and go to the bottom of the
+   screen.  Under "Help", click on the "Site Documentation" link.
+   The relevant document is "Using the File Manager", under "Hosting
+   Your Project on SF.net".
+
+6. Create SourceForge documentation if necessary, and upload it to
+   SourceForge directory /home/groups/e/el/eli-project/htdocs (you can use
+   rcp or some other mechanism instead of rsync):
+
+	./sfdocs
+   	rsync -r --delete elionline <you>,eli-project@web.sourceforge.net:htdocs
+
+7. Remove the files and directory created during this process:
+
+	rm -rf eli-X.Y.Z* elionline
+
+If the update contains significant new functionality, send an announcement
+to compilers@iecc.com.  Your e-mail should be pure ASCII, not HTML.  For
+further information, see http://compilers.iecc.com/faq.txt.

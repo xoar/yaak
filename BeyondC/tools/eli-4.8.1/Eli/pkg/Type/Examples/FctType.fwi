@@ -1,0 +1,154 @@
+@=~
+~p maximum_input_line_length = infinity
+~p typesetter = texinfo
+
+~A~<Function Types~>
+
+We finally extend our language towards the orthogonal use of
+functions, i.e. wherever a typed entity is allowed it can
+have a function type. In particular, evaluation of an expression
+may yield a function, which may be called, assigned to a variable,
+passed as an argument, or returned as a function result.
+For that purpose it is sufficient to add another
+@code{TypeDenoter} which denotes function types. New notations 
+for expressions are not needed.
+
+Here is an example program that defines a function type
+and a higher order function:
+
+~O~<FctTypeExamp~>~{
+begin
+  fun mul (int x, real y) real
+  begin return x * y; end;
+
+  fun add (int x, real y) real
+  begin return x + y; end;
+
+  type (int, real -> real) fct;
+
+  fun apply2 (real z, fct ff) real
+  begin return ff (2, z); end;
+
+  var real r;
+
+  r = apply2 (3.1, add);
+  r = apply2 (3.1, mul);
+end
+~}
+
+The following productions are added to the grammer:
+
+~$~<Abstract function type syntax~>==~{
+RULE: TypeDenoter  ::=    FunctionType END;
+RULE: FunctionType ::=    '(' ParamTypes '->' TypeDenoter ')' END;
+RULE: ParamTypes   LISTOF ParamType END;
+RULE: ParamType    ::=    TypeDenoter END;
+~}
+
+The specifications for @code{FunctionType}s exactly correspond
+to those for @code{FunctionHead}s in the context of function
+declarations. An Operator is created, that has a signature as
+given by the types of the parameters and of the result:
+
+~$~<Function type denotation~>==~{
+RULE: TypeDenoter ::= FunctionType COMPUTE
+  TypeDenoter.Type = FunctionType.Type;
+END;
+
+SYMBOL FunctionType INHERITS TypeDenotation, OperatorDefs END;
+
+RULE: FunctionType ::= '(' ParamTypes '->' TypeDenoter ')' COMPUTE
+  FunctionType.GotOper +=
+     ListOperator (
+       FunctionType.Type,
+       FunctionType.Type,
+       ParamTypes.OpndTypeList,
+       TypeDenoter.Type);
+
+ .moreTypeProperies =
+    ORDER
+      (ResetTypeName (FunctionType.Type, "function..."),
+       ResetTypeLine (FunctionType.Type, LINE));
+END;
+~}
+
+The introduction of function types to our language allows programs
+to use values which represent functions. They have a function type
+which must fit to the type required in the context.
+For example, the @code{apply2 (3.1, add)} passes the function
+@code{add} as an argument of the called function @code{apply2}.
+Hence, the type of the declared function @code{add} must be
+equivalent to the type required for the second parameter of 
+@code{apply2} (or coercible under type rules for parameter,
+as specified in the chapter on functions).
+
+In this case we have to specify structural equivalence of function
+types, in oder to let the type rules allow such uses of functions.
+If we would specify name equivalence instead, then for the above 
+example, the signature of the function declaration and the
+type @code{fct} specified for the second parameter of @code{apply2}
+are different notations of types. They would be considered
+not to be name equivalent; but, they are structural equivalent.
+
+Structural type equivalence is specified for denotations of 
+function types that either occur in a type denotation or
+as the signature of a declared function.
+We state that two types @code{a} and @code{b} are equivalent
+if both have the kind @code{FunctionClass}, and the component
+types, which are the types of the parameters and of the result,
+are elementwise equivalent:
+
+~$~<Function type equivalence~>==~{
+RULE: FunctionHead ::= '(' Parameters ')' TypeDenoter COMPUTE
+  FunctionHead.GotType = 
+    ORDER (
+      AddTypeToBlock (
+         FunctionHead.Type, FunctionClass,
+         VResetComponentTypes 
+           (FunctionHead.Type, 
+            ConsDefTableKeyList
+              (TypeDenoter.Type, Parameters.OpndTypeList))),
+         ResetTypeName (FunctionHead.Type, "function..."),
+         ResetTypeLine (FunctionHead.Type, LINE));
+END;
+
+RULE: FunctionType ::= '(' ParamTypes '->' TypeDenoter ')' COMPUTE
+  FunctionType.GotType =
+    AddTypeToBlock
+      (FunctionType.Type, FunctionClass,
+         VResetComponentTypes 
+           (FunctionType.Type, 
+            ConsDefTableKeyList
+             (TypeDenoter.Type, ParamTypes.OpndTypeList)))
+  <- .moreTypeProperies;
+END;
+
+SYMBOL ParamTypes INHERITS OpndTypeListRoot END;
+SYMBOL ParamType INHERITS OpndTypeListElem END;
+
+RULE: ParamType ::= TypeDenoter COMPUTE
+  ParamType.Type = TypeDenoter.Type;
+END;
+~}
+
+~$~<Function class~>==~{
+FunctionClass;
+~}
+
+We require for our language, that a function type @code{f} may not
+directly or indirectly have a component type @code{f}, unless the
+recursion passes through a pointer type. The check is specified
+in the context of type definitions.
+
+~O~<FunctionType.pdl~>~{
+~<Function class~>
+~}
+~O~<FunctionType.lido~>~{
+~<Abstract function type syntax~>
+~<Function type denotation~>
+~<Function type equivalence~>
+~}
+
+~O~<FunctionType.con~>~{
+~<Function type syntax~>
+~}

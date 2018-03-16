@@ -1,0 +1,157 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: BuInh.fw,v 5.2 1997/08/29 12:08:20 mjung Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements inheritance of scope properties
+to environments.
+
+Using this module requires that the modules for the basic 
+consistent renaming task, |NAME|BuScope, and for scope properties,
+|NAME|BuScopeProp are also used.
+
+All three modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+
+This module provides the following computational roles:
+
+~O~<|NAME|BuInh.lido~>~{
+~<|NAME|Extend~>
+~<|NAME|InheritScope~>
+~<|NAME|ChkInherit~>
+~<|NAME|ChkInhIdUse~>
+~<|NAME|ChkInhIdUseScopeProp~>
+~}
+
+The following roles of the BuScope and the BuScopeProp modules
+are augmented to ensure that inheritances are established
+when applied identifier occurrences are bound.
+
+~$~<|NAME|Extend~>==~{
+CLASS SYMBOL |NAME|RootScope:
+	|NAME|GotInhScopes:	VOID	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|GotInhScopes = TAIL._C_|NAME|GotKeys;
+END;
+~}
+
+|NAME|InheritScope
+The scope THIS.|NAME|OuterScope is embbedded in
+the scope SYNT.|NAME|InnerScope via inheritance.
+
+|NAME|InheritScope.|NAME|InheritOk is set to 1 iff the inheritance
+relation is legal, i.e. non cyclic and both scopes in the same
+environment hierarchy.
+
+~$~<|NAME|InheritScope~>==~{
+CLASS SYMBOL |NAME|InheritScope:
+	|NAME|InhPrecond:	VOID,		/* default */
+	|NAME|OuterScope:	Environment,	/* required */
+	|NAME|InheritOk:	int	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|InheritScope COMPUTE
+  SYNT.|NAME|InhPrecond = "yes";
+  SYNT.|NAME|InheritOk =
+	InheritClass (_V_|NAME|NewScope,
+		      SYNT.|NAME|OuterScope)
+	<- SYNT.|NAME|InhPrecond BOTTOMUP;
+END;
+~}
+
+|NAME|ChkInherit
+can be used to issue error messages in cases that the 
+|NAME|OuterScope is not set correctly or the inheritance
+relation could not be established, e.g. because it would be
+cyclic.
+
+~$~<|NAME|ChkInherit~>==~{
+CLASS SYMBOL |NAME|ChkInherit:
+	SrcErr:		int,	/* provided */
+	SrcMsg:		VOID,	/* provided */
+	InhErr:		int,	/* provided */
+	InhMsg:		VOID;	/* provided */
+
+CLASS SYMBOL |NAME|ChkInherit COMPUTE
+  SYNT.SrcErr = EQ (SYNT.|NAME|OuterScope, NoEnv);
+  SYNT.SrcMsg = IF (THIS.SrcErr,
+    message (ERROR, "Source of inheritance is missing", 0, COORDREF));
+
+  SYNT.InhErr = AND (NOT (THIS.|NAME|InheritOk),
+           NE (THIS.|NAME|OuterScope, NoEnv));
+  SYNT.InhMsg =  IF (THIS.InhErr,
+    message (ERROR, "Wrong scope inherited", 0, COORDREF));
+END;
+~}
+
+|NAME|ChkInhIdUse and |NAME|ChkInhIdUseScopeProp
+are roles to be associated to an applied identifier occurrence.
+They issue a message if several definitions of the identifer
+are inherited on different unrelated inheritance paths.
+
+|NAME|ChkInhIdUse may be used together with |NAME|IdUseEnv
+or |NAME|IdUseScope;
+
+|NAME|ChkInhIdUseScopeProp may be used together with
+|NAME|IdUseScopeProp.
+
+~$~<|NAME|ChkInhIdUse~>==~{
+CLASS SYMBOL |NAME|ChkInhIdUse:
+	|KEY|Bind:	Binding		SYNT,	/* required */
+	MulErr:		int		SYNT,	/* provided */
+	MulMsg:		VOID		SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|ChkInhIdUse COMPUTE
+  SYNT.MulErr = AND (NE (NoBinding, THIS.|KEY|Bind),
+           NE (NoBinding, 
+	       NextInhBinding (_V_|NAME|CurrEnv, THIS.|KEY|Bind)));
+  SYNT.MulMsg = IF (THIS.MulErr,
+       message (ERROR, 
+           CatStrInd ("Several definitions are inherited for: ",
+                      IdnOf (THIS.|KEY|Bind)), 
+           0, COORDREF)) BOTTOMUP;
+END;
+~}
+
+~$~<|NAME|ChkInhIdUseScopeProp~>==~{
+CLASS SYMBOL |NAME|ChkInhIdUseScopeProp:
+	|KEY|Bind:	Binding		SYNT,	/* required */
+	MulErr:		int		SYNT,	/* provided */
+	MulMsg:		VOID		SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|ChkInhIdUseScopeProp COMPUTE
+  SYNT.MulErr = AND (NE (NoBinding, THIS.|KEY|Bind),
+           NE (NoBinding, 
+	       NextInhBinding (_V_|NAME|ScopeProp, THIS.|KEY|Bind)));
+  SYNT.MulMsg = IF (THIS.MulErr,
+       message (ERROR, 
+           CatStrInd ("Several definitions are inherited for: ",
+                      IdnOf (THIS.|KEY|Bind)), 
+           0, COORDREF)) BOTTOMUP;
+END;
+~}
+
+~O~<|NAME|BuInh.specs~>~{
+$/Tech/Strings.specs
+~}

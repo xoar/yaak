@@ -1,0 +1,16 @@
+CompileOnly option specified
+GenAssembly option specified
+WideListing specified 3 time(s)
+Outputfile option, value = 'fred'
+TmpFile option, value = 'eugene'
+NumCopies option, value = '42'
+NumLines option, value = '1'
+NumLines option, value = '99'
+NumCols option, value = '83'
+NumZaps option, value = '42'
+NumZaps option, value = '67'
+NumZaps option, value = '169'
+MacroPackage option, value = 'an'
+MacroPackage option, value = 's'
+MacroPackage option, value = 'harold'
+InputFile = 'input'

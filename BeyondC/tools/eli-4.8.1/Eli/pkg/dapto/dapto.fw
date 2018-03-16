@@ -1,0 +1,784 @@
+@! $Id: dapto.fw,v 1.1 2010/03/03 19:56:07 profw Exp $
+@! Dapto specifications
+@! Copyright (c) 1994-1998 Anthony M. Sloane
+
+@A@<Lexical structure@>
+
+@O@<dapto.gla@>==@{
+ident:  C_IDENTIFIER_ISO
+str:    C_STRING_LIT
+bstr:   $\<[^>]+\>              [mkstr]
+text:   $\{             (Ctext) [mkstr]
+        C_COMMENT
+        AWK_COMMENT
+@}
+
+@A@<Concrete syntax@>
+
+@O@<dapto.con@>==@{
+spec: aspects.
+
+aspects: aspect_stmt / aspects aspect_stmt.
+
+aspect_stmt: 'aspect' iddef ';' sigs 'end' ';'.
+
+sigs: sig / sigs sig.
+
+sig: event_sig / operation_sig / str / bstr / translation_sig.
+
+event_sig: 'event' iddef export str event_block ';'.
+event_block: '(' optattrs ')'.
+
+export: '*' / /* empty */.
+
+optattrs: /* empty */ / attrs.
+attrs: attr / attrs ',' attr.
+attr: typeid iddef str.
+
+operation_sig: 'operation' iddef str operation_block text /
+               'operation' iddef str operation_block ':' typeid text.
+operation_block: '(' optparams ')'.
+
+optparams: /* empty */ / params.
+params: param / params ',' param.
+param: typeid iddef str.
+
+translation_sig: 'translation' iddef iduse str text.
+
+iddef: ident.
+iduse: ident.
+typeid: ident.
+@}
+
+@A
+
+Dapto has two name spaces, one for type identifiers and one for all other
+identifiers.
+Each identifier occurrence must be provided with a @{Sym@} attribute in
+order to use the standard Eli name analysis modules:
+
+@$@<Name analysis@>==@{@-
+ATTR Sym: int SYNT;
+
+SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+@<Type identifiers@>
+@<Other identifiers@>
+@}
+
+Both obey C scope rules:
+
+@$@<Instantiate modules@>+=@{@-
+$/Name/CScope.gnrc +instance=Type   :inst
+$/Name/CScope.gnrc +instance=Export :inst
+@}
+
+@O@<name.lido@>==@{
+@<Name analysis@>
+@<Enforce return type of string for operations@>
+@}
+
+@B
+
+The scope of a type identifier is the entire specification, and every
+occurrence of a type identifier is a defining occurrence:
+
+@$@<Type identifiers@>==@{@-
+SYMBOL typeid INHERITS IdentOcc, TypeIdDefScope END;
+@}
+
+There are two language-defined types, integers and strings, which are
+denoted by the type identifiers @{int@} and @{str@} respectively.
+Those identifiers are predefined:
+
+@$@<Instantiate modules@>+=@{@-
+$/Name/PreDefine.gnrc +instance=Type +referto=ident      :inst
+$/Name/PreDefId.gnrc  +instance=Type +referto=(Predef.d) :inst
+@}
+
+@N@<Predef.d@>==@{@-
+PreDefKey ("int", intKey)
+PreDefKey ("str", strKey)
+@}
+
+@B
+
+Other identifiers are defined within scopes.
+The entire specification is a scope, as is each @{event_block@} and
+@{operation_block@}.
+An identifier must be unique within its scope:
+
+@$@<Other identifiers@>==@{
+SYMBOL event_block     INHERITS ExportRangeScope, ExportRangeUnique      END;
+SYMBOL operation_block INHERITS ExportRangeScope, ExportRangeUnique      END;
+SYMBOL iddef           INHERITS IdentOcc, ExportIdDefScope, ExportUnique END;
+SYMBOL iduse           INHERITS IdentOcc, ExportIdUseEnv                 END;
+@}
+
+@$@<Instantiate modules@>+=@{@-
+$/Prop/Unique.gnrc +instance=Export :inst
+@}
+
+@B
+
+@$@<Enforce return type of string for operations@>==@{@-
+RULE:
+    operation_sig ::= 'operation' iddef str operation_block ':' typeid body
+COMPUTE
+    IF (NE (typeid.Key, strKey),
+        message (FATAL, "Non-string return type", 0, COORDREF));
+END;
+@}
+
+@A@<Command line specification@>
+
+@O@<ui.clp@>==@{
+InputFileName input "Monitoring interface description";
+BaseFileName "-base" string "Base file name for output";
+@}
+
+@B@<Initialization of filenames based on command line@>
+
+@O@<ui.c@>==@{
+#include <string.h>
+#include "csm.h"
+#include "err.h"
+#include "deftbl.h"
+#include "pdl_gen.h"
+
+CONST char *filename, *basefilename, *cfilename, *hfilename, *dbfilename,
+     *reqsymfilename;
+
+void uiinit ()
+{
+    char *dot, save;
+    int len;
+
+    extern DefTableKey InputFileName;
+    extern DefTableKey BaseFileName;
+
+    /* Get the actual filename and base file name */
+    filename = StringTable (GetClpValue (InputFileName, 0));
+    if (BaseFileName == NoKey) {
+       /* Default to first component of filename */
+       dot = strchr (filename, '.');
+       if (!dot) dot = strchr (filename, '\0');
+       obstack_grow0(Csm_obstk, filename, dot - filename);
+       basefilename = (const char *)obstack_finish(Csm_obstk);
+    } else    
+       basefilename = StringTable (GetClpValue (BaseFileName, 0));
+
+    /* Make the output filenames */
+    len = strlen (basefilename);
+
+    obstack_grow(Csm_obstk, basefilename, len);
+    obstack_grow0(Csm_obstk, "_dapto.c", 8);
+    cfilename = (const char *)obstack_finish(Csm_obstk);
+
+    obstack_grow(Csm_obstk, basefilename, len);
+    obstack_grow0(Csm_obstk, "_dapto.h", 8);
+    hfilename = (const char *)obstack_finish(Csm_obstk);
+
+    obstack_grow(Csm_obstk, basefilename, len);
+    obstack_grow0(Csm_obstk, "_dapto.db", 9);
+    dbfilename = (const char *)obstack_finish(Csm_obstk);
+
+    obstack_grow(Csm_obstk, basefilename, len);
+    obstack_grow0(Csm_obstk, "_dapto.reqsym", 13);
+    reqsymfilename = (const char *)obstack_finish(Csm_obstk);
+}
+@}
+
+@B@<Call to initialization for user interface@>
+
+@O@<ui.init@>==@{
+uiinit ();
+@}
+
+@B@<Interface to user interface@>
+
+@O@<ui.h@>==@{
+#ifndef UI_H
+#define UI_H
+
+extern CONST char *filename, *basefilename, *cfilename, *hfilename, *dbfilename,
+            *reqsymfilename;
+extern void uiinit ();
+
+#endif
+@}
+
+@A@<Code generation@>
+
+@$@<Define keys, properties, and access functions@>+=@{@-
+"Strings.h"
+amp, send, type: CharPtr;
+
+standard: int;
+
+"ptg_gen.h"
+cast: PTGNode;
+
+intKey ->
+  send = {"_INT"},
+  standard = {1},
+  cast = {PTGNULL},
+  type = {"int"};
+
+strKey -> 
+  send = {"_STR"},
+  standard = {1},
+  cast = {PTGNULL},
+  type = {"const char *"},
+  amp = {""};
+@}
+
+@B@<Generally useful output patterns@>
+
+@$@<Instantiate modules@>+=@{@-
+$/Output/PtgCommon.fw
+@}
+
+@$@<Instantiate modules@>+=@{@-
+$/Tech/Strings.specs
+@}
+
+@O@<out.ptg@>==@{
+SSeq:           $ " " $
+SSeq3:          $ " " $ string " " $
+DeclSeq:        $1 "    " $2 ";\n"   
+Protect:        "_" $
+NSeq:           $1 ", " $2 string $3 string
+Decl:           "   " $1 string " " $2 string ";\n"
+@}
+
+@O@<gen.ptg@>==@{
+@<Code generation output specifications@>
+@}
+
+@O@<gen.lido@>==@{
+@<Code generation attribution@>
+@}
+
+@O@<gen.pdl@>==@{
+@<Code generation properties@>
+@}
+
+@O@<gen.head@>==@{
+#include "ui.h"
+@}
+
+@B@<Overall structure of generated files@>
+
+@$@<Code generation output specifications@>+=@{
+cfile: "/* Automatically generated by dapto: DO NOT EDIT */\n"
+       "\n"
+       "#ifdef MONITOR\n"
+       "#include <stdio.h>\n"
+       "#include <time.h>\n"
+       "#include <string.h>\n"
+       "#include \"" $1 /* str */ "_dapto.h\"\n"
+       "\n"
+       $2 /* funcs */
+       "\n"
+       "void _dap_" $1 "_init ()\n"
+       "{\n"
+       $3 /* entries */
+       "}\n"
+       "#else\n"
+       "static int _dapto; /* To avoid messages about empty files. */\n"
+       "#endif\n"
+
+hfile: "/* Automatically generated by dapto: DO NOT EDIT */\n"
+       "\n"
+       "#ifndef " $1 "_DAPTO_H\n"
+       "#define " $1 "_DAPTO_H\n"
+       "#include \"dapto.h\"\n"
+       "#include \"eliproto.h\"\n"
+       $3 /* incls */
+       "extern void _dap_" $1 "_init ();\n"
+       $2 /* sigs */
+       "#endif\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN incls, entries, funcs, sigs : PTGNode;
+
+RULE:
+    spec ::= aspects
+COMPUTE
+    CHAINSTART HEAD.incls = PTGNULL;
+    CHAINSTART HEAD.entries = PTGNULL;
+    CHAINSTART HEAD.funcs = PTGNULL;
+    PTGOutFile (cfilename, PTGcfile (PTGAsIs (basefilename), TAIL.funcs,
+                                     TAIL.entries));
+    CHAINSTART HEAD.sigs = PTGNULL;
+    PTGOutFile (hfilename, PTGhfile (PTGAsIs (basefilename), TAIL.sigs,
+                                     TAIL.incls));
+END;
+@}
+
+@C@<Generation of includes@>
+
+@$@<Code generation output specifications@>+=@{
+incl: "#include " $ "\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN incls : PTGNode;
+
+RULE:
+    sig ::= bstr
+COMPUTE
+    sig.incls = PTGSeq (sig.incls, PTGincl (PTGId (bstr)));
+END;
+
+RULE:
+    sig ::= str
+COMPUTE
+    sig.incls = PTGSeq (sig.incls, PTGincl (PTGId (str)));
+END;
+@}
+
+@B@<Generation of initialization for operations@>
+
+@$@<Code generation output specifications@>+=@{
+entry: "    _dap_add_command (\"" $1 string "\", " $1 string "Cmd );\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN entries : PTGNode;
+ATTR Sym : int;
+ATTR idcode : CharPtr;
+
+SYMBOL ptg_ident
+COMPUTE
+    SYNT.idcode = StringTable (THIS.Sym);
+END;
+
+SYMBOL iddef INHERITS ptg_ident END;
+SYMBOL iduse INHERITS ptg_ident END;
+SYMBOL typeid INHERITS ptg_ident END;
+
+RULE:
+    operation_sig ::= 'operation' iddef str operation_block body
+COMPUTE
+    operation_sig.entries = PTGSeq (operation_sig.entries,
+                                    PTGentry (iddef.idcode));
+END;
+
+RULE:
+    operation_sig ::= 'operation' iddef str operation_block ':' typeid body
+COMPUTE
+    operation_sig.entries = PTGSeq (operation_sig.entries,
+                                    PTGentry (iddef.idcode));
+END;
+@}
+
+@B@<Generation of functions to handle queries@>
+
+@$@<Code generation output specifications@>+=@{
+cmdfunc: "\n"
+         "#ifdef PROTO_OK\n"
+         "void " $1 string "Cmd (char *args)\n"
+         "#else\n"
+         "void " $1 string "Cmd (args)\n"
+         "    char *args;\n"
+         "#endif\n"
+         "{\n"
+         $2
+         "    DAPTO_ARG_INIT_OP;\n"
+         $3
+         "    DAPTO_INIT_OP;\n"
+         "/* #line " $5 int " \"" $6 string "\" */\n"
+         $4
+         "\n    DAPTO_RESULT_SEND (1);\n"
+         "}\n"
+
+arg:  "    DAPTO_ARG" $1 string " (&" $2 string ");\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN funcs, names, argvars, args : PTGNode;
+CHAIN argcount : int;
+
+ATTR line : int;
+ATTR bodycode : PTGNode;
+
+RULE: body ::= text COMPUTE
+    body.line = LINE;
+    body.bodycode = PTGId (text);
+END;
+
+RULE:
+    operation_sig ::= 'operation' iddef str operation_block body
+COMPUTE
+    @<Operation attribution@>
+END;
+
+RULE:
+    operation_sig ::= 'operation' iddef str operation_block ':' typeid body
+COMPUTE
+    @<Operation attribution@>
+END;
+@}
+
+@$@<Operation attribution@>@M==@{
+CHAINSTART operation_block.args = PTGNULL;
+CHAINSTART operation_block.argvars = PTGNULL;
+CHAINSTART operation_block.names = PTGNULL;
+operation_sig.funcs = PTGSeq (operation_sig.funcs,
+                          PTGcmdfunc (iddef.idcode,
+                                      operation_block.argvars,
+                                      IF (EQ (operation_block.argcount, 0),
+                                          PTGNULL,
+                                          operation_block.args),
+                                      body.bodycode,
+                                      body.line,
+                                      filename));
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN names, argvars, args : PTGNode;
+
+RULE:
+    param ::= typeid iddef str
+COMPUTE
+    param.names = PTGNSeq (param.names, Getamp (typeid.Key, "&"),
+                           iddef.idcode);
+    param.args = PTGSeq (param.args,
+                         PTGarg (Getsend (typeid.Key,
+                                          StringTable (typeid.Sym)),
+                                 iddef.idcode));
+    param.argvars = PTGSSeq (param.argvars,
+                             PTGDecl (Gettype (typeid.Key, typeid.idcode),
+                                      iddef.idcode));
+END;
+@}
+
+@B@<Generation of functions to perform event generation@>
+
+@$@<Code generation output specifications@>+=@{
+efunc: "\n"
+       $1
+       "#ifdef PROTO_OK\n"
+       "void _dapto_" $2 string " (" $3 ")\n"
+       "#else\n"
+       "void _dapto_" $2 string " (" $4 ")\n"
+       $5
+       "#endif\n"
+       "{\n"
+       "    DAPTO_INIT_EV;\n"
+       "    DAPTO_RESULT_STR (\"" $2 string "\");\n"
+       "    DAPTO_RESULT_LONGVAL (clock ());\n"
+       $6
+       "    DAPTO_RESULT_SEND (0);\n"
+       "}\n"
+
+sig:   "#ifdef PROTO_OK\n"
+       "extern void _dapto_" $1 string " (" $2 ");\n"
+       "#else\n"
+       "extern void _dapto_" $1 string " ();\n"
+       "#endif\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+CHAIN funcs, sigs, args, ansiargs, types, ansitypes, sends : PTGNode;
+ATTR translations, translationvars : PTGNode;
+
+RULE:
+    event_sig ::= 'event' iddef export str event_block ';'
+COMPUTE
+    CHAINSTART event_block.args = PTGNULL;
+    CHAINSTART event_block.ansiargs = PTGNULL;
+    CHAINSTART event_block.types = PTGNULL;
+    CHAINSTART event_block.ansitypes = PTGNULL;
+    CHAINSTART event_block.sends = PTGNULL;
+
+    event_sig.funcs = PTGSeq (event_sig.funcs,
+                              PTGefunc (event_sig.translationvars,
+                                        iddef.idcode,
+                                        event_block.ansiargs,
+                                        event_block.args,
+                                        event_block.types,
+                                        event_block.sends));
+    event_sig.sigs = PTGSeq (event_sig.sigs,
+                             PTGsig (iddef.idcode, event_block.ansitypes));
+END;
+@}
+
+@C@<Generation of argument list, argument types and setting of arguments@>
+
+@$@<Code generation output specifications@>+=@{
+send:  "#ifdef DAPTO_RESULT" $1 string "\n"
+       "    DAPTO_RESULT" $1 string " (" $2 string ");\n"
+       "#else\n"
+       "    DAPTO_RESULT_OTHER (" $2 string ");\n"
+       "#endif\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+
+CHAIN args, types, ansitypes : PTGNode;
+ATTR cast, type, arg : PTGNode;
+
+RULE:
+    attr ::= typeid iddef str
+COMPUTE
+    .cast = Getcast (typeid.Key, PTGAsIs ("(long)"));
+    attr.args = IF (EQ (attr.args, PTGNULL),
+                    PTGAsIs (iddef.idcode),
+                    PTGCommaSeq (attr.args, PTGAsIs (iddef.idcode)));
+    .type = PTGAsIs (Gettype (typeid.Key, typeid.idcode));
+    .arg = PTGSSeq (.type, PTGAsIs (iddef.idcode));
+    attr.ansiargs = IF (EQ (attr.args, PTGNULL), .arg,
+                        PTGCommaSeq (attr.ansiargs, .arg));
+    attr.types = PTGDeclSeq (attr.types, .arg);
+    attr.ansitypes = IF (EQ (attr.args, PTGNULL), .type,
+                         PTGCommaSeq (attr.ansitypes, .type));
+    attr.sends = PTGSeq (attr.sends,
+                         PTGsend (Getsend (typeid.Key, 
+                                           StringTable (typeid.Sym)),
+                                  iddef.idcode));
+END;
+@}
+
+@C@<Generation of event translations@>
+
+@$@<Code generation properties@>+=@{
+"ptg_gen.h"
+
+Translations, TranslationVars: PTGNode;
+@}
+
+@$@<Code generation output specifications@>+=@{
+translation:    "     if (" $ string ")\n"
+                "#line " $ int " \"" $ string "\"\n"
+                $ "\n"
+translationvar: "int " $ string " = 1;\n"
+@}
+
+@$@<Code generation attribution@>+=@{
+ATTR translationsset : VOID;
+ATTR translations, translationvars : PTGNode;
+ATTR Key : DefTableKey;
+
+RULE:
+    spec ::= aspects
+COMPUTE
+    spec.translationsset = CONSTITUENTS translation_sig.translationsset;
+END;
+
+RULE:
+    event_sig ::= 'event' iddef export str event_block ';'
+COMPUTE
+    event_sig.translations = GetTranslations (iddef.Key, PTGNULL)
+                             DEPENDS_ON INCLUDING spec.translationsset;
+    event_sig.translationvars = GetTranslationVars (iddef.Key, PTGNULL)
+                                DEPENDS_ON INCLUDING spec.translationsset;
+END;
+
+RULE:
+    translation_sig ::= 'translation' iddef iduse str body
+COMPUTE
+    .translations = PTGSeq (GetTranslations (iduse.Key, PTGNULL),
+                            PTGtranslation (iddef.idcode,
+					    body.line,
+					    filename,
+                                            body.bodycode));
+    .translationvars = PTGSeq (GetTranslationVars (iduse.Key, PTGNULL),
+                               PTGtranslationvar (iddef.idcode));
+    translation_sig.translationsset =
+        ORDER (SetTranslations (iduse.Key, .translations, .translations),
+               SetTranslationVars (iduse.Key, .translationvars,
+                                   .translationvars));
+END;
+@}
+
+@A@<Counting@>
+
+@O@<count.lido@>==@{
+@<Argument counting@>
+@}
+
+@B
+
+@$@<Argument counting@>==@{
+CHAIN argcount : int;
+
+RULE operation_sig1:
+        operation_sig ::= 'operation' iddef str operation_block body
+COMPUTE
+        CHAINSTART operation_block.argcount = 0;
+END;
+
+RULE operation_sig2:
+        operation_sig ::= 'operation' iddef str operation_block ':' typeid body
+COMPUTE
+        CHAINSTART operation_block.argcount = 0;
+END;
+
+SYMBOL param
+COMPUTE
+    THIS.argcount = ADD (THIS.argcount, 1);
+END;
+@}
+
+@A@<Database generation@>
+
+@O@<dbgen.ptg@>==@{
+@<Database generation output specifications@>
+@}
+
+@O@<dbgen.lido@>==@{
+@<Database generation attribution@>
+@}
+
+@O@<dbgen.head@>==@{
+#include "ui.h"
+@}
+
+@B@<Generation of database information@>
+
+@$@<Database generation output specifications@>+=@{
+db: "# Automatically generated by dapto: DO NOT EDIT\n"
+    "\n"
+    $ /* aspectdbs */
+    $ /* eventdbs */
+@}
+
+@$@<Database generation attribution@>+=@{
+CHAIN aspectdbs, eventdbs : PTGNode;
+
+RULE:
+    spec ::= aspects
+COMPUTE
+    CHAINSTART HEAD.aspectdbs = PTGNULL;
+    CHAINSTART HEAD.eventdbs = PTGNULL;
+    PTGOutFile (dbfilename, PTGdb (aspects.aspectdbs, aspects.eventdbs));
+END;
+@}
+
+@B@<Generation of aspect information@>
+
+@$@<Database generation output specifications@>+=@{
+aspectdb: "new_aspect " $ string "\n"
+@}
+
+@$@<Database generation attribution@>+=@{
+CHAIN aspectdbs : PTGNode;
+
+RULE:
+    aspect_stmt ::= 'aspect' iddef ';' sigs 'end' ';'
+COMPUTE
+    aspect_stmt.aspectdbs = PTGSeq (aspect_stmt.aspectdbs,
+                                    PTGaspectdb (iddef.idcode));
+END;
+@}
+
+@B@<Generation of event information@>
+
+@$@<Database generation output specifications@>+=@{
+eventdb: "new_event [list " $ string " " $ " {" $ "} " $ "]\n"
+@}
+
+@$@<Database generation attribution@>+=@{
+CHAIN eventdbs, attrdbs : PTGNode;
+
+RULE:
+    event_sig ::= 'event' iddef export str event_block ';'
+COMPUTE
+    CHAINSTART event_block.attrdbs = PTGNULL;
+
+    event_sig.eventdbs = PTGSeq (event_sig.eventdbs,
+                                 PTGeventdb (iddef.idcode,
+                                             PTGId (str),
+                                             event_block.attrdbs,
+                                             PTGNumb (export.exported)));
+END;
+
+ATTR exported : int;
+
+RULE:
+    export ::= '*'
+COMPUTE
+    export.exported = 1;
+END;
+
+RULE:
+    export ::= /* empty */
+COMPUTE
+    export.exported = 0;
+END;
+@}
+
+@$@<Database generation attribution@>+=@{
+CHAIN attrdbs : PTGNode;
+
+RULE:
+    attr ::= typeid iddef str
+COMPUTE
+    attr.attrdbs = PTGSSeq3 (attr.attrdbs, iddef.idcode, PTGId (str));
+END;
+@}
+
+@A@<Required symbol generation@>
+
+This section is needed for including monitoring support in the final
+executable.  We can't rely on the basic mechanisms to do it because
+unless a monitoring interface contains events which are generated by
+some other code, the monitoring support will not be called from
+anywhere.  Hence it will not be included in the used source or
+objects.
+
+Our solution is for dapto to generate reqsym files referencing all
+operations.  Thus the file will be included regardless.
+
+@O@<reqsym.ptg@>==@{
+@<Required symbol generation output specifications@>
+@}
+
+@O@<reqsym.lido@>==@{
+@<Required symbol generation attribution@>
+@}
+
+@$@<Required symbol generation output specifications@>+=@{
+reqsyms: "/* Automatically generated by dapto: DO NOT EDIT */\n"
+         "\n"
+         $ /* reqsyms */
+
+reqsym: "{ extern void " $1 string "Cmd (); " $1 string "Cmd (); }\n"
+@}
+
+@$@<Required symbol generation attribution@>+=@{
+CHAIN reqsyms : PTGNode;
+
+RULE:
+    spec ::= aspects
+COMPUTE
+    CHAINSTART HEAD.reqsyms = PTGNULL;
+    PTGOutFile (reqsymfilename, PTGreqsyms (aspects.reqsyms));
+END;
+
+RULE operation_sig1:
+    operation_sig ::= 'operation' iddef str operation_block body
+COMPUTE
+    operation_sig.reqsyms = PTGSeq (operation_sig.reqsyms,
+                                    PTGreqsym (iddef.idcode));
+END;
+
+RULE operation_sig2:
+    operation_sig ::= 'operation' iddef str operation_block ':' typeid body
+COMPUTE
+    operation_sig.reqsyms = PTGSeq (operation_sig.reqsyms,
+                                    PTGreqsym (iddef.idcode));
+END;
+@}
+
+@O@<dapto.specs@>==@{
+@<Instantiate modules@>
+@}
+
+@O@<Type.pdl@>==@{@-
+@<Define keys, properties, and access functions@>
+@}

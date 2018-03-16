@@ -1,0 +1,211 @@
+@=~
+~p typesetter = texinfo
+~p maximum_input_line_length = infinity
+~! $Id: ScopeProp.fw,v 1.8 2013/11/18 17:56:35 profw Exp $
+~!
+~! (C) Copyright 1997 University of Paderborn.
+~! 
+~! This file is part of the Eli Module Library.
+~! 
+~! The Eli Module Library is free software; you can redistribute it and/or
+~! modify it under the terms of the GNU Library General Public License as
+~! published by the Free Software Foundation; either version 2 of the
+~! License, or (at your option) any later version.
+~! 
+~! The Eli Module Library is distributed in the hope that it will be
+~! useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+~! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+~! Library General Public License for more details.
+~! 
+~! You should have received a copy of the GNU Library General Public
+~! License along with the Eli Module Library; see the file COPYING.LIB.
+~! If not, write to the Free Software Foundation, Inc., 59 Temple Place -
+~! Suite 330, Boston, MA 02111-1307, USA. 
+~!
+
+This module implements consistent renaming of identifiers
+using scopes which are properties associated to object keys.
+
+Using this module requires that a module for the basic 
+consistent renaming task, |NAME|AlgScope or |NAME|CScope, is also used.
+Both modules have to be instantiated with the same
+generic parameters: instance=|NAME| and referto=|KEY|.
+
+The module provides the following computational roles:
+
+~O~<|NAME|ScopeProp.lido~>~{
+~<|NAME|ExportRange~>
+~<|NAME|Collected Scopes~>
+~<|NAME|QualIdUse~>
+~<|NAME|ChkQualIdUse~>
+~}
+The computational role |NAME|RootScope of the basic module is extended
+here.
+
+The module introduces the property |NAME|Scope:
+~O~<|NAME|ScopeProp.pdl~>~{
+|NAME|Scope:	Environment; "envmod.h"
+~}
+
+The Computational Roles:
+
+An |NAME|ExportRange is a |NAME|RangeScope that exports its bindings
+such that they can be used in qualified names (|NAME|QualIdUse)  
+outside as well as inside of that |NAME|ExportRange. For that purpose
+the scope of the |NAME|ExportRange is associated as a value of 
+the property |NAME|Scope to the key of an entity that is specified
+for the |NAME|ExportRange. For example the scope of an |NAME|ExportRange 
+may be associated to a key representing a class C. That scope may contain 
+a binding for a identifier D. The D may be accessed by the qualified 
+identifier C.D somewhere where C is visible. The same holds for a
+qualified identifier X.D, where X is a variable of type C.
+
+The exported entity bound to D may again export a scope, which may contain
+a binding for E. In that case E may be referred to by a qualified name
+C.D.E wherever C.D is allowed. Hence, arbitrarily deep nests of
+scopes may be exported from nested |NAME|ExportRanges.
+
+However, a range that is not a |NAME|ExportRange does not export any binding
+visible in qualified names. That leads to the following precondition
+for searching the binding of a qualified name X.D in the context of 
+a range r: 
+
+-------------------------------------------------------------------
+
+|NAME|ExportRange 
+is a |NAME|RangeScope. 
+Its scope is to be associated as the |NAME|Scope property
+to the key THIS.|NAME|ScopeKey.
+|NAME|GotScopeProp states that this property is set.
+|NAME|GotScopePropNest states that this property is set for this
+range and all its direcly contained |NAME|ExportRanges.
+|NAME|GotExportKeys states that the scope property is set and
+all local keys are bound.
+|NAME|GotExportKeysNest states that |NAME|GotExportKeys is
+achieved for this range and all its direcly contained |NAME|ExportRanges.
+
+~$~<|NAME|ExportRange~>==~{
+CLASS SYMBOL |NAME|ExportRange:
+	|NAME|ScopeKey:			DefTableKey,	/* required */
+	|NAME|GotScopeProp:		VOID,		/* local */
+	|NAME|GotScopePropNest:		VOID,		/* local */
+	|NAME|GotExportKeys:		VOID,		/* local */
+	|NAME|GotExportKeysNest:	VOID;		/* local */
+
+CLASS SYMBOL |NAME|ExportRange INHERITS |NAME|RangeScope
+COMPUTE
+  SYNT.|NAME|GotScopeProp =
+    Reset|NAME|Scope (THIS.|NAME|ScopeKey, THIS.|NAME|Env);
+
+  SYNT.|NAME|GotScopePropNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotScopePropNest
+      SHIELD |NAME|AnyScope
+      <- SYNT.|NAME|GotScopeProp;
+
+  SYNT.|NAME|GotExportKeys =
+    SYNT.|NAME|GotScopeProp <- SYNT.|NAME|GotLocKeys;
+
+  SYNT.|NAME|GotExportKeysNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotExportKeysNest
+      SHIELD |NAME|AnyScope
+      <- SYNT.|NAME|GotExportKeys;
+END;
+~}
+
+Each |NAME|AnyScope has the following attributes
+|NAME|GotVisibleScopePropNest:
+The scope properties are set for all recursively directly contained 
+|NAME|ExportRanges and those of surrounding ranges.
+|NAME|GotVisibleKeys:
+The scope properties are set and local keys are bound 
+for all directly contained |NAME|ExportRanges
+and those of surrounding ranges.
+|NAME|GotVisibleKeysNest:
+The scope properties are set and local keys are bound 
+for all recursively directly contained |NAME|ExportRanges
+and those of surrounding ranges.
+
+~$~<|NAME|Collected Scopes~>==~{
+CLASS SYMBOL |NAME|RootScope, |NAME|RangeScope:
+	|NAME|GotVisibleScopePropNest:	VOID,	/* local */
+	|NAME|GotVisibleKeys:		VOID,	/* local */
+	|NAME|GotVisibleKeysNest:	VOID;	/* local */
+
+CLASS SYMBOL |NAME|RootScope COMPUTE
+  SYNT.|NAME|GotVisibleScopePropNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotScopePropNest
+      SHIELD |NAME|AnyScope;
+
+  SYNT.|NAME|GotVisibleKeys =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotExportKeys
+      SHIELD |NAME|AnyScope;
+
+  SYNT.|NAME|GotVisibleKeysNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotExportKeysNest
+      SHIELD |NAME|AnyScope;
+END;
+
+CLASS SYMBOL |NAME|RangeScope COMPUTE
+  SYNT.|NAME|GotVisibleScopePropNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotScopePropNest
+      SHIELD |NAME|AnyScope
+      <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleScopePropNest;
+
+  SYNT.|NAME|GotVisibleKeys =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotExportKeys
+      SHIELD |NAME|AnyScope
+      <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleKeys;
+
+  SYNT.|NAME|GotVisibleKeysNest =
+    CONSTITUENTS |NAME|ExportRange.|NAME|GotExportKeysNest
+      SHIELD |NAME|AnyScope
+      <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleKeysNest;
+END;
+~}
+
+|NAME|QualIdUse
+is an applied identifier occurrence.
+A scope is to be given by the attribute SYNT.|NAME|Scope.
+This identifier is bound in the scope SYNT.|NAME|Scope.
+
+~$~<|NAME|QualIdUse~>==~{
+CLASS SYMBOL |NAME|QualIdUse:
+	Sym:			int,		/* required */
+	|NAME|ScopeKey:	DefTableKey,		/* required or Scope */
+	|NAME|Scope:	Environment,		/* required, if not ScopeKey */
+	|KEY|Bind:	Binding		SYNT,	/* provided */
+	|KEY|Key:	DefTableKey	SYNT;	/* provided */
+
+CLASS SYMBOL |NAME|QualIdUse INHERITS _|NAME|InhPrecondDefault 
+COMPUTE
+  INH.|NAME|ScopeKey = NoKey; /* default if Scope computation is overridden */
+  INH.|NAME|Scope = Get|NAME|Scope (THIS.|NAME|ScopeKey, NoEnv)
+        <- INCLUDING |NAME|AnyScope.|NAME|GotVisibleScopePropNest;
+
+  SYNT.|KEY|Bind =
+	BindingInScope (THIS.|NAME|Scope, THIS.Sym)
+	<- (INCLUDING |NAME|AnyScope.|NAME|GotVisibleKeysNest,
+            SYNT._|NAME|InhPrecond);
+  SYNT.|KEY|Key = KeyOf (SYNT.|KEY|Bind);
+END;
+~}
+
+|NAME|ChkQualIdUse
+may be used for any applied identifier occurrence to issue an error
+message if no binding is found.
+
+~$~<|NAME|ChkQualIdUse~>==~{
+CLASS SYMBOL |NAME|ChkQualIdUse:
+      |NAME|Scope:      Environment,            /* required */
+      |KEY|Key:         DefTableKey     SYNT,   /* required */
+      Sym:              int,                    /* required */
+      SymErr:           int             SYNT,   /* required */
+      SymMsg:           VOID            SYNT;   /* required */
+
+CLASS SYMBOL |NAME|ChkQualIdUse COMPUTE
+  SYNT.SymErr = AND(NE(THIS.|NAME|Scope,NoEnv),EQ(THIS.|KEY|Key,NoKey));
+  SYNT.SymMsg = IF (THIS.SymErr,
+      message (ERROR, CatStrInd ("identifier is not defined: ", THIS.Sym),
+           0, COORDREF));
+END;
+~}

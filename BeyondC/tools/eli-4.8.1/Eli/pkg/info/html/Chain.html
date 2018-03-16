@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>Remote Attribute Access: CHAIN</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Remote Attribute Access: CHAIN</h1>
+<hr>
+<P>
+
+Chains relate computations in left-to-right depth-first order
+within certain subtrees.
+
+<p align="center">
+&nbsp;<img src="gifs/chain.gif">
+</p>
+
+<p>
+<b>Typical Error Situation</b>
+
+<ul>
+<li> Breaking a chain:
+
+<pre>
+     X.mychain = onenewValue(newval);
+</pre>
+
+instead of
+
+<pre>
+     X.mychain = addoneValue(X.mychain, newval);
+</pre>
+
+<p>
+<li>In conjunction with symbol computations: inherit chain accesses
+to symbols that don't have a <tt>CHAINSTART</tt> above them.
+
+</ul>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

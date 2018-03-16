@@ -1,0 +1,776 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from mon.tnf on 5 December 2013 -->
+
+<TITLE>Execution Monitoring Reference - Implementation</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Execution Monitoring Reference</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC18" HREF="mon_toc.html#SEC18">Implementation</A></H1>
+<P>
+This chapter describes some of the implementation of Noosa in detail.
+Eli users who just want to perform monitoring with existing monitors do
+<EM>not</EM> need to read this chapter.  It is intended for Eli
+developers or advanced users who want to extend the capabilities of
+Noosa.
+<P>
+<A NAME="IDX114"></A>
+<H2><A NAME="SEC19" HREF="mon_toc.html#SEC19">Monitoring Interfaces</A></H2>
+<P>
+Noosa needs to obtain information from the running program.  It uses the
+program's <DFN>monitoring interface</DFN> to do it.  A program's monitoring
+interface is the union of all of the monitoring interfaces of the
+components making up that program.  The contents of the monitoring
+interface for a component depend on the nature of the component and the
+information that it wants to make available to the monitoring system.
+<P>
+Monitoring interfaces are described by type-<TT>`dapto'</TT> files.
+(See  <A HREF="mon_3.html#SEC30">Dapto Grammar</A>, for the syntax of the Dapto language.)  Dapto
+files contain the information described in the following.  Examples are
+taken from the monitoring interface for the string table module in Eli
+(see the file <TT>`pkg/Adt/csm.dapto'</TT> in the Eli distribution).
+<P>
+In the following discussion, two pre-defined data types: <CODE>int</CODE> and
+<CODE>str</CODE> are used.  These correspond to the C data types <CODE>int</CODE>
+and <CODE>char *</CODE>, respectively.
+<P>
+<H3><A NAME="SEC20" HREF="mon_toc.html#SEC20">Aspects</A></H3>
+<P>
+All elements of a monitoring interface are grouped together into
+<A NAME="IDX115"></A>
+<DFN>aspects</DFN> (similar to a module).  The names of aspects are used to
+enable the monitoring system to decide what components are present in
+the program.  Some monitoring commands are only applicable to programs
+which provide the aspects on which the monitor depends.
+For example, the Phrase command can only be used on programs that
+contain parsers.
+See  <A HREF="mon_3.html#SEC27">Monitoring Database</A>, for more details on this mechanism.
+<P>
+An aspect syntactically encloses the interface elements which it
+contains.
+<P>
+<PRE>
+aspect string;
+    <EM>Interface elements of the string aspect</EM>
+end;
+</PRE>
+<P>
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+<H3><A NAME="SEC21" HREF="mon_toc.html#SEC21">Event Types</A></H3>
+<P>
+Event types are described in a monitoring interface by giving their
+names plus the names and types of their parameters.  We also enforce the
+inclusion of documentation strings for each of these entities to enable
+the user interface to provide readable descriptions of events where
+necessary.
+<P>
+The string table monitoring interface contains one event,
+<CODE>string_stored</CODE>, which is generated whenever a string is inserted
+into the table.  Consequently we have the following event description in
+the monitoring interface:
+<P>
+<PRE>
+event string_stored* "Storage of a new string in the string table"
+    (int index "Index of new string", str string "New string");
+</PRE>
+<P>
+Normally event types are assumed to be hidden from the user.  If you
+want the events of a particular type to be visible to the user through
+the Handlers window, it is necessary to append a <CODE>*</CODE> to the name of
+the type, as is done in the example above.
+<P>
+<A NAME="IDX118"></A>
+<H3><A NAME="SEC22" HREF="mon_toc.html#SEC22">Operations</A></H3>
+<P>
+Operation signatures are described in the monitoring interface by giving
+the name of the operation, its parameters (if any), its return type (if
+any), along with documentation strings.  Currently the return type of
+an operation must be <CODE>str</CODE> or there must be no return type.
+<P>
+Here is the signature for the string table <CODE>get_string</CODE> and
+<CODE>set_string</CODE> operations:
+<P>
+<PRE>
+operation get_string "Look up a string given its index"
+    (int index "Index of the string to be looked up") : str
+
+operation set_string "Change the value of a stored string"
+    (int index "Index of string to be changed",
+     str value "New value for string")
+</PRE>
+<P>
+Operation implementations are given in C following the operation
+signature.  Any legal C code can be used in an operation definition,
+except that C
+<A NAME="IDX120"></A>
+<A NAME="IDX119"></A>
+<CODE>return</CODE> statements should not be used and to return values from an
+operation you must use the following macros:
+<P>
+<A NAME="IDX121"></A>
+<DL COMPACT>
+<DT><CODE>DAPTO_RESULT_STR(char *s)</CODE>
+<DD>Append the string s to the result to be returned by this operation.
+<A NAME="IDX122"></A>
+<DT><CODE>DAPTO_RESULT_INT(int i)</CODE>
+<DD>Append the integer i as a string to the result to be returned by this
+operation.
+<A NAME="IDX123"></A>
+<DT><CODE>DAPTO_RESULT_LONG(long l)</CODE>
+<DD>Append the long integer l as a string to the result to be returned by this
+operation.
+<A NAME="IDX124"></A>
+<DT><CODE>DAPTO_RESULT_PTR(void *v)</CODE>
+<DD>Append the arbitrary pointer v to the result to be returned by this
+operation.
+The value will be passed as a long integer and won't be interpreted by Noosa.
+To be useful, this value must later be passed back to another part of the
+monitoring interface where it can be used as a pointer again.
+<A NAME="IDX125"></A>
+<DT><CODE>DAPTO_RETURN</CODE>
+<DD>Return the current result as the value of this operation.
+</DL>
+Use of the <CODE>DAPTO_RESULT</CODE> macros sets up a value that is returned when
+the end of the operation is reached.  To return from the middle of an
+operation use the <CODE>DAPTO_RETURN</CODE> macro with no arguments.
+<P>
+For example, the following is the full definition of the
+<CODE>get_string</CODE> operation:
+<P>
+<PRE>
+operation get_string "Look up a string given its index"
+    (int index "Index of the string to be looked up") : str
+{ 
+    if ((index &#60; 0) || (index &#62;= numstr)) {
+        DAPTO_RESULT_STR ("*** Illegal string table index ***");
+    } else {
+        char *s = string[index];
+        if (s == (char *) 0) {
+            DAPTO_RESULT_STR ("*** No string at this index ***");
+        } else {
+            DAPTO_RESULT_STR (s);
+        }
+    }
+}
+</PRE>
+<P>
+The <CODE>DAPTO_RESULT</CODE> macros for integer, long and pointer values
+<A NAME="IDX127"></A>
+<A NAME="IDX128"></A>
+<A NAME="IDX126"></A>
+should only be used with arguments whose addresses can be taken.  For
+other values (e.g., return values from function calls or the values of
+expressions) there are analogous macros whose names are formed by
+appending <CODE>VAL</CODE> to the macro name.  For example, the first of the
+following calls will not compile; the second must be used.
+<P>
+<PRE>
+DAPTO_RESULT_INT (i + 1);
+DAPTO_RESULT_INTVAL (i + 1);
+</PRE>
+<P>
+The <CODE>VAL</CODE> forms of the macros can always be used, but they incur
+the cost of an extra copy compared to the non-<CODE>VAL</CODE> form.
+<P>
+<A NAME="IDX129"></A>
+<A NAME="IDX130"></A>
+<H3><A NAME="SEC23" HREF="mon_toc.html#SEC23">Header Files</A></H3>
+<P>
+When writing the operation and translation parts of a monitoring
+interface it is often necessary to refer to C entities exported by other
+modules.  To enable the implementation of the monitoring interface to
+access these other interfaces it is necessary to include them in the
+monitoring interface description.  Interfaces are included by simply
+naming the header files which contain them.
+<P>
+The string table monitoring interface uses some standard C library
+functions, C string functions and entities made available by the string
+table module.  Consequently the interface also includes the following
+lines:
+<P>
+<PRE>
+&#60;stdlib.h&#62;
+&#60;string.h&#62;
+"csm.h"
+</PRE>
+<P>
+<A NAME="IDX131"></A>
+<A NAME="IDX132"></A>
+<A NAME="IDX133"></A>
+<H3><A NAME="SEC24" HREF="mon_toc.html#SEC24">Non-standard types</A></H3>
+<P>
+By default, Dapto can handle the built-in types <CODE>int</CODE> and
+<CODE>str</CODE>.  If you want to pass a value of some other type to an
+operation or receive such a value as an event parameter you need to tell
+the system about it.  If you don't do anything then the values will be
+passed as the string "unknown".
+<P>
+Even if you do not add new operations or events involving non-standard
+types you probably want to provide proper monitoring support for them
+anyway.  The reason is that other parts of the system may need to report
+values of these types to Noosa.  Most notably, the attribute evaluator
+generates events whenever attributes are evaluated.  If you want to be
+able to monitor attributes of non-standard types then you must add
+proper monitoring support for these types or the attribute values will
+be reported as "unknown".
+<P>
+The rest of this section explains what you need to do to monitor values
+of a non-standard type.  It talks about the monitoring interface and
+associated support.  The next section describes how you might go about
+displaying values in the Noosa transcript window for user browsing.
+<P>
+The following information is based on the monitoring support for
+environment values in the current Eli system.  The environment module
+has the following monitoring interface containing a couple of events and
+an operation (see the file <TT>`pkg/Name/envmod.dapto'</TT> in the Eli
+distribution).
+<P>
+<PRE>
+aspect envmod;
+
+"envmod.h"
+
+event env_created* "An environment value has been created"
+    (Environment env "The environment that was created",
+     Environment parent "The parent environment (if any)");
+
+event binding_made* "A binding has been made in an environment"
+    (Environment env "The environment in which the binding was made",
+     int idn "The identifier that was bound",
+     DefTableKey key "The key to which the identifier was bound");
+
+operation get_scope_info
+    "Return the parent environment of an environment and its idn-key bindings"
+    (Environment env "The environment to be searched") : str
+{
+    Scope s;
+
+    DAPTO_RESULT_PTR (env-&#62;parent);
+    for (s = env-&#62;relate; s != NoScope; s = s-&#62;nxt) {
+        DAPTO_RESULT_INT (s-&#62;idn);
+        DAPTO_RESULT_PTR (s-&#62;key);
+    }   
+}
+ 
+end;
+</PRE>
+<P>
+As is conventional in a monitoring interface, the events are used to
+notify Noosa of important changes to the environment values as they
+occur.  The operation is used to allow Noosa to get the complete
+contents of an environment.  Providing both events and operations in
+this style is a good idea because the events allow fine-grained control
+via breakpoints and handlers while the operation can be used to
+implement value browsing.
+<P>
+Note that the operation implementation can use any C code it likes to
+determine the appropriate information and return it to Noosa.  In this
+case we use the fields provided by the environment module to return the
+parent environment and all of the integer-key pairs.
+<P>
+Since <CODE>Environment</CODE> and <CODE>DefTableKey</CODE> values are passed as
+event and operation parameters we need to tell Dapto how to pass them.
+In the following we just talk about environment values.  Support for
+definition table keys is similar.
+<P>
+When Dapto generates the event generation code for an event parameter
+of unknown type it attempts to use a macro of the form
+<CODE>DAPTO_RESULTx</CODE> where <EM>x</EM> is the name of the parameter type.
+Thus to get the value passed correctly you need to define this macro.
+Usually the definition is placed in the header file that defines the
+type itself.  E.g., <TT>`envmod.h'</TT> contains the following definition.
+<A NAME="IDX134"></A>
+<P>
+<PRE>
+#define DAPTO_RESULTEnvironment(e) DAPTO_RESULT_PTR (e)
+</PRE>
+which says that an environment value should be sent from the running
+program to Noosa as a pointer (since it is a pointer).
+<P>
+Similarly, to permit values of this type to be sent from Noosa to the
+running program (as operation parameters) you need to define a macro
+whose name is <CODE>DAPTO_ARGx</CODE>.  For example, for environments we
+define the following macro.
+<A NAME="IDX135"></A>
+<P>
+<PRE>
+#define DAPTO_ARGEnvironment(e)    DAPTO_ARG_PTR (e, Environment)
+</PRE>
+which says that it should be received as a pointer.  In the definition
+of the macro, the second parameter is the type of the value.  It is used
+to cast the received value to the appropriate type.
+<P>
+<A NAME="IDX136"></A>
+<A NAME="IDX137"></A>
+<A NAME="IDX138"></A>
+<A NAME="IDX139"></A>
+<H3><A NAME="SEC25" HREF="mon_toc.html#SEC25">Browsing non-standard types</A></H3>
+<P>
+Once you have Noosa and the running program correctly passing values of
+a non-standard type back and forth, you usually want to see those values
+in the Noosa transcript.  If the values are structured, you will also
+want to add browsing support for them.
+<P>
+Adding browsing support for a non-standard type involves writing Tcl
+code that will be invoked whenever a value of this type is browsed.  The
+procedure can be automatically loaded into Noosa by placing its
+definition in a startup file (see  <A HREF="mon_1.html#SEC4">User Initialisation</A>).
+Alternatively, it can be placed in a file of type <CODE>tcl</CODE> and
+included in your specifications.  At startup Noosa will load all files
+of this type.
+<A NAME="IDX140"></A>
+<P>
+The Noosa transcript is a general text display area, so you can use
+<CODE>n_say</CODE> to display whatever you like (it always displays at the
+end).  As a special case if you display something of the form <CODE>t:v</CODE>
+where <EM>t</EM> is the name of a type which has browsing support, then
+the value <EM>v</EM> will also be browsable.  In general it's a good idea
+to arrange for values to be prefixed by their type in this way even if
+no browsing support is currently available.  The type provides a
+valuable clue to the user and if browsing support is added later it will
+available here without you having to do anything.
+<P>
+Here is a slightly simplified version of the Tcl support used by Eli to
+support browsing of environment values.
+<P>
+<PRE>
+set n(Environment,desc) "Identifier scoping environment"
+
+proc n_Environment_say {env} {
+    n_say "Environment:0x[n_dectohex $env]"
+}
+
+proc n_Environment_open {text env} {
+    n_say "$text"
+    if {$env == 0} {
+        n_say "\n  NoEnv\n"
+    } else {
+        set env [n_hextodec $env]
+        set r [n_send get_scope_info $env]
+        if {[lindex $r 0] != 0} {
+            n_say " (parent: "
+            n_Environment_say [lindex $r 0]
+            n_say ")"
+        }
+        set r [lreplace $r 0 0]
+        n_say "\n"
+        set c 0
+        foreach {i j} $r {
+            n_say "  "
+            n_say_val DefTableKey $j
+            set s [n_send get_string $i]
+            n_say " $s\n"
+            incr c
+        }
+        if {$c == 0} {
+            n_say "  No bindings\n"
+        }
+    }
+}
+</PRE>
+<P>
+The first <CODE>set</CODE> command sets a documentation string that will be
+used to display an information message at the bottom of the Noosa window
+whenever the user moves the mouse over a value of this type in the
+transcript window.  In general, for a type <EM>x</EM> you need to set the
+array element <CODE>n(x,desc)</CODE> in the global scope.
+<A NAME="IDX141"></A>
+<P>
+The procedure <CODE>n_Environment_say</CODE> is used by Noosa to display
+values of this type.  Since Environment values are pointers, the code
+displays them in hex to facilitate cross-referencing with values
+displayed by a source-level debugger.  The Noosa library procedure
+<CODE>n_dectohex</CODE> is used to obtain the hexadecimal representation of
+the value.  If <CODE>n_Environment_say</CODE> did not exist, values would be
+displayed in the style <EM>t:v</EM> where <EM>t</EM> is the type and
+<EM>v</EM> is the value in decimal.
+<P>
+The procedure <CODE>n_Environment_open</CODE> is invoked whenever the user
+clicks on a value of this type in the transcript window.  In general,
+the procedure name must be <CODE>n_x_open</CODE> where <EM>x</EM> is the type
+name.  The existence of this procedure is taken by Noosa as an
+indication that values of type <EM>x</EM> should be browsable.  The
+procedure gets two parameters; the first is the complete text that the
+user clicked on (which includes the type name) and the second is the
+value part of that text.  In this case the second parameter will be the
+environment value of interest.
+<A NAME="IDX142"></A>
+<A NAME="IDX143"></A>
+<P>
+The implementation of this procedure first displays the clicked-on text
+to identify the subsequent output because the browsable value may be a
+long distance from the bottom of the transcript where the output will be
+displayed.  A null environment is displayed in a standard way to match
+the user's view of the module.
+<A NAME="IDX144"></A>
+<P>
+Non-null environments are converted by <CODE>n_hextodec</CODE> into decimal
+before being passed to the <CODE>get_scope_info</CODE> operation defined in
+the environment module monitoring interface (see  <A HREF="mon_3.html#SEC24">Non-standard types</A>).  This operation gets the parent environment and the integer-key
+pairs as a Tcl list.  The Noosa procedure <CODE>n_send</CODE> is used to
+invoke the operation with the environment value as the sole parameter.
+<P>
+When the <CODE>get_scope_info</CODE> operation returns, the
+<CODE>n_Environment_open</CODE> procedure goes on to display various
+information in the Noosa transcript window.  Strings are displayed using
+<CODE>n_say</CODE>.  The parent environment (if there is one) is displayed
+using <CODE>n_Environment_say</CODE> so that it is displayed in a style
+consistent with other environments.
+<P>
+All of the integer-key pairs in the environment are displayed.  The
+routine <CODE>n_say_val</CODE> is used to display the keys.  It is passed the
+type of the value and the value itself.  <CODE>n_say_val</CODE> separates the
+decision about how to display keys from other code.  <CODE>n_say_val</CODE>
+just dispatches to <CODE>n_DefTableKey_say</CODE> if it exists.
+<P>
+Note that we don't display the integers as-is, we use the
+<CODE>get_string</CODE> operation from the string storage module to convert
+them to strings which is generally more helpful.  Note: arguably this is
+a bug since it's possible to use the environment module with integers
+that are not string table indexes.
+<P>
+<A NAME="IDX145"></A>
+<A NAME="IDX146"></A>
+<H2><A NAME="SEC26" HREF="mon_toc.html#SEC26">Implementing Monitoring Interfaces</A></H2>
+<P>
+A type-<TT>`dapto'</TT> file defines the monitoring interface of a
+component.  (See  <A HREF="mon_3.html#SEC30">Dapto Grammar</A>, for the syntax of the Dapto
+language.)  The <CODE>dapto</CODE> program turns these interfaces into code
+that can be incorporated into a program that we want to be able to
+monitor.  Dapto does two main things:
+<P>
+<OL>
+<LI>
+Generates a type-<TT>`c'</TT> file and a type-<TT>`h'</TT> file containing an
+implementation of the monitoring interface given by its input
+type-<TT>`dapto'</TT> file.
+<P>
+The type-<TT>`c'</TT> file will contain routines to enable the monitoring
+system to invoke data operations and receive the results.  The
+mechanisms by which this happens are beyond the scope of this manual.
+<P>
+Also contained in the type-<TT>`c'</TT> file will be one function definition
+for each event type defined in the monitoring interface.  For each event
+type <EM>X</EM> there will be a function <CODE>_dapto_</CODE><EM>X</EM> that has
+parameters corresponding to the parameters of <EM>X</EM>.
+(See  <A HREF="mon_3.html#SEC28">Adding Monitoring Support To A Component</A>, for details on how to use this function.)
+<P>
+The type-<TT>`h'</TT> file generated by dapto will contain the externally
+visible interface of the type-<TT>`c'</TT> file.
+<P>
+<A NAME="IDX147"></A>
+<A NAME="IDX148"></A>
+<LI>
+Generates a type-<TT>`db'</TT> file containing a <DFN>monitoring database</DFN>
+with information about the monitoring interface.  This file is a TCL
+script that sets up data structures for use by the monitoring system.
+It is used to let the monitoring system know which aspects are provided
+by the monitoring interface and which events are contained in those
+aspects. See  <A HREF="mon_3.html#SEC27">Monitoring Database</A>, for more information on how the database is
+used.
+</OL>
+<P>
+The names of the generated files depend on the name of the input file;
+<TT>`csm.dapto'</TT> will produce <TT>`csm_dapto.c'</TT>, <TT>`csm_dapto.h'</TT> and
+<TT>`csm_dapto.db'</TT>.
+<P>
+<A NAME="IDX149"></A>
+<A NAME="IDX150"></A>
+<H2><A NAME="SEC27" HREF="mon_toc.html#SEC27">Monitoring Database</A></H2>
+<P>
+A monitoring database is generated by Dapto from a monitoring interface
+description (see  <A HREF="mon_3.html#SEC26">Implementing Monitoring Interfaces</A>).  The concatenation of
+the monitoring databases for all of the components present in a program
+comprises the monitoring database for the program.
+<P>
+The monitoring database is simply a TCL file which, when loaded by
+Noosa, provides information about the aspects and events of the
+monitoring interface.  For example, the monitoring database for the
+string table monitoring interface (see  <A HREF="mon_3.html#SEC19">Monitoring Interfaces</A>) yields
+the following database (reformatted slightly):
+<P>
+<PRE>
+lappend n(aspects) string
+lappend n(events) \
+    [list string_stored "Storage of a new string in the string table" \
+        { index "Index of new string" string "New string" } 1]
+</PRE>
+The global TCL lists
+<A NAME="IDX151"></A>
+<CODE>n(aspects)</CODE> and
+<A NAME="IDX152"></A>
+<CODE>n(events)</CODE> are used to store the database information.
+<CODE>n(aspects)</CODE> contains a list of the all of the aspect names
+contained in the program.  <CODE>n(events)</CODE> is a list of lists; each
+sub-list contains the name and documentation strings for a single event
+type and its parameters, plus a flag which is 1 if the event is visible
+to the user and 0 otherwise.
+<P>
+<A NAME="IDX153"></A>
+<A NAME="IDX154"></A>
+<H2><A NAME="SEC28" HREF="mon_toc.html#SEC28">Adding Monitoring Support To A Component</A></H2>
+<P>
+Once you have a monitoring interface implementation for a component you
+must add monitoring support to the component itself.  This support
+consists entirely of calls to the event generation routines for any
+events you have in your interface (see  <A HREF="mon_3.html#SEC19">Monitoring Interfaces</A> and
+see  <A HREF="mon_3.html#SEC26">Implementing Monitoring Interfaces</A>).  If you have no events in your
+interface, the code of the component does not need to be changed.
+<P>
+Adding event generation to a component is a matter of adding calls to
+event generation routines at the appropriate places.  The details of
+this will depend on the component, but the idea is to insert the calls
+at places where the action which the event represents can be said to
+have taken place.  Any necessary event parameters should be passed to
+the event generation routine.
+<P>
+To enable a monitoring-free version of the component to be easily
+produced, the convention is that all additions purely for the purpose of
+monitoring be conditionalised by
+<P>
+<PRE>
+#ifdef MONITOR
+...
+#endif
+</PRE>
+<P>
+The following examples are based on monitoring support for the Eli
+string table component.  The component must be modified to include the C
+interface to the monitoring interface:
+<P>
+<PRE>
+#ifdef MONITOR
+#include "csm_dapto.h"
+#endif
+</PRE>
+<P>
+Then we must identify places in the code where <CODE>string_stored</CODE>
+events must be generated.  There is only one of these, at the end of the
+routine <CODE>stostr</CODE>, so we add the following code to generate the
+event with the appropriate parameter values:
+<P>
+<PRE>
+#ifdef MONITOR
+    _dapto_string_stored (numstr, string[numstr]);
+#endif
+</PRE>
+<P>
+When the component is compiled by Eli with the <CODE>-DMONITOR</CODE> compiler
+option (implied by the <CODE>+monitor</CODE> parameter), this monitoring
+support will be included.
+<P>
+<H2><A NAME="SEC29" HREF="mon_toc.html#SEC29">Supporting Profiling</A></H2>
+<P>
+Noosa contains support for two kinds of profiles (see  <A HREF="mon_2.html#SEC15">Frequency Profiles</A> and see  <A HREF="mon_2.html#SEC16">Time Profiles</A>).  To support profiling of a
+component it is necessary to add extra event generation to a component.
+It is necessary to generate an <CODE>enter</CODE> event whenever execution
+enters the code of the component and a <CODE>leave</CODE> event whenever
+execution leaves the code of the component.  These events have the
+following signatures:
+<P>
+<A NAME="IDX155"></A>
+<PRE>
+event enter "Enter a program component"
+    (str name "Name of component");
+<A NAME="IDX156"></A>event leave "Leave a program component"
+    (str name "Name of component");
+</PRE>
+<P>
+For the string table component we would add the following code to the
+beginning of each string table routine:
+<P>
+<PRE>
+#ifdef MONITOR
+  _dapto_enter ("string");
+#endif
+</PRE>
+and the following code at each exit point of each string table routine:
+<PRE>
+#ifdef MONITOR
+  _dapto_leave ("string");
+#endif
+</PRE>
+The event parameter ("string" in this case) is used by the profile
+monitoring code to identify the component.
+<P>
+<A NAME="IDX157"></A>
+<A NAME="IDX158"></A>
+<A NAME="IDX159"></A>
+<A NAME="IDX160"></A>
+<H2><A NAME="SEC30" HREF="mon_toc.html#SEC30">Dapto Grammar</A></H2>
+<A NAME="IDX161"></A>
+<P>
+The following context-free grammar defines the syntax of the Dapto
+language.  <VAR>ident</VAR> is an identifier in the C style.  Identifier
+definitions are required to be unique within a specification and within
+event and operation blocks.  <VAR>str</VAR> and <VAR>bstr</VAR> are strings
+delimited by double quotes and angled brackets, respectively.
+<VAR>text</VAR> is arbitrary text delimited by braces.
+<P>
+<PRE>
+<VAR>spec</VAR>: <VAR>aspects</VAR>.
+
+<VAR>aspects</VAR>: <VAR>aspect_stmt</VAR> / <VAR>aspects</VAR> <VAR>aspect_stmt</VAR>.
+<VAR>aspect_stmt</VAR>: <SAMP>`aspect'</SAMP> <VAR>iddef</VAR> <SAMP>`;'</SAMP> <VAR>sigs</VAR> <SAMP>`end'</SAMP> <SAMP>`;'</SAMP>.
+
+<VAR>sigs</VAR>: <VAR>sig</VAR> / <VAR>sigs</VAR> <VAR>sig</VAR>.
+<VAR>sig</VAR>: <VAR>event_sig</VAR> / <VAR>operation_sig</VAR> / <VAR>str</VAR> / <VAR>bstr</VAR>.
+
+<VAR>event_sig</VAR>: <SAMP>`event'</SAMP> <VAR>iddef</VAR> <VAR>export</VAR> <VAR>str</VAR> <VAR>event_block</VAR> <SAMP>`;'</SAMP>.
+<VAR>event_block</VAR>: <SAMP>`('</SAMP> <VAR>optattrs</VAR> <SAMP>`)'</SAMP>.
+<VAR>export</VAR>: <SAMP>`*'</SAMP> / /* empty */.
+<VAR>optattrs</VAR>: /* empty */ / <VAR>attrs</VAR>.
+<VAR>attrs</VAR>: <VAR>attr</VAR> / <VAR>attrs</VAR> <SAMP>`,'</SAMP> <VAR>attr</VAR>.
+<VAR>attr</VAR>: <VAR>typeid</VAR> <VAR>iddef</VAR> <VAR>str</VAR>.
+
+<VAR>operation_sig</VAR>: <SAMP>`operation'</SAMP> <VAR>iddef</VAR> <VAR>str</VAR> <VAR>operation_block</VAR> <VAR>text</VAR> /
+               <SAMP>`operation'</SAMP> <VAR>iddef</VAR> <VAR>str</VAR> <VAR>operation_block</VAR> <SAMP>`:'</SAMP> <VAR>typeid</VAR> <VAR>text</VAR>.
+<VAR>operation_block</VAR>: <SAMP>`('</SAMP> <VAR>optparams</VAR> <SAMP>`)'</SAMP>.
+<VAR>optparams</VAR>: /* empty */ / <VAR>params</VAR>.
+<VAR>params</VAR>: <VAR>param</VAR> / <VAR>params</VAR> <SAMP>`,'</SAMP> <VAR>param</VAR>.
+<VAR>param</VAR>: <VAR>typeid</VAR> <VAR>iddef</VAR> <VAR>str</VAR>.
+
+<VAR>iddef</VAR>: <VAR>ident</VAR>.
+<VAR>iduse</VAR>: <VAR>ident</VAR>.
+<VAR>typeid</VAR>: <VAR>ident</VAR>.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_2.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_4.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="mon_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>

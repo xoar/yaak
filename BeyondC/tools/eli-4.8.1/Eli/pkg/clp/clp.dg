@@ -1,0 +1,53 @@
+# $Id: clp.dg,v 2.10 2012/04/01 13:38:29 profw Exp $
+# Copyright 1994, The Regents of the University of Colorado
+# Copyright 1995-1998, Anthony M. Sloane
+
+# This file is part of the Eli translator construction system.
+
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*.clp => :clp;
+
+:clp 'CLP specification'? => :FILE;
+:clp.cmpd 'Set of clp specification fragments' => :LIST;
+
+COLLECT  (:clp)
+  => (:one.clp.cmpd);
+
+:one.clp.cmpd 'Singleton clp specification' => :clp.cmpd;
+
+COLLECT  (:LIST :extract=:clp)
+  => (:ext.clp.cmpd);
+
+:ext.clp.cmpd 'Extracted clp specification fragments' => :clp.cmpd;
+
+EXEC (clp_gen.sh) (clp.exe) (:clp.cmpd :cpp) (clp.err)
+     ($ODINCACHE/PKGS/skeleton/sed.exe)
+  => (:clp_gen);
+
+:clp_gen 'Objects generated from CLP specifications' => :DERIVED-DIRECTORY;
+
+EXEC (clp_out.sh) (:clp.cmpd :names) (:clp_gen :name) (+monitor)
+     (clp.c) (clp.h) (clp.specs) (clp.dapto) (+nomain)
+  => (:clp_out);
+
+:clp_out 'Results of CLP processing' => :FILE;
+
+COLLECT (:allspecs +incl=(:etaIncl) :clp_out :list)
+  => (:eli*level_1_specs_in);
+
+EXEC ($ODINCACHE/PKGS/skeleton/no_map.sh) (+hookvalue) (:clp_out) clpErr
+  => (:clpErr);
+:clpErr 'Identity map for errors in standard form' => :line_err;

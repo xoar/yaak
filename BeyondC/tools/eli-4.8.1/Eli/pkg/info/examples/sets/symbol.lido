@@ -1,0 +1,14 @@
+/* $Id: symbol.lido,v 1.10 1996/11/06 20:54:43 waite Exp $ */
+
+ATTR Sym: int;
+
+SYMBOL Entity INHERITS IdDefScope, Unique COMPUTE
+  SYNT.Sym=TERM;
+  IF(NOT(THIS.Unique),
+    message(ERROR,"Multiply-defined word", 0, COORDREF));
+END;
+
+SYMBOL text INHERITS RootScope, RangeUnique END;
+SYMBOL set_body INHERITS RangeScope END;
+SYMBOL set_name INHERITS Entity END;
+SYMBOL set_element INHERITS Entity END;

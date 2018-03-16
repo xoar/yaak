@@ -1,0 +1,87 @@
+# Source Types
+
+*.idl => :IDL;
+
+*.IDL => :IDL;
+
+
+# Source Object Types
+
+:IDL 'C++ Interface Definition Language file' => :FILE;
+
+# Intermediate Object Types
+
+:idl_inc.view_desc 'view description of IDL-style included files' => :FILE;
+
+:idl_inc 'list of potential IDL-style included files' => :LIST;
+
+:all_idl_inc 'list of IDL-style transitively included files' => :LIST;
+
+# Output Object Types
+
+:idl_h_dir 'header files'? => :DERIVED-DIRECTORY;
+
+:client.C 'client side class implementation' => :cxx;
+
+:sstub.c 'server stubs' => :c;
+
+:cstub.c 'client stubs' => :c;
+
+:epv.C 'Entry point vector for server' => :cxx;
+
+:idl.a 'library of idl generated routines'? => :REFERENCE :a;
+
+:idl_lib.list 'idl generated routines' => :code.list;
+
+:idl_targets 'header file and library targets for an idl file' => :FILE;
+
+
+# Parameter Types
+
++inc_sp 'name of a directory in an include search path'? => :ls;
+
++ignore 'egrep expression for includes to ignore'? => :ls;
+
++idl_flags 'flags for idl'? => :cat;
+
++home 'home directory for relative pathnames' => :first;
+
+
+# Environment Variables
+
+$ODIN_IDL_HOME 'directory containing the idl compiler' = '';
+
+$ODIN_IDL 'name of the idl compiler' = 'idl++';
+
+$ODIN_IDL_FLAGS 'idl flags' = '-keep source';
+
+$ODIN_IDL_I 'directory containing default idl include files' = '';
+
+
+# Tools
+
+EXEC (idl_inc.sh) (:FILE) (:FILE :dir)@ (+home)@ (+inc_sp) (+ignore)
+   => (:idl_inc.view_desc);
+
+COLLECT (:idl_inc.view_desc :view)
+   => (:idl_inc);
+
+COLLECT (:idl_inc :map=:all_idl_inc) (:idl_inc)
+   => (:all_idl_inc);
+
+EXEC (idl.sh) (:IDL) (:IDL :dir)@ (+inc_sp) (+idl_flags)
+ NEEDS (:IDL +home=(:IDL :dir) :lookup=:all_idl_inc)
+   => (:idl_h_dir) (:client.C) (:epv.C) (:sstub.c) (:cstub.c);
+
+COLLECT (:client.C) (:epv.C) (:sstub.c) (:cstub.c)
+   => (:idl_lib.list);
+
+COLLECT (:idl_lib.list +inc_sp=(:idl_h_dir) :a)
+   => (:idl.a);
+
+EXEC (idl_tgts.sh) (:IDL)@ (:idl_h_dir :name) (:idl.a :name)
+   => (:idl_targets);
+
+
+
+

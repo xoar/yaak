@@ -1,0 +1,5 @@
+"Now is the time for all good men to come to the aid of their country,
+because the quick brown fox jumps over the lazy dog" contains everyone's
+favorite test sentences (but not much punctuation).  Do we need more? Yes!
+Exhaustive testing -- a typical approach -- is unecessary; although we've
+done it: only the slash (/) and star (*) were hard to fit in.

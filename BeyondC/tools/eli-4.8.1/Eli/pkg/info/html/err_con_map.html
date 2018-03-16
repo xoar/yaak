@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>.con/.map Specifications</title>
+</head>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B"
+ALINK="#FF0000" BACKGROUND="gifs/bg.gif" LANG="EN">
+%HEAD%
+<h1>Specifying the mapping between concrete and abstract syntax</h1>
+<hr>
+<P>
+Eli deduces the correspondence between the concrete
+and abstract syntaxes based on the user specifications
+in .con, .lido and .map files.
+
+<p align="center">
+&nbsp;<img src="gifs/mapcon.gif">
+</p>
+
+<p>
+<b>Typical Error Situation</b>
+
+<p>
+Often caused by typing mistakes:
+
+<p><b>.map:</b> <tt>   MAPSYM a_or_b : a b.</tt>
+
+
+<p><b>.con:</b> <tt>   x : a b. </tt>
+
+<p>
+<b>.lido:</b><tt>   RULE: x ::=  a_or_b ',' a_or_b END;</tt>
+
+<p>
+This .lido rule does not match a concrete grammar rule.
+It is added to the parsing grammar. 
+
+<p>
+==> <tt>a_or_b</b> is considered to be a terminal.
+
+<p>
+==>  <tt>ERROR: No GLA specification for a_or_b </tt>
+<p>
+<a href="ee.html">Back to Typical Eli Errors</a>
+%FOOT%
+</body></html>
+

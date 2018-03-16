@@ -1,0 +1,86 @@
+# $Id: Makefile.in,v 1.4 2010/04/26 10:44:14 pfahler Exp $
+# 
+# (C) Copyright 1997 University of Paderborn
+# 
+# /* This file is part of the Eli translator construction system.
+# 
+# Eli is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later
+# version.
+# 
+# Eli is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with Eli; see the file COPYING.  If not, write to the Free Software
+# Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
+# 
+# Makefile of Tool/cola/lalr/back/table
+
+CC	=	@CC@
+
+DIR	=	pkg/cola/lalr/back/table
+SRC	=
+C_FILES =	opt_tabs.c optfunc.c wrt_tabs.c wrtfunc.c BUILDPRS.c \
+		optresfunc.c opthelpfunc.c wrthelpfunc.c build_copa.c \
+		ptg_gen.c obstack.c
+O_FILES =	opt_tabs.o optfunc.o wrt_tabs.o wrtfunc.o \
+		optresfunc.o opthelpfunc.o wrthelpfunc.o ptg_gen.o \
+		obstack.o
+H_FILES =	build_tdcopa.h opthelpfunc.h tabsopttype.h wrthelpfunc.h \
+		opt_tabs.h opthelptype.h wrt_tabs.h optfunc.h optresfunc.h \
+	        wrtfunc.h build_copa.h ptg_gen.h obstack.h gettext.h config.h
+COP	=	$(C_FILES) $(H_FILES) Makefile.in
+AUX	=	$(COP) Makefile
+COM	=
+CMD	=
+RCS	=	
+EXE	=	../../../colaTbl.exe
+GEN	=
+GENINS	=
+SRCDIR	=
+AUXDIR	=
+
+BOTH	=	../both
+IDL	=	../../../idl
+
+LIBS = $(BOTH)/both.a $(IDL)/IDL.a
+CFLAGS	= -I$(BOTH) -I$(IDL)
+
+@toolmk_h@
+
+$(EXE): table.a build_copa.o BUILDPRS.o  $(LIBS)
+	$(CC) $(CFLAGS) BUILDPRS.o build_copa.o table.a $(LIBS) -o $(EXE)
+
+IDLH	= $(IDL)/comar.h $(IDL)/prsiface.h
+
+BUILDPRS.o: BUILDPRS.c $(IDLH) $(BOTH)/error.h build_copa.h
+	$(CC) -DTABDRIV -DFILEOPT $(CFLAGS) -c BUILDPRS.c
+
+table.a: $(O_FILES)
+	rm -f $@
+	ar rcu $@ $(O_FILES)
+	@RANLIB@ $@
+
+TABS	= wrt_tabs.h tabsopttype.h opt_tabs.h
+
+build_copa.o: build_copa.c build_copa.h $(BOTH)/rd_absprs.h $(IDLH) $(TABS)
+	$(CC) -c -DTABDRIV  $(CFLAGS) build_copa.c
+
+opt_tabs.o: opt_tabs.c optfunc.h tabsopttype.h $(BOTH)/error.h
+
+optfunc.o:   optfunc.c tabsopttype.h opthelptype.h opthelpfunc.h optresfunc.h
+
+wrt_tabs.o:  wrt_tabs.c tabsopttype.h wrtfunc.h $(BOTH)/error.h
+
+wrtfunc.o:   wrtfunc.c tabsopttype.h wrthelpfunc.h
+
+optresfunc.o:   optresfunc.c  $(BOTH)/error.h tabsopttype.h opthelptype.h
+
+opthelpfunc.o:   opthelpfunc.c  $(BOTH)/error.h tabsopttype.h opthelptype.h
+
+wrthelpfunc.o:   wrthelpfunc.c  $(BOTH)/error.h tabsopttype.h
+

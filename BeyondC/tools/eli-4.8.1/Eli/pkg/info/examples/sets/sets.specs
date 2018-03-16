@@ -1,0 +1,11 @@
+/* $Id: sets.specs,v 1.8 1996/03/27 00:03:53 waite Exp $ */
+
+sets.con
+word.gla
+
+$/Name/AlgScope.gnrc :inst
+$/Prop/Unique.gnrc :inst
+symbol.lido
+
+$/Output/LeafPtg.gnrc :inst
+code.fw

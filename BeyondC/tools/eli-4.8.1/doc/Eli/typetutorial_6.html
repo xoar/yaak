@@ -1,0 +1,370 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.29
+     from typetutorial.tnf on 5 December 2013 -->
+
+<TITLE>Tutorial on Type Analysis - Array Types</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000" BACKGROUND="gifs/bg.gif">
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0" VALIGN=BOTTOM>
+<TR VALIGN=BOTTOM>
+<TD WIDTH="160" VALIGN=BOTTOM>
+<A HREF="http://eli-project.sourceforge.net/">
+<IMG SRC="gifs/elilogo.gif" BORDER=0>
+</A>&nbsp;
+</TD>
+<TD WIDTH="25" VALIGN=BOTTOM>
+<img src="gifs/empty.gif" WIDTH=25 HEIGHT=25>
+</TD>
+<TD ALIGN=LEFT WIDTH="475" VALIGN=BOTTOM>
+<A HREF="index.html"><IMG SRC="gifs/title.png" BORDER=0></A>
+</TD>
+<!-- |DELETE FOR SOURCEFORGE LOGO|
+<TD>
+<a href="http://sourceforge.net/projects/eli-project">
+<img
+  src="http://sflogo.sourceforge.net/sflogo.php?group_id=70447&amp;type=13"
+  width="120" height="30"
+  alt="Get Eli: Translator Construction Made Easy at SourceForge.net.
+    Fast, secure and Free Open Source software downloads"/>
+</a>
+</TD>
+|DELETE FOR SOURCEFORGE LOGO| -->
+</TR>
+</TABLE>
+
+<HR size=1 noshade width=785 align=left>
+<TABLE BORDER=0 CELLSPACING=2 CELLPADDING=0>
+<TR>
+<TD VALIGN=TOP WIDTH="160">
+<h4>General Information</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="index.html">Eli: Translator Construction Made Easy</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gindex_1.html#SEC1">Global Index</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="faq_toc.html" >Frequently Asked Questions</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Tutorials</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="EliRefCard_toc.html">Quick Reference Card</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="novice_toc.html">Guide For new Eli Users</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="news_toc.html">Release Notes of Eli</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="nametutorial_toc.html">Tutorial on Name Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="typetutorial_toc.html">Tutorial on Type Analysis</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Reference Manuals</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ui_toc.html">User Interface</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="pp_toc.html">Eli products and parameters</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lidoref_toc.html">LIDO Reference Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ee.html" >Typical Eli Usage Errors</a> </td></tr>
+</table>
+
+<h4>Libraries</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lib_toc.html">Eli library routines</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="modlib_toc.html">Specification Module Library</a></td></tr>
+</table>
+
+<h4>Translation Tasks</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lex_toc.html">Lexical analysis specification</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="syntax_toc.html">Syntactic Analysis Manual</a></td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="comptrees_toc.html">Computation in Trees</a></td></tr>
+</table>
+
+<h4>Tools</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="lcl_toc.html">LIGA Control Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="show_toc.html">Debugging Information for LIDO</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="gorto_toc.html">Graphical ORder TOol</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="fw_toc.html">FunnelWeb User's Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="ptg_toc.html">Pattern-based Text Generator</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="deftbl_toc.html">Property Definition Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="oil_toc.html">Operator Identification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="tp_toc.html">Tree Grammar Specification Language</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="clp_toc.html">Command Line Processing</a> </td></tr>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="cola_toc.html">COLA Options Reference Manual</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="idem_toc.html">Generating Unparsing Code</a> </td></tr>
+</table>
+<p>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="mon_toc.html">Monitoring a Processor's Execution</a> </td></tr>
+</table>
+
+<h4>Administration</h4>
+
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<tr valign=top><td><img src="gifs/gelbekugel.gif" WIDTH=7 HEIGHT=7 ALT=" o"> </td><td><a href="sysadmin_toc.html">System Administration Guide</a> </td></tr>
+</table>
+
+<HR WIDTH="100%">
+<A HREF="mailto:eli-project-users@lists.sourceforge.net">
+<IMG SRC="gifs/button_mail.gif" BORDER=0 ALIGN="left"></A>
+<A HREF="index.html"><IMG SRC="gifs/home.gif" BORDER=0 ALIGN="right"></A>
+
+</TD>
+<TD VALIGN=TOP WIDTH="25"><img src="gifs/empty.gif" WIDTH=25 HEIGHT=25></TD>
+
+<TD VALIGN=TOP WIDTH="600">
+<H1>Tutorial on Type Analysis</H1>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+<H1><A NAME="SEC10" HREF="typetutorial_toc.html#SEC10">Array Types</A></H1>
+<P>
+We now add array types to our language. We specify that two
+array types are structural equivalent if their element types
+are equivalent, and if the types have the same number of elements.
+Hence, type equivalence is not only determined by the component types.
+<P>
+Here is an example program that uses arrays, records, and
+type definitions in combination:
+<P>
+<B>ArrayExamp</B>[63]==
+<PRE>
+begin
+  var   int k;
+  var   int[5] pi, int[5] pj;
+  var   record int i, bool b, real[3] r end [2] rv;
+  type  bool[4] bt;
+  var   bt vbt, bt wbt;
+  var   real[6][7] m;
+  pi[1] = k;
+  vbt = wbt;
+  rv[2].b = true;
+  rv[1].r[k] = 3.2;
+  m[1][k] = 1.0;
+end
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+We extend the grammar by notations for
+array type denoters and by indexed variables:
+<P>
+<I> Abstract array syntax</I>[64]==
+<PRE>
+RULE: TypeDenoter ::= ArrayType END;
+RULE: ArrayType   ::= TypeDenoter '[' ArraySize ']' END;
+RULE: ArraySize   ::= IntNumber END;
+
+RULE: Variable    ::= Variable '[' Expression ']' END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+In this language an array type is described by two properties:
+the element type and the number of elements:
+<I>Array type properties</I>[65]==
+<PRE>
+ElemType:       DefTableKey;
+ElemNo:         int;
+</PRE>
+<PRE>
+This macro is invoked in definition 73.
+</PRE>
+<P>
+In the context of a type denotation for an <CODE>ArrayType</CODE>
+the two properties of the type are set together with the
+<CODE>TypeName</CODE> to indicate the array type in the output.
+The attribute <CODE>GotTypeProp</CODE> specifies that these properties
+are set.
+<P>
+<I>Array type denoter</I>[66]==
+<PRE>
+SYMBOL ArrayType INHERITS TypeDenotation END;
+
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  .GotTypeProp =
+     ORDER
+       (ResetElemType (ArrayType.Type, TypeDenoter.Type),
+        ResetElemNo   (ArrayType.Type, ArraySize.Size),
+        ResetTypeName (ArrayType.Type, "array..."),
+        ResetTypeLine (ArrayType.Type, LINE));
+END;
+
+TERM IntNumber: int;
+
+SYMBOL ArraySize: Size: int;
+
+RULE: ArraySize ::= IntNumber COMPUTE
+  ArraySize.Size = IntNumber;
+END;
+
+RULE: TypeDenoter ::= ArrayType COMPUTE
+  TypeDenoter.Type = ArrayType.Type;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+Finally it is stated that array elements of type
+void are not allowed. We can not simply compare <CODE>voidType</CODE>
+and the type key, because <CODE>TypeDenoter.Type</CODE> not necessarily 
+contains the final element type; it may be related to it.
+The final type key is obtained by the function <CODE>FinalType</CODE>
+in a state that is characterized by <CODE>INCLUDING Program.TypeIsSet</CODE>.
+<I>Array check element type </I>[67]==
+<PRE>
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  IF (EQ (FinalType (TypeDenoter.Type), voidType),
+      message (ERROR, "Wrong element type", 0, COORDREF))
+  &#60;- INCLUDING Program.TypeIsSet;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+Two array types are equivalent if and only if their element types are
+equivalent and if they have the same number of elements.
+<P>
+In order to state the equivalence with respect to array sizes,
+we establish a bijective mapping between any array size that occurs
+in the program and a definition table key. 
+That number mapping is computed by
+turning an array size into an identifier and then binding that
+identifier in a scope that serves just this purpose.
+<P>
+<I>Size mapping</I>[68]==
+<PRE>
+$/Tech/MakeName.gnrc:inst
+$/Name/CScope.gnrc+instance=SizeMap :inst
+</PRE>
+<PRE>
+This macro is invoked in definition 72.
+</PRE>
+<P>
+<I>Array size mapping</I>[69]==
+<PRE>
+SYMBOL ArraySize INHERITS SizeMapIdDefScope END;
+
+RULE: ArraySize ::= IntNumber COMPUTE
+  ArraySize.Sym = IdnNumb (0, IntNumber);
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+The <CODE>ArraySize.Key</CODE> serves as the initial set of potential
+equivalent array types; it is used as the second argument of the
+RULE computation <CODE>AddTypeToBlock</CODE>. 
+The type of the element may contribute to type equivalence of
+array types. Hence, the third argument of <CODE>AddTypeToBlock</CODE>
+is a singleton list, which is also set as the <CODE>ComponentTypes</CODE>
+property of the array type:
+<P>
+<I>Array type equivalence</I>[70]==
+<PRE>
+RULE: ArrayType ::= TypeDenoter '[' ArraySize ']' COMPUTE
+  ArrayType.GotType =
+    AddTypeToBlock 
+     (ArrayType.Type, ArraySize.Key, 
+      VResetComponentTypes 
+        (ArrayType.Type, SingleDefTableKeyList (TypeDenoter.Type)))
+    &#60;- .GotTypeProp;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+Type analysis in the context of an indexed variable is 
+specified as a join of three expression subtrees: <CODE>Variable[1]</CODE>,
+the left-hand side of the rule is a leaf of an expression tree. 
+<CODE>PrimaryContext</CODE> is used to state  that its type is the
+<CODE>ElemType</CODE> property of <CODE>Variable[2]</CODE>.
+<P>
+<CODE>Variable[2]</CODE>, which yields the array, is considered
+to be the root of an expression subtree. No requirements
+are specified. It has to be
+checked explicitly that its type is an array type.
+<P>
+The subcript expression is a separate expression subtree.
+It has to be of type int, as specified by its <CODE>Required</CODE> 
+attribute.
+<P>
+<I>Indexing</I>[71]==
+<PRE>
+RULE: Variable ::= Variable '[' Expression ']' COMPUTE
+  PrimaryContext
+    (Variable[1],
+     GetElemType (Variable[2].Type, NoKey));
+
+  IF (EQ (GetElemType (Variable[2].Type, NoKey), NoKey),
+    message (ERROR, "Not an array", 0, COORDREF));
+
+  Expression.Required = intType;
+END;
+</PRE>
+<PRE>
+This macro is invoked in definition 74.
+</PRE>
+<P>
+<B>Array.specs</B>[72]==
+<PRE>
+<I>Size mapping</I>[68]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Array.pdl</B>[73]==
+<PRE>
+<I>Array type properties</I>[65]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<B>Array.lido</B>[74]==
+<PRE>
+<I> Abstract array syntax</I>[64]
+<I>Array type denoter</I>[66]
+<I>Array check element type </I>[67]
+<I>Array size mapping</I>[69]
+<I>Array type equivalence</I>[70]
+<I>Indexing</I>[71]
+</PRE>
+<PRE>
+This macro is attached to a product file.
+</PRE>
+<P>
+<HR size=1 noshade width=600 align=left>
+<P>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_5.html"><IMG SRC="gifs/prev.gif" ALT="Previous Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_7.html"><IMG SRC="gifs/next.gif" ALT="Next Chapter" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT=""><A HREF="typetutorial_toc.html"><IMG SRC="gifs/up.gif" ALT="Table of Contents" BORDER="0"></A>
+<IMG SRC="gifs/empty.gif" WIDTH=25 HEIGHT=25 ALT="">
+<HR size=1 noshade width=600 align=left>
+</TD>
+</TR>
+</TABLE>
+
+</BODY></HTML>
