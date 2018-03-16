@@ -1,0 +1,1606 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+@A@<Type Analysis@>
+
+Type analysis assigns a type to every value in the program.
+
+@O@<Type.lido@>==@{@-
+ATTR Type: DefTableKey; /* C type associated with every value */
+
+@<Create standard pointer types@>
+@<Associate types with identifiers@>
+@<Declaration specifiers@>
+@<Relationships among types@>
+@<Operator identification@>
+@}
+
+@O@<Type.pdl@>==@{@-
+@<Define keys, properties, and access functions@>
+@}
+
+@O@<Type.specs@>==@{@-
+@<Instantiate modules@>
+@}
+
+@B@<The C type system@>
+\label{typesystem}
+
+The meaning of a value stored in an object or returned by a function is
+determined by the @/type@/ of the expression used to access it.
+(An identifier declared to be an object is the simplest such expression:
+the type is specified in the declaration of the identifier.)
+Types are partitioned into @/object types@/ (types that describe objects),
+@/function types@/ (types that describe functions), and
+@/incomplete types@/ (types that describe objects but lack information
+needed to determine their sizes).
+
+This section uses Eli's @/O@/perator @/I@/dentification @/L@/anguage OIL
+to formalize the standard's description of types (Section \ref{types}),
+conversions among types (Section \ref{conversions}) and
+type constraints on operators (Section \ref{operators}).
+
+@O@<Type.oil@>==@{
+@<Types@>
+@<Integral promotions@>
+@<Usual arithmetic conversions@>
+@<Define a scalar type@>
+@<void@>
+@<The null pointer constant@>
+@<Operators@>
+@}
+
+@C@<Types@>
+\label{types}
+
+Section 6.1.2.5 of the standard describes all of the C types.
+This section introduces the OIL identifiers corresponding to the standard's
+names for basic C types, sets of types, and user-defined types.
+All of these identifiers begin with @{TypeIs_@}.
+Identifiers representing the basic types of C continue with one or more C
+keywords, all lower case, giving the canonic name of the type in the standard
+(e.g. @{TypeIs_char@}).
+Identifiers representing sets of types and user-defined types continue with a
+capitalized name.
+That name is the one used by the standard to describe the set of types or
+the derivation of the user-defined type wherever possible
+(e.g. @{TypeIs_Integral@}, @{TypeIs_Pointer@}).
+
+Sets of types are specified in this section by OIL @{SET@} directives.
+
+@$@<Types@>+=@{
+SET TypeIs_Signed_Integer=
+  [TypeIs_signed_char, TypeIs_short, TypeIs_int, TypeIs_long];
+
+SET TypeIs_Unsigned_Integer=
+  [TypeIs_unsigned_char, TypeIs_unsigned_short, TypeIs_unsigned_int,
+   TypeIs_unsigned_long];
+
+SET TypeIs_Floating=
+  [TypeIs_float, TypeIs_double, TypeIs_long_double];
+@}
+
+Each standard type has an associated pointer type, which may or may not be
+declared by the programmer.
+The pointer types must be defined, however, in order to be available as the
+result of an @{&@} operator applied to a standard type:
+
+@$@<Create standard pointer types@>==@{
+SYMBOL Source COMPUTE
+  SYNT.GotType=BasicPointerTypes();
+  SYNT.GotOper=BasicPointerRefs() <- THIS.GotAllTypes;
+END;
+@}
+
+@$@<void BasicPointerTypes(void)@>==@{@-
+{ int i;
+
+  for (i = 0; i < COUNT; i++) {
+    Pointer[i] = NewType();
+    ResetTypeName(Pointer[i], Name[i]);
+    AddTypeToBlock(
+      Pointer[i],
+      PointerTypes,
+      SingleDefTableKeyList(Type[i]));
+  }
+}
+@}
+
+@$@<void BasicPointerRefs(void)@>==@{@-
+{ int i;
+
+  for (i = 0; i < COUNT; i++) {
+    InstClass1(TypeIs_Pointer,FinalType(Pointer[i]),Type[i]);
+  }
+}
+@}
+
+Two arrays of the same length are common to the two routines:
+
+@$@<Type key arrays@>==@{@-
+#define COUNT 11
+
+static DefTableKey Pointer[COUNT], Type[] = {
+  TypeIs_signed_char,
+  TypeIs_short,
+  TypeIs_int,
+  TypeIs_long,
+  TypeIs_unsigned_char,
+  TypeIs_unsigned_short,
+  TypeIs_unsigned_int,
+  TypeIs_unsigned_long ,
+  TypeIs_float,
+  TypeIs_double,
+  TypeIs_long_double };
+
+static char *Name[] = {
+  "signed_char*",
+  "short*",
+  "int*",
+  "long*",
+  "unsigned_char*",
+  "unsigned_short*",
+  "unsigned_int*",
+  "unsigned_long*",
+  "float*",
+  "double*",
+  "long_double*" };
+@}
+
+Section 6.1.2.5 of the standard provides constructors enabling a user to define
+additional types, called @/derived types@/.
+It gives a short description of each constructor, explaining the relationship
+(if any) between the type derived and other types.
+
+Each of these constructors is specified in this section by an OIL @{CLASS@}.
+An Oil @{CLASS@} is a parameterized template for construction of a new type
+and all of the related operators.
+The standard gives no information about the operators related to a type in
+Section 6.1.2.5.
+This specification follows the standard, using brief descriptions of the
+operators here and actually defining them in other sections.
+For each kind of operator, the description can be found via the cross
+reference on the brief description.
+
+@$@<Types@>+=@{
+CLASS TypeIs_Enum() BEGIN
+COERCION
+  (TypeIs_Enum): TypeIs_int;
+OPER
+  Enum_Assign_Op(TypeIs_Enum, TypeIs_int): TypeIs_Enum;
+END;
+
+CLASS TypeIs_Array(elementType, pointerType) BEGIN
+COERCION
+  (TypeIs_Array): pointerType;
+  (TypeIs_Array): TypeIs_void;
+OPER
+  Array_Subscript_Op(TypeIs_Array, TypeIs_unsigned_long): elementType;
+END;
+
+CLASS TypeIs_Struct() BEGIN
+COERCION
+  (TypeIs_Struct): TypeIs_void;
+OPER
+  Struct_Assign_Op(TypeIs_Struct, TypeIs_Struct): TypeIs_Struct;
+END;
+
+CLASS TypeIs_Union() BEGIN
+COERCION
+  (TypeIs_Union): TypeIs_void;
+OPER
+  Union_Assign_Op(TypeIs_Union, TypeIs_Union): TypeIs_Union;
+END;
+
+CLASS TypeIs_Function(fnptrType) BEGIN
+COERCION
+  (TypeIs_Function): fnptrType;
+  (TypeIs_Function): TypeIs_void;
+END;
+
+CLASS TypeIs_Pointer(referencedType) BEGIN
+COERCION
+  (TypeIs_Pointer): TypeIs_void;
+  (TypeIs_Pointer): TypeIs_VoidPointer;
+  (TypeIs_NULL):    TypeIs_Pointer;
+OPER
+  Subscript_Op(TypeIs_Pointer, TypeIs_unsigned_long): referencedType;
+  Ptr_Inc_Op, Ptr_Dec_Op(TypeIs_Pointer): TypeIs_Pointer;
+  Ptr_Deref_Op(TypeIs_Pointer): referencedType;
+  Ptr_Ref_Op  (referencedType): TypeIs_Pointer;
+  Cast_IntegraltoPtr(TypeIs_unsigned_long): TypeIs_Pointer;
+  Cast_VoidPtrtoPtr (TypeIs_VoidPointer):   TypeIs_Pointer;
+  Ptr_Add_Op, Ptr_Sub_Op(TypeIs_Pointer, TypeIs_unsigned_long): TypeIs_Pointer;
+  Ptr_Rev_Add_Op        (TypeIs_unsigned_long, TypeIs_Pointer): TypeIs_Pointer;
+  Ptr_Ptr_Sub_Op        (TypeIs_Pointer, TypeIs_Pointer): TypeIs_unsigned_long;
+  Ptr_LT_Op, Ptr_GT_Op, Ptr_LTE_Op,
+  Ptr_GTE_Op(TypeIs_Pointer, TypeIs_Pointer): TypeIs_int;
+  Ptr_Eq_Op, Ptr_NEq_Op(TypeIs_Pointer, TypeIs_Pointer): TypeIs_int;
+  Ptr_Cond_Op(TypeIs_Scalar,TypeIs_Pointer,TypeIs_Pointer): TypeIs_Pointer;
+  Ptr_Assign_Op     (TypeIs_Pointer, TypeIs_Pointer):     TypeIs_Pointer;
+  Ptr_Void_Assign_Op(TypeIs_Pointer, TypeIs_VoidPointer): TypeIs_Pointer;
+  Ptr_Plus_Eq_Op (TypeIs_Pointer, TypeIs_unsigned_long): TypeIs_Pointer;
+  Ptr_Minus_Eq_Op(TypeIs_Pointer, TypeIs_unsigned_long): TypeIs_Pointer;
+END;
+@}
+
+Section 6.1.2.5 of the standard says that @{char@}, the signed and unsigned
+integer types, and the enumerated types are called @/integral types@/.
+Integral and floating types are collectively called @/arithmetic types@/.
+Arithmetic and pointer types are collectively called @/scalar types@/.
+Unfortunately, an OIL set is a static object and therefore cannot contain a
+class as a member.
+
+@$@<Types@>+=@{
+SET TypeIs_Integral =
+  [TypeIs_char] + TypeIs_Signed_Integer + TypeIs_Unsigned_Integer;
+
+SET TypeIs_Arithmetic = TypeIs_Integral + TypeIs_Floating;
+
+SET TypeIs_Scalar = TypeIs_Arithmetic + [TypeIs_VoidPointer];
+@}
+
+Section 6.1.4 of the standard describes string literals.
+The semantics of a string literal are exactly those of a pointer to a
+character sequence that is terminated by a zero byte:
+
+@$@<Types@>+=@{
+COERCION
+  (TypeIs_string): TypeIs_void;
+  (TypeIs_string): TypeIs_VoidPointer;
+OPER
+  IndexString(TypeIs_string, TypeIs_unsigned_long): TypeIs_char;
+  DerefString(TypeIs_string): TypeIs_char;
+@}
+
+@C@<Conversions@>
+\label{conversions}
+
+Section 6.2 of the standard describes the relationships between types that
+are engendered by @/implicit conversions@/.
+Such implicit conversions are defined in OIL by @/coercions@/.
+
+Implicit conversions between derived types can only be defined after the
+types themselves are defined.
+Thus coercions involving derived types must be components of the relevant
+OIL classes.
+These coercions are defined here as macros that are invoked as components
+of the classes defined in Section \ref{types}.
+
+@$@<Integral promotions@>==@{
+COERCION
+  CChartoInt          (TypeIs_char):           TypeIs_int;
+  CUnsignedChartoInt  (TypeIs_unsigned_char):  TypeIs_int;
+  CShorttoInt         (TypeIs_short):          TypeIs_int;
+  CUnsignedShorttoInt (TypeIs_unsigned_short): TypeIs_int;
+@}
+
+@$@<Usual arithmetic conversions@>==@{
+COERCION
+  CDoubletoLongDouble (TypeIs_double):         TypeIs_long_double;
+  CFloattoDouble      (TypeIs_float):          TypeIs_double;
+  CUnsignedLongtoFloat(TypeIs_unsigned_long):  TypeIs_float;
+
+  CLongtoUnsignedLong (TypeIs_long):           TypeIs_unsigned_long;
+  CUnsignedInttoLong  (TypeIs_unsigned_int):   TypeIs_long;
+  CInttoLong          (TypeIs_int):            TypeIs_long;
+  CInttoUnsignedInt   (TypeIs_int):            TypeIs_unsigned_int;
+@}
+
+Certain operators require that the integral promotion be performed on their
+operand(s), and the result has the promoted type.
+These operators are therefore defined in terms of sets that include only
+promoted integer types:
+
+@$@<Types@>+=@{
+SET TypeIs_IntegralPromoted =
+  [TypeIs_int, TypeIs_unsigned_int, TypeIs_long, TypeIs_unsigned_long];
+
+SET TypeIs_ArithPromoted    =
+  TypeIs_IntegralPromoted + TypeIs_Floating;
+@}
+
+A conditional can accept any scalar type.
+Thus we need a type key representing any scalar type:
+
+@$@<Define a scalar type@>==@{
+COERCION (TypeIs_Scalar):scalarType;
+@}
+
+Section 6.2.2.1 of the standard says that an lvalue that has type
+``array of @/type@/'' is converted to an expression that has type 
+``pointer to @/type@/''
+except when it is the operand of @{sizeof@} or the unary @{&@} operator, or
+is a character string literal used to initialize an array.
+A function designator of type ``function returning @/type@/'' is converted to
+an expression that has type `pointer to function returning @/type@/'' under
+similar circumstances:
+
+Section 6.2.2.2 says that an expression occurs in a context where a void
+expression is required, its value or designator is discarded.
+
+@$@<void@>==@{
+COERCION CScalartoVoid   (TypeIs_Scalar):   TypeIs_void;
+@}
+
+Section 6.2.2.3 of the standard describes the conversions among pointers.
+@{TypeIs_NULL@} represents an integral constant expression with the value
+0, which can be converted to a pointer of any type.
+
+@{CNulltoVoidPtr@} is required because it is possible to use an integral
+constant expression with the value 0 as a value of type @{void*@} directly,
+and @{CNulltoIntegral@} is required to allow an integral constant expression
+with the value 0 to be interpreted as an integral value rather than a null
+pointer.
+
+@$@<The null pointer constant@>==@{
+COERCION
+  (TypeIs_NULL): TypeIs_Integral;
+OPER
+  CNulltoVoidPtr (TypeIs_NULL): TypeIs_VoidPointer;
+INDICATION
+  Cast_Indication: CNulltoVoidPtr;
+@}
+
+@C@<Constraints on operators@>
+\label{operators}
+
+Many of the subsections of Section 6.3 of the standard describe constraints
+on the types of operands that a given operator can have.
+This section formalizes those constraints, defining each C operator by an
+@{INDICATION@}.
+The constraints are described by a set of @{OPER@}ators, each with a
+specific type signature.
+Each @{INDICATION@} is associated with a comma-separated list of the
+@{OPER@}ators that satisfy the standard's constraints on that C operator.
+
+@$@<Operators@>+=@{
+INDICATION
+  Subscript_Indication: Subscript_Op, Array_Subscript_Op, IndexString;
+@}
+
+Distinct subscripting operations are defined for each array type and
+each pointer type other than @{TypeIs_VoidPointer@}.
+The second operand is specified to be a @{TypeIs_unsigned_long@}, although
+the standard specifies that it has integral type.
+Any integral type can be converted to @{TypeIs_unsigned_long@} by means of
+implicit conversions, so this specification is equivalent to that of the
+standard.
+The main reason for using @{TypeIs_unsigned_long@} is that OIL does not
+permit sets as operand specifications within a class definition, but a
+secondary reason is that this approach reduces the total number of
+operators in the compiler's database.
+
+@$@<Operators@>+=@{
+INDICATION
+  Plus_Plus_Indication:   Increment_Op, Ptr_Inc_Op;
+  Minus_Minus_Indication: Decrement_Op, Ptr_Dec_Op;
+
+OPER
+  Increment_Op, Decrement_Op(TypeIs_Arithmetic): TypeIs_Arithmetic;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Star_Indication:  Ptr_Deref_Op, DerefString;
+  Amper_Indication: Ptr_Ref_Op;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Plus_Indication:   Plus_Op;
+  Minus_Indication:  Minus_Op;
+  Tilde_Indication:  Bitwise_Not_Op;
+  Bang_Indication:   Logical_Not_Op;
+  Sizeof_Indication: Sizeof_op;
+  Cast_Indication:   Cast_Op, Cast_IntegraltoPtr, Cast_VoidPtrtoPtr,
+                     Cast_VoidVoid, CScalartoVoid;
+
+SET TypeIs_CastResult = TypeIs_Scalar;
+
+OPER
+  Plus_Op, Minus_Op(TypeIs_ArithPromoted):    TypeIs_ArithPromoted;
+  Bitwise_Not_Op   (TypeIs_IntegralPromoted): TypeIs_IntegralPromoted;
+  Logical_Not_Op   (TypeIs_Scalar):           TypeIs_int;
+/* FIXME: sizeof is more constrained than this.  Also, it has different
+  semantics in that the operand is not evaluated.  May need another kind
+  of operator.
+*/
+  Sizeof_op        (TypeIs_void):             TypeIs_int;
+  Cast_Op          (TypeIs_Scalar):           TypeIs_CastResult;
+  Cast_VoidVoid    (TypeIs_void):             TypeIs_void;
+@}
+
+By defining @{TypeIs_CastResult@} as being equal to @{TypeIs_Scalar@} and
+then using these two set identifiers in defining @{Cast_Op@}, the
+specification defines a cast from every element of @{TypeIs_Scalar@} to
+every other element of @{TypeIs_Scalar@}.
+If @{Cast_Op@} were defined with the signature @{(TypeIs_Scalar):
+TypeIs_Scalar@} then the operand and result would be constrained to be
+identical.
+
+The definition of @{Cast_Op@} allows any pointer type to be cast
+to any integral type:
+There is an implicit conversion from any pointer type to
+@{TypeIs_VoidPointer@}, which is an element of @{TypeIs_Scalar@}, and
+every integral type is an element of @{TypeIs_CastResult@}.
+
+Distinct cast operators are defined for each pointer
+type other than @{TypeIs_VoidPointer@} to handle casts from
+arbitrary integers and from @{TypeIs_VoidPointer@} to that pointer type.
+The operand of the former is specified to be a @{TypeIs_unsigned_long@},
+although the standard specifies that it has integral type.
+Any integral type can be converted to @{TypeIs_unsigned_long@} by means of
+implicit conversions, so this specification is equivalent to that of the
+standard.
+The main reason for using @{TypeIs_unsigned_long@} is that OIL does not
+permit sets as operand specifications within a class definition, but a
+secondary reason is that this approach reduces the total number of
+operators in the compiler's database.
+
+The implicit conversion from any pointer type to @{TypeIs_VoidPointer@},
+combined with @{Cast_VoidPtrtoPtr@}, allows any pointer type to be cast to
+any other pointer type.
+(This includes pointers to function types.)
+
+@$@<Operators@>+=@{
+INDICATION
+  Star_Indication:    MulOp;
+  Slash_Indication:   DivOp;
+  Percent_Indication: ModOp;
+  Plus_Indication:    AddOp,
+                      Void_Ptr_Add_Op, Void_Ptr_Rev_Add_Op,
+                      Ptr_Add_Op,      Ptr_Rev_Add_Op;
+  Minus_Indication:   SubOp,
+                      Void_Ptr_Sub_Op, Ptr_Sub_Op, Ptr_Ptr_Sub_Op;
+
+OPER
+  MulOp, DivOp,
+  AddOp, SubOp   (TypeIs_Arithmetic, TypeIs_Arithmetic): TypeIs_Arithmetic;
+  ModOp          (TypeIs_Integral, TypeIs_Integral):     TypeIs_Integral;
+  Void_Ptr_Add_Op,
+  Void_Ptr_Sub_Op(TypeIs_VoidPointer, TypeIs_unsigned_long): TypeIs_VoidPointer;
+  Void_Ptr_Rev_Add_Op
+                 (TypeIs_unsigned_long, TypeIs_VoidPointer): TypeIs_VoidPointer;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Less_Less_Indication:       Bit_Shift_Left_Op;
+  Greater_Greater_Indication: Bit_Shift_Right_Op;
+  Less_Indication:            LessThan_Op,       Ptr_LT_Op;
+  Greater_Indication:         Greater_Op,        Ptr_GT_Op;
+  Less_Equal_Indication:      LessThan_Equal_Op, Ptr_LTE_Op;
+  Greater_Equal_Indication:   Greater_Equal_Op,  Ptr_GTE_Op;
+
+SET TypeIs_ShiftCount = TypeIs_IntegralPromoted;
+
+OPER
+  Bit_Shift_Right_Op,
+  Bit_Shift_Left_Op
+    (TypeIs_IntegralPromoted, TypeIs_ShiftCount): TypeIs_IntegralPromoted;
+
+  Greater_Op, LessThan_Op, Greater_Equal_Op,
+  LessThan_Equal_Op(TypeIs_Scalar, TypeIs_Scalar): TypeIs_int;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Equal_Equal_Indication: Equality_Op,  Ptr_Eq_Op;
+  Bang_Equal_Indication:  Not_Equal_Op, Ptr_NEq_Op;
+
+OPER
+  Equality_Op, Not_Equal_Op(TypeIs_Scalar, TypeIs_Scalar): TypeIs_int;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Amper_Indication:       Bitwise_And_Op;
+  Caret_Indication:       Bitwise_XOr_Op;
+  Bar_Indication:         Bitwise_Or_Op;
+  Amper_Amper_Indication: Logical_And_Op;
+  Bar_Bar_Indication:     Logical_Or_Op;  
+  Conditional_Indication: Arith_Cond_Op, Void_Cond_Op, Ptr_Cond_Op;
+
+SET TypeIs_RHS_Scalar = TypeIs_Scalar;
+
+OPER
+  Bitwise_And_Op, Bitwise_XOr_Op,
+  Bitwise_Or_Op(TypeIs_Integral, TypeIs_Integral): TypeIs_Integral;
+  Logical_And_Op,
+  Logical_Or_Op(TypeIs_Scalar, TypeIs_RHS_Scalar): TypeIs_int;
+  Arith_Cond_Op(TypeIs_Scalar,TypeIs_Arithmetic,TypeIs_Arithmetic): TypeIs_Arithmetic;
+  Void_Cond_Op (TypeIs_Scalar,TypeIs_Void,TypeIs_Void): TypeIs_Void;
+@}
+
+FIXME: The standard allows balancing of two compatible struct or union
+types.  The best way to handle this is probably to have a common type that
+all such types can be coerced to, followed by more stringent testing.
+
+@$@<Operators@>+=@{
+INDICATION
+   Equal_Indication:
+     Assign_Op, Ptr_Assign_Op, Enum_Assign_Op,
+     Struct_Assign_Op, Union_Assign_Op, Ptr_Void_Assign_Op,
+     Ptr_Void_Void_Assign_Op;
+
+SET TypeIs_RHS_Arithmetic = TypeIs_Arithmetic;
+
+OPER
+  Assign_Op(TypeIs_Arithmetic, TypeIs_RHS_Arithmetic): TypeIs_Arithmetic;
+  Ptr_Void_Void_Assign_Op
+    (TypeIs_VoidPointer, TypeIs_VoidPointer): TypeIs_VoidPointer;
+@}
+
+@$@<Operators@>+=@{
+INDICATION
+  Star_Equal_Indication:            Mult_Eq_Op;
+  Slash_Equal_Indication:           Div_Eq_Op;
+  Percent_Equal_Indication:         Mod_Eq_Op;
+  Plus_Equal_Indication:            Plus_Eq_Op,  Ptr_Plus_Eq_Op;  
+  Minus_Equal_Indication:           Minus_Eq_Op, Ptr_Minus_Eq_Op;  
+  Less_Less_Equal_Indication:       Bitwise_Shift_Left_Eq_Op;
+  Greater_Greater_Equal_Indication: Bitwise_Shift_Right_Eq_Op;
+  Amper_Equal_Indication:           Bitwise_And_Eq_Op;
+  Caret_Equal_Indication:           Bitwise_XOr_Eq_Op;
+  Bar_Equal_Indication:             Bitwise_Or_Eq_Op;
+
+SET TypeIs_RHS_Integral = TypeIs_Integral;
+
+OPER
+  Mult_Eq_Op, Div_Eq_Op, Plus_Eq_Op,
+  Minus_Eq_Op( TypeIs_Arithmetic, TypeIs_RHS_Arithmetic ) : TypeIs_Arithmetic;
+  Mod_Eq_Op, Bitwise_Shift_Left_Eq_Op, Bitwise_Shift_Right_Eq_Op,
+  Bitwise_And_Eq_Op, Bitwise_XOr_Eq_Op,
+  Bitwise_Or_Eq_Op( TypeIs_Integral, TypeIs_RHS_Integral ) : TypeIs_Integral;
+@}
+
+@B@<Associating types with identifiers@>
+
+Each type is represented by a definition table key, and these keys are
+related to the abstract syntax tree by the Eli @{Typing@} module:
+
+@$@<Instantiate modules@>+=@{
+$/Type/Typing.gnrc :inst
+@}
+
+This module classifies identifiers as either ``typed'' (representing entities,
+such as variables, that have a type property) or ``type definition''
+(representing types themselves).
+Each occurrence of the identifier is either a ``definition'', at which the
+type property is set, or a ``use'' at which it is made available.
+
+Certain constructs are also classified as ``type denotations''.
+These are the constructs that build new types from existing types.
+
+@$@<Associate types with identifiers@>+=@{
+SYMBOL Declaration          INHERITS TypedDefinition               END;
+SYMBOL Declarator           INHERITS TypedDefinition               END;
+
+SYMBOL TagDef               INHERITS TypeDefDefId, ChkTypeDefDefId END;
+SYMBOL TagUse               INHERITS TypeDefUseId, ChkTypeDefUseId END;
+SYMBOL ForwardDef           INHERITS TypeDefDefId, ChkTypeDefDefId END;
+SYMBOL ForwardUse           INHERITS TypeDefDefId, ChkTypeDefDefId END;
+
+SYMBOL MemberIdDef          INHERITS TypedDefId                    END;
+
+SYMBOL enumeration_constant INHERITS TypedDefId                    END;
+SYMBOL IdDef                INHERITS TypedDefId                    END;
+SYMBOL IdUse                INHERITS TypedUseId,   ChkTypedUseId   END;
+
+SYMBOL TypeIdDef            INHERITS TypeDefDefId, ChkTypeDefDefId END;
+SYMBOL TypeIdUse            INHERITS TypeDefUseId, ChkTypeDefUseId END;
+@}
+
+Definition table keys for derived types are created at tree nodes
+inheriting the @{TypeDenotation@} role of the @{Typing@} module,
+and passed to nodes inheriting other roles via attribute computations.
+Structures, unions and enumerations are specifiers;
+pointers, arrays, and functions are declarators.
+
+@$@<Associate types with identifiers@>+=@{
+ATTR IsStruct: int;
+
+RULE: struct_or_union ::= 'struct' COMPUTE
+  struct_or_union.IsStruct=1;
+END;
+
+RULE: struct_or_union ::= 'union' COMPUTE
+  struct_or_union.IsStruct=0;
+END;
+
+SYMBOL struct_declaration_list INHERITS TypeDenotation, OperatorDefs COMPUTE
+  SYNT.Pointer=NewType();
+  SYNT.GotType=
+    AddTypeToBlock(
+      THIS.Pointer,
+      PointerTypes,
+      SingleDefTableKeyList(THIS.Type));
+  SYNT.GotOper=
+    ORDER(
+      IF(THIS.IsStruct,
+        InstClass0(TypeIs_Struct,THIS.Type),
+        InstClass0(TypeIs_Union, THIS.Type)),
+      InstClass1(TypeIs_Pointer,THIS.Pointer,THIS.Type));
+END;
+
+RULE: struct_or_union_specifier ::=
+        struct_or_union TagDef '{' struct_declaration_list '}' COMPUTE
+  struct_declaration_list.IsStruct=struct_or_union.IsStruct;
+  struct_or_union_specifier.Type=struct_declaration_list.Type;
+  TagDef.Type=struct_declaration_list.Type;
+END;
+
+RULE: struct_or_union_specifier ::=
+        struct_or_union '{' struct_declaration_list '}' COMPUTE
+  struct_declaration_list.IsStruct=struct_or_union.IsStruct;
+  struct_or_union_specifier.Type=struct_declaration_list.Type;
+END;
+
+RULE: struct_or_union_specifier ::= struct_or_union ForwardUse COMPUTE
+  struct_or_union_specifier.Type=ForwardUse.Type;
+END;
+
+SYMBOL enumerator_list INHERITS TypeDenotation, OperatorDefs COMPUTE
+  SYNT.Pointer=NewType();
+  SYNT.GotType=
+    AddTypeToBlock(
+      THIS.Pointer,
+      PointerTypes,
+      SingleDefTableKeyList(THIS.Type));
+  SYNT.GotOper=
+    ORDER(
+      InstClass0(TypeIs_Enum,THIS.Type),
+      InstClass1(TypeIs_Pointer,THIS.Pointer,THIS.Type));
+END;
+
+RULE: enum_specifier ::= 'enum' TagDef '{' enumerator_list '}' COMPUTE
+  enum_specifier.Type=enumerator_list.Type;
+  TagDef.Type=enumerator_list.Type;
+END;
+
+RULE: enum_specifier ::= 'enum' '{' enumerator_list '}' COMPUTE
+  enum_specifier.Type=enumerator_list.Type;
+END;
+
+RULE: enum_specifier ::= 'enum' TagUse COMPUTE
+  enum_specifier.Type=TagUse.Type;
+END;
+@}
+
+A type denoted by a specifier is independent of other types.
+Types denoted by declarator nodes, on the other hand, create a type by
+modifying another type.
+In each of these constructs, the original type comes from a set of
+specifiers.  That original type is then passed through a nest of
+declarators, each of which creates a new type based on the type it
+receives.
+
+@$@<Associate types with identifiers@>+=@{
+CLASS SYMBOL Declaration COMPUTE
+  SYNT.Type=NoKey;
+END;
+
+TREE SYMBOL declaration INHERITS Declaration END;
+
+RULE: declaration ::= Specifiers init_declarator_list_opt ';' COMPUTE
+  declaration.Type=Specifiers.Type;
+END;
+
+TREE SYMBOL struct_declaration INHERITS Declaration END;
+
+RULE: struct_declaration ::= Specifiers struct_declarator_list ';' COMPUTE
+  struct_declaration.Type=Specifiers.Type;
+END;
+
+TREE SYMBOL function_definition INHERITS Declaration END;
+
+RULE: function_definition ::=
+        Specifiers FunctionDecl declaration_list function_body COMPUTE
+  function_definition.Type=Specifiers.Type;
+END;
+
+TREE SYMBOL parameter_declaration INHERITS Declaration END;
+
+RULE: parameter_declaration ::= Specifiers COMPUTE
+  parameter_declaration.Type=Specifiers.Type;
+END;
+
+RULE: parameter_declaration ::= Specifiers ParameterDecl COMPUTE
+  parameter_declaration.Type=Specifiers.Type;
+END;
+
+RULE: parameter_declaration ::= Specifiers abstract_declarator COMPUTE
+  parameter_declaration.Type=Specifiers.Type;
+END;
+
+TREE SYMBOL par_declaration INHERITS Declaration END;
+
+RULE: par_declaration ::= Specifiers par_id_decls ';' COMPUTE
+  par_declaration.Type=Specifiers.Type;
+END;
+
+TREE SYMBOL type_name INHERITS Declaration END;
+
+RULE: type_name ::= Specifiers COMPUTE
+  type_name.Type=Specifiers.Type;
+END;
+
+RULE: type_name ::= Specifiers abstract_declarator COMPUTE
+  type_name.Type=Specifiers.Type;
+END;
+@}
+
+@{ForwardDef@} and @{TagUse@} require special treatment.
+According to Section 6.5.2.3 of the standard, each may define a new
+incomplete type.
+If the type is to be completed, a subsequent declaration can be given to
+specify the content.
+The strategy is to specify the type as the incomplete type @{void@} if and
+only if a type has not already been specified.
+When a type has already been specified, specify that type again.
+Since a construct in which the tag is followed by a bracketed list
+unconditionally set the type, that will override any type set in any other
+context.
+
+@$@<Associate types with identifiers@>+=@{
+SYMBOL ForwardType COMPUTE SYNT.Type=GetDefer(THIS.Key,TypeIs_void); END;
+SYMBOL ForwardDef  INHERITS ForwardType END;
+SYMBOL ForwardUse  INHERITS ForwardType END;
+@}
+
+@C@<Analyze specifiers@>
+
+In order to attach an error report to the first specifier that cannot be
+accepted, specifier lists are analyzed left-to-right using a finite-state
+machine.
+Each specifier is an input to the machine, and the state of the machine is
+a component of the value of a chain passing through the specifiers.
+
+@$@<Declaration specifiers@>+=@{
+ATTR  InitialType: DefTableKey;
+CHAIN Specification: SpecData;
+
+SYMBOL Specifiers COMPUTE
+  CHAINSTART HEAD.Specification=InitSpecifiers(THIS.InitialType);
+  INH.InitialType=NoKey;
+  SYNT.Type=CompleteType(TAIL.Specification);
+END;
+@}
+
+The transition table for the finite-state machine is:
+
+@$@<Finite-state machine@>==@{
+/*                          u
+ *                          n
+ *              d        s  s
+ *              o  s     i  i
+ *           c  u  h  l  g  g
+ *        i  h  b  o  o  n  n
+ *        n  a  l  r  n  e  e
+ *        t  r  e  t  g  d  d
+ ***/
+/* 0*/ {{ 0, 1, 9, 4, 7,11, 6}, TypeIs_int},
+/* 1*/ {{ 1, 1, 1, 1, 1, 2, 3}, TypeIs_char},
+/* 2*/ {{ 2, 2, 2, 2, 2, 2, 2}, TypeIs_signed_char},
+/* 3*/ {{ 3, 3, 3, 3, 3, 3, 3}, TypeIs_unsigned_char},
+/* 4*/ {{ 4, 4, 4, 4, 4, 4, 5}, TypeIs_short},
+/* 5*/ {{ 5, 5, 5, 5, 5, 5, 5}, TypeIs_unsigned_short},
+/* 6*/ {{ 6, 3, 6, 5, 8, 6, 6}, TypeIs_unsigned_int},
+/* 7*/ {{ 7, 7, 7, 7, 7, 7, 8}, TypeIs_long},
+/* 8*/ {{ 8, 8, 8, 8, 8, 8, 8}, TypeIs_unsigned_long},
+/* 9*/ {{ 9, 9, 9, 9,10, 9, 9}, TypeIs_double},
+/*10*/ {{10,10,10,10,10,10,10}, TypeIs_long_double},
+/*11*/ {{11, 2,11, 4, 7,11,11}, TypeIs_int}
+@}
+
+@{Specification@} is the chain carrying state and other information from
+one specifier to the next.
+It is a structure of type @{SpecData@}:
+
+@$@<Specification data@>==@{
+typedef struct {
+  int CurrentState;          /* The current state of the machine */
+  long KeywordSet;           /* The specifiers seen so far       */
+  DefTableKey SpecifiedType; /* A type specified explicitly      */
+} SpecData;
+@}
+
+@$@<InitSpecifiers(DefTableKey key)@>==@{@-
+{ SpecData CurrentData;
+  CurrentData.CurrentState  = 0;
+  CurrentData.KeywordSet    = 0;
+  CurrentData.SpecifiedType = key;
+  return CurrentData; }
+@}
+
+Two operations are applied to @{Specification@} at each specifier.
+The first decides whether that specifier is legal, given its left context
+as embodied in @{Specification@}, and the second determines the new value
+of @{Specification@} needed to embody the left context with the current
+specifier added.
+These operations and the state table above attempt to minimize cascading
+errors by behaving as though an erroneous specifier was omitted.
+
+@$@<NextSpecifier(TypeSpecifier kw, SpecData chain)@>==@{@-
+/* Decide whether this keyword is legal in this context
+ *   On entry-
+ *     Exclude[kw]=Bit vector specifying the set of keywords that cannot
+ *                 occur in combination with kw
+ *     chain defines the current left context
+ *   On exit-
+ *     NextSpecifier=1 if this keyword is legal in the context of chain
+ *                   0 otherwise
+ ***/
+{ return (Exclude[kw] & chain.KeywordSet) == 0; }
+@}
+
+@$@<UpdateSpecification(DefTableKey type, TypeSpecifier kw, SpecData chain)@>==@{@-
+/* Update the context on the basis of a specifier
+ *   On entry-
+ *     type=Explicit type if determined by this specifier
+ *          NoKey otherwise
+ *     kw=Enumerated constant defining this keyword
+ *     chain defines the current left context
+ *   On exit-
+ *     UpdateSpecification defines the left context including this keyword
+ ***/
+{ if ((Exclude[kw] & chain.KeywordSet) == 0) {
+    if (type != NoKey) chain.SpecifiedType = type;
+    chain.KeywordSet |= (1 << kw);
+    chain.CurrentState = State[chain.CurrentState].Next[FSMInput[kw]];
+  }
+  return chain;
+}
+@}
+
+A computation at each specifier node invokes these functions with
+appropriate arguments.
+Many of the keywords have the same type of computation, differing only in
+one or more of the parameters:
+
+@$@<Declaration specifiers@>+=@{
+@<Simple declaration specifier@>@(typedef@)
+@<Simple declaration specifier@>@(extern@)
+@<Simple declaration specifier@>@(static@)
+@<Simple declaration specifier@>@(auto@)
+@<Simple declaration specifier@>@(register@)
+
+@<Specifier that determines type@>@(void@,TypeIs_void@)
+@<Simple declaration specifier@>@(char@)
+@<Simple declaration specifier@>@(short@)
+@<Simple declaration specifier@>@(int@)
+@<Simple declaration specifier@>@(long@)
+@<Specifier that determines type@>@(float@,TypeIs_float@)
+@<Simple declaration specifier@>@(double@)
+@<Simple declaration specifier@>@(signed@)
+@<Simple declaration specifier@>@(unsigned@)
+@<Non-keyword specifier@>@(struct_or_union_specifier@)
+@<Non-keyword specifier@>@(enum_specifier@)
+@<Non-keyword specifier@>@(TypeIdUse@)
+
+@<Simple declaration specifier@>@(const@)
+@<Simple declaration specifier@>@(volatile@)
+/*@<Simple declaration specifier@>@(__restrict@)*/
+@}
+
+@$@<Simple declaration specifier@>@(@1@)@M@{
+RULE: Specifier ::= '@1' COMPUTE
+  Specifier.ok=
+    NextSpecifier(Kwd_@1,Specifier.Specification);
+  Specifier.Specification=
+    UpdateSpecification(NoKey,Kwd_@1,Specifier.Specification);
+END;
+@}
+
+@$@<Specifier that determines type@>@(@2@)@M@{
+RULE: Specifier ::= '@1' COMPUTE
+  Specifier.ok=
+    NextSpecifier(Kwd_typeid,Specifier.Specification);
+  Specifier.Specification=
+    UpdateSpecification(@2,Kwd_typeid,Specifier.Specification);
+END;
+@}
+
+@$@<Non-keyword specifier@>@(@1@)@M@{
+RULE: Specifier ::= @1 COMPUTE
+  Specifier.ok=
+    NextSpecifier(Kwd_typeid,Specifier.Specification);
+  Specifier.Specification=
+    UpdateSpecification(@1.Type,Kwd_typeid,Specifier.Specification);
+END;
+@}
+
+After all specifiers have been seen, the type is determined either by an
+explicit type given by one of them or by the current state of the machine.
+The effect of any type qualifiers must also be taken into account.
+
+@$@<CompleteType(SpecData chain)@>==@{@-
+/* Determine the specified type
+ *   On entry-
+ *     chain defines the current left context
+ *   On exit-
+ *     CompleteType=type specified by the sequence
+ ***/
+{ DefTableKey type;
+
+  type = chain.SpecifiedType != NoKey ? chain.SpecifiedType
+                                      : State[chain.CurrentState].Type;
+
+  /* FIXME
+  if (InSpecifierSet(Kwd_const, chain)) {
+    if (InSpecifierSet(Kwd_volatile, chain)) return KeyForConstVolatile(type);
+    return KeyForConst(type);
+  }
+  if (InSpecifierSet(Kwd_volatile, chain)) return KeyForVolatile(type);
+  */
+  return type;
+}
+@}
+
+The relationships among qualified and unqualified types
+are explained in Section \ref{typerelations}.
+
+Here is a list of the specifier and qualifier keywords:
+
+@$@<Specifier keywords@>@M@{@-
+KWD(Kwd_typedef,  0, (ClassBits)),
+KWD(Kwd_extern,   0, (ClassBits)),
+KWD(Kwd_static,   0, (ClassBits)),
+KWD(Kwd_auto,     0, (ClassBits)),
+KWD(Kwd_register, 0, (ClassBits)),
+
+/*      void    is represented by Kwd_typeid  */
+KWD(Kwd_char,     1, ((1<<Kwd_typeid) | TypeBits | SizeBits)),
+KWD(Kwd_short,    3, ((1<<Kwd_typeid) | SizeBits | (1<<Kwd_char))),
+KWD(Kwd_int,      0, ((1<<Kwd_typeid) | TypeBits)),
+KWD(Kwd_long,     4, ((1<<Kwd_typeid) | SizeBits | (1<<Kwd_char))),
+/*      float   is represented by Kwd_typeid */
+KWD(Kwd_double,   2, ((1<<Kwd_typeid) | TypeBits | (1<<Kwd_short) |
+SignBits)),
+KWD(Kwd_signed,   5, ((1<<Kwd_typeid) | SignBits)),
+KWD(Kwd_unsigned, 6, ((1<<Kwd_typeid) | SignBits)),
+
+KWD(Kwd_typeid,   0, ((1<<Kwd_typeid) - (1<<Kwd_char))),
+
+KWD(Kwd_const,    0, ((1<<Kwd_const) | (1<<Kwd_volatile))),
+KWD(Kwd_volatile, 0, ((1<<Kwd_const) | (1<<Kwd_volatile)))
+/*KWD(Kwd___restrict, 0, ((1<<Kwd___restrict)))*/
+@}
+
+The @{KWD@} macro is used simply as a documentation aid, pulling together
+several aspects of the specifiers.
+The first argument is the enumerated constant used to represent the
+declaration specifier internally.
+The second argument is that specifier's input value for the finite state
+machine that ultimately determines the type represented by the sequence of
+specifiers.
+Finally, the third argument gives the set of declaration specifiers that
+are incompatible with the specifier represented by the keyword.
+Abbreviations, defined as follows, are used for specific groups of bits:
+
+@$@<Abbreviations for sets of bits@>==@{
+#define ClassBits ((1<<(Kwd_register + 1)) - (1<<Kwd_typedef))
+#define TypeBits  ((1<<Kwd_char)   | (1<<Kwd_int)      | (1<<Kwd_double))
+#define SizeBits  ((1<<Kwd_short)  | (1<<Kwd_long))
+#define SignBits  ((1<<Kwd_signed) | (1<<Kwd_unsigned))
+@}
+
+@C@<Analyze declarators@>
+\label{typerelations}
+
+New types are created in declarator contexts.
+In each case, the new type is related to an existing type that is obtained
+from the parent of the context.
+
+@$@<Relationships among types@>+=@{
+ATTR ExistingType, TotalType: DefTableKey;
+
+CLASS SYMBOL Declarator INHERITS TypeDenotation, OperatorDefs COMPUTE
+  INH.ExistingType=INCLUDING (Declarator.Type, Declaration.Type);
+END;
+
+CLASS SYMBOL DeclaredId COMPUTE
+  SYNT.TotalType=INCLUDING (Declarator.Type, Declaration.Type);
+END;
+
+TREE SYMBOL MemberIdDef INHERITS DeclaredId END;
+TREE SYMBOL IdDef       INHERITS DeclaredId END;
+
+CLASS SYMBOL PointerDeclarator INHERITS Declarator COMPUTE
+  SYNT.GotType=
+    AddTypeToBlock(
+      THIS.Type,
+      PointerTypes,	/* FIXME: Pointer types have extra qualifiers */
+      SingleDefTableKeyList(THIS.ExistingType));
+  SYNT.GotOper=InstClass1(TypeIs_Pointer,THIS.Type,THIS.ExistingType);
+END;
+
+TREE SYMBOL pointer_declarator           INHERITS PointerDeclarator END;
+TREE SYMBOL member_pointer_declarator    INHERITS PointerDeclarator END;
+TREE SYMBOL pointer_abstract_declarator  INHERITS PointerDeclarator END;
+
+ATTR Pointer: DefTableKey;
+
+CLASS SYMBOL ArrayDeclarator INHERITS Declarator COMPUTE
+  SYNT.Pointer=NewType();
+  SYNT.GotType=
+    ORDER(
+      AddTypeToBlock(
+        THIS.Pointer,
+        PointerTypes,	/* FIXME: This doesn't account for array size */
+        SingleDefTableKeyList(THIS.ExistingType)),
+      AddTypeToBlock(
+        THIS.Type,
+        ArrayTypes,	/* FIXME: This doesn't account for array size */
+        SingleDefTableKeyList(THIS.ExistingType)));
+  SYNT.GotOper=
+    InstClass2(TypeIs_Array,THIS.Type,THIS.ExistingType,THIS.Pointer);
+END;
+
+TREE SYMBOL array_declarator             INHERITS ArrayDeclarator END;
+TREE SYMBOL member_array_declarator      INHERITS ArrayDeclarator END;
+TREE SYMBOL array_abstract_declarator    INHERITS ArrayDeclarator END;
+
+CLASS SYMBOL FunctionDeclarator INHERITS Declarator COMPUTE
+  SYNT.Pointer=NewType();
+  SYNT.GotType=
+    ORDER(
+      AddTypeToBlock(
+        THIS.Pointer,
+        PointerTypes,
+        SingleDefTableKeyList(THIS.Type)),
+      AddTypeToBlock(
+        THIS.Type,
+        FunctionTypes,
+        ConsDefTableKeyList(
+          THIS.ExistingType,
+	  CONSTITUENT OpndTypeListRoot.OpndTypeList
+	    SHIELD (Declarator, OpndTypeListRoot))));
+END;
+
+TREE SYMBOL parameter_type_list INHERITS OpndTypeListRoot END;
+TREE SYMBOL parameters          INHERITS OpndTypeListRoot END;
+TREE SYMBOL ParameterType       INHERITS OpndTypeListElem END;
+TREE SYMBOL parameter_id        INHERITS OpndTypeListElem END;
+TREE SYMBOL DotDotDot           INHERITS OpndTypeListElem END;
+TREE SYMBOL parameter_id        INHERITS TypeDefUseId, ChkTypeDefUseId END;
+TREE SYMBOL ParameterTypeId     INHERITS TypeDefDefId                  END;
+
+RULE: DotDotDot ::= '...' COMPUTE
+  DotDotDot.Type=VarArgType;
+END;
+
+RULE: ParameterTypeId ::= ParameterDecl COMPUTE
+  ParameterTypeId.Key=ParameterDecl.Key;
+  ParameterTypeId.Type=ParameterDecl.TotalType;
+END;
+
+RULE: ParameterType ::= parameter_declaration COMPUTE
+  ParameterType.Type=parameter_declaration.TotalType;
+END;
+
+TREE SYMBOL function_declarator INHERITS FunctionDeclarator END;
+
+RULE: function_declarator ::= declarator '(' parameter_type_list ')' COMPUTE
+  function_declarator.GotOper=
+    ORDER(
+      InstClass1(
+        TypeIs_Function,
+	function_declarator.Type,
+	function_declarator.Pointer),
+      ListOperator(
+        function_declarator.Type,
+	NoOprName,
+	parameter_type_list.OpndTypeList,
+	function_declarator.ExistingType));
+END;
+
+RULE: function_declarator ::= declarator '(' parameters ')' COMPUTE
+  function_declarator.GotOper=
+    ORDER(
+      InstClass1(
+        TypeIs_Function,
+	function_declarator.Type,
+	function_declarator.Pointer),
+      ListOperator(
+        function_declarator.Type,
+	NoOprName,
+	parameters.OpndTypeList,
+	function_declarator.ExistingType));
+END;
+
+TREE SYMBOL function_abstract_declarator INHERITS FunctionDeclarator END;
+
+RULE: function_abstract_declarator ::= '(' parameter_type_list ')' COMPUTE
+  function_abstract_declarator.GotOper=
+    ORDER(
+      InstClass1(
+        TypeIs_Function,
+	function_abstract_declarator.Type,
+	function_abstract_declarator.Pointer),
+      ListOperator(
+        function_abstract_declarator.Type,
+	NoOprName,
+	parameter_type_list.OpndTypeList,
+	function_abstract_declarator.ExistingType));
+END;
+
+RULE: function_abstract_declarator ::=
+                   abstract_declarator '(' parameter_type_list ')' COMPUTE
+  function_abstract_declarator.GotOper=
+    ORDER(
+      InstClass1(
+        TypeIs_Function,
+	function_abstract_declarator.Type,
+	function_abstract_declarator.Pointer),
+      ListOperator(
+        function_abstract_declarator.Type,
+	NoOprName,
+	parameter_type_list.OpndTypeList,
+	function_abstract_declarator.ExistingType));
+END;
+
+TREE SYMBOL member_function_declarator INHERITS FunctionDeclarator END;
+
+RULE: member_function_declarator ::=
+        member_declarator '(' parameter_type_list ')' COMPUTE
+  member_function_declarator.GotOper=
+    ORDER(
+      InstClass1(
+        TypeIs_Function,
+	member_function_declarator.Type,
+	member_function_declarator.Pointer),
+      ListOperator(
+        member_function_declarator.Type,
+	NoOprName,
+	parameter_type_list.OpndTypeList,
+	member_function_declarator.ExistingType));
+END;
+
+RULE: declarator ::= TypeIdDef COMPUTE
+  TypeIdDef.Type=INCLUDING (Declarator.Type, Declaration.Type);
+END;
+
+RULE: type_name ::= Specifiers COMPUTE
+  type_name.TotalType=Specifiers.Type;
+END;
+
+RULE: type_name ::= Specifiers abstract_declarator COMPUTE
+  type_name.TotalType=abstract_declarator.TotalType;
+END;
+
+RULE: abstract_declarator ::= pointer_abstract_declarator COMPUTE
+  abstract_declarator.TotalType=pointer_abstract_declarator.TotalType;
+END;
+
+RULE: abstract_declarator ::= array_abstract_declarator COMPUTE
+  abstract_declarator.TotalType=array_abstract_declarator.TotalType;
+END;
+
+RULE: abstract_declarator ::= function_abstract_declarator COMPUTE
+  abstract_declarator.TotalType=function_abstract_declarator.TotalType;
+END;
+
+RULE: pointer_abstract_declarator ::= '*' Specifiers COMPUTE
+  pointer_abstract_declarator.TotalType=pointer_abstract_declarator.Type;
+END;
+
+RULE: pointer_abstract_declarator ::=
+        '*' Specifiers abstract_declarator COMPUTE
+  pointer_abstract_declarator.TotalType=abstract_declarator.TotalType;
+END;
+
+RULE: array_abstract_declarator ::= '[' constant_expression ']' COMPUTE
+        array_abstract_declarator.TotalType=array_abstract_declarator.Type;
+END;
+
+RULE: array_abstract_declarator ::=
+        abstract_declarator '[' constant_expression ']' COMPUTE
+  array_abstract_declarator.TotalType=abstract_declarator.TotalType;
+END;
+
+RULE: function_abstract_declarator ::= '(' parameter_type_list ')' COMPUTE
+  function_abstract_declarator.TotalType=function_abstract_declarator.Type;
+END;
+
+RULE: function_abstract_declarator ::=
+        abstract_declarator '(' parameter_type_list ')' COMPUTE
+  function_abstract_declarator.TotalType=abstract_declarator.TotalType;
+END;
+
+RULE: declarator ::= TypeIdDef COMPUTE
+  declarator.TotalType=TypeIdDef.Type;
+END;
+
+RULE: declarator ::= IdDef COMPUTE
+  declarator.TotalType=IdDef.Type;
+END;
+
+RULE: declarator ::= pointer_declarator COMPUTE
+  declarator.TotalType=pointer_declarator.TotalType;
+END;
+
+RULE: declarator ::= array_declarator COMPUTE
+  declarator.TotalType=array_declarator.TotalType;
+END;
+
+RULE: declarator ::= function_declarator COMPUTE
+  declarator.TotalType=function_declarator.TotalType;
+END;
+
+RULE: pointer_declarator ::= '*' Specifiers declarator COMPUTE
+  pointer_declarator.TotalType=declarator.TotalType;
+END;
+
+RULE: array_declarator ::= declarator '[' constant_expression ']' COMPUTE
+  array_declarator.TotalType=declarator.TotalType;
+END;
+
+RULE: function_declarator ::= declarator '(' parameter_type_list ')' COMPUTE
+  function_declarator.TotalType=declarator.TotalType;
+END;
+
+RULE: function_declarator ::= declarator '(' parameters ')' COMPUTE
+  function_declarator.TotalType=declarator.TotalType;
+END;
+
+RULE: parameter_declaration ::= Specifiers ParameterDecl COMPUTE
+  parameter_declaration.TotalType=ParameterDecl.TotalType;
+END;
+
+RULE: parameter_declaration ::= Specifiers abstract_declarator COMPUTE
+  parameter_declaration.TotalType=abstract_declarator.TotalType;
+END;
+
+RULE: parameter_declaration ::= Specifiers COMPUTE
+  parameter_declaration.TotalType=Specifiers.Type;
+END;
+
+RULE: ParameterDecl ::= declarator COMPUTE
+  ParameterDecl.TotalType=declarator.TotalType;
+END;
+@}
+
+@$@<Define keys, properties, and access functions@>+=@{
+PointerTypes;
+ArrayTypes;
+FunctionTypes;
+@}
+
+@$@<Instantiate modules@>+=@{
+$/Type/StructEquiv.fw
+@}
+
+@B@<Determining the types yielded by expressions@>
+
+@/Operator identification@/ (also called @/overload resolution@/) is the
+process of determining the type of value yielded by each expression in the
+program.
+
+@$@<Instantiate modules@>+=@{@-
+$/Type/Expression.gnrc :inst
+@}
+
+This process depends on the type system of the language.
+
+The formal description of the type system given in Section \ref{typesystem}
+results in a database of relationships among types and operators that can
+be used by a standard set of computational roles to implement operator
+identification.
+
+Each of the basic type identifiers appearing in Section \ref{types}
+denotes a definition table key that has the @{OilType@} property.
+The value of the @{OilType@} property is the corresponding type in the
+operator identification database.
+Section \ref{types} defines only one database type for a C derived type:
+@{void*@}.
+All other C derived types are considered program-dependent and must be
+added to the database by computations over the abstract syntax tree.
+These computations are discussed in Section \ref{instantiate}.
+
+@C@<Operator indications@>
+
+A correspondence must be set up between the C operator characters and the
+operator indications used in the formal specification (Section
+\ref{operators}).
+
+@$@<Instantiate modules@>+=@{
+$/Type/PreDefOp.gnrc +referto=(Operator.d) :inst
+@}
+
+@N@<Operator.d@>==@{
+PreDefInd('++',    post_lvalue_opr,     Plus_Plus_Indication)
+PreDefInd('--',    post_lvalue_opr,     Minus_Minus_Indication)
+
+PreDefInd('++',    lvalue_operator,     Plus_Plus_Indication)
+PreDefInd('--',    lvalue_operator,     Minus_Minus_Indication)
+PreDefInd('sizeof',lvalue_operator,     Sizeof_Indication)
+
+PreDefInd('=',     assignment_operator, Equal_Indication)
+PreDefInd('*=',    assignment_operator, Star_Equal_Indication)
+PreDefInd('/=',    assignment_operator, Slash_Equal_Indication)
+PreDefInd('%=',    assignment_operator, Percent_Equal_Indication)
+PreDefInd('+=',    assignment_operator, Plus_Equal_Indication)
+PreDefInd('-=',    assignment_operator, Minus_Equal_Indication)
+PreDefInd('<<=',   assignment_operator, Less_Less_Equal_Indication)
+PreDefInd('>>=',   assignment_operator, Greater_Greater_Equal_Indication)
+PreDefInd('&=',    assignment_operator, Amper_Equal_Indication)
+PreDefInd('^=',    assignment_operator, Caret_Equal_Indication)
+PreDefInd('|=',    assignment_operator, Bar_Equal_Indication)
+
+PreDefInd('~',     normal_operator,     Tilde_Indication)
+PreDefInd('!',     normal_operator,     Bang_Indication)
+
+PreDefInd('*',     normal_operator,     Star_Indication)
+PreDefInd('/',     normal_operator,     Slash_Indication)
+PreDefInd('%',     normal_operator,     Percent_Indication)
+
+PreDefInd('+',     normal_operator,     Plus_Indication)
+PreDefInd('-',     normal_operator,     Minus_Indication)
+
+PreDefInd('<<',    normal_operator,     Less_Less_Indication)
+PreDefInd('>>',    normal_operator,     Greater_Greater_Indication)
+
+PreDefInd('<',     normal_operator,     Less_Indication)
+PreDefInd('>',     normal_operator,     Greater_Indication)
+PreDefInd('<=',    normal_operator,     Less_Equal_Indication)
+PreDefInd('>=',    normal_operator,     Greater_Equal_Indication)
+
+PreDefInd('==',    normal_operator,     Equal_Equal_Indication)
+PreDefInd('!=',    normal_operator,     Bang_Equal_Indication)
+
+PreDefInd('&',     normal_operator,     Amper_Indication)
+ 
+PreDefInd('^',     normal_operator,     Caret_Indication)
+
+PreDefInd('|',     normal_operator,     Bar_Indication)
+
+PreDefInd('&&',    logical_operator,    Amper_Amper_Indication)
+PreDefInd('||',    logical_operator,    Bar_Bar_Indication)
+@}
+
+@C@<Expression contexts@>
+
+Certain abstract tree node contexts inherit computational roles from the
+operator identification module.
+
+@$@<Operator identification@>+=@{
+SYMBOL post_lvalue_opr     INHERITS OperatorSymbol   END;
+SYMBOL lvalue_operator     INHERITS OperatorSymbol   END;
+SYMBOL assignment_operator INHERITS OperatorSymbol   END;
+SYMBOL normal_operator     INHERITS OperatorSymbol   END;
+SYMBOL logical_operator    INHERITS OperatorSymbol   END;
+
+SYMBOL Expression          INHERITS ExpressionSymbol END;
+SYMBOL RHSExpr             INHERITS ExpressionSymbol END;
+SYMBOL DerefExpr           INHERITS ExpressionSymbol END;
+
+RULE: Expression ::= IdUse COMPUTE
+  PrimaryContext(Expression,IdUse.Type);
+END;
+
+RULE: Expression ::= character_constant COMPUTE
+  PrimaryContext(Expression,TypeIs_char);
+END;
+
+RULE: Expression ::= floating_constant COMPUTE
+  PrimaryContext(Expression,TypeIs_double);
+END;
+
+RULE: Expression ::= integer_constant COMPUTE
+/* FIXME: Check the suffix */
+  PrimaryContext(
+    Expression,
+    IF(EQ(strtol(StringTable(integer_constant),0,0),0),
+      TypeIs_NULL,
+      TypeIs_int));
+END;
+RULE: Expression ::= StringSeq
+COMPUTE
+  PrimaryContext(Expression,TypeIs_string);
+END;
+
+RULE: Expression ::= Expression '[' Expression ']' COMPUTE
+  DyadicContext(Expression[1],,Expression[2],Expression[3]);
+  Indication(Subscript_Indication);
+END;
+
+SYMBOL Arguments INHERITS OpndExprListRoot COMPUTE
+  SYNT.LstMsg=
+    IF(THIS.LstErr,
+      IF(AND(EQ(THIS.LstTyp,TypeIs_void),NOT(THIS.LstNxt)),
+        "A single 'void' means no arguments, so no message",
+        message(ERROR,"Too few arguments",0,COORDREF)));
+END;
+
+SYMBOL Argument  INHERITS OpndExprListElem END;
+
+RULE: Argument ::= Expression COMPUTE
+  ConversionContext(Argument,,Expression);
+  Indication(Cast_Indication);
+END;
+
+RULE: Expression ::= Expression '(' Arguments ')' COMPUTE
+  ListContext(Expression[1],,Arguments);
+  Indication(Expression[2].Type);
+END;
+
+SYMBOL MemberIdUse INHERITS TypedUseId END;
+
+RULE: Expression ::= Expression '.' MemberIdUse
+COMPUTE
+  MemberIdUse.MemberScopeKey=Expression[2].Type;
+  PrimaryContext(Expression[1],MemberIdUse.Type);
+END;
+
+RULE: Expression ::= DerefExpr '->' MemberIdUse COMPUTE
+  MemberIdUse.MemberScopeKey=DerefExpr.Type;
+  PrimaryContext(Expression,MemberIdUse.Type);
+END;
+
+RULE: DerefExpr ::= Expression COMPUTE
+  MonadicContext(DerefExpr,,Expression);
+  Indication(Star_Indication);
+END;
+
+RULE: Expression ::= Expression post_lvalue_opr COMPUTE
+  MonadicContext(Expression[1],post_lvalue_opr,Expression[2]);
+END;
+
+RULE: Expression ::= lvalue_operator Expression COMPUTE
+  MonadicContext(Expression[1],lvalue_operator,Expression[2]);
+END;
+
+RULE: Expression ::= normal_operator Expression COMPUTE
+  MonadicContext(Expression[1],normal_operator,Expression[2]);
+END;
+
+RULE: Expression ::= 'sizeof' '(' type_name ')' COMPUTE
+  PrimaryContext(Expression[1],TypeIs_int);
+END;
+
+RULE: Expression ::= '(' type_name ')' Expression COMPUTE
+  PrimaryContext(Expression[1],type_name.TotalType);
+  RootContext(type_name.TotalType,,Expression[2]);
+  Indication(Cast_Indication);
+END;
+
+RULE: Expression ::= Expression normal_operator Expression COMPUTE
+  DyadicContext(Expression[1],normal_operator,Expression[2],Expression[3]);
+END;
+
+RULE: Expression ::= Expression logical_operator Expression COMPUTE
+  DyadicContext(Expression[1],logical_operator,Expression[2],Expression[3]);
+END;
+
+RULE: Expression ::= Expression '?' Expression ':' Expression COMPUTE
+  BalanceContext(Expression[1],Expression[3],Expression[4]);
+  Expression[2].Required=scalarType;
+END;
+
+RULE: Expression ::= Expression assignment_operator RHSExpr COMPUTE
+  DyadicContext(Expression[1],assignment_operator,Expression[2],RHSExpr);
+END;
+
+RULE: RHSExpr ::= Expression COMPUTE
+  ConversionContext(RHSExpr,,Expression);
+  Indication(Cast_Indication);
+END;
+
+RULE: Expression ::= Expression ',' Expression COMPUTE
+  TransferContext(Expression[1],Expression[3]);
+END;
+@}
+
+@B@<Support code@>
+
+@O@<Type.h@>==@{
+#ifndef SEMANTIC_H
+#define SEMANTIC_H
+
+#include "eliproto.h"
+#include "deftbl.h"
+#include "oiladt2.h"
+#include "Strings.h"
+
+@<Abbreviations for sets of bits@>
+
+#define KWD(w,i,s) w
+typedef enum {
+@<Specifier keywords@>
+} TypeSpecifier;
+#undef KWD
+
+@<Specification data@>
+
+#define InSpecifierSet(kw,chain) (((1 << kw) & chain.KeywordSet) != 0)
+
+extern SpecData InitSpecifiers      ELI_ARG((DefTableKey));
+extern int NextSpecifier            ELI_ARG((TypeSpecifier, SpecData));
+extern SpecData UpdateSpecification ELI_ARG((DefTableKey, TypeSpecifier, SpecData));
+extern DefTableKey CompleteType        ELI_ARG((SpecData));
+
+extern void BasicPointerTypes ELI_ARG((void));
+extern void BasicPointerRefs  ELI_ARG((void));
+
+#endif
+@}
+
+@O@<Type.c@>==@{@-
+#include "pdl_gen.h"
+#include "Typing.h"
+#include "Expression.h"
+#include "Type.h"
+
+#define KWD(w,i,s) i
+static int FSMInput[] = {
+@<Specifier keywords@>
+};
+#undef KWD
+
+#define KWD(w,i,s) s
+static long Exclude[] = {
+@<Specifier keywords@>
+};
+#undef KWD
+
+static struct {int Next[7]; DefTableKey Type;} State[] = {
+@<Finite-state machine@>
+};
+
+SpecData
+#ifdef PROTO_OK
+InitSpecifiers(DefTableKey key)
+#else
+InitSpecifiers(key) DefTableKey key;
+#endif
+@<InitSpecifiers(DefTableKey key)@>
+
+int
+#ifdef PROTO_OK
+NextSpecifier(TypeSpecifier kw, SpecData chain)
+#else
+NextSpecifier(kw, chain) TypeSpecifier kw; SpecData chain;
+#endif
+@<NextSpecifier(TypeSpecifier kw, SpecData chain)@>
+
+SpecData
+#ifdef PROTO_OK
+UpdateSpecification(DefTableKey type, TypeSpecifier kw, SpecData chain)
+#else
+UpdateSpecification(type, kw, chain)
+DefTableKey type; TypeSpecifier kw; SpecData chain;
+#endif
+@<UpdateSpecification(DefTableKey type, TypeSpecifier kw, SpecData chain)@>
+
+DefTableKey
+#ifdef PROTO_OK
+CompleteType(SpecData chain)
+#else
+CompleteType(chain) SpecData chain;
+#endif
+@<CompleteType(SpecData chain)@>
+
+@<Type key arrays@>
+
+void
+#ifdef PROTO_OK
+BasicPointerTypes(void)
+#else
+BasicPointerTypes()
+#endif
+@<void BasicPointerTypes(void)@>
+
+void
+#ifdef PROTO_OK
+BasicPointerRefs(void)
+#else
+BasicPointerRefs()
+#endif
+@<void BasicPointerRefs(void)@>
+@}
+
+@O@<Type.head@>==@{
+#include "Type.h"
+@}

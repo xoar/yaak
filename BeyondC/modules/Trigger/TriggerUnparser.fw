@@ -1,0 +1,55 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<TriggerLanguage.lido@>==@{
+
+    ATTR TriggerConstructor : PTGNode;
+    ATTR TriggerCalls : PTGNode;
+    ATTR TriggerProcess : PTGNode;
+    
+    RULE: TriggerSubtask::= 'trigger' EventUses COMPUTE
+
+        TriggerSubtask.TriggerConstructor =
+            PTGTriggerConstructor(INCLUDING Subtask.Id,
+                                  INCLUDING function_definition.EventName);
+
+        TriggerSubtask.TriggerCalls =
+            CONSTITUENTS EventUse.IdemPtg
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        TriggerSubtask.TriggerProcess = 
+            PTGTriggerProcess(INCLUDING Subtask.Id,
+                              INCLUDING function_definition.EventName);
+
+        TriggerSubtask.IdemPtg = PTGTrigger(TriggerSubtask.TriggerConstructor,
+                                            TriggerSubtask.TriggerCalls,
+                                            TriggerSubtask.TriggerProcess);
+    END;
+
+    RULE: EventUse::= EventNameUse COMPUTE
+        EventUse.IdemPtg = PTGTriggerCall(INCLUDING Subtask.Id, 
+                                          EventNameUse.IdemPtg);
+    END;
+@}
+
+
+@O@<TriggerLanguage.ptg@>==@{
+
+Trigger:
+    $ /*constructor*/ "\n"
+    $ /*Trigger calls*/ "\n"
+    $ /*process*/ "\n"
+
+TriggerCall:
+    "    TriggerAddSubtask(subtask" $1 int ",\"" $2 /* event name */ "\", &" $2 /* event name */ " );"
+
+TriggerConstructor:
+    "    TriggerStructPtr subtask" $1 int " = TriggerConstructor(pluginList, " $1 int "," "\"" $2  "\"" ");"
+
+TriggerProcess:
+    "    if( ! TriggerProcess(subtask" $1 int ") )\n"
+    "    {\n"
+    "        RemoveTask(pluginList,\""  $2 "\");\n"
+    "        return;\n"
+    "    }\n"
+@}

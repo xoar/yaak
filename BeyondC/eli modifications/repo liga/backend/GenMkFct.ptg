@@ -1,0 +1,253 @@
+/*==============================================================*/
+/* tree construction treecon.c */
+
+#include "ansi.h"
+
+TreeConFileHead:
+	"\n/* implementation of tree construction functions */\n"
+	"\n#include \"node.h\"\n"
+	"\n#include \"nodecode.h\"\n"
+	"\n#include \"attrpredef.h\"\n"
+	"\n#include \"visitmap.h\"\n"
+	"\n#include \"treeact.h\"\n"
+        "\n#ifdef MONITOR\n"
+        "#include \"attr_mon_dapto.h\"\n"
+        "#include \"MONTblStack.h\"\n"
+        "#endif\n"
+	"\n#include <stdlib.h>\n"
+	"\n#define _USE_OBSTACK 1\n"
+	"\n/* use of obstack: */\n"
+	"\n#if _USE_OBSTACK\n"
+	"\n#include \"obstack.h\""
+	"\nstatic struct obstack TreeSpace;"
+	"\nstatic void *_TreeBase;\n"
+	"\n#ifdef __cplusplus"
+	"\nvoid* NODEPTR_struct::operator new(size_t size)"
+	"\n{"
+	"\n\treturn obstack_alloc(&TreeSpace, size);"
+	"\n}"
+	"\n#else"
+	IFANSI
+	"\nchar* TreeNodeAlloc(int size)"
+	ELSE
+	"\nchar* TreeNodeAlloc(size) int size;"
+	ENDIF
+	"\n{"
+	"\n	return (char *)(obstack_alloc(&TreeSpace, size));"
+	"\n}\n#endif\n"
+
+	"\nvoid InitTree()"
+	"\n{"
+	"\n	obstack_init(&TreeSpace);"
+	"\n	_TreeBase=obstack_alloc(&TreeSpace,0);"
+	"\n}\n"
+	"\nvoid FreeTree()"
+	"\n{"
+	"\n	obstack_free(&TreeSpace, _TreeBase);"
+	"\n	_TreeBase=obstack_alloc(&TreeSpace,0);"
+	"\n}\n"
+
+	"\n#else\n"  /* Don't use Obstack */
+	"\n#include <stdio.h>\n"
+	"\n#ifdef __cplusplus"
+	"\nvoid* NODEPTR_struct::operator new(size_t size)"
+	"\n{"
+	"\n\tvoid *retval = malloc(size);"
+	"\n\tif (retval) return retval;"
+	"\n\tfprintf(stderr, \"*** DEADLY: No more memory.\\n\");"
+	"\n\texit(1);"
+	"\n}"
+	"\n#else"
+	IFANSI
+	"\nchar* TreeNodeAlloc(int size)"
+	ELSE
+	"\nchar* TreeNodeAlloc(size) int size;"
+	ENDIF
+	"\n{"
+	"\n	char *retval = (char *) malloc(size);"
+	"\n	if (retval) return retval;"
+	"\n	fprintf(stderr, \"*** DEADLY: No more memory.\\n\");"
+	"\n	exit(1);"
+	"\n}\n#endif\n"
+	"\nvoid InitTree() { }\n"
+	"\nvoid FreeTree() { }\n"
+	"\n#endif\n"
+
+	"\n#ifdef MONITOR"
+	"\n#define _SETCOORD(node) \\"
+	"\n        node->_coord = _coordref ? *_coordref : NoCoord;"
+	"\n#define _COPYCOORD(node) \\"
+	"\n        node->_coord = _currn->_desc1->_coord;"
+	"\n#else"
+	"\n#define _SETCOORD(node)"
+	"\n#define _COPYCOORD(node)"
+	"\n#endif"
+
+
+MkSymbFctHead:
+	IFANSI
+	"\nNODEPTR Mk" $1 " (POSITION *_coordref, NODEPTR _currn)"
+	ELSE
+	"\nNODEPTR Mk" $1 " (_coordref, _currn)"
+	"\n\tPOSITION *_coordref; NODEPTR _currn;"
+	ENDIF
+	"\n{"
+	"\nif (_currn == NULLNODEPTR) return NULLNODEPTR;"
+	"\nif (IsSymb (_currn, SYMB" $1 ")) return (_currn);"
+
+MkSymbFctChk:
+	"\nif (IsSymb (_currn, SYMB" $1 ")) return (Mk" 
+			$2 "(_coordref, _currn));"
+
+MkSymbFctTail:
+	"\nreturn(NULLNODEPTR);"
+	"\n}/* Mk" $1 " */\n"
+
+/* obsolete ? */
+MkTermFct:
+	IFANSI
+	"\nNODEPTR TMk" $1 "(NODEPTR _currn)"
+	ELSE
+	"\nNODEPTR TMk" $1 "(_currn)"
+	"\n\tNODEPTR _currn;"
+	ENDIF
+	"\n{"
+	"\nif (IsSymb (_currn, SYMB" $1 ")) return (_currn);"
+	"\nreturn(NULLNODEPTR);"
+	"\n}/* TMk" $1 " */\n"
+	
+	IFANSI
+	"\nNODEPTR Mk" $1 "(POSITION *_coordref, int attrval )"
+	ELSE
+	"\nNODEPTR Mk" $1 "(_coordref, attrval)"
+	"\n\tPOSITION *_coordref;\n\tint attrval;" 
+	ENDIF
+	"\n{\n"
+	"\t_TSP" $1 " _currn;"
+	"\n#ifdef __cplusplus"
+	"\n_currn = new _TS" $1
+	";"
+	"\n#else"
+	"\n_currn = (_TSP" $1 ") TreeNodeAlloc (sizeof (struct _TS" $1 "));"
+	"\n#endif"
+	"\n_currn->_prod = RULE" $1 ";"
+	$2 /* assign terminal attr */
+	"\nreturn ((NODEPTR) _currn);\n}/* Mk" $1 "*/\n"
+
+ParmSpec:
+	"\n" $ " " $ ";"
+
+ProtoSpec:
+	", " $ " " $ 
+
+AttrAssign:
+	"\n_currn->_AT" $1 " = attrval;"
+
+MkProdFct:
+	IFANSI
+	"\nNODEPTR Mk" $1 /* ProdName */ 
+		" (POSITION *_coordref" $6 /* DescProtos */ ")"
+	ELSE
+	"\nNODEPTR Mk" $1 /* ProdName */ 
+		" (_coordref" $2 /* DescNames */ ")"
+	"\n\tPOSITION *_coordref;" 
+	$3 /* MkParmSpecs */
+	ENDIF
+	"\n{\t_TPP" $1 /* ProdName */ " _currn;"
+	"\n#ifdef __cplusplus"
+	"\n_currn = new _TP"
+	$1 ";"
+	"\n#else"
+	"\n_currn = (_TPP" $1 /* ProdName */ 
+	") TreeNodeAlloc (sizeof (struct _TP" $1 /* ProdName */ "));"
+	"\n#endif"
+	"\n#ifdef MONITOR"
+        "\n_currn->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)_currn));"
+        "\n#endif"
+	"\n_currn->_prod = RULE" $1 /* ProdName */ ";"
+	$4 /* Seq TreeAssign */
+	$7 /* terminal action */ 
+	$5 /* bottom up visit */
+	"\nreturn ( (NODEPTR) _currn);\n}/* Mk" $1 " */\n"
+
+NonLitTermAct:
+	"\n_TERMACT_" $1 /* ProdName */ ";"
+
+NonLitTermDefine:
+	"\n#define Mk" $1 string "(pos,val) (val)"
+
+OldTermDefine:
+	"\n#define Mk" $1 string "(pos,val) Mk_RNT_" $1 string "(pos,val)"
+
+NonLitTermProto:
+	", " $1 string /* type name */ " _TERM" $2 int /* term cnt */
+
+NonLitTermName:
+	", _TERM" $1 int /* term cnt */
+
+NonLitTermSpec:
+	"\n\t" $1 string /* type name */ " _TERM" $2 int /* term cnt */ ";"
+
+TreeConVisit:
+	"\n(*(VS1MAP[_currn->_prod]))((NODEPTR)_currn);/* bottom up visit */"
+
+MkTreeParmSpec:
+	"\n\tNODEPTR " $ /* DescName */ ";"
+
+MkProtoSpec:
+	", NODEPTR " $ /* DescName */
+
+TreeAssign:
+	"\n_currn->" $1 /* DescName */ 
+		" = (_TSP" $2 string /* SymbName */ ") Mk" $2 string /* SymbName */ 
+		" (_coordref, " $1 /* DescName */ ");\
+	\nif (((NODEPTR)_currn->" $1 /* DescName */ ") == NULLNODEPTR)\
+	\n\tmessage (DEADLY, \"RULE " $3 string ": root of subtree no. " 
+			$4 int " can not be made a "
+			$2 string " node \", 0, _coordref);"
+
+GenTreeAssign:
+	"\nif (" $1 /* DescName */ " == NULLNODEPTR)"
+		"\n\t_currn->" $1 /* DescName */ 
+		" = (_TSP" $2 string /* SymbName */ ") NULLNODEPTR;"
+	"\nelse\t_currn->" $1 /* DescName */
+		" = (_TSP" $2 string /* SymbName */ ") Mk" $2 string /* SymbName */
+		" (_coordref, " $1 /* DescName */ ");"
+
+/*==============================================================*/
+/* tree construction treecon.h */
+
+TreeConHeader:
+	"\n/* interface of tree construction functions */\n"
+	"\n#ifndef TREECON_H"
+	"\n#define TREECON_H"
+	"\n#include \"eliproto.h\"\n"
+	"\n#include \"err.h\"\n"
+	"\n#include \"nodeptr.h\"\n"
+	"\n#include \"HEAD.h\"\n"
+	"\n"
+
+	"\nextern void InitTree ELI_ARG((void));"
+	"\n"
+	"\nextern void FreeTree ELI_ARG((void));"
+	"\n"
+	$ /* Seq MkProcHeader */
+	"\n#endif\n"
+
+MkSymbHeader:
+	"\nextern NODEPTR Mk" $1 /* Name */ 
+		" ELI_ARG((POSITION *_coordref, NODEPTR _currn));"
+
+MkProcHeader:
+	"\nextern NODEPTR Mk" $1 /* Name */
+		" ELI_ARG((POSITION *_coordref" 
+		$2 /* DescProtos */"));"
+
+/* obsolete?:*/
+MkTermProcHeader:
+	"\nextern NODEPTR TMk" $1 /* Name */ " ELI_ARG((NODEPTR _currn));"
+	"\nextern NODEPTR Mk" $1 /* Name */
+		" ELI_ARG((POSITION *_coordref, int attrval));"
+
+
+

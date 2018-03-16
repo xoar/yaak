@@ -1,0 +1,53 @@
+#include "ansi.h"
+
+EncodeFile:
+	"\n/* encoding of tree node types and symbols */\n"
+	"\n#ifndef NODECODE_H"
+	"\n#define NODECODE_H\n"
+	"\nextern int LHSMAP[];\n"
+	"\n#define IsSymb(_n,_c) (LHSMAP[(_n)->_prod] == (_c))\n"
+	$
+	"\n#endif\n"
+
+Define:
+	"\n#define " $ " " $
+
+RuleCode:
+	"RULE" $
+
+SymbCode:
+	"SYMB" $
+
+VisitMapHead:
+	"#ifndef VISITMAP_H\n"
+	"#define VISITMAP_H\n\n"
+	"#include \"nodeptr.h\"\n"
+	IFANSI
+	"\ntypedef void (* _VPROCPTR) (NODEPTR);"
+	ELSE
+	"\ntypedef void (* _VPROCPTR) ();"
+	ENDIF
+	"\n"
+	$/* externs */
+	"\n\n#endif\n\n"
+
+VisitMapExtern:
+	"\nextern _VPROCPTR VS" $ "MAP[];"
+
+VisitMapFile:
+	"\n/* mapping of RULEcodes to visit procedures */\n"
+	"\n#include \"visitprocs.h\"\n"
+	"\n#include \"visitmap.h\"\n"
+	$/* VisitArrays */
+	"\n"
+	
+VisitArray:
+	"\n_VPROCPTR VS" $ "MAP[] = {\n" $ "\n};"
+
+VisitCast:
+	"(_VPROCPTR)" $
+
+LhsArray:
+	"\n/* mapping of productions to lefthand side symbols */\n"
+	"\n#include \"nodecode.h\"\n"
+	"\nint LHSMAP[] = {\n" $ "\n};\n"

@@ -1,0 +1,83 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<Language.lido@>==@{
+
+    ATTR WalkToConstructor : PTGNode;
+    ATTR WalkToProcess : PTGNode;
+
+    RULE: WalkToSubtask ::= EntityNameUse 'walk' 'to' integer_constant ',' integer_constant
+    COMPUTE
+
+        WalkToSubtask.WalkToConstructor =
+            PTGWalkToConstructor(INCLUDING Subtask.Id,
+                                 INCLUDING function_definition.EventName,
+                                 GetId(EntityNameUse[1].Key,0),
+                                 StringTable(integer_constant[1]),
+                                 StringTable(integer_constant[2])
+                                 ) <- INCLUDING program.GotEntityId ;
+
+        WalkToSubtask.WalkToProcess = 
+            PTGWalkToProcess(INCLUDING Subtask.Id,
+                             INCLUDING function_definition.EventName
+                             );
+
+        WalkToSubtask.IdemPtg = PTGWalkTo(WalkToSubtask.WalkToConstructor,
+                                          WalkToSubtask.WalkToProcess
+                                          );
+
+
+    END;
+
+    RULE: WalkToSubtask ::= EntityNameUse 'walk' 'to' IdUse ',' IdUse
+    COMPUTE
+
+        /* add a check for the right type*/
+        IF(NE(IdUse[1].Type,TypeIs_int),
+              message(ERROR,"Walk to subtask need integer type", 0, COORDREF));
+
+        WalkToSubtask.WalkToConstructor =
+            PTGWalkToConstructor(INCLUDING Subtask.Id,
+                                 INCLUDING function_definition.EventName,
+                                 GetId(EntityNameUse[1].Key,0),
+                                 StringTable(IdUse[1].Sym),
+                                 StringTable(IdUse[2].Sym)
+                                 ) <- INCLUDING program.GotEntityId ;
+
+        WalkToSubtask.WalkToProcess = 
+            PTGWalkToProcess(INCLUDING Subtask.Id,
+                             INCLUDING function_definition.EventName
+                             );
+
+        WalkToSubtask.IdemPtg = PTGWalkTo(WalkToSubtask.WalkToConstructor,
+                                          WalkToSubtask.WalkToProcess
+                                          );
+
+
+    END;
+@}
+
+
+@O@<Language.ptg@>==@{
+
+WalkTo:
+    $ /*constructor*/ "\n"
+    $ /*process*/ "\n"
+
+WalkToConstructor:
+    "    WalkToStructPtr subtask" $1 int 
+        " = WalkToConstructor2I(pluginList, " 
+                                   $1 int "," 
+                                   "\"" $2  /*event name*/"\"" ","
+                                   $3 int /*char id*/","
+                                   $4 string "," $5 string/*target pos*/ ","
+                                   "100, 0"
+                                   ");"
+
+WalkToProcess:
+    "    if( ! WalkToProcess(subtask" $1 int ") )\n"
+    "    {\n"
+    "        RemoveTask(pluginList,\""  $2 "\");\n"
+    "        return;\n"
+    "    }\n"
+@}

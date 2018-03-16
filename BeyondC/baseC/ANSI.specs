@@ -1,0 +1,10 @@
+/* order is important: delit and gla must appear before the identifier definition in Phrase.fw*/
+keywords.delit
+keywords.gla
+Phrase.fw
+GccExtensions.fw
+Tree.fw
+Name.fw
+Type.fw
+TypeName.fw
+C.ctl

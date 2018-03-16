@@ -1,0 +1,5 @@
+$/Name/AlgScope.gnrc+instance=Evt +referto=Evt :inst
+$/Name/AlgScope.gnrc+instance=Entity:inst
+$/Tech/Strings.specs
+$/Output/PtgCommon.fw
+yaakLanguage.fw

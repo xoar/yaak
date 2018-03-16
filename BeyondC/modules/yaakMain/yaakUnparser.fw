@@ -1,0 +1,186 @@
+@p maximum_input_line_length = infinity
+
+@O@<yaakUnparser.lido@>==@{
+
+    ATTR StmtCode : PTGNode; 
+
+    RULE: Event::= StartTag 'Event' EventNameDef empty_types function_body COMPUTE
+        Event.StmtCode = function_body.IdemPtg;
+        Event.IdemPtg=PTGEvent(EventNameDef.IdemPtg,Event.StmtCode);
+    END;
+
+
+/* --------------- fix event names----------------------*/
+
+/* without this fix there is a whitespace at the end of the name*/
+
+    RULE: EventNameDef ::= identifier COMPUTE
+        EventNameDef.IdemPtg = PTGAsIs(StringTable(identifier));
+    END;
+
+    RULE: EntityNameDef ::= identifier COMPUTE
+        EntityNameDef.IdemPtg = PTGAsIs(StringTable(identifier));
+    END;
+
+    RULE: EventNameUse ::= identifier COMPUTE
+        EventNameUse.IdemPtg = PTGAsIs(StringTable(identifier));
+    END;
+
+    RULE: EntityNameUse ::= identifier COMPUTE
+        EntityNameUse.IdemPtg = PTGAsIs(StringTable(identifier));
+    END;
+
+
+
+/*--------------- get the start event names ------------------- */
+
+
+    /* Set the event name 
+       also assign the start event name to the program nonterminal*/
+   /* TODO: check if there is more than one occurence*/
+
+    ATTR EventName : PTGNode;
+
+    /* the normal function dont get a event name for now. TODO: change this to the function name*/
+    RULE: function_definition ::=
+        Specifiers FunctionDecl declaration_list function_body COMPUTE
+
+            function_definition.EventName = PTGNULL;
+    END;
+
+    /* now the event case*/
+    RULE: function_definition ::= Event COMPUTE
+        function_definition.EventName = Event.EventName;
+    END;
+
+    RULE: Event ::= StartTag 'Event' EventNameDef empty_types function_body COMPUTE
+        Event.EventName = EventNameDef.IdemPtg;
+    END;
+
+
+/*----------- build the plugin code -------------------------*/
+
+    /* get the start event */
+    ATTR CallStartEventCode: PTGNode;
+
+    RULE: StartTag::= 'Start' COMPUTE
+        StartTag.CallStartEventCode = PTGCallStartEvent(INCLUDING Event.EventName); 
+    END;
+
+    RULE: StartTag::= COMPUTE
+        StartTag.CallStartEventCode = PTGNULL;
+    END;
+
+
+    RULE: program ::= external_declarations COMPUTE
+        program.CallStartEventCode =
+          CONSTITUENTS StartTag.CallStartEventCode
+          WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+    END;
+
+    /** build the prototypes*/
+    ATTR EventPrototypes : PTGNode;
+
+    RULE: program ::= external_declarations COMPUTE
+        program.EventPrototypes =
+          CONSTITUENTS Event.EventName
+          WITH (PTGNode, PTGNewLineSequence, PTGEventPrototype, PTGNull);
+    END;
+
+
+    /** add the additional generated task add at the end and their prototypes
+        at the beginning*/
+
+    ATTR AdditionalTaskCode : PTGNode;
+    ATTR AdditionalTaskPrototypes : PTGNode;
+
+    /*CONSTITUENTS (Subtask.AdditionalTaskCode,Entity.AdditionalTaskCode)*/
+    RULE: program ::= external_declarations COMPUTE
+        program.AdditionalTaskCode =
+          CONSTITUENTS Entity.AdditionalTaskCode
+          WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+    END;
+
+    /*(Subtask.AdditionalTaskPrototypes,Entity.AdditionalTaskPrototypes)*/
+    RULE: program ::= external_declarations COMPUTE
+        program.AdditionalTaskPrototypes =
+          CONSTITUENTS Entity.AdditionalTaskPrototypes
+          WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+    END;
+
+    /*the end plugin code*/
+    RULE: program ::= external_declarations COMPUTE
+        program.IdemPtg = PTGFileOutput(program.EventPrototypes,
+                                        program.AdditionalTaskPrototypes,
+                                        program.IdemOrigPtg,
+                                        program.CallStartEventCode,
+                                        program.AdditionalTaskCode);
+    END;
+
+
+    /*comment unparsing*/
+    CLASS SYMBOL CommentUnparser COMPUTE
+        
+        SYNT.IdemPtg = 
+            IF (GT(SYNT.comment, 0),
+                PTGComment(THIS.IdemOrigPtg,
+                           PTGAsIs(StringTable(THIS.comment))),
+                THIS.IdemOrigPtg
+                );
+    END;
+
+    SYMBOL statement INHERITS CommentUnparser END;
+    SYMBOL declaration INHERITS CommentUnparser END;
+    SYMBOL function_definition INHERITS CommentUnparser END;
+    SYMBOL function_body INHERITS CommentUnparser END;
+    SYMBOL declarator INHERITS CommentUnparser END;
+    SYMBOL struct_declaration INHERITS CommentUnparser END;
+
+
+@}
+
+@O@<yaakUnparser.ptg@>==@{
+
+Comment:
+    $ /*the idemPTG, has a newline*/
+    $ /*the comment*/ "\n"
+
+
+Event:
+    "void " $1 /*event name*/"()\n"
+    "{\n"
+    $2 /* stmt code*/ "\n"
+    "    RemoveTask(pluginList,\"" $1 "\");\n" /*event name*/
+    "}\n \n"
+
+
+EventPrototype:
+    "void " $ /*event name*/ "();\n"
+
+
+NewLineSequence:
+    $ { "\n" } $
+
+/*just call the event*/
+CallStartEvent:
+     "    AddTaskForNextRound(pluginList,\"" $1 "\", &" $1 " );\n" /*event name*/
+
+
+FileOutput:
+
+    $ /*event prototypes*/
+    $ /*Additional Task prototypes*/
+
+    $ /*Program.OrigPtg*/
+
+    "void pluginInit (void* _pluginList,void *_renderer)\n"
+    "{\n"
+    "    buildRefs(_pluginList,_renderer);\n"
+
+    $ /*StartEvents*/
+
+    "}\n"
+
+    $ /*Additional Task Code*/
+
+@}

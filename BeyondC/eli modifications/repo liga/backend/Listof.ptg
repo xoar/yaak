@@ -1,0 +1,173 @@
+#include "ansi.h"
+
+/* list node types: */
+
+ListStruct:
+"\nstruct _TP0" $1 " {\
+\nint _prod;"
+$2 /* attrs */
+"\nNODEPTR _desc1;\
+\nNODEPTR _desc2;\
+\n};\
+\n"
+
+/* list function headers: */
+ListFunctsHdr:
+	"\n#define Mk0" $1 "(_coordref) NULLNODEPTR"
+	"\nextern NODEPTR Mk2" $1
+		" ELI_ARG((POSITION *_coordref, NODEPTR l, NODEPTR r));"
+	"\nextern NODEPTR Mk" $1
+		" ELI_ARG((POSITION *_coordref, NODEPTR t));"
+
+/* list functions: */
+
+ListElemFct:
+	IFANSI
+	"\nstatic NODEPTR _Mk" $1 $2
+		" (POSITION *_coordref, NODEPTR elem)"
+	ELSE
+	"\nstatic NODEPTR _Mk" $1 $2 " (_coordref, elem)"
+	"\n\tPOSITION *_coordref; NODEPTR elem;"
+	ENDIF
+	"\n{"
+	"\n\t_TPPLST_" $1 $2 " _new;"
+	"\n#ifdef __cplusplus"
+	"\n\t_new = new _TPLST_"
+	$1 $2
+	";"
+	"\n#else"
+	"\n\t_new = (_TPPLST_" $1 $2 
+		") TreeNodeAlloc (sizeof (struct _TPLST_" $1 $2 "));"
+	"\n#endif"
+        "\n#ifdef MONITOR"
+	"\n_new->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)_new));"
+        "\n#endif"
+	"\n\t_new->_prod = RULELST_" $1 $2 ";"
+	"\n\t_new->_desc1 = (_TSP" $1 ")elem;"
+	"\n\t_new->_desc2 = (_TSPLST_" $3 ")_new;"
+
+	"\n\t{_TPPLST_" $1 $2 " _currn = _new;"
+        "\n\t _SETCOORD(_currn)"
+        "\n\t _TERMACT_LST_" $1 $2 ";"
+        "\n\t}"
+        "\n\treturn (NODEPTR)_new;"
+	"\n}\n"
+
+ListElemChk:
+	"\n\tif (IsSymb (t, SYMB" $1 ")) "
+	"\n\t\treturn _Mk" $2 $3 " (_coordref, Mk" $2 " (_coordref, t));"
+
+ListFuncts:
+	IFANSI
+	"\nstatic NODEPTR _Elem" $1
+		" (POSITION *_coordref, NODEPTR t)"
+	ELSE
+	"\nstatic NODEPTR _Elem" $1 " (_coordref, t)"
+	"\n\tPOSITION *_coordref; NODEPTR t;"
+	ENDIF
+	"\n/* coerces t to a list element and returns a single circular list */"
+	"\n{\tNODEPTR elem;"
+
+	"\n\t/* check first without then with coercion: */"
+	$3 /* ListElemChks */
+
+	"\n\tmessage (DEADLY, \"a " $1 
+		" list element node can not be generated \","
+		"\n\t\t0, _coordref);"
+	"\n\treturn t; /* never reached */"
+	"\n}\n"
+
+	IFANSI
+	"\nNODEPTR Mk2" $1 " (POSITION *_coordref, NODEPTR l, NODEPTR r)"
+	ELSE
+	"\nNODEPTR Mk2" $1 " (_coordref, l, r) POSITION *_coordref; NODEPTR l, r;"
+	ENDIF
+	"\n/* make a list of l and r, which may be null, elements, or lists */"
+	"\n{\tNODEPTR last;"
+	"\nif (l == NULLNODEPTR) return r;"
+	"\nif (r == NULLNODEPTR) return l;"
+	"\n/* ensure l and r to be lists: */"
+	"\nif (LHSMAP[l->_prod] != SYMBLST_" $2 ")"
+		"\n\tl =_Elem" $1 " (_coordref, l);"
+	"\nif (LHSMAP[r->_prod] != SYMBLST_" $2 ")"
+		"\n\tr = _Elem" $1 " (_coordref, r);"
+	"\n/* concatenate two lists: */"
+	"\nlast = ((NODEPTR)((_TPPLST_0" $1 ")r)->_desc2);"
+	"\n((_TPPLST_0" $1 ")r)->_desc2 = ((_TPPLST_0" $1 ")l)->_desc2;"
+	"\n((_TPPLST_0" $1 ")l)->_desc2 = last;"
+	"\nreturn l;"
+	"\n}\n"
+
+	IFANSI
+	"\nNODEPTR Mk" $1 " (POSITION *_coordref, NODEPTR t)"
+	ELSE
+	"\nNODEPTR Mk" $1 " (_coordref, t)"
+		" POSITION *_coordref; NODEPTR t;"
+	ENDIF
+	"\n{\tNODEPTR _currn; _TPP" $1 " root;"
+		"\n\t_TPPLST_0" $1 " list, remain, p;"
+	"\n/* argument t may be empty, a list element, or a list: */"
+	"\nif (t == NULLNODEPTR)"
+		"\n\tremain = (_TPPLST_0" $1 ")NULLNODEPTR;"
+	"\nelse {\tif (LHSMAP[t->_prod] != SYMBLST_" $2 ")"
+			"\n\t\tt = _Elem" $1 " (_coordref, t);"
+		"\n\tremain = (_TPPLST_0" $1 ")(((_TPPLST_0" $1 ") t)->_desc2);"
+		"\n\t((_TPPLST_0" $1 ") t)->_desc2 = NULLNODEPTR;"
+	"\n}"
+	"\n/* remain is a possibly empty list in reverse order */"
+	"\n/* finalize the list by an empty context: */"
+	"\n#ifdef __cplusplus"
+	"\nlist = new _TPLST_0"
+ 	$1
+	";"
+	"\n#else"
+	"\nlist = (_TPPLST_0" $1 
+		") TreeNodeAlloc (sizeof (struct _TPLST_0" $1 "));"
+	"\n#endif"
+	"\n#ifdef MONITOR"
+        "\nlist->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)list));"
+        "\n#endif"
+	"\nlist->_prod = RULELST_0" $1 ";"
+	"\nlist->_desc1 = NULLNODEPTR;"
+	"\nlist->_desc2 = NULLNODEPTR;"
+        "\n_SETCOORD(list)"
+
+	"\n_currn = (NODEPTR)list;"
+	$4 /* bottom up visit */
+	"\n/* reverse the list and visit its nodes: */"
+	"\nwhile (remain) {"
+		"\n\tp = (_TPPLST_0" $1 ")(remain->_desc2);"
+		"\n\tremain->_desc2 = (NODEPTR)list;"
+		"\n\tlist = remain;"
+		"\n\tremain = p;"
+		"\n\t_currn = (NODEPTR)list;"
+	$5 /* termacts */
+	$4 /* bottom up visit */
+	"\n}"
+	"\n/* make root node and visit it: */"
+	"\n#ifdef __cplusplus"
+	"\nroot = new _TP"
+	$1
+	";"
+	"\n#else"
+	"\nroot = (_TPP" $1 ") TreeNodeAlloc (sizeof (struct _TP" $1 "));"
+	"\n#endif"
+	"\n#ifdef MONITOR"
+        "\nroot->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)root));"
+        "\n#endif"
+	"\nroot->_prod = RULE" $1 ";"
+	"\nroot->_desc1 = (_TSPLST_" $2 ")list;"
+        "\n{ _TPP" $1 " _currn = root;"
+        "\n  _SETCOORD(_currn)"
+	"\n  _TERMACT_" $1 ";"
+        "\n}"
+	"\n_currn = (NODEPTR)root;"
+	$4 /* bottom up visit */
+	"\nreturn (NODEPTR)_currn;"
+	"\n}\n"
+
+ListTermact:
+	"\n\t/*if (_currn->_prod == RULELST_" $1 $2 ")"
+	"\n\t{_TPPLST_" $1 $2 " _currn = _currn;"
+        "\n\t _TERMACT_LST_" $1 $2 ";"
+        "\n\t} this code has been moved to _Elem" $2 "*/"

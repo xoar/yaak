@@ -1,0 +1,874 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Remote.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+Remote.fw:
+
+Each of RemoteAttrs is expanded to the so called referred set.
+That is a list of accesses of attributes which belong to those 
+tree symbols that are mentioned in the RemoteAttrs list or that
+inherits a symbol of that list.
+It is checked that two different attributes of the same tree
+symbol are not in the referred set.
+
+Similarly the set of shielded symbols is computed.
+It contains those tree symbols which are in the shield list
+or inherit from a symbol in that list.
+
+The referred sets and the shield sets are represented by linear
+lists without duplicates. They are ordered by the occurrence
+of the symbols in the global environment.
+
+Three lists of unique representations (keys) of 
+INCLUDING, CONSTITUENT, and CONSTITUENTS constructs are build. 
+Two INCLUDING constructs are considered the same
+if they have the same referred sets.
+Two CONSTITUENT(S) constructs are the same if they have the same
+referred sets and the same shield sets.
+The subtree number is a property of the occurrence of the
+CONSTITUENT(S), and does not distinguish the construct represented
+by the remote key. The subtree number ist stored separated from
+the key.
+
+A property of a construct enumerates the keys of those computations
+where the construct occurs in.
+
+The lists are output with references to the occurrences
+of each construct.
+-----------------------------------------------------------
+
+For each ShieldSym s all tree symbols t are marked if
+t inherits s directly or indirectly.
+A list of keys is constructed that contains the keys of the
+marked symbols.
+
+~$~<Shield sets~>==~{
+SYMBOL Shield: ShieldSet: DefTableKeyList;
+RULE: Shield ::= COMPUTE
+  Shield.ShieldSet = NULLDefTableKeyList;
+END;
+
+CHAIN ExpandRemoteSymbols: VOID;
+RULE: Shield ::= 'SHIELD' ShieldClause COMPUTE
+  CHAINSTART HEAD.ExpandRemoteSymbols = UnmarkSymbols ()
+    <- INCLUDING AG.GotInherit;
+
+  Shield.ShieldSet = MakeShieldSet () 
+    <- TAIL.ExpandRemoteSymbols;
+END;
+
+RULE: ShieldSym ::= SymbolId COMPUTE
+  ShieldSym.ExpandRemoteSymbols =
+    MarkInheritingTreeSymbs (SymbolId.Bind)
+    <- ShieldSym.ExpandRemoteSymbols;
+END;
+~}
+
+For each RemoteAttr s.a all tree symbols t are marked with a if
+t inherits s directly or indirectly. 
+a is not yet associated to t because it is still open whether
+the RemoteExpression will be inherited by any rule context.
+A list of pairs (symbol bind, attribute bind) is constructed 
+that contains the keys of the marked symbols.
+
+~$~<Remote sets~>==~{
+SYMBOL RemoteClause: RemoteSet: SymbAttrList;
+SYMBOL RemoteClause COMPUTE
+  CHAINSTART HEAD.ExpandRemoteSymbols = UnsetRemoteAttr ()
+    <- INCLUDING AG.GotInherit;
+
+  SYNT.RemoteSet = MakeRemoteSet ()
+    <- TAIL.ExpandRemoteSymbols;
+END;
+
+ATTR uniqueRemAttr: int;
+
+RULE: RemoteAttr ::=  SymbolId '.' AttrUseId COMPUTE
+  .uniqueRemAttr = 
+    MarkInhTreeSymbAttrs (SymbolId.Bind, AttrUseId.Sym)
+    <- (RemoteAttr.ExpandRemoteSymbols,
+       INCLUDING AG.GotGrammarClasses);
+
+  RemoteAttr.ExpandRemoteSymbols = .uniqueRemAttr;
+
+  IF (EQ (.uniqueRemAttr, 0),
+  message (ERROR, CatStrInd ("Different attributes of one symbol are not allowed: ",
+           SymbolId.Sym), 0, COORDREF));
+
+  RemoteAttr.GotRemoteEpxrIsErr =
+    ORDER (
+    IF (LT (.uniqueRemAttr, 0),
+      ORDER (
+        ResetRemoteEpxrIsErr (INCLUDING RemoteExpression.RemoteKey, 1),
+        message (ERROR, CatStrInd ("A terminal inherits this symbol: ",
+                 SymbolId.Sym), 0, COORDREF))),
+    IF (GetIsTerm (KeyOf (SymbolId.Bind), 0),
+    ORDER (
+      ResetRemoteEpxrIsErr (INCLUDING RemoteExpression.RemoteKey, 1),
+      message (ERROR, CatStrInd ("Remote access to a terminal symbol: ",
+               SymbolId.Sym), 0, COORDREF))))
+  <- INCLUDING AG.GotGrammarClasses;
+END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotRemoteEpxrIsErr = CONSTITUENTS RemoteAttr.GotRemoteEpxrIsErr;
+  /* a precondition to avoid avalanche errors */
+END;
+~}
+
+Each INCLUDING construct and each CONSTITUENT(S) construct is
+represented by a key. The constructs are considered the same
+iff they are represented by the same key.
+Three lists collect the uniquely identified keys.
+Characterizing properties are associated with the construct keys:
+
+~$~<Remote construct properties~>==~{
+IsIncluding: int;
+IsConstituent: int;
+IsConstituents: int;
+RemoteSet: SymbAttrList; "SymbAttrList.h"
+ShieldSet: DefTableKeyList; "DefTableKeyList.h"
+Funct2: int;
+Funct1: int;
+Funct0: int;
+InComputations: DefTableKeyList; "DefTableKeyList.h"
+InVoidContext: int;
+InValueContext: int;
+RemoteEpxrIsErr: int;
+~}
+
+~$~<Including list~>==~{
+SYMBOL AG COMPUTE
+  SYNT.GotInclConst = 
+    PTGOutFile
+       (CatStrStr (SRCFILE, ".remote"), RemoteOutput ())
+    <- (CONSTITUENTS RemoteExpression.RemoteKey,
+        SYNT.GotNameSym, SYNT.GotCompChecked);
+END;
+
+SYMBOL RemoteExpression: RemoteKey: DefTableKey;
+
+RULE: RemoteExpression ::= 'INCLUDING' RemoteClause COMPUTE
+  RemoteExpression.RemoteKey =
+    EnterIncluding (RemoteClause.RemoteSet, INCLUDING Compute.Key, COORDREF);
+END;
+
+RULE: RemoteExpression ::= Subtree 'CONSTITUENTS' RemoteClause Shield ExpandOpt
+COMPUTE
+  RemoteExpression.SubtreeNo = Subtree.SubtreeNo;
+  RemoteExpression.RemoteKey =
+    EnterMulConstit 
+      (RemoteClause.RemoteSet, Shield.ShieldSet, 
+       ExpandOpt.Type, ExpandOpt.Fct2, ExpandOpt.Fct1, ExpandOpt.Fct0,
+       INCLUDING Compute.Key, COORDREF);
+END;
+
+RULE: RemoteExpression ::= Subtree 'CONSTITUENT' RemoteClause Shield
+COMPUTE
+  RemoteExpression.SubtreeNo = Subtree.SubtreeNo;
+  RemoteExpression.RemoteKey =
+    EnterSglConstit
+      (RemoteClause.RemoteSet, Shield.ShieldSet, 
+       INCLUDING Compute.Key, COORDREF);
+END;
+
+SYMBOL RemoteExpression, Subtree: SubtreeNo: int;
+SYMBOL RemoteExpression COMPUTE SYNT.SubtreeNo = 0; END;
+SYMBOL Subtree COMPUTE SYNT.SubtreeNo = 0; END;
+RULE: Subtree ::= SymOcc COMPUTE
+  Subtree.SubtreeNo = PosOfProdSymbol (SymOcc.ProdSymbol);
+END;
+
+SYMBOL ExpandOpt: Type: DefTableKey,
+                  Fct0, Fct1,Fct2: int; 
+
+RULE: ExpandOpt ::= 'WITH' 
+             '(' TypeId ',' Identifier ',' Identifier ',' Identifier ')'
+COMPUTE
+  ExpandOpt.Type = TypeId.Key;
+  ExpandOpt.Fct2 = Identifier[1];
+  ExpandOpt.Fct1 = Identifier[2];
+  ExpandOpt.Fct0 = Identifier[3];
+END;
+
+RULE: ExpandOpt ::= COMPUTE
+  ExpandOpt.Type = NoKey;
+  ExpandOpt.Fct2 = NoStrIndex;
+  ExpandOpt.Fct1 = NoStrIndex;
+  ExpandOpt.Fct0 = NoStrIndex;
+END;
+~}
+
+~O~<Remote.head~>==~{
+#include "ShieldSet.h"
+#include "RemoteSet.h"
+#include "Remote.h"
+#include "RemoteOut.h"
+~}
+
+~O~<ShieldSet.h~>==~{
+#include "args.h"
+#include "envmod.h"
+#include "DefTableKeyList.h"
+
+extern void MarkInheritingTreeSymbs FEARGS ((Binding sym));
+
+extern DefTableKeyList MakeShieldSet ();
+~}
+
+~O~<ShieldSet.c~>==~{
+#include "ShieldSet.h"
+#include "pdl_gen.h"
+
+extern Environment RootEnv; /* exported by AlgScope.h */
+
+#if defined(__cplusplus) || defined(__STDC__)
+void MarkInheritingTreeSymbs (Binding sym)
+#else
+void MarkInheritingTreeSymbs (sym) Binding sym;
+#endif
+/* on entry:
+    inheritance relations are set between symbol scopes
+   on exit:
+    all tree symbols that inherit from sym are marked
+*/
+{ Environment symenv;
+  Binding b;
+
+  if (sym == NoBinding) return;
+
+  symenv = GetUpperScope (KeyOf (sym), NoEnv);
+
+  b = DefinitionsOf (RootEnv);
+  while (b != NoBinding)
+  { DefTableKey k = KeyOf (b);
+    if (GetIsSymbol (k, 0) && GetIsTreeSym (k, 0))
+    { Environment toEnv = GetUpperScope (k, NoEnv);
+      if (Inheritsfrom (toEnv, symenv))
+         ResetIsMarked (k, 1);
+    }
+    b = NextDefinition (b);
+  }
+}/* MarkInheritingTreeSymbs */
+
+DefTableKeyList MakeShieldSet ()
+/* a list of symbol keys is build; 
+   it contains every symbol that is marked;
+   the marks are unset.
+   The list always contains a NoKey element;
+   it distinguishes an empty shield list from an omitted one.
+*/
+{ DefTableKeyList res = 
+    ConsDefTableKeyList (NoKey, NULLDefTableKeyList);
+  Binding b = DefinitionsOf (RootEnv);
+  while (b != NoBinding)
+  { DefTableKey k = KeyOf (b);
+    if (GetIsSymbol (k, 0) && GetIsMarked (k, 0))
+    { ResetIsMarked (k, 0);
+      res = ConsDefTableKeyList (k, res);
+    }
+    b = NextDefinition (b);
+  }
+  return res;
+}/* MakeShieldSet */
+~}
+
+~O~<Remote.specs~>~{
+$/Adt/List.gnrc+instance=SymbAttr +referto=SymbAttr :inst
+~}
+
+~O~<SymbAttr.h~>==~{
+#ifndef SYMBATTR_H
+#define SYMBATTR_H
+
+#include "envmod.h"
+#include "args.h"
+
+typedef struct
+{ Binding symbolbind;
+  int     attr;
+} _SAElem, *SymbAttr;
+
+#define NoSymbAttr ((SymbAttr)0)
+#define SymbolBindOf(sa) ((sa)->symbolbind)
+#define AttrOf(sa) ((sa)->attr)
+
+extern SymbAttr MakeSymbAttr FEARGS ((Binding sym, int attr));
+#endif
+~}
+
+~O~<SymbAttr.c~>==~{
+#include "SymbAttr.h"
+#include "DynSpace.h"
+
+void *SymbAttrSpace = (void*)0;
+
+#if defined(__cplusplus) || defined(__STDC__)
+SymbAttr MakeSymbAttr (Binding sym, int attr)
+#else
+SymbAttr MakeSymbAttr (sym, attr) Binding sym; int attr;
+#endif
+{ SymbAttr res;
+  if (!SymbAttrSpace) SymbAttrSpace = InitDynSpace ();
+  res = (SymbAttr) DynAlloc (SymbAttrSpace, sizeof (_SAElem));
+  res->symbolbind = sym;
+  res->attr = attr;
+  return res;
+}/* MakeSymbAttr */
+~}
+
+~$~<Remote attr property~>==~{
+RemoteAttr: int;
+~}
+
+
+~O~<RemoteSet.h~>==~{
+#include "args.h"
+#include "envmod.h"
+#include "SymbAttrList.h"
+
+extern void UnsetRemoteAttr ();
+
+extern int MarkInhTreeSymbAttrs
+   FEARGS ((Binding sym, int attr));
+
+extern SymbAttrList MakeRemoteSet ();
+~}
+
+~O~<RemoteSet.c~>==~{
+#include "RemoteSet.h"
+#include "pdl_gen.h"
+#include "csm.h"
+
+extern Environment RootEnv; /* exported by AlgScope.h */
+
+void UnsetRemoteAttr ()
+/* on exit: RemoteAttr is set to NoBinding for all symbols */
+{
+  Binding b = DefinitionsOf (RootEnv);
+  while (b != NoBinding)
+  { DefTableKey k = KeyOf (b);
+    if (GetIsSymbol (k, 0)) 
+      ResetRemoteAttr (k, NoStrIndex); 
+    b = NextDefinition (b);
+  }
+}/* UnsetRemoteAttr */
+
+#if defined(__cplusplus) || defined(__STDC__)
+int MarkInhTreeSymbAttrs (Binding sym, int attr)
+#else
+int MarkInhTreeSymbAttrs (sym, attr) Binding sym; int attr;
+#endif
+/* on entry:
+    inheritance relations are set between symbol scopes
+   on exit:
+    all tree symbols that inherit from sym are marked with the
+    RemoteAttr attr.
+    0 is returned if another attribute is to be associated
+    to the same symbol.
+*/
+{ Environment symenv;
+  Binding b;
+  int res = 1;
+  if (sym == NoBinding) return res;
+
+  symenv = GetUpperScope (KeyOf (sym), NoEnv);
+
+  b = DefinitionsOf (RootEnv);
+  while (b != NoBinding)
+  { DefTableKey k = KeyOf (b);
+    if (GetIsSymbol (k, 0) && GetIsTreeSym (k, 0))
+    { Environment toEnv = GetUpperScope (k, NoEnv);
+      if (Inheritsfrom (toEnv, symenv))
+      {  int a = GetRemoteAttr (k, NoStrIndex);
+         if (k != KeyOf(sym) && GetIsTerm (k, 0))
+            return -1; /* a terminal inherits from sym */
+         if (a != 0 && a != attr) 
+            res = 0;   /* a different remote attr has been set for this symbol */
+         ResetRemoteAttr (k, attr);
+      }
+    }
+    b = NextDefinition (b);
+  }
+  return res;
+}/* MarkInhTreeSymbAttrs */
+
+SymbAttrList MakeRemoteSet ()
+/* a list of pairs (symbol binding, attr binding) is build; 
+   it contains every symbol that is marked;
+*/
+{ SymbAttrList res = NULLSymbAttrList;
+  Binding b = DefinitionsOf (RootEnv);
+  while (b != NoBinding)
+  { DefTableKey k = KeyOf (b); int ra;
+    if (GetIsSymbol (k, 0) && GetIsTreeSym (k, 0) &&
+        (ra = GetRemoteAttr (k, NoStrIndex)) != NoStrIndex)
+    { ResetRemoteAttr (k, NoStrIndex);
+      res = ConsSymbAttrList (MakeSymbAttr (b, ra), res);
+    }
+    b = NextDefinition (b);
+  }
+  return res;
+}/* MakeRemoteSet */
+~}
+
+~O~<Remote.h~>==~{
+#ifndef REMOTE_H
+#define REMOTE_H
+
+#include "DefTableKeyList.h"
+#include "SymbAttrList.h"
+#include "err.h"
+
+extern DefTableKeyList IncludingKeys;
+extern DefTableKeyList ConstituentKeys;
+extern DefTableKeyList ConstituentsKeys;
+
+extern DefTableKey EnterIncluding 
+   FEARGS ((SymbAttrList remset, DefTableKey comp, CoordPtr coord));
+
+extern DefTableKey EnterSglConstit
+   FEARGS ((SymbAttrList remset, DefTableKeyList shieldset, 
+            DefTableKey comp, CoordPtr coord));
+
+extern DefTableKey EnterMulConstit
+   FEARGS ((SymbAttrList remset, DefTableKeyList shieldset, 
+            DefTableKey tp, int fct2, int fct1, int fct0,
+            DefTableKey comp, CoordPtr coord));
+#endif
+~}
+~O~<Remote.c~>==~{
+#include "Remote.h"
+#include "pdl_gen.h"
+#include "csm.h"
+
+DefTableKeyList IncludingKeys = NULLDefTableKeyList;
+DefTableKeyList ConstituentKeys = NULLDefTableKeyList;
+DefTableKeyList ConstituentsKeys = NULLDefTableKeyList;
+
+static 
+#if defined(__cplusplus) || defined(__STDC__)
+int equalDefTableKeyLists (DefTableKeyList l1, DefTableKeyList l2)
+#else
+int equalDefTableKeyLists (l1, l2) DefTableKeyList l1; DefTableKeyList l2;
+#endif
+/* comparison is done elementwise, because the lists are ordered
+   (opposite order of the symbols in RootEnv)
+*/
+{ 
+  while (l1 != NULLDefTableKeyList && l2 != NULLDefTableKeyList)
+  { DefTableKey sa1 = HeadDefTableKeyList (l1);
+    DefTableKey sa2 = HeadDefTableKeyList (l2);
+    if (sa1 != sa2)
+       return 0;
+    l1 = TailDefTableKeyList (l1);
+    l2 = TailDefTableKeyList (l2);
+  }
+  return l1 == NULLDefTableKeyList && l2 == NULLDefTableKeyList;
+}/* equalDefTableKeyLists */
+
+
+static 
+#if defined(__cplusplus) || defined(__STDC__)
+int equalSymbAttrLists (SymbAttrList l1, SymbAttrList l2)
+#else
+int equalSymbAttrLists (l1, l2) SymbAttrList l1; SymbAttrList l2;
+#endif
+/* comparison is done elementwise, because the lists are ordered
+   (opposite order of the symbols in RootEnv)
+*/
+{ 
+  while (l1 != NULLSymbAttrList && l2 != NULLSymbAttrList)
+  { SymbAttr sa1 = HeadSymbAttrList (l1);
+    SymbAttr sa2 = HeadSymbAttrList (l2);
+    if (SymbolBindOf(sa1) != SymbolBindOf(sa2) ||
+        AttrOf(sa1) != AttrOf(sa2))
+       return 0;
+    l1 = TailSymbAttrList (l1);
+    l2 = TailSymbAttrList (l2);
+  }
+  return l1 == NULLSymbAttrList && l2 == NULLSymbAttrList;
+}/* equalSymbAttrLists */
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey EnterIncluding (SymbAttrList remset, DefTableKey comp, CoordPtr coord)
+#else
+DefTableKey EnterIncluding (remset, comp, coord) 
+   SymbAttrList remset; DefTableKey comp; CoordPtr coord;
+#endif
+/* A new including construct is entered in the list with the
+   properties as given by the parameters, if such a construct
+   does not yet exist.
+*/
+{ DefTableKeyList l = IncludingKeys;
+  DefTableKey res;
+  while (l != NULLDefTableKeyList)
+  { DefTableKey c = HeadDefTableKeyList (l);
+    SymbAttrList rset = GetRemoteSet (c, NULLSymbAttrList);
+    if (equalSymbAttrLists (rset, remset))
+    {
+#ifdef TEST
+      printf ("INCLUDING in line %d is the same as in line %d\n",
+         LineOf (*coord), LineOf (*(GetCoord (c, NoPosition))));
+#endif
+      ResetInComputations 
+         (c, ConsDefTableKeyList 
+                 (comp, GetInComputations (c, NULLDefTableKeyList)));
+      return c;
+    }
+    l = TailDefTableKeyList (l);
+  }
+  res = NewKey();
+  ResetIsIncluding (res, 1);
+  ResetRemoteSet (res, remset);
+  ResetCoord (res, coord);
+  ResetInComputations (res, ConsDefTableKeyList (comp, NULLDefTableKeyList));
+  IncludingKeys = ConsDefTableKeyList (res, IncludingKeys);
+#ifdef TEST
+      printf ("new INCLUDING in line %d\n", LineOf (*coord));
+#endif
+  return res;
+}/* EnterIncluding */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey EnterSglConstit
+    (SymbAttrList remset, DefTableKeyList shieldset, 
+     DefTableKey comp, CoordPtr coord)
+#else
+DefTableKey EnterSglConstit 
+    (remset, shieldset, comp, coord)
+  SymbAttrList remset; DefTableKeyList shieldset;
+  DefTableKey comp; CoordPtr coord;
+#endif
+/* A new constituent construct is entered in the list with the
+   properties as given by the parameters, if such a construct
+   does not yet exist.
+*/
+{ DefTableKeyList l = ConstituentKeys;
+  DefTableKey res;
+#ifdef TEST
+      printf ("enter CONSTITUENT in line %d\n",LineOf (*coord));
+#endif
+  while (l != NULLDefTableKeyList)
+  { DefTableKey c = HeadDefTableKeyList (l);
+    SymbAttrList rset = GetRemoteSet (c, NULLSymbAttrList);
+    DefTableKeyList sset = GetShieldSet (c, NULLDefTableKeyList);
+    if (equalSymbAttrLists (rset, remset) && 
+        equalDefTableKeyLists (sset, shieldset))
+    {
+#ifdef TEST
+      printf ("CONSTITUENT in line %d is the same as in line %d\n",
+         LineOf (*coord), LineOf (*(GetCoord (c, NoPosition))));
+#endif
+      ResetInComputations 
+         (c, ConsDefTableKeyList 
+                 (comp, GetInComputations (c, NULLDefTableKeyList)));
+      return c;
+    }
+    l = TailDefTableKeyList (l);
+  }
+  res = NewKey();
+  ResetIsConstituent (res, 1);
+  ResetRemoteSet (res, remset);
+  ResetShieldSet (res, shieldset);
+  ResetCoord (res, coord);
+  ResetInComputations (res, ConsDefTableKeyList (comp, NULLDefTableKeyList));
+  ConstituentKeys = ConsDefTableKeyList (res, ConstituentKeys);
+#ifdef TEST
+      printf ("entered CONSTITUENT in line %d\n", LineOf (*coord));
+#endif
+  return res;
+}/* EnterSglConstit */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+DefTableKey EnterMulConstit
+   (SymbAttrList remset, DefTableKeyList shieldset, 
+    DefTableKey tp, int fct2, int fct1, int fct0,
+    DefTableKey comp, CoordPtr coord)
+#else
+DefTableKey EnterMulConstit 
+     (remset, shieldset, 
+      tp, fct2, fct1, fct0, comp, coord)
+   SymbAttrList remset; DefTableKeyList shieldset; 
+   DefTableKey tp; int fct2, int fct1, int fct0;
+   DefTableKey comp; CoordPtr coord;
+#endif
+{ DefTableKeyList l = ConstituentsKeys;
+  DefTableKey res;
+#ifdef TEST
+      printf ("enter CONSTITUENTS in line %d\n", LineOf (*coord));
+#endif
+  while (l != NULLDefTableKeyList)
+  { DefTableKey c = HeadDefTableKeyList (l);
+    SymbAttrList rset = GetRemoteSet (c, NULLSymbAttrList);
+    DefTableKeyList sset = GetShieldSet (c, NULLDefTableKeyList);
+    DefTableKey t = GetType (c, NoKey);
+    int f2 = GetFunct2 (c, NoStrIndex);
+    int f1 = GetFunct1 (c, NoStrIndex);
+    int f0 = GetFunct0 (c, NoStrIndex);
+ 
+    if (equalSymbAttrLists (rset, remset) && 
+        equalDefTableKeyLists (sset, shieldset) &&
+        t == tp && f2 == fct2 && f1 == fct1 && f0 == fct0)
+    {
+#ifdef TEST
+      printf ("CONSTITUENTS in line %d is the same as in line %d\n",
+         LineOf (*coord), LineOf (*(GetCoord (c, NoPosition))));
+#endif
+      ResetInComputations 
+         (c, ConsDefTableKeyList 
+                 (comp, GetInComputations (c, NULLDefTableKeyList)));
+      return c;
+    }
+    l = TailDefTableKeyList (l);
+  }
+  res = NewKey();
+  ResetIsConstituents (res, 1);
+  ResetRemoteSet (res, remset);
+  ResetShieldSet (res, shieldset);
+  ResetType (res, tp);
+  ResetFunct2 (res, fct2);
+  ResetFunct1 (res, fct1);
+  ResetFunct0 (res, fct0);
+  ResetCoord (res, coord);
+  ResetInComputations (res, ConsDefTableKeyList (comp, NULLDefTableKeyList));
+  ConstituentsKeys = ConsDefTableKeyList (res, ConstituentsKeys);
+#ifdef TEST
+      printf ("entered CONSTITUENTS in line %d\n", LineOf (*coord));
+#endif
+  return res;
+}/* EnterMulConstit */
+~}
+
+~O~<Remote.ptg~>~{
+RemoteInfo:
+  "INCLUDING Constructs:" [IndentIncr] [IndentNewLine][IndentNewLine]
+     $ [IndentDecr] [IndentNewLine] [IndentNewLine]
+  "CONSTITUENT Constructs:" [IndentIncr] [IndentNewLine][IndentNewLine]
+     $ [IndentDecr] [IndentNewLine] [IndentNewLine]
+  "CONSTITUENTS Constructs:" [IndentIncr] [IndentNewLine][IndentNewLine]
+    $ [IndentDecr] [IndentNewLine] [IndentNewLine]
+
+WithOccurrences:
+  $ [IndentIncr][IndentNewLine] 
+    "occurs in " $ [IndentDecr] [IndentNewLine]
+
+IncludingInfo:
+  "INCLUDING (" $ ")" " propagate " $
+
+ConstitInfo:
+  "CONSTITUENT (" $ ")" $ " propagate " $
+
+ConstitsInfo:
+  "CONSTITUENTS (" $ ")" $ $ " propagate " $
+
+ShieldInfo:
+  " SHIELD (" $ ")"
+
+WithInfo:
+  " WITH (" $ string ", " $ string ", " $ string ", " $ string ")"
+
+SymbAttr:
+   $ string "." $ string
+~}
+
+~O~<RemoteOut.h~>~{
+#include "ptg_gen.h"
+#include "deftbl.h"
+#include "args.h"
+
+extern PTGNode RemoteOutput ();
+extern PTGNode InclOutput FEARGS((DefTableKey k));
+extern PTGNode ConstitOutput FEARGS((DefTableKey k));
+extern PTGNode ConstitsOutput FEARGS((DefTableKey k));
+~}
+
+~O~<RemoteOut.c~>~{
+#include "RemoteOut.h"
+#include "SymbolOutput.h"
+#include "Remote.h"
+#include "pdl_gen.h"
+#include "csm.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode SymbAttrsOutput (SymbAttrList sal)
+#else
+PTGNode SymbAttrsOutput (sal) SymbAttrList sal;
+#endif
+{ PTGNode res = PTGNULL;
+  while ( sal != NULLSymbAttrList)
+  { SymbAttr sa = HeadSymbAttrList (sal);
+    res = PTGCommaSeq 
+            (res,
+             PTGSymbAttr 
+               (StringTable (IdnOf (SymbolBindOf (sa))),
+                StringTable (AttrOf (sa))));
+    sal = TailSymbAttrList (sal);
+  }
+  return res;
+}/* SymbAttrsOutput */
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode LinesOutput (DefTableKeyList dkl)
+#else
+PTGNode LinesOutput (dkl) DefTableKeyList dkl;
+#endif
+{ PTGNode res = PTGNULL;
+  while (dkl != NULLDefTableKeyList)
+  { 
+    res = PTGCommaSeq 
+           (res, 
+            OutCoord (HeadDefTableKeyList (dkl)));
+    dkl = TailDefTableKeyList (dkl);
+  }
+  return res;
+}/* LinesOutput */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode InclOutput (DefTableKey k)
+#else
+PTGNode InclOutput (k) DefTableKey k;
+#endif
+{  PTGNode valvoid = 
+      GetInValueContext (k, 0) ? PTGAsIs ("value ") : PTGNULL;
+   if (GetInVoidContext (k, 0)) 
+      valvoid = PTGSeq (valvoid, PTGAsIs ("void"));
+   return PTGIncludingInfo 
+     (SymbAttrsOutput (GetRemoteSet (k, NULLSymbAttrList)),
+      valvoid);
+}/* InclOutput */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode ShieldSetOutput (DefTableKeyList dkl)
+#else
+PTGNode ShieldSetOutput (dkl) DefTableKeyList dkl;
+#endif
+{ PTGNode res = PTGNULL;
+  if (dkl == NULLDefTableKeyList)
+    return PTGNULL;
+
+  while (dkl != NULLDefTableKeyList)
+  { DefTableKey hd = HeadDefTableKeyList (dkl);
+    if (hd != NoKey)
+     res = PTGCommaSeq
+      (res, 
+       PTGAsIs 
+         (StringTable (GetNameSym (HeadDefTableKeyList (dkl), 0))));
+    dkl = TailDefTableKeyList (dkl);
+  }
+  return PTGShieldInfo (res);
+}/* ShieldSetOutput */
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode ConstitOutput (DefTableKey k)
+#else
+PTGNode ConstitOutput (k) DefTableKey k;
+#endif
+{  PTGNode valvoid = 
+      GetInValueContext (k, 0) ? PTGAsIs ("value ") : PTGNULL;
+
+   if (GetInVoidContext (k, 0)) 
+      valvoid = PTGSeq (valvoid, PTGAsIs ("void"));
+   return PTGConstitInfo 
+     (SymbAttrsOutput (GetRemoteSet (k, NULLSymbAttrList)),
+      ShieldSetOutput (GetShieldSet (k, NULLDefTableKeyList)),
+      valvoid);
+}/* ConstitOutput */
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode WithOutput (DefTableKey k)
+#else
+PTGNode WithOutput (k) DefTableKey k;
+#endif
+{ DefTableKey tp = GetType (k, NoKey);
+  if (tp == NoKey) return PTGNULL;
+
+  return PTGWithInfo
+    (StringTable (GetNameSym (tp, 0)), 
+     StringTable (GetFunct2 (k, 0)),
+     StringTable (GetFunct1 (k, 0)),
+     StringTable (GetFunct0 (k, 0)));
+}/* WithOutput */
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode ConstitsOutput (DefTableKey k)
+#else
+PTGNode ConstitsOutput (k) DefTableKey k;
+#endif
+{  PTGNode valvoid = 
+      GetInValueContext (k, 0) ? PTGAsIs ("value ") : PTGNULL;
+
+   if (GetInVoidContext (k, 0)) 
+      valvoid = PTGSeq (valvoid, PTGAsIs ("void"));
+
+   return PTGConstitsInfo 
+     (SymbAttrsOutput (GetRemoteSet (k, NULLSymbAttrList)),
+      ShieldSetOutput (GetShieldSet (k, NULLDefTableKeyList)),
+      WithOutput (k),
+      valvoid);
+}/* ConstitsOutput */
+
+
+PTGNode RemoteOutput ()
+{ DefTableKeyList reml; DefTableKey k;
+  PTGNode incls = PTGNULL, constitss = PTGNULL, constits = PTGNULL;
+
+  reml = IncludingKeys;
+  while (reml != NULLDefTableKeyList)
+  { k = HeadDefTableKeyList (reml);
+    incls = PTGSeq (incls, 
+      PTGWithOccurrences
+        (InclOutput (k),
+         LinesOutput (GetInComputations (k, NULLDefTableKeyList))));
+    reml = TailDefTableKeyList (reml);
+  }
+
+  reml = ConstituentKeys;
+  while (reml != NULLDefTableKeyList)
+  { k = HeadDefTableKeyList (reml);
+    constits = PTGSeq (constits, 
+      PTGWithOccurrences
+        (ConstitOutput (k),
+         LinesOutput (GetInComputations (k, NULLDefTableKeyList))));
+    reml = TailDefTableKeyList (reml);
+  }
+
+  reml = ConstituentsKeys;
+  while (reml != NULLDefTableKeyList)
+  { k = HeadDefTableKeyList (reml);
+    constitss = PTGSeq (constitss, 
+      PTGWithOccurrences
+        (ConstitsOutput (k),
+         LinesOutput (GetInComputations (k, NULLDefTableKeyList))));
+    reml = TailDefTableKeyList (reml);
+  }
+
+  return PTGRemoteInfo (incls, constits, constitss);
+}/* RemoteOutput */
+~}
+
+~O~<Remote.msg~>~{
+"Different attributes of one symbol are not allowed: "
+"Remote access to a terminal symbol"
+~}
+
+~O~<Remote.lido~>~{
+~<Shield sets~>
+~<Remote sets~>
+~<Including list~>
+~}
+
+~O~<Remote.pdl~>~{
+~<Remote attr property~>
+~<Remote construct properties~>
+~}

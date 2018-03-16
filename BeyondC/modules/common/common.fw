@@ -1,0 +1,72 @@
+@p maximum_input_line_length = infinity
+
+@O@<common.specs@>==@{
+$/Output/C_Separator.fw
+@}
+
+@O@<common.lido@>==@{
+
+    /** write the file. add some header extension for the gcc lika a builtin_va_list typedef*/
+
+    SYMBOL Source COMPUTE Sep_Out(THIS.IdemPtg); END;
+
+    RULE: parameter_type_list  LISTOF ParameterType  | DotDotDot COMPUTE
+        parameter_type_list.IdemPtg=
+        CONSTITUENTS (ParameterType.IdemPtg , DotDotDot.IdemPtg)
+          SHIELD (parameters,parameter_type_list) WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+
+    END;
+
+    /* write function parameters in a function definition and enum in a comma spereated list*/
+
+    RULE: parameters LISTOF parameter_id | ParameterType  | DotDotDot COMPUTE
+        parameters.IdemPtg=
+        CONSTITUENTS (parameter_id.IdemPtg, ParameterType.IdemPtg , DotDotDot.IdemPtg)
+        SHIELD (parameters,parameter_type_list) WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+    END;
+
+    RULE: enumerator_list LISTOF enumerator COMPUTE
+        enumerator_list.IdemPtg=
+        CONSTITUENTS enumerator.IdemPtg
+          WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+    END;
+
+    /* same for function call parameters*/
+    RULE: Arguments LISTOF Argument COMPUTE
+        Arguments.IdemPtg=
+        CONSTITUENTS Argument.IdemPtg
+          WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+    END;
+
+    /* inti declarators int a=3,b=3,c = 0;*/
+    RULE: init_declarator_list_opt LISTOF init_declarator COMPUTE
+        init_declarator_list_opt.IdemPtg=
+        CONSTITUENTS init_declarator.IdemPtg
+          WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+    END;
+
+    /* ??*/
+    RULE: struct_declarator_list LISTOF struct_declarator COMPUTE
+        struct_declarator_list.IdemPtg=
+        CONSTITUENTS struct_declarator.IdemPtg
+          WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+    END;
+
+    /* = { , , } */
+    ATTR Row_enclosed: PTGNode;
+    RULE: Row_initializer LISTOF initializer | Empty_initializer  COMPUTE
+        Row_initializer.Row_enclosed=
+        CONSTITUENTS (initializer.IdemPtg, Empty_initializer.IdemPtg)
+          WITH (PTGNode, PTGArgSep, IDENTICAL, PTGNull);
+
+        Row_initializer.IdemPtg = PTGRow_enclosed(Row_initializer.Row_enclosed);
+    END;
+
+
+@}
+
+@O@<common.ptg@>==@{
+    ArgSep: $ { "," [Separator] } $
+
+    Row_enclosed: "{" $ "}"
+@}

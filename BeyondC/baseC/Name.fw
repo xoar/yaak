@@ -1,0 +1,269 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+@A@<Name Analysis@>
+\label{Name}
+
+/**Name analysis establishes a meaning (possibly ``no meaning'', if certain
+errors have been made) for each identifier in the program.
+In the process, it decorates the nodes of the abstract syntax tree with
+attributes and stores properties of entities in the definition table.
+These attributes and properties provide the basis for constraint checking,
+and can also be used to guide a translation of the program.
+
+Every identifier occurrence requires an integer-valued @{Sym@} attribute
+specifying its string table index.
+The string table index is provided by the lexical analyzer as the value of
+the terminal symbol @{identifer@} (see Section~\ref{identifiers}).
+@{IdentOcc@} defines a computation setting the @{Sym@} attribute from the
+terminal symbol value; that computation can be inherited by any nonterminal
+representing an identifier occurrence:*/
+
+@O@<Name.lido@>==@{
+CLASS SYMBOL IdentOcc COMPUTE SYNT.Sym=TERM; END;
+
+@<Regions of text encompassing identifier scopes@>
+@<Identifier occurrences@>
+@<Checking for definition errors@>
+@}
+
+/**Many of the computations used during semantic analysis are common to many
+trees, and have been captured in library modules.
+Modules actually used in the semantic analysis of C programs must be
+instantiated:*/
+
+@O@<Name.specs@>==@{
+@<Instantiate modules@>
+@}
+
+@B@<Name spaces and scopes@>
+\label{scopes}
+
+/**Section 6.1.2.3 of the standard defines four @/name spaces@/ for
+identifiers in C, and therefore we use four instances of the necessary
+environment modules:*/
+
+@$@<Instantiate modules@>+=@{
+$/Name/AlgScope.gnrc      +instance=Label  :inst
+$/Name/AlgScope.gnrc      +instance=Tag    :inst
+$/Name/AlgRangeSeq.gnrc   +instance=Tag    :inst
+$/Name/AlgScope.gnrc      +instance=Member :inst
+$/Name/ScopeProp.gnrc     +instance=Member :inst
+$/Name/CScope.gnrc                         :inst
+$/Name/CRangeSeq.gnrc                      :inst
+@}
+
+/**\noindent
+(The unnamed instances implement the name space of ``ordinary identifiers''.
+An ordinary identifier is any identifier that does not belong to one of the
+other name spaces.)
+
+Label identifiers obey ALGOL-like scope rules because Section 6.1.2.1 of the
+standard states explicitly that the scope of a label identifier is the
+entire function in which it appears.
+
+Section 6.5.2.3 of the standard describes the behavior of tags, and
+although that description is couched in terms of the sequence in which
+constructs appear in the program, the overall effect is that tags obey
+ALGOL-like scope rules.
+ 
+Member identifier declarations do not interact with any other identifier
+occurrences in their scopes.
+Similarly, applied occurrences of member identifiers don't interact with
+any other identifier occurrences.
+Thus member identifiers could be considered to obey either ALGOL-like or
+C-like scope rules.
+We chose to use ALGOL-like scope rules for compatibility with the
+@{ScopeProp@} module.
+
+Ordinary identifiers obey C-like scope rules, in which the scope
+begins with the declaration of the identifier and ends at the end of some
+source language construct.
+
+Section 6.1.2.1 of the standard defines the points at which the scopes of
+various identifiers @/terminate@/, and then states that two identifiers
+have the same scope if and only if their scopes terminate at the same point.
+Certain symbols of Section \ref{ast}'s abstract syntax tree correspond to
+constructs ending at those termination points and encompassing all of the
+possible points at which the scope of an identifier could begin.
+Each of these symbols inherits the @{RangeScope@} role of the corresponding
+name space module.
+
+Identifiers appearing within the list of parameter declarations in a
+function definition have block scope terminating at the @{}@} that closes
+the function body.
+Although the parameter list and the function body are represented by
+nodes that have a common parent (@{function_definition@}), there are
+intervening nodes.
+This requires use of the range sequence module, with
+@{function_definition@} inheriting the @{RangeSequence@} role and the
+parameter list and function body each inheriting the @{RangeElement@} role.
+The definition of the range sequence module requires that @{RangeElement@}
+be inherited by a node belonging to a subtree rooted in a node that
+inherits @{RangeSequence@}.
+
+The @{parameters@} node, which represents the parameter list of a function
+definition, is a component of a @{declarator@}, which occurs in contexts
+other than function definitions.
+When @{declarator@} occurs a context other than a function definition,
+@{parameters@} represents a function prototype scope.
+There is no practical way to make a syntactic distinction between the use of 
+a @{declarator@} in a function definition and the use of a @{declarator@}
+in other contexts.
+
+Since @{parameters@} must inherit @{RangeElement@} in order to implement
+the block scope of a function definition, it must @/always@/ appear in a
+subtree rooted in a node inheriting @{RangeSequence@}.
+Thus several other nodes that would not normally be considered to represent
+constructs significant for name analysis inherit that role.*/
+
+@$@<Regions of text encompassing identifier scopes@>==@{
+SYMBOL function_body           INHERITS LabelRangeScope                 END;
+
+SYMBOL function_definition     INHERITS TagRangeSequence                END;
+SYMBOL parameters              INHERITS TagRangeElement                 END;
+SYMBOL function_body           INHERITS TagRangeElement                 END;
+SYMBOL compound_statement      INHERITS TagRangeScope                   END;
+SYMBOL Prototype               INHERITS TagRangeScope                   END;
+
+SYMBOL struct_declaration_list INHERITS MemberExportRange               END;
+
+SYMBOL function_definition     INHERITS RangeSequence                   END;
+SYMBOL parameters              INHERITS RangeElement                    END;
+SYMBOL declaration_list        INHERITS RangeElement                    END;
+SYMBOL function_body           INHERITS RangeElement                    END;
+SYMBOL compound_statement      INHERITS RangeScope                      END;
+SYMBOL parameter_type_list     INHERITS RangeScope                      END;
+
+SYMBOL init_declarator         INHERITS RangeSequence, TagRangeSequence END;
+SYMBOL parameter_declaration   INHERITS RangeSequence, TagRangeSequence END;
+@}
+
+@B
+\label{iddefuse}
+
+/**Section 6.1.2.1 of the standard says that tags are bound just after
+their appearance in the text, enumeration constants are bound after their
+enumerator, and any other identifier is bound after its declarator.
+This means that the @{IdDefScope@} computational role is sometimes
+inherited by an identifier occurrence, and sometimes by a larger construct
+with an identifier occurrence as a component.
+
+The client of the name analysis modules must compute a @{Sym@} attribute 
+for every node whose left-hand-side symbol inherits @{IdDefScope@};
+@{IdDefScope@} attaches a @{Bind@} attribute and a @{Key@} attribute to
+that node.
+
+Identifier occurrences that are components of larger constructs binding
+those identifiers inherit the @{IdInDeclarator@} role, which both acts as a
+source for the larger construct's @{Sym@} attribute and establishes a
+@{Key@} attribute for the identifier occurrence.
+The larger construct must inherit the @{DeclaratorWithId@} role, and there
+must be a 1-1 correspondence between a symbol inheriting
+@{DeclaratorWithId@} and one of its children that inherits
+@{IdInDeclarator@}.*/
+
+@$@<Identifier occurrences@>+=@{
+SYMBOL LabelDef      INHERITS IdentOcc, LabelIdDefScope  END;
+SYMBOL LabelUse      INHERITS IdentOcc, LabelIdUseEnv    END;
+
+SYMBOL TagDef        INHERITS IdentOcc, TagIdDefScope    END;
+SYMBOL TagUse        INHERITS IdentOcc, TagIdUseEnv      END;
+SYMBOL ForwardDef    INHERITS IdentOcc, TagIdDefScope    END;
+SYMBOL ForwardUse    INHERITS IdentOcc, TagIdUseEnv      END;
+
+SYMBOL MemberIdDef   INHERITS IdentOcc, MemberIdDefScope END;
+SYMBOL MemberIdUse   INHERITS IdentOcc, MemberQualIdUse  END;
+
+SYMBOL TypeIdDef     INHERITS IdentOcc, IdInDeclarator   END;
+SYMBOL TypeIdUse     INHERITS IdentOcc, IdUseEnv         END;
+
+SYMBOL InitDecl      INHERITS           DeclaratorWithId END;
+SYMBOL FunctionDecl  INHERITS           DeclaratorWithId END;
+SYMBOL ParameterDecl INHERITS           DeclaratorWithId END;
+SYMBOL enumerator    INHERITS           DeclaratorWithId END;
+SYMBOL enumeration_constant
+                     INHERITS IdentOcc, IdInDeclarator   END;
+SYMBOL IdDef         INHERITS IdentOcc, IdInDeclarator   END;
+SYMBOL IdUse         INHERITS IdentOcc, IdUseEnv         END;
+SYMBOL parameter_id  INHERITS IdentOcc, IdUseEnv         END;
+@}
+
+/*A @{MemberIdUse@} is bound in the scope of the structure or union resulting
+from the expression preceeding the access operator:*/
+
+@$@<Identifier occurrences@>+=@{
+SYMBOL struct_declaration_list COMPUTE
+  INH.MemberScopeKey=THIS.Type;
+END;
+
+SYMBOL MemberDecl INHERITS DeclaratorWithId COMPUTE
+  SYNT.Sym=NoStrIndex;
+END;
+@}
+
+/*The behavior of @{ForwardUse@} described in Section 6.5.2.3 does not quite fit
+the @{IdUseEnv@} computational roles of the @{AlgScope@} module:
+There may be @/no@/ defining occurrences of tag in its environment, but
+nevertheless it should have a binding.
+This can be arranged by creating a default binding in the root scope:*/
+
+@$@<Identifier occurrences@>+=@{
+RULE: ForwardUse ::= identifier
+COMPUTE
+  ForwardUse.GotDefaultBinding=
+    BindIdn(INCLUDING Source.TagEnv,identifier);
+END;
+
+SYMBOL Source COMPUTE
+  SYNT.TagGotKeys=
+    CONSTITUENTS ForwardUse.GotDefaultBinding <- THIS.TagGotLocKeys;
+END;
+@}
+
+@B
+\label{nameerror}
+
+/*According to Section 6.1.2.1 of the standard, an identifier can be used
+only within its scope.
+If an applied occurrence of an identifier lies outside of any scope of a
+defining occurrence of that identifier, the name analysis module will not
+be able to bind it.
+The module provide roles that can be inherited by symbols representing
+applied occurrences of identifiers in order to report such errors:*/
+
+@$@<Checking for definition errors@>+=@{
+SYMBOL LabelUse    INHERITS       ChkIdUse     END;
+SYMBOL TagUse      INHERITS       ChkIdUse     END;
+SYMBOL IdUse       INHERITS       ChkIdUse     END;
+SYMBOL MemberIdUse INHERITS MemberChkQualIdUse END;
+@}
+
+/*Section 6.1.2.1 of the standard says that label names must be unique
+within a function.
+Section 6.5 of the standard says that if an identifier has no linkage,
+there shall be no more than one declaration of the identifier (in a
+declarator or type specifier) with the same scope and in the same name
+space (the standard makes an exception for tags in Section 6.5.2.3 to
+allow for forward declarations).*/
+
+@$@<Instantiate modules@>+=@{
+$/Prop/Unique.gnrc :inst
+@}
+
+@$@<Checking for definition errors@>+=@{
+SYMBOL MultDefChk INHERITS Unique COMPUTE
+  IF(NOT(THIS.Unique),
+    message(
+      ERROR,
+      CatStrInd("identifier is multiply defined: ",THIS.Sym),
+      0,
+      COORDREF));
+END;
+
+SYMBOL LabelDef             INHERITS MultDefChk         END;
+SYMBOL TagDef               INHERITS MultDefChk         END;
+SYMBOL MemberIdDef          INHERITS MultDefChk         END;
+SYMBOL enumeration_constant INHERITS MultDefChk         END;
+SYMBOL TypeIdDef            INHERITS MultDefChk         END;
+@}

@@ -1,0 +1,686 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Compute.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+Compute.fw:
+
+Each specification of a computation gets a name:
+- The name of an attribute computation is the name of the attribute
+- The name of a plain computation is generated.
+
+Each computation name is bound in a scope:
+- a symbol computation in the upper or lower scope
+  of the symbol (scope is created in Inherit.fw)
+- a HEAD.c computation in symbol context in 
+  the symbol's HEADScope
+- a rule computation of a symbol attribute in the scope of 
+  the symbol occurrence (scope is created in Inherit.fw)
+- a computation of a rule attribute in the scope of the rule
+  (scope is created in here, does not inherit any scope)
+- a plain computation in the scope of the rule or the 
+  lower scope of the symbol.
+
+It is checked whether there are multiple computations of
+one attribute in a scope
+
+For each tree symbol new computation keys are created for those
+that are inherited from other symbols (related by InheritedBy).
+
+For each symbol computation a xref list is build and output that
+contains all rule computations which are created from it by
+inheritance (InheritedBy).
+
+An attribute that is defined by an inherited computation
+is also inherited by the tree symbol.
+-----------------------------------------------------------
+
+The computation scopes for rules are created:
+~$~<Create rule scope~>==~{
+SYMBOL RuleSpec COMPUTE
+  SYNT.GotRuleScope =
+    IF (EQ (GetLowerScope (THIS.Key, NoEnv), NoEnv),
+      ResetLowerScope 
+        (THIS.Key, 
+         AddKeyToEnv (NewScope (INCLUDING AG.SymbolEnv), THIS.Key)));
+END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotRuleScope = CONSTITUENTS RuleSpec.GotRuleScope;
+END;
+~}
+
+For an attribute computation it is determined in the context 
+of DefAttr whether it is a lower or an upper computation
+and the scope is determined where it is to be bound:
+~$~<Bind attribute computations~>==~{
+SYMBOL DefAttr: Bind:    Binding,
+                AttrKey: DefTableKey,
+                Sym:     int,
+                CompScope:   Environment,
+                IsUpperSymbComp: int;
+
+SYMBOL Attr: ProdSymbol: ProdSymbol,
+             IsHEADAcc: int;
+
+RULE: Attr ::= SymOcc '.' AttrUseId COMPUTE
+  Attr.ProdSymbol = SymOcc.ProdSymbol;
+  Attr.IsHEADAcc = EQ (SymOcc.Key, HEADKey);
+
+  IF (AND (Attr.IsDefining, EQ (SymOcc.Key, TAILKey)),
+    message (ERROR, "TAIL must not be defined", 0, COORDREF));
+
+  IF (AND (NOT (Attr.IsDefining), EQ (SymOcc.Key, HEADKey)),
+    message (ERROR, "HEAD must not be used", 0, COORDREF));
+END;
+
+RULE: Attr ::=  '.' AttrUseId COMPUTE
+  Attr.ProdSymbol = NoProdSymbol;
+  Attr.IsHEADAcc = 0;
+END;
+
+SYMBOL DefAttr COMPUTE
+  SYNT.AttrKey = CONSTITUENT AttrUseId.Key;
+  SYNT.Sym = CONSTITUENT AttrUseId.Sym;
+
+  SYNT.IsUpperSymbComp =
+    IF (OR (INCLUDING Context.IsRule,
+            OR (GetIsChain (SYNT.AttrKey, 0),
+                EQ (GetAttrClass (SYNT.AttrKey, NoClass), SYNTClass))),
+        0, 1)
+    <- INCLUDING AG.GotAllAttrProps;
+
+  SYNT.CompScope =
+    IF (INCLUDING Context.IsRule,
+        IF (EQ (CONSTITUENT Attr.ProdSymbol, NoProdSymbol),
+            GetLowerScope (INCLUDING Context.Key, NoEnv),
+            GetSymbolOccScope (CONSTITUENT Attr.ProdSymbol)),
+        IF (CONSTITUENT Attr.IsHEADAcc,
+            GetHEADScope (INCLUDING Context.Key, NoEnv),
+        IF (SYNT.IsUpperSymbComp,
+            GetUpperScope (INCLUDING Context.Key, NoEnv),
+            GetLowerScope (INCLUDING Context.Key, NoEnv))))
+    <- (INCLUDING AG.GotRuleScope, INCLUDING AG.GotSymbolScope);
+
+  SYNT.Bind = 
+    AddAttrToBinding 
+      (AddCoordToBinding (BindIdn (SYNT.CompScope, SYNT.Sym), COORDREF),
+       SYNT.AttrKey);
+END;
+~}
+
+Check that lower and upper computations can be distinguished, and
+check for multiple computations of attributes.
+~$~<Check lhs of attribute computations~>==~{
+SYMBOL DefAttr COMPUTE
+  IF (AND (NOT (INCLUDING Context.IsRule),
+           AND (NOT (GetIsChain (SYNT.AttrKey, 0)),
+                EQ (GetAttrClass (SYNT.AttrKey, NoClass), NoClass))), 
+  message 
+    (ERROR, CatStrInd (
+     "Class of defined attribute not specified: ", SYNT.Sym),
+     0, COORDREF))
+  <- INCLUDING AG.GotAllAttrProps;
+
+  SYNT.GotCheckMult = SetCheckMult (KeyOf (SYNT.Bind), 1, 2);
+
+  IF (AND (GT (GetCheckMult (KeyOf (SYNT.Bind), 1), 1),
+           AND (NOT (THIS.hasAccuToken),
+                NOT (GetHasAccuAsgn (SYNT.AttrKey, 0)))),
+  message 
+   (ERROR, CatStrInd ("Multiple computations of: ", SYNT.Sym), 
+    0, COORDREF))
+  <- INCLUDING AG.GotCheckMult;
+END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotCheckMult = CONSTITUENTS DefAttr.GotCheckMult;
+END;
+
+RULE: Attr ::= SymOcc '.' AttrUseId COMPUTE
+  IF (AND (NOT (INCLUDING Context.IsRule),
+           AND (GetIsChain (AttrUseId.Key, 0),
+                INCLUDING Compute.IsUpperSymbComp)),
+  message 
+    (ERROR, CatStrInd (
+     "chain access in upper symbol computation: ", 
+     AttrUseId.Sym),
+     0, COORDREF))
+  <- INCLUDING AG.GotAllAttrProps;
+END;
+~}
+
+
+Names are generated for plain computations:
+~O~<Compute.specs~>~{
+$/Tech/MakeName.gnrc +instance=Identifier :inst
+~}
+
+Plain computations are bound in the rule's computation
+scope or in the lower symbol scope.
+
+The properties Context (key of rule or symbol), IsBottomUp,
+and IsChainStart are set (the latter is a key value to be used
+in target code):
+~$~<Bind plain computations~>==~{
+SYMBOL PlainComp: Bind:      Binding,
+                  CompScope: Environment;
+SYMBOL PlainComp COMPUTE
+  SYNT.CompScope =
+    GetLowerScope (INCLUDING Context.Key, NoEnv)
+    <- (INCLUDING AG.GotRuleScope, INCLUDING AG.GotSymbolScope);
+
+  SYNT.Bind = 
+    BindNewPlainComp 
+      (SYNT.CompScope, 
+       GetAttrScope (INCLUDING Context.Key, NoEnv), 
+       COORDREF) 
+    <- INCLUDING AG.GotAttrScope; 
+END;
+
+SYMBOL Compute: Bind: Binding,
+                Key:  DefTableKey,
+                Sym:  int,
+                IsUpperSymbComp: int;
+
+RULE: Compute ::= AttrComp COMPUTE
+  Compute.Bind = 
+     ORDER
+       (ResetIsChainStart 
+          (KeyOf (CONSTITUENT DefAttr.Bind), AttrComp.IsChainStart),
+        CONSTITUENT DefAttr.Bind);
+  Compute.IsUpperSymbComp = CONSTITUENT DefAttr.IsUpperSymbComp;
+END;
+
+RULE: AttrComp ::= 'CHAINSTART' DefAttr '=' ExpressionDep COMPUTE 
+  AttrComp.IsChainStart = DefAttr.AttrKey;
+  IF (NOT (GetIsChain (DefAttr.AttrKey, 0)),
+    message (ERROR, "CHAINSTART must assign a chain", 0, COORDREF))
+  <- INCLUDING AG.GotChaindef;
+END;
+SYMBOL AttrComp: IsChainStart: DefTableKey;
+SYMBOL AttrComp COMPUTE SYNT.IsChainStart = NoKey; END;
+
+RULE: Compute ::= PlainComp COMPUTE
+  Compute.Bind = PlainComp.Bind;
+  Compute.IsUpperSymbComp = 0;
+END;
+
+SYMBOL Compute COMPUTE
+  SYNT.Key = KeyOf (SYNT.Bind);
+  SYNT.Sym = IdnOf (SYNT.Bind);
+  SYNT.Bound = 
+    ORDER
+      (ResetContext (SYNT.Key, INCLUDING Context.Key),
+       ResetIsBottomUp (SYNT.Key, THIS.IsBottomUp),
+       ResetIsRuleComputation (SYNT.Key, INCLUDING Context.IsRule));
+END;
+
+RULE: Computation ::= Compute 'BOTTOMUP' COMPUTE
+  Compute.IsBottomUp = 1;
+END;
+SYMBOL Compute: IsBottomUp: int;
+SYMBOL Compute COMPUTE INH.IsBottomUp = 0; END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotInheritCompute = InheritCompute (SYNT.ChainScope)
+    <- (SYNT.GotAllAttrProps, CONSTITUENTS Compute.Bound,
+        SYNT.GotRuleScope);
+END;
+~}
+
+~O~<Compute.pdl~>~{
+CheckMult: int;
+InheritedFrom: Binding; "envmod.h"
+InheritedBy: DefTableKeyList; "DefTableKeyList.h"
+Attribute: DefTableKey;
+Context: DefTableKey;
+IsRuleComputation: int;
+IsBottomUp: int;
+IsChainStart: DefTableKey;
+IsPlain: int;
+
+EmptyHEADChain: DefTableKey; /*chain of the HEAD computations in empty rules*/
+EmptyHEADAttr: DefTableKey;  /*generated rule attribute */
+EmptyHEADCompsOfRule: DefTableKeyList; "DefTableKeyList.h"
+~}
+
+For each symbol computation the line of the rule computations
+are output which are created by inheriting this symbol computation:
+~$~<Output inheritance of computations~>==~{
+SYMBOL AG COMPUTE
+  PTGOutFile
+     (CatStrStr (SRCFILE, ".inhcmp"), 
+        PTGInhComputations
+          (CONSTITUENTS Compute.InhComps
+           WITH (PTGNode, PTGSeq, IDENTICAL, PTGNull)))
+  <- SYNT.GotInheritCompute;
+  SYNT.GotPlainAttr = CONSTITUENTS PlainComp.Bind;
+END;
+
+SYMBOL Compute: InhComps: PTGNode;
+SYMBOL Compute COMPUTE
+  SYNT.InhComps = 
+    IF (INCLUDING Context.IsRule,
+      PTGNULL, InhCompOutput (SYNT.Key))
+    <- INCLUDING AG.GotInheritCompute;
+END;
+~}
+
+~O~<Compute.ptg~>~{
+InhComputations:
+  "SYMBOL computation is inherited by RULEs:\n\n" $
+
+InhComp:
+  "line " $ " inherited by lines " $ "\n"
+~}
+
+~O~<Compute.head~>==~{
+#include "Compute.h"
+~}
+~O~<Compute.h~>==~{
+#include "args.h"
+#include "envmod.h"
+#include "err.h"
+#include "ptg_gen.h"
+
+extern void InheritCompute FEARGS ((Environment chainScope));
+
+extern Binding AddCoordToBinding FEARGS ((Binding b, CoordPtr c));
+extern Binding AddAttrToBinding FEARGS ((Binding b, DefTableKey a));
+extern Binding BindNewPlainComp 
+   FEARGS ((Environment compScope, Environment attrScope, CoordPtr c));
+
+extern PTGNode InhCompOutput FEARGS ((DefTableKey comp));
+~}
+~O~<Compute.c~>==~{
+#include "Compute.h"
+#include "pdl_gen.h"
+#include "GrammarRules.h"
+#include "Grammar.h"
+#include "csm.h"
+#include "Attribute.h"
+#include "MakeName.h"
+#include "Strings.h"
+#include "PreDefId.h"
+#include "Inherit.h"
+#include "SymbolOcc.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+Binding AddCoordToBinding (Binding b, CoordPtr c)
+#else
+Binding AddCoordToBinding (b, c) Binding b; CoordPtr c;
+#endif
+{ ResetCoord (KeyOf (b), c);
+  return b;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+Binding AddAttrToBinding (Binding b, DefTableKey a)
+#else
+Binding AddAttrToBinding (b, a) Binding b; DefTableKey a;
+#endif
+{ ResetAttribute (KeyOf (b), a);
+  return b;
+}
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+Binding BindNewPlainComp 
+   (Environment compScope, Environment attrScope, CoordPtr c)
+#else
+Binding BindNewPlainComp (compScope, attrScope, c)
+   Environment compScope, attrScope; CoordPtr c;
+#endif
+{ int sym = GenerateName ("plain$");
+  Binding comp = BindIdn (compScope, sym);
+  Binding attr = BindIdn (attrScope, sym);
+#ifdef TEST
+  printf ("BindNewPlainComp %s\n", StringTable(sym));
+#endif
+  ResetAttribute (KeyOf (comp), KeyOf (attr));
+  ResetCoord (KeyOf (comp), c);
+  ResetAttrClass (KeyOf (attr), SYNTClass);
+  ResetAttrType (KeyOf (attr), VOIDkey);
+  ResetNameSym (KeyOf (attr), sym);
+  ResetCoord (KeyOf (attr), c);
+  ResetIsDefined (KeyOf (attr), 1);
+  ResetIsPlain (KeyOf (attr), 1);
+  ResetIsPlain (KeyOf (comp), 1);
+  return comp;
+}/* BindNewPlainComp */
+
+#ifdef TEST
+void PrintCompute (Binding b)
+{ int sym; Binding inh;
+  if (b == NoBinding) return;
+  sym = GetNameSym (KeyOfEnv (EnvOf (b)), 0);
+  inh = GetInheritedFrom (KeyOf (b), NoBinding);
+  if (inh == NoBinding)
+    printf ("  %s.%s is rule comp in line %d\n", 
+            StringTable (sym), StringTable (IdnOf (b)),
+            LineOf (*GetCoord (KeyOf (b), NoPosition)));
+  else
+    printf ("  %s.%s inherited from %s in line %d\n",
+            (EnvOf(inh) == GetHEADScope (KeyOfEnv (EnvOf (inh)), NoEnv))?
+               "HEAD" : StringTable (sym), 
+            StringTable (IdnOf (b)),
+            StringTable (GetNameSym (KeyOfEnv (EnvOf (inh)), 0)),
+            LineOf (*GetCoord (KeyOf (inh), NoPosition)));
+}
+
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+PTGNode InhCompOutput (DefTableKey comp)
+#else
+PTGNode InhCompOutput (comp) DefTableKey comp;
+#endif
+{ DefTableKeyList rulecomps = GetInheritedBy (comp, NULLDefTableKeyList);
+  PTGNode res = PTGNULL;
+  while (rulecomps != NULLDefTableKeyList)
+  { DefTableKey rulecomp = HeadDefTableKeyList (rulecomps);
+    res = PTGCommaSeq (res, 
+       PTGNumb (LineOf (*GetCoord (GetContext (rulecomp, NoKey), NoPosition))));
+    rulecomps = TailDefTableKeyList (rulecomps);
+  }
+  return PTGInhComp 
+    (PTGNumb (LineOf (*GetCoord (comp, NoPosition))), res);
+}/* InhCompOutput */
+
+
+void InheritAComputation 
+#if defined(__cplusplus) || defined(__STDC__)
+   (Binding srcComp, Binding attr, Environment tgtEnv, DefTableKey rule,
+    DefTableKey emptyHEADattr)
+#else
+   (srcComp, attr, tgtEnv, rule)
+   Binding srcComp, attr; Environment tgtEnv; DefTableKey rule;
+   DefTableKey emptyHEADattr;
+#endif
+/* on Entry:
+     srcComp is a binding of a computation of attr in some symbol
+     scope, in the context of rule.
+   on exit:
+     A new binding is created for a computation of attr in tgtEnv.
+     Its properties are set and it is linked to the 
+     inherited computation (srcComp, InheritedFrom).
+*/
+{
+  Binding newcomp = BindIdn (tgtEnv, IdnOf (attr));
+  DefTableKey defattr = GetAttribute (KeyOf (srcComp), NoKey);
+
+  ResetCoord 
+    (KeyOf (newcomp), 
+     GetCoord (KeyOf (srcComp), NoPosition));
+  ResetContext (KeyOf (newcomp), rule);
+  ResetInheritedFrom (KeyOf (newcomp), srcComp);
+  ResetInheritedBy 
+    (KeyOf (srcComp), 
+     ConsDefTableKeyList 
+       (KeyOf (newcomp),
+        GetInheritedBy 
+          (KeyOf (srcComp), NULLDefTableKeyList)));
+  ResetIsPlain (KeyOf (newcomp), GetIsPlain (KeyOf (srcComp), 0));
+#ifdef TEST
+  PrintCompute (newcomp);
+#endif
+  /* set the attribute of the new computation: */
+  if (defattr == NoKey) ;/* plain */
+  else if (GetIsChain (defattr, 0))
+    ResetAttribute (KeyOf (newcomp), defattr);
+  else
+    ResetAttribute (KeyOf(newcomp), KeyOf (attr));
+  if (emptyHEADattr != NoKey) {
+    /* lhs of this computation is to be substituted by emptyHEADattr */
+     ResetEmptyHEADChain (KeyOf(newcomp), defattr); /*chain*/
+     ResetEmptyHEADAttr (KeyOf(newcomp), emptyHEADattr);
+     ResetIsChainStart (KeyOf(newcomp), NoKey);
+     ResetEmptyHEADCompsOfRule (rule,
+       ConsDefTableKeyList (KeyOf(newcomp), 
+         GetEmptyHEADCompsOfRule (rule, NULLDefTableKeyList)));
+#ifdef TEST
+  printf ("empty HEAD comp for chain %s\n",
+          StringTable (GetNameSym (defattr, 0)));
+#endif
+  }
+}/* InheritAComputation */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+void SymbOccChainInherits (DefTableKey symKey, Environment syenv,
+	RuleProd rule, DefTableKey ruleKey, Environment chainScope, CoordPtr coord)
+#else
+void SymbOccChainInherits (symKey, syenv, ruleKey, chainScope, coord) 
+DefTableKey symKey; Environment syenv; RuleProd rule;
+DefTableKey ruleKey; Environment chainScope; CoordPtr coord;
+#endif
+{
+	  Environment headScope = GetHEADScope (symKey, NoEnv);
+          Binding b;
+#ifdef TEST
+  printf("  try chains\n");
+#endif
+          /* try all chains: */
+          Binding chn =  DefinitionsOf (chainScope);
+          while (chn != NoBinding)
+          {
+            b = BindingInEnv (syenv, IdnOf (chn));
+            if (b != NoBinding)
+            { if (EnvOf (b) != syenv)
+                 InheritAComputation (b, chn, syenv, ruleKey, NoKey);
+              else
+              {
+#ifdef TEST
+  printf("  already in rule:\n");
+  PrintCompute (b);
+#endif
+              }
+            }
+
+#ifdef TEST
+  printf("  check HEAD.c =\n");
+#endif
+            /* inherit HEAD.c = expr by first rhs symbol: */
+            b = BindingInEnv (headScope, IdnOf (chn));
+            if (b != NoBinding)
+            { ProdSymbol rhsSymb = FindHEADSymbolOcc (rule);
+              if (rhsSymb != NoProdSymbol)
+              { if (NoBinding == 
+                      BindingInEnv (rhsSymb->u.s.scope, IdnOf (chn)))
+                /* HEAD.c is not overridden */
+                /* The inherited HEAD.c is bound in the rule's
+                   computation scope. 
+		   In the computation occurrences of THIS
+                   are substituted by the lhs symbol, and 
+                   HEAD.c does not collide with an <lhs>.c
+                */
+                InheritAComputation 
+                   (b, chn, GetLowerScope (ruleKey, NoEnv), ruleKey, NoKey);
+              } else {
+		/* The HEAD computation is inherited by an empty rule.
+		   A rule attribute is generated to become the lhs
+		   of the computation.
+                   The computation is marked to be transformed later.
+		*/
+#ifdef TEST
+  printf("empty HEAD\n");
+#endif
+		int sym = GenerateName ("HEAD$");
+		Binding atb = 
+			BindIdn (GetAttrScope (ruleKey, NoEnv), sym);
+		DefTableKey atk = KeyOf(atb);
+		ResetNameSym (atk, sym);
+		ResetAttrClass (atk, SYNTClass);
+		ResetAttrType (atk, GetAttrType (KeyOf(chn), NoKey));
+		ResetCoord (atk, GetCoord (KeyOf(atb), NoPosition));
+                InheritAComputation 
+                  (b, chn, GetLowerScope (ruleKey, NoEnv), ruleKey, KeyOf(atb));
+	      }
+            }
+            chn = NextDefinition (chn);
+          }
+}/*SymbOccChainInherits*/
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+void SymbOccInherits (DefTableKey symKey, int symOccIndex, Environment syenv,
+			DefTableKey ruleKey, CoordPtr coord)
+#else
+void SymbOccInherits (symKey, symOccIndex, syenv, ruleKey, chainScope, coord) 
+DefTableKey symKey; int symOccIndex; Environment syenv;
+DefTableKey ruleKey; CoordPtr coord;
+#endif
+/* on entry:
+     symKey is the key of a TREE symbol, it occurs at position symOccIndex
+     in the rule ruleKey.
+     syenv is the scope of where the computations of that symbol occurrence
+     are bound (lower if symOccIndex == 0, or upper).
+  on exit:
+     for each attribute of symKey (either INH or SYNT) it is checked 
+     whether there is a computation in syenv or one can be
+     inherited from a symbol. 
+     In the latter case InheritAComputation creates a new binding 
+     for that attribute in syenv, sets its properties and links it
+     to the inherited computation (InheritedFrom).
+*/
+{
+        Environment attrenv = GetAttrScope (symKey, NoEnv);
+        Binding attr = DefinitionsOf (attrenv);
+        Binding b;
+#ifdef TEST
+  printf ("symbol %s:\n", 
+     StringTable (GetNameSym (symKey, 0)));
+#endif
+        /* try all attributes of this symbol,
+           including those for plain computations: 
+        */
+        while (attr != NoBinding)
+        { int cl = GetAttrClass (KeyOf (attr), NoClass);
+          if (((symOccIndex == 0 && cl == SYNTClass) ||
+              (symOccIndex > 0  && cl ==  INHClass)) && 
+            !(GetHasAccuAsgn (KeyOf (attr), 0)))
+          /* inheritance of accumulating attrs is in AccumulateInherit */
+          {
+
+            /* find a computation for attr in the computation scope: */
+            b = BindingInEnv (syenv, IdnOf (attr));
+            if (b == NoBinding)
+            { if (IdnOf (attr) != GENTREEsym)
+                  message (ERROR, 
+		       CatStrInd (
+                       CatStrStr (
+		       CatStrInd (
+                       CatStrStr (
+                       CatStrInd ("Computation of ", 
+			 GetNameSym (symKey, 0)),
+                         "."),
+			 IdnOf (attr)),
+			 " missing in RULE "),
+			 GetNameSym (ruleKey, 0)),
+                       0, GetCoord (ruleKey, NoPosition));
+            } else
+            { /* there is a computation for IdnOf (attr): */
+              if (EnvOf (b) != syenv)
+              { /* it is not in rule context; inherit this computation: */
+                InheritAComputation (b, attr, syenv, ruleKey, NoKey);
+              } else
+              { /* there is a rule computation for this identifier */
+                Binding inhComp = OverridesBinding (b);
+                if (inhComp != NoBinding &&
+                    GetIsAccu (KeyOf (inhComp), 0)) {
+                  message (ERROR, 
+                    CatStrInd ("Is inherited by a non-accumulating computation: ",
+                               IdnOf (attr)),
+                    0, GetCoord (KeyOf (inhComp), NoPosition));
+                  message (ERROR, 
+                    CatStrInd ("Inherits an accumulating computation: ",
+                               IdnOf (attr)),
+                    0, GetCoord (KeyOf (b), NoPosition));
+                }
+#ifdef TEST
+  PrintCompute (b);
+#endif
+              }
+            }
+          }
+
+          attr = NextDefinition (attr);
+        }/* for all attrs */
+}/*SymbOccInherits*/
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+void InheritCompute (Environment chainScope)
+#else
+void InheritCompute (chainScope) Environment chainScope;
+#endif
+/* on entry:
+     The explicit computations are bound in their computation scopes.
+   on exit:
+     All inherited computations are bound in the computation scopes 
+     of the symbol occurrences.
+*/
+{ RuleProdList rules;
+#ifdef TEST
+  printf("InheritCompute started\n");
+#endif
+
+  /* step through all nonterminal occurrences of productions: */
+  rules = GrammarRules;
+  while (rules != NULLRuleProdList)
+  { RuleProd rule = HeadRuleProdList (rules);
+    ProdSymbolList prod = rule->prod;
+    DefTableKey ruleKey = RuleKeyOfRuleProd (rule);
+    int symbolIndex = -1;
+#ifdef TEST
+  printf ("RULE %s:\n", 
+     StringTable (GetNameSym (ruleKey, 0)));
+#endif
+    while (prod != NULLProdSymbolList)
+    { ProdSymbol sy = HeadProdSymbolList (prod);
+      if (sy->kind != IsProdLiteral && !GetIsTerm (sy->u.s.symbolkey, 0))
+      { 
+        symbolIndex++;
+
+	SymbOccInherits (sy->u.s.symbolkey, symbolIndex, sy->u.s.scope,
+		ruleKey, sy->u.s.coord);
+
+        if (symbolIndex == 0) 
+        /* left-hand side symbol; inherit chain computations: */
+        { 
+	  SymbOccChainInherits (sy->u.s.symbolkey, sy->u.s.scope,
+		rule, ruleKey, chainScope, sy->u.s.coord);
+        }
+      }
+      if (rule->islistof) break; /* lhs only */
+      prod = TailProdSymbolList (prod);
+    }
+    rules = TailRuleProdList (rules);
+  }
+#ifdef TEST
+  printf("InheritCompute completed\n");
+#endif
+}/* InheritCompute */
+~}
+
+~O~<Compute.msg~>~{
+"Class of defined attribute not specified: "
+"chain access in upper symbol computation: "
+"Multiple computations of: "
+"Computation of X.a missing in RULE p"
+"TAIL must not be defined"
+"HEAD must not be used"
+~}
+
+~O~<Compute.lido~>~{
+~<Create rule scope~>
+~<Bind attribute computations~>
+~<Check lhs of attribute computations~>
+~<Bind plain computations~>
+~<Output inheritance of computations~>
+~}

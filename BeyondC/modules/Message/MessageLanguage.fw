@@ -1,0 +1,21 @@
+@p maximum_input_line_length = infinity
+
+@O@<MsgGrammer.con@>==@{
+    
+    Subtask:MesgSubtask .
+
+    MesgSubtask: EntityNameUse 'talks' 'to' EntityNameUse Mesg MesgProperties.
+    MesgSubtask: EntityNameUse 'talks' Mesg MesgProperties.
+    MesgSubtask: 'System' 'talks' Mesg MesgProperties.
+    Mesg: string_literal.
+    
+    MesgProperties: MesgProperties MesgProperty.
+    MesgProperties: .
+    MesgProperty: MesgTimeProperty / MesgPositionProperty / MesgFontPathProperty / MesgFontSizeProperty / MesgColorProperty.
+    
+    MesgTimeProperty: 'time' ':' floating_constant 's'.
+    MesgPositionProperty: 'pos' ':'  integer_constant ',' integer_constant.
+    MesgFontPathProperty: 'font' ':' string_literal.
+    MesgFontSizeProperty: 'size' ':' integer_constant.
+    MesgColorProperty: 'color' ':'  integer_constant ',' integer_constant ',' integer_constant.
+@}

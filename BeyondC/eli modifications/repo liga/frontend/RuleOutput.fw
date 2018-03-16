@@ -1,0 +1,124 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: RuleOutput.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $ 
+
+-----------------------------------------------------------
+RuleOutput.fw
+
+The rules contained in the list GrammarRules are printed
+in Lido notation with rule names generated where neccessary.
+Only one instance per rule is printed.
+
+The computations of Productions.fw have to be executed before.
+The rules need not form a complete grammar. 
+The output may be used for purposes of LigaProd.
+-----------------------------------------------------------
+
+The function OutputRules processes the list of rules and applies
+PTG patterns to it.
+
+~O~<RuleOutput.lido~>==~{
+SYMBOL AG COMPUTE
+  SYNT.RulesWritten =
+    PTGOutFile 
+      ("ligaprod", OutputRules ())
+    <- SYNT.GotGrammarRules;
+END;
+~}
+
+~O~<RuleOutput.head~>==~{
+#include "RuleOutput.h"
+#include "source.h"
+~}
+
+~O~<RuleOutput.h~>==~{
+#include "ptg_gen.h"
+extern PTGNode OutputRules ();
+~}
+
+~O~<RuleOutput.ptg~>==~{
+GramRule:	"RULE " $1 string ":\t" $2 " END;\n"
+GramProd:	$1 string " ::= " $2
+GramListof:	$1 string " LISTOF " $2
+GramLiteral:	"'" $ string "'"
+GramSymbol:	$ string
+GramGenSymbol:	"$" $ string
+GramSeq:	$ {" "} $
+GramAltSeq:	$ {" | "} $
+Seq:		$ $
+~}
+
+~O~<RuleOutput.c~>==~{
+#include "RuleOutput.h"
+#include "GrammarRules.h"
+#include "csm.h"
+#include "pdl_gen.h"
+
+const char *adaptLiterals(const char* str)
+{ if (strcmp(str, "'")) {
+     return str;
+  }
+  else return "''";
+}
+
+PTGNode OutputRules ()
+{ PTGNode res = PTGNULL;
+
+  RuleProdList rules = GrammarRules;
+  while (rules != NULLRuleProdList)
+  { RuleProd rule = HeadRuleProdList (rules);
+    ProdSymbol lhs = HeadProdSymbolList (rule->prod);
+    ProdSymbolList rhs = TailProdSymbolList (rule->prod);
+    PTGNode rhsout = PTGNULL;
+
+    while (rhs != NULLProdSymbolList)
+    { ProdSymbol symbol = HeadProdSymbolList (rhs);
+      switch (symbol->kind)
+      { case IsProdLiteral:
+          rhsout = 
+             PTGGramSeq 
+               (rhsout,
+                PTGGramLiteral 
+                  (adaptLiterals(StringTable (symbol->u.literal))));
+          break;
+        case IsProdSymbol:
+          if (rule->islistof)
+            rhsout = 
+              PTGGramAltSeq
+               (rhsout,
+                PTGGramSymbol 
+                  (StringTable (GetNameSym (symbol->u.s.symbolkey, 0))));
+          else
+            rhsout = 
+              PTGGramSeq
+               (rhsout,
+                PTGGramSymbol 
+                  (StringTable (GetNameSym (symbol->u.s.symbolkey, 0))));
+          break;
+        case IsProdGenSymbol:
+          rhsout = 
+             PTGGramSeq
+               (rhsout,
+                PTGGramGenSymbol 
+                  (StringTable (GetNameSym (symbol->u.s.symbolkey, 0))));
+          break;
+      }
+      rhs = TailProdSymbolList (rhs);
+    }
+    res = 
+      PTGSeq 
+        (res, 
+           PTGGramRule 
+             (StringTable (GetNameSym (rule->rulekey, 0)),
+              rule->islistof ?
+                PTGGramListof 
+                  (StringTable (GetNameSym (lhs->u.s.symbolkey, 0)),
+                   rhsout) :
+                PTGGramProd 
+                  (StringTable (GetNameSym (lhs->u.s.symbolkey, 0)),
+                   rhsout)));
+    rules = TailRuleProdList (rules);
+  }
+  return res;
+}/* OutputRules */
+~}

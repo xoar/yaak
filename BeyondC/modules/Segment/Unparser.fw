@@ -1,0 +1,75 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<Language.lido@>==@{
+
+    ATTR SegConstructor : PTGNode;
+    ATTR SegFreeStruct : PTGNode;
+    
+    /* main character construction*/
+    RULE: SegColliderDef::= 'Segment Collider' EntityNameDef SegProperties COMPUTE
+        SegColliderDef.IdemPtg = PTGSeg(SegColliderDef.SegConstructor,
+                                SegProperties.IdemPtg,
+                                SegColliderDef.SegFreeStruct);
+    END;
+
+    /* constructor */
+    RULE: SegColliderDef::= 'Segment Collider' EntityNameDef SegProperties COMPUTE
+        /*EntityNameDef.IdemPtg is not used at the moment*/
+        SegColliderDef.SegConstructor = 
+            PTGSegConstructor(SegColliderDef.NewEntityId);
+    END;
+
+     /* free pointer struct data */
+    RULE: SegColliderDef::= 'Segment Collider' EntityNameDef SegProperties COMPUTE
+        SegColliderDef.SegFreeStruct = 
+            PTGSegFreeStruct(SegColliderDef.NewEntityId);
+    END;
+
+    RULE: SegPositionProperty::= 'start' 'position' ':'  integer_constant ',' integer_constant
+                                  'end' 'position' ':'  integer_constant ',' integer_constant COMPUTE
+        SegPositionProperty.IdemPtg = 
+            PTGSetSegPosition(INCLUDING SegColliderDef.NewEntityId,
+                               StringTable(integer_constant[1]), 
+                               StringTable(integer_constant[2]),
+                               StringTable(integer_constant[3]),
+                               StringTable(integer_constant[4]));
+    END;
+
+
+    RULE: Entity ::=  SegColliderDef COMPUTE
+
+        Entity.AdditionalTaskPrototypes =  PTGNULL;
+
+        Entity.AdditionalTaskCode = PTGNULL;
+
+    END;
+
+
+@}
+
+
+@O@<Language.ptg@>==@{
+
+Seg: 
+    $ /* constructor*/ 
+    $ /* properties*/ 
+    $ /*free struct*/"\n"
+
+SegConstructor:
+    "    SegmentColliderStructPtr char" $1 int /*id*/ " = SegmentColliderConstructor(" $1 int /*id*/ "," 
+                                                                                     "pluginList);\n"
+
+SegFreeStruct:
+    "    SegmentColliderFreePointerStruct(char" $ int/* subtask id*/");"
+
+
+SetSegPosition:
+    "    SegmentColliderSetSegment(char" $ int /*id*/ "," 
+                                  $ string  /*pos1*/ ","
+                                  $ string  /*pos1*/ "," 
+                                  $ string  /*pos1*/ "," 
+                                  $ string /*pos2*/ ");\n"
+
+
+@}

@@ -1,0 +1,15 @@
+-a Entity is just a yobject with a name.
+
+-Every subtask has a construcotr and a process function
+
+-the process function deallocates the object. 
+	there is no need of a usage after processing a subtask.
+
+-a entity or a yobject like a character have a destructor and FreePointerStruct function:
+	the destructor deallocates the object and the pointer struct while the freepointer data only free the c struct and left the object alive.
+
+-a user should use the id functions for acessing a yobject or entity.
+
+- a destructor normally also removes the object from the used container.
+
+- a container yobject should register himself by construction.

@@ -1,0 +1,36 @@
+#!/bin/bash
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+echo "Install SDL"
+cd $DIR/lib/SDL2-2.0.0/
+./configure --prefix=$DIR/lib/SDL2 > $DIR/install.log
+make -j8 >> $DIR/install.log
+make install >> $DIR/install.log
+
+export PATH=$PATH:$DIR/lib/SDL2/bin
+
+echo "Install SDL image"
+cd $DIR/lib/SDL2_image-2.0.1/
+./autogen.sh
+./configure --prefix=$DIR/lib/SDL_image >> $DIR/install.log
+make -j8 >> $DIR/install.log
+make install >> $DIR/install.log
+
+echo "maybe you have to create the lib symlink in lib/SDL_image"
+#TODO: test this
+
+echo "Install SDL ttf"
+cd $DIR/lib/SDL2_ttf-2.0.14/
+./autogen.sh
+./configure --prefix=$DIR/lib/SDL_ttf >> $DIR/install.log
+make -j8 >> $DIR/install.log
+make install >> $DIR/install.log
+
+echo "maybe you have to create the lib symlink in lib/SDL_ttf"
+#TODO: test this automatically

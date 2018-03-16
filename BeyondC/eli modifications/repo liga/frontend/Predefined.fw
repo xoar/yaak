@@ -1,0 +1,192 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Predefined.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+Predefined.fw:
+
+-----------------------------------------------------------
+
+~O~<Predefined.specs~>~{
+$/Name/PreDefine.gnrc +referto=Identifier :inst
+$/Name/PreDefId.gnrc +referto=(Predef.pre) :inst
+~}
+
+~$~<Predefined~>==~{
+SYMBOL AG: AttrEnv, AttrNameEnv, SymbolEnv: Environment;
+SYMBOL AG COMPUTE
+  SYNT.AttrEnv = NewEnv ();
+  SYNT.AttrNameEnv = NewEnv ();
+  SYNT.SymbolEnv = NewEnv();
+  SYNT.Env = 
+     ORDER (MakePredef (RootEnv, SYNT.AttrEnv, SYNT.AttrNameEnv, SYNT.SymbolEnv),
+            RootEnv);
+END;
+
+SYMBOL AttrName  INHERITS ChkNoPredefSym END;
+SYMBOL ChainName INHERITS ChkNoPredefSym END;
+SYMBOL AttrDefId INHERITS ChkNoPredefSym END;
+
+CLASS SYMBOL ChkNoPredefSym COMPUTE
+  IF (IsPredefSym (THIS.Sym),
+    message (ERROR, CatStrInd (
+                    "Predefined name is not allowed: ", THIS.Sym),
+             0, COORDREF));
+END;
+~}
+
+~O~<Predef.pre~>~{
+PreDefSymKey ("NODEPTR", NODEPTRsym, NODEPTRkey)
+PreDefSymKey ("POSITION", POSITIONsym, POSITIONkey)
+PreDefSymKey ("$SYMB", SYMBsym, SYMBkey)
+PreDefSymKey ("$BOOL", BOOLsym, BOOLkey)
+PreDefSymKey ("int", intsym, intkey)
+PreDefSymKey ("$VOID_LIST", VOID_LISTsym, VOID_LISTkey)
+PreDefSymKey ("VOID", VOIDsym, VOIDkey)
+
+PreDefSymKey ("ROOTCLASS", ROOTCLASSsym, ROOTCLASSkey)
+PreDefSymKey ("NULLNODEPTR", NULLNODEPTRsym, NULLNODEPTRkey)
+PreDefSym ("GENTREE", GENTREEsym)
+PreDefSymKey ("IF", IFsym, IFkey)
+PreDefSymKey ("ORDER", ORDERsym, ORDERkey)
+PreDefSymKey ("RuleFct", RuleFctsym, RuleFctkey)
+PreDefSymKey ("RhsFct", RhsFctsym, RhsFctkey)
+PreDefSymKey ("TermFct", TermFctsym, TermFctkey)
+PreDefSymKey ("LINE", LINEsym, LINEkey)
+PreDefSymKey ("COL", COLsym, COLkey)
+PreDefSymKey ("COORDREF", COORDREFsym, COORDREFkey)
+PreDefSymKey ("RULENAME", RULENAMEsym, RULENAMEkey)
+~}
+
+~O~<Predefined.pdl~>~{
+GENTREEkey;
+~}
+
+~O~<Predefined.head~>==~{
+#include "Predefined.h"
+~}
+~O~<Predefined.h~>==~{
+#include "args.h"
+#include "envmod.h"
+
+extern int IsPredefSym FEARGS ((int idn));
+
+extern void MakePredef 
+FEARGS ((Environment globenv, 
+         Environment attrenv, Environment attrnameenv, Environment symbolenv));
+~}
+~O~<Predefined.c~>==~{
+#include "Predefined.h"
+#include "pdl_gen.h"
+#include "Attribute.h"
+#include "PreDefId.h"
+
+int maxPredefSym = 0;
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+int IsPredefSym (int idn)
+#else
+int IsPredefSym (idn) int idn;
+#endif
+{ return idn <= maxPredefSym;
+}
+
+static 
+#if defined(__cplusplus) || defined(__STDC__)
+void SetPredefProp (DefTableKey k, int idn)
+#else
+void SetPredefProp (k) DefTableKey k; int idn;
+#endif
+{ if (idn > maxPredefSym) maxPredefSym = idn;
+  ResetNameSym (k, idn);
+  ResetCoord (k, NoPosition);
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+void MakePredef 
+ (Environment globenv,
+  Environment attrenv, Environment attrnameenv, Environment symbolenv)
+#else
+void MakePredef (globenv, attrenv, attrnameenv, symbolenv)
+  Environment globenv, attrenv, attrnameenv, symbolenv;
+#endif
+{ Binding b;
+  Environment e;
+  DefTableKey k;
+
+#ifdef TEST
+  printf ("MakePredef begin\n");
+#endif
+  SetPredefProp (VOIDkey, VOIDsym);
+  ResetIsType (VOIDkey, 1);
+
+  SetPredefProp (VOID_LISTkey, VOID_LISTsym);
+  ResetIsType (VOID_LISTkey, 1);
+
+  SetPredefProp (intkey, intsym);
+  ResetIsType (intkey, 1);
+
+  SetPredefProp (BOOLkey, BOOLsym);
+  ResetIsType (BOOLkey, 1);
+
+  SetPredefProp (SYMBkey, SYMBsym);
+  ResetIsType (SYMBkey, 1);
+
+  SetPredefProp (POSITIONkey, POSITIONsym);
+  ResetIsType (POSITIONkey, 1);
+
+  SetPredefProp (NODEPTRkey, NODEPTRsym);
+  ResetIsType (NODEPTRkey, 1);
+
+  SetPredefProp (ROOTCLASSkey, ROOTCLASSsym);
+  ResetIsSymbol (ROOTCLASSkey, 1);
+  ResetIsCLASSSym (ROOTCLASSkey, 1);
+  ResetIsUsed (ROOTCLASSkey, 1);
+
+  e = NewScope (symbolenv); SetKeyOfEnv (e, ROOTCLASSkey);
+  ResetUpperScope (ROOTCLASSkey, e);
+  e = NewScope (symbolenv); SetKeyOfEnv (e, ROOTCLASSkey);
+  ResetLowerScope (ROOTCLASSkey, e);
+  e = NewScope (symbolenv); SetKeyOfEnv (e, ROOTCLASSkey);
+  ResetHEADScope (ROOTCLASSkey, e);
+  e = NewScope (attrenv); SetKeyOfEnv (e, ROOTCLASSkey);
+  ResetAttrScope (ROOTCLASSkey, e);
+#ifdef TEST
+  k = KeyOf(BindingInEnv (globenv, ROOTCLASSsym));
+  printf ("bind ROOTCLASS key %s\n", 
+    k != ROOTCLASSkey ? "failed" : "ok");
+#endif
+
+  BindKey (attrnameenv, GENTREEsym, GENTREEkey);
+  SetPredefProp (GENTREEkey, GENTREEsym);
+  ResetAttrClass (GENTREEkey, INHClass);
+  ResetAttrType (GENTREEkey, NODEPTRkey);
+
+  SetPredefProp (IFkey, IFsym);
+  SetPredefProp (ORDERkey, ORDERsym);
+  SetPredefProp (RuleFctkey, RuleFctsym);
+  SetPredefProp (RhsFctkey, RhsFctsym);
+  SetPredefProp (TermFctkey, TermFctsym);
+  SetPredefProp (LINEkey, LINEsym);
+  SetPredefProp (COLkey, COLsym);
+  SetPredefProp (COORDREFkey, COORDREFsym);
+  SetPredefProp (RULENAMEkey, RULENAMEsym);
+  SetPredefProp (NULLNODEPTRkey, NULLNODEPTRsym);
+#ifdef TEST
+  printf ("MakePredef end\n");
+#endif
+}
+~}
+
+~O~<Predefined.msg~>~{
+"Predefined name is not allowed: "
+~}
+
+~O~<Predefined.lido~>~{
+~<Predefined~>
+~}

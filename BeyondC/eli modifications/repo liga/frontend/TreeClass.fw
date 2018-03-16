@@ -1,0 +1,117 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: TreeClass.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+TreeClass.fw
+
+TREE and CLASS symbols are distinguished.
+The properties IsTREESym, IsCLASSSym are set.
+TERM symbols are set IsTREESym.
+
+The properties IsTREEReported, IsCLASSReported are used to avoid
+multiple reports.
+-----------------------------------------------------------
+
+~$~<Tree or Class Property~>==~{
+IsTREESym: int;
+IsCLASSSym: int;
+IsTREEReported: int;
+IsCLASSReported: int;
+~}
+
+There are 3 contexts where TREE or CLASS may be specified explicitly:
+SymAttrSpec, SymCompSpec, TermSpec.
+The attributes IsTREESym, IsCLASSSym capture the information:
+
+~$~<Tree or class context~>==~{
+ATTR IsTREESym, IsCLASSSym: int;
+CLASS SYMBOL SymbolSpecs END;
+SYMBOL SymAttrSpec INHERITS SymbolSpecs END;
+SYMBOL SymCompSpec INHERITS SymbolSpecs END;
+SYMBOL TermSpec INHERITS SymbolSpecs END;
+
+RULE: SymClass ::= 'TREE' 'SYMBOL' COMPUTE
+  SymClass.IsTREESym = 1;
+END;
+RULE: SymClass ::= 'CLASS' 'SYMBOL' COMPUTE
+  SymClass.IsCLASSSym = 1;
+END;
+SYMBOL SymClass COMPUTE /* default: */
+  SYNT.IsTREESym = 0; SYNT.IsCLASSSym = 0;
+END;
+
+RULE: SymAttrSpec ::= SymClass SymbolDefIds ':' AttrDefsOpt COMPUTE
+  SymAttrSpec.IsTREESym = SymClass.IsTREESym;
+  SymAttrSpec.IsCLASSSym = SymClass.IsCLASSSym;
+END;
+RULE: SymCompSpec ::= SymClass SymbolDefId InheritOpt CompPart 'END' 
+COMPUTE
+  SymCompSpec.IsTREESym = SymClass.IsTREESym;
+  SymCompSpec.IsCLASSSym = SymClass.IsCLASSSym;
+END;
+RULE: TermSpec ::= 'TERM' SymbolDefIds ':' TypeId COMPUTE
+  TermSpec.IsTREESym = 1;
+  TermSpec.IsCLASSSym = 0;
+END;
+~}
+
+Set the tree and class properties in contexts of symbol definitions
+and occurrences in productions:
+~$~<Set tree or class~>==~{
+SYMBOL SymbolDefId COMPUTE
+  SYNT.GotTREECLASS = 
+    ORDER 
+    (IF (INCLUDING SymbolSpecs.IsTREESym,
+         ResetIsTREESym (THIS.Key, 1)),
+     IF (INCLUDING SymbolSpecs.IsCLASSSym,
+         ResetIsCLASSSym (THIS.Key, 1)));
+END;
+~}
+
+Check consistent specification and use of TREE and CLASS symbols:
+
+~$~<Check tree or class~>==~{
+SYMBOL AG COMPUTE
+  SYNT.GotTREECLASS = CONSTITUENTS SymbolDefId.GotTREECLASS;
+END;
+
+SYMBOL SymbolDefId COMPUTE
+  IF (AND (GetIsCLASSSym (THIS.Key, 0),
+      AND (INCLUDING SymbolSpecs.IsTREESym,
+           NOT (GetIsTREEReported (THIS.Key, 0)))),
+  ORDER
+    (ResetIsTREEReported (THIS.Key, 1),
+     message
+       (ERROR, CatStrInd
+                 ("Occurs as CLASS symbol, too: ",
+        THIS.Sym), 0, COORDREF)))
+  <- INCLUDING AG.GotTREECLASS;
+
+  IF (AND (GetIsTREESym (THIS.Key, 0),
+      AND (INCLUDING SymbolSpecs.IsCLASSSym,
+           NOT (GetIsCLASSReported (THIS.Key, 0)))),
+  ORDER
+    (ResetIsCLASSReported (THIS.Key, 1),
+     message
+       (ERROR, CatStrInd
+                 ("Occurs as TREE symbol, too: ",
+        THIS.Sym), 0, COORDREF)))
+  <- INCLUDING AG.GotTREECLASS;
+END;
+~}
+
+~O~<TreeClass.msg~>~{
+"Occurs as CLASS symbol, too: "
+"Occurs as TREE symbol, too: "
+~}
+
+~O~<TreeClass.pdl~>~{
+~<Tree or Class Property~>
+~}
+
+~O~<TreeClass.lido~>~{
+~<Tree or class context~>
+~<Set tree or class~>
+~<Check tree or class~>
+~}

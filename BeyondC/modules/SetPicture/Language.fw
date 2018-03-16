@@ -1,0 +1,13 @@
+@p maximum_input_line_length = infinity
+
+@O@<Language.con@>==@{
+
+    Subtask: SetPictureSubtask.
+
+    SetPictureSubtask: EntityNameUse 'set' 'current' 'picture' 'to' string_literal.
+
+    SetPictureSubtask: EntityNameUse 'set' 'current' 'animation' 'picture' 'to' string_literal 'with' 'index' integer_constant.
+
+    SetPictureSubtask: EntityNameUse 'set' 'current' 'animation' 'picture' 'to' string_literal 'with' 'index' IdUse.
+
+@}

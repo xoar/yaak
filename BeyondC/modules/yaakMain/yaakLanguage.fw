@@ -1,0 +1,177 @@
+@p maximum_input_line_length = infinity
+
+@O@<yaakLanguage.con@>==@{
+
+
+    /* TODO: why do I need this??? who works the mapping identifier IdUse.*/
+    IdUse : identifier.
+
+    /* entities have names bound to their object like character */
+
+    /* the Entity is just a statment. you can define it everywhere*/
+    statement: Entity .
+
+    EntityNameUse : identifier.
+    EntityNameDef: identifier.
+
+
+    /*Event definition*/
+    function_definition: Event .
+
+    /*same as leave current Id the same and set declarationState = External at the end*/
+    Event: StartTag 'Event' EventNameDef empty_types
+      &'BindStackPush(CurrentId);BeginParameters(0); CurrentId = BindStackTop; BindStackPop; Bind();'
+      function_body .
+
+    /*needed for an empty parameters equivalent*/
+    empty_types: .
+
+    StartTag: 'Start' .
+    StartTag: .
+
+    /*the original subtask def*/
+    statement: Subtask .
+
+    EventNameUse: identifier.
+    EventNameDef: identifier.
+
+
+
+@}
+
+
+
+@O@<yaakLanguage.lido@>==@{
+
+
+   /* RULE: function_definition ::= Event COMPUTE
+      function_definition.Type=NoKey;
+    END;*/
+
+
+    /* ------------ Subtask and Entity ids are calc via chains ------------*/
+
+/*first the subtask ids*/
+
+    ATTR Id: int;
+    CHAIN ChainId: int;
+    
+    
+    RULE: program ::= external_declarations COMPUTE
+        CHAINSTART HEAD.ChainId = 0;
+    END;
+
+
+/* a rule which give every subtask element an id. overide this if you need more than an inc of 1.*/
+/* an empty subtask get no id. */
+   
+/*get the incoming id value of the chain, save it in id and write the outgoing value*/
+
+   SYMBOL Subtask COMPUTE
+     SYNT.Id = THIS.ChainId;
+     THIS.ChainId = ADD(SYNT.Id, 1);
+   END;
+
+
+/*generate the entities ids.*/
+/*entities start with 1. 0 is only for subtask entities*/
+
+    ATTR EntityId: int;
+    CHAIN ChainEntityId: int;
+
+    RULE: program ::= external_declarations COMPUTE
+        CHAINSTART HEAD.ChainEntityId = 1;
+    END;
+    
+    SYMBOL Entity COMPUTE
+        SYNT.EntityId = THIS.ChainEntityId;
+        THIS.ChainEntityId = ADD(SYNT.EntityId, 1);
+    END;
+
+
+/*assign the Entity id property, for using it in e.g message nodes.
+  also signal via GotEntityId that the definition is done. 
+  Need all definitions before checking the right usage.*/
+
+   
+    ATTR GotEntityId: VOID;
+
+    RULE: program ::= external_declarations COMPUTE
+        program.GotEntityId = CONSTITUENTS Entity.GotEntityId;
+    END;
+
+
+
+
+    /* Check if the all events an Entities are used properly
+       events and chars have an algo scope. */
+
+
+    SYMBOL Source INHERITS EvtRootScope END;
+    SYMBOL Source INHERITS EvtRangeScope END;
+    
+    SYMBOL Source INHERITS EntityRootScope END;
+    SYMBOL Source INHERITS EntityRangeScope END;
+
+    SYMBOL EventNameDef INHERITS EvtIdDefScope END;
+    SYMBOL EventNameUse INHERITS EvtIdUseEnv, EvtChkIdUse END;
+
+    SYMBOL EntityNameDef INHERITS EntityIdDefScope END;
+    SYMBOL EntityNameUse INHERITS EntityIdUseEnv, EntityChkIdUse END;
+
+    CLASS SYMBOL EvtIdentOcc: Sym: int;
+    CLASS SYMBOL EvtIdentOcc COMPUTE SYNT.Sym = TERM; END;
+    
+    CLASS SYMBOL EntityIdentOcc: Sym: int;
+    CLASS SYMBOL EntityIdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+    SYMBOL EventNameDef INHERITS EvtIdentOcc END;
+    SYMBOL EventNameUse INHERITS EvtIdentOcc END;
+
+    SYMBOL EntityNameDef INHERITS EntityIdentOcc END;
+    SYMBOL EntityNameUse INHERITS EntityIdentOcc END;
+
+    /* scope fixes: eventnamedef is the same as iddef*/
+
+    SYMBOL EventNameDef   INHERITS TypedDefId     END;
+    /*TREE SYMBOL EventNameDef    INHERITS DeclaredId END;*/
+
+    /*SYMBOL EventNameDef COMPUTE
+        ResetTypeName(THIS.Type,"function");
+        SYNT.TotalType = THIS.Type;
+    END;*/
+
+
+    /*SYMBOL EventNameDef         INHERITS IdInDeclarator   END;*/
+    /* is this wrong*/
+    /*SYMBOL EventNameDef         INHERITS DeclaratorWithId   END;*/
+    SYMBOL EventNameDef         INHERITS IdDefScope   END;
+    
+    SYMBOL Event INHERITS FunctionDeclarator END;
+
+
+    /* to import the specifier type as a normal function:*/
+    /*RULE: function_definition ::= Specifiers FunctionDecl declaration_list function_body COMPUTE
+        function_definition.Type=Specifiers.Type;
+    END;*/
+    
+    RULE: function_definition ::= Event COMPUTE
+      function_definition.Type=TypeIs_void;
+    END;
+
+    RULE: Event::= StartTag 'Event' EventNameDef empty_types function_body END;
+
+    RULE: empty_types ::=   END;
+    TREE SYMBOL empty_types INHERITS OpndTypeListRoot END;
+
+@}
+
+@O@<yaakLanguage.pdl@>==@{
+    /*Event and Char Names must be Unique */
+
+    Defs: int; 
+
+    /*To get the id of entities. */
+
+    Id: int; 
+@}

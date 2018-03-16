@@ -1,0 +1,11 @@
+%optionderive ! == <<EOF
+loglevel=4
+errlevel=3
+warnlevel=3
+option.specs + parser=cola: exe:warning>WARN
+option.specs + parser=cola: exe:error>ERR
+option.specs + parser=cola: source: dir_of : vir_dir  + copy_dest=(derivedSrcs):copy
+EOF
+
+
+

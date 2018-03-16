@@ -1,0 +1,93 @@
+#I assume you have set the YAAK enviorment variable to the trunk folder
+
+CC=g++
+LD=g++
+
+HEADERS =-Iinclude \
+-Iplugin/MessageNode/include \
+-Iplugin/TriggerNode/include \
+-Iplugin/WaitOnInputSubtask/include \
+-Iplugin/WalkToSubtask/include \
+-Iplugin/CharacterEntity/include \
+-Iplugin/TriggerZoneEntity/include \
+-Iplugin/ChoiceNode/include \
+-Ieli/include \
+-Ilib/SDL2/include/SDL2 \
+-Ilib/SDL_ttf/include/SDL2 \
+-Ilib/SDL_image/include/SDL2 
+
+LDFLAGS = -shared \
+-Llib/SDL2/lib \
+-Llib/SDL_ttf/lib \
+-Llib/SDL_image/lib \
+-lSDL2main \
+-lSDL2 \
+-lSDL2_ttf \
+-lSDL2_image \
+-lfreetype \
+-pthread \
+-ldl \
+-lrt
+
+CFLAGS = -fPIC -std=c++0x -g
+
+SOURCES = \
+src/Utils.cpp \
+src/Timer.cpp \
+src/Subtask.cpp \
+src/Yobject.cpp \
+src/Entity.cpp \
+src/Picture.cpp \
+src/DoNothingSubtask.cpp \
+src/Compositor.cpp \
+src/PluginList.cpp \
+src/GlobalTimer.cpp \
+src/EventSystem.cpp \
+src/RenderableYobject.cpp \
+src/RenderableEntity.cpp \
+src/EventSystemInterface.cpp \
+plugin/MessageNode/src/Message.cpp \
+plugin/MessageNode/src/MessageSubtask.cpp \
+plugin/MessageNode/src/MessageSubtaskInterface.cpp \
+plugin/MessageNode/src/MessageYobject.cpp \
+plugin/MessageNode/src/MessageYobjectInterface.cpp \
+plugin/CharacterEntity/src/Character.cpp \
+plugin/CharacterEntity/src/CharacterInterface.cpp \
+plugin/TriggerZoneEntity/src/TriggerZoneEntity.cpp \
+plugin/TriggerZoneEntity/src/TriggerZoneEntityInterface.cpp \
+plugin/TriggerNode/src/TriggerSubtask.cpp \
+plugin/TriggerNode/src/TriggerSubtaskInterface.cpp \
+plugin/WaitOnInputSubtask/src/WaitOnInputSubtask.cpp \
+plugin/WaitOnInputSubtask/src/WaitOnInputSubtaskInterface.cpp \
+plugin/WalkToSubtask/src/WalkToSubtask.cpp \
+plugin/WalkToSubtask/src/WalkToSubtaskInterface.cpp \
+plugin/ChoiceNode/src/ChoiceSubtask.cpp \
+src/Task.cpp \
+src/TaskManager.cpp \
+src/TaskManagerInterface.cpp
+
+
+OBJECTS = $(SOURCES:.cpp=.o)
+TARGET=bin/libplugin.so.1.0
+LIBNAME=libplugin.so.1
+
+all: $(OBJECTS) TestPlugin.c
+	$(LD) $(OBJECTS) eli/TestPlugin.o $(LDFLAGS) -Wl,-soname,$(LIBNAME) \
+	-o $(TARGET)
+
+TestPlugin.c:
+	gcc -fPIC -std=c99 -g $(HEADERS) -c eli/TestPlugin.c -o eli/TestPlugin.o
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(HEADERS)  -c $< -o $@
+	
+clean:
+	rm -f src/*.o
+	rm -f eli/*.o
+	rm -f plugin/MessageNode/src/*.o
+	rm -f plugin/TriggerNode/src/*.o
+	rm -f plugin/CharacterEntity/src/*.o
+	rm -f plugin/WalkToSubtask/src/*.o
+	rm -f plugin/TriggerZoneEntity/src/*.o
+	rm -f plugin/WaitOnInputSubtask/src/*.o
+

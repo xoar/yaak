@@ -1,0 +1,180 @@
+@p maximum_input_line_length = infinity
+
+@O@<ChoiceUnparser.lido@>==@{
+
+    ATTR ChoicePointerDefintion : PTGNode;
+    ATTR ChoicePointerDefintions : PTGNode;
+
+    ATTR ChoiceDestructMsg : PTGNode;
+    ATTR ChoiceDestructMsgs : PTGNode;
+    ATTR ChoiceBuildMsg : PTGNode;
+    ATTR ChoiceBuildMsgs : PTGNode;
+    ATTR ChoiceIsInTriggerZone : PTGNode;
+    ATTR ChoiceIsInTriggerZones : PTGNode;
+
+
+    RULE: ChoiceSubtask ::= 'Choice' EntityNameUse ChoiceBoxes COMPUTE
+
+
+        ChoiceSubtask.IdemPtg =
+            PTGChoice(  PTGNumb(GetId(EntityNameUse.Key,0)),
+                        INCLUDING function_definition.EventName,
+                        ChoiceSubtask.ChoicePointerDefintions,
+                        ChoiceSubtask.ChoiceBuildMsgs,
+                        ChoiceSubtask.ChoiceIsInTriggerZones,
+                        ChoiceSubtask.ChoiceDestructMsgs,
+                        INCLUDING Subtask.Id
+                     );
+
+        ChoiceSubtask.ChoicePointerDefintions = 
+            CONSTITUENTS ChoiceBox.ChoicePointerDefintion
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        ChoiceSubtask.ChoiceBuildMsgs = 
+            CONSTITUENTS ChoiceBox.ChoiceBuildMsg
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        ChoiceSubtask.ChoiceDestructMsgs = 
+            CONSTITUENTS ChoiceBox.ChoiceDestructMsg
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        ChoiceSubtask.ChoiceIsInTriggerZones = 
+            CONSTITUENTS ChoiceBox.ChoiceIsInTriggerZone
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+    END;
+
+    /*expression is mapped to Expression in Tree.fw*/
+    RULE: ChoiceBox::= 'display' string_literal 'if' Expression
+                     'and' 'trigger' EventNameUse COMPUTE
+
+        ChoiceBox.ChoicePointerDefintion =
+            PTGChoicePointerDefinition(EventNameUse.IdemPtg);
+
+
+
+        ChoiceBox.ChoiceBuildMsg =
+            PTGChoiceBuildMsg(
+                              INCLUDING Subtask.Id,
+                              StringTable(string_literal),
+                              Expression.IdemPtg,
+                              EventNameUse.IdemPtg
+                             );
+
+        ChoiceBox.ChoiceIsInTriggerZone = 
+            PTGChoiceIsInTriggerZone(
+                                    Expression.IdemPtg,
+                                    EventNameUse.IdemPtg,
+                                    INCLUDING function_definition.EventName);
+
+        ChoiceBox.ChoiceDestructMsg = 
+            PTGChoiceDestructMsg(EventNameUse.IdemPtg);
+
+    END;
+
+@}
+
+@O@<ChoiceUnparser.ptg@>==@{
+
+ChoicePointerDefinition:
+    "    MessageYobjectStructPtr " $1 /*triggered event name*/ "Message = 0;\n"
+    "    TriggerZoneStructPtr " $1 /*triggered event name*/"Zone = 0;\n"
+
+
+Choice:
+    "    /* try to set the status of the character to the event name.\n"
+    "    block until the set*/\n"
+    "    if(!ChoiceTryToLockCharacter("$1 /*char id*/",\"" $2 /*event name*/ "\",&clearTaskCollision,pluginList))\n"
+    "    {\n"
+    "            RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
+    "            return;\n"
+    "    }\n"
+
+    "    /** --------------choice ------------------------*/\n"
+
+    $3 /* pointer definitions */
+
+
+    "    int currentPosX = 380;\n"
+    "    int currentPosY = 700;\n"
+
+    "    /* --------  build section: choose which message to display ---------------*/\n" 
+
+    $4 /* message build*/
+
+    "    /* -------  test section: check if the user click on one of the messages --*/\n"
+    "    int loop = 1;\n"
+
+    "    while(loop)\n"
+    "    {\n"
+
+    "        WaitOnInputStructPtr sub" $1 /*char id*/ " = WaitOnInputConstructor(pluginList, "
+                                                       $7 int /*subtask id*/ ","
+                                                      "\"" $2 /*event name*/ "\","
+                                                      "\"mouse\",\"left\");\n"
+
+    "        if (! WaitOnInputProcess (sub" $1 /*char id*/ "))"
+    "        {\n"
+    "            RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
+    "            return;\n"
+    "        }\n"
+
+    "        GameEvents events = EventSystemGetCurrentEvents(pluginList);\n"
+    "        Position targetPosition = {events.mouseX,events.mouseY};\n"
+
+        $5 /* check is in trigger zone*/
+
+    "        /*if we just repeat the loop with out that WaitOn just\n"
+    "        dont block if the mouse was clicked -> endless loop*/\n"
+    "        if (loop)"
+    "        {\n"
+    "            if(!SuspendTaskUntilNextRound(pluginList,\"" $2 /*event name*/ "\"))\n"
+    "            {\n"
+    "                RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
+    "                return;\n"
+    "            }\n"
+    "        }\n"
+    "    }\n"
+
+    $6 /* message destruction*/
+
+
+    "    /** --------------end choice ------------------------*/\n"
+    
+    "    CharacterLock(pluginList,"$1 /*char id*/");\n"
+    "    CharacterSetStatus(pluginList,"$1 /*char id*/",\"None\");\n"
+    "    CharacterUnlock(pluginList,"$1 /*char id*/");\n"
+
+
+ChoiceBuildMsg:
+    
+    "    if (" $3 /*expression*/ ")\n"
+    "    {\n"
+    "        ChoiceBuildMessage(&currentPosX,"
+                           "&currentPosY,"
+                           "&" $4 /*triggered event name*/ "Message,"
+                           "&" $4 /*triggered event name*/"Zone,"
+                           "\""$4 /*triggered event name*/"Zone\","
+                           $2 string /*text*/","
+                           $1 int /*subtask id*/","
+                           "pluginList);\n"
+    "    }\n"
+
+
+ChoiceIsInTriggerZone:
+    "    if ("  $1 /*expression*/ ")\n"
+    "    {\n"
+    "        if (IsPointInTriggerZone(" $2 /*triggered event name*/ "Zone,targetPosition))\n"
+    "        {\n"
+    "            AddAndRunTask(pluginList,\"" $2 /*triggered event name*/ 
+                                "\", &" $2 /*triggered event name*/ 
+                                "," "\"" $3 /*caller event name*/ "\""  ");\n"
+    "            loop = 0;\n"
+    "        }\n"
+    "    }\n"
+
+ChoiceDestructMsg:
+    "    if (" $1 /*triggered event name*/ "Message)\n" 
+    "        MessageYobjectDestructor(" $1 /*triggered event name*/ "Message);\n"
+
+@}

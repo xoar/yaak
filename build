@@ -1,0 +1,6 @@
+#!/bin/bash
+
+make clean
+make $1 $2 || { echo "Main System build failed";exit 1;}
+make -f MakefileTestPlugin clean
+make -f MakefileTestPlugin $1 $2 || { echo "Plugin build failed";exit 1;}

@@ -1,0 +1,12 @@
+/* $Id: back.specs,v 1.1 2015/05/20 11:14:26 pfahler Exp $ */
+
+backliga.ptg
+back.ptg
+Node.ptg
+NodePtr.ptg
+Encode.ptg
+GenMkFct.ptg
+General.ptg
+Listof.ptg
+GenMon.ptg
+AttrMon.ptg

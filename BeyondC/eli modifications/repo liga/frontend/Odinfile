@@ -1,0 +1,5 @@
+%frontderive ! == <<EOF
+Lido.specs +parser=cola :exe:warning > WARN
+Lido.specs +parser=cola :exe:error > ERR
+Lido.specs +parser=cola :source: dir_of : vir_dir  + copy_dest=(derivedSrcs):copy
+EOF

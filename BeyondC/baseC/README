@@ -1,0 +1,22 @@
+A specification for a processor for C.  The contents of this directory are:
+
+Phrase.fw	The phrase structure of C.
+Tree.fw		A tree structure for C programs
+Name.fw		Scope rules for C
+Type.fw		Type system for C
+
+Odinfile	Commands that build some useful products
+
+You can request any of the following products by invoking "eli" with the
+name of the product as its argument (e.g. "eli c.exe"):
+
+c.exe		Executable processor for C
+
+%source		All files, including a Makefile, needed to implement the
+		C processor independent of Eli.  This product should be
+		redirected to a directory (e.g. "eli '%source>src'").
+
+C.pdf		Formatted specification for printing (this requires the
+		html.sty style file of LaTeX2Html)
+
+$Id: README,v 1.2 2008/08/27 21:38:15 waite Exp $

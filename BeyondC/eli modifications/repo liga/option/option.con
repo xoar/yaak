@@ -1,0 +1,86 @@
+% Concrete grammar for LIGA option handler
+% HaDeS, 07/02/90 - 07/23/91
+
+Start:		Options .
+
+
+Options:	Option ';' Options /
+		.
+
+Option:		'EXPAND' ':' ExpandOpts /
+		'ORDER' ':' OrderOpts /
+		'OPTIM' ':' OptimOpts /
+		'BACKEND' ':' BackendOpts .
+
+
+IdentList:	Identifier IdentList /
+		.
+
+ExpandOpts:	ExpandOpt ',' ExpandOpts /
+		ExpandOpt.
+
+OrderOpts:	OrderOpt ',' OrderOpts /
+		OrderOpt.
+
+OptimOpts:	OptimOpt ',' OptimOpts /
+		OptimOpt.
+
+BackendOpts:	BackendOpt ',' BackendOpts /
+		BackendOpt.
+
+
+ExpandOpt:	Identifier Identifier /
+		% ^^^	CONST_ATTR_NAME / INCL_ATTR_NAME /
+		%	CHAIN_PRE_ATTR_NAME / CHAIN_POST_ATTR_NAME
+		'INCLUDING' Identifier /
+		%	     ^^^ ON /  OFF
+		Identifier .
+		% ^^^	INCLUDINGS_SEPARATE / INFO
+
+
+OrderOpt:	Identifier Identifier /
+		%	    ^^^	EARLY / LATE
+		% ^^^	PARTITION / TOPOLOGICAL
+		'GRAPH' Identifier IdentList /
+		%	 ^^^ DIRECT_SYMBOL / TRANSITIVE_SYMBOL /
+		%	INDUCED_SYMBOL / DIRECT_RULE / TRANSITIVE_RULE /
+		%	INDUCED_RULE / PARTITIONED_RULE / PARTITION /
+		%	VISIT_SEQUENCE
+		'TREE' Identifier /
+		%	^^^	COMPLETE / BOTTOM_UP / TOP_DOWN
+		'ARRANGE' ArrangeType .
+
+ArrangeType:	'AUTOMATICALLY' /
+		'FAST' /
+		'FOR' 'SYMB' Identifier 'EVAL' Identifier 'BEFORE' Identifier /
+		'IN' 'RULE' Identifier 'EVAL' AttrSpec 'BEFORE' AttrSpec .
+
+AttrSpec:	Identifier '[' IntNumber ']' '.' Identifier .
+
+
+OptimOpt:	Identifier /
+		% ^^^	OFF / INFO / MORE_GLOBALS /
+		%	NO_VARIABLES / NO_STACKS / NO_GROUPING
+		'GROUPING' Identifier /
+		%	    ^^^	VARIABLE / STACK / ALL
+		'ATTRSPEZ' AttrType AttrList .
+
+AttrType:	Identifier Identifier /
+		%	    ^^^	STACK / VAR
+		% ^^^	GLOBAL / GROUP
+		'TREE_NODE' .
+
+AttrList:	AttrNames AttrList /
+		.
+
+AttrNames:	Identifier '[' NamesList ']' .
+
+NamesList:	Identifier NamesList /
+		Identifier .
+
+
+BackendOpt:	Identifier /
+		% ^^^	READABLE / KEEP_TREE / FREE_TREE
+		Identifier IntNumber .
+		% ^^^	PRODS_IN_CASE / ATSTACK_SIZE
+

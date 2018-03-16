@@ -1,0 +1,4 @@
+DELITwith: $with [mkstr]
+DELITTO: $to [mkstr]
+DELITINDEX: $index [mkstr]
+DELITPOSTITION: $position [mkstr]

@@ -1,0 +1,73 @@
+/*==============================================================*/
+/* monitoring support mon_aprods.c */
+
+#include "ansi.h"
+
+MonAprods:
+	"/* implementation of monitoring support for attribution */\n\n"
+	"#ifdef MONITOR\n\n"
+	"#include \"node.h\"\n"
+	"#include \"treecon.h\"\n"
+	"#include\"nodecode.h\"\n"
+	"#include\"eliproto.h\"\n"
+	"\n"
+	$1 /* AbsProds */
+	$2 /* AbsNchild */
+	$3 /* AbsChild */
+	"#else\n"
+	"/* To avoid messages about empty files */\n"
+	"static int _dapto;\n"
+	"#endif\n"
+
+AbsProds:
+	"CONST char *abs_prods[] = {\n"
+	$1 /* Prods */
+	"  (char *) 0\n"
+	"};\n\n"
+
+Prods:
+	"  \"{" $1 string "} {" $2 string "} {"
+	     $3 "}\",\n"
+
+AbsNchild:
+	"int abs_nchild[] = {\n"
+	$1 /* Nchild */
+	"};\n\n"
+
+Nchild:
+	"  " $1 int ",\n"
+
+AbsChild:
+	IFANSI
+	"\nNODEPTR abs_child (NODEPTR n, int c)"
+	ELSE
+	"\nNODEPTR abs_child (n, c)\n"
+	"  NODEPTR n;\n"
+	"  int c;"
+	ENDIF
+	"\n{\n"
+	"  switch (n->_prod) {\n"
+	$1 /* Child */
+	"    default:\n"
+	"        return (NODEPTR) 0;\n"
+	"  }\n"
+	"}\n\n"
+
+Child:
+	"    case RULE" $1 string ": {\n"
+	"      _TPP" $1 string " m = (_TPP" $1 string ") n;\n"
+	"      switch (c) {\n"
+	$2 /* Desc */
+	"        default:\n"
+	"          return (NODEPTR) 0;\n"
+	"      }\n"
+	"      break;\n"
+	"    }\n"
+
+Desc:
+	"        case " $1 int ": return (NODEPTR) m->_desc" $1 int "; break;\n"
+
+Sseq:
+	$1 " " $2 string
+Lseq:
+	$1 " '" [C_outstr_noquotes $2 string] "'"

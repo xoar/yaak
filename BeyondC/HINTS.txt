@@ -1,0 +1,2 @@
+dont use to normal kewords e.g 'Talk'
+a function call of Talk() than wouldnt work

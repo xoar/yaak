@@ -1,0 +1,35 @@
+@p maximum_input_line_length = infinity
+
+@O@<GccExtensions.con@>==@{
+
+    attribute_specifier_list : attribute_specifier_list attribute_specifier .
+    attribute_specifier_list : attribute_specifier .
+
+    attribute_specifier : '__atribute__' '((' attribute_list '))' .
+
+    attribute_list : attribute_list ',' attribute .
+    attribute_list : attribute .
+
+    attribute : .
+    attribute : identifier .
+    attribute : identifier '(' attribute_parameters ')' .
+
+    attribute_parameters : attribute_parameters ',' attribute_parameter .
+    attribute_parameters : .
+
+    attribute_parameter : identifier .
+    attribute_parameter : expression .
+    attribute_parameter : string_literal .
+
+
+    init_declarator: declarator  attribute_specifier_list .
+    init_declarator: declarator  attribute_specifier_list '=' initializer .
+
+@}
+
+@O@<GccExtensions.lido@>==@{
+
+    RULE: init_declarator ::= InitDecl attribute_specifier_list END;
+    RULE: init_declarator ::= InitDecl attribute_specifier_list '=' initializer END;
+
+@}

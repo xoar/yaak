@@ -1,0 +1,46 @@
+@p maximum_input_line_length = infinity
+
+@O@<Language.con@>==@{
+
+     Entity: SegColliderDef.
+
+     SegColliderDef: 'Segment Collider' EntityNameDef SegProperties.
+
+     SegProperties: SegProperties SegProperty.
+     SegProperties: .
+    
+     SegProperty: SegPositionProperty .
+
+     /*--------------*/
+     SegPositionProperty: 'start' 'position' ':'  integer_constant ',' integer_constant
+                          'end' 'position' ':'  integer_constant ',' integer_constant.
+
+@}
+
+@O@<CharacterAnalysis.lido@>==@{
+
+    /* signal id was set*/
+    RULE: SegColliderDef::= 'Segment Collider' EntityNameDef SegProperties COMPUTE
+        SegColliderDef.GotEntityId = ResetId(EntityNameDef.Key,INCLUDING Entity.EntityId);       
+    END;
+    
+    RULE: Entity::= SegColliderDef COMPUTE
+        Entity.GotEntityId =  SegColliderDef.GotEntityId;
+    END;
+
+    /*-------------------------------------------------*/
+
+    ATTR NewEntityId: int;
+    
+    /*the entity can be overwritten by another occurence
+      to prevent a call of <- INCLUDING program.GotEntityId ;
+      and PTGNumb(GetId(EntityNameUse[1].Key,0)) 
+      by every occurance of the entity id we make this shortcut*/
+    RULE: SegColliderDef::= 'Segment Collider' EntityNameDef SegProperties COMPUTE
+        SegColliderDef.NewEntityId = GetId(EntityNameDef.Key,INCLUDING Entity.EntityId) 
+                               <- INCLUDING program.GotEntityId;
+    END;
+
+    /*-------------------------------------------------*/
+
+@}

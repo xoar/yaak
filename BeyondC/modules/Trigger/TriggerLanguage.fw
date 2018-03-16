@@ -1,0 +1,13 @@
+@p maximum_input_line_length = infinity
+
+@O@<TriggerGrammer.con@>==@{
+
+    Subtask: TriggerSubtask.
+    
+    TriggerSubtask: 'trigger' EventUses.
+    EventUses: EventUses ',' EventUse.
+    EventUses: EventUse.
+
+    EventUse: EventNameUse.
+
+@}

@@ -1,0 +1,165 @@
+/* $Id: back.ptg,v 1.1 2015/05/20 11:14:26 pfahler Exp $ */
+
+/*==============================================================*/
+/* LIGA backend PTG specification */
+/* U. Kastens */
+/*==============================================================*/
+
+#include "ansi.h"
+
+/* annotation of computations */
+
+SpecLineInfo:
+	"/*SPC(" $ int ")*/\n"
+
+/* visit procedures */
+
+VisitProcFileHead:
+"\n#include \"HEAD.h\"\
+\n#include \"err.h\"\
+\n#include \"node.h\"\
+\n#include \"visitprocs.h\"\
+\n#include \"attrpredef.h\"\n\
+\n#include \"visitmap.h\"\n\
+\n#ifdef MONITOR\
+\n#include \"attr_mon_dapto.h\"\
+\n#include \"liga_dapto.h\"\
+\n#endif\n\
+\n#ifndef _VisitVarDecl\
+\n#define _VisitVarDecl()\
+\n#endif\n\
+\n#ifndef _VisitEntry\
+\n#define _VisitEntry()\
+\n#endif\n\
+\n#ifndef _VisitExit\
+\n#define _VisitExit()\
+\n#endif\n\n"
+IFANSI
+"\n#define _CALL_VS_(args) (void (*)args)"
+ELSE
+"\n#define _CALL_VS_(args) "
+ENDIF "\n"
+
+
+RootProc:
+IFANSI
+"\nvoid LIGA_ATTREVAL (NODEPTR _currn)"
+ELSE
+"\nvoid LIGA_ATTREVAL (_currn) NODEPTR _currn;"
+ENDIF
+"\n{"
+$ /* RootVisit */
+"}\n/*SPC(0)*/\n"
+
+RootVisit:
+"(*(VS1MAP[_currn->_prod])) ((NODEPTR)_currn);"
+
+PredefVSProc:
+IFANSI
+"\nvoid " $1/*name*/ "(NODEPTR _currn)"
+ELSE
+"\nvoid " $1/*name*/ "(_currn) NODEPTR _currn;"
+ENDIF
+"\n{ _VisitVarDecl()\n_VisitEntry();\n"
+$2/* descendent visits */
+"\n_VisitExit();\n}\n"
+
+PredefVSHeader:
+"\nextern void " $ /*Name*/ " ELI_ARG((NODEPTR _currn));"
+
+VisitHeader:
+"\n#ifndef _VISITPROCS_H\n#define _VISITPROCS_H\n"
+"\n#include \"HEAD.h\""
+"\n#include \"node.h\""
+"\n#include \"treecon.h\"\n"
+"\n#include \"eliproto.h\"\n"
+"\n\nextern void LIGA_ATTREVAL ELI_ARG((NODEPTR));"
+$ /* VisitProcHeaders */
+"\n#endif\n"
+
+VisitProcHeader:
+"\nextern void " $1/*ProcName*/ " ELI_ARG((" $2/*ProdPtrTypeName*/ " _currn" 
+	                                $3/*ComSeq StackAttrName*/ "));"
+
+DefineVS:
+"\n#define " $/*VisitProcName*/ " " $/*VisitProcName*/ "\n"
+
+VisitProcHead:
+IFANSI
+"\nvoid " $1/*VisitProcName*/ "(" $3 " _currn" $8 /*protos*/ ")"
+ELSE
+"\nvoid " $1/*VisitProcName*/ "(_currn " $2/* ComSeq StackAttrName */ ")\n"
+$3/* ProdPtrTypeName */ " _currn;\n"
+$4/* Seq StackAttrParamSpec */
+ENDIF
+"\n{\n"
+$5/* decls */
+"\n_VisitVarDecl()\n_VisitEntry();\n"
+$6/* stmts */
+$7/* epilog */
+"\n_VisitExit();\n}\n"
+
+DescVisit:
+"(*(_CALL_VS_((NODEPTR " $4 /*ComSeq StackProtos*/")) "
+"(VS" $1 "MAP[_currn->" $2/* DescName */ "->_prod])))((NODEPTR) _currn->"
+$2/* DescName */ $3/* ComSeq StackArg*/ ");\n"
+
+GenAssign:
+	"{ " $1 /* desc ptr */ 
+             " = (_TSP" $2 string /* symb name */ ") "
+                 "Mk" $2 string "(NoPosition, " $3/* rhs */ ");\n"
+        "  if ((NODEPTR)" $1 " == NULLNODEPTR)\n" 
+        "    message (DEADLY, \"generated tree is not of type " 
+                  $2 string "\", 0, NoPosition);\n}"
+
+/*==============================================================*/
+/* Non-literal Terminals */
+
+TreeActHead:
+	"\n\n#define _TERMACT_" $ string /* rule name */
+
+DefineLine:
+        /* switch newline-style to cpp-style ("\"); */
+	" \\\n\t" [cpp_new_line] $ [ord_new_line]";"
+
+NonLitTermAcc:
+	"_TERM" $ int /* terminal number */
+
+LineSelect:
+	"((" $ ").line)"
+
+ColSelect:
+	"((" $ ").col)"
+
+LineAccess:
+	"(_coordref ? _coordref->line : 0)"
+
+ColAccess:
+	"(_coordref ? _coordref->col : 0)"
+
+CoordAccess:
+	"(_coordref ? *_coordref : NoCoord)"
+
+/*==============================================================*/
+/* cycles */
+
+Label:
+"\n" $/* name */ ":;\n"
+
+LabName:
+"_CYCLE" $2 /* symbno */ $1 /* attr name*/
+
+Loop:
+"\nif (!(" $1 /* cond */ ")) {\n" $2 /* iter */ 
+"\ngoto " $3/* name */ ";\n}\n"
+
+/*==============================================================*/
+/* including */
+
+InclPre:
+$/*InclLocName*/ "=" $/*InclGlobName*/ ";"
+$/*InclGlobName*/ "= &(_currn->" $/*TreeAttrName*/ ");\n"
+
+InclPost:
+$/*InclGlobName*/ "=" $/*InclLocName*/ ";\n"
+

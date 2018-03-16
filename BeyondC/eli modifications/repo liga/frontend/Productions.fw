@@ -1,0 +1,620 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Productions.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $ */
+
+-----------------------------------------------------------
+Productions.fw
+
+An internal representation of the production of every
+rule instance is created.
+
+Several instances of the same rule are identified.
+Unnamed rules are matched to named rules of the same
+structure. An error is reported if that match is ambiguous.
+
+Names are created for the non-matched unnamed rules.
+
+The unique internal rule representation is associated as
+Rule property to each rule key.
+
+LISTOF rules are checked for consistency.
+LISTOF rules may not be transformed in this phase which is
+part of LigaProd. They are transformed in the Frontend phase.
+
+The set of tree grammar rules is exported by the variable
+RuleProdList GrammarRules, to be used by
+#include "GrammarRules.h".
+A production is represented as a list of ProdSymbols.
+The production instances are collected in lists of RuleProd.
+
+
+These computations may be applied to complete or to 
+incomplete tree grammars (Liga frontend or Liga production extractor).
+-----------------------------------------------------------
+
+For each instance of a production a list of ProdSymbols is created:
+
+~$~<CreateProd.lido~>==~{
+SYMBOL Production INHERITS ProdSymbolListRoot END;
+SYMBOL SyntId INHERITS ProdSymbolListElem END;
+SYMBOL SyntLit INHERITS ProdSymbolListElem END;
+
+RULE: SyntLit ::= P_String COMPUTE
+  SyntLit.ProdSymbolElem = MakeProdLiteral (P_String);
+
+  IF (EQ (0, strlen (StringTable(P_String))),
+    message 
+      (ERROR,
+       "Literal terminal may not be the empty string",
+       0, COORDREF));
+END;
+
+SYMBOL SyntId: IsGenSymbol: int;
+SYMBOL SyntId COMPUTE 
+  INH.IsGenSymbol = 0; /* default */
+
+  SYNT.ProdSymbolElem = 
+    MakeProdSymbol (THIS.Key, INH.IsGenSymbol, COORDREF);
+END;
+
+RULE: SyntUnit ::= '$' SyntId COMPUTE
+  SyntId.IsGenSymbol = 1;
+END;
+~}
+
+
+A representation for each rule instance is created and kept
+in two lists, one for named and one for unnamed rules:
+~$~<CreateRules.lido~>==~{
+SYMBOL AG COMPUTE
+  SYNT.GotRuleInstance = CONSTITUENTS RuleSpec.RuleInstance;
+END;
+
+SYMBOL RuleSpec: RuleInstance: RuleProd;
+RULE: RuleSpec ::= 'RULE' RuleSpecId ':' Production CompPart 'END' 
+COMPUTE
+  RuleSpec.RuleInstance = 
+    MakeRuleProd 
+      (RuleSpecId.Key, Production.ProdSymbolList, 
+       Production.IsListof, COORDREF);
+END;
+
+SYMBOL RuleSpecId: Key: DefTableKey;
+RULE: RuleSpecId ::= RuleId COMPUTE
+  RuleSpecId.Key = RuleId.Key;
+END;
+
+RULE: RuleSpecId ::= COMPUTE
+  RuleSpecId.Key = NoKey;
+END;
+~}
+
+The function MakeGrammar identifies several instances of the same rule.
+An unnamed rule instance is identified with a named one if that
+they coincide in the production and there is no other named instance
+which also matches.
+
+Those rules which are still unnamed get generated names.
+
+A unique representation is kept for each rule. It is associated to the
+rule's key. The attribute Rule is set to that representation.
+They are stored in the list GrammarRules.
+
+LISTOF productions are checked for consistency.
+
+~$~<IdentifyRules.lido~>==~{
+SYMBOL AG COMPUTE
+  SYNT.MadeGrammar =
+     MakeGrammar (SYNT.Env) <- (SYNT.GotRuleInstance, SYNT.GotNameSym);
+  SYNT.GotGrammarRules = CONSTITUENTS RuleSpec.Rule;
+END;
+
+SYMBOL RuleSpec: Rule: RuleProd,
+                 Key: DefTableKey;
+RULE: RuleSpec ::= 'RULE' RuleSpecId ':' Production CompPart 'END' 
+COMPUTE
+  RuleSpec.Key = RuleKeyOfRuleProd (RuleSpec.RuleInstance)
+      <- INCLUDING AG.MadeGrammar;
+  RuleSpec.Rule = GetRule (RuleSpec.Key, NoRuleProd);
+END;
+
+SYMBOL Production: IsListof: int;
+RULE: Production ::= SyntId '::=' SyntUnits COMPUTE
+  Production.IsListof = 0;
+END;
+
+RULE: Production ::= SyntId 'LISTOF' Alts COMPUTE
+  Production.IsListof = 1;
+END;
+~}
+
+~O~<Productions.lido~>~{
+~<CreateProd.lido~>
+~<CreateRules.lido~>
+~<IdentifyRules.lido~>
+~}
+
+The following modules are used:
+DynSpace for storing list elements,
+LidoList<ProdSymbol> for composing productions,
+List<RuleProd> for tree grammar rule lists,
+MakeName for creation of rule identifiers in unnamed rules,
+Strings for adding identifiers to error reports.
+
+~O~<Prod.specs~>~{
+$/Adt/DynSpace.fw
+$/Adt/LidoList.gnrc+instance=ProdSymbol +referto=Prod :inst
+$/Adt/List.gnrc+instance=RuleProd +referto=RuleProd :inst
+$/Tech/MakeName.gnrc +instance=Identifier :inst
+$/Tech/Strings.specs
+~}
+
+~O~<Prod.pdl~>~{
+IsNonterm: int;
+HasListof: int;    /* this lhs symbol has a LISTOF production */
+HasNonListof: int; /* this lhs symbol has a non-LISTOF production */
+Rule: RuleProd; "RuleProd.h"
+LhsOfRule: DefTableKey;
+ListofRuleOfLhs: DefTableKey; /* rule key of its lhs used for check*/
+~}
+
+~O~<Prod.h~>~{
+#ifndef PROD_H
+#define PROD_H
+
+#include "args.h"
+#include "deftbl.h"
+#include "envmod.h"
+#include "err.h"
+
+#define IsProdLiteral	0
+#define IsProdSymbol	1
+#define IsProdGenSymbol	2
+
+typedef struct
+{ int    kind;                /* one of the above kinds */
+  union 
+   { struct
+     { DefTableKey symbolkey; /* nonterm or non-literal term */
+       int symbolpos;         
+         /* i-th nonterm in production counted from 0, or
+            i-th terminal in production counted from 1 
+         */
+       Environment scope;     /* the scope of the symbol occurrence */
+       CoordPtr coord;
+     } s;
+     int         literal;     /* StringTable index of literal */
+   } u;
+} _PElem, *ProdSymbol;
+
+#define NoProdSymbol ((ProdSymbol)0)
+#define PosOfProdSymbol(sy) ((sy) == NoProdSymbol ? 0 : (sy)->u.s.symbolpos)
+#define GetSymbolOccScope(sy) ((sy) == NoProdSymbol ? NoEnv : (sy)->u.s.scope)
+
+extern void *ProdSpace;
+
+extern ProdSymbol MakeProdSymbol 
+  FEARGS ((DefTableKey key, int isgen, CoordPtr coord));
+extern ProdSymbol MakeProdLiteral FEARGS ((int lit));
+
+#endif
+~}
+
+~O~<Prod.c~>~{
+#include "Prod.h"
+#include "DynSpace.h"
+
+void *ProdSpace = (void*)0;
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol MakeProdSymbol (DefTableKey key, int isgen, CoordPtr coord)
+#else
+ProdSymbol MakeProdSymbol (key, isgen, coord) 
+   DefTableKey key; int isgen; CoordPtr coord;
+#endif
+{ ProdSymbol res;
+  if (!ProdSpace) ProdSpace = InitDynSpace ();
+  res = (ProdSymbol) DynAlloc (ProdSpace, sizeof (_PElem));
+  res->kind = isgen ? IsProdGenSymbol : IsProdSymbol;
+  res->u.s.symbolkey = key;
+  res->u.s.coord = coord;
+  return res;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol MakeProdLiteral (int lit)
+#else
+ProdSymbol MakeProdLiteral (lit) int lit;
+#endif
+{ ProdSymbol res;
+  if (!ProdSpace) ProdSpace = InitDynSpace ();
+  res = (ProdSymbol) DynAlloc (ProdSpace, sizeof (_PElem));
+  res->kind = IsProdLiteral;
+  res->u.literal = lit;
+  return res;
+}
+~}
+
+~O~<RuleProd.h~>~{
+#ifndef RULEPROD_H
+#define RULEPROD_H
+
+#include "args.h"
+#include "deftbl.h"
+#include "err.h"
+#include "ProdSymbolList.h"
+
+typedef struct
+{ DefTableKey    rulekey;
+  ProdSymbolList prod;
+  int            islistof;
+  CoordPtr       coord;
+} _RElem, *RuleProd;
+
+#define NoRuleProd ((RuleProd)0)
+#define RuleKeyOfRuleProd(r) ((r)->rulekey)
+
+#endif
+~}
+
+~O~<GrammarRules.head~>~{
+#include "GrammarRules.h"
+~}
+
+~O~<GrammarRules.h~>~{
+#include "RuleProdList.h"
+#include "envmod.h"
+
+extern RuleProd MakeRuleProd 
+  FEARGS ((DefTableKey rulekey, ProdSymbolList prod, 
+           int islistof, CoordPtr coord));
+
+/* list of all rules, no duplicate instances, each named,
+   names generated for unnamed rules that are not matched to
+   a named rule:
+*/
+extern RuleProdList GrammarRules;
+
+extern void MakeGrammar (Environment env);
+~}
+
+~O~<GrammarRules.c~>~{
+#include "GrammarRules.h"
+#include "MakeName.h"
+#include "pdl_gen.h"
+#include "Strings.h"
+#include "DynSpace.h"
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+static void TestRule (char *s, DefTableKey key, CoordPtr coord)
+{ int id = GetNameSym (key, 0);
+  char *name = id == 0 ? "unnamed" : StringTable(id);
+  printf ("%s rule %s in line %d\n", s, name, LineOf(*coord));
+}
+#endif
+
+static
+#if defined(__cplusplus) || defined(__STDC__)
+int CmpProdElem (ProdSymbol s1, ProdSymbol s2)
+#else
+int CmpProdElem (s1, s2) ProdSymbol s1, s2;
+#endif
+/* compares 2 ProdSymbols */
+{
+    if (s1->kind != s2->kind) return 1;
+    if (s1->kind == IsProdLiteral)
+    {  if (strcmp (StringTable (s1->u.literal),
+                   StringTable (s2->u.literal)) != 0) 
+          return 1;
+    } else
+    if (s1->u.s.symbolkey != s2->u.s.symbolkey) return 1;
+    else return 0;
+    return 0; /* never reached */
+}
+
+static
+#if defined(__cplusplus) || defined(__STDC__)
+int CmpProd (ProdSymbolList prod1, ProdSymbolList prod2)
+#else
+int CmpProd (prod1, prod2) ProdSymbolList prod1, prod2;
+#endif
+/* compares 2 non-listof productions */
+{
+  while (prod1 != NULLProdSymbolList && prod2 != NULLProdSymbolList)
+  { ProdSymbol s1 = HeadProdSymbolList (prod1);
+    ProdSymbol s2 = HeadProdSymbolList (prod2);
+    if (CmpProdElem (s1, s2)) return 1;
+    prod1 = TailProdSymbolList (prod1);
+    prod2 = TailProdSymbolList (prod2);
+  }
+  if (prod1 != NULLProdSymbolList || prod2 != NULLProdSymbolList)
+       return 1;
+  else return 0;
+}
+
+static
+#if defined(__cplusplus) || defined(__STDC__)
+int CmpListofProd (ProdSymbolList prod1, ProdSymbolList prod2)
+#else
+int CmpListofProd (prod1, prod2) ProdSymbolList prod1, prod2;
+#endif
+/* compares 2 listof productions */
+{ ProdSymbolList aux1 = prod1;
+  while (aux1 != NULLProdSymbolList)
+  { ProdSymbol s1 = HeadProdSymbolList (aux1);
+    if (!ElemInProdSymbolList (s1, prod2, CmpProdElem))
+       return 1;
+    aux1 = TailProdSymbolList (aux1);
+  }
+  while (prod2 != NULLProdSymbolList)
+  { ProdSymbol s2 = HeadProdSymbolList (prod2);
+    if (!ElemInProdSymbolList (s2, prod1, CmpProdElem))
+       return 1;
+    prod2 = TailProdSymbolList (prod2);
+  }
+  return 0;
+}
+
+static
+#if defined(__cplusplus) || defined(__STDC__)
+int CmpRule (RuleProd rule1, RuleProd rule2)
+#else
+int CmpRule (rule1, rule2) RuleProd rule1, rule2;
+#endif
+/* compares 2 rules */
+{
+  if (rule1->rulekey != rule2->rulekey) return 1;
+  if (rule1->islistof != rule2->islistof) return 1;
+  if (rule1->islistof)
+       return CmpListofProd (rule1->prod, rule2->prod);
+  else return CmpProd (rule1->prod, rule2->prod);
+}
+
+/* all explicitly named rules, one for all instances,
+   the productions are checked for equality:
+*/
+static RuleProdList namedrules = NULLRuleProdList;
+
+/* all rules without a name that differ in the production:
+*/
+static RuleProdList unnamedrules = NULLRuleProdList;
+
+/* all rules, no duplicate instances, each named,
+   names generated for unnamed rules that are not matched to
+   a named rule:
+*/
+RuleProdList GrammarRules = NULLRuleProdList;
+
+#if defined(__cplusplus) || defined(__STDC__)
+RuleProd MakeRuleProd 
+  (DefTableKey rulekey, ProdSymbolList prod, 
+   int islistof, CoordPtr coord)
+#else
+RuleProd MakeRuleProd (rulekey, prod, islistof, coord) 
+  DefTableKey rulekey; ProdSymbolList prod; 
+  int islistof; CoordPtr coord;
+#endif
+/* on exit
+     one of the lists unnamedrules or GrammarRules
+     contains an entry for this rule instance
+*/
+{ RuleProd res;
+#ifdef TEST
+  TestRule("MakeRuleProd", rulekey, coord);
+#endif
+  /* check whether there is already an instance of this rule: */
+  if (rulekey == NoKey)
+  { RuleProdList search = unnamedrules;
+    while (search != NULLRuleProdList)
+    { RuleProd unnamedrule = HeadRuleProdList (search);
+      int equal = unnamedrule->islistof == islistof;
+      if (equal && islistof &&
+          0 == CmpListofProd (unnamedrule->prod, prod))
+         return unnamedrule;
+      if (equal && !islistof &&
+          0 == CmpProd (unnamedrule->prod, prod))
+         return unnamedrule;
+      search = TailRuleProdList (search);
+    }
+  } else
+  { RuleProdList search = GrammarRules;
+    while (search != NULLRuleProdList)
+    { RuleProd namedrule = HeadRuleProdList (search);
+      if (namedrule->rulekey == rulekey)
+      { int equal = namedrule->islistof == islistof;
+        if (equal && islistof)
+           equal = (0 == CmpListofProd (namedrule->prod, prod));
+        if (equal && !islistof)
+           equal = (0 == CmpProd (namedrule->prod, prod));
+        if (!equal)
+        { message 
+             (ERROR,
+              "Different productions for the same RULE name",
+              0, namedrule->coord);
+          message 
+             (ERROR,
+              "Different productions for the same RULE name",
+              0, coord);
+        }
+        return namedrule;
+      }
+      search = TailRuleProdList (search);
+    }
+  }
+  /* a new rule is found: */
+  res = (RuleProd) DynAlloc (ProdSpace, sizeof (_RElem));
+  res->rulekey = rulekey;
+  res->prod = prod;
+  res->islistof = islistof;
+  res->coord = coord;
+
+  { ProdSymbol lhs = HeadProdSymbolList (prod);
+    if (islistof) {
+         ResetHasListof (lhs->u.s.symbolkey, 1);
+         if (rulekey != NoKey) /* named rule */
+	   ResetListofRuleOfLhs (lhs->u.s.symbolkey, rulekey);
+    }
+    else ResetHasNonListof (lhs->u.s.symbolkey, 1);
+  }
+
+  if (rulekey == NoKey)
+       unnamedrules = ConsRuleProdList (res, unnamedrules);
+  else GrammarRules = ConsRuleProdList (res, GrammarRules);
+  return res;
+}/* MakeRuleProd */
+
+static
+void MapUnnamedRules (Environment globenv)
+/* on entry:
+	The lists namedrules and GrammarRules 
+	contain one entry for each RULE
+   on exit:
+	The list GrammarRules contains one named entry
+	for each RULE
+*/
+{ RuleProdList orignamedrules = GrammarRules;
+	/* the rules that have non-generated names */
+
+  while (unnamedrules != NULLRuleProdList)
+  { RuleProdList mapto = orignamedrules;
+    RuleProd unnamedrule = HeadRuleProdList (unnamedrules);
+    RuleProd namedrule;
+
+    /* search first named rule with same production: */
+    while (mapto != NULLRuleProdList)
+    { namedrule = HeadRuleProdList (mapto);
+      if (namedrule->islistof == unnamedrule->islistof &&
+          0 == CmpProd (namedrule->prod, unnamedrule->prod))
+         break;
+       mapto = TailRuleProdList (mapto);
+    }
+    if (mapto != NULLRuleProdList)
+    {  /* found one: */
+       int reported = 0;
+       RuleProd firstfound = namedrule;
+       /* use named key: */
+       unnamedrule->rulekey = namedrule->rulekey;
+#ifdef TEST
+  TestRule("orig coord", namedrule->rulekey, namedrule->coord);
+#endif
+       /* use coord of unnamed, because more likely to be
+          manually written: */
+       namedrule->coord = unnamedrule->coord;
+       ResetCoord (namedrule->rulekey, unnamedrule->coord);
+#ifdef TEST
+  TestRule("new coord", namedrule->rulekey, namedrule->coord);
+#endif
+
+       /* search for another one: */
+       mapto = TailRuleProdList (mapto);
+       while (mapto != NULLRuleProdList)
+       { namedrule = HeadRuleProdList (mapto);
+         if (namedrule->islistof == unnamedrule->islistof &&
+             0 == CmpProd (namedrule->prod, unnamedrule->prod))
+         { if (!reported)
+           { message (ERROR,
+                      CatStrInd (
+                         "Unnamed RULE matches several named rules: ",
+                         GetNameSym (firstfound->rulekey, 0)),
+                      0, unnamedrule->coord);
+             reported = 1;
+           }
+           message (ERROR, 
+                    CatStrInd (
+                       "Unnamed RULE matches several named rules: ",
+                       GetNameSym (namedrule->rulekey, 0)),
+                    0, unnamedrule->coord);
+         }
+         mapto = TailRuleProdList (mapto);
+       }
+    } else /* create rule name, add unnamedrule to grammar: */
+    { int newname = GenerateName ("rule_");
+      unnamedrule->rulekey = DefineIdn (globenv, newname);
+      ResetNameSym (unnamedrule->rulekey, newname);
+      ResetIsRule (unnamedrule->rulekey, 1);
+      ResetCoord (unnamedrule->rulekey, unnamedrule->coord);
+      GrammarRules = ConsRuleProdList (unnamedrule, GrammarRules);
+    }
+    unnamedrules = TailRuleProdList (unnamedrules);
+  }
+}/* MapUnnamedRules */
+
+static
+void SetRuleProperty ()
+/* on entry
+        the GrammarRules are completed
+   on exit
+        the properties Rule and LhsOfRule are set for each rule key
+*/
+{ RuleProdList rules = GrammarRules;
+  while (rules != NULLRuleProdList)
+  { RuleProd rule = HeadRuleProdList (rules);
+    ProdSymbol lhs = HeadProdSymbolList (rule->prod);
+    ResetRule (rule->rulekey, rule);
+    ResetLhsOfRule (rule->rulekey, lhs->u.s.symbolkey);
+    rules = TailRuleProdList (rules);
+  }
+}/* SetRuleProperty */
+
+static
+void ChkListofRules ()
+/* on entry
+	the GrammarRules are completed
+   on exit
+	reports are given for any lhs symbol that has both
+	a LISTOF and a non-LISTOF or a different production
+*/
+{ RuleProdList rules = GrammarRules;
+  while (rules != NULLRuleProdList)
+  { RuleProd rule = HeadRuleProdList (rules);
+    DefTableKey lhs = (HeadProdSymbolList (rule->prod))->u.s.symbolkey;
+    DefTableKey otherListRule = GetListofRuleOfLhs (lhs, NoKey);
+
+    if (rule->islistof && 
+        otherListRule != NoKey && otherListRule != rule->rulekey)
+          message (ERROR,
+                   CatStrInd (
+           "The same left-hand side occurs in a different production: ",
+                     GetNameSym (otherListRule, 0)),
+                   0, rule->coord);
+
+    if (GetHasListof (lhs, 0) && GetHasNonListof (lhs, 0))
+    {  if (rule->islistof)
+          message (ERROR,
+                   CatStrInd (
+         "The same left-hand side occurs in a non-LISTOF production: ",
+                     GetNameSym (rule->rulekey, 0)),
+                   0, rule->coord);
+       else
+          message (ERROR,
+                   CatStrInd (
+         "The same left-hand side occurs in a LISTOF production: ",
+                     GetNameSym (rule->rulekey, 0)),
+                   0, rule->coord);
+    }
+    rules = TailRuleProdList (rules);
+  }
+}/* ChkListofRules */
+
+#if defined(__cplusplus) || defined(__STDC__)
+void MakeGrammar (Environment env)
+#else
+void MakeGrammar (env) Environment env;
+#endif
+{
+  MapUnnamedRules (env);
+  SetRuleProperty ();
+  ChkListofRules ();
+}/* MakeGrammar */
+~}
+
+~O~<Productions.msg~>==~{
+"Literal terminal may not be the empty string"
+"Different productions for the same RULE name"
+"Unnamed RULE matches several named rules: "
+"The same left-hand side occurs in a non-LISTOF production: "
+"The same left-hand side occurs in a LISTOF production: "
+"The same left-hand side occurs in a different production: "
+~}

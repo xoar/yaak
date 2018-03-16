@@ -1,0 +1,51 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+
+@O@<simple.con@>@{
+
+source: statements.
+
+statements: statements statement ';' 'with' hello.
+statements: .
+
+statement: 'H'.
+
+
+@}
+
+@O@<simple.delit@>@{
+
+$; DELITSemikolon
+
+@}
+
+@O@<simple.gla@>@{
+
+DELITSemikolon: $;
+hello: $hello
+
+@}
+
+
+@O@<simple.lido@>@{
+
+ATTR bla: PTGNode;
+
+RULE: statements::= statements statement ';' 'with' hello
+COMPUTE
+END;
+
+RULE: source::= statements
+COMPUTE
+    source.bla = PTGblub();
+END;
+
+@}
+
+@O@<simple.ptg@>@{
+
+blub:
+   "Hallo"
+
+@}

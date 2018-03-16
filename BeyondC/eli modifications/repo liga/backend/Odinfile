@@ -1,0 +1,23 @@
+%backderive ! == <<EOF
+loglevel=4
+errlevel=3
+warnlevel=3
+back.specs:allspecs:ptg_gen:warning>WARN
+back.specs:allspecs:ptg_gen:error>ERR
+
+back.specs :source: dir_of : vir_dir  + copy_dest=(tmpderivedSrcs):copy
+
+!if test -d derivedSrcs;then echo 'OK';else mkdir derivedSrcs;fi
+
+back.specs:allspecs:ptg_gen/ptg_gen.c > derivedSrcs
+
+!cp  tmpderivedSrcs/ptg*.h derivedSrcs
+!cp  tmpderivedSrcs/obstack.[hc] derivedSrcs
+!cp  tmpderivedSrcs/csm*.[hc] derivedSrcs
+!cp  tmpderivedSrcs/gettext.h derivedSrcs
+
+!rm -rf tmpderivedSrcs
+EOF
+
+
+

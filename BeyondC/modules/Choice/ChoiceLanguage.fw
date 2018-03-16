@@ -1,0 +1,13 @@
+@p maximum_input_line_length = infinity
+
+@O@<ChoiceLanguage.con@>==@{
+    
+    Subtask: ChoiceSubtask .
+
+    ChoiceSubtask: 'Choice' EntityNameUse ChoiceBoxes.
+    ChoiceBoxes: ChoiceBoxes ChoiceBox.
+    ChoiceBoxes: ChoiceBox.
+
+    ChoiceBox: 'display' string_literal 'if' expression 'and' 'trigger' EventNameUse. 
+
+@}

@@ -1,0 +1,29 @@
+# $Id: Odinfile,v 1.2 2008/08/27 21:38:15 waite Exp $
+# Derive a C processor
+
+%current == %ANSI.specs +debug +monitor +cc=gcc
+
+%ANSI.specs == <<
+  Phrase.fw
+  Tree.fw
+  Name.fw
+  Type.fw
+  TypeName.fw
+  %C.ctl
+  
+%C.ctl == <<
+  ORDER: ARRANGE FOR SYMB Source EVAL GotKeys BEFORE TagEnv;
+
+%C.tex.vtd == <<
+  %base.tex  == wrapper.tex
+  %title.tex == title.tex
+  %parse.tex == Phrase.fw +chapter :fwTex
+  %ast.tex   == Tree.fw   +chapter :fwTex
+  %name.tex  == Name.fw   +chapter :fwTex
+  %type.tex  == Type.fw   +chapter :fwTex
+  %typename.tex  == TypeName.fw   +chapter :fwTex
+
+C.pdf == %C.tex.vtd :pdf
+
+c.exe   == %current :exe
+%source == %current :source

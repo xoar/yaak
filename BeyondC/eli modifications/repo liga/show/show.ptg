@@ -1,0 +1,78 @@
+/*$Id: show.ptg,v 1.1 2015/05/11 10:03:11 pfahler Exp $*/
+/* intfana.ptg */
+
+/* Symbols and Attributes */
+	
+AttrListHead:	$/* symb class */ $/* name */ ":"
+
+AttrDecl:	"\n	" $/* name */ ": " $/* type */ 
+		" " $/* class */ $/* delim */
+
+AttrInfo:	"/*  visit: " $/* number */  " store: " $/* storage */ 
+		" origin: " $/* origin */ $/* coord */ " */"
+
+TreeStore:	" TREE "
+StackStore:	" STACK "
+VarStore:	" VARIABLE " $/* name */ " "
+
+OrigChain:	" CHAIN "
+OrigRule:	" RULE " $/* name */ 
+OrigConst:	" CONSTITUENT(S) "
+OrigIncl:	" INCLUDING "
+
+Unknown:	" UNKNOWN "
+NONTERM:	"\nNONTERM "
+TerminalDef:	"\nTERM " $ string ": " $ string ";"
+
+INH:		"INH  "
+SYNT:		"SYNT "
+
+/* LIDO functions: */
+Line:		"LINE "
+Col:		"COL "
+Addr:		"ADDR (...) "
+Order:		"ORDER (...) "
+Pragma:		"LIGAPragma (...) "
+If:		"IF (...) "
+Iterate:	"ITERATE " $ " = ... "
+Call:		$ " (...) "
+Assign:		$ " = " $
+NonLitTermAcc:	"TERM[" $int "] "
+
+Constituents:	"CONSTITUENTS ... "
+Constituent:	"CONSTITUENT ... "
+Constituent_s:	"CONSTITUENT(S) ... "
+Including:	"INCLUDING ... "
+
+/* visit sequences */
+
+VisitRule:	"\nRULE " $/* name */ ":\n" $/* lhs */ " ::= " $/* rhs */ "\n"
+SymbolIndex:	$/* name */ "[" $/* numb */ "]"
+Symbol:		$ " "
+GenSymbol:	"$ " $/* name */
+Literal:	"'" $/* text */ "' "
+
+Visit:		"\n	visit no. " $/* numb */ " to " $/* symbol */
+Leave:		"\n	leave no. " $/* numb */ 
+Computation:	"\n     " $ "; in " $
+Label:		"\n     ITERATE on preceeding attribute"
+ChainStart:	"\n	CHAINSTART " $/* coord */
+AttrAcc:	$ "." $
+
+/* general */
+FileList:	"/* Coordinates are denoted (Fi:line:col) with"
+		$/* FileAssocs */
+		"\n*/\n"
+FileAssoc:	"\n	" $/* file ref */ ":  " $/* file name */
+Coord:		"(" $/* file ref */ ":" $/* line */ ":" $/* col */ ")"
+FileRef:	"F" $/* number */
+Comma:		", "
+Semicol:	"; "
+ColSemi:	"\n: ;\n"
+NewLine:	"\n"
+Space2:		"  "
+
+CChar:		"'" $ string "'"
+Name:		$ string
+Numb:		$ int
+Seq:		$ $

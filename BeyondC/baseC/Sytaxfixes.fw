@@ -1,0 +1,16 @@
+@p maximum_input_line_length = infinity
+
+@O@<GccExtensions.con@>==@{
+
+
+    /*pointer_abstract_declarator:
+    '*' type_qualifier_list_opt .*/
+
+    declaration: GccDirective.
+    struct_declaration: GccDirective.
+
+@}
+
+@O@<GccExtensions.lido@>==@{
+
+@}

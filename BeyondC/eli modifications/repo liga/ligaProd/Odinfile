@@ -1,0 +1,9 @@
+%ligaprodderive ! == <<EOF
+loglevel=4
+errlevel=3
+warnlevel=3
+
+ligaProd.specs +parser=cola :exe:warning > WARN
+ligaProd.specs +parser=cola :exe:error > ERR
+ligaProd.specs + parser=cola: source: dir_of : vir_dir  + copy_dest=(derivedSrcs):copy
+EOF

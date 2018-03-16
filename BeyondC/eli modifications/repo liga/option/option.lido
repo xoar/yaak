@@ -1,0 +1,345 @@
+%
+% LIDO attributed grammar for option handler
+% HaDeS, 06/18/90 - 05/23/91
+% $Id: option.lido,v 1.1 2015/05/11 12:17:23 pfahler Exp $
+%
+
+% TYPE	IdList;
+% TYPE	ExpOption;
+% TYPE	OrdOption;
+% TYPE	OptOption;
+% TYPE	BEOption;
+% TYPE	ANamesList;
+% TYPE	ExpList;
+% TYPE	OrdList;
+% TYPE	OptList;
+% TYPE	BEList;
+% TYPE	OptCollect;
+% TYPE	OptCombin;
+
+
+SYMBOL	Start:		OK:		int		SYNT;
+SYMBOL	Options:	Opts:		OptCollect	SYNT;
+SYMBOL	Option:		Opts:		OptCombin	SYNT;
+SYMBOL IdentList:	Ids:		IdList		SYNT;
+SYMBOL	ExpandOpts:	EOpts:		ExpList		SYNT;
+SYMBOL	OrderOpts:	OrdOpts:	OrdList		SYNT;
+SYMBOL	OptimOpts:	OptOpts:	OptList		SYNT;
+SYMBOL	BackendOpts:	BEOpts:		BEList		SYNT;
+SYMBOL	ExpandOpt:	ExpEntry:	ExpOption	SYNT;
+SYMBOL	OrderOpt:	OrdEntry:	OrdOption	SYNT;
+SYMBOL	ArrangeType:	OrdEntry:	OrdOption	SYNT;
+SYMBOL	AttrSpec:	Id1:		int		SYNT,
+			Id2:		int		SYNT,
+			IntVal:		int		SYNT;
+SYMBOL	OptimOpt:	OptEntry:	OptOption	SYNT;
+SYMBOL	AttrType:	Flag:		int		SYNT;
+SYMBOL	AttrList:	Names:		ANamesList	SYNT;
+SYMBOL	AttrNames:	Id:		int		SYNT,
+			Ids:		IdList		SYNT;
+SYMBOL	NamesList:	Ids:		IdList		SYNT;
+SYMBOL	BackendOpt:	BEEntry:	BEOption	SYNT;
+
+RULE START:	Start ::= Options
+COMPUTE
+	Output (Options.Opts,
+		Start.OK);
+	Start.OK= Mix_Options (
+			Conflict_Test (
+				Options.Opts),
+			Options.Opts);
+END;
+
+
+RULE OPTIONS1:	Options ::= Option ';' Options
+COMPUTE
+	Options[1].Opts= JoinOpts (
+			Option.Opts,
+			Options[2].Opts);
+END;
+
+RULE OPTIONS2:	Options ::=
+COMPUTE
+	Options.Opts= InitOpts ();
+END;
+
+RULE OPTEXP:	Option ::= 'EXPAND' ':' ExpandOpts
+COMPUTE
+	Option.Opts= TransferOpts1 (
+			ExpandOpts.EOpts);
+END;
+
+RULE OPTORD:	Option ::= 'ORDER' ':' OrderOpts
+COMPUTE
+	Option.Opts= TransferOpts2 (
+			OrderOpts.OrdOpts);
+END;
+
+RULE OPTOPT:	Option ::= 'OPTIM' ':' OptimOpts
+COMPUTE
+	Option.Opts= TransferOpts3 (
+			OptimOpts.OptOpts);
+END;
+
+RULE OPTBACK:	Option ::= 'BACKEND' ':' BackendOpts
+COMPUTE
+	Option.Opts= TransferOpts4 (
+			BackendOpts.BEOpts);
+END;
+
+
+RULE IDENTS1:	IdentList ::= Identifier IdentList
+COMPUTE
+	IdentList[1].Ids= concatIdList (
+				creatIdList (
+					Identifier),
+				IdentList[2].Ids);
+		% append index of identifier to the list
+END;
+
+RULE IDENTS2:	IdentList ::=
+COMPUTE
+	IdentList.Ids= nullIdList ();
+		% create empty list
+END;
+
+
+RULE EXPANDS1:	ExpandOpts ::= ExpandOpt ',' ExpandOpts
+COMPUTE
+	ExpandOpts[1].EOpts= concatExpOList (
+				creatExpOList (
+					ExpandOpt.ExpEntry),
+				ExpandOpts[2].EOpts);
+END;
+
+RULE EXPANDS2:	ExpandOpts ::= ExpandOpt
+COMPUTE
+	ExpandOpts.EOpts= creatExpOList (
+				ExpandOpt.ExpEntry);
+END;
+
+
+RULE ORDERS1:	OrderOpts ::= OrderOpt ',' OrderOpts
+COMPUTE
+	OrderOpts[1].OrdOpts= concatOrdOList (
+				creatOrdOList (
+					OrderOpt.OrdEntry),
+				OrderOpts[2].OrdOpts);
+END;
+
+RULE ORDERS2:	OrderOpts ::= OrderOpt
+COMPUTE
+	OrderOpts.OrdOpts= creatOrdOList (
+				OrderOpt.OrdEntry);
+END;
+
+RULE OPTIMS1:	OptimOpts ::= OptimOpt ',' OptimOpts
+COMPUTE
+	OptimOpts[1].OptOpts= concatOptOList (
+				creatOptOList (
+					OptimOpt.OptEntry),
+				OptimOpts[2].OptOpts);
+END;
+
+RULE OPTIMS2:	OptimOpts ::= OptimOpt
+COMPUTE
+	OptimOpts.OptOpts= creatOptOList (
+				OptimOpt.OptEntry);
+END;
+
+RULE BACKS1:	BackendOpts ::= BackendOpt ',' BackendOpts
+COMPUTE
+	BackendOpts[1].BEOpts= concatBEOList (
+				creatBEOList (
+					BackendOpt.BEEntry),
+				BackendOpts[2].BEOpts);
+END;
+
+RULE BACKS2:	BackendOpts ::= BackendOpt
+COMPUTE
+	BackendOpts.BEOpts= creatBEOList (
+				BackendOpt.BEEntry);
+END;
+
+
+RULE EXPAND1:	ExpandOpt ::= Identifier Identifier
+	% CONST_ATTR_NAME / INCL_ATTR_NAME /
+	% CHAIN_PRE_ATTR_NAME / CHAIN_POST_ATTR_NAME
+COMPUTE
+	ExpandOpt.ExpEntry= ExpOptEnter1 (
+			Identifier[1],
+			Identifier[2]);
+END;
+
+RULE EXPAND3:	ExpandOpt ::= 'INCLUDING' Identifier
+	% ON / OFF
+COMPUTE
+	ExpandOpt.ExpEntry= ExpOptEnter3 (
+			Identifier);
+END;
+
+RULE EXPAND2:	ExpandOpt ::= Identifier
+	% INCLUDINGS_SEPARATE / INFO / INCLUDING_FUNCTION
+COMPUTE
+	ExpandOpt.ExpEntry= ExpOptEnter2 (
+			Identifier);
+END;
+
+
+RULE ORDER1:	OrderOpt ::= Identifier Identifier
+	% PARTITION / TOPOLOGICAL
+	%	EARLY / LATE
+COMPUTE
+	OrderOpt.OrdEntry= OrdOptEnter1 (
+			Identifier[1],
+			Identifier[2]);
+END;
+
+RULE ORDER2:	OrderOpt ::= 'GRAPH' Identifier IdentList
+	% DIRECT_SYMBOL / TRANSITIVE_SYMBOL / INDUCED_SYMBOL / DIRECT_RULE /
+	% TRANSITIVE_RULE / INDUCED_RULE / PARTITIONED_RULE / PARTITION /
+	% VISIT_SEQUENCE
+COMPUTE
+	OrderOpt.OrdEntry= OrdOptEnter2 (
+			Identifier,
+			IdentList.Ids);
+END;
+
+RULE ORDER3:	OrderOpt ::= 'TREE' Identifier
+	% COMPLETE / BOTTOM_UP / TOP_DOWN
+COMPUTE
+	OrderOpt.OrdEntry= OrdOptEnter3 (
+			Identifier);
+END;
+
+RULE ORDER4:	OrderOpt ::= 'ARRANGE' ArrangeType
+COMPUTE
+	OrderOpt.OrdEntry = ArrangeType.OrdEntry;
+END;
+
+RULE ARRANGE1:	ArrangeType ::= 'AUTOMATICALLY'
+COMPUTE
+	ArrangeType.OrdEntry= OrdOptEnter4 ();
+END;
+
+RULE ARRANGE4:	ArrangeType ::= 'FAST'
+COMPUTE
+	ArrangeType.OrdEntry= OrdOptEnter7 ();
+END;
+
+RULE ARRANGE2:	ArrangeType ::= 'FOR' 'SYMB' Identifier 'EVAL' Identifier 'BEFORE' Identifier
+COMPUTE
+	ArrangeType.OrdEntry= OrdOptEnter5 (
+			Identifier[1],
+			Identifier[2],
+			Identifier[3]);
+END;
+
+RULE ARRANGE3:	ArrangeType ::= 'IN' 'RULE' Identifier 'EVAL' AttrSpec 'BEFORE' AttrSpec
+COMPUTE
+	ArrangeType.OrdEntry= OrdOptEnter6 (
+			Identifier,
+			AttrSpec[1].Id1,
+			AttrSpec[1].Id2,
+			AttrSpec[1].IntVal,
+			AttrSpec[2].Id1,
+			AttrSpec[2].Id2,
+			AttrSpec[2].IntVal);
+END;
+
+RULE ATTR1:	AttrSpec ::= Identifier '[' IntNumber ']' '.' Identifier
+COMPUTE
+	AttrSpec.Id1= Identifier[1];
+	AttrSpec.Id2= Identifier[2];
+	AttrSpec.IntVal= IntNumber;
+END;
+
+
+RULE OPTIM1:	OptimOpt ::= Identifier
+	% OFF / INFO / MORE_GLOBALS / NO_VARIABLES / NO_STACKS / NO_GROUPING
+COMPUTE
+	OptimOpt.OptEntry= OptOptEnter1 (
+				Identifier);
+END;
+
+RULE OPTIM2:	OptimOpt ::= 'GROUPING' Identifier
+	% VARIABLE / STACK / ALL
+COMPUTE
+	OptimOpt.OptEntry= OptOptEnter2 (
+				Identifier);
+END;
+
+RULE OPTIM3:	OptimOpt ::= 'ATTRSPEZ' AttrType AttrList
+COMPUTE
+	OptimOpt.OptEntry= OptOptEnter3 (
+				AttrType.Flag,
+				AttrList.Names);
+END;
+
+
+RULE ATTRTYPE1:	AttrType ::= Identifier Identifier
+	% GLOBAL / GROUP
+	%	STACK / VAR
+COMPUTE
+	AttrType.Flag= AttrTypeId1 (
+				Identifier[1],
+				Identifier[2]);
+END;
+
+RULE ATTRTYPE2:	AttrType ::= 'TREE_NODE'
+COMPUTE
+	AttrType.Flag= AttrTypeId2 ();
+END;
+
+RULE ATTRS1:	AttrList ::= AttrNames AttrList
+COMPUTE
+	AttrList[1].Names= concatNamesList (
+				creatNamesList (
+					AttrNames.Id,
+					AttrNames.Ids),
+				AttrList[2].Names);
+END;
+
+RULE ATTRS2:	AttrList ::=
+COMPUTE
+	AttrList.Names= nullNamesList();
+END;
+
+RULE ATTRNAMES:	AttrNames ::= Identifier '[' NamesList ']'
+COMPUTE
+	AttrNames.Id = Identifier;
+        AttrNames.Ids = NamesList.Ids;
+END;
+
+RULE NAMESL1:	NamesList ::= Identifier NamesList
+COMPUTE
+	NamesList[1].Ids= concatIdList (
+				creatIdList (
+					Identifier),
+				NamesList[2].Ids);
+		% append index of identifier to the list
+END;
+
+RULE NAMESL2:	NamesList ::= Identifier
+COMPUTE
+	NamesList.Ids= creatIdList (
+				Identifier);
+		% create new list of indexes, containing just one index
+END;
+
+
+RULE BACKEND1:	BackendOpt ::= Identifier
+	% READABLE / KEEP_TREE / FREE_TREE
+COMPUTE
+	BackendOpt.BEEntry= BEOptEnter1 (
+				Identifier);
+END;
+
+RULE BACKEND2:	BackendOpt ::= Identifier IntNumber
+	% SPLIT_CASE / ATSTACK_SIZE / NODESTACK_SIZE
+COMPUTE
+	BackendOpt.BEEntry= BEOptEnter2 (
+				Identifier,
+				IntNumber);
+END;
+

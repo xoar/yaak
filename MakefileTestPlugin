@@ -1,0 +1,135 @@
+#I assume you have set the YAAK enviorment variable to the trunk folder
+
+CC=g++
+LD=g++
+
+HEADERS = \
+-Iengine/base/include \
+-Iengine/CharacterEntity/include \
+-Iengine/ChoiceSubtask/include \
+-Iengine/Collider/include \
+-Iengine/Compositor/include \
+-Iengine/EngineCallbacks/include \
+-Iengine/EventSystem/include \
+-Iengine/GlobalSettings/include \
+-Iengine/GlobalTimer/include \
+-Iengine/Message/include \
+-Iengine/Scene/include \
+-Iengine/TriggerSubtask/include \
+-Iengine/TriggerZoneEntity/include \
+-Iengine/WaitOnInputSubtask/include \
+-Iengine/WalkToSubtask/include \
+-Igame/include \
+-Igame/src \
+-Ilib/SDL2/include/SDL2 \
+-Ilib/SDL_ttf/include/SDL2 \
+-Ilib/SDL_image/include/SDL2 
+
+LDFLAGS = -shared \
+-Llib/SDL2/lib \
+-Llib/SDL_ttf/lib \
+-Llib/SDL_image/lib \
+-lSDL2main \
+-lSDL2 \
+-lSDL2_ttf \
+-lSDL2_image \
+-lfreetype \
+-pthread \
+-ldl \
+-lrt
+
+CFLAGS = -fPIC -std=c++0x
+CFLAGSPLUGIN = -fPIC -std=c99
+
+SOURCES = \
+engine/base/src/MainEngine.cpp \
+engine/base/src/Utils.cpp \
+engine/base/src/Subtask.cpp \
+engine/base/src/Yobject.cpp \
+engine/base/src/Entity.cpp \
+engine/base/src/Timer.cpp \
+engine/base/src/PluginList.cpp \
+engine/base/src/Task.cpp \
+engine/base/src/TaskManager.cpp \
+engine/base/src/TaskManagerInterface.cpp \
+engine/CharacterEntity/src/Character.cpp \
+engine/CharacterEntity/src/CharacterInterface.cpp \
+engine/CharacterEntity/src/Picture.cpp \
+engine/CharacterEntity/src/PictureList.cpp \
+engine/ChoiceSubtask/src/ChoiceSubtask.cpp \
+engine/Collider/src/ColliderYobject.cpp \
+engine/Collider/src/AABBColliderYobject.cpp \
+engine/Collider/src/SegmentColliderYobject.cpp \
+engine/Collider/src/SegmentColliderYobjectInterface.cpp \
+engine/Compositor/src/Compositor.cpp \
+engine/Compositor/src/CompositorInterface.cpp \
+engine/Compositor/src/RenderableYobject.cpp \
+engine/Compositor/src/RenderableEntity.cpp \
+engine/EngineCallbacks/src/EngineUtils.cpp \
+engine/EventSystem/src/EventSystem.cpp \
+engine/EventSystem/src/EventSystemInterface.cpp \
+engine/GlobalSettings/src/GlobalSettings.cpp \
+engine/GlobalSettings/src/GlobalSettingsInterface.cpp \
+engine/GlobalTimer/src/GlobalTimer.cpp \
+engine/Message/src/Message.cpp \
+engine/Message/src/MessageSubtask.cpp \
+engine/Message/src/MessageSubtaskInterface.cpp \
+engine/Message/src/MessageYobject.cpp \
+engine/Message/src/MessageYobjectInterface.cpp \
+engine/Scene/src/SceneYobject.cpp \
+engine/Scene/src/SceneEntity.cpp \
+engine/TriggerSubtask/src/TriggerSubtask.cpp \
+engine/TriggerSubtask/src/TriggerSubtaskInterface.cpp \
+engine/TriggerZoneEntity/src/TriggerZoneEntity.cpp \
+engine/TriggerZoneEntity/src/TriggerZoneEntityInterface.cpp \
+engine/WaitOnInputSubtask/src/WaitOnInputSubtask.cpp \
+engine/WaitOnInputSubtask/src/WaitOnInputSubtaskInterface.cpp \
+engine/WalkToSubtask/src/WalkToSubtask.cpp \
+engine/WalkToSubtask/src/WalkToSubtaskInterface.cpp
+
+OBJECTS = $(SOURCES:.cpp=.o)
+TARGET=bin/libplugin.so.1.0
+LIBNAME=libplugin.so.1
+
+all: release
+
+release: CFLAGS += -O3
+release: CFLAGSPLUGIN += -O3
+release: executable
+
+debug: CFLAGS += -g -DDEBUG_OUTPUT
+debug: CFLAGSPLUGIN += -g -DDEBUG_OUTPUT
+debug: executable
+
+
+executable: $(OBJECTS) TestPlugin.c
+	$(LD) $(OBJECTS) game/TestPlugin.o $(LDFLAGS) -Wl,-soname,$(LIBNAME) \
+	-o $(TARGET)
+
+TestPlugin.c:
+	BeyondC/bin/compile.sh game/TestPlugin_dsl.c TestPlugin_dsl_output.c -std=c99 -g $(HEADERS)
+	sed '/#/d' TestPlugin_dsl_output.c > TestPlugin_dsl_output_no_directives.c
+	gcc $(CFLAGSPLUGIN) $(HEADERS) -c TestPlugin_dsl_output_no_directives.c -o game/TestPlugin.o
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(HEADERS)  -c $< -o $@
+	
+clean:
+	rm -f game/src/*.o
+	rm -f game/*.o
+	rm -f engine/base/src/*.o
+	rm -f engine/CharacterEntity/src/*.o
+	rm -f engine/ChoiceSubtask/src/*.o
+	rm -f engine/Collider/src/*.o
+	rm -f engine/Compositor/src/*.o
+	rm -f engine/EngineCallbacks/src/*.o
+	rm -f engine/EventSystem/src/*.o
+	rm -f engine/GlobalSettings/src/*.o
+	rm -f engine/GlobalTimer/src/*.o
+	rm -f engine/Message/src/*.o
+	rm -f engine/Scene/src/*.o
+	rm -f engine/TriggerSubtask/src/*.o
+	rm -f engine/TriggerZoneEntity/src/*.o
+	rm -f engine/WalkToSubtask/src/*.o
+	rm -f engine/WaitOnInputSubtask/src/*.o
+

@@ -1,0 +1,77 @@
+/*==============================================================*/
+/* type definitions */
+
+NodeTypeFile:
+	"\n/* definition of tree node structure */\n"
+	"\n#ifndef NODE_H"
+	"\n#define NODE_H"
+	"\n#include \"err.h\""
+	"\n#include \"nodeptr.h\" /* defines NODEPTR */"
+	"\n#include \"HEAD.h\""
+	
+	/* ---- edit: add a vector class for traversing*/
+	"\n#ifdef __cplusplus\n"
+	"        #include <vector> \n"
+	"#endif\n"
+
+	"\n\n#ifdef MONITOR"
+	"\n#define _NODECOMMON int _prod; POSITION _coord; int _uid;"
+	"\n#else"
+	"\n#define _NODECOMMON int _prod;"
+	"\n#endif\n"
+
+	"struct NODEPTR_struct {\n"
+	"        _NODECOMMON\n"
+	"#ifdef __cplusplus\n"
+	"        void* operator new(size_t size);\n"
+	/* ---- edit: add a vector class for traversing*/
+	"		 std::vector <NODEPTR> childs;\n"
+	"#endif\n"
+	"};\n"
+
+	$1 /* pointer type defs */
+	"\n"
+	$2 /* struct defs */
+	"\n#undef _NODECOMMON"
+	"\n#endif\n"
+
+ProdTypeDef:
+	"\ntypedef struct _TP" $1 string "* _TPP" $1 string ";"
+
+SymbTypeDef:
+	"\ntypedef struct _TS" $1 string "* _TSP" $1 string ";"
+
+ProdStructDecl:
+	"\nstruct _TP" $1 string /* name */ 
+	"\n#ifdef __cplusplus" 
+	"\n\t: public NODEPTR_struct {" 
+	"\n#else" 
+	"\n{" 
+	"\n_NODECOMMON"
+	"\n#endif"
+	$2 /* lhs symb attrs */
+	$3 /* descs */
+	$4 /* rule attrs */
+	"\n};\n"
+
+ListDescs:
+	"\nNODEPTR _desc1;\nNODEPTR _desc2;"
+
+SymbStructDecl:
+	"\nstruct _TS" $1 string /* name */ 
+	"\n#ifdef __cplusplus"
+	"\n\t: public NODEPTR_struct {"
+	"\n#else"
+	"\n{"
+	"\n_NODECOMMON"
+	"\n#endif"
+	$2 /* attrs */
+	"\n};\n"
+
+SubTreeComp:
+	"\n_TSP" $1 string /* node type */ " _desc" $2 int /* number */ ";"
+
+AttrComp:
+	"\n" $1 string /* type */ " _AT" $2 string /* name */ ";"
+
+

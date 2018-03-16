@@ -1,0 +1,142 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Globals.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+Globals.fw:
+
+This specification binds names that have a global scope.
+That are names for symbols, rules, terminals, and types.
+Their kinds are distinguished by properties.
+Each identifier is associated as a property NameSym of 
+the entity.
+
+Checks:
+It is checked whether those names are used consistently with
+respect to their kinds.
+
+To do:
+Change Key to Bind; remove NameSym property?
+-----------------------------------------------------------
+
+There is no order required for the occurrences of global names.
+Hence, Algol-like scope rules are applied:
+~O~<Globals.specs~>~{
+$/Name/AlgScope.gnrc:inst
+$/Tech/Strings.specs
+$/Prop/PropLib.fw
+~}
+
+The following 6 tree grammar symbols represent occurrences of
+names that are global bound:
+~$~<Global bound names~>==~{
+SYMBOL SymbolDefId INHERITS GeneralDefine END;
+SYMBOL SymbolId INHERITS GeneralDefine END;
+SYMBOL SyntId INHERITS GeneralDefine END;
+SYMBOL TermOrCIdent INHERITS GeneralDefine END;
+SYMBOL TypeId INHERITS GeneralDefine END;
+SYMBOL RuleId INHERITS GeneralDefine END;
+
+CLASS SYMBOL IdentOcc: Sym: int;
+CLASS SYMBOL IdentOcc COMPUTE SYNT.Sym = TERM; END;
+
+CLASS SYMBOL GeneralDefine  INHERITS IdDefScope, IdentOcc COMPUTE
+  SYNT.GotNameSym = 
+    ORDER (ResetNameSym (THIS.Key, THIS.Sym),
+           SetOnceCoord (THIS.Key, COORDREF));
+END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotNameSym = CONSTITUENTS GeneralDefine.GotNameSym;
+END;
+~}
+
+Three kinds are distinguished by the following properties.
+The token code of the each entity is associated to the key
+as property NameSym:
+~O~<Globals.pdl~>~{
+IsSymbol: int;
+IsType: int;
+IsRule: int;
+NameSym: int;
+Coord: CoordPtr [SetOnce]; "err.h"
+~}
+
+The kind properties are set and checked for consistency:
+~$~<Kinds of global entities~>==~{
+SYMBOL AG COMPUTE
+  SYNT.GotKind = 
+    CONSTITUENTS 
+      (SymbolDefId.GotKind, SymbolId.GotKind, SyntId.GotKind,
+       TypeId.GotKind, RuleId.GotKind);
+END;
+
+SYMBOL SymbolDefId INHERITS ChkNotIsType, ChkNotIsRule COMPUTE
+  SYNT.GotKind = ResetIsSymbol (THIS.Key, 1);
+END;
+
+SYMBOL SymbolId INHERITS ChkNotIsType, ChkNotIsRule COMPUTE
+  INH.GotKind = ResetIsSymbol (THIS.Key, 1);
+  /* overridden in non-attribute context */
+END;
+
+/* checks are not inherited here: */
+RULE: SymbolRef ::= SymbolId Index COMPUTE
+   SymbolId.GotKind = "none"; /* override: set to be a symbol */
+   SymbolId.CheckNotIsType = "no"; /* override check */
+   SymbolId.CheckNotIsRule = "no"; /* override check */
+END;
+
+SYMBOL SyntId INHERITS ChkNotIsType, ChkNotIsRule COMPUTE
+  SYNT.GotKind = ResetIsSymbol (THIS.Key, 1);
+END;
+
+SYMBOL TypeId INHERITS ChkNotIsSymbol, ChkNotIsRule COMPUTE
+  SYNT.GotKind = ResetIsType (THIS.Key, 1);
+END;
+
+SYMBOL RuleId INHERITS ChkNotIsSymbol, ChkNotIsType COMPUTE
+  SYNT.GotKind = ResetIsRule (THIS.Key, 1);
+END;
+
+CLASS SYMBOL ChkNotIsSymbol COMPUTE
+  INH.CheckNotIsSym =
+    IF (GetIsSymbol (THIS.Key, 0),
+    message 
+      (ERROR, CatStrInd 
+             ("Used as symbol identifier elsewhere: ",
+       THIS.Sym), 0, COORDREF))
+    <- INCLUDING AG.GotKind;
+END;
+
+CLASS SYMBOL ChkNotIsType COMPUTE
+  INH.CheckNotIsType =
+    IF (GetIsType (THIS.Key, 0),
+    message 
+      (ERROR, CatStrInd 
+             ("Used as type identifier elsewhere: ",
+       THIS.Sym), 0, COORDREF))
+    <- INCLUDING AG.GotKind;
+END;
+
+CLASS SYMBOL ChkNotIsRule COMPUTE
+  INH.CheckNotIsRule =
+    IF (GetIsRule (THIS.Key, 0),
+    message 
+      (ERROR, CatStrInd 
+             ("Used as rule identifier elsewhere: ",
+       THIS.Sym), 0, COORDREF))
+    <- INCLUDING AG.GotKind;
+END;
+~}
+
+~O~<Globals.msg~>~{
+"Used as symbol identifier elsewhere: "
+"Used as type identifier elsewhere: "
+"Used as rule identifier elsewhere: "
+~}
+
+~O~<Globals.lido~>~{
+~<Global bound names~>
+~<Kinds of global entities~>
+~}

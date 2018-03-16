@@ -1,0 +1,275 @@
+@p maximum_input_line_length = infinity
+
+@O@<CharacterUnparserAnalysis.lido@>==@{
+
+
+    ATTR CharConstructor : PTGNode;
+    ATTR CharFreeStruct : PTGNode;
+    
+    /* main character construction*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.IdemPtg = PTGCharacter(CharDef.CharConstructor,
+                                       CharProperties.IdemPtg,
+                                       CharDef.CharFreeStruct);
+    END;
+
+    /* constructor */
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.CharConstructor = 
+            PTGCharConstructor(CharDef.NewEntityId,
+                               EntityNameDef.IdemPtg);
+    END;
+
+     /* free pointer struct data */
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.CharFreeStruct = 
+            PTGCharFreeStruct(CharDef.NewEntityId);
+    END;
+
+
+    /*character properties*/
+
+    /*--------- position property ---------*/
+    
+    RULE: CharPositionProperty::= 'position' ':'  integer_constant ',' integer_constant COMPUTE
+        CharPositionProperty.IdemPtg = 
+            PTGSetCharPosition(INCLUDING CharDef.NewEntityId,
+                               StringTable(integer_constant[1]), 
+                               StringTable(integer_constant[2]));
+    END;
+
+    /* --------- char pictures: ---------*/
+    /* just collect the picture code */
+    RULE: CharPicProperty ::=  'picture' string_literal ':' string_literal COMPUTE
+        CharPicProperty.IdemPtg = 
+            PTGSetCharPicture(INCLUDING CharDef.NewEntityId,
+                              StringTable(string_literal[1]),
+                              StringTable(string_literal[2]));
+    END;
+
+
+    /*--------- char anim --------- */
+
+    ATTR CharAnimName : PTGNode;
+
+    RULE: CharAnimProperty ::=  'animation' string_literal  ':' CharAnimPathes COMPUTE
+
+        CharAnimProperty.IdemPtg=
+            CONSTITUENTS CharAnimPath.IdemPtg
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        CharAnimProperty.CharAnimName = PTGAsIs(StringTable(string_literal));
+    END;
+
+    RULE: CharAnimPath::= string_literal COMPUTE
+        CharAnimPath.IdemPtg = 
+            PTGSetCharAnimation(INCLUDING CharDef.NewEntityId,
+                                INCLUDING CharAnimProperty.CharAnimName,
+                                StringTable(string_literal));
+    END;
+
+    /*--------- char trigger ---------*/
+
+    ATTR CharName : PTGNode;
+    ATTR displayedText : PTGNode;
+    ATTR hasText : int;
+
+    /*just to have access to the name*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.CharName = EntityNameDef.IdemPtg;
+    END;
+
+    RULE: CharTriggerProperty ::= 'trigger' ':' EventNameUse COMPUTE
+        
+        CharTriggerProperty.AdditionalTaskPrototypes = PTGClickEventPrototype(INCLUDING CharDef.CharName);
+        CharTriggerProperty.AdditionalTaskCode = 
+            IF(INCLUDING CharDef.hasText,
+                /*if it has a text to display*/
+                PTGClickTextEvent(INCLUDING CharDef.CharName,
+                                  INCLUDING CharDef.NewEntityId,
+                                  INCLUDING CharDef.displayedText,
+                                  EventNameUse.IdemPtg),
+                /*else*/
+                PTGClickNoTextEvent(INCLUDING CharDef.CharName,
+                                    INCLUDING CharDef.NewEntityId,
+                                    EventNameUse.IdemPtg));
+
+        CharTriggerProperty.IdemPtg = PTGClickEventTrigger(INCLUDING function_definition.EventName,
+                                                           INCLUDING CharDef.CharName);
+    END;
+
+    RULE: Entity ::=  CharDef COMPUTE
+
+        Entity.AdditionalTaskPrototypes = 
+            CONSTITUENTS CharTriggerProperty.AdditionalTaskPrototypes
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        Entity.AdditionalTaskCode =
+            CONSTITUENTS CharTriggerProperty.AdditionalTaskCode
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+    END;
+
+
+    /*--------- char display text ---------*/
+
+     /*just to have access to the displayed text*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.displayedText = 
+            CONSTITUENTS CharDisplayTextProperty.displayedText
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+        
+        /*int variable which indicates a text*/
+        CharDef.hasText = 
+            CONSTITUENTS CharDisplayTextProperty.hasText
+            WITH (int, ADD, IDENTICAL, ZERO);
+
+    END;
+
+    RULE: CharDisplayTextProperty::= 'display' ':' string_literal COMPUTE
+        CharDisplayTextProperty.displayedText = PTGAsIs(StringTable(string_literal));
+        CharDisplayTextProperty.hasText = 1;
+        CharDisplayTextProperty.IdemPtg = PTGNULL;
+    END;
+
+@}
+
+@O@<CharacterPTG.ptg@>==@{
+
+Character: 
+    $ /* constructor*/ 
+    $ /* properties*/ 
+    $ /*free struct*/"\n"
+
+CharConstructor:
+    "    CharacterStructPtr char" $1 int /*id*/ " = CharacterConstructor(" $1 int /*id*/ "," 
+                                                                       "\"" $2"\"" "," /*name*/
+                                                                       "pluginList);\n"
+
+CharFreeStruct:
+    "    CharacterFreePointerStruct(char" $ int/* subtask id*/");"
+
+SetCharAnimation:
+    "    CharacterAddAnimationPicture(char" $ int/* subtask id*/
+    " ," $ /*anim name*/ "," $ string/* path*/ ");"
+
+SetCharPosition:
+    "    CharacterSetPosition2I(char" $ int /*id*/ "," 
+                                  $ string  /*pos1*/ "," 
+                                  $ string /*pos2*/ ");\n"
+
+SetCharPicture:
+     "    CharacterAddPicture( char" $ int "," $ string "," $ string ");\n"
+
+ClickEventTrigger:
+    "    TriggerStructPtr subtask"$2 /*triggername*/" = TriggerConstructor(pluginList, 0,\""$1 /*eventname*/"\");\n"
+    "    TriggerAddSubtask(subtask"$2 /*triggername*/",\"_Character"$2 /*triggername*/"\", &_Character"$2 /*triggername*/" );\n"
+    "    if( ! TriggerProcess(subtask"$2 /*triggername*/") )\n"
+    "    {\n"
+    "       RemoveTask(pluginList,\""$1 /*eventname*/"\");\n"
+    "       return;\n"
+    "    }\n"
+
+ClickEventPrototype:
+   "void _Character" $1 /*eventname*/ "();\n"
+
+ClickNoTextEvent:
+
+    "void _Character" $1 /*charname*/ "()\n"
+    "{"
+
+    "    while(1)\n"
+    "    {\n"
+            
+    "        GameEvents events = EventSystemGetCurrentEvents(pluginList);\n"
+    "        Position targetPosition = {events.mouseX,events.mouseY};\n"
+
+    "        if (CharacterIsPointInCollider(pluginList," $2 int /*charid*/  ",targetPosition))\n"
+    "        {\n"
+
+    "             TriggerStructPtr subtask0 = TriggerConstructor(pluginList, 0,\"_Character"$1 /*charname*/"\");\n"
+    "             TriggerAddSubtask(subtask0,\"" $3 /*triggername*/ "\", &" $3 /*triggername*/ " );\n"
+    "             if( ! TriggerProcess(subtask0) )\n"
+    "             {\n"
+    "                  RemoveTask(pluginList,\"_Character"$1 /*charname*/"\");\n"
+    "                  return;\n"
+    "             }\n"
+
+    "        }\n"
+
+    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/"\"))\n"
+    "        {\n"
+    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/"\");\n"
+    "            return;\n"
+    "        }\n"
+
+
+    "    }\n"
+        
+
+    "}\n"
+
+
+ClickTextEvent:
+
+    "void _Character" $1 /*charname*/ "()\n"
+    "{"
+
+    "    MessageYobjectStructPtr message;\n"
+    "    Position objectPosition = CharacterGetPositionById(pluginList," $2 int /*charid*/ ");\n"
+    "    Size objectSize = CharacterGetSizeById(pluginList," $2 int /*charid*/ ");\n"
+
+    "    Position messagePosition;\n"
+    "    messagePosition.posX = objectPosition.posX + 2;\n"
+    "    messagePosition.posY = objectPosition.posY - 2;\n"
+    "    Color objectColor = {255,255,255};\n"
+    "    message = MessageYobjectConstructor(0,\n"
+    "                                        0,\n"
+    "                                        " $3 /*displayedText*/ ",\n"
+    "                                        -1,\n"
+    "                                        pluginList\n"
+    "                                        );\n"
+
+    "    MessageYobjectSetPosition(message,messagePosition);\n"
+    "    MessageYobjectSetFontSize(message,30);\n"
+    "    MessageYobjectSetColor(message,objectColor);\n"
+    "    MessageYobjectSignalInitRessources(message);\n"
+
+
+    "    while(1)\n"
+    "    {\n"
+            
+    "        GameEvents events = EventSystemGetCurrentEvents(pluginList);\n"
+    "        Position targetPosition = {events.mouseX,events.mouseY};\n"
+
+    "        MessageYobjectActivate(message);\n"
+
+    "        if (CharacterIsPointInCollider(pluginList," $2 int /*charid*/  ",targetPosition))\n"
+    "        {\n"
+
+    "             TriggerStructPtr subtask0 = TriggerConstructor(pluginList, 0,\"_Character"$1 /*charname*/"\");\n"
+    "             TriggerAddSubtask(subtask0,\"" $4 /*triggername*/ "\", &" $4 /*triggername*/ " );\n"
+    "             if( ! TriggerProcess(subtask0) )\n"
+    "             {\n"
+    "                  MessageYobjectDestructor(message);\n"
+    "                  RemoveTask(pluginList,\"_Character"$1 /*charname*/"\");\n"
+    "                  return;\n"
+    "             }\n"
+
+    "        }\n"
+    "        else MessageYobjectDeactivate(message);\n"
+
+    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/"\"))\n"
+    "        {\n"
+    "            MessageYobjectDestructor(message);\n"
+    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/"\");\n"
+    "            return;\n"
+    "        }\n"
+
+
+    "    }\n"
+        
+
+    "}\n"
+
+@}

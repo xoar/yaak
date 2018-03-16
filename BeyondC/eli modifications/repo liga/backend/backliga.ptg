@@ -1,0 +1,159 @@
+/* $Id: backliga.ptg,v 1.1 2015/05/20 11:14:26 pfahler Exp $ */
+
+/*==============================================================*/
+/* LIGA  PTG specification for frontend and backend */
+/* U. Kastens */
+/*==============================================================*/
+
+ThisNode:
+  "_currn"
+
+DescNode:
+  "_currn->_desc" $ int
+
+/*==============================================================*/
+/* Names */
+
+DescName:
+"_desc" $/* number */
+
+VisitProcName:
+"_VS" $/* sectno */ $/* name */
+
+InclGlobName:
+"_IG" $/* name */
+
+InclLocName:
+"_IL" $/* name */
+
+SymbStructName:
+"struct _TS" $/* name */
+
+SymbPtrTypeName:
+"_TSP" $/* name */
+
+ProdStructName:
+"struct _TP" $/* name */
+
+ProdPtrTypeName:
+"_TPP" $/* name */
+
+MkProcName:
+"Mk" $/* name */
+
+NullNodePtr:
+"NULLNODEPTR "
+
+MkParmName:
+"_tr" $/* numb */
+
+TermGetName:
+"GET" $/*symbname*/ $/*attr name*/
+
+/*==============================================================*/
+/* attribute access */
+
+LhsStackAttrName:
+"_AS0" $/* name */
+ 
+RhsStackAttrName:
+"_AS" $/* number */ $/* name */
+
+VarAttrName:
+"_AV" $/* name */
+
+TreeAttrName:
+"_AT" $/* name */
+
+RuleAttrName:
+"_AR" $/* rule did number */ $/* name */
+
+/*==============================================================*/
+/* C statements and expressions */
+
+Stmt:
+$/* body */ ";" [new_line]
+
+Call:
+$/* name */ "(" $/* SeqCom args*/ ")"
+
+ProcExpr:
+"(*(" $/* proc expression */ ")) "
+
+Assign:
+$/* lhs */ "=" $/* rhs */
+
+IfStmt:
+[new_line] "if (" $/* cond */ ") {" [new_line]
+$/* Stmt */
+[new_line] "} else {" [new_line]
+$/* Stmt */
+"}" [new_line]
+
+IfExpr:
+[new_line] "((" $/* cond */ [new_line] ") ? (" $/* Expr */ [new_line] ") : (" $/* Expr */ "))" [new_line]
+
+Paren:
+[new_line] "(" $/* Expr */ ")" [new_line]
+
+PtrTo:
+$/* type */ "*"
+
+SelectPtr:
+$/*Ptr*/ "->" $/*Name*/
+
+Content:
+"(* " $/*Ptr*/ ")"
+
+Addr:
+"(&( " $/*Name*/ "))"
+
+NoVal: "(0)"
+
+ToNoVal: "(" $/* Expr */ ", 0)"
+
+/*==============================================================*/
+/* C declarations */
+
+Decl:
+$/*TypeName*/ " " $/*Name*/ ";\n"
+
+Proto:
+"," $/*TypeName*/ " " $/*Name*/
+
+ExternDecl:
+"extern " $/*TypeName*/ " " $/*Name*/ ";\n"
+
+/*==============================================================*/
+/* general */
+
+Seq:
+	$/*left*/ $/*right*/
+
+ComElem:
+	"," $/*elem*/
+
+ComSeq:
+	"," $/*left*/ $/*right*/
+
+SeqCom:
+	$ { ", " } $
+
+Sep:
+	$ " "
+
+File:
+	$/* contents */ "\n"
+
+Numb:
+	$ int
+
+AsIs:
+	$ string
+
+C_Str:
+	[C_outstr $ string]
+
+P_Str:
+	[P_outstr $ string]
+

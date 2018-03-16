@@ -1,0 +1,67 @@
+@p maximum_input_line_length = infinity
+
+@O@<CharacterGrammer.con@>==@{
+
+    Entity: CharDef.
+
+    /*solve dangling trigger problem. is bound to char properties first instead of statement*/
+    CharDef: CharType EntityNameDef CharProperties $'trigger'.
+    /*will be extended in the future*/
+    CharType: 'Character' / 'Scene' 'Object'.
+
+    CharProperties: CharProperties CharProperty.
+    CharProperties: .
+    
+    CharProperty: CharPicProperty /
+                  CharPositionProperty /
+                  CharAnimProperty / 
+                  CharTriggerProperty /
+                  CharDisplayTextProperty.
+
+    /*--------------*/
+    CharPicProperty: 'picture' string_literal ':' string_literal.
+
+    /*--------------*/
+    CharAnimProperty: 'animation' string_literal  ':' CharAnimPathes.
+    CharAnimPathes: CharAnimPathes ',' CharAnimPath.
+    CharAnimPathes: CharAnimPath.
+
+    CharAnimPath: string_literal.
+
+    /*--------------*/
+    CharPositionProperty: 'position' ':'  integer_constant ',' integer_constant.
+
+    /*--------------*/
+    CharTriggerProperty: 'trigger' ':' EventNameUse.
+
+    /*--------------*/
+    CharDisplayTextProperty: 'display' ':' string_literal.
+@}
+
+@O@<CharacterAnalysis.lido@>==@{
+
+    /* signal id was set*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.GotEntityId = ResetId(EntityNameDef.Key,INCLUDING Entity.EntityId);       
+    END;
+    
+    RULE: Entity::= CharDef COMPUTE
+        Entity.GotEntityId =  CharDef.GotEntityId;
+    END;
+
+    /*-------------------------------------------------*/
+
+    ATTR NewEntityId: int;
+    
+    /*the entity can be overwritten by another occurence
+      to prevent a call of <- INCLUDING program.GotEntityId ;
+      and PTGNumb(GetId(EntityNameUse[1].Key,0)) 
+      by every occurance of the entity id we make this shortcut*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.NewEntityId = GetId(EntityNameDef.Key,INCLUDING Entity.EntityId) 
+                               <- INCLUDING program.GotEntityId;
+    END;
+
+    /*-------------------------------------------------*/
+
+@}

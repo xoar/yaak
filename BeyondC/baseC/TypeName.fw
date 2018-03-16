@@ -1,0 +1,63 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+@A@<Provide Readable Type Names@>
+
+@O@<TypeName.specs@>==@{
+$/Tech/Strings.specs
+@}
+
+@O@<TypeName.pdl@>==@{
+TypeName: CharPtr; "Strings.h"
+
+TypeIs_void                  -> TypeName={"void"};
+TypeIs_char                  -> TypeName={"char"};
+TypeIs_signed_char           -> TypeName={"signed_char"};
+TypeIs_unsigned_char         -> TypeName={"unsigned_char"};
+TypeIs_short                 -> TypeName={"short"};
+TypeIs_unsigned_short        -> TypeName={"unsigned_short"};
+TypeIs_int                   -> TypeName={"int"};
+TypeIs_NULL                  -> TypeName={"int 0"};
+TypeIs_unsigned_int          -> TypeName={"unsigned_int"};
+TypeIs_long                  -> TypeName={"long"};
+TypeIs_unsigned_long         -> TypeName={"unsigned_long"};
+TypeIs_float                 -> TypeName={"float"};
+TypeIs_double                -> TypeName={"double"};
+TypeIs_long_double           -> TypeName={"long_double"};
+TypeIs_string                -> TypeName={"string"};
+
+TypeIs_VoidPointer           -> TypeName={"void*"};
+TypeIs_signed_charPointer    -> TypeName={"signed_char*"};
+TypeIs_shortPointer          -> TypeName={"short*"};
+TypeIs_intPointer            -> TypeName={"int*"};
+TypeIs_longPointer           -> TypeName={"long*"};
+TypeIs_unsigned_charPointer  -> TypeName={"unsigned_char*"};
+TypeIs_unsigned_shortPointer -> TypeName={"unsigned_short*"};
+TypeIs_unsigned_intPointer   -> TypeName={"unsigned_int*"};
+TypeIs_unsigned_longPointer  -> TypeName={"unsigned_long *"};
+TypeIs_floatPointer          -> TypeName={"float*"};
+TypeIs_doublePointer         -> TypeName={"double*"};
+TypeIs_long_doublePointer    -> TypeName={"long_double*"};
+@}
+
+@O@<TypeName.lido@>==@{
+CLASS SYMBOL PointerDeclarator COMPUTE
+  ResetTypeName(THIS.Type,"pointer");
+END;
+
+CLASS SYMBOL ArrayDeclarator COMPUTE
+  ResetTypeName(THIS.Type,"array");
+END;
+
+CLASS SYMBOL FunctionDeclarator COMPUTE
+  ResetTypeName(THIS.Type,"function");
+END;
+
+TREE SYMBOL struct_declaration_list COMPUTE
+  ResetTypeName(THIS.Type,"struct");
+END;
+
+TREE SYMBOL enumerator_list COMPUTE
+  ResetTypeName(THIS.Type,"enum");
+END;
+@}

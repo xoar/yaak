@@ -1,0 +1,1271 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+@A@<Phrase Structure@>
+
+The @/phrase structure@/ of a language defines the form of the input
+representation.
+Annex B of ANSI/ISO 9899-1990 summarizes the phrase structure of C, and
+this chapter captures most of that information (pre-processor definitions
+are omitted).
+
+A scanner and parser that verify lexical and syntactic correctness of
+pre-processed C text can be generated from this chapter.
+It can also be used as one component of a larger specification
+from which a C compiler or special-purpose analyzer could be generated,
+or it could form the basis for a specification of an extension to C.
+
+Section \ref{lexical} specifies the way in which input characters are grouped
+into tokens and comments.
+This task is made more difficult than usual in C because certain basic
+symbols with the lexical structure of an identifier need to be classified
+as type names.
+The details of this process, which requires feedback from an analysis of
+the syntactic structure, are given in Section \ref{findtypedefs}.
+
+Section \ref{syntactic} specifies the way in which the syntactic structure is
+derived from the sequence of tokens.
+
+@B@<Lexical structure@>
+\label{lexical}
+
+A type-@{gla@} file contains the declarative specifications
+of the character strings to be recognized in the input text.
+
+@O@<Phrase.gla@>@{
+@<Lexical elements@>
+  C_COMMENT
+  $#  (auxEOL)
+@}
+
+Eli provides a @/canned description@/ for C comments that implements the
+definition in Section 6.1.9 of the standard.
+
+The C pre-processor normally leaves lines beginning with @{#@} in its
+output text to define the correspondence between that output and the input
+text.
+Here we ignore those lines by invoking the token processor @{auxEOL@},
+which skips past the end of the current line.
+
+@C@<Tokens@>
+
+Tokens are the basic symbols from which a C text is composed.
+Their composition is defined in several ways in this specification, as
+shown in Sections \ref{keywords} through \ref{prenumbers}.
+
+@C@<Keywords@>
+\label{keywords}
+
+Keywords are described by literal terminals in the grammar.
+Eli does not require an additional specification.
+
+@C@<Identifiers@>
+\label{identifiers}
+
+There is a well-known ambiguity in C, resulting from the fact that ordinary
+identifiers can be type specifiers.
+It is illustrated by the line:
+
+\begin{quote}
+@{A (*B);@}
+\end{quote}
+
+If @{A@} has been defined as a type name, then the line is a declaration
+of a variable @{B@} to be of type ``pointer to @{A@}''.
+(The parentheses surrounding ``@{*B@}'' are ignored -- see Section 6.5.4 of
+the standard.)
+If @{A@} has not been defined as a type name, then the line is a call of
+the function @{A@} with the single parameter @{*B@}.
+This ambiguity cannot be resolved by the grammar, since the two constructs
+can appear in the same contexts.
+
+This specification resolves the ambiguity via an interaction between the
+scanner and the parser, as described in Section \ref{findtypedefs}.
+When an identifier defined as a type name is used, the scanner reports it as
+the token @{typedef_name@} (Standard, Section 6.5.2).
+
+The semantic analysis task can be simplified if identifiers in two other
+contexts (definition of a type name and definition of a @{struct@} or
+@{union@} member) can also be given distinct tokens.
+Since the scanner/parser interaction mechanism must be in place to resolve
+the type name ambiguity, this distinction can be added at very little cost.
+
+@$@<Lexical elements@>+=@{
+identifier:   C_IDENTIFIER [IdnOrType]
+typedef_name: C_IDENTIFIER
+typedef_def:  C_IDENTIFIER
+member_def:   C_IDENTIFIER
+@}
+
+Note that all of these tokens have exactly the same lexical structure.
+The ambiguity resolution rules of Eli guarantee that the token processor
+@{IdnOrType@} will be invoked after each character sequence satisfying this
+definition has been recognized.
+@{IdnOrType@} will then classify the sequence.
+Details can be found in Section \ref{findtypedefs}
+
+@C@<Constants@>
+
+The classification of constants is carried out by a syntactic rule:
+
+@$@<Syntactic elements@>+=@{
+constant:
+  floating_constant /
+  integer_constant /
+  character_constant .
+@}
+
+A @{constant@} is one possible form of @{primary_expression@} (that is the
+only context in which @{constant@} appears in the grammar), and an
+@{identifier@} is another.
+Because an enumeration constant is an @{identifier@}, there would be an
+ambiguity in the grammar if @{enumeration_constant@} appeared in this
+definition of @{constant@} (as it does in the standard):
+Should the @{identifier@} be reduced directly to a @{primary_expression@},
+or first to an @{enumeration_constant@}?
+
+Information about the the declaration of an identifier is needed to
+distinguish an enumeration constant from a variable identifier in the
+context represented by @{constant@}, and this information is not available
+to the parser.
+Since the distinction is irrelevant in determining the structure of the
+tree anyway, it can simply be ignored.
+
+Eli provides canned descriptions for C constants that implement the
+definitions found in Section 6.1.3.1, 6.1.3.2, and 6.1.3.4 of the standard:
+
+@$@<Lexical elements@>+=@{
+floating_constant:  C_FLOAT          [mkidn]
+integer_constant:   C_INT_DENOTATION [mkidn]
+character_constant: C_CHAR_CONSTANT  [mkidn]
+@}
+
+This specification uses @{mkidn@} to guarantee that there is only one copy
+of any constant in the string table.
+
+@C@<String literals@>
+
+C string literals are also defined by an Eli canned description, and made
+unique:
+
+@$@<Lexical elements@>+=@{
+string_literal:  C_STRING_LIT [mkidn]
+@}
+
+@C@<Operators@>
+
+Operators are represented by literal symbols in the grammar, so no
+additional lexical specification is necessary.
+
+@C@<Punctuators@>
+
+Punctuators are represented by literal symbols in the grammar, so no
+additional lexical specification is necessary.
+
+@C@<Header names@>
+
+Preprocessing is not defined in this chapter.
+
+@C@<Preprocessing numbers@>
+\label{prenumbers}
+
+Preprocessing is not defined in this chapter.
+
+@B@<Syntactic structure@>
+\label{syntactic}
+
+A type-@{con@} file contains the context-free grammar describing how the
+structure of a program is determined from the sequence of tokens.
+
+@O@<Phrase.con@>@{
+@<Syntactic elements@>
+@}
+
+In the syntactic notation used here, syntactic categories (nonterminals)
+are indicated by words in @{this@} type, and literal words and character
+set members (terminals) are enclosed in apostrophes @{' '@}.
+The underscore character @{_@} is used instead of the standard's hyphen
+@{-@} within symbols.
+A colon (@{:@}) following a nonterminal introduces its definition.
+Alternative definitions are separated by slashes (@{/@}), and the
+definition is terminated by a period.
+
+CHANGEME: There should be a description of the BNF extensions here, as well 
+as a brief discussion of the need to use them in order to implement certain 
+lists.
+
+An optional symbol is indicated by adding @{_opt@} to the name.
+
+Optional symbols are defined implicitly in the standard, but explicit
+definitions are required in order to generate a parser:
+
+@$@<Syntactic elements@>+=@{
+type_qualifier_list_opt:      / type_qualifier_list .
+constant_exp_opt:             / constant_expression .
+expression_opt1:              / expression .
+expression_opt2:              / expression .
+argument_expression_list_opt: / argument_expression_list .
+init_declarator_list_opt:     / init_declarator_list .
+@}
+
+@C@<Expressions@>
+
+@$@<Syntactic elements@>+=@{
+primary_expression:
+  identifier /
+  constant /
+  StringSeq /
+  '(' expression ')' .
+
+StringSeq:
+  string_literal /
+  StringSeq string_literal .
+@}
+
+\noindent
+Section 6.1.4 of the standard states that any sequence of adjacent
+character string literal tokens are concatenated into a single sequence
+when translated.
+We use the @{StringSeq@} phrase here to formalize that specification.
+
+@$@<Syntactic elements@>+=@{
+postfix_expression:
+  primary_expression /
+  postfix_expression '[' expression ']' /
+  postfix_expression '(' argument_expression_list_opt ')' /
+  postfix_expression '.' identifier /
+  postfix_expression '->' identifier /
+  postfix_expression '++' /
+  postfix_expression '--' .
+
+argument_expression_list:
+  assignment_expression /
+  argument_expression_list ',' assignment_expression.
+
+unary_expression:
+  postfix_expression /
+  '++' unary_expression /
+  '--' unary_expression /
+  '&' cast_expression /
+  unary_operator cast_expression /
+  'sizeof' unary_expression /
+  'sizeof' '(' type_name ')'.
+
+unary_operator:
+  '*' / '+' / '-' / '~'  / '!' .
+@}
+
+Section 6.2.2.1 of the standard says that when the unary @{&@} operator
+is applied to an lvalue, the result is the address of the object
+designated by the lvalue.
+If any other unary operator is applied to an lvalue, that lvalue is
+converted to the value stored in the designated object.
+Thus the semantics of the unary @{&@} operator differ significantly from
+those of the other unary operators.
+Semantic analysis is simplified if the two contexts are distinguished.
+
+@$@<Syntactic elements@>+=@{
+cast_expression:
+  unary_expression /
+  '(' type_name ')' cast_expression.
+
+multiplicative_expression:
+  cast_expression /
+  multiplicative_expression '*' cast_expression /
+  multiplicative_expression '/' cast_expression /
+  multiplicative_expression '%' cast_expression .
+
+additive_expression:
+  multiplicative_expression /
+  additive_expression '+' multiplicative_expression /
+  additive_expression '-' multiplicative_expression .
+
+shift_expression:
+  additive_expression /
+  shift_expression '<<' additive_expression /
+  shift_expression '>>' additive_expression .
+
+relational_expression:
+  shift_expression /
+  relational_expression '<'  shift_expression /
+  relational_expression '>'  shift_expression /
+  relational_expression '<=' shift_expression /
+  relational_expression '>=' shift_expression .
+
+equality_expression:
+  relational_expression /
+  equality_expression '==' relational_expression /
+  equality_expression '!=' relational_expression .
+
+AND_expression:
+  equality_expression /
+  AND_expression '&' equality_expression.
+@}
+
+@$@<Syntactic elements@>+=@{
+exclusive_OR_expression:
+  AND_expression /
+  exclusive_OR_expression '^' AND_expression.
+
+inclusive_OR_expression:
+  exclusive_OR_expression /
+  inclusive_OR_expression '|' exclusive_OR_expression.
+
+logical_AND_expression:
+  inclusive_OR_expression /
+  logical_AND_expression '&&' inclusive_OR_expression.
+
+logical_OR_expression:
+  logical_AND_expression /
+  logical_OR_expression '||' logical_AND_expression.
+
+conditional_expression:
+  logical_OR_expression /
+  logical_OR_expression '?' expression ':' conditional_expression .
+
+assignment_expression:
+  conditional_expression /
+  unary_expression assignment_operator assignment_expression .
+
+assignment_operator:
+  '=' / '*=' / '/=' / '%=' / '+=' / '-=' / '<<=' / '>>=' / '&=' / '^=' / '|=' .
+
+expression:
+  assignment_expression /
+  expression ',' assignment_expression .
+
+constant_expression:
+  conditional_expression .
+@}
+
+@C@<Declarations@>
+
+A @{declaration@} specifies the interpretation and attributes of a set of
+identifiers.
+The @{declaration_specifiers@} phrase consists of a sequence of specifiers
+that indicate the linkage, storage duration, and part of the type of the
+entities denoted in the @{init_declarator_list_opt@}.
+
+@$@<Syntactic elements@>+=@{
+declaration:
+  declaration_specifiers init_declarator_list_opt &'@<Reset state@>' ';' .
+
+init_declarator_list:
+  init_declarator /
+  init_declarator_list ',' init_declarator .
+
+init_declarator:
+  declarator &'@<Deferred binding@> @<End parameters@>' /
+  declarator &'@<Deferred binding@> @<End parameters@>' '=' initializer .
+@}
+
+Specifiers appearing in the @{declaration_specifiers@} phrase must be
+drawn from one of the three sets (storage class specifiers, type specifiers,
+type qualifiers) defined in Section 6.5 of the standard.
+
+Five of the type specifiers can only appear in lists of one element;
+the other seven can be used to form lists of one or more elements.
+It is important to distinguish the two kinds of type specifiers
+syntactically in order to parse a sequence like ``@{int j;@}''
+properly when @{j@} has been declared in an outer scope to be a
+@{typedef_name@}:
+If the parser knows that a @{typedef_name@} cannot follow the
+@{type_specifier@} @{int@}, then it will be forced to re-classify @{j@} as
+an identifier.
+If this information is not available to the parser, then it will detect a
+syntax error after accepting @{j@} as a @{type_specifier@} and not finding
+an identifier.
+At that point, however, it is too late to re-classify @{j@}.
+
+The @{type_specifier@}s that must appear singly are therefore
+classified as @{type_specifier_1@}s, and those that may appear in groups
+are classified as @{type_specifier_2@}s.
+
+The phrase @{declaration_specifiers@} is then defined to enforce the
+constraint syntactically.
+All lists must be left-recursive here in order to detect the error at the
+proper symbol:
+
+@$@<Syntactic elements@>+=@{
+declaration_specifiers:
+  ds0 / ds1 / ds2.
+
+  ds0:	/* List without type specifiers */
+    storage_class_specifier / ds0 storage_class_specifier /
+    type_qualifier / ds0 type_qualifier .
+
+  ds1:	/* List with a single type_specifier_1 */
+    type_specifier_1 / ds0 type_specifier_1 /
+    ds1 storage_class_specifier / ds1 type_qualifier .
+
+  ds2:	/* List with one or more type_specifier_2's */
+    type_specifier_2 / ds0 type_specifier_2 /
+    ds2 type_specifier_2 / ds2 storage_class_specifier / ds2 type_qualifier .
+
+storage_class_specifier:
+  'typedef' &'@<Accept a typedef specifier@>' /
+  'extern' /
+  'static' /
+  'auto' /
+  'register' .
+
+type_specifier_1:
+  'void' /
+  'float' /
+  struct_or_union_specifier /
+  enum_specifier /
+  typedef_name .
+
+type_specifier_2:
+  'char' /
+  'short' /
+  'int' /
+  'long' /
+  'double' /
+  'signed' /
+  'unsigned' .
+
+struct_or_union_specifier:
+  struct_or_union identifier
+    &'@<Nest@>@(member_def@,0@)' '{' struct_declaration_list &'@<Restore@>' '}' /
+  struct_or_union
+    &'@<Nest@>@(member_def@,0@)' '{' struct_declaration_list &'@<Restore@>' '}' /
+  struct_or_union identifier $';' .
+@}
+
+The modifier @{$';'@} in the last line above prevents a reduction to
+@{struct_or_union_specifier@} if the lookahead symbol is @{;@}.
+A modifier is only effective, however, if there is a conflict.
+There is no conflict in this grammar involving that alternative:
+@{struct_or_union identifier@} may be followed by either a @{declarator@}
+or a @{;@} and the reduction to a @{struct_or_union_specifier@} is valid.
+
+Section 6.5.2.3 of the standard gives the two cases quite different
+semantics, however.
+If @{struct_or_union identifier@} is followed by a @{;@} then the
+@{identifier@} is a structure or union tag that specifies a new type
+distinct from any type with the same tag in an enclosing scope (if any).
+Otherwise it will specify a new type only if there is no structure or union
+with that tag visible at that point.
+
+When constructing an abstract syntax tree, it is useful to distinguish
+these contexts by first reducing the @{identifier@} to a separate
+nonterminal and then reducing the result.
+If this is done, and the given modifier is not present, then a conflict
+will be introduced into the grammar.
+The modifier is therefore inserted here in order to allow construction of
+an appropriate abstract syntax tree without the need to alter this
+specification.
+
+@$@<Syntactic elements@>+=@{
+struct_or_union:
+  'struct' /
+  'union' .
+
+struct_declaration_list: struct_declaration+ .
+
+struct_declaration:
+  specifier_qualifier_list struct_declarator_list ';'.
+@}
+
+A @{specifier_qualifier_list@} phrase differs from a
+@{declaration_specifiers@} phrase only in the fact that
+storage class specifiers are not allowed.
+The same problem with type specifiers must be solved, and the same
+mechanism is used.
+
+@$@<Syntactic elements@>+=@{
+specifier_qualifier_list:
+  sq0 / sq1 / sq2 .
+
+  sq0:	/* List without type specifiers */
+    type_qualifier / sq0 type_qualifier .
+
+  sq1:	/* List with a single type_specifier_1 */
+    type_specifier_1 / sq0 type_specifier_1 / sq1 type_qualifier .
+
+  sq2:	/* List with one or more type_specifier_2's */
+    type_specifier_2 / sq0 type_specifier_2 /
+    sq2 type_specifier_2 / sq2 type_qualifier .
+
+struct_declarator_list: struct_declarator // ',' .
+
+struct_declarator:
+  member_declarator                         /
+  member_declarator ':' constant_expression /
+                    ':' constant_expression .
+
+member_declarator:
+  member_pointer_declarator /
+  member_direct_declarator .
+
+member_direct_declarator:
+  MemberIdDef $')'          /
+  '(' member_declarator ')' /
+  member_array_declarator   /
+  member_function_declarator .
+
+member_pointer_declarator:
+  '*' type_qualifier_list_opt member_declarator .
+
+member_array_declarator:
+  member_direct_declarator '[' constant_exp_opt ']' .
+
+member_function_declarator:
+  member_direct_declarator '(' empty_parameter_type_list                ')' /
+  member_direct_declarator
+    '(' &'@<Nest@>@(identifier@,0@)' parameter_type_list &'@<Restore@>' ')' .
+
+MemberIdDef:
+  member_def &'@<Bind@>' /
+  '(' MemberIdDef ')' .
+
+enum_specifier:
+  'enum' identifier
+    &'@<Nest@>@(identifier@,1@)' '{' enumerator_list &'@<Restore@>' '}' /
+  'enum'
+    &'@<Nest@>@(identifier@,1@)' '{' enumerator_list &'@<Restore@>' '}' /
+  'enum' identifier .
+
+enumerator_list:
+  enumerator /
+  enumerator_list ',' enumerator .
+
+enumerator:
+  enumeration_constant /
+  enumeration_constant '=' constant_expression.
+
+enumeration_constant:
+  identifier &'@<Bind@>' .
+
+type_qualifier:
+  'const' /
+  'volatile'.
+@}
+
+@D@<Declarators@>
+
+Section 6.5.4 of the standard devotes separate subsections to pointer
+declarators, array declarators, and function declarators but does not
+distinguish these constructs syntactically.
+It is useful for semantic analysis to separate the forms of declarator that
+actually declare types from those that simply place identifiers.
+
+The standard uses an optional @{pointer@}, and defines the @{pointer@} itself
+recursively.
+That definition not only leads to a grammar conflict, but the structure it
+imposes on the text does not correspond to the structure required by
+Section 6.5.4.1 of the standard.
+
+@$@<Syntactic elements@>+=@{
+declarator:
+  pointer_declarator /
+  direct_declarator .
+
+direct_declarator:
+  TypeIdDef   $'(' $')' &'@<Parameters?@>@(0@)' /
+  IdDef       $'(' $')' &'@<Parameters?@>@(0@)' /
+  '(' declarator ')' /
+  array_declarator /
+  function_declarator .
+
+pointer_declarator:
+  '*' type_qualifier_list_opt declarator .
+
+type_qualifier_list:
+  type_qualifier /
+  type_qualifier_list type_qualifier .
+
+array_declarator:
+  direct_declarator '[' constant_exp_opt ']' .
+@}
+
+The block scope of a function definition begins at the beginning of the
+parameter list.
+Thus a (possible) parameter list of a function must be distinguished from
+the function prototypes that may form part of a complex declarator.
+The type rules in Section 6.5.4 of the standard show that the parameter
+list of a function definition is always the first modifier following the
+declarator's identifier.
+That identifier may, however, itself be enclosed in parentheses to arbitrary
+depth.
+The nonterminal @{declarator_name@} represents such an identifier.
+It can be reduced to a @{direct_declarator@} unless it is followed by a
+parameter list; in that case the following parameter list (represented by
+@{parameters@} is possibly the parameter list of the function definition.
+
+@$@<Syntactic elements@>+=@{
+function_declarator:
+  direct_declarator '('        empty_parameter_type_list                ')' /
+  direct_declarator
+    '(' &'@<Nest@>@(identifier@,0@)' parameter_type_list &'@<Restore@>' ')' /
+  TypeIdDef         '(' &'@<Parameters?@>@(1@)' parameters              ')' /
+  IdDef             '(' &'@<Parameters?@>@(1@)' parameters              ')' .
+
+parameter_type_list:
+  parameter_list /
+  parameter_list ',' '...' .
+
+parameter_list:
+  parameter_declaration /
+  parameter_list ',' parameter_declaration.
+
+parameter_declaration:
+  declaration_specifiers declarator &'@<Deferred binding@> @<End parameters@>' /
+  declaration_specifiers abstract_declarator /
+  declaration_specifiers  .
+
+parameters:
+  parameter_list_1 /
+  parameter_list_1 ',' '...' /
+  [ identifier &'@<Bind@>' // ',' ] .
+
+parameter_list_1:
+  parameter_declaration /
+  parameter_list_1 ',' parameter_declaration.
+
+TypeIdDef:
+  typedef_def &'@<Defer the binding@>' /
+  '(' TypeIdDef ')' .
+
+IdDef:
+  identifier &'@<Defer the binding@>' /
+  '(' IdDef ')' .
+@}
+
+@D@<Type names@>
+
+The standard uses an optional @{pointer@} and
+an optional @{direct_abs_declarator@}.
+These options must be made explicit here in order to avoid a grammar
+conflict.
+
+@$@<Syntactic elements@>+=@{
+type_name:
+  specifier_qualifier_list abstract_declarator /
+  specifier_qualifier_list .
+
+abstract_declarator:
+  pointer_abstract_declarator /
+  direct_abstract_declarator .
+
+pointer_abstract_declarator:
+  '*' type_qualifier_list_opt abstract_declarator .
+
+direct_abstract_declarator:
+  '(' abstract_declarator ')' /
+  array_abstract_declarator /
+  function_abstract_declarator .
+
+array_abstract_declarator:
+  direct_abstract_declarator '[' constant_exp_opt ']' /
+  '[' constant_exp_opt ']' .
+
+function_abstract_declarator:
+  direct_abstract_declarator '(' empty_parameter_type_list ')' /
+  direct_abstract_declarator
+    '(' &'@<Nest@>@(identifier@,0@)' parameter_type_list &'@<Restore@>' ')' /
+  '(' empty_parameter_type_list ')' /
+  '(' &'@<Nest@>@(identifier@,0@)' parameter_type_list &'@<Restore@>' ')' .
+
+empty_parameter_type_list: .
+@}
+
+@D@<Initialization@>
+
+The row initializer should be an abstract syntax tree node with an
+arbitrary number of children.
+Eli cannot construct such a list if the list has itself as a component.
+Therefore another symbol must be introduced to describe the top-level
+@{initializer_list@}.
+
+@$@<Syntactic elements@>+=@{
+initializer:
+  assignment_expression /
+  Row_initializer .
+
+Row_initializer:
+  '{' initializer_list '}' /
+  '{' initializer_list ',' Empty_initializer '}'.
+
+initializer_list:
+  initializer /
+  initializer_list ',' initializer.
+
+Empty_initializer: .
+@}
+
+@C@<Statements@>
+
+@$@<Syntactic elements@>+=@{
+statement:
+  labeled_statement /
+  compound_statement /
+  expression_statement /
+  selection_statement /
+  switch_statement /
+  iteration_statement /
+  jump_statement.
+@}
+
+The left context of the @{identifier@} in a @{labeled_statement@} is
+identical to that of a @{typedef_name@} in a declaration.
+Therefore the parser cannot provide any information that would allow the
+lexical analyzer to distinguish the label from a named type.
+
+In the absence of parser information, the lexical analyzer will classify an
+identifier as an @{identifier@} or @{typedef_name@} depending on the context.
+Thus the parser must accept either of these terminals as a valid label.
+
+@$@<Syntactic elements@>+=@{
+labeled_statement:
+  identifier ':' statement /
+  typedef_name ':' statement /
+  'case' constant_expression ':' statement /
+  'default' ':' statement.
+
+compound_statement:
+  &'@<New region@>' &'@<Nest@>@(identifier@,1@)' '{' body &'@<Restore@>' &'@<End region@>' '}' .
+
+decls: declaration / decls declaration .
+stmts: statement / stmts statement .
+body: / decls / stmts / decls stmts .
+@}
+
+Section 6.6.3 of the standard defines the expression and null statements
+in one syntax rule, using the @{expression_opt@} nonterminal.
+This implies that a null statement is really an expression statement in
+which the expression happens to be empty.
+Semantically, however, the null statement ``performs no operation''.
+Two alternatives express this situation more clearly:
+
+@$@<Syntactic elements@>+=@{
+expression_statement: 
+  expression ';' /
+             ';' .
+@}
+
+There is a grammar conflict here between the first and second alternatives.
+This conflict is resolved by the modification @{$'else'@}, which prevents
+reduction of the first alternative if the lookahead symbol is @{else@}.
+
+@$@<Syntactic elements@>+=@{
+selection_statement:
+  'if' '(' expression ')' statement $'else' /
+  'if' '(' expression ')' statement 'else' statement.
+
+switch_statement:
+  'switch' '(' expression ')' statement.
+@}
+
+According to Section 6.6.5.3 of the standard, the effects of omitting the
+initializer and the step of the @{for@} statement are the same; omitting
+the condition has a different effect.
+Since these effects must be distinguished in the abstract syntax tree, the
+grammar uses different symbols.
+
+@$@<Syntactic elements@>+=@{
+iteration_statement:
+  'while' '(' expression ')' statement /
+  'do' statement 'while' '(' expression ')' ';' /
+  'for' '(' expression_opt1 ';' expression_opt2 ';' expression_opt1 ')'
+    statement.
+@}
+
+Section 6.6.6.2 of the standard defines the two versions of the return
+statement in one syntax rule, using the @{expression_opt@} nonterminal.
+These two versions have different constraints, however.
+Two alternatives express this situation more clearly:
+
+@$@<Syntactic elements@>+=@{
+jump_statement:
+  'goto' identifier   ';' /
+  'continue'          ';' /
+  'break'             ';' /
+  'return'            ';' /
+  'return' expression ';' .
+@}
+
+@C@<External Definitions@>
+
+@$@<Syntactic elements@>+=@{
+program: external_declaration* .
+
+external_declaration:
+  function_definition /
+  declaration .
+@}
+
+The standard uses an optional @{declaration_specifiers@}.
+This option must be made explicit here in order to avoid a grammar
+conflict.
+
+@$@<Syntactic elements@>+=@{
+function_definition:
+  empty_declaration_specifiers
+    declarator &'@<Deferred binding@>' declaration_list function_body /
+  declaration_specifiers
+    declarator &'@<Deferred binding@>' declaration_list function_body .
+
+empty_declaration_specifiers: .
+
+declaration_list: par_declaration* .
+
+par_declaration: declaration_specifiers par_id_decls ';' .
+
+par_id_decls: declarator // ',' .
+
+function_body:
+  '{' body &'@<End parameters@>' '}' .
+@}
+
+@B@<Identifier classification@>
+\label{findtypedefs}
+
+In order to resolve the type name ambiguity, the scanner needs to
+distinguish ordinary identifiers that are defined as type names from those
+that are not.
+Two additional identifier classes can be used to embody important semantic
+properties:
+
+\begin{itemize}
+\item @{typedef_name@}:
+An applied occurrence of an ordinary identifier defined as a type name.
+This category of identifier is necessary to resolve an ambiguity.
+
+\item @{typedef_def@}:
+A defining occurrence of an ordinary identifier defined as a type name.
+This category of identifier is useful because the actions needed to define
+an identifier representing a type are different from those needed to define
+an identifier representing a typed object.
+
+\item @{member_def@}:
+A defining occurrence of a member identifier.
+This category of identifier is useful because a member identifier belongs
+to a different name space than an ordinary identifier.
+Applied occurrences of member identifiers occur in contexts that are
+syntactically distinct, but there is no such distinction for defining
+occurrences.
+This classification provides that distinction.
+
+\item @{identifier@}:
+Identifier occurrences whose processing requirements can be determined 
+from their gramatical construct.
+\end{itemize}
+
+@C@<Reporting the classification@>
+
+The specification given in Section \ref{identifiers} results in a scanner
+that invokes the token processor @{IdnOrType@} when it recognizes a character
+sequence obeying the definition of a C identifier.
+A token processor is responsible for reporting the syntactic classification
+of the token and its internal representation (if any) to the parser.
+
+Invoking the token processor @{mkidn@} establishes the internal
+representation of the identifier.
+Here are the steps for classifying it:
+
+\begin{enumerate}
+\item If the identifier is bound to @{typedef_name@} in the current context,
+classify it as a @{typedef_name@}.
+
+\item If the identifier lies within a @{struct_declaration_list@},
+but not within the parameter list of a function declarator,
+classify it as a @{member_def@}.
+
+\item If the identifier lies within an @{init_declarator_list@} in a
+declaration having a @{typedef@} storage class specifier,
+but not within the parameter list of a function declarator,
+classify it as a @{typedef_def@}.
+
+\item Otherwise classify it as an @{identifier@}.
+\end{enumerate}
+
+\noindent
+After classifying the identifier, @{IdnOrType@} saves some information for
+later binding:
+
+@$@<IdnOrType(char *start, int length, int *syncode, int *rep)@>==@{
+/* Obtain the internal representation of an identifier
+ *   On entry-
+ *     start points to the character string for the identifier
+ *     length=length of the character string for the identifier
+ *     syncode points to a location containing the initial terminal code
+ *     Context.SynCode in [member_def, typedef_def, identifier]
+ *   On exit-
+ *     syncode has been set to the terminal code
+ *     rep has been set to the internal coding
+ *     Context.Symbol=string table index of the token
+ ***/
+{
+  mkidn(start, length, syncode, rep);
+
+  *syncode = GetSynCode(KeyInEnv(CurrentEnv, *rep), Context.SynCode);
+  if (*syncode == identifier && Context.SynCode != identifier)
+    *syncode = Context.SynCode;
+
+  @<Instance information for binding@>
+}
+@}
+
+@{CurrentEnv@}, the set of bindings currently valid, is described in
+Section \ref{env}.
+
+@{IdnOrType@} may deliver a classification that is not allowed by the
+grammar.
+In that case, the generated parser will call @{Reparatur@} in an attempt
+to get the token reclassified.
+Two reclassifications are possible:
+
+@$@<Reparatur(POSITION *coord, int *syncode, int *rep)@>==@{
+/* Repair a syntax error by changing the lookahead token
+ *   On entry-
+ *     coord points to the coordinates of the lookahead token
+ *     syncode points to the classification of the lookahead token
+ *     rep points to the representation of the lookahead token
+ *   If the lookahead token has been changed then on exit-
+ *     Reparatur=1
+ *     coord, syncode and rep reflect the change
+ *   Else on exit-
+ *     Reparatur=0
+ *     coord, syncode and rep are unchanged
+ ***/
+{
+  if (*syncode == typedef_name && Context.SynCode == member_def) {
+    *syncode = member_def;
+    return 1;
+  }
+  if (*syncode != identifier) { *syncode = identifier; return 1; }
+  return 0;
+}
+@}
+
+@C@<Tracking current context@>
+
+The following information is sufficient to track the current context for
+the purposes of classifying identifier occurrences:
+
+@$@<State variable declarations@>+=@{
+typedef struct {
+  int SynCode;   /* Identifier classification on the basis of context */
+  int BindingOK; /* 1 if identifiers should be bound in this context */
+} IdProperties;
+
+extern IdProperties Context;
+@}
+
+It is not possible to set the value of @{Context@} before each declaration,
+because that leads to a conflict in the grammar.
+Therefore the value must be reset at the beginning of the compilation
+and the end of each declaration:
+
+@$@<Reset state@>@M@{Context.SynCode = identifier; Context.BindingOK = 1;@}
+
+The classification is set to @{typedef_def@} when the storage class
+specifier @{typedef@} is accepted by the parser:
+
+@$@<Accept a typedef specifier@>==@{Context.SynCode = typedef_def;@}
+
+A @{struct_declaration@} may be nested within a normal declaration or
+another structure or union.
+Since the possible nesting depth is arbitrary, a stack is needed:
+
+@$@<Instantiate a stack module for state values@>==@{
+$/Adt/Stack.gnrc +instance=IdState +referto=IdProperties :inst
+@}
+
+The classification set to either @{member_def@} (for a @{struct@} or @{union@}
+declaration) or to @{identifier@} (for any other declaration).
+In addition, the binding permission should be set for an object or function
+declaration, but not for function prototypes.
+
+@$@<Nest@>@(@2@)@M@{BeginDeclaration(@1,@2);@}
+
+@$@<BeginDeclaration(int c, int b)@>==@{
+{
+  IdStateStackPush(Context);
+  Context.SynCode = c; Context.BindingOK = b;
+}
+@}
+
+@$@<Restore@>@M@{Context = IdStateStackTop; IdStateStackPop;@}
+
+@C@<Binding identifier occurrences@>
+\label{env}
+
+@{IdnOrType@} saves information about the identifier it classifies.
+If this is a defining occurrence of an ordinary identifier, and binding is
+permitted, then the given identifier should be bound in the current scope
+with the appropriate classification.
+
+@$@<State variable declarations@>+=@{
+typedef struct {
+  int BindingOK;   /* 1 if binding is allowed */
+  int Symbol;      /* Identifier to be bound */
+  Environment Env; /* Environment in which to bind */
+  int SynCode;     /* Identifier classification */
+} BindData;
+
+extern BindData CurrentId;
+@}
+
+Scope rules are embodied in the concept of an @/environment@/, which is a
+set of bindings for identifiers.
+The Eli library's @{envmod@} module implements a countour-model environment
+suitable for classifying C identifiers:
+
+@$@<Instantiate an environment module for identifier analysis@>==@{
+$/Name/envmod.specs
+@}
+
+@$@<State variable declarations@>+=@{
+extern Environment CurrentEnv;
+@}
+
+@$@<Initialize the set of bindings@>==@{
+CurrentEnv = NewEnv();
+@}
+
+@{IdnOrType@} captures the current state, adds the specific identifier, and
+determines the appropriate classification:
+
+@$@<Instance information for binding@>==@{
+CurrentId.BindingOK = Context.BindingOK;
+CurrentId.Symbol    = *rep;
+CurrentId.Env       = CurrentEnv;
+CurrentId.SynCode   = Context.SynCode == typedef_def ? typedef_name
+                                                     : identifier;
+@}
+
+The environment module binds the identifier to a definition table key;
+the classification must be stored as a property of that key:
+
+@O@<Phrase.pdl@>@{
+SynCode: int;
+@}
+
+@$@<Bind(void)@>==@{
+{ 
+  if (CurrentId.BindingOK) 
+    ResetSynCode(DefineIdn(CurrentId.Env, CurrentId.Symbol), CurrentId.SynCode);
+}
+@}
+
+In some constructs the state must be saved and the actual binding made
+when the end of that construct is reached; in other cases the binding must
+be done immediately.
+Deferred bindings are nested, so they can be stored on a stack:
+
+@$@<Instantiate a stack module for deferred bindings@>==@{
+$/Adt/Stack.gnrc +instance=Bind +referto=BindData :inst
+@}
+
+@$@<Defer the binding@>@M@{BindStackPush(CurrentId);@}
+
+@$@<Deferred binding@>@M@{CurrentId = BindStackTop; BindStackPop; Bind();@}
+
+@$@<Bind@>@M@{Bind();@}
+
+@C@<Nested environments@>
+
+Environments can be nested, in which case the binding in the innermost
+environment hides those in outer environments.
+This means that a stack can be used to store the @{Environment@} values:
+
+@$@<Instantiate a stack module for environment values@>==@{
+$/Adt/Stack.gnrc +instance=Region +referto=Environment :inst
+@}
+
+@$@<New region@>@M@{@-
+RegionStackPush(CurrentEnv); CurrentEnv = NewScope(CurrentEnv);@}
+
+@$@<End region@>@M@{CurrentEnv = RegionStackTop; RegionStackPop;@}
+
+@C@<Procedure parameters@>
+
+According to Section 6.1.2.1 of the standard, an identifier declared in the
+parameter list of a function of a function has block scope, which
+terminates at the @{}@} closing the function definition.
+That means we need to create an environment at the beginning of the
+parameter list and discard it at the end of the function definition.
+
+The problem is that when the beginning of the parameter list is encountered
+there is no way to tell whether the declarator is part of a function
+definition or not.
+
+If the declarator is part of a nested declaration, then its parameter list
+is a function prototype and the environment can be discarded at the end of
+the parameter list.
+
+If the declarator is at the outermost level of an external declaration,
+then its parameter list @/may@/ be the parameter list of a function and the
+environment cannot be discarded at the end of the parameter list.
+It must be discarded at the end of the declaration.
+
+A particular external declaration may or may not have a declarator
+specifying a parameter list.
+The current environment should be discarded at the end of an external
+declaration if and only if the declaration actually has a parameter list.
+
+The necessary information can be provided by a variable that
+distinguishes four possible states:
+
+@$@<State variable definitions@>+=@{
+typedef enum {
+  External,
+  NoParameters,
+  HasParameters,
+  IsNested
+} DeclarationStateValues;
+
+static int DeclarationState = External;
+@}
+
+Arbitrary nesting is handled without a stack by incrementing the
+current value of @{DeclarationState@} by @{IsNested@}:
+A value greater than or equal to @{IsNested@} indicates the nested state,
+but the state at the top level is also preserved.
+This is the reason that @{DeclarationState@} cannot be declared as a
+variable of type @{DeclarationStateValues@}; with arbitrary nesting,
+@{DeclarationState@} takes on values that are not valid
+@{DeclarationStateValues@}.
+
+@$@<Parameters?@>@(@1@)@M@{BeginParameters(@1);@}
+@$@<End parameters@>@M@{EndDeclaration();@}
+
+@$@<State variable definitions@>+=@{
+void
+BeginParameters(int p)
+{
+  if (DeclarationState != External) DeclarationState += IsNested;
+  else if (!p) DeclarationState = NoParameters;
+  else {
+    DeclarationState = HasParameters;
+    @<New region@>
+    @<Nest@>@(identifier@,1@)
+  }
+}
+
+void
+EndDeclaration()
+{
+  if (DeclarationState > IsNested) DeclarationState -= IsNested;
+  else {
+    if (DeclarationState == HasParameters) {
+      @<Restore@>
+      @<End region@>
+    }
+    DeclarationState = External;
+  }
+}
+@}
+
+@B@<Operational Specifications@>
+
+Operational specifications of some characteristics are provided directly in
+a version of C that is compatible with C++.
+
+@C
+
+This code is provided with controls so that it can be compiled with
+non-ANSI C compilers.
+
+@O@<Phrase.c@>@{
+#include "eliproto.h"
+#include "err.h"
+#include "envmod.h"
+#include "termcode.h"
+#include "pdl_gen.h"
+#include "Phrase.h"
+
+BindData    CurrentId;
+Environment CurrentEnv;
+
+IdProperties Context = { identifier, 1 };
+
+@<State variable definitions@>
+
+void
+#if PROTO_OK
+Bind(void)
+#else
+Bind()
+#endif
+@<Bind(void)@>
+
+void
+#if PROTO_OK
+IdnOrType(char *start, int length, int *syncode, int *rep)
+#else
+IdnOrType(start, length, syncode, rep)
+char *start; int length, *syncode; int *rep;
+#endif
+@<IdnOrType(char *start, int length, int *syncode, int *rep)@>
+
+int
+#if PROTO_OK
+Reparatur(POSITION *coord, int *syncode, int *rep)
+#else
+Reparatur(coord, syncode, rep) POSITION *coord; int *syncode, *rep;
+#endif
+@<Reparatur(POSITION *coord, int *syncode, int *rep)@>
+
+void
+#if PROTO_OK
+BeginDeclaration(int c, int b)
+#else
+BeginDeclaration(c, b) int c, b;
+#endif
+@<BeginDeclaration(int c, int b)@>
+@}
+
+@C
+
+Interface specifications for the operational descriptions are controlled so
+that they may be included several times without the danger of multiple
+definitions.
+
+@O@<Phrase.h@>@{
+#ifndef PHRASE_H
+#define PHRASE_H
+
+#include "eliproto.h"
+#include "envmod.h"
+#include "RegionStack.h"
+#include "IdStateStack.h"
+#include "BindStack.h"
+#include "reparatur.h"
+
+@<State variable declarations@>
+
+extern void Bind             ELI_ARG((void));
+extern void BeginDeclaration ELI_ARG((int,int));
+extern void BeginParameters  ELI_ARG((int));
+extern void EndDeclaration   ELI_ARG((void));
+
+#endif
+@}
+
+@C
+
+@O@<Phrase.specs@>@{
+@<Instantiate an environment module for identifier analysis@>
+@<Instantiate a stack module for environment values@>
+@<Instantiate a stack module for deferred bindings@>
+@<Instantiate a stack module for state values@>
+@}
+
+@C
+
+@O@<Phrase.head@>@{
+#include "Phrase.h"
+#include "termcode.h"
+#include "IdStateStack.h"
+@}
+
+@C
+
+@O@<Phrase.init@>@{
+@<Reset state@>
+@<Initialize the set of bindings@>
+@}

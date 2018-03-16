@@ -1,0 +1,246 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Inherit.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $
+
+-----------------------------------------------------------
+Inherit.fw
+
+Inheritance relations are established between 
+scopes that contain keys of attributes, and between
+scopes that contain keys of computations.
+
+Scopes for computations:
+Three scopes are associated with every TREE or CLASS symbol.
+These scopes contain keys of the upper and lower symbol 
+computations, and of the HEAD-computations.
+They inherit the corresponding scopes of other symbols.
+
+One scope is created for every symbol occurrence in a production.
+These scopes contain keys of the rule computations for attributes 
+of that symbol occurrence.
+They inherit either the upper or the lower scope of the symbol.
+
+One scope is created for every rule to contain keys of the
+computations of rule attributes and of the plain computations
+in rule context. It is created in Compute.fw.
+It does not inherit any scope.
+
+Scopes for attributes:
+One scope is created for every symbol and every rule to contain 
+keys of the attributes specified for that entity.
+The symbol scopes inherit from other symbol scopes. 
+The rule scope does not inherit from any scope.
+(The rule scope is created in Attribute.fw.)
+
+-----------------------------------------------------------
+
+~O~<Inherit.pdl~>~{
+UpperScope: Environment; "envmod.h"
+LowerScope: Environment;
+HEADScope: Environment;
+~}
+
+Establish the scope pairs for symbols.
+Then a call of MakeSymbOccScopes creates the scopes for
+symbol occurrence in a productions, and establishes the
+inheritance from the symbol scopes:
+
+~$~<Create scope pairs for computations~>==~{
+SYMBOL AG: SymbolEnv: Environment;
+SYMBOL AG COMPUTE
+  SYNT.GotSymbolScope = MakeSymbOccScopes (SYNT.SymbolEnv)
+    <- (CONSTITUENTS SetSymbolScope.GotSymbolScope,
+        THIS.GotGrammarClasses);
+END;
+
+CLASS SYMBOL SetSymbolScope COMPUTE
+  SYNT.GotSymbolScope =
+    IF (EQ (GetUpperScope (THIS.Key, NoEnv), NoEnv),
+       ORDER
+         (ResetUpperScope 
+             (THIS.Key, 
+              AddKeyToEnv (NewScope (INCLUDING AG.SymbolEnv), THIS.Key)),
+          ResetLowerScope 
+             (THIS.Key, 
+              AddKeyToEnv (NewScope (INCLUDING AG.SymbolEnv), THIS.Key)),
+          ResetHEADScope 
+             (THIS.Key, 
+              AddKeyToEnv (NewScope (INCLUDING AG.SymbolEnv), THIS.Key))));
+END;
+
+SYMBOL SymbolDefId INHERITS SetSymbolScope END;
+SYMBOL SymbolId INHERITS SetSymbolScope END;
+SYMBOL SyntId INHERITS SetSymbolScope END;
+
+SYMBOL SymCompSpec: UpperScope, LowerScope, HEADScope, AttrScope: 
+                    Environment,
+		    isRoot: int;
+RULE: SymCompSpec ::= SymClass SymbolDefId InheritOpt CompPart 'END'
+COMPUTE
+  SymCompSpec.UpperScope = GetUpperScope (SymbolDefId.Key, NoEnv)
+    <- INCLUDING AG.GotSymbolScope;
+  SymCompSpec.LowerScope = GetLowerScope (SymbolDefId.Key, NoEnv)
+    <- INCLUDING AG.GotSymbolScope;
+  SymCompSpec.HEADScope = GetHEADScope (SymbolDefId.Key, NoEnv)
+    <- INCLUDING AG.GotSymbolScope;
+  SymCompSpec.AttrScope = GetAttrScope (SymbolDefId.Key, NoEnv)
+    <- INCLUDING AG.GotAttrScope;
+
+  SymCompSpec.isRoot = GetIsRoot (SymbolDefId.Key, 0)
+    <- INCLUDING AG.GotGrammarClasses;
+
+  IF (GetIsTerm (SymbolDefId.Key, 0),
+  message (ERROR, CatStrInd ("A terminal can not inherit computations: ",
+           SymbolDefId.Sym), 0, COORDREF))
+  <- INCLUDING AG.GotGrammarClasses;
+END;
+~}
+
+~O~<Inherit.lido~>~{
+~<Create scope pairs for computations~>
+~<Explicit inheritances~>
+~}
+
+The explicit inheritances are processed:
+~$~<Explicit inheritances~>==~{
+RULE: InheritSym ::= SymbolId COMPUTE
+  InheritSym.GotInherit =
+  IF (NOT (InheritClass
+             (INCLUDING SymCompSpec.AttrScope,
+              GetAttrScope (SymbolId.Key, NoEnv))),
+  message (ERROR, 
+           "Cyclic inheritance",
+           0, COORDREF),
+  ORDER
+    (
+     InheritClass
+       (INCLUDING SymCompSpec.LowerScope,
+        GetLowerScope (SymbolId.Key, NoEnv)),
+     InheritClass
+       (INCLUDING SymCompSpec.UpperScope,
+        GetUpperScope (SymbolId.Key, NoEnv)),
+     InheritClass
+       (INCLUDING SymCompSpec.HEADScope,
+        GetHEADScope (SymbolId.Key, NoEnv))))
+  <- INCLUDING AG.GotSymbolScope;
+END;
+
+SYMBOL AG COMPUTE
+  SYNT.GotInherit = CONSTITUENTS InheritSym.GotInherit;
+END;
+~}
+
+int InheritClass (Environment tocl, Environment fromcl)
+int ChkInherit (Environment tocl, Environment fromcl)
+DefTableKey NextInhKey(Environment env, int idn, DefTableKey lastkey)
+
+~O~<Inherit.head~>~{
+#include "Inherit.h"
+~}
+
+~O~<Inherit.h~>~{
+#include "envmod.h"
+
+#if defined(__cplusplus) || defined(__STDC__)
+extern void MakeSymbOccScopes (Environment env);
+extern Environment AddKeyToEnv (Environment env, DefTableKey k);
+#else
+extern void MakeSymbOccScopes ();
+extern Environment AddKeyToEnv ();
+#endif
+~}
+
+~O~<Inherit.c~>~{
+#include "Inherit.h"
+#include "GrammarRules.h"
+#include "Grammar.h"
+#include "pdl_gen.h"
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+Environment AddKeyToEnv (Environment env, DefTableKey k)
+#else
+Environment AddKeyToEnv (env, k) Environment env; DefTableKey k;
+#endif
+{
+  SetKeyOfEnv (env, k);
+  return env;
+}
+
+static POSITION NoPos = {0,1};
+
+#if defined(__cplusplus) || defined(__STDC__)
+void MakeSymbOccScopes (Environment env)
+#else
+void MakeSymbOccScopes (env) Environment env;
+#endif
+/* on entry
+        the GrammarRules are completed,
+	the Scope property is set to each symbol
+   on exit
+        a scope is created for each symbol occurrence,
+	the scope of the symbol is inherited to it
+*/
+{ RuleProdList rules;
+
+#ifdef TEST
+  printf ("MakeSymbOccScopes begin\n");
+#endif
+
+  rules = GrammarRules;
+  while (rules != NULLRuleProdList)
+  { RuleProd rule = HeadRuleProdList (rules);
+    ProdSymbol lhs = HeadProdSymbolList (rule->prod);
+    ProdSymbolList rhs = TailProdSymbolList (rule->prod);
+
+    lhs->u.s.scope = AddKeyToEnv (NewScope (env), lhs->u.s.symbolkey);
+    (void)InheritClass
+       (lhs->u.s.scope, GetLowerScope (lhs->u.s.symbolkey, NoEnv));
+
+    if (lhs->u.s.symbolkey == GrammarRoot)
+    (void)InheritClass /* inherit the INH computations, too */
+       (lhs->u.s.scope, GetUpperScope (lhs->u.s.symbolkey, NoEnv));
+
+    while (rhs != NULLProdSymbolList)
+    { ProdSymbol sy = HeadProdSymbolList (rhs);
+      if (sy->kind != IsProdLiteral)
+      { sy->u.s.scope = AddKeyToEnv (NewScope (env), sy->u.s.symbolkey);
+        (void)InheritClass 
+          (sy->u.s.scope, GetUpperScope (sy->u.s.symbolkey, NoEnv));
+      }
+      rhs = TailProdSymbolList (rhs);
+    }
+    rules = TailRuleProdList (rules);
+  }
+
+  if (GrammarRoot != NoKey)
+  {  if (!InheritClass (GetUpperScope (GrammarRoot, NoEnv),
+                        GetUpperScope (ROOTCLASSkey, NoEnv)))
+    message (ERROR, "Cyclic inheritance for ROOTCLASS", 0,
+             GetCoord (GrammarRoot, &NoPos));
+#ifdef TEST
+  printf ("connect ROOTCLASS\n");
+#endif
+  (void) InheritClass (GetLowerScope (GrammarRoot, NoEnv),
+                       GetLowerScope (ROOTCLASSkey, NoEnv));
+  (void) InheritClass (GetHEADScope (GrammarRoot, NoEnv),
+                       GetHEADScope (ROOTCLASSkey, NoEnv));
+  (void) InheritClass (GetAttrScope (GrammarRoot, NoEnv),
+                       GetAttrScope (ROOTCLASSkey, NoEnv));
+  }
+#ifdef TEST
+  printf ("MakeSymbOccScopes end\n");
+#endif
+}/* MakeSymbOccScopes */
+~}
+
+~O~<Inherit.msg~>~{
+"Cyclic inheritance"
+"Cyclic inheritance for ROOTCLASS"
+"A terminal can not inherit computations",
+~}
+

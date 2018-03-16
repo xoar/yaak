@@ -1,0 +1,642 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: SymbolOcc.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $ */
+
+-----------------------------------------------------------
+SymbolOcc.fw
+
+Symbol occurrences (SymOcc) are part of an attribute use
+(Block in Block.env) or denote a subtree in a CONSTITUENT 
+construct. SYNT, INH, THIS, HEAD, TAIL are also derived from
+SymOcc.
+
+Symbol occurrences in rule computations are linked to the
+corresponding element of the production representation.
+Proper indexing of symbol occurrences is checked.
+
+In case of SYNT, INH, and the SymOcc on the left-hand side
+of an attribute computation in a rule context (DefAttr),
+the SymOcc contributes to the classification of the
+attached attribute (SYNT or INH). The class is then
+represented by SymOcc.AttrClass.
+
+The two forms of terminal access are also handled here.
+
+-----------------------------------------------------------
+
+The 5 attributes of SymOcc are used as follows:
+
+Key is the symbol Key, except for HEAD.a, TAIL.a where it
+is a specific key that identifies HEAD or TAIL.
+
+In rule contexts ProdSymbol points to the symbol occurrence
+in the abstraction of the production.
+That holds for HEAD and TAIL, too.
+
+AttrClass is set to SYNT or INH if SymOcc is SYNT or INH
+in a symbol context, or if SymOcc is in a defining position 
+of an attribute computation in a rule context
+(indicated by attribute IsDefining).
+
+The VOID attribute ChkContext is used to specify a default
+check which is overridden in specific contexts.
+
+~$~<Attributes~>==~{
+SYMBOL SymOcc: Key: DefTableKey, 
+               ChkContext: VOID,
+               ProdSymbol: ProdSymbol,
+               IsDefining: int INH,
+               AttrClass: int;
+~}
+
+The following default computations cover the case 
+  SymOcc ::= 'THIS'
+completely:
+
+~$~<Defaults~>==~{
+SYMBOL SymOcc COMPUTE
+  INH.IsDefining = 0;
+  SYNT.AttrClass = NoClass;
+
+  SYNT.Key =
+    IF (INCLUDING Context.IsRule, NoKey, INCLUDING Context.Key);
+
+  SYNT.ChkContext =
+    IF (INCLUDING Context.IsRule,
+    message (ERROR,
+             "Not allowed in RULE computation",
+             0, COORDREF));
+
+  SYNT.ProdSymbol = NoProdSymbol;
+END;
+~}
+
+Here we know the AttrClass definitely:
+
+~$~<SYNT and INH~>==~{
+RULE: SymOcc ::= 'SYNT' COMPUTE
+  SymOcc.AttrClass = SYNTClass;
+END;
+
+RULE: SymOcc ::= 'INH' COMPUTE
+  SymOcc.AttrClass = INHClass;
+END;
+~}
+
+Symbol occurrences HEAD and TAIL are marked by specific keys:
+~$~<HEAD and TAIL keys~>==~{
+HEADKey;
+TAILKey;
+~}
+
+HEAD and TAIL are allowed in both rule and symbol contexts;
+In rule contexts the right-hand side of the production may 
+not be empty.
+The Key identifies this particular case.
+If we are in rule context the ProdSymbol where the chain
+starts and ends is determined in a specific way:
+
+~$~<HEAD and TAIL~>==~{
+RULE: SymOcc ::= 'HEAD' COMPUTE
+  SymOcc.Key = HEADKey;
+  SymOcc.ChkContext = "yes";
+
+  SymOcc.ProdSymbol =
+    IF (INCLUDING Context.IsRule,
+       FindHEADSymbolOcc
+         (GetRule (INCLUDING Context.Key, NoRuleProd)),
+       NoProdSymbol)
+    <- (INCLUDING AG.GotGrammarClasses,
+        INCLUDING AG.MadeGrammar);
+
+  IF (AND (INCLUDING Context.IsRule,
+           EQ (SymOcc.ProdSymbol, NoProdSymbol)),
+    message (ERROR,
+             "HEAD not allowed in RULE without nonterminal",
+             0, COORDREF));
+END;
+
+RULE: SymOcc ::= 'TAIL' COMPUTE
+  SymOcc.Key = TAILKey;
+  SymOcc.ChkContext = "yes";
+
+  SymOcc.ProdSymbol =
+    IF (INCLUDING Context.IsRule,
+       FindTAILSymbolOcc
+         (GetRule (INCLUDING Context.Key, NoRuleProd)),
+       NoProdSymbol)
+    <- INCLUDING AG.GotGrammarClasses;
+
+  IF (AND (INCLUDING Context.IsRule,
+           EQ (SymOcc.ProdSymbol, NoProdSymbol)),
+    message (ERROR,
+             "TAIL not allowed in RULE without nonterminal",
+             0, COORDREF));
+END;
+~}
+
+This is the form where a production symbol occurrence is
+referred in rule context:
+
+~$~<Reference to production nonterminal~>==~{
+RULE: SymOcc ::= SymbolId Index COMPUTE
+  SymOcc.Key = SymbolId.Key;
+
+  SymOcc.ChkContext =
+    IF (NOT (INCLUDING Context.IsRule),
+    message (ERROR,
+             "Not allowed in SYMBOL computation",
+             0, COORDREF));
+
+  SymOcc.ProdSymbol =
+    IF (INCLUDING Context.IsRule,
+       FindSymbolOcc
+         (GetRule (INCLUDING Context.Key, NoRuleProd),
+          SymOcc.Key,
+          Index.Value,
+          COORDREF),
+       NoProdSymbol)
+    <- INCLUDING AG.GotGrammarClasses;
+
+  SymOcc.AttrClass =
+    IF (OR (EQ (SymOcc.ProdSymbol, NoProdSymbol),
+            NOT (SymOcc.IsDefining)),
+       NoClass,
+       IF (EQ (PosOfProdSymbol (SymOcc.ProdSymbol), 0),
+           SYNTClass, INHClass));
+END;
+~}
+
+A SymbolRef is a specific form of an expression in a computation.
+It refers to an occurrence of a terminal symbol in the RULE the
+computation belongs to or is inherited to.
+In a RULE computation the form 
+    SymbolRef ::= SymbolId Index
+is applied where the index is optional, e.g.
+    Number [2]
+    Identifier
+In a SYMBOL computation the form
+    SymbolRef ::= 'TERM' Index
+is applied where the index is optional, e.g.
+    TERM [2]
+    TERM
+
+In case of a SymbolRef in a RULE context it is checked whether
+a terminal occurrence in the rule is addressed.
+
+The analysis of SymbolRef and error reporting is quite complex,
+because a single name foo is allowed as an expression in a computation;
+it will be bound in the generated C program. Such names are derived from
+SymbolRef. Hence, in a RULE computation a non-indexed name, like foo, 
+which does not occur in the RULE, will be accepted, too; 
+in a SYMBOL computation any non-indexed name, like foo, will be accepted.
+
+Furthermore, it is a common mistake to omit attribute names in 
+computations, e.g.
+   X.a = f(Expr[2], Expr[3]);
+such constructs are recognized as illegal SymbolRefs.
+We try to avoid misleading error reports in such cases.
+
+The TERM construct in symbol computations is expanded
+and checked when inherited by rule contexts.
+
+~$~<Reference to production terminal~>==~{
+ATTR ProdSymbol: ProdSymbol;
+ATTR occs: int;
+
+SYMBOL SymbolRef: Key: DefTableKey,
+                  Pos: int;
+
+RULE: SymbolRef ::= SymbolId Index COMPUTE
+   SymbolRef.Key =
+     KeyOf(BindingInEnv (INCLUDING AG.Env, SymbolId.Sym));
+
+  .ProdSymbol =
+    IF (AND (INCLUDING Context.IsRule,
+             GetIsTerm (SymbolRef.Key, 0)),
+       FindSymbolRef
+         (GetRule (INCLUDING Context.Key, NoRuleProd),
+          SymbolRef.Key,
+          Index.Value),
+       NoProdSymbol)
+    <- INCLUDING AG.GotGrammarClasses;
+
+   SymbolRef.Pos =
+     IF (NE (.ProdSymbol, NoProdSymbol),
+       PosOfProdSymbol (.ProdSymbol), SUB (0, 1));
+
+   .occs =
+      IF (INCLUDING Context.IsRule,
+        CountSymbolRef 
+          (GetRule (INCLUDING Context.Key, NoRuleProd),
+           SymbolRef.Key),
+        0);
+
+   IF (INCLUDING Context.IsRule,
+      IF (GetIsNonterm (SymbolRef.Key, 0),
+         IF (GT (.occs, 0),
+               ORDER (
+                 message (ERROR, 
+                   "Attribute of nonterminal is missing",
+                   0, COORDREF),
+                 IF (AND (GT (Index.Value, 0), GT (Index.Value, .occs)),
+                 message (ERROR, 
+                   "Wrong index of nonterminal occurrence",
+                   0, COORDREF))),
+             /* nt not in rule: */
+             IF (GT (Index.Value, 0), 
+                 message (ERROR, 
+                   "Symbol does not occur in rule",
+                   0, COORDREF))),
+         IF (GetIsTerm (SymbolRef.Key, 0),
+            IF (AND (GT (.occs, 0), 
+                AND (GT (Index.Value, 0), GT (Index.Value, .occs))),
+                 message (ERROR, 
+                   "Wrong index of terminal occurrence",
+                   0, COORDREF),
+                IF (AND (EQ (.occs, 0), GT (Index.Value, 0)),
+                 message (ERROR, 
+                   "Symbol does not occur in rule",
+                   0, COORDREF))),
+            /* neither nonterm nor term: */
+            IF (GT (Index.Value, 0),
+                 message (ERROR, 
+                   "Only symbols may be indexed",
+                   0, COORDREF)))),
+        /* SYMBOL context: */
+        IF (GT (Index.Value, 0),
+                 message (ERROR, 
+                   "Indexed name is not allowed",
+                   0, COORDREF)));
+END;
+
+RULE: SymbolRef ::= 'TERM' Index COMPUTE
+   SymbolRef.Pos = Index.Value;
+   SymbolRef.Key = NoKey;
+
+   IF (INCLUDING Context.IsRule,
+   message (ERROR,
+            "TERM is not allowed in RULE computation",
+            0, COORDREF));
+
+   IF (INCLUDING Compute.IsUpperSymbComp,
+   message (ERROR,
+            "TERM is not allowed in upper symbol computation",
+            0, COORDREF));
+END;
+~}
+
+Attribute occurrences are distinguished in defining occurrences
+on the left-hand sides of attribute computations and applied
+occurrences. That property is propagated down to SymOcc
+to be used for determining the attribute class:
+~$~<Defining attribute occurrences~>==~{
+SYMBOL Attr: IsDefining: int;
+SYMBOL Attr COMPUTE 
+  INH.IsDefining = 0; 
+END;
+
+RULE: Attr ::= SymOcc '.' AttrUseId COMPUTE
+  SymOcc.IsDefining = Attr.IsDefining;
+END;
+RULE: DefAttr ::= Attr COMPUTE
+  Attr.IsDefining = 1;
+END;
+~}
+
+The optional index is checked in FindSymbolOcc, called above.
+A missing one is represented by value 0.
+
+~$~<Symbol index~>==~{
+SYMBOL Index: Value: int;
+RULE: Index ::= '[' C_Integer ']' COMPUTE
+  Index.Value = IF (LE (C_Integer, 0), 1, C_Integer);
+
+  IF (LE (C_Integer, 0),
+  message (ERROR,
+           "Index must be greater than 0",
+           0, COORDREF));
+END;
+
+RULE: Index ::= COMPUTE
+  Index.Value = 0;
+END;
+~}
+
+All occurrences of symbol identifiers are bound to
+their entity in the global environment. However,
+symbol occurrences in remote attributes, shield constructs,
+and in inherits clauses require the existance in a definition
+or in a rule.
+
+~$~<Symbol defined check property~>==~{
+IsDefined: int;
+IsDefinedReported: int;
+~}
+
+~$~<Symbol defined check~>==~{
+SYMBOL AG COMPUTE
+  SYNT.GotSymbIsDefined = 
+    CONSTITUENTS
+      (SymbolDefId.GotSymbIsDefined,
+       SyntId.GotSymbIsDefined);
+END;
+
+SYMBOL SymbolDefId COMPUTE
+  SYNT.GotSymbIsDefined = ResetIsDefined (THIS.Key, 1);
+END;
+SYMBOL SyntId COMPUTE
+  SYNT.GotSymbIsDefined = ResetIsDefined (THIS.Key, 1);
+END;
+
+SYMBOL SymbolId COMPUTE
+  INH.CheckIsDefined =
+    IF (AND (NOT (GetIsDefined (THIS.Key, 0)),
+             NOT (GetIsDefinedReported (THIS.Key, 0))),
+    ORDER 
+      (ResetIsDefinedReported (THIS.Key, 1),
+       message (ERROR, CatStrInd (
+         "Symbol does not occur in rule or definition: ",
+             THIS.Sym),
+         0, COORDREF))) <- INCLUDING AG.GotSymbIsDefined;
+END;
+
+/* check is inherited here: */
+RULE: InheritSym ::= SymbolId END;
+RULE: RemoteAttr ::= SymbolId '.' AttrUseId END;
+RULE: ShieldSym ::= SymbolId END;
+
+/* check is not inherited here: */
+RULE: SymOcc ::= SymbolId Index COMPUTE
+  SymbolId.CheckIsDefined = "no";
+END;
+RULE: SymbolRef ::= SymbolId Index COMPUTE
+   SymbolId.CheckIsDefined = "no"; /* override check */
+END;
+~}
+
+~O~<SymbolOcc.lido~>==~{
+~<Attributes~>
+~<Defaults~>
+~<SYNT and INH~>
+~<HEAD and TAIL~>
+~<Reference to production nonterminal~>
+~<Reference to production terminal~>
+~<Defining attribute occurrences~>
+~<Symbol index~>
+~<Symbol defined check~>
+~}
+
+~O~<SymbolOcc.head~>==~{
+#include "SymbolOcc.h"
+~}
+
+~O~<SymbolOcc.h~>==~{
+#ifndef SYMBOLOCC_H
+#define SYMBOLOCC_H
+
+#include "args.h"
+#include "GrammarRules.h"
+#include "err.h"
+
+extern ProdSymbol FindHEADSymbolOcc
+   FEARGS ((RuleProd rule));
+
+extern ProdSymbol FindTAILSymbolOcc
+   FEARGS ((RuleProd rule));
+
+extern ProdSymbol FindSymbolOcc
+   FEARGS ((RuleProd rule, DefTableKey symbol, int index, CoordPtr coord));
+extern ProdSymbol FindSymbolRef
+   FEARGS ((RuleProd rule, DefTableKey symbol, int index));
+extern int CountSymbolRef
+   FEARGS ((RuleProd rule, DefTableKey symbol));
+
+#endif
+~}
+
+~O~<SymbolOcc.c~>==~{
+#include "SymbolOcc.h"
+#include "pdl_gen.h"
+#include "csm.h"
+
+#ifdef TEST
+#define TEST
+#include <stdio.h>
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol FindHEADSymbolOcc (RuleProd rule)
+#else
+ProdSymbol FindHEADSymbolOcc (rule)
+  RuleProd rule;
+#endif
+{ ProdSymbolList rhs;
+  if (rule == NoRuleProd) return NoProdSymbol;
+
+  rhs = TailProdSymbolList (rule->prod);
+  while (rhs != NULLProdSymbolList)
+  { ProdSymbol s = HeadProdSymbolList (rhs);
+    if (s->kind != IsProdLiteral && 
+        GetIsNonterm (s->u.s.symbolkey, 0))
+       return s;
+    rhs = TailProdSymbolList (rhs);
+  }
+  return NoProdSymbol;
+}/* FindHEADSymbolOcc */
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol FindTAILSymbolOcc (RuleProd rule)
+#else
+ProdSymbol FindTAILSymbolOcc (rule)
+  RuleProd rule;
+#endif
+{ ProdSymbolList rhs; 
+  ProdSymbol lastnonterm = NoProdSymbol;
+  if (rule == NoRuleProd) return NoProdSymbol;
+
+  rhs = TailProdSymbolList (rule->prod);
+  while (rhs != NULLProdSymbolList)
+  { ProdSymbol s = HeadProdSymbolList (rhs);
+    if (s->kind != IsProdLiteral &&
+        GetIsNonterm (s->u.s.symbolkey, 0))
+       lastnonterm = s;
+    rhs = TailProdSymbolList (rhs);
+  }
+  return lastnonterm;
+}/* FindTAILSymbolOcc */
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol FindSymbolOcc 
+  (RuleProd rule, DefTableKey symbol, int index, CoordPtr coord)
+#else
+ProdSymbol FindSymbolOcc (rule, symbol, index, coord)
+  RuleProd rule; DefTableKey symbol; int index; CoordPtr coord;
+#endif
+/* on entry:
+     rule is the representative production of a rule
+     symbol[index] is a symbol occurrence to be found
+       index == 0 represents no index
+   on exit:
+     the pointer to the symbol occurrence record is returned
+     messages are reported if
+        the symbol occurrence is not in the production,
+        the index should be present
+        the index should not be present
+     NoProdSymbol is returned in erroneous cases
+*/
+{ ProdSymbolList symblist;
+  ProdSymbol result = NoProdSymbol;
+  int count = (index > 0 ? index : 1);
+#ifdef TEST
+printf ("FindSymbolOcc %s count %d in line %d\n",
+    StringTable(GetNameSym (symbol, 0)), count, LineOf(*coord));
+#endif
+  if (rule == NoRuleProd) return NoProdSymbol;
+
+  symblist = rule->prod;
+  while (symblist != NULLProdSymbolList && count > 0)
+  { ProdSymbol s = HeadProdSymbolList (symblist);
+    if (s->kind != IsProdLiteral && s->u.s.symbolkey == symbol)
+    { count--;
+      result = s;
+    }
+    symblist = TailProdSymbolList (symblist);
+  }
+
+  if (count > 0) /* not enough occs of symbol in the prod */
+  { if (rule->islistof)
+      message (ERROR,
+               "Only left-hand side of a LISTOF may be accessed",
+               0, coord);
+    else
+      message (ERROR,
+               "Symbol is not in production",
+               0, coord);
+    return NoProdSymbol;
+  }
+
+  /* count == 0 implies 
+       result is the i-th occurrence of symbol
+  */
+  if (index > 1) /* explicit index>1 is correct */
+     return result;
+
+  /* index==1 or no index was given, 
+     first occ has been found */
+  /* check whether there is another occurrence of symbol: */
+  while (symblist != NULLProdSymbolList)
+  { ProdSymbol s = HeadProdSymbolList (symblist);
+    if (s->kind != IsProdLiteral && s->u.s.symbolkey == symbol)
+    { /* found another occ after the first one */
+      if (index == 0) /* is not indexed */
+         message (ERROR,
+                  "Symbol index is missing",
+                  0, coord);
+      return result;
+    }
+    symblist = TailProdSymbolList (symblist);
+  }
+
+  /* result is the only occ of symbol */
+  if (index > 1) /* is indexed */
+     message (ERROR,
+              "Symbol must not be indexed",
+              0, coord);
+  return result;
+}/* FindSymbolOcc */
+
+#if defined(__cplusplus) || defined(__STDC__)
+ProdSymbol FindSymbolRef 
+  (RuleProd rule, DefTableKey symbol, int index)
+#else
+ProdSymbol FindSymbolRef (rule, symbol, index)
+  RuleProd rule; DefTableKey symbol; int index;
+#endif
+/*same as FindSymbolOcc but without messages;
+  to be used to find a terminal occurrence
+  on entry:
+     rule is the representative production of a rule
+     symbol[index] is a symbol occurrence to be found
+       index == 1 is set for an optional index
+   on exit:
+     the pointer to the symbol occurrence record is returned
+     NoProdSymbol is returned if the symbol is not found
+*/
+{ ProdSymbolList symblist;
+  ProdSymbol result = NoProdSymbol;
+  int count = (index > 0 ? index : 1);
+
+  if (rule == NoRuleProd) return NoProdSymbol;
+
+  symblist = rule->prod;
+  while (symblist != NULLProdSymbolList && count > 0)
+  { ProdSymbol s = HeadProdSymbolList (symblist);
+    if (s->kind != IsProdLiteral && s->u.s.symbolkey == symbol)
+    { count--;
+      result = s;
+    }
+    symblist = TailProdSymbolList (symblist);
+  }
+
+  if (count > 0) /* not enough occs of symbol in the prod */
+    return NoProdSymbol;
+
+  if (rule->islistof && result != HeadProdSymbolList (rule->prod))
+    return NoProdSymbol;
+
+  return result;
+}/* FindSymbolRef */
+
+
+#if defined(__cplusplus) || defined(__STDC__)
+int CountSymbolRef 
+  (RuleProd rule, DefTableKey symbol)
+#else
+int CountSymbolRef (rule, symbol, index)
+  RuleProd rule; DefTableKey symbol; int index;
+#endif
+/*same as FindSymbolRef, but counting the occurrences;
+  on entry:
+     rule is the representative production of a rule
+     symbol is the key of a name; its occurrences are counted
+   on exit:
+     the number of occurrences of symbol in the rule is returned
+*/
+{ ProdSymbolList symblist;
+  int count = 0;
+
+  if (rule == NoRuleProd) return 0;
+  if (rule->islistof) return 0; /* nor terminals are in LISTOF rules */
+
+  symblist = rule->prod;
+  while (symblist != NULLProdSymbolList)
+  { ProdSymbol s = HeadProdSymbolList (symblist);
+    if (s->kind != IsProdLiteral && s->u.s.symbolkey == symbol)
+    { count++;
+    }
+    symblist = TailProdSymbolList (symblist);
+  }
+  return count;
+}/* CountSymbolRef */
+~}
+
+~O~<SymbolOcc.pdl~>~{
+~<Symbol defined check property~>
+~<HEAD and TAIL keys~>
+~}
+
+~O~<SymbolOcc.msg~>~{
+"TERM is not allowed in RULE computation"
+"Not allowed in SYMBOL computation"
+"Index must be greater than 0"
+"Symbol is not in production"
+"Only left-hand side of a LISTOF may be accessed"
+"Symbol index is missing"
+"Symbol must not be indexed"
+"Only terminals may be indexed"
+"TERM is not allowed in upper symbol computation"
+"HEAD not allowed in RULE without nonterminal"
+"TAIL not allowed in RULE without nonterminal"
+"Symbol does not occur in rule or definition: "
+~}

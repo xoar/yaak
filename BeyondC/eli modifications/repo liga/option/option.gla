@@ -1,0 +1,7 @@
+
+Identifier:	C_IDENTIFIER
+IntNumber:	PASCAL_INTEGER
+
+		C_COMMENT
+		AWK_COMMENT
+

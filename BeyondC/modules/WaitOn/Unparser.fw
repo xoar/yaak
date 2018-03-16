@@ -1,0 +1,79 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<Language.lido@>==@{
+
+    ATTR WaitOnConstructor : PTGNode;
+    ATTR WaitOnProcess : PTGNode;
+    SYMBOL Modus : device : PTGNode;
+    SYMBOL Modus : button : PTGNode;
+
+    RULE: WaitOnSubtask::= 'wait' 'on' Modus 
+    COMPUTE
+
+        WaitOnSubtask.WaitOnConstructor =
+            PTGWaitOnConstructor(INCLUDING Subtask.Id,
+                                 INCLUDING function_definition.EventName,
+                                 Modus.device,
+                                 Modus.button
+                                 );
+
+        WaitOnSubtask.WaitOnProcess = 
+            PTGWaitOnProcess(INCLUDING Subtask.Id,
+                             INCLUDING function_definition.EventName
+                             );
+
+        WaitOnSubtask.IdemPtg = PTGWaitOn(WaitOnSubtask.WaitOnConstructor,
+                                          WaitOnSubtask.WaitOnProcess
+                                          );
+
+
+    END;
+
+    SYMBOL mouseSpecifier : button : PTGNode;
+
+    RULE: Modus::= mouseSpecifier 'mouse' 'click' 
+    COMPUTE
+        Modus.device =  PTGAsIs("mouse");
+        Modus.button = mouseSpecifier.button;
+    END;
+
+    RULE: mouseSpecifier::= 'left' 
+    COMPUTE
+        mouseSpecifier.button =  PTGAsIs("left");
+    END;
+
+    RULE: mouseSpecifier::= 'right' 
+    COMPUTE
+        mouseSpecifier.button =  PTGAsIs("right");
+    END;
+
+    RULE: mouseSpecifier::= 'middle' 
+    COMPUTE
+        mouseSpecifier.button =  PTGAsIs("middle");
+    END;
+@}
+
+
+@O@<Language.ptg@>==@{
+
+WaitOn:
+    $ /*constructor*/ "\n"
+    $ /*process*/ "\n"
+
+WaitOnConstructor:
+    "    WaitOnInputStructPtr subtask" $1 int 
+        " = WaitOnInputConstructor(pluginList, " 
+                                   $1 int "," 
+                                   "\"" $2  "\"" ","
+                                   "\"" $3 /*device*/ "\"" ","
+                                   "\"" $4 /*button*/ "\""
+                                   ");"
+
+WaitOnProcess:
+    "    if( ! WaitOnInputProcess(subtask" $1 int ") )\n"
+    "    {\n"
+    "        RemoveTask(pluginList,\""  $2 "\");\n"
+    "        return;\n"
+    "    }\n"
+@}

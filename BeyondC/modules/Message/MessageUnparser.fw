@@ -1,0 +1,130 @@
+@p maximum_input_line_length = infinity
+
+@O@<MsgUnparser.lido@>==@{
+
+    ATTR MsgConstructor : PTGNode;
+    ATTR MsgProperties : PTGNode;
+    ATTR MsgProcess : PTGNode;
+
+
+    /* main construction*/
+    RULE: Subtask ::= MesgSubtask COMPUTE
+
+        MesgSubtask.MsgProperties = 
+            CONSTITUENTS MesgProperty.IdemPtg
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        MesgSubtask.MsgProcess = 
+            PTGMessageProcess(Subtask.Id,
+                              INCLUDING function_definition.EventName);
+
+        /*only write the constructor and the setters*/
+        Subtask.IdemPtg = PTGMessage (MesgSubtask.MsgConstructor ,
+                                      MesgSubtask.MsgProperties,
+                                      MesgSubtask.MsgProcess );
+    END;
+
+
+    /*different constructor*/
+
+    RULE: MesgSubtask ::= EntityNameUse 'talks' 'to' EntityNameUse Mesg MesgProperties COMPUTE
+         MesgSubtask.MsgConstructor = PTGMessageSubtaskDef(
+                                  INCLUDING Subtask.Id,
+                                  Mesg.IdemPtg, 
+                                  PTGNumb(GetId(EntityNameUse[1].Key,0)),
+                                  INCLUDING function_definition.EventName
+                                ) <- INCLUDING program.GotEntityId ;
+    END;
+
+    RULE: MesgSubtask ::= EntityNameUse 'talks' Mesg MesgProperties COMPUTE
+        MesgSubtask.MsgConstructor = PTGMessageSubtaskDef(
+                                 INCLUDING Subtask.Id,
+                                 Mesg.IdemPtg, 
+                                 PTGNumb(GetId(EntityNameUse[1].Key,0)), 
+                                 INCLUDING function_definition.EventName
+                               ) <- INCLUDING program.GotEntityId ;
+    END;
+
+    RULE: MesgSubtask ::= 'System' 'talks' Mesg MesgProperties COMPUTE
+        MesgSubtask.MsgConstructor = PTGMessageSubtaskDef(
+                                 INCLUDING Subtask.Id,
+                                 Mesg.IdemPtg, 
+                                 PTGAsIs("-1"),
+                                 INCLUDING function_definition.EventName
+                               ) ;
+    END;
+
+
+
+    RULE: MesgTimeProperty::= 'time' ':' floating_constant 's' COMPUTE
+        MesgTimeProperty.IdemPtg = PTGSetMesgTime(INCLUDING Subtask.Id,
+                                                  StringTable(floating_constant));
+    END;
+    
+    RULE: MesgPositionProperty::= 'pos' ':'  integer_constant ',' 
+                                             integer_constant COMPUTE
+        MesgPositionProperty.IdemPtg = PTGSetMesgPosition(INCLUDING Subtask.Id,
+                                                          StringTable(integer_constant[1]),
+                                                          StringTable(integer_constant[2]));
+    END;
+    
+    RULE: MesgFontPathProperty::= 'font' ':' string_literal COMPUTE
+        MesgFontPathProperty.IdemPtg = PTGSetMesgFontPath(INCLUDING Subtask.Id,
+                                                          StringTable(string_literal));
+    END;
+    
+    RULE: MesgFontSizeProperty::= 'size' ':' integer_constant COMPUTE
+        MesgFontSizeProperty.IdemPtg = PTGSetMesgFontSize(INCLUDING Subtask.Id,
+                                                          StringTable(integer_constant));
+    END;
+    
+    RULE:MesgColorProperty::= 'color' ':'  integer_constant ',' 
+                                           integer_constant ',' 
+                                           integer_constant COMPUTE
+
+        MesgColorProperty.IdemPtg = PTGSetMesgColor(INCLUDING Subtask.Id,
+                                                    StringTable(integer_constant[1]),
+                                                    StringTable(integer_constant[2]), 
+                                                    StringTable(integer_constant[3]));
+    END;
+
+@}
+
+@O@<MsgUnparser.ptg@>==@{
+
+Message:
+    $ "\n"/*Message Constructor*/
+    $ "\n"/*Message Properties*/
+    $ "\n"/*Message Process*/
+    
+MessageProcess:
+    "    if( !MessageSubtaskProcess(subtask" $1 int /*subtask id*/ ") )\n"
+    "    {\n"
+    "        RemoveTask(pluginList,\""  $2 "\");\n"
+    "        return;\n"
+    "    }\n"
+
+MessageSubtaskDef:
+    "    MessageSubtaskStructPtr subtask" $1 int " = MessageSubtaskConstructor(pluginList,"
+                                                        $1 int ", " /* id*/
+                                                        $2     ", " /*message*/
+                                                        $3     ", "  /*owner id*/
+                                                        " \"" $4  "\" " /*event name*/
+                                                        ");\n"
+    
+
+SetMesgTime:
+    "    MessageSubtaskSetTime(subtask" $ int "," $ string ");"
+
+SetMesgPosition:
+    "    MessageSubtaskSetPosition2I(subtask" $ int"," $ string "," $string ");"
+
+SetMesgFontPath:
+    "    MessageSubtaskSetFontPath(subtask" $ int"," $ string ");"
+    
+SetMesgFontSize:
+    "    MessageSubtaskSetFontSize(subtask" $ int"," $ string ");"
+    
+SetMesgColor:
+    "    MessageSubtaskSetColor3I(subtask" $ int"," $ string "," $string "," $string ");"
+@}

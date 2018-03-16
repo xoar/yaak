@@ -1,0 +1,29 @@
+/****************/
+/* option.specs */
+/****************/
+
+option.con
+option.gla
+option.clp
+option.lido
+
+option.head
+option.init
+
+opt_liga.c
+various.c
+keywords.c
+optlists.c
+conflicts.c
+output.c
+
+/* .h files */
+conflicts.h
+opt_liga.h
+output.h
+keywords.h
+optlists.h
+various.h
+../../eli/pkg/liga/option/option_types.h 
+../../eli/pkg/liga/option/option_enums.h 
+

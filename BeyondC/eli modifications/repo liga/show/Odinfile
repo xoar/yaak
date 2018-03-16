@@ -1,0 +1,21 @@
+%showderive ! == <<EOF
+loglevel=4
+errlevel=3
+warnlevel=3
+show.ptg:ptg_gen:warning>WARN
+show.ptg:ptg_gen:error>ERR
+
+show.specs :source: dir_of : vir_dir  + copy_dest=(tmpderivedSrcs):copy
+
+!if test -d derivedSrcs;then echo 'OK';else mkdir derivedSrcs;fi
+show.ptg:ptg_gen/ptg_gen.c > derivedSrcs
+
+!cp  tmpderivedSrcs/ptg*.h derivedSrcs
+!cp  tmpderivedSrcs/obstack.[hc] derivedSrcs
+!cp  tmpderivedSrcs/gettext.h derivedSrcs
+
+!rm -rf tmpderivedSrcs
+EOF
+
+
+

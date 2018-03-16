@@ -1,0 +1,11 @@
+@p maximum_input_line_length = infinity
+
+@O@<Language.con@>==@{
+
+    Subtask: WalkToSubtask.
+    
+    WalkToSubtask: EntityNameUse 'walk' 'to' integer_constant ',' integer_constant.
+    /*for using a integer variable*/
+    WalkToSubtask: EntityNameUse 'walk' 'to' IdUse ',' IdUse.
+
+@}

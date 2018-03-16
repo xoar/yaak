@@ -1,0 +1,21 @@
+Structure.fw
+Globals.fw
+TreeClass.fw
+Productions.fw
+RuleOutput.fw
+/* so far we have LigaProd
+   the following assumes a complete tree grammar
+*/
+Grammar.fw
+Attribute.fw
+Inherit.fw
+SymbolOcc.fw
+SymbolOutput.fw
+Predefined.fw
+Compute.fw
+Remote.fw
+CompRepr.fw
+ReprOut.fw
+DefsOut.fw
+CompOut.fw
+Accumulate.fw

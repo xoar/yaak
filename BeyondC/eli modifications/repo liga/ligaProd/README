@@ -1,0 +1,6 @@
+ligaProd
+--------
+
+generate directory derivedSrcs by calling
+
+eli %ligaprodderive

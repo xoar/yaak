@@ -1,0 +1,12 @@
+@p maximum_input_line_length = infinity
+
+@O@<Language.con@>==@{
+
+    Subtask: WaitOnSubtask.
+    
+    WaitOnSubtask: 'wait' 'on' Modus.
+
+    Modus: mouseSpecifier 'mouse' 'click'.
+    mouseSpecifier: 'left' | 'right' | 'middle'.
+
+@}

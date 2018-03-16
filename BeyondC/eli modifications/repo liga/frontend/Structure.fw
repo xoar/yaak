@@ -1,0 +1,373 @@
+@=~
+~p maximum_input_line_length = infinity
+$Id: Structure.fw,v 1.1 2015/05/13 10:17:34 pfahler Exp $ */
+
+Lido Structure Specification
+============================
+
+~O~<Lido.con~>~{
+~<Specifications~>
+~<Symbol Specifications~>
+~<Attribute Specifications~>
+~<CHAIN specification~>
+~<RULE specifications~>
+~<Productions~>
+~<Computations~>
+~<Basic computations~>
+~<Iterative computations~>
+~<Remote attribute access~>
+~<Symbol computation specification~>
+~}
+
+~$~<Specifications~>==~{
+AG :  Specs.
+Specs :  Specs Spec ';'.
+Specs : .
+Spec : TermSpec / SymAttrSpec / 
+       AttrSpec / ChainSpec / 
+       RuleSpec / SymCompSpec.
+~}
+
+~$~<Symbol Specifications~>==~{
+TermSpec :  'TERM' SymbolDefIds ':' TypeId. /* new TERM definition */
+SymAttrSpec :  SymClass SymbolDefIds ':' AttrDefsOpt.
+SymClass : 'SYMBOL'.
+SymClass : 'TREE' 'SYMBOL'.
+SymClass : 'CLASS' 'SYMBOL'.
+
+SymbolDefIds :  SymbolDefId // ','.
+SymbolDefId: Identifier.
+
+AttrDefsOpt :  AttrDefs.
+AttrDefsOpt : .
+AttrDefs :  AttrDef.
+AttrDefs :  AttrDefs ',' AttrDef.
+
+AttrDef :  AttrDefIds ':' TypeId Class.
+
+AttrDefIds :  AttrDefId.
+AttrDefIds :  AttrDefIds ',' AttrDefId.
+AttrDefId :  Identifier.
+
+TypeId :  Identifier.
+
+Class : 'SYNT' / 'INH' / .
+~}
+
+~$~<Attribute Specifications~>==~{
+AttrSpec : 'ATTR' AttrNames ':' TypeId Class.
+AttrNames :  AttrNames ',' AttrName.
+AttrNames :  AttrName.
+AttrName :  Identifier.
+~}
+
+~$~<CHAIN specification~>==~{
+ChainSpec :  'CHAIN' ChainNames ':' TypeId.
+ChainNames :  ChainNames ',' ChainName.
+ChainNames :  ChainName.
+ChainName :  Identifier.
+~}
+
+~$~<RULE specifications~>==~{
+RuleSpec :
+   'RULE' 
+   &'scan_p_strings();' 
+     /* set scanner switch to recognize Pascal strings in productions */
+   RuleSpecId ':' Production 
+   &'scan_c_chars();' 
+     /* set scanner switch to recognize C characters in computations */
+   CompPart 
+   'END'.
+
+RuleSpecId :  RuleId.
+RuleSpecId : .
+RuleId : Identifier.
+~}
+
+~$~<Productions~>==~{
+Production :  SyntId '::=' SyntUnits.
+Production :  SyntId 'LISTOF' Alts.
+Alts :  Alts '|' Alt.
+Alts :  Alt.
+Alt : .
+Alt :  SyntId.
+SyntUnits :  SyntUnits SyntUnit.
+SyntUnits : .
+SyntUnit :  SyntId.
+SyntUnit :  '$' SyntId.
+SyntUnit :  SyntLit.
+SyntLit :   P_String.
+SyntId :  Identifier.
+~}
+
+~$~<Computations~>==~{
+CompPart : 'COMPUTE' Computations / .
+Computations : Computation ';' Computations / .
+Computation : Compute / Compute 'BOTTOMUP'.
+
+Compute : AttrComp .
+Compute : PlainComp.
+PlainComp : ExpressionDep.
+PlainComp : Loop.
+
+AttrComp : DefAttr AsgnTok ExpressionDep.
+AttrComp : DefAttr '=' Loop.
+AttrComp : 'CHAINSTART' DefAttr '=' ExpressionDep.
+AsgnTok : '=' / '+='.
+~}
+
+
+A single identifier in an Expression, say Id in f(Id) refers to
+a terminal if the expression is part of a rule computation
+and the identifier occurs in the production.
+Otherwise, it is considered as an identifier that is bound in the
+generated C program.
+In both cases that identifier is derived by
+  SymbolRef   :  SymbolId Index.
+where the Index is empty in this case.
+An unambiguous syntactic distinction is not possible.
+
+~$~<Basic computations~>==~{
+DefAttr :  Attr.
+
+Attr :  SymOcc '.' AttrUseId.
+Attr :  '.' AttrUseId.
+AttrUseId: Identifier.
+
+SymOcc :  SymbolId Index.
+SymOcc :  'SYNT' / 'INH' / 'THIS' / 'HEAD' / 'TAIL'.
+Index :  '[' C_Integer ']'.
+Index : .
+SymbolId : Identifier.
+
+ExpressionDep :  Expression DepClause.
+ExpressionDep :  Expression.
+
+Expression :  Attr.
+Expression :  RhsAttrs.
+Expression :  Identifier '(' ParamsOpt ')'.
+Expression :  RemoteExpression.
+Expression :  SymbolRef.
+Expression :  P_String.
+Expression :  C_String.
+Expression :  C_Float.
+Expression :  C_Integer.
+
+SymbolRef   :  SymbolId Index.
+SymbolRef   :  'TERM' Index.
+
+
+RhsAttrs :   'RHS' '.' Identifier.
+
+DepClause :  'DEPENDS_ON' Dependence.
+DepClause :  '<-' Dependence.
+Dependence :  DepAttr.
+Dependence :  '(' DepAttrs ')'.
+DepAttrs :  DepAttr ',' DepAttrs.
+DepAttrs :  DepAttr.
+DepAttr :  RemoteExpression.
+DepAttr :  Attr.
+DepAttr :  RhsAttrs.
+
+ParamsOpt :  Params.
+ParamsOpt : .
+Params :  Param.
+Params :  Param ',' Params.
+Param :  ExpressionDep.
+~}
+
+~$~<Iterative computations~>==~{
+Loop : 'UNTIL' ExpressionDep 'ITERATE' Attr '=' ExpressionDep.
+~}
+
+~$~<Remote attribute access~>==~{
+RemoteExpression :  'INCLUDING' RemoteClause.
+RemoteExpression :  Subtree 'CONSTITUENTS' RemoteClause Shield ExpandOpt.
+RemoteExpression :  Subtree 'CONSTITUENT' RemoteClause Shield.
+
+RemoteClause :  RemoteAttr.
+RemoteClause :  '(' RemoteAttrs ')'.
+RemoteAttrs :  RemoteAttr.
+RemoteAttrs :  RemoteAttr ',' RemoteAttrs.
+RemoteAttr :  SymbolId '.' AttrUseId.
+
+ExpandOpt :  'WITH' 
+             '(' TypeId ',' Identifier ',' Identifier ',' Identifier ')'.
+ExpandOpt : .
+Subtree :  SymOcc.
+Subtree : .
+Shield :  'SHIELD' ShieldClause.
+Shield : .
+ShieldClause :  ShieldSym.
+ShieldClause :  '(' ShieldSyms ')'.
+ShieldClause :  '(' ')'.
+ShieldSyms :  ShieldSyms ',' ShieldSym.
+ShieldSyms :  ShieldSym.
+ShieldSym :  SymbolId.
+~}
+
+~$~<Symbol computation specification~>==~{
+SymCompSpec :  SymClass SymbolDefId InheritOpt CompPart 'END'.
+InheritOpt :  'INHERITS' InheritSyms.
+InheritOpt : .
+InheritSyms :  InheritSyms ',' InheritSym.
+InheritSyms :  InheritSym.
+InheritSym :  SymbolId.
+~}
+
+~O~<Lido.gla~>~{
+/* Identifier: $[a-zA-Z_](_?[a-zA-Z0-9])* [mkidn] */
+Identifier: C_IDENTIFIER 
+C_Integer:   C_INTEGER
+P_String:   $' (aux_p_string_or_c_char) [p_mkstr]
+C_String:  C_STRING_LIT			[c_mkstr]
+C_Float: C_FLOAT
+
+        $"(*"           (auxPascalComment)
+        $"%"            (auxEOL)
+        C_COMMENT
+        AWK_COMMENT
+~}
+
+~O~<Lido.head~>~{
+#include "scanswitch.h"
+~}
+
+~O~<scanswitch.h~>~{
+#ifndef SCANSWITCH_H
+#define SCANSWITCH_H
+
+#include "args.h"
+
+typedef enum {want_p_strings, want_c_chars} scan_switch_type;
+
+extern scan_switch_type scan_switch;
+
+extern void scan_p_strings FEARGS(( void ));
+extern void scan_c_chars FEARGS(( void ));
+
+extern char* aux_p_string_or_c_char FEARGS(( char *start, int length ));
+
+#endif
+~}
+
+~O~<scanswitch.c~>~{
+#include "scanswitch.h"
+#include "args.h"
+
+extern char* auxPascalString FEARGS((char *start, int length));
+extern char* auxCChar FEARGS((char *start, int length));
+
+scan_switch_type scan_switch = want_c_chars;
+
+void scan_p_strings()
+{ 
+  scan_switch = want_p_strings;
+}
+
+void scan_c_chars()
+{ 
+  scan_switch = want_c_chars;
+}
+
+#if defined(__cplusplus) || defined(__STDC__)
+char* aux_p_string_or_c_char(char* start, int length)
+#else
+char* aux_p_string_or_c_char(start, length)
+char *start;
+int length;
+#endif
+{ 
+  if (scan_switch == want_p_strings)
+    return auxPascalString(start, length);
+  else 	
+    return auxCChar(start, length);
+}
+~}
+
+~O~<p_mkstr.h~>~{
+#ifndef P_MKSTR_H
+#define P_MKSTR_H
+
+#include "args.h"
+
+extern	void	p_mkstr FEARGS(( char *c, int length, int *t, int *v ));
+
+#endif
+~}
+
+~O~<p_mkstr.c~>~{
+#include "csm.h"
+#include "p_mkstr.h"
+
+#define DYNAMICSIZE 2048        /* handle strings up to this length */
+#define SQ	'\''
+
+/*
+ * p_mkstr
+ *
+ * Make an internal string value from a character string by
+ * colapsing escape sequences.
+ *
+ * On entry, c points to a character string of length 
+ *           t points to a location containing the initial terminal code
+ * On exit, t points to a location containing the correct terminal code
+ *          an internal string value representing the character string has been
+ *          stored at the location pointed to by v.
+ */
+#if defined(__cplusplus) || defined(__STDC__)
+extern void mkstr(char *c, int l, int *t, int *p);
+#endif
+
+#if defined(__cplusplus) || defined(__STDC__)
+void p_mkstr(char* c, int length, int* t, int* v)
+#else
+void p_mkstr(c, length, t, v)
+char *c;
+int length, *t;
+int *v;
+#endif
+{
+        char *from , *to;
+	char converted[DYNAMICSIZE];	/* converted string */
+
+	from = c;
+	to = &converted[0];
+
+        from++; /* skip leading quote */
+        length -= 2; /* throw away both quotes */
+        for (; (length> 0);){
+		if( *from == SQ)
+			if( *(from+1) == SQ ) {	/* '' --> ' */
+				length -= 2;
+				*to++ = *from++;
+				from++;
+				}
+			else	{
+				/* This shouldn't happen! */
+				}
+		else	{
+                        *to++ = *from++;
+                        length--;
+			}
+                }/*endfor*/
+
+        mkstr( converted, to-converted, t, v ); /* save the string */
+}
+~}
+
+~O~<args.h~>~{
+#ifndef FEARGS_H
+#define FEARGS_H
+
+#if defined(__cplusplus) || defined(__STDC__)
+#define FEARGS(x) x
+#else
+#define FEARGS(x) ()
+#endif
+#endif
+~}
+
+~O~<Lido.specs~>~{
+$/Scan/pascalStr.c
+~}

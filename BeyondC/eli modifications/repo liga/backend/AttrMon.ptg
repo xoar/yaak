@@ -1,0 +1,143 @@
+/* Attribute monitoring */
+
+/* File attr.dapto: */
+
+MonAttrFile:
+  "aspect attribution;\n"
+  "/* implementation of attribute monitoring */\n\n"
+  "\"node.h\"\n\"nodecode.h\"\n\"eliproto.h\"\n\"MONTblStack.h\"\n\n"
+  $1 /* MonGetAttrs */
+  $2 /* MonAttrComps */
+  $3 /* MonPlainComp */
+  "\nend;\n"
+
+MonGetSymbAttrs:
+  "operation get_symb_attrs\n"
+     "\t\"Return the attribute names and types for a particular node\"\n"
+     "\t(int root \"Pointer to the relevant node\") : str\n"
+     "{ switch (LHSMAP[(MONTblStackArray(root))->_prod]) {\n"
+        $1 /* MonGetAttrCases */
+        "\tdefault: DAPTO_RESULT_STR (\"unknown node type\");\n"
+     "}}\n\n"
+
+MonGetRuleAttrs:
+  "operation get_rule_attrs\n"
+     "\t\"Return the attribute names and types for a particular node\"\n"
+     "\t(int root \"Pointer to the relevant node\") : str\n"
+     "{ switch ((MONTblStackArray(root))->_prod) {\n"
+        $1 /* MonGetAttrCases */
+        "\tdefault: DAPTO_RESULT_STR (\"unknown node type\");\n"
+     "}}\n\n"
+
+MonGetAttrSymbCase:
+  "\tcase SYMB" $1 string /* Symbol */ ":\n"
+                $2 /* MonAttrDescrs */
+                "\t\tbreak;\n"
+MonGetAttrRuleCase:
+  "\tcase RULE" $1 string /* Rule name */ ":\n"
+                $2 /* MonAttrDescrs */
+                "\t\tbreak;\n"
+
+MonGetTerms:
+  "operation get_rule_terms\n"
+     "\t\"Return terminal names and types for the rule applied at a node\"\n"
+     "\t(int root \"Pointer to the relevant node\") : str\n"
+     "{ switch ((MONTblStackArray(root))->_prod) {\n"
+        $1 /* MonGetTermCases */
+        "\tdefault: DAPTO_RESULT_STR (\"unknown node type\");\n"
+     "}}\n\n"
+
+MonGetTermCase:
+  "\tcase RULE" $1 string /* Rule name */ ":\n"
+                $2 /* MonTermDescrs */
+                "\t\tbreak;\n"
+
+MonTermDescr:
+    "\t\tDAPTO_RESULT_STR (\"" 
+        $1 string /* Term */ $2 /* index */ " " $3 string /* Type */ "\");\n"
+
+MonIndex:
+    "[" $ int "]"
+
+MonAttrDescr:
+  "\t\tDAPTO_RESULT_STR (\"" 
+        $1 string /* Attr */ " " $2 string /* Type */ "\");\n"
+
+MonAttrComp:
+  "event attr_" $1 string /* Type */ "\n"
+     "\t\"An attribute of type " $1 string /* Type */ " has been evaluated\"\n"
+     "\t(int root \"Pointer to the attribute's node\",\n"
+     "\t int is_symb \"Is a symbol attribute\",\n"
+     "\t str name \"Name of the attribute\",\n"
+     "\t " $1 string /* Type */ " value \"Value of the attribute\",\n"
+     "\t int line \"The line number of the computation in the specification\",\n"
+     "\t int col \"The column of the computation in the specification\");\n\n"
+
+MonPlainComp:
+  "event computation\n"
+     "\t\"A plain computation has been computed\"\n"
+     "\t(int root \"Pointer to the node that is the computation's context\",\n"
+     "\t int line \"The line number of the computation in the specification\",\n"
+     "\t int col \"The column of the computation in the specification\");\n\n"
+
+  "event void_comp\n"
+     "\t\"A computation associated with a VOID attribute has been evaluated\"\n"
+     "\t(int root \"Pointer to the attribute's node\",\n"
+     "\t str name \"Name of the attribute\",\n"
+     "\t int line \"The line number of the computation in the specification\",\n"
+     "\t int col \"The column of the computation in the specification\");\n\n"
+
+MonTermEvent:
+     "event term_" $1 string /* Type */ "\n"
+     "\t\"A terminal value of type " $1 string " is available\"\n"
+     "\t(int root \"Pointer to the left-hand side node of the rule "
+                       "where the terminal appears\",\n"
+     "\t str name \"Name of the terminal\",\n"
+     "\t " $1 string " value \"Value of the terminal\");\n\n"
+
+/* Calls in visitprocs.c: */
+
+MonAttrCompCall:
+  "#ifdef MONITOR\n"
+  "_dapto_attr_" $1 string /* Type */ 
+      "((" $2 /* node */ "->_uid), "
+          $3 int /* is symb attr */ ", \""
+          $4 string /* attr name */ "\", "
+          $5 /* attr value */ ", "
+          $6 int /* spec line */ ", "
+          $7 int /* spec col */ ");\n"
+  "#endif\n"
+
+MonTermCall:
+  "\n#ifdef MONITOR\n"
+  "_currn->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)_currn));\n"
+ "_dapto_term_" $1 string /* Type */ 
+      "((_currn)->_uid, \""
+          $2 string /* terminal name */ 
+          $3 /* optional index */ "\", _TERM"
+          $4 int /* terminal number */ ");\n"
+  "#endif\n"
+
+MonPlainCompCall:
+  "#ifdef MONITOR\n"
+  "_dapto_computation (_currn->_uid, "
+       $1 int /* spec line */ ", "
+       $2 int /* spec col */ ");\n"
+  "#endif\n"
+
+MonVoidAssign:
+  "#ifdef MONITOR\n"
+  "_dapto_void_comp ((" $1 /* node */ "->_uid), \""
+       $2 string /* attr name */  "\", "
+       $3 int /* spec line */ ", "
+       $4 int /* spec col */ ");\n"
+  "#endif\n"
+
+MonTreeInsertion:
+  "#ifdef MONITOR\n"
+  "_currn->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)_currn));\n"
+  $1"->_uid=MONTblStackSize; MONTblStackPush(((NODEPTR)"$1"));\n"
+  "_dapto_tree ((" $1 /* node */ "->_uid), _currn->_uid, "
+  $2 int /* subtree index */ ");\n"
+  "#endif\n"
+

@@ -1,0 +1,14 @@
+$/Tech/Strings.specs
+$/Output/PtgCommon.fw
+language.specs
+language.specs :idem
+modules/Message/MsgUnparser.specs
+modules/Character/CharacterUnparser.specs
+modules/Trigger/TriggerUnparser.specs
+modules/Choice/ChoiceUnparser.specs
+modules/yaakMain/yaakUnparser.specs
+modules/WaitOn/Unparser.fw
+modules/WalkTo/Unparser.fw
+modules/SetPicture/Unparser.fw
+modules/Segment/Unparser.fw
+modules/common/commonUnparser.specs

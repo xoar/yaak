@@ -1,0 +1,16 @@
+/*==============================================================*/
+/* tree construction nodeptr.h */
+
+NodePtrHeader:
+	"\n#ifndef NODEPTR_H\n"
+	"\n#define NODEPTR_H\n"
+	"\n"
+	"\ntypedef struct NODEPTR_struct *NODEPTR;\n"
+	"\n#define NULLNODEPTR ((NODEPTR) 0)\n"
+	"\n#endif\n"
+
+	"\n#ifdef MONITOR\n"
+	"\n#define DAPTO_RESULTNODEPTR(n) DAPTO_RESULT_PTR(n)\n"
+	"\n#define DAPTO_ARGNODEPTR(n) DAPTO_ARG_PTR(n, NODEPTR)\n"
+	"\n#endif\n"
+

@@ -1,0 +1,604 @@
+@p typesetter = latex2html
+@p maximum_input_line_length = infinity
+
+@A@<The Abstract Syntax Tree@>
+\label{ast}
+
+An abstract syntax tree reflects the semantic structure of a program.
+Computations over the abstract syntax tree are used to verify context
+conditions, and to provide information for translating or interpreting the
+program.
+The abstract syntax tree should be designed to facilitate these
+computations.
+
+Eli provides a number of library modules that embody computations useful in
+the semantic analysis of a variety of languages.
+These modules are often coupled to an abstract syntax tree by having tree
+symbols inherit computational roles provided by the module.
+One aspect of the design of the tree is to ensure that symbols appropriate
+to these roles are available.
+
+The abstract syntax tree structure is defined by a set of rules written in
+LIDO.
+Each rule describes a particular @/context@/ that could appear in an
+abstract syntax tree representing a C program.
+It is convenient to have a tree root that is distinguished from the root of
+the subtree representing the program:
+
+@O@<C.lido@>==@{
+RULE: Source ::= program END;
+@<AST nodes@>
+@}
+
+@B@<String constants@>
+
+A string constant may be made up of a concatenation of string literals.
+Such a concatenation is not relevant for the semantic analysis, but must be
+carried out if the program is being translated.
+Thus it is made explicit in the abstract syntax tree.
+
+@$@<AST nodes@>+=@{
+RULE: StringSeq ::= string_literal           END;
+RULE: StringSeq ::= StringSeq string_literal END;
+@}
+
+@B@<Identifiers@>
+
+An identifier belongs to one of four different name spaces.
+Section 6.1.2.3 of the standard points out that the syntactic context
+determines the name space to which a particular identifier occurrence
+belongs.
+These contexts are distinguished in the abstract syntax tree by distinct
+names.
+
+Each of the four name spaces has at least one defining occurrence and one
+applied occurrence.
+If an identifier in the label name space happens to also be declared as a
+@{typedef_name@} in the name space of ordinary identifiers, the scanner will
+classify it as a @{typedef_name@} instead of an @{identifier@} because the
+@{:@} that distinguishes the label context @/follows@/ the identifier.
+Thus the identifier that is the defining occurrence of a label may have
+been classified as either a @{typedef_name@} or an @{identifier@}.
+(See Section \ref{findtypedefs} for the details of the classification
+task.)
+
+Identifiers in the tag name space have more complex semantics, discussed in
+Section 6.5.2.3 of the standard.
+Some of the occurrences are always defining, others are always applied, but
+the characteristics of some may be influenced by constructs remotefrom
+their position.
+Further information can be found in Section \ref{structunion}.
+
+Ordinary identifiers may denote objects or functions on the one hand, and
+types on the other.
+The semantics of objects and functions are quite different from the
+semantics of types, and therefore it is useful to separate object and
+function identifier occurrences from type identifier occurrences in the tree.
+Both defining and applied occurrences of type identifiers can be
+distinguished during scanning, so this is just a matter of assigning them
+distinct tree nodes.
+
+A @{parameter_id@} is a defining ocurrence of an ordinary identifier in the
+parameter list of a function definition.
+This is a very special context present only to enable compilation of legacy
+programs.
+
+@$@<AST nodes@>+=@{
+RULE: LabelDef     ::= identifier   END;
+RULE: LabelDef     ::= typedef_name END;
+RULE: LabelUse     ::= identifier   END;
+
+RULE: TagDef       ::= identifier   END;
+RULE: TagUse       ::= identifier   END;
+RULE: ForwardDef   ::= identifier   END;
+RULE: ForwardUse   ::= identifier   END;
+
+RULE: MemberIdDef  ::= member_def   END;
+RULE: MemberIdUse  ::= identifier   END;
+
+RULE: TypeIdDef    ::= typedef_def  END;
+RULE: TypeIdUse    ::= typedef_name END;
+RULE: IdDef        ::= identifier   END;
+RULE: IdUse        ::= identifier   END;
+RULE: parameter_id ::= identifier   END;
+@}
+
+@B@<Expressions@>
+
+An expression is a combination of operators and operands that yields a
+value.
+Operators can be grouped according to the way in which an expression
+containing them is evaluated, and the constraints that they place upon the
+operands.
+Expressions whose operators fall into the same group can be represented by
+a single context that has the operator as a component.
+The grouping strategy is a design decision.
+
+Section 6.2.2.1 of the standard defines an @/lvalue@/ as ``an expression
+that designates an object''.
+Except when it is the operand of the @{sizeof@} operator, the unary @{&@}
+operator, the @{++@} operator, the @{--@} operator, or the left operand
+of the @{.@} operator or an assignment operator, an lvalue that does not
+have array type is converted to the value in the designated object.
+These operators must therefore be distinguished from all others.
+
+The @{&@} operator does not use the normal operator identification process
+because it may require construction of a completely new pointer type.
+
+@$@<AST nodes@>+=@{
+RULE: post_lvalue_opr     ::= '++'     END;
+RULE: post_lvalue_opr     ::= '--'     END;
+
+RULE: lvalue_operator     ::= '++'     END;
+RULE: lvalue_operator     ::= '--'     END;
+RULE: lvalue_operator     ::= 'sizeof' END;
+
+RULE: assignment_operator ::= '='      END;
+RULE: assignment_operator ::= '*='     END;
+RULE: assignment_operator ::= '/='     END;
+RULE: assignment_operator ::= '%='     END;
+RULE: assignment_operator ::= '+='     END;
+RULE: assignment_operator ::= '-='     END;
+RULE: assignment_operator ::= '<<='    END;
+RULE: assignment_operator ::= '>>='    END;
+RULE: assignment_operator ::= '&='     END;
+RULE: assignment_operator ::= '^='     END;
+RULE: assignment_operator ::= '|='     END;
+@}
+
+Separation of this group into three subgroups is based on differing
+semantics: the value of the expression is taken before the modification
+with a @{post_lvalue_op@}, and only the left operand of an
+@{assignment_operator@} is treated as an lvalue.
+
+Sections 6.3.13 and 6.3.13 of the standard state that the @{&&@} and @{||@}
+operators guarantee left-to-right evaluation, with a sequence point (a
+point at which all side effects of previous evaluations are complete -- see
+Section 5.1.2.3 of the standard).
+For other binary operations, Section 6.3 of the standard says that the
+order of evaluation of subexpressions and the order in which side effects
+take place are both unspecified.
+
+@$@<AST nodes@>+=@{
+RULE: logical_operator ::= '&&' END;
+RULE: logical_operator ::= '||' END;
+@}
+
+All of the remaining operators have the same lvalue, evaluation order, and
+side-effect properties.
+Note that no distinction need be made between unary and binary operators
+here.
+That distinction is made by the expression context in which the operator
+appears.
+For ease of comparison with the standard, rules have been duplicated for
+operator indications that are both unary and binary (recall that the unary
+@{&@} is an @{lvalue_operator@}, not a @{normal_operator@}):
+
+@$@<AST nodes@>+=@{
+RULE: normal_operator ::= '*'  END;
+RULE: normal_operator ::= '+'  END;
+RULE: normal_operator ::= '-'  END;
+RULE: normal_operator ::= '~'  END;
+RULE: normal_operator ::= '!'  END;
+
+RULE: normal_operator ::= '*'  END;
+RULE: normal_operator ::= '/'  END;
+RULE: normal_operator ::= '%'  END;
+
+RULE: normal_operator ::= '+'  END;
+RULE: normal_operator ::= '-'  END;
+
+RULE: normal_operator ::= '<<' END;
+RULE: normal_operator ::= '>>' END;
+
+RULE: normal_operator ::= '<'  END;
+RULE: normal_operator ::= '>'  END;
+RULE: normal_operator ::= '<=' END;
+RULE: normal_operator ::= '>=' END;
+
+RULE: normal_operator ::= '==' END;
+RULE: normal_operator ::= '!=' END;
+
+RULE: normal_operator ::= '&'  END;
+
+RULE: normal_operator ::= '^'  END;
+
+RULE: normal_operator ::= '|'  END;
+@}
+
+Given this grouping of operators, the expression contexts are:
+
+@$@<AST nodes@>+=@{
+RULE: Expression          ::= IdUse                                     END;
+RULE: Expression          ::= character_constant                        END;
+RULE: Expression          ::= floating_constant                         END;
+RULE: Expression          ::= integer_constant                          END;
+RULE: Expression          ::= StringSeq                                 END;
+
+RULE: Expression          ::= Expression '[' Expression ']'             END;
+RULE: Expression          ::= Expression '(' Arguments ')'              END;
+RULE: Expression          ::= Expression '.' MemberIdUse                END;
+RULE: Expression          ::= DerefExpr  '->' MemberIdUse               END;
+RULE: Expression          ::= Expression post_lvalue_opr                END;
+
+RULE: Expression          ::= lvalue_operator Expression                END;
+RULE: Expression          ::= normal_operator Expression                END;
+RULE: Expression          ::= 'sizeof' '(' type_name ')'                END;
+
+RULE: Expression          ::= '(' type_name ')' Expression              END;
+
+RULE: Expression          ::= Expression normal_operator Expression     END;
+
+RULE: Expression          ::= Expression logical_operator Expression    END;
+
+RULE: Expression          ::= Expression '?' Expression ':' Expression  END;
+
+RULE: Expression          ::= Expression assignment_operator RHSExpr    END;
+
+RULE: Expression          ::= Expression ',' Expression                 END;
+
+RULE: constant_expression ::= Expression                                END;
+RULE: constant_expression ::=                                           END;
+
+RULE: DerefExpr           ::= Expression                                END;
+RULE: RHSExpr             ::= Expression                                END;
+@}
+
+An argument to a function call has a proper superset of the semantics
+of an expression.
+Therefore it is called out as an additional context:
+
+@$@<AST nodes@>+=@{
+RULE: Arguments LISTOF Argument   END;
+RULE: Argument  ::=    Expression END;
+@}
+
+@B@<Declarations@>
+\label{declarations}
+
+A declaration begins with a sequence of specifiers that indicate the
+linkage, storage duration, and part of the type of the entities being
+declared.
+If a type is not completely described by the specifiers, the remaining
+information is provided by each declarator.
+
+The declaration of a @{ForwardTag@}, described in Section 6.5.2.3 of the
+standard, has implications for the name analysis task that are very
+different from those of any other declaration.
+Representing this case by its own context simplifies the semantic analysis
+task.
+
+@$@<AST nodes@>+=@{
+RULE: declaration     ::=    Specifiers init_declarator_list_opt ';' END;
+RULE: declaration     ::=    struct_or_union ForwardDef ';'          END;
+
+RULE: Specifiers      LISTOF Specifier                               END;
+
+RULE: init_declarator_list_opt
+                      LISTOF init_declarator                         END;
+RULE: init_declarator ::=    InitDecl                                END;
+RULE: init_declarator ::=    InitDecl '=' initializer                END;
+RULE: InitDecl        ::=    declarator                              END;
+@}
+
+Storage specifiers, type specifiers, and type qualifiers are lumped
+together in this specification because they must be processed in the same
+way.
+
+@$@<AST nodes@>+=@{
+RULE: Specifier ::= 'typedef'                 END;
+RULE: Specifier ::= 'extern'                  END;
+RULE: Specifier ::= 'static'                  END;
+RULE: Specifier ::= 'auto'                    END;
+RULE: Specifier ::= 'register'                END;
+RULE: Specifier ::= 'void'                    END;
+RULE: Specifier ::= 'char'                    END;
+RULE: Specifier ::= 'short'                   END;
+RULE: Specifier ::= 'int'                     END;
+RULE: Specifier ::= 'long'                    END;
+RULE: Specifier ::= 'float'                   END;
+RULE: Specifier ::= 'double'                  END;
+RULE: Specifier ::= 'signed'                  END;
+RULE: Specifier ::= 'unsigned'                END;
+RULE: Specifier ::= struct_or_union_specifier END;
+RULE: Specifier ::= enum_specifier            END;
+RULE: Specifier ::= TypeIdUse                 END;
+RULE: Specifier ::= 'const'                   END;
+RULE: Specifier ::= 'volatile'                END;
+@}
+
+@C@<Struct and union specifiers@>
+\label{structunion}
+
+Structure and union specifiers have the same form, being distinguished only
+by the appearance of the keyword @{struct@} or the keyword @{union@}.
+The presence of a bracketed list declares a new type, which may or may not
+be given a tag.
+@{TagDef@} represents the context in which a tag is given to a new type.
+
+When a bracketed list is not present, the situation is much more complex.
+Because of the need to declare types that are related cyclically by
+pointers, tags may be used before they are given specific types.
+@{ForwardDef@} (Section \ref{declarations}, above) represents a context in
+which a forward reference represents a type declared in the current scope.
+@{ForwardUse@} represents a reference that may be forward (if the
+identifier appears in a later @{TagDef@} or @{ForwardDef@} context in the
+same scope) or may not (if the identifier does not appear in such a context
+but has previously appeared in a @{TagDef@} or @{ForwardDef@} context
+visible at this point).
+
+An additional consideration is that the identifier may @/never@/ appear in
+a @{TagDef@} or @{ForwardDef@} context visible atthis point.
+That situation is not necessarily an error.
+The type represented by the tag is incomplete (Section 6.1.2.5 of the
+standard), and as such it may be legally used in any situation that does not
+require its size.
+
+Clearly the semantics of @{TagDef@}, @{ForwardDef@}, and @{ForwardUse@} are
+quite different.
+Representing them by distinct contexts in the tree simplifies the semantic
+analysis task.
+
+@$@<AST nodes@>+=@{
+RULE: struct_or_union_specifier
+                         ::= struct_or_union TagDef
+                                    '{' struct_declaration_list '}'   END;
+RULE: struct_or_union_specifier
+                         ::= struct_or_union
+                                    '{' struct_declaration_list '}'   END;
+RULE: struct_or_union_specifier
+                         ::= struct_or_union ForwardUse               END;
+
+RULE: struct_or_union    ::=    'struct'                              END;
+RULE: struct_or_union    ::=    'union'                               END;
+
+RULE: struct_declaration_list
+                         LISTOF struct_declaration                    END;
+
+RULE: struct_declaration ::=    Specifiers struct_declarator_list ';' END;
+
+RULE: struct_declarator_list
+                         LISTOF struct_declarator                     END;
+
+RULE: struct_declarator  ::=    member_declarator                     END;
+RULE: struct_declarator  ::=    member_declarator ':' constant_expression END;
+RULE: struct_declarator  ::=                      ':' constant_expression END;
+
+RULE: member_declarator ::= member_pointer_declarator END;
+RULE: member_declarator ::= MemberIdDef END;
+RULE: member_declarator ::= member_array_declarator END;
+RULE: member_declarator ::= member_function_declarator END;
+RULE: member_pointer_declarator ::= '*' Specifiers member_declarator END;
+RULE: member_array_declarator ::= member_declarator '[' constant_expression ']' END;
+RULE: member_function_declarator ::= member_declarator '(' parameter_type_list ')' END;
+@}
+
+@C@<Enumeration specifiers@>
+
+According to Section 6.5.2.3 of the standard, there is no forward use of an
+enumerator tag similar to the ones discussed in Section \ref{structunion}.
+The reason is that enumerations do not involve any requirement for cyclic
+definitions.
+It is always possible to simply declare an enumeration before it is used.
+This means that enumerations involve only the @{TagDef@} and@{TagUse@}
+contexts.
+
+@$@<AST nodes@>+=@{
+RULE: enum_specifier  ::=    'enum' TagDef '{' enumerator_list '}'        END;
+RULE: enum_specifier  ::=    'enum'        '{' enumerator_list '}'        END;
+RULE: enum_specifier  ::=    'enum' TagUse                                END;
+
+RULE: enumerator_list LISTOF enumerator                                   END;
+RULE: enumerator      ::=    enumeration_constant                         END;
+RULE: enumerator      ::=    enumeration_constant '=' constant_expression END;
+RULE: enumeration_constant
+                      ::=    identifier                                   END;
+@}
+
+@C@<Declarators@>
+
+Each declarator declares one identifier in the member or ordinary
+identifier name space (Section 6.1.2.3 of the standard).
+An ordinary identifier may be either a type identifier or an identifier
+denoting an object or function.
+All three of these possibilities are given distinct contexts because they
+have distinct semantics.
+
+The declarator may also create a type for the identifier it is declaring
+by modifying the type described by the @{Specifier@} in the containing
+declaration.
+Type creation is represented in the tree by the @{pointer_declarator@},
+@{array_declarator@}, and @{function_declarator@} contexts.
+
+Two contexts are distinguished for prarmeters: those definitely belonging
+to a function prototype, and those possibly belonging to a function
+definition.
+Parameters possible belonging to a function definition have different
+scopes than those belonging to a function prototype, and also parameters
+belonging to a function definition may be simple identifiers rather than
+declarations.
+
+@$@<AST nodes@>+=@{
+RULE: declarator      ::= TypeIdDef                                      END;
+RULE: declarator      ::= IdDef                                          END;
+RULE: declarator      ::= pointer_declarator                             END;
+RULE: declarator      ::= array_declarator                               END;
+RULE: declarator      ::= function_declarator                            END;
+
+RULE: pointer_declarator  ::= '*' Specifiers declarator                  END;
+RULE: array_declarator    ::= declarator '[' constant_expression ']'     END;
+RULE: function_declarator ::= declarator '(' parameter_type_list ')'     END;
+RULE: function_declarator ::= declarator '(' parameters ')'              END;
+
+RULE: parameter_type_list       LISTOF ParameterType  | DotDotDot END;
+RULE: parameters LISTOF parameter_id | ParameterType  | DotDotDot END;
+
+RULE: ParameterType         ::= parameter_declaration                    END;
+
+RULE: parameter_declaration ::= Specifiers ParameterDecl                 END;
+RULE: parameter_declaration ::= Specifiers abstract_declarator           END;
+RULE: parameter_declaration ::= Specifiers                               END;
+RULE: DotDotDot             ::= '...'                                    END;
+RULE: ParameterDecl         ::= declarator                               END;
+@}
+
+@C@<Type names@>
+
+A type name is used to denote a type.
+If it is not possible to describe the desired type with specifiers alone,
+then a declarator is needed.
+However, that declarator is not allowed to declare an identifier.
+This situation, a declarator that describes a type but does not declare an
+identifier, is represented by the @{abstract_declarator@} contexts.
+
+@$@<AST nodes@>+=@{
+RULE: type_name                    ::= Specifiers                         END;
+RULE: type_name                    ::= Specifiers abstract_declarator     END;
+
+RULE: abstract_declarator          ::= pointer_abstract_declarator        END;
+RULE: abstract_declarator          ::= array_abstract_declarator          END;
+RULE: abstract_declarator          ::= function_abstract_declarator       END;
+
+RULE: pointer_abstract_declarator  ::= '*' Specifiers                     END;
+RULE: pointer_abstract_declarator  ::= '*' Specifiers abstract_declarator END;
+
+RULE: array_abstract_declarator    ::= '[' constant_expression ']'        END;
+RULE: array_abstract_declarator    ::=
+                   abstract_declarator '[' constant_expression ']'        END;
+
+RULE: function_abstract_declarator ::= '(' parameter_type_list ')'        END;
+RULE: function_abstract_declarator ::=
+                   abstract_declarator '(' parameter_type_list ')'        END;
+@}
+
+@C@<Initialization@>
+
+@$@<AST nodes@>+=@{
+RULE: initializer       ::=    Expression                      END;
+RULE: initializer       ::=    Row_initializer                 END;
+RULE: Row_initializer   LISTOF initializer | Empty_initializer END;
+RULE: Empty_initializer ::=                                    END;
+@}
+
+@B@<Statements@>
+
+@$@<AST nodes@>+=@{
+RULE: statement ::= LabelDef ':' statement                                 END;
+RULE: statement ::= 'case' constant_expression ':' statement               END;
+RULE: statement ::= 'default' ':' statement                                END;
+
+RULE: statement ::= compound_statement                                     END;
+RULE: compound_statement
+                ::= '{' body '}'                                           END;
+RULE: body   LISTOF declaration | statement                                END;
+
+RULE: statement ::= Expression ';'                                         END;
+RULE: statement ::=            ';'                                         END;
+
+RULE: statement ::= 'if' '(' Expression ')' statement 'else' statement     END;
+RULE: statement ::= 'if' '(' Expression ')' statement                      END;
+RULE: statement ::= switch_statement                                       END;
+RULE: switch_statement ::= 'switch' '(' Expression ')' statement           END;
+
+RULE: statement ::= iteration_statement                                    END;
+RULE: iteration_statement
+                ::= 'while' '(' Expression ')' statement                   END;
+RULE: iteration_statement
+                ::= 'do' statement 'while' '(' Expression ')' ';'          END;
+RULE: iteration_statement
+                ::= 'for' '(' Exp1or3 ';' Exp2 ';' Exp1or3 ')' statement   END;
+
+RULE: Exp1or3   ::= Expression                                             END;
+RULE: Exp1or3   ::=                                                        END;
+RULE: Exp2      ::= Expression                                             END;
+RULE: Exp2      ::=                                                        END;
+@}
+
+Section 6.6.5.3 of the standard says that both the initializer and the step
+Of a @{for@} statement may be omitted.
+Each is then evaluated as a void expression.
+An omitted condition is replaced by a nonzero constant.
+These distinct semantics are embodied in specific tree contexts.
+
+@$@<AST nodes@>+=@{
+RULE: statement ::= 'goto' LabelUse     ';' END;
+RULE: statement ::= 'continue'          ';' END;
+RULE: statement ::= 'break'             ';' END;
+RULE: statement ::= 'return'            ';' END;
+RULE: statement ::= 'return' Expression ';' END;
+@}
+
+@B@<External definitions@>
+
+@$@<AST nodes@>+=@{
+
+/* this listof production make external c declarations hard
+   science we dont need it anywhere it got killed*/
+/*RULE: program LISTOF declaration | function_definition         END;*/
+
+RULE: function_definition ::=
+        Specifiers FunctionDecl declaration_list function_body END;
+RULE: function_body       ::=    '{' body '}'                  END;
+RULE: FunctionDecl        ::=    declarator                    END;
+
+RULE: declaration_list    LISTOF par_declaration               END;
+RULE: par_declaration     ::=    Specifiers par_id_decls ';'   END;
+RULE: par_id_decls        LISTOF ParameterTypeId               END;
+RULE: ParameterTypeId     ::=    ParameterDecl                 END;
+@}
+
+@B
+
+An abstract syntax tree does not distinguish symbols of the original
+grammar that are semantically identical.
+If a symbol in the abstract syntax tree corresponds to a number of
+distinct grammar symbols, that correspondence must be given as part of the
+specification.
+This is the role of a file of type @{map@}:
+
+@O@<Tree.map@>==@{
+MAPSYM
+
+parameter_type_list ::=
+  empty_parameter_type_list .
+
+Arguments ::= argument_expression_list_opt .
+
+statement ::= selection_statement expression_statement jump_statement
+  labeled_statement .
+
+Expression ::=
+  constant
+  primary_expression postfix_expression unary_expression cast_expression
+  multiplicative_expression additive_expression shift_expression
+  relational_expression equality_expression AND_expression
+  exclusive_OR_expression inclusive_OR_expression logical_AND_expression
+  logical_OR_expression conditional_expression assignment_expression
+  expression .
+
+constant_expression ::= constant_exp_opt .
+
+Exp1or3 ::=
+  expression_opt1 .
+Exp2 ::=
+  expression_opt2 .
+
+normal_operator ::= unary_operator .
+
+Specifiers ::=
+  declaration_specifiers empty_declaration_specifiers
+  type_qualifier_list_opt specifier_qualifier_list .
+
+Specifier ::=
+  storage_class_specifier
+  type_qualifier .
+
+declarator ::=
+  direct_declarator .
+
+member_declarator ::=
+  member_direct_declarator .
+
+abstract_declarator ::= direct_abstract_declarator .
+
+@}

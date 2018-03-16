@@ -1,0 +1,203 @@
+@p maximum_input_line_length = infinity
+
+@O@<GccExtensions.con@>==@{
+
+    attribute_specifier_list : attribute_specifier_list attribute_specifier .
+    attribute_specifier_list : attribute_specifier .
+
+    attribute_specifier : '__attribute__' '(' '(' attribute_list ')' ')' .
+
+    /*for support of the deprectaed throw()*/
+    attribute_specifier : 'throw()'.
+    /*this is the new replacment science std11*/
+    attribute_specifier : 'noexcept'.
+
+    /*very hackish. have to implement the right specification*/
+    attribute_specifier : '__asm__' '(' asm_list')'.
+
+    asm_list: .
+    asm_list: asm_list asm.
+    asm: string_literal .
+
+    attribute_list : attribute_list ',' attribute .
+    attribute_list : attribute .
+
+    attribute : .
+    attribute : identifier .
+    attribute : identifier '(' attribute_parameters ')' .
+
+    attribute_parameters : attribute_parameters ',' attribute_parameter .
+    attribute_parameters : attribute_parameter.
+
+    attribute_parameter : identifier .
+    attribute_parameter : string_literal .
+
+    /*function declration with extern is solve like that:
+      external_declaration : declaration .
+      declaration : declaration_specifiers init_declarator_list_opt ';'
+      init_declarator_list_opt : init_declarator_list .
+      init_declarator_list : init_declarator .
+      init_declarator : declarator attribute_specifier_list .
+      declarator : direct_declarator .
+      direct_declarator : function_declarator .
+      */
+
+
+    declaration_specifier: '__extension__' .
+    declaration_specifier: '_Float128'.
+
+    /*IMPORTANT: the overload for prototypes*/
+    init_declarator: 
+        declarator &'CurrentId = BindStackTop; BindStackPop; Bind(); EndDeclaration();' 
+        attribute_specifier_list .
+    
+    /*init_declarator: 
+        declarator &'CurrentId = BindStackTop; BindStackPop; Bind(); EndDeclaration();' 
+        attribute_specifier_list '=' initializer .*/
+
+    /*the hackisch way. normally we should declare a specifier restrict etc.*/
+
+     pointer_declarator:
+    '*' '__restrict' type_qualifier_list_opt declarator .
+
+    pointer_abstract_declarator:
+    '*' '__restrict' type_qualifier_list_opt abstract_declarator .
+
+    /*external declaration is nearly a list of declaration and function definition.
+      so we overload the declaration to allow placing # in structs*/
+
+    declaration: GccDirective.
+    struct_declaration: GccDirective.
+
+    /* extern c command for cpp compiler*/
+    /*also changed the programm listof in tree.fw*/
+    external_declaration: extern_C_declaration.
+    extern_C_declaration: 'extern' '"C"' '{' inner_extern_C_declarations '}' .
+
+    inner_extern_C_declarations: .
+    inner_extern_C_declarations: inner_extern_C_declarations inner_extern_C_declaration.
+
+    inner_extern_C_declaration: function_definition.
+    inner_extern_C_declaration: declaration.
+
+    /*add a forgotten rule? in the concrete grammar the is no option of
+      a pointer declaration with no name, need for parameter e.g.
+      (FILE_IO *, const char * hello) TODO: why is this implicit declared.
+      doesnt change anything*/ 
+
+   /* pointer_abstract_declarator:
+    '*' type_qualifier_list_opt .
+
+    pointer_abstract_declarator:
+    '*' '__restrict' type_qualifier_list_opt .*/
+
+@}
+
+@O@<GccExtensions.lido@>==@{
+
+    RULE: Specifier ::= '__extension__' COMPUTE
+        Specifier.ok=1;
+    END;
+    
+
+    RULE: Specifier ::= '_Float128' COMPUTE
+        Specifier.ok=1;
+    END;
+
+    /*IMPORTANT: the overload for prototypes*/
+
+    RULE: init_declarator ::= InitDecl attribute_specifier_list END;
+   /* RULE: init_declarator ::= InitDecl attribute_specifier_list '=' initializer END;*/
+
+
+    RULE: pointer_declarator ::= '*' '__restrict' Specifiers declarator COMPUTE
+        pointer_declarator.TotalType=declarator.TotalType;
+    END;
+
+    RULE: pointer_abstract_declarator ::= '*' '__restrict' Specifiers COMPUTE
+        pointer_abstract_declarator.TotalType=pointer_abstract_declarator.Type;
+    END;
+
+    RULE: pointer_abstract_declarator ::=
+        '*' '__restrict' Specifiers abstract_declarator COMPUTE
+        pointer_abstract_declarator.TotalType=abstract_declarator.TotalType;
+    END;
+
+    /* to have right formatted expressions*/
+    RULE:  Expression ::=    '(' Expression ')'           END;
+
+    RULE: declaration::= GccDirective END;
+    RULE: struct_declaration::= GccDirective END;
+
+    /*fix of a broken rule. this should normally be derivable*/
+    /*RULE: ParameterType ::= Specifiers '*' COMPUTE
+        ParameterType.Type = Specifiers.Type;
+    END;*/
+    /*RULE: Specifiers ::= END;*/
+
+
+    /* print void (*eventfunc) () ); right*/
+
+    RULE:  declarator        ::= '(' declarator ')' COMPUTE
+        declarator[1].TotalType = declarator[2].TotalType;
+    END;
+
+    RULE:  declarator        ::= '(' declarator ')'
+    END;
+
+    /* comments unparsing*/
+    ATTR comment: int;
+    CLASS SYMBOL Comments COMPUTE
+      SYNT.comment = getComment () BOTTOMUP;
+    END;
+
+    /* now every symbol inherit the printing function*/
+    SYMBOL statement INHERITS Comments END;
+    SYMBOL declaration INHERITS Comments END;
+    SYMBOL function_definition INHERITS Comments END;
+    SYMBOL function_body INHERITS Comments END;
+    SYMBOL declarator INHERITS Comments END;
+    SYMBOL struct_declaration INHERITS Comments END;
+
+    /*----------AST debugging--------------*/
+    /*RULE: Source ::= program COMPUTE
+        debugAST() <- program.IdemPtg;
+    END;*/
+
+    /*SYMBOL Source COMPUTE 
+       debugAST() <- THIS.IdemPtg;
+    END;*/
+
+
+@}
+
+@O@<GccExtensions.specs@>==@{
+
+CommentStore.h
+CommentStore.c
+/* DebugAST.h
+    DebugAST.c*/
+/*driver.c*/
+    
+@}
+
+
+@O@<GccExtensions.head@>==@{
+
+#include "stdio.h"
+
+/* comment unparsing*/
+#include "CommentStore.h"
+/*#include "DebugAST.h"*/
+#include "clp.h"
+
+@}
+
+
+@O@<GccExtensions.gla@>==@{
+
+  GccDirective: $#  (auxEOL) [mkstr]
+  /*C_COMMENT*/
+  $"/*" (auxCComment) [storeComment]
+  /*$#  (auxEOL)*/
+@}
