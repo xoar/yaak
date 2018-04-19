@@ -250,6 +250,9 @@ void MainEngine::reloadPlugin()
 
     std::cout << "\nprocess reload "<< std::endl;
 
+    /*delete the pluginList*/
+    pluginList->clear();
+
     /*close the plugin and load it again*/
     std::cout << "\nclose library"<< std::endl;
     dlclose(pluginLibrary);
@@ -259,12 +262,24 @@ void MainEngine::reloadPlugin()
     std::cout << "\nrecompile library"<< std::endl;
     system("./recompile");
 
-    /* signal that the reload is over*/
-    ((ReloadGamePlugin*) pluginList->get( ReloadGamePlugin::getPluginName() ))->setReloadStatus(false);
+    /*init the Pluginlist like the Taskmanager*/
+    initGamePlugins();
 
     /*load the plugin again but use the reload fct if present*/
     std::cout << "\nload library again"<< std::endl;
-    loadPlugin();
+    loadPlugin(); 
+
+
+    /*exec the init function in the plugin*/
+    initPluginsFunction(pluginList);
+
+    /* start the plugin's init fct*/
+    //std::cout << "start normal init function" << std::endl;
+    //initFunction( ((void*) pluginList),((void*)renderer)  );
+
+    /* signal that the reload is over*/
+    ((ReloadGamePlugin*) pluginList->get( ReloadGamePlugin::getPluginName() ))->setReloadStatus(false);
+
 
     std::cout << "Start reload init" << std::endl;
     reloadFunction( ((void*) pluginList),((void*)renderer));

@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <stdexcept>
+#include <iostream>
 
 #include "GameEnginePlugin.h"
 
@@ -13,7 +14,7 @@ class PluginList
         PluginList();
         virtual ~PluginList();
         void add (GameEnginePlugin* plugin);
-
+        void clear();
         GameEnginePlugin* get(std::string name) throw (std::runtime_error);
     protected:
         std::unordered_map<std::string, GameEnginePlugin*> plugins;

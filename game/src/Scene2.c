@@ -59,3 +59,19 @@ Event InitScene2
     trigger WalkEvent
 
 }
+
+/*void reloadInit(void* _pluginList,void *_renderer)
+{
+
+    buildRefs(_pluginList,_renderer);
+
+    AddTaskForNextRound(pluginList,"InitScene2", &InitScene2 );
+}
+
+void signalPluginReload()
+{
+    SceneFreeList(pluginList);
+    TriggerZoneFreeList(pluginList);
+    ColliderFreeList(pluginList);
+    CompositorFreeList(pluginList);
+}*/
