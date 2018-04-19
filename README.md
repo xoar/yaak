@@ -17,10 +17,10 @@ Similar to this project is mbeddr (http://mbeddr.com), but with the difference t
 To see some examples of the mixture of C and the DSL, see the file game/src/Scene1.c
 
 # Install Guide
-create the eli subsystem by running BeyondC/tools/build eli.sh
-create the compiler by running BeyondC/build compiler.sh
-build the libaries ./installLibaries
-and build the game by running ./build
+create the eli subsystem by running BeyondC/tools/build\ eli.sh \
+create the compiler by running BeyondC/build\ compiler.sh \
+build the libaries ./installLibaries \
+and build the game by running ./build \
 
 You must have a tcl interpreter installed and the tk window system for tcl
 
