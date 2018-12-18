@@ -56,7 +56,7 @@ bool Character::isPointInCollider(Position point)
 bool Character::collides()
 {
     if (walkCollider)
-        return walkCollider->collides(walkCollider);
+        return walkCollider->collides();
     else 
         return false;
 }
@@ -182,7 +182,7 @@ std::string Character::getStatus()
 void Character::setCollider(int width,int height)
 {
     //the walk collider is used. create & register it.
-    walkCollider = std::make_shared<AABBColliderYobject>(0,id,pluginList);
+    walkCollider = std::make_shared<AABBColliderYobject>(1,id,pluginList);
     walkCollider->registerYobject(walkCollider);
 
     //the the size of the walk collider

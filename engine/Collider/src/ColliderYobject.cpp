@@ -1,5 +1,6 @@
 #include "ColliderYobject.h"
 #include "ColliderPlugin.h"
+#include <memory>
 
 ColliderYobject::ColliderYobject (int id,
 								  int parentId,
@@ -40,8 +41,10 @@ std::string ColliderYobject::getType()
 	return this->type;
 }
 
-bool ColliderYobject::collides(std::shared_ptr<ColliderYobject> collider)
+bool ColliderYobject::collides()
 {
+    std::shared_ptr<Yobject> yobject = colliderPlugin->getYobject(this->id,this->parentId);
+    
+    std::shared_ptr<ColliderYobject> collider =  std::dynamic_pointer_cast<ColliderYobject>(yobject);
     return colliderPlugin->collides(collider);
-    return false;
 }

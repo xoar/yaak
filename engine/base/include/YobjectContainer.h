@@ -73,6 +73,21 @@ public:
         std::exit(EXIT_FAILURE);
     }
 
+    std::shared_ptr<Yobject> getYobject(int id,int parentId)
+    {
+        std::lock_guard<std::recursive_mutex> lock(containerMutex);
+        
+        for (auto it = yobjectList->begin();it != yobjectList->end(); it++)
+        {
+            if ((*it)->getParentId() == parentId)
+                if ((*it)->getId() == id)
+                    return (*it);
+        }
+
+        std::cerr << "\n cant find yobject: id: " << id << "parentId :"<< parentId <<"\n";
+        std::exit(EXIT_FAILURE);
+    }
+
     int getEntityIdByName(std::string name)
     {
         /*nobody should change the list while iterating*/

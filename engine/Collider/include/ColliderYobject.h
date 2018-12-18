@@ -33,7 +33,7 @@ class ColliderYobject: public Yobject
         virtual bool collidesWith(std::shared_ptr<ColliderYobject> collider);
         
         /* checks if a collision occurs. must have themself as a parameter for now*/
-        bool collides(std::shared_ptr<ColliderYobject> collider);
+        bool collides();
         
         /* return a list of the colliders from the collision.*/
         //vector<std::shared_ptr<ColliderYobject>> getCollisionList();
