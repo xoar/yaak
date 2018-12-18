@@ -2,7 +2,7 @@
 
 TriggerZoneEntity::TriggerZoneEntity(int id,std::string name,
                      PluginList* pluginList)
-                     : Entity(id,name)
+                     : Yobject(id,name)
 {
     posX = 0;
     posY = 0;

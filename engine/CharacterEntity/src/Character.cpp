@@ -4,7 +4,7 @@
 Character::Character(int id,
                      std::string name,
                      PluginList* pluginList)
-                     : SceneEntity(id,name,pluginList)
+                     : SceneYobject(id,name,pluginList)
 {
     pictureMap = std::make_shared<PictureList>(0,id,pluginList);
     pictureMap->registerYobject(pictureMap);

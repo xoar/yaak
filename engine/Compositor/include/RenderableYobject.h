@@ -13,6 +13,9 @@ class RenderableYobject : public Yobject
     public:
         RenderableYobject(int id,int parentId,
                           PluginList* pluginList);
+        RenderableYobject(int id,
+                          std::string name,
+                          PluginList* pluginList);
 
         virtual ~RenderableYobject();
         virtual void render() {};

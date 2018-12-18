@@ -46,7 +46,6 @@ engine/base/src/MainEngine.cpp \
 engine/base/src/Utils.cpp \
 engine/base/src/Subtask.cpp \
 engine/base/src/Yobject.cpp \
-engine/base/src/Entity.cpp \
 engine/base/src/Timer.cpp \
 engine/base/src/PluginList.cpp \
 engine/base/src/Task.cpp \
@@ -64,7 +63,6 @@ engine/Collider/src/SegmentColliderYobjectInterface.cpp \
 engine/Compositor/src/Compositor.cpp \
 engine/Compositor/src/CompositorInterface.cpp \
 engine/Compositor/src/RenderableYobject.cpp \
-engine/Compositor/src/RenderableEntity.cpp \
 engine/EngineCallbacks/src/EngineUtils.cpp \
 engine/EventSystem/src/EventSystem.cpp \
 engine/EventSystem/src/EventSystemInterface.cpp \
@@ -77,7 +75,6 @@ engine/Message/src/MessageSubtaskInterface.cpp \
 engine/Message/src/MessageYobject.cpp \
 engine/Message/src/MessageYobjectInterface.cpp \
 engine/Scene/src/SceneYobject.cpp \
-engine/Scene/src/SceneEntity.cpp \
 engine/TriggerSubtask/src/TriggerSubtask.cpp \
 engine/TriggerSubtask/src/TriggerSubtaskInterface.cpp \
 engine/TriggerZoneEntity/src/TriggerZoneEntity.cpp \

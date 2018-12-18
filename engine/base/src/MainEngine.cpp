@@ -68,7 +68,7 @@ void MainEngine::initGamePlugins()
 
 bool MainEngine::initLibraries()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+    if (SDL_Init(SDL_INIT_EVERYTHING  & ~SDL_INIT_AUDIO) < 0) {
         logSDLError(std::cout,"SDL Iinit");
         return false;
     }

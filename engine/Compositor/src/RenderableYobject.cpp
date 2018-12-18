@@ -43,6 +43,17 @@ RenderableYobject::RenderableYobject(int id,
 
 }
 
+
+RenderableYobject::RenderableYobject(int id,
+                                   std::string name,
+                                   PluginList* pluginList)
+                                   : RenderableYobject(id,0,pluginList)
+{
+    this->name = name;
+    this->type = "Entity";
+}
+
+
 RenderableYobject::~RenderableYobject()
 {
 }

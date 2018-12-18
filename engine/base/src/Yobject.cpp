@@ -5,6 +5,13 @@ Yobject::Yobject(int id,int parentId)
     this->id = id;
     this->parentId = parentId;
     this->type = "Yobject";
+    name = "";
+}
+
+Yobject::Yobject(int id,std::string name): Yobject(id,0)
+{
+    this->type = "Entity";
+    this->name = name;
 }
 
 int Yobject::getId()

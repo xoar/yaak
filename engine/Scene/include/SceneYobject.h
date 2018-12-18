@@ -13,6 +13,10 @@ class SceneYobject : public Yobject
         SceneYobject(int id,int parentId,
                           PluginList* pluginList);
 
+        SceneYobject(int id,
+                     std::string name,
+                     PluginList* pluginList);
+
         virtual ~SceneYobject();
 
         virtual void registerYobject(std::shared_ptr<SceneYobject> yobject);

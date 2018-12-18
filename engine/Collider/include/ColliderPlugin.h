@@ -13,6 +13,8 @@
 
 class ColliderYobject;
 
+
+/*TODO: add a procces function for the onClick and OnCollissionCollider*/
 class ColliderPlugin: public YobjectContainer
 {
 public:

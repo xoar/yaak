@@ -13,7 +13,7 @@
 #include "Size.h"
 
 #include "Picture.h"
-#include "RenderableEntity.h"
+#include "RenderableYobject.h"
 
 
 class PictureList:public RenderableYobject

@@ -11,14 +11,14 @@
 #include "Position.h"
 #include "Rectangle.h"
 
-#include "SceneEntity.h"
+#include "SceneYobject.h"
 #include "Picture.h"
 #include "PictureList.h"
 #include "AABBColliderYobject.h"
 #include <memory>
 
 
-class Character: public SceneEntity
+class Character: public SceneYobject
 {
     public:
         Character(int id,std::string name,

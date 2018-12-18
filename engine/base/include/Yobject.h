@@ -22,7 +22,12 @@ class Yobject
            a subtask have always the pointers so he can remove the yobject trough the adresses
            from the yobject container*/
 
+        /*sonstrucor for pure Yobjects*/
         Yobject(int id, int parentId);
+
+        /*constructor for entities*/
+        Yobject(int id,std::string name);
+
         virtual ~Yobject() {};
 
         /** get its id. */
@@ -34,13 +39,13 @@ class Yobject
         /** set its id */
         void setParentId(int parentId);
 
-        /**set the object type. used as a leightwight rtti approach*/
+        /**set the object type."Yobject" or "Entity" used as a leightwight rtti approach*/
         void setType(std::string type);
         /**set the object type. used as a leightwight rtti approach*/
         std::string getType();
 
         /* if the yobjects are entites you can access there name*/
-        virtual std::string getName(){return "";}
+        std::string getName(){return name;}
 
     protected:
 
@@ -49,6 +54,8 @@ class Yobject
 
         /*leightwight rtti*/
         std::string type;
+
+        std::string name;
 };
 
 #endif // YOBJECT_H

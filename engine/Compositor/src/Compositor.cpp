@@ -1,6 +1,5 @@
 #include "Compositor.h"
 /*to avoid include problems we include them herer*/
-#include "RenderableEntity.h"
 #include "RenderableYobject.h"
 #include "MainEngine.h"
 Compositor::Compositor(PluginList* pluginlist) : YobjectContainer()

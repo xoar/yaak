@@ -28,7 +28,6 @@ engine/base/src/MainEngine.cpp \
 engine/base/src/Utils.cpp \
 engine/base/src/Subtask.cpp \
 engine/base/src/Yobject.cpp \
-engine/base/src/Entity.cpp \
 engine/base/src/Timer.cpp \
 engine/base/src/PluginList.cpp \
 engine/base/src/Task.cpp \

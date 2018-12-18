@@ -23,6 +23,16 @@ SceneYobject::SceneYobject(int id,
     
 }
 
+SceneYobject::SceneYobject(int id,
+                         std::string name,
+                          PluginList* pluginList)
+                          : SceneYobject(id,0,pluginList)
+{
+    this->name = name;
+    this->type = "Entity";
+}
+
+
 SceneYobject::~SceneYobject()
 {
     

@@ -12,9 +12,14 @@
 #include "Rectangle.h"
 #include "PluginList.h"
 #include "TriggerZonePlugin.h"
-#include "Entity.h"
+#include "Yobject.h"
 
-class TriggerZoneEntity: public Entity
+
+/*TODO: merge with AABB collider.*/
+/*TODO:  implement onClick and onCollision Listener*/
+/*TODO: implement a processFunction in TriggerZonePlugin*/
+
+class TriggerZoneEntity: public Yobject
 {
     public:
         TriggerZoneEntity(int id,std::string name,
@@ -27,6 +32,9 @@ class TriggerZoneEntity: public Entity
         void setRectangle(int x, int y, int width, int height);
 
         bool isPointInTriggerZone(Position point);
+
+        void setOnClickListener() {};
+        void setOnCollisionListener(){};
 
     protected:
         int posX;

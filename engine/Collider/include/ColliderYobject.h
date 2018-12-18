@@ -17,6 +17,8 @@
 
 class ColliderPlugin;
 
+
+/*TODO: fix the himself as a parameter stuff in collides*/
 class ColliderYobject: public Yobject
 {
     public:
@@ -29,7 +31,13 @@ class ColliderYobject: public Yobject
 
         virtual bool isPointInCollider(Position point);
         virtual bool collidesWith(std::shared_ptr<ColliderYobject> collider);
+        
+        /* checks if a collision occurs. must have themself as a parameter for now*/
         bool collides(std::shared_ptr<ColliderYobject> collider);
+        
+        /* return a list of the colliders from the collision.*/
+        //vector<std::shared_ptr<ColliderYobject>> getCollisionList();
+
         std::string getType();
 
     protected:
