@@ -1,0 +1,39 @@
+- add support for entity id variables for the set anim picture and set picture dsl
+
+- when c++ support stackfull coroutines: change task to coroutines.
+  can use yield for ẃaiting.no need for semaphores and condition variables anymore.
+
+- could we catch the wait exceptions in the scheduler instead of each task.
+  easier for new beginners. no need in catching them at task lvl ?
+  We only need a wrapper funktion placed between task and scheduler.
+
+- Character: eliminate or summarize picture and anim picture.
+  only support dsl for seperation between these two.
+  simpler smaller interface.
+
+- C wrapper: hide c++ implementation and use the struct keyword.
+  could use the class also in c interface but look like struct.
+  compile the plugin with c++ compiler but use c preprocessor
+  or similar techniques to avoid redefining a struct with a class within.
+
+- Make a scenegraph. trough out movement of collider and text. 
+  just dock them to the charater and propagate the movements
+
+- Unification: make everything a big scene object. picture, npc, character. 
+  (see character anim interface TODO)
+  its simpler for beginners and only need a bit of ram.
+
+- C interface : throw out id interface. c++ and c interface should match.
+
+- Wait: add wait statement as subtask and dsl.
+  add example with clock.
+
+- clean up choice object. build top down instead bottom up. change interface.
+
+- add relative positions between 0 and 1
+
+- Character statemachines:
+  - add action structs (walk action with start and end coordinates)
+  - record: current action and previuos action 
+    (usefull e.g for pong. have the vector. or when you stop and solve the collision)
+  - let collision be an edge in this statemachine.
