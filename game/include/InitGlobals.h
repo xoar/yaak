@@ -34,7 +34,7 @@ void InitGlobals()
     registerSetting(pluginList,"DefaultTime", defaultTime);
 
     union SettingsValue debugFrames;
-    debugFrames.intValue = 0;
+    debugFrames.intValue = 1;
     registerSetting(pluginList,"DebugFrames", debugFrames);
 
 

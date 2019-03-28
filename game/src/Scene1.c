@@ -79,7 +79,14 @@ Event Prolog
         color : 255, 144, 0
 
     /*wait on an input*/
-    wait on left mouse click
+    /*wait on left mouse click*/
+    WaitForSubtaskStructPtr waitfor = WaitForSubtaskConstructor(pluginList,3,"Prolog");
+    WaitForSubtaskSetTime(waitfor,10);
+    if( ! WaitForSubtaskProcess(waitfor) )
+    {
+        RemoveTask(pluginList,"Prolog");
+        return;
+    }
 
     /*now let bernard come in*/
     trigger IntroduceBernard
@@ -155,7 +162,7 @@ Event ChoiceGreenTentacle
 {
     Choice Bernard
         display "Exit"         if (1)            and trigger Exit
-        display "Hey Tentacle" if (!HeyTentacle) and trigger TentacleBernard
+        display "Hey Doc!!" if (!HeyTentacle) and trigger TentacleBernard
 }
 
 Event Exit
@@ -174,7 +181,7 @@ Event TentacleBernard
 
     HeyTentacle = 1;
 
-    Bernard talks to Tentacle "Hey green tentacle! What's up" 
+    Bernard talks to Tentacle "Hey Doc! What's up?" 
         time : 4.0s 
         size : 30 
         color : 255, 255, 255
@@ -184,7 +191,7 @@ Event TentacleBernard
         size : 30 
         color : 0, 255, 0
 
-    Tentacle talks to Bernard "sometimes i'm bored" 
+    Tentacle talks to Bernard "Sometimes i'm bored" 
         time : 4.0s 
         size : 30 
         color : 0, 255, 0

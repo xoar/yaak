@@ -18,6 +18,7 @@ HEADERS = \
 -Iengine/TriggerSubtask/include \
 -Iengine/TriggerZoneEntity/include \
 -Iengine/WaitOnInputSubtask/include \
+-Iengine/WaitForSubtask/include \
 -Iengine/WalkToSubtask/include \
 -Igame/include \
 -Igame/src \
@@ -81,6 +82,8 @@ engine/TriggerZoneEntity/src/TriggerZoneEntity.cpp \
 engine/TriggerZoneEntity/src/TriggerZoneEntityInterface.cpp \
 engine/WaitOnInputSubtask/src/WaitOnInputSubtask.cpp \
 engine/WaitOnInputSubtask/src/WaitOnInputSubtaskInterface.cpp \
+engine/WaitForSubtask/src/WaitForSubtask.cpp \
+engine/WaitForSubtask/src/WaitForSubtaskInterface.cpp \
 engine/WalkToSubtask/src/WalkToSubtask.cpp \
 engine/WalkToSubtask/src/WalkToSubtaskInterface.cpp
 

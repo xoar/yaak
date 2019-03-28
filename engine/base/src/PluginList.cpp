@@ -39,7 +39,7 @@ void PluginList::add (GameEnginePlugin* plugin)
 
 }
 
-GameEnginePlugin* PluginList::get(std::string name) throw (std::runtime_error)
+GameEnginePlugin* PluginList::get(std::string name) //throw (std::runtime_error)
 {
     auto got = plugins.find (name);
 

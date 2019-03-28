@@ -15,7 +15,7 @@ class PluginList
         virtual ~PluginList();
         void add (GameEnginePlugin* plugin);
         void clear();
-        GameEnginePlugin* get(std::string name) throw (std::runtime_error);
+        GameEnginePlugin* get(std::string name) ;//throw (std::runtime_error);
     protected:
         std::unordered_map<std::string, GameEnginePlugin*> plugins;
 };

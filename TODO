@@ -18,6 +18,8 @@
 
 - Make a scenegraph. trough out movement of collider and text. 
   just dock them to the charater and propagate the movements
+  - kill message yobject movs
+  - kill chollider movs
 
 - Unification: make everything a big scene object. picture, npc, character. 
   (see character anim interface TODO)
@@ -27,6 +29,8 @@
 
 - Wait: add wait statement as subtask and dsl.
   add example with clock.
+  - make a subtask
+  - kill wait in messagesubtask
 
 - clean up choice object. build top down instead bottom up. change interface.
 
@@ -37,3 +41,6 @@
   - record: current action and previuos action 
     (usefull e.g for pong. have the vector. or when you stop and solve the collision)
   - let collision be an edge in this statemachine.
+
+-Eliminate Picture and Message by merging with the yobjects.
+ a yobject should be the samllest class.

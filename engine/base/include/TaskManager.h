@@ -61,16 +61,16 @@ class TaskManager : public GameEnginePlugin
 
     /* throw an exception if the caller was killed.
      * Used to disable branching of killed Task */
-    void addTask(Task* task,std::string callerEventName) throw (KillException);
+    void addTask(Task* task,std::string callerEventName); //throw (KillException);
 
     /* suspend a task until the next loop iteration*/
-    void suspendTaskUntilNextRound(std::string name) throw (KillException);
+    void suspendTaskUntilNextRound(std::string name); //throw (KillException);
 
     /*remove the task from the active task list and free the task ressource*/
     void removeTask(std::string name);
 
     /* suspend a task until the next loop iteration*/
-    void suspendTaskUntilNextRound(Task* task) throw (KillException);
+    void suspendTaskUntilNextRound(Task* task); //throw (KillException);
 
     /*remove the task from the active task list */
     void removeTask(Task* task);

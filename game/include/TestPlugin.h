@@ -10,6 +10,7 @@
 #include "TriggerSubtaskInterface.h"
 #include "TriggerZoneEntityInterface.h"
 #include "WaitOnInputSubtaskInterface.h"
+#include "WaitForSubtaskInterface.h"
 #include "WalkToSubtaskInterface.h"
 #include "CharacterInterface.h"
 #include "EventSystemInterface.h"

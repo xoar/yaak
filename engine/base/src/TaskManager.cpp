@@ -26,7 +26,7 @@ int TaskManager::getLoopCounter()
 }
 
 
-void TaskManager::suspendTaskUntilNextRound(Task* task) throw (KillException)
+void TaskManager::suspendTaskUntilNextRound(Task* task) //throw (KillException)
 {
     /* only one can access the manager */
     std::unique_lock<std::recursive_mutex> lock(taskManagerMutex);
@@ -232,7 +232,7 @@ void TaskManager::removeTaskFromList(std::vector<Task*>* list ,std::string name)
 }
 
 
-void TaskManager::addTask(Task* task,std::string callerEventName) throw (KillException)
+void TaskManager::addTask(Task* task,std::string callerEventName) //throw (KillException)
 {
 
      /* only one can access the manager */
@@ -320,7 +320,7 @@ void TaskManager::addTaskForNextRound(Task* task)
 }
 
 
-void TaskManager::suspendTaskUntilNextRound(std::string name) throw (KillException)
+void TaskManager::suspendTaskUntilNextRound(std::string name) //throw (KillException)
 {
     /* only one can access the manager */
     std::unique_lock<std::recursive_mutex> lock(taskManagerMutex);
