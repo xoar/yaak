@@ -16,8 +16,12 @@
 #include "PictureList.h"
 #include "AABBColliderYobject.h"
 #include <memory>
+#include "Action.h"
 
-
+/* Note that when accessing attributes you always lock before.
+   At the moment there is no good implementation of just only lock one locks.
+   therefore allowing user to access different attributes in a row (incremental move)
+   evrey user must to lock manually the character before accessing*/
 class Character: public SceneYobject
 {
     public:
@@ -33,7 +37,9 @@ class Character: public SceneYobject
         std::string getStatus();
 
         /* if you want to access the character from different threads,
-           e.g to change the status you should lock this mutex before*/
+           e.g to change the status you should lock this mutex before
+           when you want to acess several properties in a row e.g for a incremental
+           move (getPosition,setPosition) you can lock the Character*/
         void lock();
         void unlock();
 
@@ -73,6 +79,7 @@ class Character: public SceneYobject
         void setPosition(int posX, int posY);
         Position getPosition();
 
+
         /*get the size of the current picture*/
         Size getSize();
 
@@ -88,7 +95,30 @@ class Character: public SceneYobject
         /*get the walk function*/
         void* getWalkAnimationFkt();
 
+        /* try to enqueue a action. if it will be granted and queue is decided by
+           the function decideEnqueueAction.*/
+        bool tryEnqueueAction(std::shared_ptr<Action> action);
+
+        /* set the function which decided if a new action is enqueued.
+           is called by tryEnqueueAction() and therefore the type of the action 
+           which should be enqueued is given..*/
+        void setDecideEnqueueActionFunction (bool (*decideEnqueueAction) 
+                                                    (std::string actionType));
+
+        /* only signal abort to all actions in the queue. 
+           the processes who enqueue this action clean it up also.
+           this is the only we have not several calls aborting the same action*/
+        void abortCurrentAction();
+
+        /*dequeue the current action*/
+        void dequeueAction(std::shared_ptr<Action> action);
+
     protected:
+        /*the position in the scene*/
+        int posX;
+        int posY;
+
+
         /*helper: updates the collider with new position and new size*/
         void updateCollider();
 
@@ -110,9 +140,6 @@ class Character: public SceneYobject
                 /*the collider of the character*/
         std::shared_ptr<AABBColliderYobject> walkCollider;
 
-        int posX;
-        int posY;
-
         /*max size used for the walk collider offset*/
         int maxSizeY;
 
@@ -124,6 +151,12 @@ class Character: public SceneYobject
 
         /*save a pointer of the pluginlist*/
         PluginList* pluginList;
+
+        /* a pointer to a granting function for actions.*/
+        bool (*decideEnqueueAction) (std::string actionType);
+
+        /* the action queue*/
+        std::vector<std::shared_ptr<Action>>* actionQueue;
 
     private:
 };

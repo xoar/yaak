@@ -20,7 +20,7 @@ SceneYobject::SceneYobject(int id,
         << id << ", "  << e.what() << "\n";
     }
 
-    
+    childs = new std::vector<std::shared_ptr<SceneYobject>>();
 }
 
 SceneYobject::SceneYobject(int id,
@@ -46,4 +46,25 @@ void SceneYobject::registerYobject(std::shared_ptr<SceneYobject> yobject)
 void SceneYobject::unregisterYobject(std::shared_ptr<SceneYobject> yobject)
 {
     scene->removeYobject(yobject);
+}
+
+ /*attach another scene node to this to notice 
+          the propagated translations. see tranlsate()*/
+void SceneYobject::attachChild(std::shared_ptr<SceneYobject> yobject)
+{
+    childs->push_back(yobject);
+}
+
+/*propagate down the translate function*/
+void SceneYobject::translateChilds(int dx, int dy)
+{
+
+    /* update the position. maybe the where overwritten*/
+    this->updatePosition(dx,dy);
+
+    for (auto it = childs->begin();it != childs->end(); it++)
+    {
+            (*it)->translateChilds(dx,dy);
+    } 
+
 }

@@ -1,6 +1,9 @@
 #include "Character.h"
 #include "ColliderPlugin.h"
 
+bool grantAll(std::string actionType) {return true;}
+
+
 Character::Character(int id,
                      std::string name,
                      PluginList* pluginList)
@@ -21,10 +24,14 @@ Character::Character(int id,
 
     this->pluginList = pluginList;
 
+    maxSizeY = 0;
+
+    decideEnqueueAction = grantAll;
+
+    actionQueue = new std::vector<std::shared_ptr<Action>>();
+
     posX = 0;
     posY = 0;
-
-    maxSizeY = 0;
 }
 
 
@@ -89,12 +96,19 @@ void Character::addPicture(std::string specifier, std::string fileName)
 }
 
 
-
 void Character::setPosition(Position pos)
 {
     this->setPosition(pos.posX, pos.posY);
 }
 
+Position Character::getPosition()
+{
+    Position pos;
+    pos.posX = posX;
+    pos.posY = posY;
+
+    return pos;
+}
 
 void Character::setPosition(int posX, int posY)
 {
@@ -108,15 +122,6 @@ void Character::setPosition(int posX, int posY)
     pictureMap->setPosition(posX,posY);
 }
 
-
-Position Character::getPosition()
-{
-    Position pos;
-    pos.posX = posX;
-    pos.posY = posY;
-
-    return pos;
-}
 
 bool Character::setCurrentAnimationPicture(std::string specifier, int index)
 {
@@ -207,4 +212,90 @@ void Character::setWalkAnimationFkt(void (*walkAnimation) (Position sourcePositi
 void* Character::getWalkAnimationFkt()
 {
     return (void*) this->walkAnimation;
+}
+
+/* try to enqueue a action. if it will be granted and queue is decided by
+   the function decideEnqueueAction.*/
+bool Character::tryEnqueueAction(std::shared_ptr<Action> action)
+{
+   
+    if(!action)
+    {
+        std::cerr << "invalid pointer";
+        return false;
+    }
+
+    /*/* Now check if the action is granted*/
+    bool isGranted = (*decideEnqueueAction)(action->getType());
+
+    /* get the mutex to avoid the queue get fucked up*/
+    lock();
+
+    // when it was granted it can be add to the queue for later execution
+    if (isGranted)
+        actionQueue->push_back(action);
+
+    if (actionQueue->size() == 1)
+        action->setState("Ready");
+
+    unlock();
+
+    return true;
+}
+
+/* set the function which decided if a new action is enqueued.
+   is called by tryEnqueueAction() and therefore the type of the action 
+   which should be enqueued is given.*/
+void Character::setDecideEnqueueActionFunction (bool (*decideEnqueueAction) 
+                                                       (std::string actionType))
+{
+    lock();
+
+    this->decideEnqueueAction = decideEnqueueAction;
+
+    unlock();
+}
+
+
+void Character::dequeueAction(std::shared_ptr<Action> action)
+{
+
+    lock();
+
+    if (!actionQueue->empty())
+    {
+
+        if (action == actionQueue->front())
+        {
+            /*dequeue it*/
+            actionQueue->erase(actionQueue->begin());
+
+            //set the next ready
+            if (actionQueue->size() >= 1)
+               (actionQueue->front())->setState("Ready");
+        }
+        else
+            std::cerr << "not allowed to dequeue element";
+    }
+
+    unlock();
+}
+
+/*only signal abort to all actions in the queue. 
+  the processes who enqueue this action clean it up also.
+  this is the only we have not several calls aborting the same action*/
+void Character::abortCurrentAction()
+{
+    lock();
+
+    /* signal abort to all actions*/
+    /* This is simple because only one action should be waiting the rest should aborting
+       or wait to abort*/
+    for (auto action : *actionQueue) 
+    {
+        action->signalAbort();
+    }
+
+    unlock();
+
 }

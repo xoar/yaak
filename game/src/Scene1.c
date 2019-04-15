@@ -81,7 +81,7 @@ Event Prolog
     /*wait on an input*/
     /*wait on left mouse click*/
     WaitForSubtaskStructPtr waitfor = WaitForSubtaskConstructor(pluginList,3,"Prolog");
-    WaitForSubtaskSetTime(waitfor,10);
+    WaitForSubtaskSetTime(waitfor,5);
     if( ! WaitForSubtaskProcess(waitfor) )
     {
         RemoveTask(pluginList,"Prolog");

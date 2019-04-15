@@ -43,4 +43,6 @@
   - let collision be an edge in this statemachine.
 
 -Eliminate Picture and Message by merging with the yobjects.
- a yobject should be the samllest class.
+ a yobject should be the smallest class.
+
+-Unify the lock concept for character: all setter and getter should lock automatically

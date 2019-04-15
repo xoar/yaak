@@ -13,7 +13,14 @@
 #include "GlobalTimer.h"
 #include "Character.h"
 #include "Compositor.h"
+#include "Action.h"
 
+
+class WalkAction : public Action
+{
+    public: 
+        WalkAction() : Action("Walk") {}
+};
 
 class WalkToSubtask : public Subtask
 {
@@ -59,6 +66,8 @@ class WalkToSubtask : public Subtask
                             Position targetPosition,
                             int totalElapsedTicks, 
                             int elapsedTicks);
+
+     std::shared_ptr<Action> walkAction;
 
 };
 

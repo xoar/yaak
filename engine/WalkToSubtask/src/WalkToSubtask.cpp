@@ -1,5 +1,6 @@
 #include "WalkToSubtask.h"
 
+
 WalkToSubtask::WalkToSubtask(PluginList* pluginList,
                              int id,
                              std::string eventName,
@@ -66,11 +67,14 @@ WalkToSubtask::WalkToSubtask(PluginList* pluginList,
 
     /*TODO: do we need a lock here?*/    
     sourcePosition = character->getPosition();
+
+    walkAction = std::make_shared<WalkAction>();
 }
 
 WalkToSubtask::~WalkToSubtask()
 {
     this->character.reset();
+    walkAction.reset();
 }
 
 
@@ -78,6 +82,28 @@ WalkToSubtask::~WalkToSubtask()
 /** just fire the next node */
 void WalkToSubtask::process()
 {
+
+    //std::cerr << walkAction.use_count();
+
+    /* try to start character action*/
+    if (!(character->tryEnqueueAction(walkAction)))
+        return;
+
+    /* sleep until we can start*/
+    while(walkAction->getState() == "Wait")
+    {
+        taskManager->suspendTaskUntilNextRound(eventName);
+    }
+
+    /* if we get canceld here no big deal just dequeue and quit*/
+    if (walkAction->getState() == "Aborted")
+    {
+        character->dequeueAction(walkAction);
+        return;
+    }
+
+    /* now we can start*/
+
     double totalElapsedTicks = 0;
 
     int distanceX = targetPosition.posX - sourcePosition.posX;
@@ -88,25 +114,9 @@ void WalkToSubtask::process()
     /*distance/speed = time*/
     double totalTicks = distance/speed * 1000.0f; //1000 for ms
 
-    /*for the first frame we do nothing to give  other task the chance to canckl it.
-      just to have less work: when we dont update the picture 
-      we dont have to revert this back*/
-
-    /* we access the character, so we lock him 
-       to prevent erros due multitasking*/
     character->lock();
-        
-    std::string status = character->getStatus();
-    if ( status != "None" )
-    {
-            /*unlock the mutex and break up;*/
-            character->unlock();
-            return;
-    }
-
-    character->setStatus("InitWalk");
+    character->setStatus("Walk");
     character->unlock();
-    taskManager->suspendTaskUntilNextRound(eventName);
 
     while(totalElapsedTicks < totalTicks)
     {
@@ -123,23 +133,20 @@ void WalkToSubtask::process()
            to prevent erros due multitasking*/
         character->lock();
 
-        /* check the status. if there already runs an other animation 
-           we cancel the walk. Can also be the case when the walk 
-           was interrupted by force*/ 
-        std::string status = character->getStatus();
-        if ( !(status == "None" || status == "Walk" || status == "InitWalk"))
+        /* check the status if we got aborted*/
+        //TODO: do we need the lock for walkAnim????
+        if (walkAction->getState() == "Aborted")
         {
             //signal an end of the walk
             if (walkAnimation != nullptr && walkAnimation != NULL)
                     walkAnimation(sourcePosition,targetPosition,-1,-1);
 
             /*unlock the mutex and break up;*/
+            character->setStatus("None");
             character->unlock();
+            character->dequeueAction(walkAction);
             return;
         }
-
-        // if it runs the second time we must change initWalk to Walk
-        character->setStatus("Walk");
 
         /*theres no other animation playing. process the walk*/
         character->setPosition(newPosX,newPosY);
@@ -158,6 +165,7 @@ void WalkToSubtask::process()
             /*unlock the mutex and break up;*/
             character->setStatus("None");
             character->unlock();
+            character->dequeueAction(walkAction);
             return;
         }
 
@@ -185,6 +193,8 @@ void WalkToSubtask::process()
        change the status of the character back to None*/
     character->setStatus("None");
     character->unlock();
+    /*finished. dequeue the action*/
+    character->dequeueAction(walkAction);
 
 }
 
