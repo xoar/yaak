@@ -6,7 +6,8 @@ MessageYobject::MessageYobject(int id,
                                std::string text,
                                int characterId,
                                PluginList* pluginList)
-                                : RenderableYobject(id,parentId,pluginList)
+                                : RenderableYobject(id,parentId,pluginList),
+                                  SceneYobject(id,parentId,pluginList)
 {
     GlobalSettings* globalSettings = nullptr;
     try
@@ -42,11 +43,12 @@ MessageYobject::MessageYobject(int id,
                                 this->renderer /*init by rederableYobject*/
                                 );
 
+    owner = nullptr;
+
     if (characterId > -1)
     {
         try
         {
-            SceneContainer* scene = (SceneContainer*) pluginList->get(SceneContainer::getPluginName());
             std::shared_ptr<Yobject> charYobject = scene->getYobject(characterId);
 
             this->owner = std::static_pointer_cast<Character>(charYobject);
@@ -56,10 +58,17 @@ MessageYobject::MessageYobject(int id,
             std::cerr <<"ERROR: Cant find the Scene Editor, subtask id: "<< id 
             << ", "  << e.what() << "\n";
         }
+
+        /* get the offset for the message. TODO: calc this with char size*/
+        Position p = owner->getPosition();
+        p.posY -= 50;
+        message->setPosition(p);
+
     }
     
     fixedTextPosition = false;
     hasInitializedRessources = false;
+
 }
 
 
@@ -97,12 +106,12 @@ void MessageYobject::render()
 
     /* display the text over the owner */
     /* TODO : clac an offset */
-    if ((owner) && (!this->fixedTextPosition))
-    {
-        Position p = owner->getPosition();
-        p.posY -= 50;
-        message->setPosition(p);
-    }
+    //if ((owner) && (!this->fixedTextPosition))
+    //{
+    //    Position p = owner->getPosition();
+    //    p.posY -= 50;
+    //    message->setPosition(p);
+    //}
     
     message->render();
 }
@@ -151,4 +160,37 @@ void MessageYobject::setColor(SDL_Color color)
     this->message->setColor(color);
     /* need a new build of the message*/
     if (hasInitializedRessources) signalInitRessourcesNow();
+}
+
+
+void MessageYobject::registerYobject(std::shared_ptr<MessageYobject> yobject)
+{
+    /*TODO:WORKAROUND */
+    RenderableYobject::registerYobject(std::static_pointer_cast<RenderableYobject>(yobject));
+    SceneYobject::registerYobject(std::static_pointer_cast<SceneYobject>(yobject));
+    /*dock yourself to the character*/
+    if(owner)
+        owner->attachChild(std::static_pointer_cast<SceneYobject>(yobject));
+}
+
+void MessageYobject::unregisterYobject(std::shared_ptr<MessageYobject> yobject)
+{
+    RenderableYobject::unregisterYobject(std::static_pointer_cast<RenderableYobject>(yobject));
+    SceneYobject::unregisterYobject(std::static_pointer_cast<SceneYobject>(yobject));
+    /*unddock yourself from the character*/
+    if(owner)
+        owner->detachChild(std::static_pointer_cast<SceneYobject>(yobject));
+}
+
+void MessageYobject::updatePosition(int dx, int dy)
+{
+
+    if (!this->fixedTextPosition)
+    {
+        Position p = message->getPosition();
+        p.posX += dx;
+        p.posY += dy;
+        message->setPosition(p);
+    }
+
 }

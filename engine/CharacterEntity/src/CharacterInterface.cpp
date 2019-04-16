@@ -187,10 +187,10 @@ int CharacterGetId(void* pluginList,char* name)
     return id;
 }
 
-void CharacterSetCollider(void* pluginList,int id,int width,int height)
+void CharacterSetCollider(void* pluginList,int id,int width,int height,int heightOffset)
 {
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
-    character->setCollider(width,height);
+    character->setCollider(width,height,heightOffset);
 }
 
 void CharacterFreePointerStruct(CharacterStructPtr character)

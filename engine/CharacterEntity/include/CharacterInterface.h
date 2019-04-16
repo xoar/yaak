@@ -81,7 +81,7 @@ int CharacterGetId(void* pluginList,char* name);
 
 
 
-void CharacterSetCollider(void* pluginList,int id,int width,int height);
+void CharacterSetCollider(void* pluginList,int id,int width,int height,int heightOffset);
 
 
 void CharacterSetWalkAnimationFkt(void* pluginList,

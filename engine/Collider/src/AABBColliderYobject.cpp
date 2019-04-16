@@ -5,7 +5,8 @@ AABBColliderYobject::AABBColliderYobject (int id,
                                           int parentId,
                                           PluginList* pluginList)
                                            :ColliderYobject(id,parentId,"AABB",pluginList),
-                                            RenderableYobject(id,parentId,pluginList)
+                                            RenderableYobject(id,parentId,pluginList),
+                                            SceneYobject(id,parentId,pluginList)
 {
     posX = 0;
     posY = 0;
@@ -29,12 +30,14 @@ void AABBColliderYobject::registerYobject(std::shared_ptr<AABBColliderYobject> y
     /*TODO:WORKAROUND */
     RenderableYobject::registerYobject(std::static_pointer_cast<RenderableYobject>(yobject));
     ColliderYobject::registerYobject(std::static_pointer_cast<ColliderYobject>(yobject));
+    SceneYobject::registerYobject(std::static_pointer_cast<SceneYobject>(yobject));
 }
 
 void AABBColliderYobject::unregisterYobject(std::shared_ptr<AABBColliderYobject> yobject)
 {
     RenderableYobject::unregisterYobject(std::static_pointer_cast<RenderableYobject>(yobject));
     ColliderYobject::unregisterYobject(std::static_pointer_cast<ColliderYobject>(yobject));
+    SceneYobject::unregisterYobject(std::static_pointer_cast<SceneYobject>(yobject));
 }
 
 AABBColliderYobject::~AABBColliderYobject()
@@ -117,4 +120,11 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
 	/*TODO support this*/
 	return false;
 
+}
+
+
+void AABBColliderYobject::updatePosition(int dx, int dy)
+{
+    posX += dx;
+    posY += dy;
 }

@@ -128,7 +128,7 @@ Event IntroduceBernard
 
     /*add a fix collider for bernard*/
     int CharacterId = CharacterGetId(pluginList,"Bernard");
-    CharacterSetCollider(pluginList,CharacterId,20,20);
+    CharacterSetCollider(pluginList,CharacterId,20,20,230);
     CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
 
     Bernard walk to 400, 200

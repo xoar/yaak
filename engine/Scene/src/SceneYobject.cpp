@@ -1,5 +1,6 @@
 #include "SceneYobject.h"
 #include <stdexcept>
+#include <algorithm> //std::find
 
 SceneYobject::SceneYobject(int id,
                            int parentId,
@@ -55,6 +56,18 @@ void SceneYobject::attachChild(std::shared_ptr<SceneYobject> yobject)
     childs->push_back(yobject);
 }
 
+/*detach a scene node from this*/
+void SceneYobject::detachChild(std::shared_ptr<SceneYobject> yobject)
+{
+
+  auto it = std::find (childs->begin(), childs->end(), yobject);
+  if (it != childs->end())
+      childs->erase(it);
+  else
+    std::cerr << "can't find child " <<yobject->getId() 
+              << " in SceneYobject " << id;
+
+}
 /*propagate down the translate function*/
 void SceneYobject::translateChilds(int dx, int dy)
 {

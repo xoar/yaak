@@ -84,7 +84,7 @@ class Character: public SceneYobject
         Size getSize();
 
         /*set the walk collider.*/
-        void setCollider(int width,int height);
+        void setCollider(int width,int height, int heightOffset);
 
         /*set the walk function */
         void setWalkAnimationFkt(void (*walkAnimation) (Position sourcePosition, 
@@ -118,10 +118,6 @@ class Character: public SceneYobject
         int posX;
         int posY;
 
-
-        /*helper: updates the collider with new position and new size*/
-        void updateCollider();
-
         /*picture Map*/
         std::shared_ptr<PictureList> pictureMap;
 
@@ -140,8 +136,6 @@ class Character: public SceneYobject
                 /*the collider of the character*/
         std::shared_ptr<AABBColliderYobject> walkCollider;
 
-        /*max size used for the walk collider offset*/
-        int maxSizeY;
 
         /*walk function which is called by the walk to subtask*/
         void (*walkAnimation) (Position sourcePosition, 

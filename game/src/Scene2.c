@@ -53,7 +53,7 @@ Event InitScene2
 
     /*add a fix collider for bernard*/
     int CharacterId = CharacterGetId(pluginList,"Bernard");
-    CharacterSetCollider(pluginList,CharacterId,20,20);
+    CharacterSetCollider(pluginList,CharacterId,20,20,230);
     CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
 
     trigger WalkEvent

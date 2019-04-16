@@ -14,6 +14,7 @@
 
 #include "ColliderYobject.h"
 #include "RenderableYobject.h"
+#include "SceneYobject.h"
 #include "GlobalSettings.h"
 
 
@@ -21,7 +22,8 @@
 Do we need a collider superclass with isPoint in collider,
 registering, collides with AABB?*/ 
 class AABBColliderYobject: public ColliderYobject,
-                           public RenderableYobject
+                           public RenderableYobject,
+                           public SceneYobject
 {
     public:
         AABBColliderYobject(int id,int parentId,PluginList* pluginList);
@@ -40,6 +42,8 @@ class AABBColliderYobject: public ColliderYobject,
 
         bool isPointInCollider(Position point);
         bool collidesWith(std::shared_ptr<ColliderYobject> collider);
+
+        virtual void updatePosition(int dx, int dy);
 
         virtual void render();
 

@@ -10,6 +10,7 @@
 #include "RenderableYobject.h"
 #include "Character.h"
 #include "GlobalSettings.h"
+#include "SceneYobject.h"
 #include <memory>
 
 
@@ -17,7 +18,7 @@
    before rendering it, or you see nothing.
    We use this approach for allowing users to change the color, font etc,
    over the getters before displaying the texture*/
-class MessageYobject : public RenderableYobject
+class MessageYobject : public RenderableYobject, public SceneYobject
 {
     public:
         MessageYobject (int id,
@@ -42,6 +43,13 @@ class MessageYobject : public RenderableYobject
         Position getPosition();
         void setPosition(Position pos);
         void setPosition(int posX, int posY);
+
+        virtual void updatePosition(int dx, int dy);
+
+        /*TODO workaround*/
+        virtual void registerYobject(std::shared_ptr<MessageYobject> yobject);
+        virtual void unregisterYobject(std::shared_ptr<MessageYobject> yobject);
+
 
         void setFontPath(std::string fontPath);
         void setFontSize(int fontSize);

@@ -27,12 +27,12 @@ class SceneYobject : public Yobject
           the propagated translations. see tranlsate()*/
         void attachChild(std::shared_ptr<SceneYobject> yobject);
          /*detach a scene node from this*/
-        void detachChild(std::shared_ptr<SceneYobject> yobject){}
+        void detachChild(std::shared_ptr<SceneYobject> yobject);
 
         /*propagate down the translate function*/
         virtual void translateChilds(int dx, int dy);
         /* override this function to adapt to the position diff*/
-        virtual void updatePosition(int dx, int dy) {}
+        virtual void updatePosition(int dx, int dy){}
 
     protected:
 

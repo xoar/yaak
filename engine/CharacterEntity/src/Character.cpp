@@ -24,35 +24,21 @@ Character::Character(int id,
 
     this->pluginList = pluginList;
 
-    maxSizeY = 0;
-
     decideEnqueueAction = grantAll;
 
     actionQueue = new std::vector<std::shared_ptr<Action>>();
 
     posX = 0;
     posY = 0;
+
+    /*attach the collider to us*/
+    this->attachChild(std::static_pointer_cast<SceneYobject>(charCollider));
 }
 
 
 Size Character::getSize()
 {
     return pictureMap->getSize();
-}
-
-void Character::updateCollider()
-{
-
-    //get the current size
-    Size size = this->getSize();
-    if (size.width != -1) charCollider->setSize(size.width,size.height);
-
-    //update the position
-    charCollider->setPosition(posX,posY);
-  
-    /* set the walk collider. use a fix maximum to prevent bobing*/
-    if (walkCollider)
-        walkCollider->setPosition(posX,posY+maxSizeY);
 }
 
 bool Character::isPointInCollider(Position point)
@@ -70,14 +56,7 @@ bool Character::collides()
 
 bool Character::setCurrentPicture(std::string specifier)
 {
-    /* first set the new picture*/
-    /* picture are insert alone, in contrast to animations*/
-    bool status = pictureMap->setCurrentPicture(specifier,0);
-
-    /*now update the collider pos+size*/
-    if (status) updateCollider();
-
-    return status;
+    return Character::setCurrentAnimationPicture(specifier,0);
 }
 
 void Character::addPicture(std::string specifier, std::string fileName)
@@ -86,10 +65,6 @@ void Character::addPicture(std::string specifier, std::string fileName)
     /*TODO: check if there is already a specifier in the list*/
     /* first add+set the new picture*/
     pictureMap->addPicture(specifier,fileName);
-
-    /* update the maxSize*/
-    Size size = this->getSize();
-    if (size.height > maxSizeY) maxSizeY = size.height;
 
     /*now set the current piucture and update the collider*/
     setCurrentPicture(specifier);
@@ -112,13 +87,18 @@ Position Character::getPosition()
 
 void Character::setPosition(int posX, int posY)
 {
-    /*updated position + the collider*/
+
+    /*propagate the movement*/
+    int dx = posX - this->posX;
+    int dy = posY - this->posY;
+
+    translateChilds(dx, dy);
+
+    /*updated our position*/
     this->posX = posX;
     this->posY = posY;
     
-    //update the position
-    updateCollider();
-
+    /*update the images*/
     pictureMap->setPosition(posX,posY);
 }
 
@@ -129,8 +109,12 @@ bool Character::setCurrentAnimationPicture(std::string specifier, int index)
     /* picture are insert alone, in contrast to animations*/
     bool status = pictureMap->setCurrentPicture(specifier,index);
 
-    /*TODO: collider changes with animation size. change this*/
-    if (status) updateCollider();
+    /*change the collider. for clicking with the mouse while having an animation*/
+    if (status){
+        //get the current size
+        Size size = this->getSize();
+        if (size.width != -1) charCollider->setSize(size.width,size.height);
+    }
 
     return status;
 }
@@ -140,10 +124,7 @@ void Character::addAnimationPicture(std::string specifier, std::string fileName)
 {
     /* first add+set the new picture*/
     pictureMap->addPicture(specifier,fileName);
-
-    /* update the maxSize*/
-    Size size = this->getSize();
-    if (size.height > maxSizeY) maxSizeY = size.height;
+    
     /*no update of the current picture and collider for animations*/
 }
 
@@ -184,7 +165,7 @@ std::string Character::getStatus()
     return currentStatus;
 }
 
-void Character::setCollider(int width,int height)
+void Character::setCollider(int width,int height,int heightOffset)
 {
     //the walk collider is used. create & register it.
     walkCollider = std::make_shared<AABBColliderYobject>(1,id,pluginList);
@@ -193,9 +174,11 @@ void Character::setCollider(int width,int height)
     //the the size of the walk collider
     walkCollider->setSize(width,height);
 
-    //we call updateCollider because for fix collider
-    //the position is changed a bit
-    updateCollider();
+    /* set the walk collider. use a fix maximum to prevent bobing*/
+    walkCollider->setPosition(posX,posY+heightOffset);
+
+    /*register the walkCollider to the Character*/
+    this->attachChild(std::static_pointer_cast<SceneYobject>(walkCollider));
 
 }
 
