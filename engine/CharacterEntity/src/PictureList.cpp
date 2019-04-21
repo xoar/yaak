@@ -135,3 +135,19 @@ Position PictureList::getPosition()
     pos.posY = this->posY;
     return pos;
 }
+
+double PictureList::getRenderPriority()
+{
+    /* because we have the origin of or coordinates on the upper left corner
+       we transform it to the lower left corner.*/
+
+    Size size = {0,0}; 
+
+    if (currentPic)
+        size = currentPic->getSize();
+    
+    double priority = this->posY - size.height;
+
+    return priority;
+
+}

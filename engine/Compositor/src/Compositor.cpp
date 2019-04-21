@@ -2,6 +2,7 @@
 /*to avoid include problems we include them herer*/
 #include "RenderableYobject.h"
 #include "MainEngine.h"
+#include  <algorithm>
 Compositor::Compositor(PluginList* pluginlist) : YobjectContainer()
 {
 
@@ -20,6 +21,8 @@ void Compositor::renderYobjects()
     /*it is guaranteed through FinalizeContextSharing, that we have a valid context*/
     compositorMutex.lock();
 
+    /*sort the queue to reflect players which move up the screen and now hide new things*/
+    sortByRenderPriority();
 
     /* clear the screen */
     SDL_RenderClear(renderer);
@@ -27,10 +30,9 @@ void Compositor::renderYobjects()
     /* render the objetcs */
     for (auto it = yobjectList->begin();it != yobjectList->end(); it++)
     {
-        /*std::weak_ptr<Yobject> yobject = (*it);
-        std::weak_ptr<RenderableYobject> ryobject = std::static_pointer_cast<RenderableYobject>(yobject);
-        if ( ryobject->isActive()) ryobject->render();*/
-        RenderableYobject* yobject = (RenderableYobject*) (*it).get();
+        std::shared_ptr<RenderableYobject> yobject = 
+            std::static_pointer_cast<RenderableYobject>(*it);
+
         if ( yobject->isActive()) yobject->render();
     }
 
@@ -111,10 +113,28 @@ void Compositor::deactivateAllYobjects()
         
     for (auto it = yobjectList->begin();it != yobjectList->end(); it++)
     {   
-            /*std::weak_ptr<Yobject> yobject = (*it);
-            std::weak_ptr<RenderableYobject> ryobject = std::static_pointer_cast<RenderableYobject>(yobject);
-            ryobject->deactivate();*/
-            RenderableYobject* yobject = (RenderableYobject*) (*it).get();
+            std::shared_ptr<RenderableYobject> yobject = 
+                std::static_pointer_cast<RenderableYobject>(*it);
             yobject->deactivate();
     }
+}
+
+/* compare the objects by its render priority*/
+bool compareRenderPriority(std::shared_ptr<Yobject> yobjectLeft , 
+                           std::shared_ptr<Yobject> yobjectRight)
+{
+    std::shared_ptr<RenderableYobject> left =
+        std::static_pointer_cast<RenderableYobject>(yobjectLeft);
+    
+    std::shared_ptr<RenderableYobject> right =
+            std::static_pointer_cast<RenderableYobject>(yobjectRight);
+
+    return (left->getRenderPriority() < right->getRenderPriority());
+}
+
+/*sort the array by render priority of the object*/
+void Compositor::sortByRenderPriority()
+{
+    // sort by increaing priority 
+    std::sort(yobjectList->begin(), yobjectList->end(), compareRenderPriority);
 }

@@ -41,6 +41,9 @@ RenderableYobject::RenderableYobject(int id,
      /* active by default*/
     active = true;
 
+    /*set the default priority*/
+    renderPriority = 0;
+
 }
 
 
@@ -98,3 +101,13 @@ void RenderableYobject::deactivate()
  {
     return active;
  }
+
+void RenderableYobject::setRenderPriority(double priority)
+{
+    renderPriority = priority;
+}
+
+double RenderableYobject::getRenderPriority()
+{
+    return renderPriority;
+}

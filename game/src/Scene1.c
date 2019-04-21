@@ -163,6 +163,7 @@ Event ChoiceGreenTentacle
     Choice Bernard
         display "Exit"         if (1)            and trigger Exit
         display "Hey Doc!!" if (!HeyTentacle) and trigger TentacleBernard
+        //display "ein Test" if(1) and trigger Exit. TODO: trace this bug
 }
 
 Event Exit

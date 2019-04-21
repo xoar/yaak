@@ -43,7 +43,17 @@ class RenderableYobject : public Yobject
         virtual void initRessources() {};
         virtual void freeRessources() {};
 
+        /*setter and getter for the render priority.*/
+        /* one can set the priority or overload tgis function to change the render order*/
+        virtual void setRenderPriority(double priority);
+        virtual double getRenderPriority();
+
     protected:
+
+        /* when should the object be rendered? see Compositor::sortByRenderPriority*/
+        /* this can be implemented in a position attribute or something else*/
+        double renderPriority;
+
         SDL_Renderer    *renderer;
         Compositor *compositor;
 

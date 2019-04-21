@@ -47,6 +47,11 @@ class PictureList:public RenderableYobject
         virtual bool setCurrentPicture(std::string specifier,int index);
 
         void render();
+
+
+        /*overloaded the priority to use the lower left corner for the rendering order*/
+        virtual double getRenderPriority();
+
     protected:
         int posX;
         int posY;
