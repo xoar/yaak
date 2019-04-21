@@ -42,6 +42,13 @@ Start Event InitScene
         display : "green tentacle"
         trigger : CheckChoice
 
+
+    Scene Object Clock
+        position : 800, 200
+        picture "right": "../res/clockRight.png"
+        picture "middle": "../res/clockMiddle.png"
+        picture "left": "../res/clockLeft.png"
+
     /* close he Door*/
     Door set current picture to "closed"
 
@@ -78,15 +85,7 @@ Event Prolog
         size : 50 
         color : 255, 144, 0
 
-    /*wait on an input*/
-    /*wait on left mouse click*/
-    WaitForSubtaskStructPtr waitfor = WaitForSubtaskConstructor(pluginList,3,"Prolog");
-    WaitForSubtaskSetTime(waitfor,5);
-    if( ! WaitForSubtaskProcess(waitfor) )
-    {
-        RemoveTask(pluginList,"Prolog");
-        return;
-    }
+    wait for 2 s
 
     /*now let bernard come in*/
     trigger IntroduceBernard
@@ -138,8 +137,22 @@ Event IntroduceBernard
 
     BernardIsInTheRoom = 1;
 
-    trigger WalkEvent
+    trigger WalkEvent,ClockTicking
 
+}
+
+Event ClockTicking
+{
+    Clock set current picture to "left"
+    wait for 2 s
+    Clock set current picture to "middle"
+    wait for 2 s
+    Clock set current picture to "right"
+    wait for 2 s
+    Clock set current picture to "middle"
+    wait for 2 s
+
+    trigger ClockTicking
 }
 
 

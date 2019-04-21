@@ -1,0 +1,11 @@
+@p maximum_input_line_length = infinity
+
+@O@<Language.con@>==@{
+
+    Subtask: WaitForSubtask.
+    
+    WaitForSubtask: 'wait' 'for' integer_constant 's'.
+    /*for using a integer variable*/
+    WaitForSubtask: 'wait' 'for' IdUse 's'.
+
+@}

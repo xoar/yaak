@@ -6,5 +6,6 @@ modules/Choice/ChoiceLanguage.specs
 modules/yaakMain/yaakLanguage.specs
 modules/WaitOn/Language.fw
 modules/WalkTo/Language.fw
+modules/WaitFor/Language.fw
 modules/SetPicture/Language.fw
 modules/Segment/Language.fw

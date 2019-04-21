@@ -9,6 +9,7 @@ modules/Choice/ChoiceUnparser.specs
 modules/yaakMain/yaakUnparser.specs
 modules/WaitOn/Unparser.fw
 modules/WalkTo/Unparser.fw
+modules/WaitFor/Unparser.fw
 modules/SetPicture/Unparser.fw
 modules/Segment/Unparser.fw
 modules/common/commonUnparser.specs

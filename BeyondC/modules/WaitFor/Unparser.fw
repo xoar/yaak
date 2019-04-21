@@ -1,0 +1,93 @@
+@p maximum_input_line_length = infinity
+
+
+@O@<Language.lido@>==@{
+
+    ATTR WaitForConstructor : PTGNode;
+    ATTR WaitForSetTime : PTGNode;
+    ATTR WaitForProcess : PTGNode;
+
+    
+    RULE: WaitForSubtask ::= 'wait' 'for' integer_constant 's'
+    COMPUTE
+
+        WaitForSubtask.WaitForConstructor =
+            PTGWaitForConstructor(INCLUDING Subtask.Id,
+                                 INCLUDING function_definition.EventName
+                                 ) <- INCLUDING program.GotEntityId ;
+
+        WaitForSubtask.WaitForSetTime = 
+            PTGWaitForSetTime(INCLUDING Subtask.Id,
+                              StringTable(integer_constant[1])
+                             );
+
+        WaitForSubtask.WaitForProcess = 
+            PTGWaitForProcess(INCLUDING Subtask.Id,
+                             INCLUDING function_definition.EventName
+                             );
+
+        WaitForSubtask.IdemPtg = PTGWaitFor(WaitForSubtask.WaitForConstructor,
+                                            WaitForSubtask.WaitForSetTime,
+                                            WaitForSubtask.WaitForProcess
+                                          );
+
+
+    END;
+
+
+    RULE: WaitForSubtask ::= 'wait' 'for' IdUse 's'
+    COMPUTE
+
+        /* add a check for the right type*/
+        IF(NE(IdUse[1].Type,TypeIs_int),
+              message(ERROR,"Walk to subtask need integer type", 0, COORDREF));
+
+        WaitForSubtask.WaitForConstructor =
+            PTGWaitForConstructor(INCLUDING Subtask.Id,
+                                 INCLUDING function_definition.EventName
+                                 ) <- INCLUDING program.GotEntityId ;
+
+        WaitForSubtask.WaitForSetTime = 
+            PTGWaitForSetTime(INCLUDING Subtask.Id,
+                              StringTable(IdUse[1].Sym)
+                             );
+
+        WaitForSubtask.WaitForProcess = 
+            PTGWaitForProcess(INCLUDING Subtask.Id,
+                             INCLUDING function_definition.EventName
+                             );
+
+        WaitForSubtask.IdemPtg = PTGWaitFor(WaitForSubtask.WaitForConstructor,
+                                            WaitForSubtask.WaitForSetTime,
+                                            WaitForSubtask.WaitForProcess
+                                          );
+
+
+    END;
+@}
+
+
+@O@<Language.ptg@>==@{
+
+WaitFor:
+    $ /*constructor*/ "\n"
+    $ /*Set time*/ "\n"
+    $ /*process*/ "\n"
+
+WaitForConstructor:
+    "    WaitForSubtaskStructPtr subtask" $1 int 
+        " = WaitForSubtaskConstructor(pluginList, " 
+                                   $1 int "," 
+                                   "\"" $2  /*event name*/"\""
+                                   ");"
+
+WaitForSetTime:
+    "    WaitForSubtaskSetTime(subtask" $1 int "," $2 string ");"
+
+WaitForProcess:
+    "    if( ! WaitForSubtaskProcess(subtask" $1 int ") )\n"
+    "    {\n"
+    "        RemoveTask(pluginList,\""  $2 "\");\n"
+    "        return;\n"
+    "    }\n"
+@}
