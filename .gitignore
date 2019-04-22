@@ -1,1 +1,7 @@
 lib/
+*.o
+TestPlugin_dsl_output.c
+TestPlugin_dsl_output_no_directives.c
+install.log
+bin/
+buildTemp/

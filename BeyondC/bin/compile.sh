@@ -4,6 +4,8 @@
 
 #find the folder of this file and place the path in dir
 
+#To get rid of the cpp attibute macros see https://stackoverflow.com/questions/5746477/c-preprocessor-getting-rid-of-the-align-and-attribute
+
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -21,7 +23,7 @@ fileName=$(basename $1)
 
 #important: have the same env as clang
 echo "preproccess with " "cpp ${@:3} $1 > buildTemp/${fileName}_cpp"
-cpp ${@:3} $1 > buildTemp/${fileName}_cpp
+clang -std=c99 -fno-gnu-inline-asm -fno-gnu-keywords ${@:3}  -D"__attribute__(ARGS)=" -E $1> buildTemp/${fileName}_cpp
 
 #add the builtin_va_list workaround
 cat $DIR/processed_file_header.txt buildTemp/${fileName}_cpp > buildTemp/${fileName}_preprocessed
