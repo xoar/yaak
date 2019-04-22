@@ -22,7 +22,10 @@ mkdir -p buildTemp
 fileName=$(basename $1)
 
 #important: have the same env as clang
+#on some machines echo "\n" is not working...
+echo ""
 echo "preproccess with " "cpp ${@:3} $1 > buildTemp/${fileName}_cpp"
+echo ""
 clang -std=c99 -fno-gnu-inline-asm -fno-gnu-keywords ${@:3}  -D"__attribute__(ARGS)=" -E $1> buildTemp/${fileName}_cpp
 
 #add the builtin_va_list workaround
@@ -33,7 +36,8 @@ $DIR/unparser.specs.exe buildTemp/${fileName}_preprocessed > buildTemp/${fileNam
 sed '/typedef char \* __builtin_va_list;/d' ./buildTemp/${fileName}_processed > buildTemp/${fileName}
 
 #run clang
-echo "test with " "clang -fsyntax-only ${@:3} buildTemp/${fileName}"
+echo "test with " "clang -fsyntax-only ${@:3} buildTemp/${fileName} \n"
+echo ""
 clang -fsyntax-only ${@:3} buildTemp/${fileName}
 
 #move it to the ouput directory

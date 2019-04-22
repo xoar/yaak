@@ -1,7 +1,7 @@
 #TODO: remove the Character binding here
 
-CC=g++
-LD=g++
+CC=clang++
+LD=clang++
 
 HEADERS = -Ilib/SDL2/include/SDL2 \
 -Ilib/SDL_ttf/include/SDL2 \

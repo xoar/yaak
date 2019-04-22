@@ -1,7 +1,7 @@
 #I assume you have set the YAAK enviorment variable to the trunk folder
 
-CC=g++
-LD=g++
+CC=clang++
+LD=clang++
 
 HEADERS = \
 -Iengine/base/include \
@@ -109,7 +109,9 @@ executable: $(OBJECTS) TestPlugin.c
 TestPlugin.c:
 	BeyondC/bin/compile.sh game/TestPlugin_dsl.c TestPlugin_dsl_output.c -g $(HEADERS)
 	sed '/#/d' TestPlugin_dsl_output.c > TestPlugin_dsl_output_no_directives.c
-	gcc $(CFLAGSPLUGIN) $(HEADERS) -c TestPlugin_dsl_output_no_directives.c -o game/TestPlugin.o
+	@/bin/echo ""
+	clang $(CFLAGSPLUGIN) $(HEADERS) -c TestPlugin_dsl_output_no_directives.c -o game/TestPlugin.o
+	@/bin/echo
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(HEADERS)  -c $< -o $@
