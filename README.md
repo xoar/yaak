@@ -89,6 +89,13 @@ Finally we have to add the two files into the compiler construction by adding th
 
 Now run BeyondC/build compiler.sh and bin/recompile and test the new language item.
 
+#Dependencies
+
+Clang and because we use SDL2,SDL_image and SDL_ttf you should install their dependencies.
+For SDL2 see https://wiki.libsdl.org/Installation.
+Freetype is shipped with this project.
+
+
 # Issues
 
   When you have trouble to link against the SDL libraries, the lib folders could be missing.

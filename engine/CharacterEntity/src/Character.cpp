@@ -282,3 +282,9 @@ void Character::abortCurrentAction()
     unlock();
 
 }
+
+void Character::setRenderPriority(double priority)
+{
+
+    pictureMap->setRenderPriority(priority);
+}

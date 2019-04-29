@@ -52,6 +52,8 @@ class PictureList:public RenderableYobject
         /*overloaded the priority to use the lower left corner for the rendering order*/
         virtual double getRenderPriority();
 
+        virtual void setRenderPriority(double priority);
+
     protected:
         int posX;
         int posY;
@@ -62,6 +64,8 @@ class PictureList:public RenderableYobject
         /*normal Pictures used for standing and looking in a direction*/
         std::unordered_map<std::string,std::vector<Picture*>*>* specifierList;
 
+        /* indicates if the priority is set by the user or not*/
+        bool fixedPriority;
 
     private:
 };

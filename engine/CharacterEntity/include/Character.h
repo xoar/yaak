@@ -113,6 +113,8 @@ class Character: public SceneYobject
         /*dequeue the current action*/
         void dequeueAction(std::shared_ptr<Action> action);
 
+        void setRenderPriority(double priority);
+
     protected:
         /*the position in the scene*/
         int posX;

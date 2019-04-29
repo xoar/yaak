@@ -12,6 +12,8 @@ PictureList::PictureList(int id,
     specifierList = new std::unordered_map<std::string,std::vector<Picture*>*>();
     currentPic = nullptr;
 
+    fixedPriority = false;
+
 }
 
 
@@ -136,6 +138,14 @@ Position PictureList::getPosition()
     return pos;
 }
 
+void PictureList::setRenderPriority(double priority)
+{
+    fixedPriority = true;
+    this->renderPriority = priority;
+
+}
+
+
 double PictureList::getRenderPriority()
 {
     /* because we have the origin of or coordinates on the upper left corner
@@ -146,8 +156,13 @@ double PictureList::getRenderPriority()
     if (currentPic)
         size = currentPic->getSize();
     
-    double priority = this->posY - size.height;
+    double prior = 0; 
 
-    return priority;
+    if (fixedPriority)
+        prior = this->renderPriority;
+    else
+        prior = this->posY + size.height;
+
+    return prior;
 
 }

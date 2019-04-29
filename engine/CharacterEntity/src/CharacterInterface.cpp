@@ -217,3 +217,10 @@ void CharacterSetWalkAnimationFkt(void* pluginList,
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
     character->setWalkAnimationFkt(walkAnimation);
 }
+
+void CharacterSetRenderPriority(void* pluginList,int id,double priority)
+{
+
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    character->setRenderPriority(priority);
+}

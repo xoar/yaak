@@ -91,6 +91,8 @@ void CharacterSetWalkAnimationFkt(void* pluginList,
                                                          int totalElapsedTicks, 
                                                          int elapsedTicks));
 
+void CharacterSetRenderPriority(void* pluginList,int id,double priority);
+
 #ifdef __cplusplus
 }
 #endif

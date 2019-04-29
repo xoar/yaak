@@ -49,6 +49,10 @@ Start Event InitScene
         picture "middle": "../res/clockMiddle.png"
         picture "left": "../res/clockLeft.png"
 
+
+    int CharacterId = CharacterGetId(pluginList,"PurpursRoom");
+    CharacterSetRenderPriority(pluginList,CharacterId,0);
+
     /* close he Door*/
     Door set current picture to "closed"
 
