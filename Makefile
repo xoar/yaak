@@ -4,6 +4,7 @@ CC=clang++
 LD=clang++
 
 HEADERS = -Ilib/SDL2/include/SDL2 \
+-Ilib/freetype2/include \
 -Ilib/SDL_ttf/include/SDL2 \
 -Ilib/SDL_image/include/SDL2 \
 -Iengine/base/include
@@ -15,7 +16,7 @@ LDFLAGS = -Llib/SDL2/lib \
 -lSDL2 \
 -lSDL2_ttf \
 -lSDL2_image \
--lfreetype \
+-Lfreetype2/lib \
 -lpthread \
 -ldl \
 -lrt

@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 #USAGE: compile filename.c output_filename (build paramters)*
 
