@@ -1,5 +1,6 @@
 #include "MessageYobject.h"
 #include <stdexcept>
+#include <limits>
 
 MessageYobject::MessageYobject(int id,
                                int parentId,
@@ -68,6 +69,8 @@ MessageYobject::MessageYobject(int id,
     
     fixedTextPosition = false;
     hasInitializedRessources = false;
+
+    setRenderPriority(std::numeric_limits<double>::max());
 
 }
 

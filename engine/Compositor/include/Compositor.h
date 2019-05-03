@@ -17,6 +17,10 @@ class Compositor: public YobjectContainer
 {
     public:
 
+        /* Note that sdl use a fix working logical resoultion and
+         * map this to the real resolution.
+         *the logical resolution is set width setWindowSize()*/
+
         Compositor(PluginList* pluginlist);
 
         /** call the render function for all object.
@@ -43,6 +47,14 @@ class Compositor: public YobjectContainer
         /*deactivate all Yobjects in the render list*/
         void deactivateAllYobjects();
 
+        /*set the logical windows size to calculate the display scale
+         *By setting this the scale will be recalculated*/
+        void setWindowSize(int height, int width);
+
+        /*get the display Scale for width and height*/
+        double getDisplayScaleWidth();
+        double getDisplayScaleHeight();
+
         virtual std::string getName() {return getPluginName();}
         static std::string getPluginName() {return COMPOSITORNAME;}
 
@@ -51,10 +63,13 @@ class Compositor: public YobjectContainer
         /*sort the array by increasig render priority of the object*/
         void sortByRenderPriority();
 
-
         std::mutex compositorMutex;
 
         SDL_Renderer *renderer;
+
+        /* The targeted logical width and height of the window
+         * Note that Sdl will map this to the right display resoulution*/
+        int windowHeight;int windowWidth;
 
         //context is a void pointer...
         SDL_GLContext context;

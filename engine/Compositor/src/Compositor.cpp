@@ -10,6 +10,9 @@ Compositor::Compositor(PluginList* pluginlist) : YobjectContainer()
     this->window = ((MainEngine*) pluginlist->get( MainEngine::getPluginName() ))->getWindow();
     
     initContext();
+
+    windowHeight = 768;
+    windowWidth =  1024;
 }
 
 
@@ -137,4 +140,22 @@ void Compositor::sortByRenderPriority()
 {
     // sort by increaing priority 
     std::sort(yobjectList->begin(), yobjectList->end(), compareRenderPriority);
+}
+
+
+/*set the windows logical size to calculate the display scale*/
+void Compositor::setWindowSize(int height, int width)
+{
+    windowWidth = width;
+    windowHeight = height;
+}
+
+double Compositor::getDisplayScaleWidth()
+{
+    return windowWidth;
+}
+
+double Compositor::getDisplayScaleHeight()
+{
+    return windowHeight;
 }
