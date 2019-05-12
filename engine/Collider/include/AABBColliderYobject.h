@@ -16,6 +16,7 @@
 #include "RenderableYobject.h"
 #include "SceneYobject.h"
 #include "GlobalSettings.h"
+#include "PictureList.h"
 
 
 /*TODO: change thsi to AABB collider.
@@ -43,6 +44,8 @@ class AABBColliderYobject: public ColliderYobject,
         bool isPointInCollider(Position point);
         bool collidesWith(std::shared_ptr<ColliderYobject> collider);
 
+        void setPictureList(std::shared_ptr<PictureList> pictureList);
+
         virtual void updatePosition(int dx, int dy);
 
         virtual void render();
@@ -52,6 +55,8 @@ class AABBColliderYobject: public ColliderYobject,
         int posY;
         int width;
         int height;
+
+        std::shared_ptr<PictureList> pictureList;
 
         GlobalSettings* globalSettings;
 

@@ -23,6 +23,8 @@ AABBColliderYobject::AABBColliderYobject (int id,
         std::cerr << e.what() <<" \n";
     }
 
+    pictureList = nullptr;
+
 }
 
 void AABBColliderYobject::registerYobject(std::shared_ptr<AABBColliderYobject> yobject)
@@ -107,6 +109,12 @@ bool AABBColliderYobject::isPointInCollider(Position point)
         (point.posY >= this->posY) && (point.posY <= (this->posY + this->height)) ) 
     {
 
+        /* check pixel to pixel collision*/
+        if (pictureList)
+        {   
+            return pictureList->isCurrentPixelTransparent(point.posX,point.posY);
+        }
+
         return true;
     }
 
@@ -115,11 +123,53 @@ bool AABBColliderYobject::isPointInCollider(Position point)
 }
 
 
+
 bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider)
 {
-	/*TODO support this*/
-	return false;
+	if (collider->getType() == "AABB")
+    {
+        Rectangle targetColliderRectangle = (std::dynamic_pointer_cast<AABBColliderYobject>(collider))->getRectangle();
+        Rectangle sourceColliderRectangle = getRectangle();
 
+        SDL_Rect targetSDLRect;
+        SDL_Rect sourceSDLRect;
+
+        targetSDLRect.w = targetColliderRectangle.width;
+        targetSDLRect.h = targetColliderRectangle.height;
+        targetSDLRect.x = targetColliderRectangle.posX;
+        targetSDLRect.y = targetColliderRectangle.posY;
+
+        sourceSDLRect.w = sourceColliderRectangle.width;
+        sourceSDLRect.h = sourceColliderRectangle.height;
+        sourceSDLRect.x = sourceColliderRectangle.posX;
+        sourceSDLRect.y = sourceColliderRectangle.posY;
+
+        SDL_Rect intersectionRect;
+
+        if(SDL_IntersectRect(&sourceSDLRect,&targetSDLRect,&intersectionRect))
+        {
+            /*std::cout << "AABB Intersection: \n" 
+                      << "target: \n"
+                      <<  targetSDLRect.x <<"\n" 
+                      <<  targetSDLRect.y <<"\n"
+                      <<  targetSDLRect.w <<"\n"
+                      <<  targetSDLRect.h <<"\n"
+                      << "source: \n"
+                      <<  sourceSDLRect.x <<"\n" 
+                      <<  sourceSDLRect.y <<"\n"
+                      <<  sourceSDLRect.w <<"\n"
+                      <<  sourceSDLRect.h <<"\n"
+                      <<"intersection: \n"
+
+                    <<  intersectionRect.x <<"\n" 
+                    <<  intersectionRect.y <<"\n"
+                    <<  intersectionRect.w <<"\n"
+                    <<  intersectionRect.h <<"\n";*/
+        }
+
+    }
+
+    return false;
 }
 
 
@@ -127,4 +177,9 @@ void AABBColliderYobject::updatePosition(int dx, int dy)
 {
     posX += dx;
     posY += dy;
+}
+
+void AABBColliderYobject::setPictureList(std::shared_ptr<PictureList> pictureList)
+{
+    this->pictureList = pictureList;
 }

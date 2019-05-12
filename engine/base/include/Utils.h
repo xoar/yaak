@@ -18,4 +18,6 @@ void logSDLError(std::ostream &os, const std::string &msg);
 
 void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y);
 
+SDL_Surface* LoadSurface(std::string file);
+
 #endif // UTILS_H_INCLUDED

@@ -15,6 +15,8 @@ Character::Character(int id,
     charCollider = std::make_shared<AABBColliderYobject>(0,id,pluginList);
     charCollider->registerYobject(charCollider);
 
+    charCollider->setPictureList(pictureMap);
+
     //the walk collider is only use if the user set one
     walkCollider = nullptr;
 

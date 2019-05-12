@@ -54,6 +54,9 @@ class PictureList:public RenderableYobject
 
         virtual void setRenderPriority(double priority);
 
+        /*checks if the global scene pixe si a transpatent image pixel*/
+        bool isCurrentPixelTransparent(int x, int y);
+
     protected:
         int posX;
         int posY;

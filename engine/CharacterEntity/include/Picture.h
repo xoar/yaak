@@ -20,6 +20,9 @@ class Picture
         Position getPosition();
         void setPosition(Position pos);
         void setPosition(int posX, int posY);
+
+        /* assure that you have lock the compositor before using this function*/
+        bool isPixelTransparent(int px, int py);
         Size getSize();
         void render();
     protected:
@@ -31,6 +34,10 @@ class Picture
         
         SDL_Texture     *texture;
         SDL_Renderer    *renderer;
+
+        SDL_Surface *surface;
+
+        std::string fileName;
 
     private:
 };

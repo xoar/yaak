@@ -50,6 +50,18 @@ SDL_Texture* LoadImage(std::string file,SDL_Renderer *renderer)
     return tex;
 }
 
+
+/** loads an image with the image extention library */
+SDL_Surface* LoadSurface(std::string file)
+{
+    SDL_Surface* surface = nullptr;
+    surface = IMG_Load(file.c_str());
+    if (surface == nullptr)
+        throw std::runtime_error("Failed to load image: " + file + IMG_GetError());
+    return surface;
+}
+
+
 /**
 * Log an SDL error with some error message to the output stream of our choice
 * @param os The output stream to write the message too
