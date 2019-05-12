@@ -52,6 +52,7 @@ Start Event InitScene
 
     int CharacterId = CharacterGetId(pluginList,"PurpursRoom");
     CharacterSetRenderPriority(pluginList,CharacterId,0);
+    CharacterDeactivateCollider(pluginList,CharacterId);
 
     /* close he Door*/
     Door set current picture to "closed"

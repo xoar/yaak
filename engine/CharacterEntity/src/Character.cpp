@@ -290,3 +290,13 @@ void Character::setRenderPriority(double priority)
 
     pictureMap->setRenderPriority(priority);
 }
+
+void Character::activateCollider()
+{
+    charCollider->setActive();
+}
+
+void Character::deactivateCollider()
+{
+    charCollider->setInactive();
+}

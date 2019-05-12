@@ -23,6 +23,8 @@ AABBColliderYobject::AABBColliderYobject (int id,
         std::cerr << e.what() <<" \n";
     }
 
+    active = true;
+
     pictureList = nullptr;
 
 }
@@ -126,9 +128,22 @@ bool AABBColliderYobject::isPointInCollider(Position point)
 
 bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider)
 {
+    if (!active)
+    {
+        return false;
+    }
+ 
 	if (collider->getType() == "AABB")
     {
-        Rectangle targetColliderRectangle = (std::dynamic_pointer_cast<AABBColliderYobject>(collider))->getRectangle();
+
+        std::shared_ptr<AABBColliderYobject> targetCollider = 
+            std::dynamic_pointer_cast<AABBColliderYobject>(collider);
+
+        /*check if the other on is active too*/
+        if (!targetCollider->isActive())
+            return false;
+
+        Rectangle targetColliderRectangle = targetCollider->getRectangle();
         Rectangle sourceColliderRectangle = getRectangle();
 
         SDL_Rect targetSDLRect;
@@ -146,27 +161,59 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
 
         SDL_Rect intersectionRect;
 
+        /*check if the rects have an intersection*/
         if(SDL_IntersectRect(&sourceSDLRect,&targetSDLRect,&intersectionRect))
         {
-            /*std::cout << "AABB Intersection: \n" 
-                      << "target: \n"
-                      <<  targetSDLRect.x <<"\n" 
-                      <<  targetSDLRect.y <<"\n"
-                      <<  targetSDLRect.w <<"\n"
-                      <<  targetSDLRect.h <<"\n"
-                      << "source: \n"
-                      <<  sourceSDLRect.x <<"\n" 
-                      <<  sourceSDLRect.y <<"\n"
-                      <<  sourceSDLRect.w <<"\n"
-                      <<  sourceSDLRect.h <<"\n"
-                      <<"intersection: \n"
+            //std::cout << "is active"<< "\n";
 
-                    <<  intersectionRect.x <<"\n" 
-                    <<  intersectionRect.y <<"\n"
-                    <<  intersectionRect.w <<"\n"
-                    <<  intersectionRect.h <<"\n";*/
+            std::shared_ptr<PictureList> targetPictureList = 
+                targetCollider->getPictureList();
+
+           /* std::cout << "AABB Intersection: \n" 
+                                      << "target: \n"
+                                      <<  targetSDLRect.x <<"\n" 
+                                      <<  targetSDLRect.y <<"\n"
+                                      <<  targetSDLRect.w <<"\n"
+                                      <<  targetSDLRect.h <<"\n"
+                                      << "source: \n"
+                                      <<  sourceSDLRect.x <<"\n" 
+                                      <<  sourceSDLRect.y <<"\n"
+                                      <<  sourceSDLRect.w <<"\n"
+                                      <<  sourceSDLRect.h <<"\n"
+                                      <<"intersection: \n"
+                                      <<  intersectionRect.x <<"\n" 
+                                      <<  intersectionRect.y <<"\n"
+                                      <<  intersectionRect.w <<"\n"
+                                      <<  intersectionRect.h <<"\n";*/
+
+            /*check if both support picel to pixel collision, 
+              i.e. they both have a picture list*/
+            if (targetPictureList && pictureList)
+            {
+                for (int i = intersectionRect.x; i < intersectionRect.w; i++)
+                {
+                    for (int j= intersectionRect.y; j < intersectionRect.h; j++)
+                    {
+
+                        if ((!pictureList->isCurrentPixelTransparent(i,j)) &&
+                            (!targetPictureList->isCurrentPixelTransparent(i,j)))
+                        {
+                            
+                            return true;
+                        }
+                          
+                    }
+                }
+                /* they support pixel to pixel collision but dont have a collision*/
+                return false;
+            }
+
+            /*not support ptp collision but have a collision*/
+            return true;
+
         }
 
+        /*not have a collision*/
     }
 
     return false;
@@ -182,4 +229,9 @@ void AABBColliderYobject::updatePosition(int dx, int dy)
 void AABBColliderYobject::setPictureList(std::shared_ptr<PictureList> pictureList)
 {
     this->pictureList = pictureList;
+}
+
+std::shared_ptr<PictureList> AABBColliderYobject::getPictureList()
+{
+    return pictureList;
 }

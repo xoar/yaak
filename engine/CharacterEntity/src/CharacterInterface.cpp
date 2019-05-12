@@ -224,3 +224,17 @@ void CharacterSetRenderPriority(void* pluginList,int id,double priority)
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
     character->setRenderPriority(priority);
 }
+
+void CharacterActivateCollider(void* pluginList,int id)
+{
+
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    character->activateCollider();
+}
+
+void CharacterDeactivateCollider(void* pluginList,int id)
+{
+
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    character->deactivateCollider();
+}

@@ -115,6 +115,11 @@ class Character: public SceneYobject
 
         void setRenderPriority(double priority);
 
+
+        /*deactivate/active the collider for collision checks*/
+        void activateCollider();
+        void deactivateCollider();
+
     protected:
         /*the position in the scene*/
         int posX;

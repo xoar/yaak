@@ -93,6 +93,9 @@ void CharacterSetWalkAnimationFkt(void* pluginList,
 
 void CharacterSetRenderPriority(void* pluginList,int id,double priority);
 
+void CharacterActivateCollider(void* pluginList,int id);
+void CharacterDeactivateCollider(void* pluginList,int id);
+
 #ifdef __cplusplus
 }
 #endif
