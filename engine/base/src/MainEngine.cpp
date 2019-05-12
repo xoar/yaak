@@ -80,11 +80,19 @@ bool MainEngine::initLibraries()
         return false;
     }
 
-
     if ((renderer = SDL_CreateRenderer(window, -1,
          SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == nullptr)
     {
         logSDLError(std::cout,"Create Renderer");
+        return false;
+    }
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+  
+    // set logical resolution
+    if ( SDL_RenderSetLogicalSize(renderer, 1024, 768) != 0)
+    {
+        logSDLError(std::cout,"Set Logical Size");
         return false;
     }
 
