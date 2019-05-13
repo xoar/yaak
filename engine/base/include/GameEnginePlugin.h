@@ -10,7 +10,7 @@ class GameEnginePlugin
         GameEnginePlugin() {}
         virtual ~GameEnginePlugin() {}
         /** the unique Name of the Plugin. have to be overidden */
-        virtual std::string getName() {};
+        virtual std::string getName() {return "";}
 
 };
 

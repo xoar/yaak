@@ -166,7 +166,7 @@ public:
 
     }
 
-    virtual std::string getName() {}
+    virtual std::string getName() {return "";}
 
 protected:
     std::vector<std::shared_ptr<Yobject>>* yobjectList;

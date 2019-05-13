@@ -28,6 +28,9 @@ void CharacterDestructor(CharacterStructPtr character);
 /*for named yojects we need a access only with its id. so for every setter
  getter we povided two interfaces*/
 
+/*the CharacterStructPtr is for generate code*/
+/*TODO: unify this!!!*/
+
 Position CharacterGetPosition(CharacterStructPtr character);
 Position CharacterGetPositionById(void* pluginList,int id);
         
@@ -95,6 +98,8 @@ void CharacterSetRenderPriority(void* pluginList,int id,double priority);
 
 void CharacterActivateCollider(void* pluginList,int id);
 void CharacterDeactivateCollider(void* pluginList,int id);
+
+int CharacterCollides(void* pluginList,int id);
 
 #ifdef __cplusplus
 }

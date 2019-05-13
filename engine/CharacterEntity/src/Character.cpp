@@ -50,10 +50,11 @@ bool Character::isPointInCollider(Position point)
 
 bool Character::collides()
 {
+    /*if you bild up trigger zones with this it will use the second option*/
     if (walkCollider)
         return walkCollider->collides();
     else 
-        return false;
+        return charCollider->collides();
 }
 
 bool Character::setCurrentPicture(std::string specifier)

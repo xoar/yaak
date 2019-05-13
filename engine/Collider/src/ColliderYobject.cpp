@@ -32,8 +32,8 @@ void ColliderYobject::unregisterYobject(std::shared_ptr<ColliderYobject> yobject
 }
 
 
-bool ColliderYobject::isPointInCollider(Position point) {}
-bool ColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider) {}
+bool ColliderYobject::isPointInCollider(Position point) {return false;}
+bool ColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider) {return false;}
 
 
 std::string ColliderYobject::getType()

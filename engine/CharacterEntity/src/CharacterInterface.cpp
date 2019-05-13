@@ -238,3 +238,9 @@ void CharacterDeactivateCollider(void* pluginList,int id)
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
     character->deactivateCollider();
 }
+
+int CharacterCollides(void* pluginList,int id)
+{
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    return (int) character->collides();
+}

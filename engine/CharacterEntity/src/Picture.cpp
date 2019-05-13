@@ -38,6 +38,7 @@ Picture::~Picture()
 {
 
     SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 
 }
 

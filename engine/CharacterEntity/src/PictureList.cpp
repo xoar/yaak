@@ -111,12 +111,13 @@ Size PictureList::getSize()
 {
     if (currentPic)
         return currentPic->getSize();
-    else
-    {
-        Size rec;
-        rec.width = -1;
-        rec.height = -1;
-    }
+
+    Size rec;
+    rec.width = -1;
+    rec.height = -1;
+    
+    return rec;
+
 }
 
 void PictureList::setPosition(Position pos)

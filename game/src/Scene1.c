@@ -18,9 +18,82 @@ int HeyTentacle = 0;
 
 int BernardIsInTheRoom = 0;
 
+Event UnitTest1
+{
 
+        Scene Object PurpursRoom
+        picture "standing":  "../res/purpurRoom2.png"
+        position : 0, 0
+
+        int CharacterId = CharacterGetId(pluginList,"PurpursRoom");
+        CharacterSetRenderPriority(pluginList,CharacterId,0);
+        CharacterDeactivateCollider(pluginList,CharacterId);
+
+        Scene Object TriggerZone
+        position : 227, 0
+        picture "right": "../res/zone.png"
+
+        /*create Bernard*/
+        Character Bernard
+        picture "standing right" : "../res/C1WR2.png"
+        picture "standing left" : "../res/C1WL2.png"
+
+        position : 300, 50
+
+        animation "walking right":  "../res/C1WR1.png",
+                                    "../res/C1WR2.png",
+                                    "../res/C1WR3.png",
+                                    "../res/C1WR2.png"
+
+        animation "walking left": "../res/C1WL1.png",
+                                  "../res/C1WL2.png",
+                                  "../res/C1WL3.png",
+                                  "../res/C1WL2.png"
+
+        animation "walking up": "../res/C1WU1.png",
+                                "../res/C1WU2.png",
+                                "../res/C1WU3.png",
+                                "../res/C1WU2.png"
+                                
+        animation "walking down": "../res/C1WD1.png",
+                                  "../res/C1WD2.png",
+                                  "../res/C1WD3.png",
+                                  "../res/C1WD2.png"
+
+        /*add a fix collider for bernard*/
+        CharacterId = CharacterGetId(pluginList,"Bernard");
+        CharacterSetCollider(pluginList,CharacterId,20,20,230);
+        CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
+
+        CharacterId = CharacterGetId(pluginList,"TriggerZone");
+        if (CharacterCollides(pluginList,CharacterId))
+        {
+            /*trigger InitScene2*/
+            printf("collides\n");
+        }
+        else
+            printf("not collides\n");
+
+        trigger WalkEvent
+
+}
 
 Start Event InitScene
+{
+
+    if (wasReloaded) 
+    {
+        trigger UnitTest1
+    }
+    else
+    {
+
+        trigger StartScene
+    }
+
+}
+
+Event StartScene
 {
 
     InitGlobals();
@@ -49,9 +122,16 @@ Start Event InitScene
         picture "middle": "../res/clockMiddle.png"
         picture "left": "../res/clockLeft.png"
 
+     Scene Object TriggerZone
+        position : 227, 0
+        picture "right": "../res/zone.png"
+
 
     int CharacterId = CharacterGetId(pluginList,"PurpursRoom");
     CharacterSetRenderPriority(pluginList,CharacterId,0);
+    CharacterDeactivateCollider(pluginList,CharacterId);
+
+    CharacterId = CharacterGetId(pluginList,"Door");
     CharacterDeactivateCollider(pluginList,CharacterId);
 
     /* close he Door*/
@@ -65,14 +145,7 @@ Start Event InitScene
         start position : 447, 208
         end position : 22,364
 
-    if (!wasReloaded) 
-    {
-        trigger Prolog
-    }
-    else
-    {
-        trigger IntroduceBernard
-    }
+    trigger Prolog
 }
 
 
@@ -142,7 +215,7 @@ Event IntroduceBernard
 
     BernardIsInTheRoom = 1;
 
-    trigger WalkEvent,ClockTicking
+    trigger WalkEvent,ClockTicking,CheckDoorCollision
 
 }
 
@@ -227,30 +300,40 @@ Event CheckOpenDoor
 
     if (events.rightMouseButtonPressed)
     {
-        trigger OpenDoor
+        if (!isDoorOpen)
+            Door set current picture to "open"
+        else
+            Door set current picture to "closed" 
+
+        isDoorOpen = !isDoorOpen;
     }
 }
 
-
-Event OpenDoor
+Event CheckDoorCollision
 {
-
-    if (isDoorOpen)
+    int CharacterId = CharacterGetId(pluginList,"TriggerZone");
+    if (isDoorOpen && CharacterCollides(pluginList,CharacterId))
     {
-        trigger InitScene2
+        /*trigger InitScene2*/
+        printf("Collides");
+        trigger CheckDoorCollision
     }
     else
-       Door set current picture to "open"
-
-    isDoorOpen = !isDoorOpen;
+    {
+        trigger CheckDoorCollision
+    }
 }
-
-
-
 
 
 void reloadInit(void* _pluginList,void *_renderer)
 {
+
+    /* thats not good. we loaded the plugin again*/
+
+    SceneFreeList(_pluginList);
+    TriggerZoneFreeList(_pluginList);
+    ColliderFreeList(_pluginList);
+    CompositorFreeList(_pluginList);
 
     buildRefs(_pluginList,_renderer);
 
@@ -266,4 +349,7 @@ void signalPluginReload()
     TriggerZoneFreeList(pluginList);
     ColliderFreeList(pluginList);
     CompositorFreeList(pluginList);
+
+    /*if i kill things here the waked up functions try to acess stuff before
+      clean themself*/
 }
