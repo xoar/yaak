@@ -48,7 +48,7 @@ class TaskManager : public GameEnginePlugin
 
     TaskManager(PluginList* pluginList);
 
-    /* add a task to process it. try to add it to the active list and
+    /* Try to spawn a task. Try to add it to the active list and
      * run it directly. If there already runs a task with the
      * same name the new task will be add to the waiting list, until the
      * old is finished. not block.
@@ -61,7 +61,7 @@ class TaskManager : public GameEnginePlugin
 
     /* throw an exception if the caller was killed.
      * Used to disable branching of killed Task */
-    void addTask(Task* task,std::string callerEventName); //throw (KillException);
+    void tryToSpawnTask(Task* task,std::string callerEventName); //throw (KillException);
 
     /* suspend a task until the next loop iteration*/
     void suspendTaskUntilNextRound(std::string name); //throw (KillException);
@@ -83,6 +83,10 @@ class TaskManager : public GameEnginePlugin
 
     /* signal a kill of all the task except those one in the given list*/
     /* param nameList a list of event names*/
+    /* For now this should only be called from Tasks while having 
+     * the Taskmanager running its process routine. outside of this routine 
+     * calls are not supported yet.
+     */
     void killAllTaskExcept(std::vector<std::string> & nameList); 
 
     /* get the loop counter.

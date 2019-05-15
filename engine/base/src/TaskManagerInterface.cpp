@@ -11,7 +11,7 @@ void AddAndRunTask (void * pluginList,const char* name,
     PluginList* mPluginList = (PluginList*) pluginList;
     TaskManager* taskManager = ((TaskManager*) mPluginList->get("TaskManager"));
     Task* task = new Task(taskManager,std::string(name), run);
-    taskManager->addTask(task,std::string(callerEventName));
+    taskManager->tryToSpawnTask(task,std::string(callerEventName));
 
 }
 

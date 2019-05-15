@@ -56,7 +56,7 @@ void TaskManager::suspendTaskUntilNextRound(Task* task) //throw (KillException)
     CheckAllTasksDone();
 
     /*notify the kill function if all task were killed*/
-    CheckAllSelectedActiveTasksGotKilled();
+    //CheckAllSelectedActiveTasksGotKilled();
 
     /*if the task got killed we don't suspend him*/
     //TODO: add a new exception for this
@@ -87,14 +87,22 @@ void TaskManager::suspendTaskUntilNextRound(Task* task) //throw (KillException)
 void TaskManager::CheckAllTasksDone()
 {
 
-    if (activeTaskCounter <= 0)
+    if (activeTaskCounter < 0)
     {
-        activeTaskCounter = 0;
+        std::cerr << "\n ERROR: Taskmanager: Active counter is negativ " << "\n";
+        std::exit(EXIT_FAILURE);
+
+    }
+
+    if (activeTaskCounter == 0)
+    {
+        //activeTaskCounter = 0;
         allActiveTaskAreDone.notify_all();
     }
 
 }
 
+/*DEPRECATED*/
 /* Check if all selected tasks got killed.
    if true it notify the the waiting kill function.
    should be called with and acquired mutex*/
@@ -104,6 +112,7 @@ void TaskManager::CheckAllSelectedActiveTasksGotKilled()
     if (leftToKillActiveTaskCounter <= 0)
     {
         leftToKillActiveTaskCounter = 0;
+        /* not used*/
         allSelectedActiveTaskGotKilled.notify_all();
     }
 
@@ -131,7 +140,7 @@ void TaskManager::removeTask(Task* task)
 
     /* because the task will be removed we dont throw an exception.
        just decrease the counter and signal the kill function if neccessary*/
-    if (task->gotKilled()) leftToKillActiveTaskCounter--;
+    //if (task->gotKilled()) leftToKillActiveTaskCounter--;
 
     /*remove the task */
 
@@ -163,7 +172,7 @@ void TaskManager::removeTask(Task* task)
     //std::cout << " done" << std::endl;
 
     /*notify the kill function if all active task got killed*/
-    CheckAllSelectedActiveTasksGotKilled();
+    //CheckAllSelectedActiveTasksGotKilled();
 
     //std::cout << "remove done" << std::endl;
 
@@ -208,31 +217,7 @@ Task* TaskManager::getTaskByName(std::string name)
 
 }
 
-/*helper function. should be called with an auqired mutex*/
-void TaskManager::removeTaskFromList(std::vector<Task*>* list ,std::string name)
-{
-    try 
-    {
-        std::vector<Task*>::iterator nextIt;
-
-        for (std::vector<Task*>::iterator it = list->begin();
-             it != list->end(); it=nextIt)
-        {
-            if ((*it)->getName() == name)
-                nextIt = list->erase(it);
-            else
-                nextIt= std::next(it);
-        }
-    }
-    catch (std::exception& e)
-    {
-            std::cerr << "\n ERROR: cant remove task " << e.what() << '\n';
-            std::exit(EXIT_FAILURE);
-    }
-}
-
-
-void TaskManager::addTask(Task* task,std::string callerEventName) //throw (KillException)
+void TaskManager::tryToSpawnTask(Task* task,std::string callerEventName) //throw (KillException)
 {
 
      /* only one can access the manager */
@@ -245,6 +230,26 @@ void TaskManager::addTask(Task* task,std::string callerEventName) //throw (KillE
     if (caller != nullptr)
     {   
         if (caller->gotKilled()) throw KillException();
+    }
+
+    /* if the task was in the waiting List and should be spawnd by the system
+       we just cancel the spawn. There is no thread running this
+       so we dont throw an clean up exception*/
+    /*check with "" that the Taskmanager try to spawn it*/
+    if (task->gotKilled() && callerEventName =="")
+    {
+        /* In this case the task spawn routine was
+         * called from processWaitingThreads(). 
+         * Therefore we dont have to lower waitingTaskCounter*/
+        return;
+    }
+    if (task->gotKilled() && callerEventName != "")
+    {
+        std::cerr << "ERROR: task for this round is killed but have a caller"
+                  << ",taskname: " << task->getName() 
+                  << "caller event: " << callerEventName
+                  << "loop counter: " << getLoopCounter() << "\n";
+        std::exit(EXIT_FAILURE);
     }
 
     /*ensure the task is not already in the list or ran in this round*/
@@ -386,7 +391,7 @@ void TaskManager::processWaitingThreads()
     {
         Task* task = (*it);
         /*add the task. use the recursive mutex*/
-        addTask(task,"");
+        tryToSpawnTask(task,"");
     }
 }
 
@@ -418,18 +423,16 @@ void TaskManager::process()
     /*clear the terminated task list for this round. prevent double call of a task*/
     terminatedTaskList->clear();
 
-    /*process the suspended thread*/
-    processSupsendedThreads();
 
-    
-    /*process the waiting thread*/
+    /*TODO: the following two functions were ordered reversed before. 
+            had this maked sense*/
+
+    /*process the waiting tasks. waiting task are threads which ran
+     * the previous round and tried to spawn themself in this round again */
     processWaitingThreads();
 
-    /*if there were no task to activate in this round check this before waiting*/
-
-    /*we start waiting before the processing of the new tasks (start of the supsended
-      and end of the active(remove function))
-      because of the aquired mutex*/
+    /*process the suspended thread*/
+    processSupsendedThreads();
 
     if (activeTaskCounter > 0)
     {
@@ -439,7 +442,31 @@ void TaskManager::process()
 }
 
 
- void TaskManager::killAllTaskExcept(std::vector<std::string> & nameList)
+/*helper function. should be called with an auqired mutex*/
+void TaskManager::removeTaskFromList(std::vector<Task*>* list ,std::string name)
+{
+    try 
+    {
+        std::vector<Task*>::iterator nextIt;
+
+        for (std::vector<Task*>::iterator it = list->begin();
+             it != list->end(); it=nextIt)
+        {
+            if ((*it)->getName() == name)
+                nextIt = list->erase(it);
+            else
+                nextIt= std::next(it);
+        }
+    }
+    catch (std::exception& e)
+    {
+            std::cerr << "\n ERROR: cant remove task " << e.what() << "\n";
+            std::exit(EXIT_FAILURE);
+    }
+}
+
+
+void TaskManager::killAllTaskExcept(std::vector<std::string> & nameList)
  {
     /* only one can access the manager */
     std::unique_lock<std::recursive_mutex> lock(taskManagerMutex);
@@ -476,12 +503,12 @@ void TaskManager::process()
     {
         Task* task = (*it);
         /*grep the active tasks*/
-        if (task->isActive()) leftToKillActiveTaskCounter++;
+        //if (task->isActive()) leftToKillActiveTaskCounter++;
         
         task->setKilled();
     }
 
-    std::cout << "block" << std::endl;
+    //std::cout << "block" << std::endl;
 
     /*we wait until all the active task in the lists were destroyed.
       the suspended and waiting threads will be killed automatically in

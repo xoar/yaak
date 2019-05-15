@@ -37,7 +37,7 @@ void TriggerSubtask::triggerNextSubtasks()
     {
         Task* task = (*it);
         /*add and run task*/
-        taskManager->addTask(task,eventName);
+        taskManager->tryToSpawnTask(task,eventName);
 
     }
     
