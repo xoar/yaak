@@ -39,13 +39,13 @@ Event StartScene
         picture "open": "../res/openDoor.png"
         picture "closed": "../res/closedDoor.png"
         display : "Door"
-        trigger : CheckOpenDoor
+        mouse trigger : CheckOpenDoor
 
     Character Tentacle
         position : 500, 300
         picture "standing": "../res/docstanding.png"
         display : "green tentacle"
-        trigger : CheckChoice
+        mouse trigger : CheckChoice
 
 
     Scene Object Clock
@@ -53,6 +53,7 @@ Event StartScene
         picture "right": "../res/clockRight.png"
         picture "middle": "../res/clockMiddle.png"
         picture "left": "../res/clockLeft.png"
+        display: "clock"
 
      Scene Object TriggerZone
         position : 227, 0

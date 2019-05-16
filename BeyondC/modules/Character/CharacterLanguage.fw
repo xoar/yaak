@@ -32,7 +32,7 @@
     CharPositionProperty: 'position' ':'  integer_constant ',' integer_constant.
 
     /*--------------*/
-    CharTriggerProperty: 'trigger' ':' EventNameUse.
+    CharTriggerProperty: 'mouse' 'trigger' ':' EventNameUse.
 
     /*--------------*/
     CharDisplayTextProperty: 'display' ':' string_literal.

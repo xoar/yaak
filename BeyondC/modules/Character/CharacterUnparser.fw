@@ -26,8 +26,30 @@
             PTGCharFreeStruct(CharDef.NewEntityId);
     END;
 
+     /*--------- helper attributes ---------*/
 
-    /*character properties*/
+    ATTR CharName : PTGNode;
+
+    /*just to have access to the name*/
+    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
+        CharDef.CharName = EntityNameDef.IdemPtg;
+    END;
+
+
+    /*collect the property in upper context to set the entity's Task attribute*/
+    RULE: Entity ::=  CharDef COMPUTE
+
+        Entity.AdditionalTaskPrototypes = 
+            CONSTITUENTS (CharTriggerProperty.AdditionalTaskPrototypes,CharDisplayTextProperty.AdditionalTaskPrototypes)
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+        Entity.AdditionalTaskCode =
+            CONSTITUENTS (CharTriggerProperty.AdditionalTaskCode,CharDisplayTextProperty.AdditionalTaskCode)
+            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
+
+    END;
+
+    /*======== character properties===========================================*/
 
     /*--------- position property ---------*/
     
@@ -59,6 +81,7 @@
             WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
 
         CharAnimProperty.CharAnimName = PTGAsIs(StringTable(string_literal));
+    
     END;
 
     RULE: CharAnimPath::= string_literal COMPUTE
@@ -68,69 +91,41 @@
                                 StringTable(string_literal));
     END;
 
-    /*--------- char trigger ---------*/
+    /*--------- char mouse trigger ---------*/
 
-    ATTR CharName : PTGNode;
-    ATTR displayedText : PTGNode;
-    ATTR hasText : int;
-
-    /*just to have access to the name*/
-    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
-        CharDef.CharName = EntityNameDef.IdemPtg;
-    END;
-
-    RULE: CharTriggerProperty ::= 'trigger' ':' EventNameUse COMPUTE
+    RULE: CharTriggerProperty ::= 'mouse' 'trigger' ':' EventNameUse COMPUTE
         
-        CharTriggerProperty.AdditionalTaskPrototypes = PTGClickEventPrototype(INCLUDING CharDef.CharName);
-        CharTriggerProperty.AdditionalTaskCode = 
-            IF(INCLUDING CharDef.hasText,
-                /*if it has a text to display*/
-                PTGClickTextEvent(INCLUDING CharDef.CharName,
-                                  INCLUDING CharDef.NewEntityId,
-                                  INCLUDING CharDef.displayedText,
-                                  EventNameUse.IdemPtg),
-                /*else*/
-                PTGClickNoTextEvent(INCLUDING CharDef.CharName,
-                                    INCLUDING CharDef.NewEntityId,
-                                    EventNameUse.IdemPtg));
+        CharTriggerProperty.AdditionalTaskPrototypes = PTGClickEventPrototype(INCLUDING CharDef.CharName,
+                                                                              "mouse");
+        CharTriggerProperty.AdditionalTaskCode = PTGClickNoTextEvent(INCLUDING CharDef.CharName,
+                                                                     INCLUDING CharDef.NewEntityId,
+                                                                     EventNameUse.IdemPtg,
+                                                                     "mouse");
 
+        /* start the function which check per polling if the mouse is over the char*/
         CharTriggerProperty.IdemPtg = PTGClickEventTrigger(INCLUDING function_definition.EventName,
-                                                           INCLUDING CharDef.CharName);
+                                                           INCLUDING CharDef.CharName,
+                                                           "mouse");
     END;
-
-    RULE: Entity ::=  CharDef COMPUTE
-
-        Entity.AdditionalTaskPrototypes = 
-            CONSTITUENTS CharTriggerProperty.AdditionalTaskPrototypes
-            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
-
-        Entity.AdditionalTaskCode =
-            CONSTITUENTS CharTriggerProperty.AdditionalTaskCode
-            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
-
-    END;
-
 
     /*--------- char display text ---------*/
 
-     /*just to have access to the displayed text*/
-    RULE: CharDef::= CharType EntityNameDef CharProperties COMPUTE
-        CharDef.displayedText = 
-            CONSTITUENTS CharDisplayTextProperty.displayedText
-            WITH (PTGNode, PTGNewLineSequence, IDENTICAL, PTGNull);
-        
-        /*int variable which indicates a text*/
-        CharDef.hasText = 
-            CONSTITUENTS CharDisplayTextProperty.hasText
-            WITH (int, ADD, IDENTICAL, ZERO);
-
-    END;
-
     RULE: CharDisplayTextProperty::= 'display' ':' string_literal COMPUTE
-        CharDisplayTextProperty.displayedText = PTGAsIs(StringTable(string_literal));
-        CharDisplayTextProperty.hasText = 1;
-        CharDisplayTextProperty.IdemPtg = PTGNULL;
+        
+        CharDisplayTextProperty.AdditionalTaskPrototypes = PTGClickEventPrototype(INCLUDING CharDef.CharName,
+                                                                                  "display");
+        CharDisplayTextProperty.AdditionalTaskCode = PTGClickTextEvent(INCLUDING CharDef.CharName,
+                                                                       INCLUDING CharDef.NewEntityId,
+                                                                       PTGAsIs(StringTable(string_literal)),
+                                                                       "display");
+
+        /* start the function which check per polling if the mouse is over the char*/
+        CharDisplayTextProperty.IdemPtg = PTGClickEventTrigger(INCLUDING function_definition.EventName,
+                                                               INCLUDING CharDef.CharName,
+                                                               "display");
     END;
+
+    /*---------         ---------*/
 
 @}
 
@@ -162,20 +157,22 @@ SetCharPicture:
      "    CharacterAddPicture( char" $ int "," $ string "," $ string ");\n"
 
 ClickEventTrigger:
-    "    TriggerStructPtr subtask"$2 /*triggername*/" = TriggerConstructor(pluginList, 0,\""$1 /*eventname*/"\");\n"
-    "    TriggerAddSubtask(subtask"$2 /*triggername*/",\"_Character"$2 /*triggername*/"\", &_Character"$2 /*triggername*/" );\n"
-    "    if( ! TriggerProcess(subtask"$2 /*triggername*/") )\n"
+    "    TriggerStructPtr subtask"$2 /*triggername*/$3 string " = TriggerConstructor(pluginList, 0,\""$1 /*eventname*/"\");\n"
+    "    TriggerAddSubtask(subtask"$2 /*triggername*/$3 string ","
+                           "\"_Character"$2 /*triggername*/ $3 string "\","
+                            "&_Character"$2 /*triggername*/ $3 string " );\n"
+    "    if( ! TriggerProcess(subtask"$2 /*triggername*/$3 string ") )\n"
     "    {\n"
     "       RemoveTask(pluginList,\""$1 /*eventname*/"\");\n"
     "       return;\n"
     "    }\n"
 
 ClickEventPrototype:
-   "void _Character" $1 /*eventname*/ "();\n"
+   "void _Character" $1 /*eventname*/ $2 string "();\n"
 
 ClickNoTextEvent:
 
-    "void _Character" $1 /*charname*/ "()\n"
+    "void _Character" $1 /*charname*/ $4 string "()\n"
     "{"
 
     "    while(1)\n"
@@ -187,19 +184,19 @@ ClickNoTextEvent:
     "        if (CharacterIsPointInCollider(pluginList," $2 int /*charid*/  ",targetPosition))\n"
     "        {\n"
 
-    "             TriggerStructPtr subtask0 = TriggerConstructor(pluginList, 0,\"_Character"$1 /*charname*/"\");\n"
+    "             TriggerStructPtr subtask0 = TriggerConstructor(pluginList, 0,\"_Character"$1 /*charname*/ $4 string "\");\n"
     "             TriggerAddSubtask(subtask0,\"" $3 /*triggername*/ "\", &" $3 /*triggername*/ " );\n"
     "             if( ! TriggerProcess(subtask0) )\n"
     "             {\n"
-    "                  RemoveTask(pluginList,\"_Character"$1 /*charname*/"\");\n"
+    "                  RemoveTask(pluginList,\"_Character"$1 /*charname*/$4 string "\");\n"
     "                  return;\n"
     "             }\n"
 
     "        }\n"
 
-    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/"\"))\n"
+    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/$4 string"\"))\n"
     "        {\n"
-    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/"\");\n"
+    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/$4 string"\");\n"
     "            return;\n"
     "        }\n"
 
@@ -212,7 +209,7 @@ ClickNoTextEvent:
 
 ClickTextEvent:
 
-    "void _Character" $1 /*charname*/ "()\n"
+    "void _Character" $1 /*charname*/ $4 string"()\n"
     "{"
 
     "    MessageYobjectStructPtr message;\n"
@@ -242,27 +239,18 @@ ClickTextEvent:
     "        GameEvents events = EventSystemGetCurrentEvents(pluginList);\n"
     "        Position targetPosition = {events.mouseX,events.mouseY};\n"
 
-    "        MessageYobjectActivate(message);\n"
-
+    "        MessageYobjectDeactivate(message);\n"
     "        if (CharacterIsPointInCollider(pluginList," $2 int /*charid*/  ",targetPosition))\n"
     "        {\n"
 
-    "             TriggerStructPtr subtask0 = TriggerConstructor(pluginList, 0,\"_Character"$1 /*charname*/"\");\n"
-    "             TriggerAddSubtask(subtask0,\"" $4 /*triggername*/ "\", &" $4 /*triggername*/ " );\n"
-    "             if( ! TriggerProcess(subtask0) )\n"
-    "             {\n"
-    "                  MessageYobjectDestructor(message);\n"
-    "                  RemoveTask(pluginList,\"_Character"$1 /*charname*/"\");\n"
-    "                  return;\n"
-    "             }\n"
+    "               MessageYobjectActivate(message);\n"
 
     "        }\n"
-    "        else MessageYobjectDeactivate(message);\n"
 
-    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/"\"))\n"
+    "        if (!SuspendTaskUntilNextRound(pluginList,\"_Character"$1  /*charname*/$4 string"\"))\n"
     "        {\n"
     "            MessageYobjectDestructor(message);\n"
-    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/"\");\n"
+    "            RemoveTask(pluginList,\"_Character"$1  /*charname*/$4 string"\");\n"
     "            return;\n"
     "        }\n"
 
