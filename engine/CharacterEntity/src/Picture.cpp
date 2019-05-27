@@ -89,78 +89,14 @@ bool Picture::isPixelTransparent(int px, int py)
 
 
     /* if the pixel coord is outside the image*/
-    if (x > width || y > height || y < 0 || x <0)
+    if (x >= width || y >= height || y < 0 || x <0)
         return true;
 
-
-//-------------------------------------
-    /*TODO: workaround: we need to load surfaces intead textures to support the 
-      target memory layout.
-      then we could use https://lazyfoo.net/tutorials/SDL/40_texture_manipulation/index.php
-    
-    TODO: with this method we still have to assure that the format is supported: see SDL_GetRendererInfo   
-    possible another approach ? https://gamedev.stackexchange.com/questions/62705/how-do-i-access-the-pixels-of-an-sdl-2-texture
-
-    */
-
-    //SDL_Rect    rect;
-    //use argb with 32 bit and 4 bytes per pixel
-    /*Uint32      format  = SDL_PIXELFORMAT_ARGB2101010;
-    void*       pixels;
-    int         pitch   = 8;
-
-
-    SDL_SetRenderTarget(renderer,texture);
-
-
-    if (SDL_RenderReadPixels(renderer,NULL, format,&pixels,pitch) != 0)
+    if (!surface)
     {
-        printf( "Unable to acces texture! %s\n", SDL_GetError() );
-        return false;
-
+        std::cerr << "Picture not loaded a surface\n";
+        std::exit(1);
     }
-
-    int bpp = SDL_BYTESPERPIXEL(format);
-    
-    //SDL_PixelFormat* pixel_format =  SDL_AllocFormat(format);
-
-
-    Uint8* p = (Uint8*)pixels + y *pitch + x * bpp;
-    Uint32 pixelColor;
-     
-    pixelColor = *(Uint32*)p;
-
-
-    std::cout << "pixel: "<< pixelColor <<"\n";
-
-    //Uint8 red, green, blue, alpha;
-    //SDL_GetRGBA(pixelColor,pixel_format, &red, &green, &blue, &alpha);
- 
-    //SDL_FreeFormat(pixel_format);*/
-
-
-//--------------------------------------
-    /*void*       pixels;
-    int         pitch;*/
-
-    /*if( SDL_LockTexture( texture, NULL, &pixels, &pitch ) != 0 )
-    {
-            printf( "Unable to lock texture! %s\n", SDL_GetError() );
-            return false;
-    }*/
-    /*
-    SDL_PixelFormat* pixel_format =  SDL_AllocFormat(SDL_PIXELFORMAT_UNKNOWN);
-
-    std::cout << "format: " << SDL_GetPixelFormatName(pixel_format->format) << "\n";
-    std::cout << "bit per pixel : " << pixel_format->BitsPerPixel << "\n";
-    std::cout << "bytes per pixel: " << pixel_format->BytesPerPixel << "\n";
-
-    int bpp = pixel_format->BytesPerPixel;
-
-    Uint8* p = (Uint8*)pixels + y *pitch + x * bpp;
-    Uint32 pixelColor = *(Uint32*)p;*/
-
-//----------------------------------------
 
 
     int bpp = surface->format->BytesPerPixel;
@@ -189,8 +125,6 @@ bool Picture::isPixelTransparent(int px, int py)
     Uint8 red, green, blue, alpha;
     SDL_GetRGBA(pixelColor, surface->format, &red, &green, &blue, &alpha);
  
-
-
     //int alpha = 1;
 
     /*if (alpha == 0) 
@@ -198,5 +132,5 @@ bool Picture::isPixelTransparent(int px, int py)
     else
         std::cout << "not transparent\n";*/
 
-    return alpha > 0;
+    return alpha == 0;
 }

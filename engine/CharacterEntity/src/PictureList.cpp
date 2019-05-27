@@ -172,9 +172,9 @@ bool PictureList::isCurrentPixelTransparent(int x, int y)
 {
     if (currentPic)
     {
-        //compositor->lockContext();
+        compositor->lockContext();
         bool result = currentPic->isPixelTransparent(x,y);
-        //compositor->freeContext();
+        compositor->freeContext();
         return result;
 
     }

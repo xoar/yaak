@@ -18,10 +18,7 @@
 #include <memory>
 #include "Action.h"
 
-/* Note that when accessing attributes you always lock before.
-   At the moment there is no good implementation of just only lock one locks.
-   therefore allowing user to access different attributes in a row (incremental move)
-   evrey user must to lock manually the character before accessing*/
+/* Note that when accessing attributes in a row you always lock before.*/
 class Character: public SceneYobject
 {
     public:
@@ -72,7 +69,10 @@ class Character: public SceneYobject
         bool isPointInCollider(Position point);
 
         /*test if it collides with other objects*/
-        bool collides();
+        bool WalkColliderCollides();
+
+        bool CurrentPictureCollides();
+
 
         /*updates the collider and position*/
         void setPosition(Position pos);
@@ -84,7 +84,7 @@ class Character: public SceneYobject
         Size getSize();
 
         /*set the walk collider.*/
-        void setCollider(int width,int height, int heightOffset);
+        void setWalkCollider(int width,int height, int heightOffset);
 
         /*set the walk function */
         void setWalkAnimationFkt(void (*walkAnimation) (Position sourcePosition, 
@@ -135,7 +135,7 @@ class Character: public SceneYobject
 
         /*because several threads can try to access the character, 
           e.g to change the status, we need a lock*/
-        std::mutex characterMutex;
+        std::recursive_mutex characterMutex;
 
         /*the mouse collider of the character*/
         std::shared_ptr<AABBColliderYobject> charCollider;

@@ -70,13 +70,13 @@ Event StartScene
     /* close he Door*/
     Door set current picture to "closed"
 
-    Segment Collider SegWallRight
+    /*Segment Collider SegWallRight
         start position : 416, 217
         end position : 1023,299
 
     Segment Collider SegWallLeft
         start position : 447, 208
-        end position : 22,364
+        end position : 22,364*/
 
     trigger Prolog
 }
@@ -247,9 +247,8 @@ Event CheckDoorCollision
     int CharacterId = CharacterGetId(pluginList,"TriggerZone");
     if (isDoorOpen && CharacterCollides(pluginList,CharacterId))
     {
-        /*trigger InitScene2*/
+        trigger InitScene2
         printf("Collides");
-        trigger CheckDoorCollision
     }
     else
     {

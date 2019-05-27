@@ -36,66 +36,57 @@ Start Event UnitTest1
         picture "right": "../res/zone.png"
         display: "zone"
 
-        Scene Object TriggerZone2
-        position : 227, 200
-        picture "right": "../res/zone.png"
-        display: "zone2"
-
         /*create Bernard*/
         Character Bernard
         picture "standing right" : "../res/C1WR2.png"
         picture "standing left" : "../res/C1WL2.png"
 
         position : 300, 50
+
+        /*animation "walking right":  "../res/C1WR1.png",
+                                    "../res/C1WR2.png",
+                                    "../res/C1WR3.png",
+                                    "../res/C1WR2.png"
+
+        animation "walking left": "../res/C1WL1.png",
+                                  "../res/C1WL2.png",
+                                  "../res/C1WL3.png",
+                                  "../res/C1WL2.png"
+
+        animation "walking up": "../res/C1WU1.png",
+                                "../res/C1WU2.png",
+                                "../res/C1WU3.png",
+                                "../res/C1WU2.png"
+                                
+        animation "walking down": "../res/C1WD1.png",
+                                  "../res/C1WD2.png",
+                                  "../res/C1WD3.png",
+                                  "../res/C1WD2.png"*/
         display: "Bernie"
 
         /*add a fix collider for bernard*/
         CharacterId = CharacterGetId(pluginList,"Bernard");
-        CharacterSetWalkCollider(pluginList,CharacterId,20,20,230);
+        CharacterSetCollider(pluginList,CharacterId,20,20,230);
         CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
 
-        wait on left mouse click
 
-        
+        Position targetPosition;
+        targetPosition.posX = 357;
+        targetPosition.posY = 102;
+
+        int pixelBer = CharacterIsPointInCollider(pluginList,CharacterId,targetPosition);
+
+
         CharacterId = CharacterGetId(pluginList,"TriggerZone");
+        int pixelZone = CharacterIsPointInCollider(pluginList,CharacterId,targetPosition);
 
-        printf("\nTest collision: Zone with somebody\n");
-
-        if (CharacterCurrentPictureCollides(pluginList,CharacterId))
+        if (CharacterCollides(pluginList,CharacterId))
         {
             /*trigger InitScene2*/
-            printf("collides");
+            printf("collides\n %d %d",pixelBer,pixelZone);
         }
         else
-            printf("not collides");
-
-
-        printf("\nTest collision: Bernies walkcollider with somebody\n");
-
-        CharacterId = CharacterGetId(pluginList,"Bernard");
-
-        if (CharacterWalkColliderCollides(pluginList,CharacterId))
-        {
-            /*trigger InitScene2*/
-            printf("collides\n");
-        }
-        else
-            printf("not collides\n");
-
-        printf("\nTest collision: Zone 2 with somebody\n");
-
-        CharacterId = CharacterGetId(pluginList,"TriggerZone2");
-
-        if (CharacterCurrentPictureCollides(pluginList,CharacterId))
-        {
-            /*trigger InitScene2*/
-            printf("collides\n");
-        }
-        else
-            printf("not collides\n");
-
-
-
+            printf("not collides\n %d %d",pixelBer,pixelZone);
 
 
 }

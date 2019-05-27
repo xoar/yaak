@@ -114,7 +114,7 @@ bool AABBColliderYobject::isPointInCollider(Position point)
         /* check pixel to pixel collision*/
         if (pictureList)
         {   
-            return pictureList->isCurrentPixelTransparent(point.posX,point.posY);
+            return !pictureList->isCurrentPixelTransparent(point.posX,point.posY);
         }
 
         return true;
@@ -139,9 +139,10 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
         std::shared_ptr<AABBColliderYobject> targetCollider = 
             std::dynamic_pointer_cast<AABBColliderYobject>(collider);
 
-        /*check if the other on is active too*/
-        if (!targetCollider->isActive())
-            return false;
+        /*the collision detection was forced by the target. so its irrelevant
+          if its active or not*/
+        //if (!targetCollider->isActive())
+        //    return false;
 
         Rectangle targetColliderRectangle = targetCollider->getRectangle();
         Rectangle sourceColliderRectangle = getRectangle();
@@ -169,7 +170,7 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
             std::shared_ptr<PictureList> targetPictureList = 
                 targetCollider->getPictureList();
 
-           /* std::cout << "AABB Intersection: \n" 
+            std::cout << "AABB Intersection: \n" 
                                       << "target: \n"
                                       <<  targetSDLRect.x <<"\n" 
                                       <<  targetSDLRect.y <<"\n"
@@ -184,19 +185,24 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
                                       <<  intersectionRect.x <<"\n" 
                                       <<  intersectionRect.y <<"\n"
                                       <<  intersectionRect.w <<"\n"
-                                      <<  intersectionRect.h <<"\n";*/
+                                      <<  intersectionRect.h <<"\n";
 
             /*check if both support picel to pixel collision, 
               i.e. they both have a picture list*/
-            if (targetPictureList && pictureList)
+            if (targetPictureList != nullptr && pictureList != nullptr)
             {
-                for (int i = intersectionRect.x; i < intersectionRect.w; i++)
+                //std::cout << "\nboth have a picture\n";
+                for (int i = intersectionRect.x; i < intersectionRect.x + intersectionRect.w; i++)
                 {
-                    for (int j= intersectionRect.y; j < intersectionRect.h; j++)
+                    for (int j= intersectionRect.y; j < intersectionRect.y + intersectionRect.h; j++)
                     {
+                        Position p = {i,j};
 
-                        if ((!pictureList->isCurrentPixelTransparent(i,j)) &&
-                            (!targetPictureList->isCurrentPixelTransparent(i,j)))
+                        /*std::cout << "check pixel: " << i << "," << j 
+                                  << "is point picture:" << targetCollider->isPointInCollider(p)
+                                  << "," << isPointInCollider(p) <<"\n";*/
+                        
+                        if ( targetCollider->isPointInCollider(p) && isPointInCollider(p))
                         {
                             
                             return true;
@@ -204,12 +210,38 @@ bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider
                           
                     }
                 }
+                //std::cout << "\nfound no pixel\n";
                 /* they support pixel to pixel collision but dont have a collision*/
                 return false;
             }
 
-            /*not support ptp collision but have a collision*/
-            return true;
+            /*both not support ptp collision but have a collision*/
+            if (targetPictureList == nullptr && pictureList == nullptr)
+                return true;
+
+            /* one of them have a picture. check if a pixel is in the rect of the other collider*/
+            /*TODO: workaround fix this.*/
+            if (targetPictureList != nullptr && pictureList == nullptr)
+            {
+                for (int i = intersectionRect.x; i < intersectionRect.x + intersectionRect.w; i++)
+                    for (int j= intersectionRect.y; j < intersectionRect.y + intersectionRect.h; j++)
+                    {
+                        Position p = {i,j};
+                        if (targetCollider->isPointInCollider(p))
+                            return true;
+                    }
+            }
+            if (targetPictureList == nullptr && pictureList != nullptr)
+            {
+                for (int i = intersectionRect.x; i < intersectionRect.x + intersectionRect.w; i++)
+                    for (int j= intersectionRect.y; j < intersectionRect.y + intersectionRect.h; j++)
+                    {
+                        Position p = {i,j};
+                        if (isPointInCollider(p))
+                            return true;
+                    }
+            }
+
 
         }
 

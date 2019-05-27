@@ -15,6 +15,7 @@ Character::Character(int id,
     charCollider = std::make_shared<AABBColliderYobject>(0,id,pluginList);
     charCollider->registerYobject(charCollider);
 
+
     charCollider->setPictureList(pictureMap);
 
     //the walk collider is only use if the user set one
@@ -35,27 +36,64 @@ Character::Character(int id,
 
     /*attach the collider to us*/
     this->attachChild(std::static_pointer_cast<SceneYobject>(charCollider));
+
+    /*only use a walk collider for collision check or by force with the collides and having no walk collider*/
+    deactivateCollider();
 }
 
 
 Size Character::getSize()
 {
-    return pictureMap->getSize();
+    lock();
+
+    Size result = pictureMap->getSize();
+    
+    unlock();
+
+    return result;
 }
 
 bool Character::isPointInCollider(Position point)
 {
-    return charCollider->isPointInCollider(point);
+    lock();
+
+    bool result = charCollider->isPointInCollider(point);
+
+    unlock();
+
+    return result;
 }
 
-bool Character::collides()
+bool Character::CurrentPictureCollides()
 {
-    /*if you bild up trigger zones with this it will use the second option*/
+    lock();
+
+    bool result = false;
+
     if (walkCollider)
-        return walkCollider->collides();
-    else 
-        return charCollider->collides();
+    {
+        std::cout << "\n!!!!check walk collider\n";
+        result =  walkCollider->collides();
+    }
+
+    unlock();
+
+    return result;
+    
 }
+
+bool Character::WalkColliderCollides()
+{
+    lock();
+
+    bool result =  charCollider->collides();
+
+    unlock();
+
+    return result;
+    
+}
+
 
 bool Character::setCurrentPicture(std::string specifier)
 {
@@ -65,12 +103,16 @@ bool Character::setCurrentPicture(std::string specifier)
 void Character::addPicture(std::string specifier, std::string fileName)
 {
 
+    lock();
+
     /*TODO: check if there is already a specifier in the list*/
     /* first add+set the new picture*/
     pictureMap->addPicture(specifier,fileName);
 
     /*now set the current piucture and update the collider*/
     setCurrentPicture(specifier);
+
+    unlock();
 }
 
 
@@ -81,15 +123,20 @@ void Character::setPosition(Position pos)
 
 Position Character::getPosition()
 {
+    lock();
+
     Position pos;
     pos.posX = posX;
     pos.posY = posY;
+
+    unlock();
 
     return pos;
 }
 
 void Character::setPosition(int posX, int posY)
 {
+    lock();
 
     /*propagate the movement*/
     int dx = posX - this->posX;
@@ -103,11 +150,15 @@ void Character::setPosition(int posX, int posY)
     
     /*update the images*/
     pictureMap->setPosition(posX,posY);
+
+    unlock();
 }
 
 
 bool Character::setCurrentAnimationPicture(std::string specifier, int index)
 {
+    lock();
+
     /* first set the new picture*/
     /* picture are insert alone, in contrast to animations*/
     bool status = pictureMap->setCurrentPicture(specifier,index);
@@ -119,21 +170,29 @@ bool Character::setCurrentAnimationPicture(std::string specifier, int index)
         if (size.width != -1) charCollider->setSize(size.width,size.height);
     }
 
+    unlock();
+
     return status;
 }
 
 
 void Character::addAnimationPicture(std::string specifier, std::string fileName)
 {
+    lock();
+
     /* first add+set the new picture*/
     pictureMap->addPicture(specifier,fileName);
     
     /*no update of the current picture and collider for animations*/
+
+    unlock();
 }
 
 
 Character::~Character()
 {
+    lock();
+
     //destroy the collider
     charCollider->unregisterYobject(charCollider);
     charCollider.reset();
@@ -146,6 +205,8 @@ Character::~Character()
     
     pictureMap->unregisterYobject(pictureMap);
     pictureMap.reset();
+
+    unlock();
 }
 
 
@@ -161,15 +222,21 @@ void Character::unlock()
 
 void Character::setStatus(std::string status)
 {
+    lock();
+
     currentStatus = status;
+
+    unlock();
 }
 std::string Character::getStatus()
 {
     return currentStatus;
 }
 
-void Character::setCollider(int width,int height,int heightOffset)
+void Character::setWalkCollider(int width,int height,int heightOffset)
 {
+    lock();
+
     //the walk collider is used. create & register it.
     walkCollider = std::make_shared<AABBColliderYobject>(1,id,pluginList);
     walkCollider->registerYobject(walkCollider);
@@ -183,6 +250,8 @@ void Character::setCollider(int width,int height,int heightOffset)
     /*register the walkCollider to the Character*/
     this->attachChild(std::static_pointer_cast<SceneYobject>(walkCollider));
 
+    unlock();
+
 }
 
 /*set the walk function */
@@ -191,7 +260,11 @@ void Character::setWalkAnimationFkt(void (*walkAnimation) (Position sourcePositi
                                                 int totalElapsedTicks, 
                                                 int elapsedTicks))
 {
+    lock();
+
     this->walkAnimation = walkAnimation;
+
+    unlock();
 }
 
 /*set the walk function */
@@ -289,15 +362,27 @@ void Character::abortCurrentAction()
 void Character::setRenderPriority(double priority)
 {
 
+    lock();
+
     pictureMap->setRenderPriority(priority);
+
+    unlock();
 }
 
 void Character::activateCollider()
 {
+    lock();
+
     charCollider->setActive();
+
+    unlock();
 }
 
 void Character::deactivateCollider()
 {
+    lock();
+
     charCollider->setInactive();
+
+    unlock();
 }

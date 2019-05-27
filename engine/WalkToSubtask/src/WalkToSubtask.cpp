@@ -114,9 +114,9 @@ void WalkToSubtask::process()
     /*distance/speed = time*/
     double totalTicks = distance/speed * 1000.0f; //1000 for ms
 
-    character->lock();
+    //character->lock();
     character->setStatus("Walk");
-    character->unlock();
+    //character->unlock();
 
     while(totalElapsedTicks < totalTicks)
     {
@@ -152,7 +152,7 @@ void WalkToSubtask::process()
         character->setPosition(newPosX,newPosY);
 
         //check if there are collision with the new position
-        if (character->collides())
+        if (character->WalkColliderCollides())
         {   
             //try to solve the collision
             std::cout << "collision on pos:" << newPosX << " " << newPosY << "\n";
@@ -235,6 +235,6 @@ void WalkToSubtask::trySolveCollision(double totalElapsedTicks,
         //to prevent endless loops
         loopCounter++;
 
-    } while((character->collides()) && (loopCounter <= 10) );
+    } while((character->WalkColliderCollides()) && (loopCounter <= 10) );
 
 }
