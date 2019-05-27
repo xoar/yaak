@@ -12,6 +12,9 @@ ColliderYobject::ColliderYobject (int id,
     colliderPlugin = (ColliderPlugin*) pluginList->get( ColliderPlugin::getPluginName());
     this->type = type;
 
+    tag = "";
+    active = true;
+
 }
 
 ColliderYobject::~ColliderYobject()
@@ -33,7 +36,7 @@ void ColliderYobject::unregisterYobject(std::shared_ptr<ColliderYobject> yobject
 
 
 bool ColliderYobject::isPointInCollider(Position point) {return false;}
-bool ColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider) {return false;}
+bool ColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider,std::string type,std::string tag) {return false;}
 
 
 std::string ColliderYobject::getType()
@@ -41,10 +44,10 @@ std::string ColliderYobject::getType()
 	return this->type;
 }
 
-bool ColliderYobject::collides()
+bool ColliderYobject::collides(std::string type,std::string tag)
 {
     std::shared_ptr<Yobject> yobject = colliderPlugin->getYobject(this->id,this->parentId);
     
     std::shared_ptr<ColliderYobject> collider =  std::dynamic_pointer_cast<ColliderYobject>(yobject);
-    return colliderPlugin->collides(collider);
+    return colliderPlugin->collides(collider,type,tag);
 }

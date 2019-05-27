@@ -69,9 +69,9 @@ class Character: public SceneYobject
         bool isPointInCollider(Position point);
 
         /*test if it collides with other objects*/
-        bool WalkColliderCollides();
+        bool WalkColliderCollides(std::string type,std::string tag);
 
-        bool CurrentPictureCollides();
+        bool CurrentPictureCollides(std::string type,std::string tag);
 
 
         /*updates the collider and position*/

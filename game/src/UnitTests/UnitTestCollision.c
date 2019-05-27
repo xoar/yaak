@@ -61,7 +61,7 @@ Start Event UnitTest1
 
         printf("\nTest collision: Zone with somebody\n");
 
-        if (CharacterCurrentPictureCollides(pluginList,CharacterId))
+        if (CharacterCurrentPictureCollides(pluginList,CharacterId,"",""))
         {
             /*trigger InitScene2*/
             printf("collides");
@@ -74,7 +74,7 @@ Start Event UnitTest1
 
         CharacterId = CharacterGetId(pluginList,"Bernard");
 
-        if (CharacterWalkColliderCollides(pluginList,CharacterId))
+        if (CharacterWalkColliderCollides(pluginList,CharacterId,"",""))
         {
             /*trigger InitScene2*/
             printf("collides\n");
@@ -86,7 +86,17 @@ Start Event UnitTest1
 
         CharacterId = CharacterGetId(pluginList,"TriggerZone2");
 
-        if (CharacterCurrentPictureCollides(pluginList,CharacterId))
+        if (CharacterCurrentPictureCollides(pluginList,CharacterId,"",""))
+        {
+            /*trigger InitScene2*/
+            printf("collides\n");
+        }
+        else
+            printf("not collides\n");
+
+        printf("\nTest collision: Zone 2 with walkCollider\n");
+
+        if (CharacterCurrentPictureCollides(pluginList,CharacterId,"","WalkCollider"))
         {
             /*trigger InitScene2*/
             printf("collides\n");

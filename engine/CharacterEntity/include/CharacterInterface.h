@@ -71,8 +71,8 @@ void CharacterSetWalkCollider(void* pluginList,int id,int width,int height,int h
 void CharacterActivateCollider(void* pluginList,int id);
 void CharacterDeactivateCollider(void* pluginList,int id);
 
-int CharacterWalkColliderCollides(void* pluginList,int id);
-int CharacterCurrentPictureCollides(void* pluginList,int id);
+int CharacterWalkColliderCollides(void* pluginList,int id,char* type,char* tag);
+int CharacterCurrentPictureCollides(void* pluginList,int id,char* type,char *tag);
 
 
 //------------------------ Other -----------------------------------------------

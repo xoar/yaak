@@ -29,7 +29,7 @@ class SegmentColliderYobject: public ColliderYobject,
 
         void setSegment(int startX,int startY,int endX,int endY);
         bool isPointInCollider(Position point);
-        bool collidesWith(std::shared_ptr<ColliderYobject> collider);
+        bool collidesWith(std::shared_ptr<ColliderYobject> collider,std::string type,std::string tag);
         Vector getNormal();
 
         virtual void render();

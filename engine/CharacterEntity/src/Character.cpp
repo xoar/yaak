@@ -37,8 +37,8 @@ Character::Character(int id,
     /*attach the collider to us*/
     this->attachChild(std::static_pointer_cast<SceneYobject>(charCollider));
 
-    /*only use a walk collider for collision check or by force with the collides and having no walk collider*/
-    deactivateCollider();
+    charCollider->setTag("PictureCollider");
+
 }
 
 
@@ -64,7 +64,8 @@ bool Character::isPointInCollider(Position point)
     return result;
 }
 
-bool Character::CurrentPictureCollides()
+bool Character::WalkColliderCollides(std::string type,std::string tag)
+
 {
     lock();
 
@@ -73,7 +74,7 @@ bool Character::CurrentPictureCollides()
     if (walkCollider)
     {
         std::cout << "\n!!!!check walk collider\n";
-        result =  walkCollider->collides();
+        result =  walkCollider->collides(type,tag);
     }
 
     unlock();
@@ -82,11 +83,11 @@ bool Character::CurrentPictureCollides()
     
 }
 
-bool Character::WalkColliderCollides()
+bool Character::CurrentPictureCollides(std::string type,std::string tag)
 {
     lock();
 
-    bool result =  charCollider->collides();
+    bool result =  charCollider->collides(type,tag);
 
     unlock();
 
@@ -246,6 +247,8 @@ void Character::setWalkCollider(int width,int height,int heightOffset)
 
     /* set the walk collider. use a fix maximum to prevent bobing*/
     walkCollider->setPosition(posX,posY+heightOffset);
+
+    walkCollider->setTag("WalkCollider");
 
     /*register the walkCollider to the Character*/
     this->attachChild(std::static_pointer_cast<SceneYobject>(walkCollider));

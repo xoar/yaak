@@ -86,40 +86,18 @@ void SegmentColliderYobject::setSegment(int startX,int startY,int endX,int endY)
 }
 
 
-bool SegmentColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider)
+bool SegmentColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider,std::string type,std::string tag)
 {
-    if (collider->getType() == "AABB")
+
+    /* this collider has not the right tag*/
+    if (tag != "" && tag != getTag())
+        return false;
+
+
+    if (collider->getType() == "AABB") 
     {
         Rectangle aabb = (std::dynamic_pointer_cast<AABBColliderYobject>(collider))->getRectangle();
         return TestSegmentAABB(start,end,aabb);
-
-
-        /* dont work. seems there is a broken cohen sutherland implementation*/
-        /*SDL_Rect rect;
-        rect.w = aabb.width;
-        rect.h = aabb.height;
-        rect.x = aabb.posX;
-        rect.y = aabb.posY;
-
-        int sx = start.posX;
-        int sy = start.posY;
-
-        int ex = end.posX;
-        int ey = end.posY;
-
-        std::cout << " Test intersection: " << " start: " << sx << ", " << sy
-        		  << " end: " << ex << " , " << ey <<"\n"
-        		  << " AABB " << " x: " << rect.x << " y: " << rect.y
-        		  << " width " << rect.w << " height " << rect.h << "\n";
-
-        if(SDL_IntersectRectAndLine(&rect,&sx,&sy,&ex,&ey) == SDL_TRUE)
-        {
-        	std::cout << "New  Coords: " << " start: " << sx << ", " << sy
-        		  	  << " end: " << ex << " , " << ey <<"\n";
-        	return true;
-        }*/
-
-
     }
 
     return false;

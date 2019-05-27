@@ -152,7 +152,7 @@ void WalkToSubtask::process()
         character->setPosition(newPosX,newPosY);
 
         //check if there are collision with the new position
-        if (character->WalkColliderCollides())
+        if (character->WalkColliderCollides("",""))
         {   
             //try to solve the collision
             std::cout << "collision on pos:" << newPosX << " " << newPosY << "\n";
@@ -235,6 +235,6 @@ void WalkToSubtask::trySolveCollision(double totalElapsedTicks,
         //to prevent endless loops
         loopCounter++;
 
-    } while((character->WalkColliderCollides()) && (loopCounter <= 10) );
+    } while((character->WalkColliderCollides("","")) && (loopCounter <= 10) );
 
 }

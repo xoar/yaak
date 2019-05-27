@@ -150,16 +150,16 @@ int CharacterIsPointInCollider(void* pluginList,int id,Position point)
     return status;
 }
 
-int CharacterWalkColliderCollides(void* pluginList,int id)
+int CharacterWalkColliderCollides(void* pluginList,int id,char* type,char * tag)
 {
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
-    return (int) character->WalkColliderCollides();
+    return (int) character->WalkColliderCollides(std::string(type),std::string(tag));
 }
 
-int CharacterCurrentPictureCollides(void* pluginList,int id)
+int CharacterCurrentPictureCollides(void* pluginList,int id,char* type,char * tag)
 {
     std::shared_ptr<Character> character = getCharacter(pluginList,id);
-    return (int) character->CurrentPictureCollides();
+    return (int) character->CurrentPictureCollides(std::string(type),std::string(tag));
 }
 
 

@@ -23,8 +23,6 @@ AABBColliderYobject::AABBColliderYobject (int id,
         std::cerr << e.what() <<" \n";
     }
 
-    active = true;
-
     pictureList = nullptr;
 
 }
@@ -126,9 +124,17 @@ bool AABBColliderYobject::isPointInCollider(Position point)
 
 
 
-bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider)
+bool AABBColliderYobject::collidesWith(std::shared_ptr<ColliderYobject> collider,std::string type,std::string tag)
 {
-    if (!active)
+
+    /* this collider has not the right tag*/
+    if (tag != "" && tag != getTag())
+        return false;
+    if (type != "" && ColliderYobject::getType() != type )
+        return false;
+
+
+    if (!ColliderYobject::active)
     {
         return false;
     }

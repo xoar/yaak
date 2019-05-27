@@ -42,16 +42,10 @@ class AABBColliderYobject: public ColliderYobject,
         void setSize(int width, int height);
 
         bool isPointInCollider(Position point);
-        bool collidesWith(std::shared_ptr<ColliderYobject> collider);
+        bool collidesWith(std::shared_ptr<ColliderYobject> collider,std::string type,std::string tag);
 
         void setPictureList(std::shared_ptr<PictureList> pictureList);
         std::shared_ptr<PictureList> getPictureList();
-
-        /*set active for collision checks*/
-        void setActive() { active = true;}
-        void setInactive() { active = false;}
-
-        bool isActive() { return active;}
 
         virtual void updatePosition(int dx, int dy);
 
@@ -63,7 +57,6 @@ class AABBColliderYobject: public ColliderYobject,
         int width;
         int height;
 
-        bool active;
 
         std::shared_ptr<PictureList> pictureList;
 
