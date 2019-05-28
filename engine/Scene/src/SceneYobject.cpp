@@ -36,7 +36,8 @@ SceneYobject::SceneYobject(int id,
 
 SceneYobject::~SceneYobject()
 {
-    
+    childs->clear();
+    delete childs;
 }
 
 void SceneYobject::registerYobject(std::shared_ptr<SceneYobject> yobject)

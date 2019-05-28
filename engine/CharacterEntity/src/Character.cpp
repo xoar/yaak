@@ -207,6 +207,11 @@ Character::~Character()
     pictureMap->unregisterYobject(pictureMap);
     pictureMap.reset();
 
+    actionQueue->clear();
+    delete actionQueue;
+
+    
+
     unlock();
 }
 

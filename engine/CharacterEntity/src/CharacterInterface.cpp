@@ -7,6 +7,13 @@
 //***************************!! User API !!************************************* 
 //******************************************************************************
 
+int CharacterGetId(void* pluginList,char* name)
+{
+    PluginList* pluginListClass = (PluginList*) pluginList;
+    SceneContainer* scene = (SceneContainer*) pluginListClass->get(SceneContainer::getPluginName());
+    int id = scene->getEntityIdByName(std::string(name));
+    return id;
+}
 
 /* helper function*/
 std::shared_ptr<Character> getCharacter(void* pluginList,int id)
@@ -19,14 +26,6 @@ std::shared_ptr<Character> getCharacter(void* pluginList,int id)
     return character;
 }
 
-
-int CharacterGetId(void* pluginList,char* name)
-{
-    PluginList* pluginListClass = (PluginList*) pluginList;
-    SceneContainer* scene = (SceneContainer*) pluginListClass->get(SceneContainer::getPluginName());
-    int id = scene->getEntityIdByName(std::string(name));
-    return id;
-}
 
 //----------------------- Position ---------------------------------------------
 
@@ -272,12 +271,12 @@ Size CharacterGetSize(CharacterStructPtr character)
 void CharacterFreePointerStruct(CharacterStructPtr character)
 {
     character->character.reset();
-    //free(character);
+    delete character;
 }
 
 void CharacterDestructor(CharacterStructPtr character)
 {
     character->character->unregisterYobject(character->character);
     character->character.reset();
-    //free(character);
+    delete character;
 }

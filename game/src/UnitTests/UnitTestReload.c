@@ -18,17 +18,27 @@ Start Event UnitTest1
 {
 
         Scene Object TriggerZone
-        position : 227, 0
-        picture "right": "../res/zone.png"
+            position : 227, 0
+            picture "right": "../res/zone.png"
+
+        Scene Object PurpursRoom
+            picture "standing":  "../res/purpurRoom2.png"
+            position : 0, 0
 
 
-        trigger EndlessTest
+        //trigger EndlessTest
 
 }
 
 Event AfterReload
 {
     printf("\nReload Successfull\n");
+
+    Scene Object PurpursRoom
+            picture "standing":  "../res/purpurRoom2.png"
+            position : 0, 0
+
+
 }
 
 void reloadInit(void* _pluginList,void *_renderer)
