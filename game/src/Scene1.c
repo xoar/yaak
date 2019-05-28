@@ -57,7 +57,7 @@ Event StartScene
 
      Scene Object TriggerZone
         position : 227, 0
-        picture "right": "../res/zone.png"
+        picture "right": "../res/closedDoorTiggerZone.png"
 
 
     int CharacterId = CharacterGetId(pluginList,"PurpursRoom");
@@ -67,16 +67,20 @@ Event StartScene
     CharacterId = CharacterGetId(pluginList,"Door");
     CharacterDeactivateCollider(pluginList,CharacterId);
 
+    /* walk collider should ignore this*/
+    CharacterId = CharacterGetId(pluginList,"TriggerZone");
+    CharacterDeactivateCollider(pluginList,CharacterId);
+
     /* close he Door*/
     Door set current picture to "closed"
 
-    /*Segment Collider SegWallRight
+    Segment Collider SegWallRight
         start position : 416, 217
         end position : 1023,299
 
     Segment Collider SegWallLeft
         start position : 447, 208
-        end position : 22,364*/
+        end position : 22,364
 
     trigger Prolog
 }
@@ -138,7 +142,7 @@ Event IntroduceBernard
 
     /*add a fix collider for bernard*/
     int CharacterId = CharacterGetId(pluginList,"Bernard");
-    CharacterSetCollider(pluginList,CharacterId,20,20,230);
+    CharacterSetWalkCollider(pluginList,CharacterId,20,20,230);
     CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
 
     Bernard walk to 400, 200
@@ -244,16 +248,28 @@ Event CheckOpenDoor
 
 Event CheckDoorCollision
 {
-    int CharacterId = CharacterGetId(pluginList,"TriggerZone");
-    if (isDoorOpen && CharacterCollides(pluginList,CharacterId))
+
+    int loop;
+    loop = 1;
+
+    while(loop)
     {
-        trigger InitScene2
-        printf("Collides");
+        int CharacterId = CharacterGetId(pluginList,"TriggerZone");
+        if (isDoorOpen && CharacterCurrentPictureCollides(pluginList,CharacterId,"","WalkCollider"))
+        {
+            trigger InitScene2
+            printf("Collides");
+            loop = 0;
+        }
+
+        if (!(SuspendTaskUntilNextRound(pluginList,"CheckDoorCollision")))
+        {
+            /*got kill instruction. break*/
+             loop = 0;
+        }
+
     }
-    else
-    {
-        trigger CheckDoorCollision
-    }
+   
 }
 
 

@@ -24,6 +24,10 @@ Event InitScene2
       picture "standing":  "../res/Room2.png"
       position: 0, 0
 
+    int roomID = CharacterGetId(pluginList,"Room2");
+    CharacterSetRenderPriority(pluginList,roomID,0);
+    CharacterDeactivateCollider(pluginList,roomID);
+
     Character Bernard
       picture "standing right" : "../res/C1WR2.png"
       picture "standing left" : "../res/C1WL2.png"
@@ -53,7 +57,7 @@ Event InitScene2
 
     /*add a fix collider for bernard*/
     int CharacterId = CharacterGetId(pluginList,"Bernard");
-    CharacterSetCollider(pluginList,CharacterId,20,20,230);
+    CharacterSetWalkCollider(pluginList,CharacterId,20,20,230);
     CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
 
     trigger WalkEvent

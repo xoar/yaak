@@ -73,7 +73,7 @@ bool Character::WalkColliderCollides(std::string type,std::string tag)
 
     if (walkCollider)
     {
-        std::cout << "\n!!!!check walk collider\n";
+        //std::cout << "\n!!!!check walk collider\n";
         result =  walkCollider->collides(type,tag);
     }
 
