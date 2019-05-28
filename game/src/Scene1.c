@@ -295,6 +295,20 @@ int grantAction(char* action)
     {
         grant = 1;
     }
+    else if (strcmp(status,"Walk") == 0)
+    {
+        //walk can be arborted with a choice
+        if (strcmp(action,"Choice") == 0)
+        {
+            CharacterAbortCurrentActions(pluginList,CharacterId);
+            grant = 1;
+        }
+        else
+        {
+            grant = 0;
+        }
+
+    }
     else if (strcmp(status,"Walk") != 0)
     {
         // the choice and other stuff can't get interrupted. deny all
@@ -302,32 +316,6 @@ int grantAction(char* action)
     }
 
     CharacterUnlock(pluginList,CharacterId);
-
-    /*
-    //get the state and parse it
-    char* status = CharacterGetStatus(pluginList,CharacterId);
-    printf("status %s; action %s \n",status,action);
-    if (status == "None")
-    {
-        grant = 1;
-    }
-    else if (status == "Walk")
-    {
-        // a new Walk can interupt another but nothin else
-        if (action == "Walk")
-            grant = 1;
-
-    }
-    else if (status == "Choice")
-    {
-        // the choice can't get interrupted. deny all
-        grant = 0;
-    }
-
-    // didnt catch the case. use a default deny
-    grant = 0;
-
-    CharacterUnlock(pluginList,CharacterId);*/
 
     return grant;
 }

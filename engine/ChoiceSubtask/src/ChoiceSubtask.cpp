@@ -144,6 +144,7 @@ void ChoiceFinish(void * pluginList,int characterId)
     }
 
     character->lock();
+    character->setStatus("None");
     character->dequeueAction(nullptr);
     character->unlock();
 
