@@ -1,36 +1,82 @@
 #include "ChoiceSubtask.h"
 
-int ChoiceTryToLockCharacter(int id, 
-                              const char* eventName, 
-                              int (*clearTaskCollision)(),
+#include "TaskManager.h"
+#include "Character.h"
+#include "Action.h"
+#include <iostream>
+#include <string>
+
+class ChoiceAction : public Action
+{
+    public: 
+        ChoiceAction() : Action("Choice") {}
+};
+
+int ChoiceTryToLockCharacter(int characterId, 
+                              const char* eventName,
                               void * pluginList )
 {
 
-    /* check if therer are collisions with the walk*/
-    
-    CharacterLock(pluginList,id);
+    PluginList* _pluginList = (PluginList*) pluginList; 
+    TaskManager* taskManager;
 
-    /*wait until the started walk or another animation is over*/
-    while (!clearTaskCollision())
+    try
     {
-        //havn't the permission to start. wait
-        CharacterUnlock(pluginList,id);
+        taskManager = ((TaskManager*) _pluginList->get(TaskManager::getPluginName()));
+    }
+    catch(std::runtime_error& e)
+    {    
+        std::cerr <<"Cant find the task manager, needed for the walkToSubtask\n";
+    }
 
-        if(!SuspendTaskUntilNextRound(pluginList,eventName))
+    std::shared_ptr<Action> choiceAction = std::make_shared<ChoiceAction>();
+
+    std::shared_ptr<Character> character = nullptr;
+
+    if (characterId > -1)
+    {
+        try
         {
-            /**recieved kill signal. signal it*/
-            return 0;
+            SceneContainer* scene = ((SceneContainer*) _pluginList->get(SceneContainer::getPluginName()));
+            std::shared_ptr<Yobject> charYobject = scene->getYobject(characterId);
+            character = std::static_pointer_cast<Character>(charYobject);
         }
-        /* get the lock again to evaluate the collision*/
-        CharacterLock(pluginList,id);
+        catch(std::runtime_error& e)
+        {    
+            std::cerr << e.what() << std::endl;
+        } 
+    }
+
+    /* try to enqueue the action*/
+    if (!(character->tryEnqueueAction(choiceAction)))
+        return 0;
+
+    /* sleep until we can start*/
+    try
+    {
+        while(choiceAction->getState() == "Wait")
+        {
+            taskManager->suspendTaskUntilNextRound(eventName);
+        }
+    }
+    catch (KillException& e)
+    {
+        return 0;
+    }
+
+    character->lock();
+    /* if we get canceld here no big deal just dequeue and quit*/
+    if (choiceAction->getState() == "Aborted")
+    {
+        character->dequeueAction(choiceAction);
+        character->unlock();
+        return 0;
     }
 
     //no collisions set the status to Choice
-    CharacterSetStatus(pluginList,id,eventName);
+    character->setStatus(std::string(eventName));
 
-    //all things are done, release the lock
-    CharacterUnlock(pluginList,id);
-
+    character->unlock();
     /** all things were done successfully*/
     return 1;
 }
@@ -75,4 +121,30 @@ void ChoiceBuildMessage(int * currentPosX,
 
     *currentPosY= *currentPosY - height - 2; // 2 for a bit space between the text fields
     if (*currentPosY < 0) *currentPosY = 0; // TODO:should throw an error
+}
+
+void ChoiceFinish(void * pluginList,int characterId)
+{
+
+    PluginList* _pluginList = (PluginList*) pluginList; 
+    std::shared_ptr<Character> character = nullptr;
+
+    if (characterId > -1)
+    {
+        try
+        {
+            SceneContainer* scene = (SceneContainer*) _pluginList->get(SceneContainer::getPluginName());
+            std::shared_ptr<Yobject> charYobject = scene->getYobject(characterId);
+            character = std::static_pointer_cast<Character>(charYobject);
+        }
+        catch(std::runtime_error& e)
+        {    
+            std::cerr << e.what() << std::endl;
+        } 
+    }
+
+    character->lock();
+    character->dequeueAction(nullptr);
+    character->unlock();
+
 }

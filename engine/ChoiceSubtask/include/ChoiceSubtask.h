@@ -19,8 +19,7 @@ extern "C"
 #endif
 
 int ChoiceTryToLockCharacter(int id, 
-                              const char* eventName, 
-                              int (*clearTaskCollision)(),
+                              const char* eventName,
                               void * pluginList );
 
 void ChoiceBuildMessage(int * currentPosX, 
@@ -34,7 +33,7 @@ void ChoiceBuildMessage(int * currentPosX,
                         );
 
 
-
+void ChoiceFinish(void * pluginList,int characterId);
 
 #ifdef __cplusplus
 }

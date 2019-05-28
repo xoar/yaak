@@ -84,7 +84,7 @@ ChoicePointerDefinition:
 Choice:
     "    /* try to set the status of the character to the event name.\n"
     "    block until the set*/\n"
-    "    if(!ChoiceTryToLockCharacter("$1 /*char id*/",\"" $2 /*event name*/ "\",&clearTaskCollision,pluginList))\n"
+    "    if(!ChoiceTryToLockCharacter("$1 /*char id*/",\"" $2 /*event name*/ "\",pluginList))\n"
     "    {\n"
     "            RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
     "            return;\n"
@@ -115,6 +115,7 @@ Choice:
 
     "        if (! WaitOnInputProcess (sub" $1 /*char id*/ "))"
     "        {\n"
+                 $6 /* message destruction*/
     "            RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
     "            return;\n"
     "        }\n"
@@ -130,6 +131,7 @@ Choice:
     "        {\n"
     "            if(!SuspendTaskUntilNextRound(pluginList,\"" $2 /*event name*/ "\"))\n"
     "            {\n"
+                     $6 /* message destruction*/
     "                RemoveTask (pluginList, \"" $2 /*event name*/ "\");\n"
     "                return;\n"
     "            }\n"
@@ -141,9 +143,7 @@ Choice:
 
     "    /** --------------end choice ------------------------*/\n"
     
-    "    CharacterLock(pluginList,"$1 /*char id*/");\n"
-    "    CharacterSetStatus(pluginList,"$1 /*char id*/",\"None\");\n"
-    "    CharacterUnlock(pluginList,"$1 /*char id*/");\n"
+    "    ChoiceFinish(pluginList," $1 /*char id*/ ");\n"
 
 
 ChoiceBuildMsg:

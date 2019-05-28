@@ -75,6 +75,14 @@ int CharacterWalkColliderCollides(void* pluginList,int id,char* type,char* tag);
 int CharacterCurrentPictureCollides(void* pluginList,int id,char* type,char *tag);
 
 
+//----------------------Action Interface ---------------------------------------
+
+void CharacterSetDecideEnqueueActionFunction (void* pluginList,int id,
+                                              int (*decideEnqueueAction) 
+                                                    (char* actionType));
+
+void CharacterAbortCurrentActions(void* pluginList,int id);
+
 //------------------------ Other -----------------------------------------------
 
 

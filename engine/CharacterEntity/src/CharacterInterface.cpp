@@ -161,6 +161,24 @@ int CharacterCurrentPictureCollides(void* pluginList,int id,char* type,char * ta
     return (int) character->CurrentPictureCollides(std::string(type),std::string(tag));
 }
 
+//----------------------Action Interface ---------------------------------------
+
+void CharacterSetDecideEnqueueActionFunction (void* pluginList,int id, 
+                                              int (*decideEnqueueAction) 
+                                                      (char* actionType))
+{
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    character->setDecideEnqueueActionFunction(decideEnqueueAction);
+
+}
+
+void CharacterAbortCurrentActions(void* pluginList,int id)
+{
+    std::shared_ptr<Character> character = getCharacter(pluginList,id);
+    character->abortCurrentActions();
+
+}
+
 
 //------------------------ Other -----------------------------------------------
 

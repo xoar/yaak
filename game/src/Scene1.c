@@ -6,6 +6,9 @@
 /*set the globals*/
 #include "InitGlobals.h"
 
+//prototyp 
+int grantAction(char* action);
+
 
 /*signal the plugin was reloaded*/
 int wasReloaded = 0;
@@ -144,6 +147,7 @@ Event IntroduceBernard
     int CharacterId = CharacterGetId(pluginList,"Bernard");
     CharacterSetWalkCollider(pluginList,CharacterId,20,20,230);
     CharacterSetWalkAnimationFkt(pluginList,CharacterId,walkAnimation);
+    CharacterSetDecideEnqueueActionFunction(pluginList,CharacterId,grantAction);
 
     Bernard walk to 400, 200
 
@@ -271,6 +275,63 @@ Event CheckDoorCollision
     }
    
 }
+
+
+int grantAction(char* action)
+{
+
+    printf("\ngrant action call\n");
+
+    int grant = 1;
+
+    // lock the player to prevent status changes
+    int CharacterId = CharacterGetId(pluginList,"Bernard");
+    CharacterLock(pluginList,CharacterId);
+    
+    char* status = CharacterGetStatus(pluginList,CharacterId);
+    printf("status %s; action %s \n",status,action);
+
+    if (strcmp(status,"None") == 0)
+    {
+        grant = 1;
+    }
+    else if (strcmp(status,"Walk") != 0)
+    {
+        // the choice and other stuff can't get interrupted. deny all
+        grant = 0;
+    }
+
+    CharacterUnlock(pluginList,CharacterId);
+
+    /*
+    //get the state and parse it
+    char* status = CharacterGetStatus(pluginList,CharacterId);
+    printf("status %s; action %s \n",status,action);
+    if (status == "None")
+    {
+        grant = 1;
+    }
+    else if (status == "Walk")
+    {
+        // a new Walk can interupt another but nothin else
+        if (action == "Walk")
+            grant = 1;
+
+    }
+    else if (status == "Choice")
+    {
+        // the choice can't get interrupted. deny all
+        grant = 0;
+    }
+
+    // didnt catch the case. use a default deny
+    grant = 0;
+
+    CharacterUnlock(pluginList,CharacterId);*/
+
+    return grant;
+}
+
 
 
 void reloadInit(void* _pluginList,void *_renderer)

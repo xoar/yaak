@@ -63,30 +63,6 @@ void walkAnimation(Position sourcePosition,
     }
 }
 
-/*check if there are collisions when the task start which has to
-  be solved. if it returns true all things are solved and we can continue. 
-  otherwise we cancel the task start
-  the character lock should be aquired when this function is called*/ 
-int clearTaskCollision()
-{
-    /* the id of the main character*/
-    int CharacterId = CharacterGetId(pluginList,"Bernard");
-
-    char* status =  CharacterGetStatus(pluginList,CharacterId);
-
-    if ( (strcmp(status,"InitWalk") == 0) || (strcmp(status,"None") == 0))
-    {
-        /*in the init phase of the walk there is no update of the picture.
-          so there is nothing to resolve. the status is changed by the caller*/
-        free(status);
-        return 1;
-    }
-
-    /*an animation or somthing else is processing.*/
-    free(status);
-    return 0;
-}
-
 Event WalkEvent
 {
 

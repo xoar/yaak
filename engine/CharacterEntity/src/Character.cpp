@@ -1,7 +1,7 @@
 #include "Character.h"
 #include "ColliderPlugin.h"
 
-bool grantAll(std::string actionType) {return true;}
+int grantAll(char* actionType) {return 1;}
 
 
 Character::Character(int id,
@@ -293,28 +293,31 @@ bool Character::tryEnqueueAction(std::shared_ptr<Action> action)
     }
 
     /*/* Now check if the action is granted*/
-    bool isGranted = (*decideEnqueueAction)(action->getType());
+    char * actionType = (char*) action->getType().c_str();
+    bool isGranted = (*decideEnqueueAction)(actionType);
 
     /* get the mutex to avoid the queue get fucked up*/
     lock();
 
     // when it was granted it can be add to the queue for later execution
     if (isGranted)
+    {
         actionQueue->push_back(action);
 
-    if (actionQueue->size() == 1)
-        action->setState("Ready");
+        if (actionQueue->size() == 1)
+            action->setState("Ready");
+    }
 
     unlock();
 
-    return true;
+    return isGranted;
 }
 
 /* set the function which decided if a new action is enqueued.
    is called by tryEnqueueAction() and therefore the type of the action 
    which should be enqueued is given.*/
-void Character::setDecideEnqueueActionFunction (bool (*decideEnqueueAction) 
-                                                       (std::string actionType))
+void Character::setDecideEnqueueActionFunction (int (*decideEnqueueAction) 
+                                                       (char* actionType))
 {
     lock();
 
@@ -332,7 +335,7 @@ void Character::dequeueAction(std::shared_ptr<Action> action)
     if (!actionQueue->empty())
     {
 
-        if (action == actionQueue->front())
+        if (action == nullptr || action == actionQueue->front())
         {
             /*dequeue it*/
             actionQueue->erase(actionQueue->begin());
@@ -351,7 +354,7 @@ void Character::dequeueAction(std::shared_ptr<Action> action)
 /*only signal abort to all actions in the queue. 
   the processes who enqueue this action clean it up also.
   this is the only we have not several calls aborting the same action*/
-void Character::abortCurrentAction()
+void Character::abortCurrentActions()
 {
     lock();
 
