@@ -269,7 +269,8 @@ Event CheckDoorCollision
         if (!(SuspendTaskUntilNextRound(pluginList,"CheckDoorCollision")))
         {
             /*got kill instruction. break*/
-             loop = 0;
+             RemoveTask(pluginList,"CheckDoorCollision");
+             return;
         }
 
     }

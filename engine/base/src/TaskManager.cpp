@@ -34,7 +34,7 @@ void TaskManager::suspendTaskUntilNextRound(Task* task) //throw (KillException)
     /*check if the task got killed.
       because the task is active when it enters this function we
       have to decrease the left to kill counter TODO:check if active*/
-    if (task->gotKilled()) leftToKillActiveTaskCounter--;
+    //if (task->gotKilled()) leftToKillActiveTaskCounter--;
 
     //Check if the task is not suspended -> suspend him and change the counter.
     if( task->isActive() )
@@ -45,23 +45,23 @@ void TaskManager::suspendTaskUntilNextRound(Task* task) //throw (KillException)
     //if it was already suspended or it was waiting this is strange...
     else
     {
-        std::cerr << "WARNING: try to suspend an waiting/suspended task again"
+        std::cerr << "ERROR: try to suspend an waiting/suspended task again"
                   << task->getName() << "\n";
+        std::exit(EXIT_FAILURE);
     }
-
-    /* add him to the suspended task counter*/
-    suspendedTaskCounter++;
 
     /*all tasks are processed. notify next round*/
     CheckAllTasksDone();
-
-    /*notify the kill function if all task were killed*/
-    //CheckAllSelectedActiveTasksGotKilled();
 
     /*if the task got killed we don't suspend him*/
     //TODO: add a new exception for this
     if (task->gotKilled())  throw KillException();
 
+    /* add him to the suspended task counter*/
+    suspendedTaskCounter++;
+
+    /*notify the kill function if all task were killed*/
+    //CheckAllSelectedActiveTasksGotKilled();
     nextRound.wait(lock);
 
     /* alive so resume*/
@@ -128,6 +128,8 @@ void TaskManager::removeTask(Task* task)
               << " Loop : " << getLoopCounter() << "\n";
 #endif
     
+    /* kill task which try to wait for the next round where suspended but
+       got an kill exeption. Therefore the activeTaskCounter was decreased before*/
     if( task->isActive() )
     {
         activeTaskCounter--;

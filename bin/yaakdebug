@@ -10,5 +10,5 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR/../lib/SDL_image/lib:$DIR/../lib/SDL2/lib:$DIR/../lib/SDL_ttf/lib:$DIR"
 cd $DIR
 #qtcreator -debug yaak
-#gdb yaak
-valgrind --leak-check=yes --track-origins=yes  ./yaak
+gdb yaak
+#valgrind --leak-check=yes --track-origins=yes  ./yaak
